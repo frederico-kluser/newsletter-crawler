@@ -1,0 +1,15 @@
+{
+  "routing": {
+    "must_trigger": [
+      "how do I change the sqlite schema and tables",
+      "frontier state machine resume after crash",
+      "queue pagination stop condition",
+      "dedup with content_hash and normalizeUrl"
+    ],
+    "must_not_trigger": [
+      "which reasoning effort for the llm",
+      "how to block fonts in playwright"
+    ]
+  },
+  "content_must_include": ["frontier", "resetInProgress", "content_hash", "claimNext", "@79fd5d8"]
+}

@@ -1,0 +1,15 @@
+{
+  "routing": {
+    "must_trigger": [
+      "which reasoning effort for deepseek openrouter",
+      "openrouter returns 400 invalid reasoning",
+      "add llm prompts with json_schema zod",
+      "why does the openrouter key give 401"
+    ],
+    "must_not_trigger": [
+      "how do I block fonts in playwright",
+      "how does the frontier resume after a crash"
+    ]
+  },
+  "content_must_include": ["xhigh", "never", "max", "json_schema", "zod", "@79fd5d8"]
+}

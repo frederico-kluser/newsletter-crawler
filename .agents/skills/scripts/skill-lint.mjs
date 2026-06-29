@@ -4,7 +4,7 @@
 import { listSkillDirs, parseSkill } from './lib.mjs';
 
 const NAME_RE = /^[a-z0-9]+(-[a-z0-9]+)*$/;
-const PROVENANCE_RE = /[\w./-]+:\d+@[0-9a-f]{7,40}/; // path:line@shorthash
+const PROVENANCE_RE = /[\w./-]+:\d+(?:[-,]\d+)*@[0-9a-f]{7,40}/; // path:line(-range,list)@shorthash
 const VALID_TYPES = ['knowledge', 'task', 'router', 'meta'];
 
 function lintSkill(name) {

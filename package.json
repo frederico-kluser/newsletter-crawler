@@ -1,0 +1,34 @@
+{
+  "name": "newsletter-crawler",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Crawler de newsletters em Node.js puro com seletores CSS gerados por LLM (OpenRouter / DeepSeek V4) e cache self-healing em SQLite.",
+  "engines": {
+    "node": ">=22"
+  },
+  "bin": {
+    "newsletter-crawler": "src/index.js"
+  },
+  "scripts": {
+    "crawl": "node --env-file=.env src/index.js crawl",
+    "status": "node --env-file=.env src/index.js status",
+    "add": "node --env-file=.env src/index.js add",
+    "export": "node --env-file=.env src/index.js export",
+    "start": "node --env-file=.env src/index.js"
+  },
+  "dependencies": {
+    "@mozilla/readability": "^0.6.0",
+    "better-sqlite3": "^12.11.1",
+    "cheerio": "^1.2.0",
+    "got": "^15.0.7",
+    "jsdom": "^29.1.1",
+    "normalize-url": "^9.0.1",
+    "openai": "^6.45.0",
+    "p-limit": "^7.3.0",
+    "playwright": "^1.61.1",
+    "robots-parser": "^3.0.1",
+    "turndown": "^7.2.4",
+    "zod": "^4.4.3"
+  }
+}

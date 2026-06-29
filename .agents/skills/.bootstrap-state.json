@@ -4,7 +4,7 @@
     { "id": 2, "name": "Skill map", "done": true, "gate_passed": true, "artifact": ".agents/skills/skill-map.md" },
     { "id": 3, "name": "Generate skills", "done": true, "gate_passed": true, "artifact": ".agents/skills/catalog.md" },
     { "id": 4, "name": "Router + evolution + hooks", "done": true, "gate_passed": true, "artifact": ".claude/settings.json" },
-    { "id": 5, "name": "Validation", "done": false, "gate_passed": false, "artifact": ".agents/skills/validation-report.md" }
+    { "id": 5, "name": "Validation", "done": true, "gate_passed": true, "artifact": ".agents/skills/validation-report.md" }
   ],
-  "updated_by": "phase-4-done"
+  "updated_by": "phase-5-done-all-green"
 }

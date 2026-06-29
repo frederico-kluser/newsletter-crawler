@@ -1,10 +1,10 @@
 {
   "phases": [
     { "id": 1, "name": "Project analysis", "done": true, "gate_passed": true, "artifact": ".agents/skills/project-analysis.md" },
-    { "id": 2, "name": "Skill map", "done": false, "gate_passed": false, "artifact": ".agents/skills/skill-map.md" },
+    { "id": 2, "name": "Skill map", "done": true, "gate_passed": true, "artifact": ".agents/skills/skill-map.md" },
     { "id": 3, "name": "Generate skills", "done": false, "gate_passed": false, "artifact": ".agents/skills/catalog.md" },
     { "id": 4, "name": "Router + evolution + hooks", "done": false, "gate_passed": false, "artifact": ".claude/settings.json" },
     { "id": 5, "name": "Validation", "done": false, "gate_passed": false, "artifact": ".agents/skills/validation-report.md" }
   ],
-  "updated_by": "phase-1-done"
+  "updated_by": "phase-2-done"
 }

@@ -1,0 +1,22 @@
+# dependências
+node_modules/
+
+# segredos — NUNCA commitar
+.env
+.env.*
+!.env.example
+
+# dados em runtime (banco, exports, logs)
+data/
+*.db
+*.db-wal
+*.db-shm
+*.log
+
+# Playwright (caso configurem cache local)
+/test-results/
+/playwright-report/
+.cache/
+
+# OS
+.DS_Store

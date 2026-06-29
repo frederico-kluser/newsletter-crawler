@@ -1,0 +1,15 @@
+{
+  "routing": {
+    "must_trigger": [
+      "how do I run a bounded test crawl",
+      "what command shows the crawl status counts",
+      "how to verify my change works end to end",
+      "how do I export crawl results and check status"
+    ],
+    "must_not_trigger": [
+      "what is the sqlite schema",
+      "which reasoning effort for deepseek"
+    ]
+  },
+  "content_must_include": ["npm run status", "--max-pages", "npm run export", "cache"]
+}

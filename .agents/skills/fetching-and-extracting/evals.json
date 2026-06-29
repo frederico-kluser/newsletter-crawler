@@ -1,0 +1,15 @@
+{
+  "routing": {
+    "must_trigger": [
+      "fetchSmart static to playwright rendering decision",
+      "change the readability article extraction threshold",
+      "where is robots handled and the circuit breaker",
+      "css selector validation too few links"
+    ],
+    "must_not_trigger": [
+      "which deepseek model is used",
+      "how does pagination stop"
+    ]
+  },
+  "content_must_include": ["fetchSmart", "Readability", "robots", "Circuit breaker", "@79fd5d8"]
+}

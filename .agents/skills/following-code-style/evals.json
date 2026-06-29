@@ -1,0 +1,15 @@
+{
+  "routing": {
+    "must_trigger": [
+      "code style conventions for javascript",
+      "how do I write a new module with esm imports",
+      "logging and defensive parsing conventions",
+      "naming conventions and stmts database access"
+    ],
+    "must_not_trigger": [
+      "how do I change the sqlite schema",
+      "which reasoning effort for deepseek"
+    ]
+  },
+  "content_must_include": ["errorLog", "stmts", "axios", "@79fd5d8"]
+}

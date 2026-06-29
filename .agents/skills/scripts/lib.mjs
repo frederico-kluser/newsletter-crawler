@@ -99,7 +99,9 @@ export function scoreSkillForQuery(descTerms, queryTerms) {
 export function buildRouterIndex() {
   return listSkillDirs().map((name) => {
     const { fm } = parseSkill(name);
-    return { name, type: fm.metadata?.type, descTerms: terms(fm.description || '') };
+    // Unique terms: presence-based scoring so a word repeated in a description
+    // does not inflate its routing score (which mis-ranked skills).
+    return { name, type: fm.metadata?.type, descTerms: [...new Set(terms(fm.description || ''))] };
   });
 }
 

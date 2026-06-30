@@ -45,6 +45,16 @@ cp .env.example .env                 # e preencha OPENROUTER_API_KEY
   - `maxIndexPages`: quantas páginas do índice paginar (default 1 = só a 1ª).
   - Uma página apontada por um link que for, ela mesma, uma **coleção** de várias notícias (pouca prosa + muitos links externos) é **dividida em N** automaticamente (`MAX_CRAWL_DEPTH` limita a recursão).
 
+## Menu guiado (TUI)
+Ao chamar a ferramenta **sem argumentos num terminal interativo**, abre um **menu guiado** (Ink/React) com todas as ações (coletar, status, exportar, classificar, adicionar fonte, limpar). Ele monta os parâmetros por opções, **mostra o comando equivalente** (assim você aprende as flags) e exibe um **painel de progresso ao vivo** no crawl. **As flags continuam executando direto** — o menu é só um atalho.
+```bash
+npm start            # ou `node src/index.js` — abre o menu (em TTY)
+npm run ui           # idem, explícito
+CRAWLER_LANG=en npm run ui     # interface em inglês (default: português)
+NO_COLOR=1 npm run ui          # sem cores
+```
+> Mudança: `node src/index.js` sem args agora abre o **menu** (TTY) ou imprime **ajuda** (não-TTY/`--no-input`), em vez de rodar o crawl. Use `npm run crawl` para coletar. Ctrl-C sai limpo (restaura o terminal; jobs `in_progress` são retomados no próximo run).
+
 ## Uso
 ```bash
 npm run crawl                          # semeia do config e roda até esvaziar a fila (resumível)
@@ -79,7 +89,9 @@ src/llm.js        OpenRouter: deriveLinkSelector/Content/Next + extractLinks/Art
 src/selectors.js  cache get/put + validação Cheerio (self-healing)
 src/substack.js   atalho opcional via API JSON do Substack
 src/crawl.js      frontier + processJob + crawlArchive + paginação
-src/index.js      CLI + loop principal resumível
+src/commands.js   implementação dos comandos (compartilhada CLI + UI) + getStatus
+src/index.js      CLI (parseFlags + dispatch) + gate do menu guiado
+src/ui/           menu Ink/React (htm, sem build): App, screens, RunView (painel ao vivo), i18n
 ```
 
 ## Notas

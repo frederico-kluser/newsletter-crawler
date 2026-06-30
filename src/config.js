@@ -91,6 +91,9 @@ export const STAGE_KEYS = [
   'contentSelector', // deriva o seletor CSS do corpo do artigo
   'articleExtract', // fallback: extrai título/corpo/data do artigo
   'classify', // classificação multi-faceta de tags
+  'summarize', // resumo + título em PT-BR (Flash high)
+  'searchRelevance', // busca modo A: julga artigo vs consulta (Flash high, 50x)
+  'searchTags', // busca modo B: mapeia consulta -> tags por faceta (Pro)
 ];
 const DEFAULT_MODEL = MODELS.pro;
 const DEFAULT_EFFORT = 'xhigh';
@@ -150,6 +153,21 @@ export const ARTICLE_CONCURRENCY = Number(process.env.ARTICLE_CONCURRENCY || 2);
 export const CLASSIFY_MAX_CHARS = Number(process.env.CLASSIFY_MAX_CHARS || 12000);
 // Hook pós-crawl: classifica os novos artigos ao fim do `crawl` (desligue com =false ou --no-classify).
 export const CLASSIFY_AFTER_CRAWL = process.env.CLASSIFY_AFTER_CRAWL !== 'false';
+
+// ---- resumos PT-BR (pós-processamento) ----
+// 1 chamada/artigo (Flash high): título + resumo em português do Brasil. `content` segue original.
+export const SUMMARIZE_CONCURRENCY = Number(process.env.SUMMARIZE_CONCURRENCY || 6);
+export const SUMMARIZE_MAX_CHARS = Number(process.env.SUMMARIZE_MAX_CHARS || 12000);
+// Hook pós-crawl: gera os resumos ao fim do crawl (desligue com =false ou --no-summarize).
+export const SUMMARIZE_AFTER_CRAWL = process.env.SUMMARIZE_AFTER_CRAWL !== 'false';
+
+// ---- busca na base ----
+// Modo A (exaustivo): 50 chamadas Flash simultâneas julgando CADA artigo vs a consulta.
+export const SEARCH_FLASH_CONCURRENCY = Number(process.env.SEARCH_FLASH_CONCURRENCY || 50);
+// Recorte do corpo enviado por artigo no modo A (controle de custo a 50x).
+export const SEARCH_MAX_CHARS = Number(process.env.SEARCH_MAX_CHARS || 8000);
+// Guard de custo: acima disto de artigos, o modo A exige --yes (evita varredura cara acidental).
+export const SEARCH_MODE_A_CONFIRM = Number(process.env.SEARCH_MODE_A_CONFIRM || 200);
 
 export function loadSources() {
   const p = path.join(ROOT, 'config', 'sources.json');

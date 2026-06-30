@@ -6,18 +6,25 @@ import path from 'node:path';
 import pLimit from 'p-limit';
 import { stmts, wipeAll } from './db.js';
 import {
-  ROOT, DB_PATH, CONCURRENCY, MAX_RETRIES, HAS_LLM, CLASSIFY_AFTER_CRAWL, loadSources,
+  ROOT, DB_PATH, CONCURRENCY, MAX_RETRIES, HAS_LLM, CLASSIFY_AFTER_CRAWL, SUMMARIZE_AFTER_CRAWL,
+  SEARCH_MODE_A_CONFIRM, loadSources,
 } from './config.js';
 import { processJob, enqueue, upsertSource } from './crawl.js';
 import { classifyPending } from './classify.js';
+import { summarizePending } from './summarize.js';
+import { runSearch, getSearchProgress } from './search.js';
 import { closeBrowser } from './fetch.js';
 import { slugify, normalizeUrl, parseDate, log, errorLog } from './util.js';
+
+// Re-export p/ a UI importar de um lugar só (igual getStatus).
+export { getSearchProgress };
 
 /** Contagens do banco como DADO (reusado pela UI e pelo printStatus). */
 export function getStatus() {
   const f = Object.fromEntries(stmts.countFrontierByState.all().map((r) => [r.state, r.c]));
   const articles = stmts.countArticles.get().c;
   const classified = stmts.countClassifications.get().c;
+  const summaries = stmts.countSummaries.get().c;
   return {
     sources: stmts.countSources.get().c,
     pages: stmts.countPages.get().c,
@@ -25,6 +32,8 @@ export function getStatus() {
     selectors: stmts.countSelectors.get().c,
     classified,
     pendingClassif: Math.max(0, articles - classified),
+    summaries,
+    pendingSummary: Math.max(0, articles - summaries),
     frontier: {
       pending: f.pending || 0,
       in_progress: f.in_progress || 0,
@@ -42,6 +51,7 @@ export function printStatus() {
   log(`articles:  ${s.articles}`);
   log(`selectors: ${s.selectors}`);
   log(`classif.:  done=${s.classified} pending=${s.pendingClassif}`);
+  log(`resumos:   done=${s.summaries} pending=${s.pendingSummary}`);
   log(
     `frontier:  pending=${s.frontier.pending} in_progress=${s.frontier.in_progress} ` +
       `done=${s.frontier.done} failed=${s.frontier.failed}`,
@@ -132,6 +142,15 @@ export async function cmdCrawl(flags) {
     }
   }
 
+  // Hook pós-crawl: gera os resumos PT-BR (configurável). `--no-summarize` pula.
+  if (SUMMARIZE_AFTER_CRAWL && HAS_LLM && flags['no-summarize'] !== true) {
+    try {
+      await summarizePending({});
+    } catch (e) {
+      errorLog(`summarize pós-crawl falhou: ${e.message}`);
+    }
+  }
+
   printStatus();
 }
 
@@ -193,6 +212,8 @@ function articleMarkdown(a, facets) {
     `# ${a.title || ''}\n\n` +
     `> ${a.url}\n` +
     (a.published_at ? `> ${a.published_at}\n` : '') +
+    (a.title_pt ? `\n## ${a.title_pt}\n` : '') +
+    (a.summary_pt ? `\n${a.summary_pt}\n` : '') +
     `\n${a.content || ''}\n`
   );
 }
@@ -232,4 +253,42 @@ export async function cmdClassify(flags) {
   const force = flags.force === true;
   await classifyPending({ limit, force });
   printStatus();
+}
+
+export async function cmdSummarize(flags) {
+  if (!HAS_LLM) {
+    errorLog('OPENROUTER_API_KEY ausente — o resumo PT-BR requer o caminho LLM.');
+    process.exit(1);
+  }
+  const limit = flags.limit ? Number(flags.limit) : Infinity;
+  const force = flags.force === true;
+  await summarizePending({ limit, force });
+  printStatus();
+}
+
+// Busca na base. Modo A (Flash, varre tudo) ou B (Pro, por tags). RETORNA os resultados (a UI captura).
+export async function cmdSearch(rest, flags) {
+  if (!HAS_LLM) {
+    errorLog('OPENROUTER_API_KEY ausente — a busca requer o caminho LLM.');
+    process.exit(1);
+  }
+  const query = (rest || []).join(' ').trim(); // multiword sem aspas
+  if (!query) {
+    errorLog('uso: search <consulta> [--mode A|B] [--limit N] [--yes]');
+    process.exit(1);
+  }
+  const mode = String(flags.mode || 'A').toUpperCase() === 'B' ? 'B' : 'A';
+  const limit = flags.limit ? Number(flags.limit) : Infinity;
+  if (mode === 'A') {
+    // Guard de custo: o modo A faz 1 chamada Flash por artigo.
+    const total = stmts.countArticles.get().c;
+    const n = Math.min(total, Number.isFinite(limit) ? limit : Infinity);
+    if (n > SEARCH_MODE_A_CONFIRM && flags.yes !== true) {
+      errorLog(
+        `Modo A vai avaliar ~${n} artigos (custo alto). Refaça com --yes, ou use --limit N / --mode B.`,
+      );
+      process.exit(1);
+    }
+  }
+  return runSearch(query, { mode, limit, yes: flags.yes === true });
 }

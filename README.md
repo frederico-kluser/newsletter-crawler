@@ -64,9 +64,18 @@ npm run crawl -- --source "AI Weekly" --since 2026-06-25   # piso de data (veja 
 npm run status                         # contagens de sources/pages/articles/selectors/frontier
 npm run add -- https://exemplo.com/arquivo --name "Minha" --type index --max-index-pages 1
 npm run export -- --format md          # escreve data/export/<fonte>/*.md  (ou --format json)
+npm run summarize                      # resumo + título em PT-BR p/ cada artigo (Flash; idempotente)
+npm run search -- react server components --mode B   # busca por tags (5 Pro, rápido)
+npm run search -- "local llm" --mode A --limit 20 --yes   # busca exaustiva (Flash, varre tudo)
 npm run reset -- --yes                 # APAGA TODOS OS DADOS (slate limpo); respeita DB_PATH
-npm test                               # node:test: parseDate + extractPublishedDate
+npm test                               # node:test (datas, anti-bot, busca por tags, menu)
 ```
+
+### Resumos PT-BR e busca na base
+- **Resumos:** `summarize` gera `title_pt` + `summary_pt` (resumo legível em **português do Brasil**) por artigo. O `content` original é mantido (busca/tags usam ele). Roda **automático pós-crawl** (desligue com `SUMMARIZE_AFTER_CRAWL=false` ou `--no-summarize`).
+- **Busca — Modo A (exaustivo):** `--mode A` faz **1 chamada Flash por artigo** (concorrência 50), julgando `direto`/`parecido`; rankeia direto>parecido. Guard de custo: acima de `SEARCH_MODE_A_CONFIRM` (~200) artigos exige `--yes`.
+- **Busca — Modo B (por tags):** `--mode B` faz **5 chamadas Pro** (1 por faceta de retrieval) → une as tags → traz artigos cujas tags cruzam. Rápido; **exige classificação feita**.
+- Toda busca devolve dois grupos: **Notícias** e **Ferramentas** (artigo que é *sobre* uma ferramenta vai p/ Ferramentas). Disponível também no menu (`npm run ui` → Buscar).
 
 ### Seleção de fonte e parada por data
 - **`--source "<nome|url>"`** semeia só uma fonte (nome exato ou URL); **`--only <substr>`** casa por substring.
@@ -89,6 +98,10 @@ src/llm.js        OpenRouter: deriveLinkSelector/Content/Next + extractLinks/Art
 src/selectors.js  cache get/put + validação Cheerio (self-healing)
 src/substack.js   atalho opcional via API JSON do Substack
 src/crawl.js      frontier + processJob + crawlArchive + paginação
+src/classify.js   classificação multi-faceta de tags (vocabulário controlado)
+src/taxonomy.js   vocabulário/facetas + prompts (classificação e busca por tags)
+src/summarize.js  resumo + título PT-BR por artigo (Flash)
+src/search.js     busca na base: modo A (Flash, varre tudo) + modo B (Pro, por tags)
 src/commands.js   implementação dos comandos (compartilhada CLI + UI) + getStatus
 src/index.js      CLI (parseFlags + dispatch) + gate do menu guiado
 src/ui/           menu Ink/React (htm, sem build): App, screens, RunView (painel ao vivo), i18n

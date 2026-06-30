@@ -13,6 +13,27 @@ function getTaxonomy() {
 
 const uniq = (arr) => [...new Set(arr)];
 
+// Facetas úteis p/ RETRIEVAL na busca por tags (modo B): 5 chamadas Pro, 1 por faceta.
+export const RETRIEVAL_FACETS = [
+  'domain',
+  'topic-technology',
+  'framework-library-tool',
+  'concept-theme',
+  'trending-emerging',
+];
+// content-types que marcam um artigo como sendo SOBRE uma ferramenta (vai p/ o bucket Ferramentas).
+export const TOOL_CONTENT_TYPES = new Set(['tool-release', 'tooling', 'library-release', 'product-launch']);
+
+// Um artigo é "ferramenta" se tem tag da faceta framework-library-tool OU content-type de ferramenta.
+// Recebe as linhas de getTagsForArticle ([{facet,tag,rank}]). Puro (sem DB/LLM).
+export function isToolByTags(tagRows) {
+  return (tagRows || []).some(
+    (r) =>
+      r.facet === 'framework-library-tool' ||
+      (r.facet === 'content-type' && TOOL_CONTENT_TYPES.has(r.tag)),
+  );
+}
+
 // Ordem dos 9 agentes. topic-technology e framework-library-tool são montados a partir da
 // UNIÃO de todos os domínios + o vocabulário transversal de AI engineering.
 const FACET_ORDER = [
@@ -137,5 +158,29 @@ export function buildFacetPrompt(facet, article) {
     `VOCABULÁRIO CONTROLADO (faceta "${name}"):\n${facet.vocab.join(', ')}\n\n` +
     `TABELA DE ALIASES (variante -> canônico):\n${aliasLines}\n\n` +
     `ARTIGO\nTítulo: ${article.title || ''}\n\nConteúdo:\n${content}`;
+  return { system, user };
+}
+
+/** Monta { system, user } p/ mapear uma CONSULTA de busca -> tags DESTA faceta (modo B). */
+export function buildFacetQueryPrompt(facet, query) {
+  const tax = getTaxonomy();
+  const { name, max } = facet;
+  const aliasLines = Object.entries(tax.aliases || {})
+    .map(([k, v]) => `${k} -> ${v}`)
+    .join('\n');
+  const system =
+    `Você mapeia uma CONSULTA de busca para tags da faceta "${name}", usando EXCLUSIVAMENTE ` +
+    'o vocabulário controlado fornecido. Responda apenas com JSON.';
+  const user =
+    `FACETA: ${name}\n` +
+    `TAREFA: liste as tags DESTA faceta que melhor representam a CONSULTA (0 a ${max}).\n\n` +
+    'REGRAS:\n' +
+    '1. Só use tags que existam LITERALMENTE no vocabulário abaixo. Nunca invente.\n' +
+    '2. Normalize variantes pela tabela de aliases (ex.: "js" -> "javascript").\n' +
+    '3. Inclua só o que for claramente relevante; se nada se aplica, devolva [].\n' +
+    '4. Devolva SOMENTE JSON: {"tags":[...]}.\n\n' +
+    `VOCABULÁRIO CONTROLADO (faceta "${name}"):\n${facet.vocab.join(', ')}\n\n` +
+    `TABELA DE ALIASES (variante -> canônico):\n${aliasLines}\n\n` +
+    `CONSULTA: ${query}`;
   return { system, user };
 }

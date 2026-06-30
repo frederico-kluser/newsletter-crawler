@@ -16,6 +16,8 @@
     "add": "node --env-file=.env src/index.js add",
     "export": "node --env-file=.env src/index.js export",
     "classify": "node --env-file=.env src/index.js classify",
+    "summarize": "node --env-file=.env src/index.js summarize",
+    "search": "node --env-file=.env src/index.js search",
     "reset": "node --env-file=.env src/index.js reset",
     "test": "node --test",
     "ui": "NODE_NO_WARNINGS=1 node --env-file=.env src/index.js ui",

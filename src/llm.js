@@ -4,7 +4,7 @@
 import OpenAI from 'openai';
 import { z } from 'zod';
 import {
-  OPENROUTER_API_KEY, HTTP_REFERER, X_TITLE, HAS_LLM, MAX_HTML_FOR_LLM, stageModel,
+  OPENROUTER_API_KEY, HTTP_REFERER, X_TITLE, HAS_LLM, MAX_HTML_FOR_LLM, SEARCH_MAX_CHARS, stageModel,
 } from './config.js';
 import { warn } from './util.js';
 
@@ -278,4 +278,92 @@ export async function classifyFacet({ system, user }) {
     user,
   });
   return facetZ.parse(out);
+}
+
+// ---------- etapa summarize: título + resumo em PT-BR (Flash high) ----------
+const summarySchema = {
+  type: 'object',
+  properties: { title_pt: { type: 'string' }, summary_pt: { type: 'string' } },
+  required: ['title_pt', 'summary_pt'],
+  additionalProperties: false,
+};
+const summaryZ = z.object({ title_pt: z.string(), summary_pt: z.string() });
+export async function summarizeArticle({ title, content }) {
+  const { model, effort } = stageModel('summarize');
+  const out = await callJSON({
+    model,
+    reasoning: { effort },
+    schemaName: 'summary_pt',
+    schema: summarySchema,
+    system:
+      'Você é um editor técnico brasileiro. Resuma artigos de tecnologia em português do Brasil, ' +
+      'de forma fiel e fluente. Responda apenas com JSON.',
+    user:
+      'Traduza o TÍTULO e escreva um RESUMO em português do Brasil do artigo abaixo.\n' +
+      '- title_pt: o título adaptado para PT-BR (curto, natural).\n' +
+      '- summary_pt: um resumo CLARO e LEGÍVEL em PT-BR (NÃO é tradução literal palavra-por-palavra). ' +
+      'Cubra os pontos principais em 1–3 parágrafos curtos; preserve nomes próprios, termos técnicos e ' +
+      'nomes de produtos/bibliotecas no original quando fizer sentido.\n' +
+      'Devolva SOMENTE JSON {"title_pt","summary_pt"}.\n\n' +
+      `ARTIGO\nTítulo: ${title || ''}\n\nConteúdo:\n${clamp(content)}`,
+  });
+  return summaryZ.parse(out);
+}
+
+// ---------- etapa searchRelevance: julga artigo vs consulta (modo A, Flash high, 50x) ----------
+const RELATIONS = new Set(['direct', 'similar', 'none']);
+const KINDS = new Set(['news', 'tool']);
+const relevanceSchema = {
+  type: 'object',
+  properties: {
+    relation: { type: 'string', description: 'direct | similar | none' },
+    kind: { type: 'string', description: 'news | tool' },
+  },
+  required: ['relation', 'kind'],
+  additionalProperties: false,
+};
+// Sem enum no json_schema (strict não garante); a garantia real é o clamp do zod + fail-open.
+const relevanceZ = z.object({
+  relation: z.string().transform((s) => (RELATIONS.has(String(s).toLowerCase()) ? String(s).toLowerCase() : 'none')),
+  kind: z.string().transform((s) => (KINDS.has(String(s).toLowerCase()) ? String(s).toLowerCase() : 'news')),
+});
+export async function judgeRelevance({ query, title, content }) {
+  const { model, effort } = stageModel('searchRelevance');
+  const out = await callJSON({
+    model,
+    reasoning: { effort },
+    schemaName: 'relevance',
+    schema: relevanceSchema,
+    system: 'Você avalia se um ARTIGO técnico é relevante para uma CONSULTA de busca. Responda apenas com JSON.',
+    user:
+      `CONSULTA: ${query}\n\n` +
+      'Avalie o ARTIGO em relação à CONSULTA e devolva JSON {"relation","kind"}:\n' +
+      '- relation: "direct" se o artigo trata DIRETAMENTE do que a consulta pede (é o foco); ' +
+      '"similar" se é relacionado/adjacente mas não é o foco; "none" se não há relação real.\n' +
+      '- kind: "tool" se o artigo é SOBRE uma ferramenta (pacote npm/biblioteca/framework/CLI e o que ' +
+      'ela faz/como usar); "news" caso contrário (notícia, lançamento, análise, tutorial, opinião, paper...).\n\n' +
+      `ARTIGO\nTítulo: ${title || ''}\n\nConteúdo:\n${String(content || '').slice(0, SEARCH_MAX_CHARS)}`,
+  });
+  return relevanceZ.parse(out);
+}
+
+// ---------- etapa searchTags: mapeia consulta -> tags de UMA faceta (modo B, Pro) ----------
+const searchTagsSchema = {
+  type: 'object',
+  properties: { tags: { type: 'array', items: { type: 'string' } } },
+  required: ['tags'],
+  additionalProperties: false,
+};
+const searchTagsZ = z.object({ tags: z.array(z.string()) });
+export async function mapQueryToFacetTags({ system, user }) {
+  const { model, effort } = stageModel('searchTags');
+  const out = await callJSON({
+    model,
+    reasoning: { effort },
+    schemaName: 'search_tags',
+    schema: searchTagsSchema,
+    system,
+    user,
+  });
+  return searchTagsZ.parse(out).tags;
 }

@@ -8,6 +8,8 @@ Single source of truth for agents working in this repo. Keep it short; scoped de
 - unit/eval: `npm test` (node:test — parseDate, extractPublishedDate, isBlockedPage, UI menu render)
 - guided menu (TUI): `npm run ui` (or `node src/index.js` with no args in a TTY). `CRAWLER_LANG=pt|en`, `--no-input` disables it.
 - run (bounded): `npm run crawl -- --max-pages 1 --max-articles 3`
+- summaries (PT-BR): `npm run summarize` (gera title_pt/summary_pt; auto pós-crawl). Tags: `npm run classify`.
+- search: `npm run search -- <consulta> --mode B` (por tags, 5 Pro) ou `--mode A --limit N --yes` (Flash, varre tudo).
 - export: `npm run export -- --format md`
 - skills lint/eval: `node .agents/skills/scripts/skill-lint.mjs --all` / `node .agents/skills/scripts/skill-eval.mjs --all`
 - (no linter / type-checker configured yet — see project-analysis.md)

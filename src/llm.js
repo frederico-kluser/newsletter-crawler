@@ -29,8 +29,28 @@ const responseFormat = (name, schema) => ({
 
 // IMPORTANTE: enviar SÓ o objeto aninhado `reasoning` (nunca `reasoning_effort` junto);
 // para DeepSeek V4 o efeito máximo é "xhigh" — "max" é rejeitado com 400 (guard abaixo).
+// Parse defensivo: JSON direto -> extrai o {...} -> undefined (sentinela; JSON.parse nunca
+// devolve undefined, então é seguro distinguir "falhou" de um valor válido como null/false).
+function tryParseJSON(content) {
+  if (!content) return undefined;
+  try {
+    return JSON.parse(content);
+  } catch {
+    /* tenta extrair o objeto */
+  }
+  const m = content.match(/\{[\s\S]*\}/);
+  if (m) {
+    try {
+      return JSON.parse(m[0]);
+    } catch {
+      /* desiste */
+    }
+  }
+  return undefined;
+}
+
 let _warnedMaxEffort = false;
-async function callJSON({ model, reasoning, schema, schemaName, system, user }) {
+async function callJSON({ model, reasoning, schema, schemaName, system, user, retries = 2 }) {
   // Guard: "max" não é suportado pelo DeepSeek V4 (HTTP 400); rebaixa para "xhigh".
   if (reasoning?.effort === 'max') {
     if (!_warnedMaxEffort) {
@@ -43,28 +63,17 @@ async function callJSON({ model, reasoning, schema, schemaName, system, user }) 
   const messages = [];
   if (system) messages.push({ role: 'system', content: system });
   messages.push({ role: 'user', content: user });
+  const response_format = responseFormat(schemaName, schema);
 
-  const resp = await client().chat.completions.create({
-    model,
-    reasoning,
-    response_format: responseFormat(schemaName, schema),
-    messages,
-  });
-
-  const content = resp.choices?.[0]?.message?.content ?? '';
-  // Parser defensivo mesmo com strict:true.
-  try {
-    return JSON.parse(content);
-  } catch {
-    const m = content.match(/\{[\s\S]*\}/);
-    if (m) {
-      try {
-        return JSON.parse(m[0]);
-      } catch {
-        /* cai no throw */
-      }
-    }
-    throw new Error('JSON inválido retornado pelo LLM');
+  // Retry no JSON inválido: o Flash às vezes trunca/malforma a resposta (esp. com reasoning alto).
+  // Uma nova amostragem costuma resolver (a chamada não tem temperatura 0). maxRetries do SDK
+  // já cobre 429/5xx; aqui cobrimos resposta 200 com conteúdo não-parseável.
+  for (let attempt = 0; ; attempt++) {
+    const resp = await client().chat.completions.create({ model, reasoning, response_format, messages });
+    const parsed = tryParseJSON(resp.choices?.[0]?.message?.content ?? '');
+    if (parsed !== undefined) return parsed;
+    if (attempt >= retries) throw new Error('JSON inválido retornado pelo LLM');
+    warn(`JSON inválido do LLM (tentativa ${attempt + 1}/${retries + 1}); repetindo…`);
   }
 }
 

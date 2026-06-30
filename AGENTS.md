@@ -3,12 +3,14 @@
 Single source of truth for agents working in this repo. Keep it short; scoped detail + provenance live in `.agents/skills/`.
 
 ## Commands
-- build: none (pure ESM, Node >= 22, no build step)
+- build: none (pure ESM, Node >= 22, no build step — the Ink TUI uses `htm` tagged templates, NOT JSX, to stay build-free)
 - smoke test: `npm run status` (imports every module + boots the SQLite schema)
+- unit/eval: `npm test` (node:test — parseDate, extractPublishedDate, isBlockedPage, UI menu render)
+- guided menu (TUI): `npm run ui` (or `node src/index.js` with no args in a TTY). `CRAWLER_LANG=pt|en`, `--no-input` disables it.
 - run (bounded): `npm run crawl -- --max-pages 1 --max-articles 3`
 - export: `npm run export -- --format md`
 - skills lint/eval: `node .agents/skills/scripts/skill-lint.mjs --all` / `node .agents/skills/scripts/skill-eval.mjs --all`
-- (no test runner / linter / type-checker configured yet — see project-analysis.md)
+- (no linter / type-checker configured yet — see project-analysis.md)
 
 ## Rules (only what differs from defaults and is not tooling-guaranteed)
 - ESM only; never add `axios` (supply-chain incident) — use `got`.

@@ -22,6 +22,19 @@ export function sha256(s) {
   return crypto.createHash('sha256').update(s || '').digest('hex');
 }
 
+/**
+ * Traduz uma string de data (Readability/LLM/JSON-LD) para um Date iterável/comparável.
+ * Cobre ISO-8601 (com Z, offset, ou milissegundos) e date-only (YYYY-MM-DD -> meia-noite UTC).
+ * Defensivo: null/vazio/inválido -> null (nunca lança), p/ uma data ruim não derrubar o crawl.
+ */
+export function parseDate(str) {
+  if (str == null) return null;
+  const s = String(str).trim();
+  if (!s) return null;
+  const d = new Date(s);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
 export function sleep(ms) {
   return new Promise((r) => setTimeout(r, ms));
 }
@@ -40,9 +53,24 @@ export function hostOf(u) {
   }
 }
 
-/** Assinatura de template: host + tipo de página (chave do cache de seletores). */
+/** Assinatura de template: host + tipo de página (chave do cache de seletores).
+ * Artigo: 1 template de conteúdo por host. Listagem: inclui um "template" de caminho p/
+ * separar arquivos multinível no mesmo host (ex.: /issues vs /issues/<slug>) — segmentos
+ * dinâmicos (com dígito ou muito longos, tipo slugs) viram `*`. */
 export function domainSig(u, kind = 'listing') {
-  return `${hostOf(u)}:${kind}`;
+  const host = hostOf(u);
+  if (kind === 'article') return `${host}:article`;
+  let pathTpl = '';
+  try {
+    const segs = new URL(u).pathname
+      .split('/')
+      .filter(Boolean)
+      .map((s) => (/\d/.test(s) || s.length > 24 ? '*' : s));
+    pathTpl = '/' + segs.slice(0, 2).join('/');
+  } catch {
+    pathTpl = '';
+  }
+  return `${host}:${kind}:${pathTpl}`;
 }
 
 export function slugify(s) {
@@ -58,6 +86,30 @@ export function slugify(s) {
 }
 
 const ts = () => new Date().toISOString();
-export const log = (...a) => console.log(`[${ts()}]`, ...a);
-export const warn = (...a) => console.warn(`[${ts()}] WARN`, ...a);
-export const errorLog = (...a) => console.error(`[${ts()}] ERROR`, ...a);
+
+// Sink opcional de logs: quando setado (ex.: a UI Ink), TODO o output do crawl vai p/ ele em
+// vez do console — sem tocar em crawl.js/fetch.js/classify.js. setLogSink(null) restaura o console.
+let logSink = null;
+export function setLogSink(fn) {
+  logSink = typeof fn === 'function' ? fn : null;
+}
+const emit = (level, a) => {
+  if (!logSink) return false;
+  logSink({ level, text: a.map((x) => (typeof x === 'string' ? x : String(x))).join(' ') });
+  return true;
+};
+export const log = (...a) => {
+  if (!emit('log', a)) console.log(`[${ts()}]`, ...a);
+};
+export const warn = (...a) => {
+  if (!emit('warn', a)) console.warn(`[${ts()}] WARN`, ...a);
+};
+export const errorLog = (...a) => {
+  if (!emit('error', a)) console.error(`[${ts()}] ERROR`, ...a);
+};
+// Debug verboso, ligado por env DEBUG=1 (ou true). Vai p/ stderr p/ não poluir stdout.
+const DEBUG_ON = process.env.DEBUG === '1' || process.env.DEBUG === 'true';
+export const debug = (...a) => {
+  if (!DEBUG_ON) return;
+  if (!emit('debug', a)) console.error(`[${ts()}] DEBUG`, ...a);
+};

@@ -1,0 +1,12 @@
+{
+  "default": { "model": "deepseek/deepseek-v4-pro", "effort": "xhigh" },
+  "stages": {
+    "linkSelector":    { "model": "deepseek/deepseek-v4-pro", "effort": "xhigh" },
+    "linkExtract":     { "model": "deepseek/deepseek-v4-pro", "effort": "xhigh" },
+    "roundupExtract":  { "model": "deepseek/deepseek-v4-pro", "effort": "xhigh" },
+    "nextLink":        { "model": "deepseek/deepseek-v4-pro", "effort": "xhigh" },
+    "contentSelector": { "model": "deepseek/deepseek-v4-pro", "effort": "xhigh" },
+    "articleExtract":  { "model": "deepseek/deepseek-v4-pro", "effort": "xhigh" },
+    "classify":        { "model": "deepseek/deepseek-v4-pro", "effort": "xhigh" }
+  }
+}

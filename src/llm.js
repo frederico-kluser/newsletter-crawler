@@ -1,10 +1,12 @@
-// Cliente OpenRouter (SDK openai) + derivação de seletores e fallbacks.
-// Estratégia dois níveis: Pro (xhigh) deriva seletor reutilizável; Flash (high) faz fallbacks.
+// Cliente OpenRouter (SDK openai) + derivação de seletores, fallbacks e classificação.
+// Modelo + reasoning effort de CADA etapa vêm de stageModel() (config/models.json + env);
+// default de tudo: deepseek/deepseek-v4-pro + xhigh ("max" => 400, então o teto é xhigh).
 import OpenAI from 'openai';
 import { z } from 'zod';
 import {
-  OPENROUTER_API_KEY, MODELS, HTTP_REFERER, X_TITLE, HAS_LLM, MAX_HTML_FOR_LLM,
+  OPENROUTER_API_KEY, HTTP_REFERER, X_TITLE, HAS_LLM, MAX_HTML_FOR_LLM, stageModel,
 } from './config.js';
+import { warn } from './util.js';
 
 let _client = null;
 function client() {
@@ -26,8 +28,18 @@ const responseFormat = (name, schema) => ({
 });
 
 // IMPORTANTE: enviar SÓ o objeto aninhado `reasoning` (nunca `reasoning_effort` junto);
-// para DeepSeek V4 o efeito máximo é "xhigh" — "max" é rejeitado com 400.
+// para DeepSeek V4 o efeito máximo é "xhigh" — "max" é rejeitado com 400 (guard abaixo).
+let _warnedMaxEffort = false;
 async function callJSON({ model, reasoning, schema, schemaName, system, user }) {
+  // Guard: "max" não é suportado pelo DeepSeek V4 (HTTP 400); rebaixa para "xhigh".
+  if (reasoning?.effort === 'max') {
+    if (!_warnedMaxEffort) {
+      warn("reasoning effort 'max' não é suportado pelo DeepSeek V4 (HTTP 400); usando 'xhigh'.");
+      _warnedMaxEffort = true;
+    }
+    reasoning = { ...reasoning, effort: 'xhigh' };
+  }
+
   const messages = [];
   if (system) messages.push({ role: 'system', content: system });
   messages.push({ role: 'user', content: user });
@@ -58,7 +70,7 @@ async function callJSON({ model, reasoning, schema, schemaName, system, user }) 
 
 const clamp = (s) => (s || '').slice(0, MAX_HTML_FOR_LLM);
 
-// ---------- Pro (xhigh): seletor de links da listagem ----------
+// ---------- etapa linkSelector: seletor de links da listagem ----------
 const linkSelectorSchema = {
   type: 'object',
   properties: {
@@ -69,15 +81,18 @@ const linkSelectorSchema = {
   required: ['selector', 'attribute', 'confidence'],
   additionalProperties: false,
 };
+// `confidence`/`attribute` são tolerantes: o DeepSeek às vezes omite campos mesmo com
+// strict:true ("strict não é garantia absoluta"). Não derrubamos a derivação por metadado.
 const linkSelectorZ = z.object({
   selector: z.string().min(1),
-  attribute: z.string().min(1),
-  confidence: z.number(),
+  attribute: z.string().nullish(),
+  confidence: z.number().nullish(),
 });
 export async function deriveLinkSelector(prunedHtml) {
+  const { model, effort } = stageModel('linkSelector');
   const out = await callJSON({
-    model: MODELS.pro,
-    reasoning: { effort: 'xhigh' },
+    model,
+    reasoning: { effort },
     schemaName: 'link_selector',
     schema: linkSelectorSchema,
     system: 'Você é um especialista em CSS e web scraping. Responda apenas com JSON.',
@@ -90,7 +105,7 @@ export async function deriveLinkSelector(prunedHtml) {
   return linkSelectorZ.parse(out);
 }
 
-// ---------- Pro (xhigh): seletor de conteúdo do artigo ----------
+// ---------- etapa contentSelector: seletor de conteúdo do artigo ----------
 const contentSelectorSchema = {
   type: 'object',
   properties: {
@@ -100,11 +115,15 @@ const contentSelectorSchema = {
   required: ['content_selector', 'confidence'],
   additionalProperties: false,
 };
-const contentSelectorZ = z.object({ content_selector: z.string().min(1), confidence: z.number() });
+const contentSelectorZ = z.object({
+  content_selector: z.string().min(1),
+  confidence: z.number().nullish(),
+});
 export async function deriveContentSelector(prunedHtml) {
+  const { model, effort } = stageModel('contentSelector');
   const out = await callJSON({
-    model: MODELS.pro,
-    reasoning: { effort: 'xhigh' },
+    model,
+    reasoning: { effort },
     schemaName: 'content_selector',
     schema: contentSelectorSchema,
     system: 'Você é um especialista em CSS e web scraping. Responda apenas com JSON.',
@@ -116,7 +135,7 @@ export async function deriveContentSelector(prunedHtml) {
   return contentSelectorZ.parse(out);
 }
 
-// ---------- Flash (high): próxima página ----------
+// ---------- etapa nextLink: próxima página (paginação) ----------
 const nextSchema = {
   type: 'object',
   properties: {
@@ -128,9 +147,10 @@ const nextSchema = {
 };
 const nextZ = z.object({ next_url: z.string().nullable(), selector: z.string().nullable() });
 export async function deriveNextLink(prunedHtml, baseUrl) {
+  const { model, effort } = stageModel('nextLink');
   const out = await callJSON({
-    model: MODELS.flash,
-    reasoning: { effort: 'high' },
+    model,
+    reasoning: { effort },
     schemaName: 'next_link',
     schema: nextSchema,
     system: 'Você localiza o link de próxima página de listagens. Responda apenas com JSON.',
@@ -142,7 +162,7 @@ export async function deriveNextLink(prunedHtml, baseUrl) {
   return nextZ.parse(out);
 }
 
-// ---------- Flash (high): extração de links item-a-item ----------
+// ---------- etapa linkExtract: extração de links item-a-item (fallback) ----------
 const linksSchema = {
   type: 'object',
   properties: {
@@ -161,9 +181,10 @@ const linksSchema = {
 };
 const linksZ = z.object({ links: z.array(z.object({ url: z.string(), title: z.string() })) });
 export async function extractLinksItemByItem(prunedHtml) {
+  const { model, effort } = stageModel('linkExtract');
   const out = await callJSON({
-    model: MODELS.flash,
-    reasoning: { effort: 'high' },
+    model,
+    reasoning: { effort },
     schemaName: 'links',
     schema: linksSchema,
     system: 'Você extrai links de artigos. Responda apenas com JSON.',
@@ -174,7 +195,28 @@ export async function extractLinksItemByItem(prunedHtml) {
   return linksZ.parse(out).links;
 }
 
-// ---------- Flash (high): extração de artigo ----------
+// ---------- etapa roundupExtract: links externos curados de uma issue/roundup (fallback) ----------
+// Usado quando o Readability não isola os links da issue. Diferente de linkExtract: aqui os
+// alvos são os links das FONTES EXTERNAS (a notícia em si), não edições internas da newsletter.
+export async function extractRoundupLinks(prunedHtml, baseUrl) {
+  const { model, effort } = stageModel('roundupExtract');
+  const out = await callJSON({
+    model,
+    reasoning: { effort },
+    schemaName: 'roundup_links',
+    schema: linksSchema,
+    system: 'Você extrai os links das fontes externas citadas numa edição de newsletter. Responda apenas com JSON.',
+    user:
+      `Esta é uma EDIÇÃO/ROUNDUP de newsletter (URL ${baseUrl}) com comentário editorial e links ` +
+      'para NOTÍCIAS/ARTIGOS EXTERNOS. Extraia {links:[{url,title}]} com os links das fontes externas ' +
+      '(a notícia em si). IGNORE: navegação do site, edição anterior/próxima, links internos da própria ' +
+      'newsletter, social, login, e PATROCÍNIO/anúncio. Prefira URLs absolutas.\n\n' +
+      `HTML:\n${clamp(prunedHtml)}`,
+  });
+  return linksZ.parse(out).links;
+}
+
+// ---------- etapa articleExtract: extração de artigo via LLM (fallback) ----------
 const articleSchema = {
   type: 'object',
   properties: {
@@ -191,9 +233,10 @@ const articleZ = z.object({
   published_at: z.string().nullable(),
 });
 export async function extractArticleViaLLM(prunedHtmlOrText) {
+  const { model, effort } = stageModel('articleExtract');
   const out = await callJSON({
-    model: MODELS.flash,
-    reasoning: { effort: 'high' },
+    model,
+    reasoning: { effort },
     schemaName: 'article',
     schema: articleSchema,
     system: 'Você extrai o conteúdo principal de um artigo. Responda apenas com JSON.',
@@ -202,4 +245,37 @@ export async function extractArticleViaLLM(prunedHtmlOrText) {
       `de publicação (ISO 8601 ou null) deste conteúdo:\n\n${clamp(prunedHtmlOrText)}`,
   });
   return articleZ.parse(out);
+}
+
+// ---------- etapa classify: classificação multi-faceta (1 agente por faceta) ----------
+// Schema/zod UNIFORMES: tags são strings simples — SEM enum no json_schema. O suporte a
+// enum/minItems no strict do DeepSeek V4 não é comprovado; a garantia real de vocabulário é
+// a validação por Set em taxonomy.js (no espírito "strict não é garantia absoluta"). O
+// vocabulário, os limites e as regras vão no prompt (montado em taxonomy.js).
+const facetSchema = {
+  type: 'object',
+  properties: {
+    tags: { type: 'array', items: { type: 'string' } },
+    uncovered: { type: 'array', items: { type: 'string' } },
+    confidence: { type: 'number' },
+  },
+  required: ['tags', 'uncovered', 'confidence'],
+  additionalProperties: false,
+};
+const facetZ = z.object({
+  tags: z.array(z.string()),
+  uncovered: z.array(z.string()),
+  confidence: z.number(),
+});
+export async function classifyFacet({ system, user }) {
+  const { model, effort } = stageModel('classify');
+  const out = await callJSON({
+    model,
+    reasoning: { effort }, // default 'xhigh' = teto real do DeepSeek V4 ("max" => 400)
+    schemaName: 'facet_tags',
+    schema: facetSchema,
+    system,
+    user,
+  });
+  return facetZ.parse(out);
 }

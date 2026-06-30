@@ -2,30 +2,79 @@
 import * as cheerio from 'cheerio';
 import { stmts } from './db.js';
 import { fetchSmart, checkRobots } from './fetch.js';
-import { pruneForLLM, extractArticle, fallbackTitle } from './clean.js';
+import {
+  pruneForLLM, extractArticle, fallbackTitle, readableLinks, linksInHtml, isBlockedPage,
+  extractPublishedDate,
+} from './clean.js';
 import {
   getCachedSelector, putSelector, validateLinkSelector, applyLinkSelector,
-  validateContentSelector,
+  applyLinkSelectorWithDates, validateContentSelector,
 } from './selectors.js';
 import {
   deriveLinkSelector, deriveContentSelector, deriveNextLink,
-  extractLinksItemByItem, extractArticleViaLLM,
+  extractLinksItemByItem, extractArticleViaLLM, extractRoundupLinks,
 } from './llm.js';
 import { isSubstack, substackArchive } from './substack.js';
-import { normalizeUrl, sha256, domainSig, hostOf, log, warn, errorLog } from './util.js';
-import { HAS_LLM, RESPECT_ROBOTS } from './config.js';
+import {
+  normalizeUrl, sha256, domainSig, hostOf, parseDate, log, warn, errorLog, debug,
+} from './util.js';
+import {
+  HAS_LLM, RESPECT_ROBOTS, MAX_CRAWL_DEPTH, ROUNDUP_MIN_LINKS,
+  ARTICLE_ROUNDUP_MIN_LINKS, ARTICLE_ROUNDUP_MAX_LINKS, ROUNDUP_MAX_PROSE_CHARS,
+  SINCE_MAX_INDEX_PAGES,
+} from './config.js';
 
-export function enqueue(url, kind, fromUrl, sourceId) {
+export function enqueue(url, kind, fromUrl, sourceId, depth = 0) {
   const n = normalizeUrl(url, fromUrl);
   if (!n) return false;
-  return stmts.enqueue.run(n, kind, fromUrl || null, sourceId || null).changes > 0;
+  return stmts.enqueue.run(n, kind, fromUrl || null, sourceId || null, depth).changes > 0;
 }
 
 export function upsertSource(seed) {
   const url = typeof seed === 'string' ? seed : seed.url;
   const base = normalizeUrl(url);
   const name = (typeof seed === 'object' && seed.name) || hostOf(base);
-  return stmts.upsertSource.get({ name, base_url: base });
+  const type = (typeof seed === 'object' && seed.type) || 'listing';
+  const maxIndexPages =
+    typeof seed === 'object' && seed.maxIndexPages != null ? Number(seed.maxIndexPages) : null;
+  return stmts.upsertSource.get({ name, base_url: base, type, max_index_pages: maxIndexPages });
+}
+
+/** Filtra/normaliza links EXTERNOS (outro host) e únicos — base do roundup. */
+function externalLinks(links, pageUrl) {
+  const host = hostOf(pageUrl);
+  const out = new Map();
+  for (const l of links || []) {
+    const abs = normalizeUrl(l.url, pageUrl);
+    if (!abs || !/^https?:/i.test(abs)) continue;
+    const h = hostOf(abs);
+    if (!h || h === host) continue; // ignora links internos da própria newsletter
+    if (!out.has(abs)) out.set(abs, { url: abs, title: (l.title || '').trim() });
+  }
+  return [...out.values()];
+}
+
+/**
+ * Links curados de uma issue/roundup: primeiro via corpo do Readability (geral, sem LLM e já
+ * sem sponsor/nav); se vier pouco, cai p/ extração via LLM. Retorna links externos únicos.
+ */
+async function roundupLinks(html, pageUrl) {
+  const { links } = readableLinks(html, pageUrl);
+  let ext = externalLinks(links, pageUrl);
+  debug(`roundup ${pageUrl}: ${ext.length} links externos via Readability`);
+  if (ext.length >= ROUNDUP_MIN_LINKS) return ext;
+
+  if (HAS_LLM) {
+    try {
+      const llm = await extractRoundupLinks(pruneForLLM(html), pageUrl);
+      const ext2 = externalLinks(llm, pageUrl);
+      debug(`roundup ${pageUrl}: ${ext2.length} links externos via LLM (fallback)`);
+      if (ext2.length > ext.length) ext = ext2;
+    } catch (e) {
+      warn(`extractRoundupLinks falhou (${pageUrl}): ${e.message}`);
+    }
+  }
+  return ext;
 }
 
 async function ensureAllowed(url) {
@@ -37,13 +86,28 @@ async function ensureAllowed(url) {
 
 export async function processJob(job, opts = {}) {
   const source = job.source_id ? stmts.getSourceById.get(job.source_id) : null;
+  debug(`job ${job.kind} d=${job.depth ?? 0} ${job.url}`);
   if (job.kind === 'article') return processArticle(job, source, opts);
+  if (job.kind === 'roundup') return processRoundup(job, source, opts);
   return processListing(job, source, opts); // listing (default)
 }
 
 // ---------------- LISTING ----------------
 async function processListing(job, source, opts) {
   const url = job.url;
+  const depth = job.depth ?? 0;
+  // `index` => os filhos são roundups (issues); senão => os filhos são artigos (default).
+  const isIndex = source?.type === 'index';
+  const childKind = isIndex ? 'roundup' : 'article';
+  // O índice só pagina a 1ª página por padrão (max_index_pages); listagem normal usa --max-pages.
+  // Com --since, o índice pode paginar mais fundo (a data é que para), até um teto de segurança.
+  const maxPages = isIndex
+    ? opts.sinceDate
+      ? Math.max(source?.max_index_pages ?? 1, SINCE_MAX_INDEX_PAGES)
+      : source?.max_index_pages != null
+        ? source.max_index_pages
+        : opts.maxPages ?? 1
+    : opts.maxPages ?? Infinity;
 
   // Atalho Substack: usa API JSON pública e pula HTML/LLM.
   if (isSubstack(url)) {
@@ -51,7 +115,13 @@ async function processListing(job, source, opts) {
       const posts = await substackArchive(url);
       if (posts.length) {
         let n = 0;
-        for (const p of posts) if (enqueue(p.url, 'article', url, source?.id)) n++;
+        for (const p of posts) {
+          if (opts.sinceDate) {
+            const d = parseDate(p.published_at);
+            if (d && d < opts.sinceDate) continue; // piso: pula posts mais antigos
+          }
+          if (enqueue(p.url, childKind, url, source?.id, depth + 1)) n++;
+        }
         log(`substack: ${posts.length} posts (${n} novos) de ${hostOf(url)}`);
         return;
       }
@@ -98,7 +168,9 @@ async function processListing(job, source, opts) {
   }
 
   if (sel?.link_selector) {
-    await crawlArchive(url, source, sel, opts, html);
+    await crawlArchive(url, source, sel, html, {
+      childKind, baseDepth: depth, maxPages, sinceDate: opts.sinceDate,
+    });
     return;
   }
 
@@ -106,16 +178,16 @@ async function processListing(job, source, opts) {
   if (HAS_LLM) {
     const links = await extractLinksItemByItem(pruneForLLM(html));
     let n = 0;
-    for (const l of links) if (enqueue(l.url, 'article', url, source?.id)) n++;
-    log(`fallback Flash: ${n} links enfileirados de ${url}`);
+    for (const l of links) if (enqueue(l.url, childKind, url, source?.id, depth + 1)) n++;
+    log(`fallback Flash: ${n} links (${childKind}) enfileirados de ${url}`);
   } else {
     warn(`sem OPENROUTER_API_KEY e sem seletor cacheado — não há como descobrir links em ${url}`);
   }
 }
 
 /** Pagina do arquivo até parar: página vazia, hash repetido, ou sem "próximo". */
-async function crawlArchive(startUrl, source, sel, opts, firstHtml = null) {
-  const maxPages = opts.maxPages ?? Infinity;
+async function crawlArchive(startUrl, source, sel, firstHtml, ctx) {
+  const { childKind = 'article', baseDepth = 0, maxPages = Infinity, sinceDate = null } = ctx || {};
   const seenHashes = new Set();
   let pageUrl = startUrl;
   let html = firstHtml;
@@ -137,8 +209,21 @@ async function crawlArchive(startUrl, source, sel, opts, firstHtml = null) {
       break;
     }
 
+    // Com --since, pareia cada link à sua data (do <time> do item) p/ aplicar o piso já aqui e
+    // PARAR a paginação ao ver o 1º item abaixo do piso (a lista do arquivo é decrescente).
+    const dated = sinceDate
+      ? applyLinkSelectorWithDates(html, sel.link_selector, sel.link_attribute, pageUrl)
+      : v.urls.map((u) => ({ url: u, date: null }));
     let added = 0;
-    for (const u of v.urls) if (enqueue(u, 'article', pageUrl, source?.id)) added++;
+    let below = 0;
+    for (const it of dated) {
+      const d = sinceDate ? parseDate(it.date) : null;
+      if (sinceDate && d && d < sinceDate) {
+        below++; // mais antigo que o piso: não enfileira
+        continue;
+      }
+      if (enqueue(it.url, childKind, pageUrl, source?.id, baseDepth + 1)) added++;
+    }
     stmts.upsertPage.run({
       source_id: source?.id ?? null,
       url: normalizeUrl(pageUrl),
@@ -146,8 +231,16 @@ async function crawlArchive(startUrl, source, sel, opts, firstHtml = null) {
       status: 'done',
       pagination_depth: depth,
     });
-    log(`arquivo p${depth}: ${v.urls.length} links (${added} novos) em ${pageUrl}`);
+    log(
+      `arquivo p${depth}: ${dated.length} links ${childKind} (${added} novos` +
+        `${sinceDate ? `, ${below} < --since` : ''}) em ${pageUrl}`,
+    );
 
+    if (sinceDate && below > 0) {
+      log(`--since: piso atingido, parando paginação em ${pageUrl}`);
+      break;
+    }
+    if (depth + 1 >= maxPages) break; // não vamos paginar -> evita findNextPage (pode custar 1 LLM)
     const next = await findNextPage(html, pageUrl, sel);
     if (!next || normalizeUrl(next) === normalizeUrl(pageUrl)) {
       log(`paginação: sem próxima página após ${pageUrl}`);
@@ -189,18 +282,77 @@ async function findNextPage(html, baseUrl, sel) {
   return null;
 }
 
+// ---------------- ROUNDUP (issue/edição: lista de links externos curados) ----------------
+async function processRoundup(job, source, opts = {}) {
+  const url = job.url;
+  const depth = job.depth ?? 0;
+  if (!(await ensureAllowed(url))) return;
+
+  const fetched = await fetchSmart(url);
+  const finalUrl = fetched.url || url;
+
+  // Piso por data da ISSUE (backstop autoritativo p/ itens do índice sem data legível). Como
+  // descartamos a issue ANTES de enfileirar artigos, todo artigo enfileirado é de issue no piso.
+  if (opts.sinceDate) {
+    const d = parseDate(extractPublishedDate(fetched.html));
+    if (d && d < opts.sinceDate) {
+      log(`issue anterior a --since (${d.toISOString().slice(0, 10)}) ignorada: ${url}`);
+      return;
+    }
+  }
+
+  const links = await roundupLinks(fetched.html, finalUrl);
+  if (!links.length) {
+    warn(`roundup sem links externos (nada enfileirado): ${url}`);
+    return;
+  }
+  let n = 0;
+  for (const l of links) if (enqueue(l.url, 'article', url, source?.id, depth + 1)) n++;
+  log(`roundup: ${links.length} links externos (${n} novos) em ${url.slice(0, 80)}`);
+}
+
 // ---------------- ARTICLE ----------------
 async function processArticle(job, source, opts) {
   const url = job.url;
+  const depth = job.depth ?? 0;
   if (!(await ensureAllowed(url))) return;
 
-  const html = (await fetchSmart(url)).html;
+  const fetched = await fetchSmart(url);
+  const html = fetched.html;
+  const finalUrl = fetched.url || url;
+  // Identidade canônica pós-redirect: dedup mesmo quando A->B (alias de redirect). Checa ANTES
+  // de extrair — não cadastra 2x o mesmo link e economiza extração/LLM. (content_hash é backstop.)
+  const canonicalUrl = normalizeUrl(finalUrl) || normalizeUrl(url) || finalUrl;
+  if (stmts.getArticleByUrl.get(canonicalUrl)) {
+    log(`artigo já existe (url canônica) ignorado: ${url}`);
+    return;
+  }
   let title = null;
   let content = null;
   let published = null;
 
-  // 1) Readability.
-  const art = extractArticle(html, url);
+  // 1) Readability (uma vez; reaproveitado p/ roundup-detection e p/ extração do corpo).
+  const art = extractArticle(html, finalUrl);
+
+  // Roundup-detection: às vezes um "link" aponta p/ uma página que é uma COLEÇÃO de várias
+  // notícias. Só dividimos quando a página é PREDOMINANTEMENTE uma lista de links (pouca prosa)
+  // e o nº de links externos está numa faixa "de roundup" — assim um paper com 150 referências
+  // (que é UM artigo) não é destruído. Limitado por MAX_CRAWL_DEPTH p/ não recursar sem fim.
+  if (depth < MAX_CRAWL_DEPTH && art?.content) {
+    const proseLen = art.textContent?.trim().length || 0;
+    const ext = externalLinks(linksInHtml(art.content, finalUrl), finalUrl);
+    const looksLikeCollection =
+      ext.length >= ARTICLE_ROUNDUP_MIN_LINKS &&
+      ext.length <= ARTICLE_ROUNDUP_MAX_LINKS &&
+      proseLen < ROUNDUP_MAX_PROSE_CHARS;
+    if (looksLikeCollection) {
+      let n = 0;
+      for (const l of ext) if (enqueue(l.url, 'article', url, source?.id, depth + 1)) n++;
+      log(`artigo é roundup (${ext.length} links, ${proseLen} chars prosa) -> dividido em ${n}: ${url.slice(0, 60)}`);
+      return;
+    }
+  }
+
   if (art?.textContent && art.textContent.trim().length >= 400) {
     title = art.title;
     content = art.textContent.trim();
@@ -247,6 +399,23 @@ async function processArticle(job, source, opts) {
     return;
   }
 
+  // Descarta interstitials anti-bot (Cloudflare "Just a moment...", captcha) — vêm com 200 mas
+  // não são artigo. Evita salvar lixo quando o site bloqueia o crawler.
+  if (isBlockedPage(title, content)) {
+    warn(`página anti-bot/bloqueada ignorada (sem artigo real): ${url}`);
+    return;
+  }
+
+  // Piso por data do ARTIGO ("ambos"): descarta artigo com data PRÓPRIA anterior ao piso.
+  // Data nula é mantida — sua issue de origem já está dentro do piso (por construção).
+  if (opts.sinceDate) {
+    const d = parseDate(published);
+    if (d && d < opts.sinceDate) {
+      log(`artigo anterior a --since (${published}) ignorado: ${url}`);
+      return;
+    }
+  }
+
   const contentHash = sha256(content);
   if (stmts.getArticleByHash.get(contentHash)) {
     log(`artigo duplicado (hash) ignorado: ${url}`);
@@ -255,11 +424,11 @@ async function processArticle(job, source, opts) {
 
   stmts.insertArticle.run({
     source_id: source?.id ?? null,
-    url: normalizeUrl(url),
-    title: title || url,
+    url: canonicalUrl,
+    title: title || canonicalUrl,
     content,
     content_hash: contentHash,
     published_at: published || null,
   });
-  log(`artigo salvo: ${(title || url).slice(0, 80)}`);
+  log(`artigo salvo: ${(title || canonicalUrl).slice(0, 80)}`);
 }

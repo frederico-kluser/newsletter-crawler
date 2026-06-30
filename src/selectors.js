@@ -34,6 +34,28 @@ export function applyLinkSelector(html, selector, attribute = 'href', baseUrl) {
   return [...new Set(urls)];
 }
 
+/**
+ * Como applyLinkSelector, mas pareia cada link com a data do item (string crua de
+ * <time datetime>), usada p/ a parada por data na paginação do índice. Procura o <time>
+ * como DESCENDENTE do <a> (layout aiweekly) e, como fallback, dentro do <li> ancestral
+ * (layouts em que a data é irmã do link). Dedup por URL.
+ */
+export function applyLinkSelectorWithDates(html, selector, attribute = 'href', baseUrl) {
+  const $ = cheerio.load(html);
+  const out = new Map();
+  $(selector).each((_, el) => {
+    const v = $(el).attr(attribute) || $(el).attr('href');
+    const abs = v ? normalizeUrl(v, baseUrl) : null;
+    if (!abs || out.has(abs)) return;
+    const date =
+      $(el).find('time[datetime]').first().attr('datetime') ||
+      $(el).closest('li').find('time[datetime]').first().attr('datetime') ||
+      null;
+    out.set(abs, { url: abs, date: date ? date.trim() : null });
+  });
+  return [...out.values()];
+}
+
 export function validateLinkSelector(html, selector, attribute, baseUrl, { min = 3 } = {}) {
   let urls = [];
   try {

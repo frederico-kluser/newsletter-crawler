@@ -22,6 +22,19 @@ export function sha256(s) {
   return crypto.createHash('sha256').update(s || '').digest('hex');
 }
 
+/**
+ * Traduz uma string de data (Readability/LLM/JSON-LD) para um Date iterável/comparável.
+ * Cobre ISO-8601 (com Z, offset, ou milissegundos) e date-only (YYYY-MM-DD -> meia-noite UTC).
+ * Defensivo: null/vazio/inválido -> null (nunca lança), p/ uma data ruim não derrubar o crawl.
+ */
+export function parseDate(str) {
+  if (str == null) return null;
+  const s = String(str).trim();
+  if (!s) return null;
+  const d = new Date(s);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
 export function sleep(ms) {
   return new Promise((r) => setTimeout(r, ms));
 }

@@ -16,6 +16,8 @@
     "add": "node --env-file=.env src/index.js add",
     "export": "node --env-file=.env src/index.js export",
     "classify": "node --env-file=.env src/index.js classify",
+    "reset": "node --env-file=.env src/index.js reset",
+    "test": "node --test",
     "start": "node --env-file=.env src/index.js"
   },
   "dependencies": {

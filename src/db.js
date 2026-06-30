@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS frontier (
   created_at TEXT DEFAULT (datetime('now'))
 );
 CREATE INDEX IF NOT EXISTS idx_frontier_state ON frontier(state);
-CREATE INDEX IF NOT EXISTS idx_articles_hash ON articles(content_hash);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_articles_hash ON articles(content_hash);
 
 CREATE TABLE IF NOT EXISTS classifications (
   article_id INTEGER PRIMARY KEY REFERENCES articles(id) ON DELETE CASCADE,
@@ -105,6 +105,20 @@ ensureColumn('frontier', 'depth', 'depth INTEGER DEFAULT 0');
 ensureColumn('sources', 'type', "type TEXT DEFAULT 'listing'");
 ensureColumn('sources', 'max_index_pages', 'max_index_pages INTEGER');
 
+// Dedup de conteúdo à prova de concorrência: promove idx_articles_hash a UNIQUE em DBs
+// antigos (CREATE UNIQUE ... IF NOT EXISTS não converte um índice já existente). Só age se
+// for não-único; se houver hashes duplicados pré-existentes, mantém o índice não-único.
+{
+  const ix = db.prepare(`SELECT "unique" AS u FROM pragma_index_list('articles') WHERE name = 'idx_articles_hash'`).get();
+  if (ix && ix.u === 0) {
+    try {
+      db.exec('DROP INDEX idx_articles_hash; CREATE UNIQUE INDEX idx_articles_hash ON articles(content_hash);');
+    } catch {
+      db.exec('CREATE INDEX IF NOT EXISTS idx_articles_hash ON articles(content_hash);');
+    }
+  }
+}
+
 export const stmts = {
   // sources
   upsertSource: db.prepare(
@@ -132,6 +146,7 @@ export const stmts = {
      VALUES (@source_id, @url, @title, @content, @content_hash, @published_at)`,
   ),
   getArticleByHash: db.prepare(`SELECT id FROM articles WHERE content_hash = ?`),
+  getArticleByUrl: db.prepare(`SELECT id FROM articles WHERE url = ?`),
   listArticlesBySource: db.prepare(`SELECT * FROM articles WHERE source_id = ? ORDER BY id`),
 
   // selectors
@@ -215,3 +230,23 @@ export const stmts = {
     `SELECT term, COUNT(*) c FROM classification_uncovered GROUP BY term ORDER BY c DESC LIMIT ?`,
   ),
 };
+
+// Limpeza total (slate limpo). Ordem filho->pai porque foreign_keys=ON. VACUUM fora da
+// transação p/ recuperar espaço do arquivo/WAL. Opera no DB de DB_PATH (respeita o override).
+export function wipeAll() {
+  const tables = [
+    'article_tags',
+    'classification_uncovered',
+    'classifications',
+    'articles',
+    'pages',
+    'selectors',
+    'frontier',
+    'sources',
+  ];
+  const tx = db.transaction(() => {
+    for (const t of tables) db.prepare(`DELETE FROM ${t}`).run();
+  });
+  tx();
+  db.exec('VACUUM');
+}

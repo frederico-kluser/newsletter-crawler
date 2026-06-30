@@ -109,12 +109,66 @@ const BLOCKED_PATTERNS = [
   /access denied/i,
   /ddos protection by/i,
   /cf-browser-verification/i,
+  /performing security verification/i,
+  /checking if the site connection is secure/i,
 ];
 
 /** A página parece um interstitial anti-bot (Cloudflare etc.) em vez de um artigo? */
 export function isBlockedPage(title, text) {
   const hay = `${title || ''}\n${(text || '').slice(0, 600)}`;
   return BLOCKED_PATTERNS.some((re) => re.test(hay));
+}
+
+// Acha recursivamente um `datePublished` em JSON-LD (que costuma vir aninhado em @graph).
+// Checa datePublished explicitamente ANTES de descer, p/ nunca confundir com dateModified.
+function findDatePublished(node) {
+  if (!node || typeof node !== 'object') return null;
+  if (Array.isArray(node)) {
+    for (const x of node) {
+      const r = findDatePublished(x);
+      if (r) return r;
+    }
+    return null;
+  }
+  if (typeof node.datePublished === 'string') return node.datePublished;
+  for (const k of Object.keys(node)) {
+    const v = node[k];
+    if (v && typeof v === 'object') {
+      const r = findDatePublished(v);
+      if (r) return r;
+    }
+  }
+  return null;
+}
+
+/**
+ * Data de publicação a partir do HTML (a issue/edição expõe isso de forma confiável):
+ * JSON-LD `datePublished` (inclusive dentro de @graph) -> <meta article:published_time> ->
+ * primeiro <time datetime>. Retorna a STRING crua (o parsing fica em util.parseDate).
+ */
+export function extractPublishedDate(html) {
+  try {
+    const $ = cheerio.load(html);
+    let found = null;
+    $('script[type="application/ld+json"]').each((_, el) => {
+      if (found) return;
+      try {
+        found = findDatePublished(JSON.parse($(el).text()));
+      } catch {
+        /* JSON-LD malformado: ignora */
+      }
+    });
+    if (found) return String(found).trim();
+    const meta =
+      $('meta[property="article:published_time"]').attr('content') ||
+      $('meta[name="article:published_time"]').attr('content');
+    if (meta) return meta.trim();
+    const t = $('time[datetime]').first().attr('datetime');
+    if (t) return t.trim();
+  } catch {
+    /* fail-open */
+  }
+  return null;
 }
 
 /** Título de fallback a partir de <h1>/<title>. */

@@ -1,0 +1,15 @@
+{
+  "routing": {
+    "must_trigger": [
+      "how do I add a screen to the guided terminal menu",
+      "build the interactive Ink menu UI",
+      "the live progress panel in the terminal UI",
+      "how does the menu invocation gate work with TTY"
+    ],
+    "must_not_trigger": [
+      "which reasoning effort for deepseek",
+      "how to change the sqlite schema"
+    ]
+  },
+  "content_must_include": ["htm", "setLogSink", "ring buffer", "@inkjs/ui", "exitOnCtrlC"]
+}

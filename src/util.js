@@ -86,11 +86,30 @@ export function slugify(s) {
 }
 
 const ts = () => new Date().toISOString();
-export const log = (...a) => console.log(`[${ts()}]`, ...a);
-export const warn = (...a) => console.warn(`[${ts()}] WARN`, ...a);
-export const errorLog = (...a) => console.error(`[${ts()}] ERROR`, ...a);
+
+// Sink opcional de logs: quando setado (ex.: a UI Ink), TODO o output do crawl vai p/ ele em
+// vez do console — sem tocar em crawl.js/fetch.js/classify.js. setLogSink(null) restaura o console.
+let logSink = null;
+export function setLogSink(fn) {
+  logSink = typeof fn === 'function' ? fn : null;
+}
+const emit = (level, a) => {
+  if (!logSink) return false;
+  logSink({ level, text: a.map((x) => (typeof x === 'string' ? x : String(x))).join(' ') });
+  return true;
+};
+export const log = (...a) => {
+  if (!emit('log', a)) console.log(`[${ts()}]`, ...a);
+};
+export const warn = (...a) => {
+  if (!emit('warn', a)) console.warn(`[${ts()}] WARN`, ...a);
+};
+export const errorLog = (...a) => {
+  if (!emit('error', a)) console.error(`[${ts()}] ERROR`, ...a);
+};
 // Debug verboso, ligado por env DEBUG=1 (ou true). Vai p/ stderr p/ não poluir stdout.
 const DEBUG_ON = process.env.DEBUG === '1' || process.env.DEBUG === 'true';
 export const debug = (...a) => {
-  if (DEBUG_ON) console.error(`[${ts()}] DEBUG`, ...a);
+  if (!DEBUG_ON) return;
+  if (!emit('debug', a)) console.error(`[${ts()}] DEBUG`, ...a);
 };

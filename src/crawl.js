@@ -4,20 +4,24 @@ import { stmts } from './db.js';
 import { fetchSmart, checkRobots } from './fetch.js';
 import {
   pruneForLLM, extractArticle, fallbackTitle, readableLinks, linksInHtml, isBlockedPage,
+  extractPublishedDate,
 } from './clean.js';
 import {
   getCachedSelector, putSelector, validateLinkSelector, applyLinkSelector,
-  validateContentSelector,
+  applyLinkSelectorWithDates, validateContentSelector,
 } from './selectors.js';
 import {
   deriveLinkSelector, deriveContentSelector, deriveNextLink,
   extractLinksItemByItem, extractArticleViaLLM, extractRoundupLinks,
 } from './llm.js';
 import { isSubstack, substackArchive } from './substack.js';
-import { normalizeUrl, sha256, domainSig, hostOf, log, warn, errorLog, debug } from './util.js';
+import {
+  normalizeUrl, sha256, domainSig, hostOf, parseDate, log, warn, errorLog, debug,
+} from './util.js';
 import {
   HAS_LLM, RESPECT_ROBOTS, MAX_CRAWL_DEPTH, ROUNDUP_MIN_LINKS,
   ARTICLE_ROUNDUP_MIN_LINKS, ARTICLE_ROUNDUP_MAX_LINKS, ROUNDUP_MAX_PROSE_CHARS,
+  SINCE_MAX_INDEX_PAGES,
 } from './config.js';
 
 export function enqueue(url, kind, fromUrl, sourceId, depth = 0) {
@@ -96,10 +100,13 @@ async function processListing(job, source, opts) {
   const isIndex = source?.type === 'index';
   const childKind = isIndex ? 'roundup' : 'article';
   // O índice só pagina a 1ª página por padrão (max_index_pages); listagem normal usa --max-pages.
+  // Com --since, o índice pode paginar mais fundo (a data é que para), até um teto de segurança.
   const maxPages = isIndex
-    ? source?.max_index_pages != null
-      ? source.max_index_pages
-      : opts.maxPages ?? 1
+    ? opts.sinceDate
+      ? Math.max(source?.max_index_pages ?? 1, SINCE_MAX_INDEX_PAGES)
+      : source?.max_index_pages != null
+        ? source.max_index_pages
+        : opts.maxPages ?? 1
     : opts.maxPages ?? Infinity;
 
   // Atalho Substack: usa API JSON pública e pula HTML/LLM.
@@ -108,7 +115,13 @@ async function processListing(job, source, opts) {
       const posts = await substackArchive(url);
       if (posts.length) {
         let n = 0;
-        for (const p of posts) if (enqueue(p.url, childKind, url, source?.id, depth + 1)) n++;
+        for (const p of posts) {
+          if (opts.sinceDate) {
+            const d = parseDate(p.published_at);
+            if (d && d < opts.sinceDate) continue; // piso: pula posts mais antigos
+          }
+          if (enqueue(p.url, childKind, url, source?.id, depth + 1)) n++;
+        }
         log(`substack: ${posts.length} posts (${n} novos) de ${hostOf(url)}`);
         return;
       }
@@ -155,7 +168,9 @@ async function processListing(job, source, opts) {
   }
 
   if (sel?.link_selector) {
-    await crawlArchive(url, source, sel, html, { childKind, baseDepth: depth, maxPages });
+    await crawlArchive(url, source, sel, html, {
+      childKind, baseDepth: depth, maxPages, sinceDate: opts.sinceDate,
+    });
     return;
   }
 
@@ -172,7 +187,7 @@ async function processListing(job, source, opts) {
 
 /** Pagina do arquivo até parar: página vazia, hash repetido, ou sem "próximo". */
 async function crawlArchive(startUrl, source, sel, firstHtml, ctx) {
-  const { childKind = 'article', baseDepth = 0, maxPages = Infinity } = ctx || {};
+  const { childKind = 'article', baseDepth = 0, maxPages = Infinity, sinceDate = null } = ctx || {};
   const seenHashes = new Set();
   let pageUrl = startUrl;
   let html = firstHtml;
@@ -194,8 +209,21 @@ async function crawlArchive(startUrl, source, sel, firstHtml, ctx) {
       break;
     }
 
+    // Com --since, pareia cada link à sua data (do <time> do item) p/ aplicar o piso já aqui e
+    // PARAR a paginação ao ver o 1º item abaixo do piso (a lista do arquivo é decrescente).
+    const dated = sinceDate
+      ? applyLinkSelectorWithDates(html, sel.link_selector, sel.link_attribute, pageUrl)
+      : v.urls.map((u) => ({ url: u, date: null }));
     let added = 0;
-    for (const u of v.urls) if (enqueue(u, childKind, pageUrl, source?.id, baseDepth + 1)) added++;
+    let below = 0;
+    for (const it of dated) {
+      const d = sinceDate ? parseDate(it.date) : null;
+      if (sinceDate && d && d < sinceDate) {
+        below++; // mais antigo que o piso: não enfileira
+        continue;
+      }
+      if (enqueue(it.url, childKind, pageUrl, source?.id, baseDepth + 1)) added++;
+    }
     stmts.upsertPage.run({
       source_id: source?.id ?? null,
       url: normalizeUrl(pageUrl),
@@ -203,8 +231,15 @@ async function crawlArchive(startUrl, source, sel, firstHtml, ctx) {
       status: 'done',
       pagination_depth: depth,
     });
-    log(`arquivo p${depth}: ${v.urls.length} links ${childKind} (${added} novos) em ${pageUrl}`);
+    log(
+      `arquivo p${depth}: ${dated.length} links ${childKind} (${added} novos` +
+        `${sinceDate ? `, ${below} < --since` : ''}) em ${pageUrl}`,
+    );
 
+    if (sinceDate && below > 0) {
+      log(`--since: piso atingido, parando paginação em ${pageUrl}`);
+      break;
+    }
     if (depth + 1 >= maxPages) break; // não vamos paginar -> evita findNextPage (pode custar 1 LLM)
     const next = await findNextPage(html, pageUrl, sel);
     if (!next || normalizeUrl(next) === normalizeUrl(pageUrl)) {
@@ -248,13 +283,24 @@ async function findNextPage(html, baseUrl, sel) {
 }
 
 // ---------------- ROUNDUP (issue/edição: lista de links externos curados) ----------------
-async function processRoundup(job, source) {
+async function processRoundup(job, source, opts = {}) {
   const url = job.url;
   const depth = job.depth ?? 0;
   if (!(await ensureAllowed(url))) return;
 
   const fetched = await fetchSmart(url);
   const finalUrl = fetched.url || url;
+
+  // Piso por data da ISSUE (backstop autoritativo p/ itens do índice sem data legível). Como
+  // descartamos a issue ANTES de enfileirar artigos, todo artigo enfileirado é de issue no piso.
+  if (opts.sinceDate) {
+    const d = parseDate(extractPublishedDate(fetched.html));
+    if (d && d < opts.sinceDate) {
+      log(`issue anterior a --since (${d.toISOString().slice(0, 10)}) ignorada: ${url}`);
+      return;
+    }
+  }
+
   const links = await roundupLinks(fetched.html, finalUrl);
   if (!links.length) {
     warn(`roundup sem links externos (nada enfileirado): ${url}`);
@@ -274,6 +320,13 @@ async function processArticle(job, source, opts) {
   const fetched = await fetchSmart(url);
   const html = fetched.html;
   const finalUrl = fetched.url || url;
+  // Identidade canônica pós-redirect: dedup mesmo quando A->B (alias de redirect). Checa ANTES
+  // de extrair — não cadastra 2x o mesmo link e economiza extração/LLM. (content_hash é backstop.)
+  const canonicalUrl = normalizeUrl(finalUrl) || normalizeUrl(url) || finalUrl;
+  if (stmts.getArticleByUrl.get(canonicalUrl)) {
+    log(`artigo já existe (url canônica) ignorado: ${url}`);
+    return;
+  }
   let title = null;
   let content = null;
   let published = null;
@@ -353,6 +406,16 @@ async function processArticle(job, source, opts) {
     return;
   }
 
+  // Piso por data do ARTIGO ("ambos"): descarta artigo com data PRÓPRIA anterior ao piso.
+  // Data nula é mantida — sua issue de origem já está dentro do piso (por construção).
+  if (opts.sinceDate) {
+    const d = parseDate(published);
+    if (d && d < opts.sinceDate) {
+      log(`artigo anterior a --since (${published}) ignorado: ${url}`);
+      return;
+    }
+  }
+
   const contentHash = sha256(content);
   if (stmts.getArticleByHash.get(contentHash)) {
     log(`artigo duplicado (hash) ignorado: ${url}`);
@@ -361,11 +424,11 @@ async function processArticle(job, source, opts) {
 
   stmts.insertArticle.run({
     source_id: source?.id ?? null,
-    url: normalizeUrl(url),
-    title: title || url,
+    url: canonicalUrl,
+    title: title || canonicalUrl,
     content,
     content_hash: contentHash,
     published_at: published || null,
   });
-  log(`artigo salvo: ${(title || url).slice(0, 80)}`);
+  log(`artigo salvo: ${(title || canonicalUrl).slice(0, 80)}`);
 }

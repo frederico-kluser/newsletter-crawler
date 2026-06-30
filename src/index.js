@@ -1,14 +1,16 @@
 #!/usr/bin/env node
-// CLI: crawl | status | add | export. Loop principal resumível com concorrência.
+// CLI: crawl | status | add | export | classify | reset. Loop principal resumível c/ concorrência.
 import { mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import pLimit from 'p-limit';
-import { stmts, db } from './db.js';
-import { ROOT, CONCURRENCY, MAX_RETRIES, HAS_LLM, CLASSIFY_AFTER_CRAWL, loadSources } from './config.js';
+import { stmts, db, wipeAll } from './db.js';
+import {
+  ROOT, DB_PATH, CONCURRENCY, MAX_RETRIES, HAS_LLM, CLASSIFY_AFTER_CRAWL, loadSources,
+} from './config.js';
 import { processJob, enqueue, upsertSource } from './crawl.js';
 import { classifyPending } from './classify.js';
 import { closeBrowser } from './fetch.js';
-import { slugify, log, errorLog } from './util.js';
+import { slugify, normalizeUrl, parseDate, log, errorLog } from './util.js';
 
 function parseFlags(argv) {
   const flags = {};
@@ -56,16 +58,37 @@ async function cmdCrawl(flags) {
   const reset = stmts.resetInProgress.run();
   if (reset.changes) log(`resume: ${reset.changes} jobs in_progress -> pending`);
 
-  // Semeia as fontes do config. `--only <substr>` semeia só as fontes cujo nome/url casam
-  // (útil p/ debugar uma newsletter isolada).
+  // Seleção de fonte ao executar: `--source "<nome exato>"` (ou a URL) seleciona UMA fonte;
+  // `--only <substr>` casa por substring no nome/url. Sem nenhum, semeia todas do config.
   const only = typeof flags.only === 'string' ? flags.only.toLowerCase() : null;
+  const sourceExact = typeof flags.source === 'string' ? flags.source.toLowerCase() : null;
   for (const s of loadSources()) {
     if (only && !`${s.name || ''} ${s.url}`.toLowerCase().includes(only)) continue;
+    if (
+      sourceExact &&
+      (s.name || '').toLowerCase() !== sourceExact &&
+      normalizeUrl(s.url) !== normalizeUrl(flags.source)
+    ) {
+      continue;
+    }
     const src = upsertSource(s);
     if (enqueue(s.url, 'listing', null, src.id, 0)) log(`seed: ${s.url} (type=${src.type})`);
   }
 
-  const opts = { maxPages: flags['max-pages'] ? Number(flags['max-pages']) : Infinity };
+  // --since <YYYY-MM-DD|ISO>: piso de data (coleta do mais novo até esse piso e para). Aplica
+  // à data da issue E do artigo. Data inválida aborta (em vez de ignorar o filtro silenciosamente).
+  const sinceRaw = typeof flags.since === 'string' ? flags.since : null;
+  const sinceDate = sinceRaw ? parseDate(sinceRaw) : null;
+  if (sinceRaw && !sinceDate) {
+    errorLog(`--since inválido (use ISO, ex.: 2026-06-25): ${sinceRaw}`);
+    process.exit(1);
+  }
+  if (sinceDate) log(`--since ativo: piso ${sinceDate.toISOString()}`);
+
+  const opts = {
+    maxPages: flags['max-pages'] ? Number(flags['max-pages']) : Infinity,
+    sinceDate,
+  };
   const maxArticles = flags['max-articles'] ? Number(flags['max-articles']) : Infinity;
 
   const limit = pLimit(CONCURRENCY);
@@ -127,6 +150,21 @@ function cmdAdd(rest, flags) {
   });
   enqueue(url, 'listing', null, src.id, 0);
   log(`fonte adicionada: ${src.base_url} (id ${src.id}, type=${src.type})`);
+}
+
+// Limpa TODOS os dados (slate limpo). Destrutivo: exige --yes.
+function cmdReset(flags) {
+  if (flags.yes !== true) {
+    errorLog(
+      `reset APAGA TODOS OS DADOS de ${DB_PATH} (articles, frontier, pages, selectors, ` +
+        'classifications, article_tags, classification_uncovered, sources).',
+    );
+    errorLog('Confirme com:  npm run reset -- --yes');
+    process.exit(1);
+  }
+  wipeAll();
+  log(`reset: todos os dados apagados (${DB_PATH}).`);
+  printStatus();
 }
 
 // Agrupa as tags do artigo por faceta (preservando a ordem de rank), para o export.
@@ -207,8 +245,9 @@ try {
   else if (cmd === 'add') cmdAdd(rest, flags);
   else if (cmd === 'export') cmdExport(flags);
   else if (cmd === 'classify') await cmdClassify(flags);
+  else if (cmd === 'reset' || cmd === 'clean') cmdReset(flags);
   else {
-    errorLog(`comando desconhecido: ${cmd} (use: crawl | status | add | export | classify)`);
+    errorLog(`comando desconhecido: ${cmd} (use: crawl | status | add | export | classify | reset)`);
     process.exit(1);
   }
   db.close();

@@ -49,10 +49,19 @@ cp .env.example .env                 # e preencha OPENROUTER_API_KEY
 ```bash
 npm run crawl                          # semeia do config e roda até esvaziar a fila (resumível)
 npm run crawl -- --max-pages 2 --max-articles 5   # limita custo/tempo (ótimo p/ 1º teste)
+npm run crawl -- --source "AI Weekly"  # semeia só essa fonte (nome exato; ou --only <substr>)
+npm run crawl -- --source "AI Weekly" --since 2026-06-25   # piso de data (veja abaixo)
 npm run status                         # contagens de sources/pages/articles/selectors/frontier
-npm run add -- https://exemplo.com/arquivo --name "Minha Newsletter"
+npm run add -- https://exemplo.com/arquivo --name "Minha" --type index --max-index-pages 1
 npm run export -- --format md          # escreve data/export/<fonte>/*.md  (ou --format json)
+npm run reset -- --yes                 # APAGA TODOS OS DADOS (slate limpo); respeita DB_PATH
+npm test                               # node:test: parseDate + extractPublishedDate
 ```
+
+### Seleção de fonte e parada por data
+- **`--source "<nome|url>"`** semeia só uma fonte (nome exato ou URL); **`--only <substr>`** casa por substring.
+- **`--since <YYYY-MM-DD|ISO>`** é um **piso**: coleta do mais novo para o mais antigo e **para** ao passar da data. Aplica-se à data da **issue** (para a paginação do índice ao cruzar o piso) **e** à data de cada **artigo** (descarta os mais antigos; artigo sem data conhecida é mantido, pois sua issue já está no intervalo). Com `--since`, o índice pode paginar além de `maxIndexPages`, até `SINCE_MAX_INDEX_PAGES` (teto de segurança). Não é persistido — repita a flag ao retomar.
+- **Dedup garantido:** o mesmo link nunca é cadastrado 2× — identidade pela **URL canônica pós-redirect** (`UNIQUE(url)`) + **`content_hash`** (índice UNIQUE). Links de paginação (instáveis) não servem de identidade; a checagem é pela notícia/conteúdo.
 
 ## Modelos (OpenRouter / DeepSeek V4)
 - **Pro** `deepseek/deepseek-v4-pro` com `reasoning.effort: "xhigh"` — deriva/repara seletores (1 chamada amortizada por template). Use `"xhigh"`, **nunca** `"max"`.

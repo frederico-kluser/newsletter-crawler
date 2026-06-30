@@ -1,0 +1,15 @@
+{
+  "routing": {
+    "must_trigger": [
+      "how do I search the saved newsletter base",
+      "the two search modes flash per article vs pro tags",
+      "generate PT-BR summaries of articles",
+      "retrieve articles by tag and bucket news vs tools"
+    ],
+    "must_not_trigger": [
+      "which reasoning effort for deepseek",
+      "how does pagination stop"
+    ]
+  },
+  "content_must_include": ["searchRelevance", "json_each", "isToolByTags", "summary_pt", "RETRIEVAL_FACETS"]
+}

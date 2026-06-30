@@ -104,6 +104,9 @@ function ensureColumn(table, column, ddl) {
 ensureColumn('frontier', 'depth', 'depth INTEGER DEFAULT 0');
 ensureColumn('sources', 'type', "type TEXT DEFAULT 'listing'");
 ensureColumn('sources', 'max_index_pages', 'max_index_pages INTEGER');
+// Resumo PT-BR p/ leitura (o `content` segue original, p/ busca/tags). Ambos nullable.
+ensureColumn('articles', 'title_pt', 'title_pt TEXT');
+ensureColumn('articles', 'summary_pt', 'summary_pt TEXT');
 
 // Dedup de conteúdo à prova de concorrência: promove idx_articles_hash a UNIQUE em DBs
 // antigos (CREATE UNIQUE ... IF NOT EXISTS não converte um índice já existente). Só age se
@@ -148,6 +151,31 @@ export const stmts = {
   getArticleByHash: db.prepare(`SELECT id FROM articles WHERE content_hash = ?`),
   getArticleByUrl: db.prepare(`SELECT id FROM articles WHERE url = ?`),
   listArticlesBySource: db.prepare(`SELECT * FROM articles WHERE source_id = ? ORDER BY id`),
+
+  // resumos PT-BR (title_pt/summary_pt; LIMIT -1 = sem limite, como em classify)
+  setSummary: db.prepare(`UPDATE articles SET title_pt = @title_pt, summary_pt = @summary_pt WHERE id = @id`),
+  listArticlesNeedingSummary: db.prepare(
+    `SELECT id, url, title, content FROM articles WHERE summary_pt IS NULL ORDER BY id LIMIT ?`,
+  ),
+  listArticlesForResummarize: db.prepare(
+    `SELECT id, url, title, content FROM articles ORDER BY id LIMIT ?`,
+  ),
+  countSummaries: db.prepare(`SELECT COUNT(*) c FROM articles WHERE summary_pt IS NOT NULL`),
+
+  // busca: varredura completa (modo A) e retrieval por conjunto de tags (modo B, via json_each)
+  listAllArticlesForSearch: db.prepare(
+    `SELECT id, url, title, title_pt, summary_pt, content FROM articles ORDER BY id LIMIT ?`,
+  ),
+  articlesByTags: db.prepare(
+    `SELECT a.id, a.url, a.title, a.title_pt, a.summary_pt, a.content,
+            COUNT(DISTINCT at.tag) AS matches
+       FROM article_tags at
+       JOIN articles a ON a.id = at.article_id
+      WHERE at.tag IN (SELECT value FROM json_each(@tags))
+      GROUP BY a.id
+      ORDER BY matches DESC
+      LIMIT @limit`,
+  ),
 
   // selectors
   getSelector: db.prepare(`SELECT * FROM selectors WHERE template_sig = ?`),

@@ -5,16 +5,22 @@ import { Box, Text, useApp } from 'ink';
 import { Badge } from '@inkjs/ui';
 import { html } from './html.js';
 import { t } from './i18n.js';
-import { getStatus, cmdCrawl, cmdExport, cmdClassify, cmdAdd, cmdReset } from '../commands.js';
+import {
+  getStatus, cmdCrawl, cmdExport, cmdClassify, cmdAdd, cmdReset, cmdSummarize, cmdSearch,
+} from '../commands.js';
 import {
   Menu, StatusScreen, CrawlConfig, ExportConfig, ClassifyConfig, AddConfig, ResetConfirm,
+  SummarizeConfig, SearchConfig,
 } from './screens.js';
 import { RunView } from './RunView.js';
+import { ResultsView } from './ResultsView.js';
 
 const THUNKS = {
   crawl: (flags) => cmdCrawl(flags),
   export: (flags) => cmdExport(flags),
   classify: (flags) => cmdClassify(flags),
+  summarize: (flags) => cmdSummarize(flags),
+  search: (flags, rest) => cmdSearch(rest, flags), // retorna os resultados p/ a UI
   add: (flags, rest) => cmdAdd(rest, flags),
   reset: (flags) => cmdReset(flags),
 };
@@ -41,6 +47,7 @@ export default function App() {
   const { exit } = useApp();
   const [screen, setScreen] = useState('menu');
   const [runSpec, setRunSpec] = useState(null);
+  const [runResult, setRunResult] = useState(null); // resultados da busca
   const [, setRefresh] = useState(0);
 
   const onRun = ({ sub, flags = {}, rest = [] }) => {
@@ -63,12 +70,28 @@ export default function App() {
     body = html`<${ExportConfig} onRun=${onRun} onBack=${toMenu} />`;
   } else if (screen === 'classify') {
     body = html`<${ClassifyConfig} onRun=${onRun} onBack=${toMenu} />`;
+  } else if (screen === 'summarize') {
+    body = html`<${SummarizeConfig} onRun=${onRun} onBack=${toMenu} />`;
+  } else if (screen === 'search') {
+    body = html`<${SearchConfig} onRun=${onRun} onBack=${toMenu} />`;
   } else if (screen === 'add') {
     body = html`<${AddConfig} onRun=${onRun} onBack=${toMenu} />`;
   } else if (screen === 'reset') {
     body = html`<${ResetConfirm} onRun=${onRun} onBack=${toMenu} />`;
   } else if (screen === 'run') {
-    body = html`<${RunView} spec=${runSpec} onDone=${(v) => (v === 'quit' ? exit() : toMenu())} />`;
+    body = html`<${RunView}
+      spec=${runSpec}
+      onResults=${(data) => {
+        setRunResult(data);
+        setScreen('results');
+      }}
+      onDone=${(v) => (v === 'quit' ? exit() : toMenu())}
+    />`;
+  } else if (screen === 'results') {
+    body = html`<${ResultsView}
+      result=${runResult}
+      onDone=${(v) => (v === 'quit' ? exit() : toMenu())}
+    />`;
   }
 
   return html`<${Box} flexDirection="column" padding=${1}>

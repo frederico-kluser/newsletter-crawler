@@ -7,16 +7,17 @@ import { Spinner, Alert, Select } from '@inkjs/ui';
 import { html } from './html.js';
 import { t } from './i18n.js';
 import { setLogSink } from '../util.js';
-import { getStatus } from '../commands.js';
+import { getStatus, getSearchProgress } from '../commands.js';
 
 const LEVEL_COLOR = { warn: 'yellow', error: 'red', debug: 'gray' };
 const VISIBLE = 12;
 
-export function RunView({ spec, onDone }) {
+export function RunView({ spec, onDone, onResults }) {
   const [lines, setLines] = useState([]);
   const [status, setStatus] = useState(() => getStatus());
   const [baseline] = useState(() => getStatus());
   const [result, setResult] = useState(null); // { ok, error }
+  const [prog, setProg] = useState(null); // progresso da busca (modo A)
   const mounted = useRef(true);
   const ring = useRef([]);
 
@@ -29,10 +30,21 @@ export function RunView({ spec, onDone }) {
       if (ring.current.length > 200) ring.current.shift();
       setLines([...ring.current]);
     });
-    const id = setInterval(() => mounted.current && setStatus(getStatus()), 300);
+    const id = setInterval(() => {
+      if (!mounted.current) return;
+      setStatus(getStatus());
+      if (spec.sub === 'search') setProg(getSearchProgress());
+    }, 300);
     Promise.resolve()
       .then(() => spec.thunk())
-      .then(() => mounted.current && setResult({ ok: true }))
+      .then((value) => {
+        if (!mounted.current) return;
+        if (spec.sub === 'search' && value) {
+          onResults?.(value); // App troca p/ a ResultsView com os resultados
+          return;
+        }
+        setResult({ ok: true });
+      })
       .catch((e) => mounted.current && setResult({ ok: false, error: e?.message || String(e) }))
       .finally(() => {
         setLogSink(null);
@@ -51,8 +63,10 @@ export function RunView({ spec, onDone }) {
   const dArticles = Math.max(0, status.articles - baseline.articles);
   const dClassif = Math.max(0, status.classified - baseline.classified);
   const counters =
-    `${t('articles')} +${dArticles} · ${t('classif')} +${dClassif} · ` +
-    `${t('frontier')} ${f.pending}/${f.in_progress}/${f.done}/${f.failed}`;
+    spec.sub === 'search' && prog
+      ? t('searchScanning', { n: prog.scanned, total: prog.total, m: prog.relevant })
+      : `${t('articles')} +${dArticles} · ${t('classif')} +${dClassif} · ` +
+        `${t('frontier')} ${f.pending}/${f.in_progress}/${f.done}/${f.failed}`;
 
   return html`<${Box} flexDirection="column">
     <${Box}>

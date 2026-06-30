@@ -7,6 +7,9 @@
     "nextLink":        { "model": "deepseek/deepseek-v4-pro", "effort": "xhigh" },
     "contentSelector": { "model": "deepseek/deepseek-v4-pro", "effort": "xhigh" },
     "articleExtract":  { "model": "deepseek/deepseek-v4-pro", "effort": "xhigh" },
-    "classify":        { "model": "deepseek/deepseek-v4-pro", "effort": "xhigh" }
+    "classify":        { "model": "deepseek/deepseek-v4-pro", "effort": "xhigh" },
+    "summarize":       { "model": "deepseek/deepseek-v4-flash", "effort": "high" },
+    "searchRelevance": { "model": "deepseek/deepseek-v4-flash", "effort": "high" },
+    "searchTags":      { "model": "deepseek/deepseek-v4-pro", "effort": "high" }
   }
 }

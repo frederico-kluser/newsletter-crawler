@@ -9,6 +9,7 @@ import { t } from './i18n.js';
 import { buildCommandPreview } from './commandPreview.js';
 import { loadSources, HAS_LLM } from '../config.js';
 import { parseDate } from '../util.js';
+import { getStatus } from '../commands.js';
 
 const yesNo = () => [
   { label: t('yes'), value: 'yes' },
@@ -47,15 +48,17 @@ function Field({ label, error, children }) {
 export function Menu({ onSelect }) {
   const options = [
     { label: t('menuCrawl'), value: 'crawl' },
+    { label: t('menuSearch'), value: 'search' },
     { label: t('menuStatus'), value: 'status' },
     { label: t('menuExport'), value: 'export' },
     { label: t('menuClassify'), value: 'classify' },
+    { label: t('menuSummarize'), value: 'summarize' },
     { label: t('menuAdd'), value: 'add' },
     { label: t('menuReset'), value: 'reset' },
     { label: t('menuQuit'), value: 'quit' },
   ];
   return html`<${Box} flexDirection="column">
-    <${Select} options=${options} onChange=${onSelect} visibleOptionCount=${7} />
+    <${Select} options=${options} onChange=${onSelect} visibleOptionCount=${9} />
     <${Box} marginTop=${1}><${Text} dimColor>${t('hintNav')}</${Text}></${Box}>
   </${Box}>`;
 }
@@ -190,6 +193,97 @@ export function ClassifyConfig({ onRun, onBack }) {
     </${Field}>`;
   }
   return html`<${Review} sub="classify" flags=${flags} onRun=${onRun} onBack=${onBack} />`;
+}
+
+export function SummarizeConfig({ onRun, onBack }) {
+  const [step, setStep] = useState('limit');
+  const [flags, setFlags] = useState({});
+  const [err, setErr] = useState(null);
+  if (!HAS_LLM) {
+    return html`<${Box} flexDirection="column">
+      <${Alert} variant="error">${t('summarizeNoLLM')}</${Alert}>
+      <${Select} options=${[{ label: t('back'), value: 'back' }]} onChange=${onBack} />
+    </${Box}>`;
+  }
+  if (step === 'limit') {
+    return html`<${Field} label=${t('summarizeLimit')} error=${err}>
+      <${TextInput} placeholder="" onSubmit=${(val) => {
+        const r = parseIntFlag(val);
+        if (!r.ok) return setErr(t('numInvalid'));
+        setErr(null);
+        if (r.value) setFlags((f) => ({ ...f, limit: r.value }));
+        setStep('force');
+      }} />
+    </${Field}>`;
+  }
+  if (step === 'force') {
+    return html`<${Field} label=${t('summarizeForce')}>
+      <${Select} options=${yesNo()} onChange=${(v) => {
+        setFlags((f) => (v === 'yes' ? { ...f, force: true } : f));
+        setStep('review');
+      }} />
+    </${Field}>`;
+  }
+  return html`<${Review} sub="summarize" flags=${flags} onRun=${onRun} onBack=${onBack} />`;
+}
+
+export function SearchConfig({ onRun, onBack }) {
+  const [step, setStep] = useState('query');
+  const [flags, setFlags] = useState({});
+  const [query, setQuery] = useState('');
+  const [err, setErr] = useState(null);
+  if (!HAS_LLM) {
+    return html`<${Box} flexDirection="column">
+      <${Alert} variant="error">${t('searchNoLLM')}</${Alert}>
+      <${Select} options=${[{ label: t('back'), value: 'back' }]} onChange=${onBack} />
+    </${Box}>`;
+  }
+  if (step === 'query') {
+    return html`<${Field} label=${t('searchQuery')} error=${err}>
+      <${TextInput} placeholder="ex.: react server components" onSubmit=${(val) => {
+        const v = val.trim();
+        if (!v) return setErr(t('searchEmptyQuery'));
+        setErr(null);
+        setQuery(v);
+        setStep('mode');
+      }} />
+    </${Field}>`;
+  }
+  if (step === 'mode') {
+    return html`<${Field} label=${t('searchMode')}>
+      <${Select} options=${[
+        { label: t('searchModeA'), value: 'A' },
+        { label: t('searchModeB'), value: 'B' },
+      ]} onChange=${(v) => {
+        setFlags((f) => ({ ...f, mode: v }));
+        if (v === 'B') return setStep(getStatus().classified === 0 ? 'noclass' : 'review');
+        setStep('confirmA'); // modo A sempre confirma (e seta --yes p/ não ser recusado)
+      }} />
+    </${Field}>`;
+  }
+  if (step === 'noclass') {
+    return html`<${Box} flexDirection="column">
+      <${StatusMessage} variant="warning">${t('searchNoClass')}</${StatusMessage}>
+      <${Select} options=${[
+        { label: t('searchModeA'), value: 'A' },
+        { label: t('back'), value: 'back' },
+      ]} onChange=${(v) => {
+        if (v === 'back') return onBack();
+        setFlags((f) => ({ ...f, mode: 'A' }));
+        setStep('confirmA');
+      }} />
+    </${Box}>`;
+  }
+  if (step === 'confirmA') {
+    return html`<${Field} label=${t('searchCostWarn', { n: getStatus().articles })}>
+      <${Select} options=${yesNo()} onChange=${(v) => {
+        if (v !== 'yes') return onBack();
+        setFlags((f) => ({ ...f, yes: true }));
+        setStep('review');
+      }} />
+    </${Field}>`;
+  }
+  return html`<${Review} sub="search" flags=${flags} rest=${[query]} onRun=${onRun} onBack=${onBack} />`;
 }
 
 export function AddConfig({ onRun, onBack }) {

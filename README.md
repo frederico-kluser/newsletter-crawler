@@ -34,8 +34,16 @@ cp .env.example .env                 # e preencha OPENROUTER_API_KEY
 - **`.env`** — segredos e overrides (veja `.env.example`). Nunca é commitado.
 - **`config/sources.json`** — as newsletters a raspar:
   ```json
-  { "sources": [ { "name": "The Batch — Research", "url": "https://www.deeplearning.ai/the-batch/tag/research" } ] }
+  {
+    "sources": [
+      { "name": "The Batch — Research", "url": "https://www.deeplearning.ai/the-batch/tag/research" },
+      { "name": "AI Weekly", "url": "https://aiweekly.co/issues", "type": "index", "maxIndexPages": 1 }
+    ]
+  }
   ```
+  - `type` (default `listing`): em `listing` os links da página são artigos. Em **`index`** os links são **issues/edições** (roundups) — o crawler abre cada issue e, de dentro dela, abre os **links externos curados** (a notícia em si). Fluxo: `índice → issue (roundup) → artigo`.
+  - `maxIndexPages`: quantas páginas do índice paginar (default 1 = só a 1ª).
+  - Uma página apontada por um link que for, ela mesma, uma **coleção** de várias notícias (pouca prosa + muitos links externos) é **dividida em N** automaticamente (`MAX_CRAWL_DEPTH` limita a recursão).
 
 ## Uso
 ```bash

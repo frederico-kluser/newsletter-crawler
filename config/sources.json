@@ -4,6 +4,12 @@
       "name": "The Batch — Research",
       "url": "https://www.deeplearning.ai/the-batch/tag/research",
       "render": "auto"
+    },
+    {
+      "name": "AI Weekly",
+      "url": "https://aiweekly.co/issues",
+      "type": "index",
+      "maxIndexPages": 1
     }
   ]
 }

@@ -21,6 +21,41 @@ export function extractArticle(html, url) {
   }
 }
 
+/** <a href> de um fragmento HTML como {url,title} absolutos. Defensivo (nunca lança). */
+export function linksInHtml(fragmentHtml, baseUrl) {
+  const out = [];
+  try {
+    const $ = cheerio.load(fragmentHtml || '');
+    $('a[href]').each((_, el) => {
+      const href = $(el).attr('href');
+      let abs;
+      try {
+        abs = new URL(href, baseUrl).href;
+      } catch {
+        return;
+      }
+      out.push({ url: abs, title: $(el).text().replace(/\s+/g, ' ').trim() });
+    });
+  } catch {
+    /* fail-open */
+  }
+  return out;
+}
+
+/**
+ * Links do CORPO que o Readability isola (já sem nav/header/footer/sponsor). É a base da
+ * extração de roundup/issue: os <a> aqui são os links curados das notícias. Retorna
+ * { title, textLen, links:[{url,title}] } com URLs absolutas (resolvidas contra `url`).
+ */
+export function readableLinks(html, url) {
+  const art = extractArticle(html, url);
+  return {
+    title: art?.title || null,
+    textLen: art?.textContent?.trim().length || 0,
+    links: art?.content ? linksInHtml(art.content, url) : [],
+  };
+}
+
 /** Heurística do Readability: a página parece um artigo legível? */
 export function probablyArticle(html, url) {
   let dom;
@@ -58,6 +93,28 @@ export function htmlToMarkdown(html) {
   } catch {
     return '';
   }
+}
+
+// Páginas de bloqueio/desafio anti-bot (Cloudflare etc.) que vêm com status 200 mas sem
+// conteúdo real — não devem virar "artigo". Detecta pelo título/início do corpo.
+const BLOCKED_PATTERNS = [
+  /just a moment/i,
+  /attention required/i,
+  /verify(?:ing)? (?:that )?you(?:'| a)?re (?:a )?human/i,
+  /enable javascript and cookies/i,
+  /please enable (?:js|javascript|cookies)/i,
+  /checking your browser/i,
+  /are you a robot/i,
+  /\bcaptcha\b/i,
+  /access denied/i,
+  /ddos protection by/i,
+  /cf-browser-verification/i,
+];
+
+/** A página parece um interstitial anti-bot (Cloudflare etc.) em vez de um artigo? */
+export function isBlockedPage(title, text) {
+  const hay = `${title || ''}\n${(text || '').slice(0, 600)}`;
+  return BLOCKED_PATTERNS.some((re) => re.test(hay));
 }
 
 /** Título de fallback a partir de <h1>/<title>. */

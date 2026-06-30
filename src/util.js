@@ -40,9 +40,24 @@ export function hostOf(u) {
   }
 }
 
-/** Assinatura de template: host + tipo de página (chave do cache de seletores). */
+/** Assinatura de template: host + tipo de página (chave do cache de seletores).
+ * Artigo: 1 template de conteúdo por host. Listagem: inclui um "template" de caminho p/
+ * separar arquivos multinível no mesmo host (ex.: /issues vs /issues/<slug>) — segmentos
+ * dinâmicos (com dígito ou muito longos, tipo slugs) viram `*`. */
 export function domainSig(u, kind = 'listing') {
-  return `${hostOf(u)}:${kind}`;
+  const host = hostOf(u);
+  if (kind === 'article') return `${host}:article`;
+  let pathTpl = '';
+  try {
+    const segs = new URL(u).pathname
+      .split('/')
+      .filter(Boolean)
+      .map((s) => (/\d/.test(s) || s.length > 24 ? '*' : s));
+    pathTpl = '/' + segs.slice(0, 2).join('/');
+  } catch {
+    pathTpl = '';
+  }
+  return `${host}:${kind}:${pathTpl}`;
 }
 
 export function slugify(s) {
@@ -61,3 +76,8 @@ const ts = () => new Date().toISOString();
 export const log = (...a) => console.log(`[${ts()}]`, ...a);
 export const warn = (...a) => console.warn(`[${ts()}] WARN`, ...a);
 export const errorLog = (...a) => console.error(`[${ts()}] ERROR`, ...a);
+// Debug verboso, ligado por env DEBUG=1 (ou true). Vai p/ stderr p/ não poluir stdout.
+const DEBUG_ON = process.env.DEBUG === '1' || process.env.DEBUG === 'true';
+export const debug = (...a) => {
+  if (DEBUG_ON) console.error(`[${ts()}] DEBUG`, ...a);
+};

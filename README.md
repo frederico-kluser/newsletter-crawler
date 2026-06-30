@@ -34,17 +34,44 @@ cp .env.example .env                 # e preencha OPENROUTER_API_KEY
 - **`.env`** — segredos e overrides (veja `.env.example`). Nunca é commitado.
 - **`config/sources.json`** — as newsletters a raspar:
   ```json
-  { "sources": [ { "name": "The Batch — Research", "url": "https://www.deeplearning.ai/the-batch/tag/research" } ] }
+  {
+    "sources": [
+      { "name": "The Batch — Research", "url": "https://www.deeplearning.ai/the-batch/tag/research" },
+      { "name": "AI Weekly", "url": "https://aiweekly.co/issues", "type": "index", "maxIndexPages": 1 }
+    ]
+  }
   ```
+  - `type` (default `listing`): em `listing` os links da página são artigos. Em **`index`** os links são **issues/edições** (roundups) — o crawler abre cada issue e, de dentro dela, abre os **links externos curados** (a notícia em si). Fluxo: `índice → issue (roundup) → artigo`.
+  - `maxIndexPages`: quantas páginas do índice paginar (default 1 = só a 1ª).
+  - Uma página apontada por um link que for, ela mesma, uma **coleção** de várias notícias (pouca prosa + muitos links externos) é **dividida em N** automaticamente (`MAX_CRAWL_DEPTH` limita a recursão).
+
+## Menu guiado (TUI)
+Ao chamar a ferramenta **sem argumentos num terminal interativo**, abre um **menu guiado** (Ink/React) com todas as ações (coletar, status, exportar, classificar, adicionar fonte, limpar). Ele monta os parâmetros por opções, **mostra o comando equivalente** (assim você aprende as flags) e exibe um **painel de progresso ao vivo** no crawl. **As flags continuam executando direto** — o menu é só um atalho.
+```bash
+npm start            # ou `node src/index.js` — abre o menu (em TTY)
+npm run ui           # idem, explícito
+CRAWLER_LANG=en npm run ui     # interface em inglês (default: português)
+NO_COLOR=1 npm run ui          # sem cores
+```
+> Mudança: `node src/index.js` sem args agora abre o **menu** (TTY) ou imprime **ajuda** (não-TTY/`--no-input`), em vez de rodar o crawl. Use `npm run crawl` para coletar. Ctrl-C sai limpo (restaura o terminal; jobs `in_progress` são retomados no próximo run).
 
 ## Uso
 ```bash
 npm run crawl                          # semeia do config e roda até esvaziar a fila (resumível)
 npm run crawl -- --max-pages 2 --max-articles 5   # limita custo/tempo (ótimo p/ 1º teste)
+npm run crawl -- --source "AI Weekly"  # semeia só essa fonte (nome exato; ou --only <substr>)
+npm run crawl -- --source "AI Weekly" --since 2026-06-25   # piso de data (veja abaixo)
 npm run status                         # contagens de sources/pages/articles/selectors/frontier
-npm run add -- https://exemplo.com/arquivo --name "Minha Newsletter"
+npm run add -- https://exemplo.com/arquivo --name "Minha" --type index --max-index-pages 1
 npm run export -- --format md          # escreve data/export/<fonte>/*.md  (ou --format json)
+npm run reset -- --yes                 # APAGA TODOS OS DADOS (slate limpo); respeita DB_PATH
+npm test                               # node:test: parseDate + extractPublishedDate
 ```
+
+### Seleção de fonte e parada por data
+- **`--source "<nome|url>"`** semeia só uma fonte (nome exato ou URL); **`--only <substr>`** casa por substring.
+- **`--since <YYYY-MM-DD|ISO>`** é um **piso**: coleta do mais novo para o mais antigo e **para** ao passar da data. Aplica-se à data da **issue** (para a paginação do índice ao cruzar o piso) **e** à data de cada **artigo** (descarta os mais antigos; artigo sem data conhecida é mantido, pois sua issue já está no intervalo). Com `--since`, o índice pode paginar além de `maxIndexPages`, até `SINCE_MAX_INDEX_PAGES` (teto de segurança). Não é persistido — repita a flag ao retomar.
+- **Dedup garantido:** o mesmo link nunca é cadastrado 2× — identidade pela **URL canônica pós-redirect** (`UNIQUE(url)`) + **`content_hash`** (índice UNIQUE). Links de paginação (instáveis) não servem de identidade; a checagem é pela notícia/conteúdo.
 
 ## Modelos (OpenRouter / DeepSeek V4)
 - **Pro** `deepseek/deepseek-v4-pro` com `reasoning.effort: "xhigh"` — deriva/repara seletores (1 chamada amortizada por template). Use `"xhigh"`, **nunca** `"max"`.
@@ -62,7 +89,9 @@ src/llm.js        OpenRouter: deriveLinkSelector/Content/Next + extractLinks/Art
 src/selectors.js  cache get/put + validação Cheerio (self-healing)
 src/substack.js   atalho opcional via API JSON do Substack
 src/crawl.js      frontier + processJob + crawlArchive + paginação
-src/index.js      CLI + loop principal resumível
+src/commands.js   implementação dos comandos (compartilhada CLI + UI) + getStatus
+src/index.js      CLI (parseFlags + dispatch) + gate do menu guiado
+src/ui/           menu Ink/React (htm, sem build): App, screens, RunView (painel ao vivo), i18n
 ```
 
 ## Notas

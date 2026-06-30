@@ -71,9 +71,18 @@ export async function fetchStatic(url) {
 }
 
 // ---- fetch renderizado (Playwright, browser compartilhado) ----
+// Em containers/CI o chromium aborta sem `--no-sandbox` (e o abort é um fatal de V8 que
+// derruba o processo Node inteiro, não uma exceção capturável). Por isso os args abaixo são
+// o default; sobrescreva com CRAWLER_CHROMIUM_ARGS (lista separada por vírgula) se precisar.
+const CHROMIUM_ARGS = (process.env.CRAWLER_CHROMIUM_ARGS
+  ? process.env.CRAWLER_CHROMIUM_ARGS.split(',')
+  : ['--no-sandbox', '--disable-dev-shm-usage', '--disable-gpu'])
+  .map((s) => s.trim())
+  .filter(Boolean);
+
 let _browser = null;
 async function getBrowser() {
-  if (!_browser) _browser = await chromium.launch({ headless: true });
+  if (!_browser) _browser = await chromium.launch({ headless: true, args: CHROMIUM_ARGS });
   return _browser;
 }
 export async function closeBrowser() {

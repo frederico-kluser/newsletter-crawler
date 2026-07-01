@@ -1,6 +1,17 @@
 # newsletter-crawler
 
-Crawler de newsletters em **Node.js puro** que descobre, extrai e arquiva artigos, usando um **LLM no OpenRouter (DeepSeek V4)** para *derivar seletores CSS reutilizáveis* — não para extrair página a página. O seletor é validado com Cheerio, **cacheado por template no SQLite**, e o LLM só é chamado de novo quando o cache falha (**self-healing**). Resultado: custo de LLM próximo de zero por artigo depois do primeiro acerto.
+> Crawler de newsletters em **Node.js puro** (ESM, Node ≥ 22, **sem build**) que descobre, extrai, classifica, resume em PT-BR e **busca** artigos — com **menu guiado no terminal** (Ink/React) e as flags diretas.
+
+Usa um **LLM no OpenRouter (DeepSeek V4)** para *derivar seletores CSS reutilizáveis* — não para extrair página a página. O seletor é validado com Cheerio, **cacheado por template no SQLite** e só re-derivado quando o cache falha (**self-healing**) — então o custo de LLM da **descoberta/extração** fica próximo de zero por artigo depois do primeiro acerto. Classificação de tags e resumos PT-BR são passes **opcionais** por artigo (rodam automáticos pós-crawl e podem ser desligados).
+
+## Recursos
+- **Crawl multinível** `índice → issue (roundup) → artigo`: abre cada edição e segue os links externos curados; uma página que é uma coleção de notícias é **dividida em N** automaticamente.
+- **Resumível e educado:** fila/frontier no SQLite (`pending → in_progress → done/failed`), `robots.txt` + Crawl-delay, jitter e circuit breaker por host; rejeita interstitials anti-bot (Cloudflare).
+- **Dedup garantido:** o mesmo link nunca é cadastrado 2× (URL canônica pós-redirect + `content_hash` UNIQUE).
+- **Parada por data** (`--since`): coleta do mais novo ao mais antigo e para no piso (issue e artigo).
+- **Tags multi-faceta** contra um vocabulário controlado (9 facetas, ~800 tags) e **resumos + títulos em PT-BR**.
+- **Busca na base** em 2 modos: exaustivo (Flash, avalia todo artigo) ou por tags (Pro), devolvendo **Notícias** e **Ferramentas**.
+- **Menu guiado (TUI)** bilíngue PT/EN que monta os parâmetros, mostra o comando equivalente e exibe progresso ao vivo — sem substituir as flags.
 
 ## Como funciona (visão geral)
 
@@ -46,7 +57,7 @@ cp .env.example .env                 # e preencha OPENROUTER_API_KEY
   - Uma página apontada por um link que for, ela mesma, uma **coleção** de várias notícias (pouca prosa + muitos links externos) é **dividida em N** automaticamente (`MAX_CRAWL_DEPTH` limita a recursão).
 
 ## Menu guiado (TUI)
-Ao chamar a ferramenta **sem argumentos num terminal interativo**, abre um **menu guiado** (Ink/React) com todas as ações (coletar, status, exportar, classificar, adicionar fonte, limpar). Ele monta os parâmetros por opções, **mostra o comando equivalente** (assim você aprende as flags) e exibe um **painel de progresso ao vivo** no crawl. **As flags continuam executando direto** — o menu é só um atalho.
+Ao chamar a ferramenta **sem argumentos num terminal interativo**, abre um **menu guiado** (Ink/React) com todas as ações (coletar, **buscar**, status, exportar, classificar, **resumir**, adicionar fonte, limpar). Ele monta os parâmetros por opções, **mostra o comando equivalente** (assim você aprende as flags) e exibe um **painel de progresso ao vivo** no crawl/busca. **As flags continuam executando direto** — o menu é só um atalho.
 ```bash
 npm start            # ou `node src/index.js` — abre o menu (em TTY)
 npm run ui           # idem, explícito

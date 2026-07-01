@@ -11,7 +11,17 @@ data/
 *.db
 *.db-wal
 *.db-shm
+*.sqlite
+*.sqlite3
 *.log
+
+# Memória do Claude Code (fica em ~/.claude; ignora se algo aparecer dentro do repo).
+# NÃO confundir com as skills em .agents/skills/, que SÃO versionadas de propósito.
+memory/
+**/memory/
+MEMORY.md
+.claude/memory/
+.claude/plans/
 
 # Playwright (caso configurem cache local)
 /test-results/

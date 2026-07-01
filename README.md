@@ -2,6 +2,8 @@
 
 > Crawler de newsletters em **Node.js puro** (ESM, Node ≥ 22, **sem build**) que descobre, extrai, classifica, resume em PT-BR e **busca** artigos — com **menu guiado no terminal** (Ink/React) e as flags diretas.
 
+> Histórico de versões em [CHANGELOG.md](CHANGELOG.md) — atual: **v1.1.0**.
+
 Usa um **LLM no OpenRouter (DeepSeek V4)** para *derivar seletores CSS reutilizáveis* — não para extrair página a página. O seletor é validado com Cheerio, **cacheado por template no SQLite** e só re-derivado quando o cache falha (**self-healing**) — então o custo de LLM da **descoberta/extração** fica próximo de zero por artigo depois do primeiro acerto. Classificação de tags e resumos PT-BR são passes **opcionais** por artigo (rodam automáticos pós-crawl e podem ser desligados).
 
 ## Recursos
@@ -101,7 +103,7 @@ npm test                               # node:test (datas, anti-bot, busca por t
 
 ### Resumos PT-BR e busca na base
 - **Resumos:** `summarize` gera `title_pt` + `summary_pt` (resumo legível em **português do Brasil**) por artigo. O `content` original é mantido (busca/tags usam ele). Roda **automático pós-crawl** (desligue com `SUMMARIZE_AFTER_CRAWL=false` ou `--no-summarize`).
-- **Busca — Modo A (exaustivo):** `--mode A` faz **1 chamada Flash por artigo** (concorrência 50), julgando `direto`/`parecido`; rankeia direto>parecido. Guard de custo: acima de `SEARCH_MODE_A_CONFIRM` (~200) artigos exige `--yes`.
+- **Busca — Modo A (exaustivo):** `--mode A` faz **1 chamada Flash por artigo** (concorrência 50), julgando `direto`/`parecido`; rankeia direto>parecido. Guard de custo: acima de `SEARCH_MODE_A_CONFIRM` (~200) artigos exige `--yes`. O prompt de relevância foi **calibrado por avaliação** (`eval/`, rubrica + few-shot): F1 macro no Flash 0.73 → **0.85**, cortando falsos positivos.
 - **Busca — Modo B (por tags):** `--mode B` faz **5 chamadas Pro** (1 por faceta de retrieval) → une as tags → traz artigos cujas tags cruzam. Rápido; **exige classificação feita**.
 - Toda busca devolve dois grupos: **Notícias** e **Ferramentas** (artigo que é *sobre* uma ferramenta vai p/ Ferramentas). Disponível também no menu (`npm run ui` → Buscar).
 
@@ -135,6 +137,7 @@ src/keys.js       chave OpenRouter: probe (GET /api/v1/key) + upsert idempotente
 src/commands.js   implementação dos comandos (compartilhada CLI + UI) + getStatus
 src/index.js      CLI (parseFlags + dispatch) + gate do menu guiado
 src/ui/           menu Ink/React (htm, sem build): App, screens, RunView (painel ao vivo), i18n
+eval/             harness de avaliação do prompt de busca (golden set, variantes, Flash vs Pro) → REPORT.md
 ```
 
 ## Notas

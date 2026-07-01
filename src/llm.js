@@ -51,7 +51,9 @@ function tryParseJSON(content) {
 }
 
 let _warnedMaxEffort = false;
-async function callJSON({
+// Exportado para o harness de avaliação (eval/) reusar EXATAMENTE o mesmo caminho de chamada
+// (reasoning-only, guard de 'max', retry de JSON). Passe fallbackModel:null p/ isolar o modelo.
+export async function callJSON({
   model, reasoning, schema, schemaName, system, user, retries = 2, fallbackModel = MODELS.pro,
 }) {
   // Guard: "max" não é suportado pelo DeepSeek V4 (HTTP 400); rebaixa para "xhigh".
@@ -332,7 +334,7 @@ export async function summarizeArticle({ title, content }) {
 // ---------- etapa searchRelevance: julga artigo vs consulta (modo A, Flash high, 50x) ----------
 const RELATIONS = new Set(['direct', 'similar', 'none']);
 const KINDS = new Set(['news', 'tool']);
-const relevanceSchema = {
+export const relevanceSchema = {
   type: 'object',
   properties: {
     relation: { type: 'string', description: 'direct | similar | none' },
@@ -342,7 +344,7 @@ const relevanceSchema = {
   additionalProperties: false,
 };
 // Sem enum no json_schema (strict não garante); a garantia real é o clamp do zod + fail-open.
-const relevanceZ = z.object({
+export const relevanceZ = z.object({
   relation: z.string().transform((s) => (RELATIONS.has(String(s).toLowerCase()) ? String(s).toLowerCase() : 'none')),
   kind: z.string().transform((s) => (KINDS.has(String(s).toLowerCase()) ? String(s).toLowerCase() : 'news')),
 });
@@ -353,15 +355,24 @@ export async function judgeRelevance({ query, title, content }) {
     reasoning: { effort },
     schemaName: 'relevance',
     schema: relevanceSchema,
-    system: 'Você avalia se um ARTIGO técnico é relevante para uma CONSULTA de busca. Responda apenas com JSON.',
+    // Prompt escolhido por avaliação (eval/): variante "v2_fewshot" — rubrica + few-shot contrastivo.
+    // 3 rodadas × 5 cenários × 36 artigos, gabarito Opus: F1 macro Flash 0.848 vs baseline 0.731
+    // (+0.117; precisão 0.59→0.79, corta falsos positivos), Pro 0.807 vs 0.778. Mesma latência, 0 falhas JSON.
+    system:
+      'Você é um avaliador de relevância de busca, rigoroso e consistente. Siga a rubrica e os EXEMPLOS. ' +
+      'Responda APENAS com JSON válido.',
     user:
+      'RUBRICA relation: "direct"=foco central da consulta; "similar"=adjacente, não é o foco; "none"=sem resposta. ' +
+      'Mesmo tema amplo NÃO basta para "direct". kind: "tool"=sobre biblioteca/pacote/framework/CLI; senão "news".\n\n' +
+      'EXEMPLOS (consulta → artigo → saída):\n' +
+      '1) "bibliotecas de inferência de LLM" → "Lib X acelera serving de LLM em GPU" → {"relation":"direct","kind":"tool"}\n' +
+      '2) "bibliotecas de inferência de LLM" → "Startup de IA capta US$ 300M" → {"relation":"none","kind":"news"}\n' +
+      '3) "captação de startups de IA" → "Paper novo sobre compressão de KV cache" → {"relation":"none","kind":"news"}\n' +
+      '4) "regulação de IA" → "UE atrasa provisões do AI Act" → {"relation":"direct","kind":"news"}\n' +
+      '5) "modelos de pesos abertos" → "Modelo PROPRIETÁRIO Y desafia rivais" → {"relation":"none","kind":"news"}\n\n' +
       `CONSULTA: ${query}\n\n` +
-      'Avalie o ARTIGO em relação à CONSULTA e devolva JSON {"relation","kind"}:\n' +
-      '- relation: "direct" se o artigo trata DIRETAMENTE do que a consulta pede (é o foco); ' +
-      '"similar" se é relacionado/adjacente mas não é o foco; "none" se não há relação real.\n' +
-      '- kind: "tool" se o artigo é SOBRE uma ferramenta (pacote npm/biblioteca/framework/CLI e o que ' +
-      'ela faz/como usar); "news" caso contrário (notícia, lançamento, análise, tutorial, opinião, paper...).\n\n' +
-      `ARTIGO\nTítulo: ${title || ''}\n\nConteúdo:\n${String(content || '').slice(0, SEARCH_MAX_CHARS)}`,
+      `ARTIGO\nTítulo: ${title || ''}\n\nConteúdo:\n${String(content || '').slice(0, SEARCH_MAX_CHARS)}\n\n` +
+      'Devolva JSON {"relation","kind"}.',
   });
   return relevanceZ.parse(out);
 }

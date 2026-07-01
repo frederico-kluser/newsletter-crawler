@@ -1,7 +1,8 @@
 // Configuração central: carrega .env, sources e constantes.
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
+import { normalizeUrl } from './util.js'; // util é puro (não importa config) -> sem ciclo
 
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -169,14 +170,42 @@ export const SEARCH_MAX_CHARS = Number(process.env.SEARCH_MAX_CHARS || 8000);
 // Guard de custo: acima disto de artigos, o modo A exige --yes (evita varredura cara acidental).
 export const SEARCH_MODE_A_CONFIRM = Number(process.env.SEARCH_MODE_A_CONFIRM || 200);
 
+export const SOURCES_PATH = path.join(ROOT, 'config', 'sources.json');
+
 export function loadSources() {
-  const p = path.join(ROOT, 'config', 'sources.json');
   try {
-    const raw = JSON.parse(readFileSync(p, 'utf8'));
+    const raw = JSON.parse(readFileSync(SOURCES_PATH, 'utf8'));
     return Array.isArray(raw.sources) ? raw.sources : [];
   } catch {
     return [];
   }
+}
+
+/**
+ * Persiste (upsert por URL normalizada) uma fonte em config/sources.json, para ela ficar
+ * PERMANENTE: aparece no seletor da UI e é re-semeada a cada crawl. `configPath` é injetável
+ * p/ teste. Retorna { added, total }.
+ */
+export function addSourceToConfig({ url, name, type, maxIndexPages }, configPath = SOURCES_PATH) {
+  let data = { sources: [] };
+  try {
+    const raw = JSON.parse(readFileSync(configPath, 'utf8'));
+    if (raw && Array.isArray(raw.sources)) data = raw;
+  } catch {
+    /* arquivo ausente/ inválido: começa do zero */
+  }
+  const entry = {};
+  if (name) entry.name = name;
+  entry.url = url;
+  if (type) entry.type = type;
+  if (maxIndexPages != null) entry.maxIndexPages = Number(maxIndexPages);
+
+  const key = normalizeUrl(url);
+  const i = data.sources.findIndex((s) => normalizeUrl(s.url) === key);
+  if (i >= 0) data.sources[i] = { ...data.sources[i], ...entry };
+  else data.sources.push(entry);
+  writeFileSync(configPath, JSON.stringify(data, null, 2) + '\n');
+  return { added: i < 0, total: data.sources.length };
 }
 
 // Vocabulário controlado da classificação. Lança se ausente/ inválido (a classificação

@@ -7,7 +7,7 @@ import pLimit from 'p-limit';
 import { stmts, wipeAll } from './db.js';
 import {
   ROOT, DB_PATH, CONCURRENCY, MAX_RETRIES, HAS_LLM, CLASSIFY_AFTER_CRAWL, SUMMARIZE_AFTER_CRAWL,
-  SEARCH_MODE_A_CONFIRM, loadSources,
+  SEARCH_MODE_A_CONFIRM, loadSources, addSourceToConfig,
 } from './config.js';
 import { processJob, enqueue, upsertSource } from './crawl.js';
 import { classifyPending } from './classify.js';
@@ -167,7 +167,17 @@ export function cmdAdd(rest, flags) {
     maxIndexPages: flags['max-index-pages'] ? Number(flags['max-index-pages']) : undefined,
   });
   enqueue(url, 'listing', null, src.id, 0);
-  log(`fonte adicionada: ${src.base_url} (id ${src.id}, type=${src.type})`);
+  // Persiste em config/sources.json (permanente: aparece no seletor da UI e re-semeia todo crawl).
+  const { added } = addSourceToConfig({
+    url: src.base_url,
+    name: src.name,
+    type: src.type,
+    maxIndexPages: src.max_index_pages,
+  });
+  log(
+    `fonte ${added ? 'adicionada' : 'atualizada'}: ${src.base_url} (id ${src.id}, type=${src.type}) ` +
+      '— salva em config/sources.json',
+  );
 }
 
 // Limpa TODOS os dados (slate limpo). Destrutivo: exige --yes.

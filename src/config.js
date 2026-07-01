@@ -1,10 +1,33 @@
 // Configuração central: carrega .env, sources e constantes.
-import { readFileSync, existsSync, writeFileSync } from 'node:fs';
+import { readFileSync, existsSync, writeFileSync, mkdirSync, copyFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
+import os from 'node:os';
 import { normalizeUrl } from './util.js'; // util é puro (não importa config) -> sem ciclo
 
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+
+// ---- diretório "casa" do usuário (dados previsíveis ao rodar o `ncrawl` global) ----
+// Tudo que é RUNTIME/segredo do USUÁRIO (banco SQLite, .env, sources.json, exports) mora aqui —
+// NÃO dentro do repo. Assim o binário linkado (`npm link`) funciona de QUALQUER diretório e os
+// dados ficam num lugar previsível. Override por env `NC_HOME`. O config do APP versionado
+// (config/models.json, config/taxonomy.json e o sources.json semente) continua em ROOT/config.
+export const NC_HOME = process.env.NC_HOME
+  ? path.resolve(process.env.NC_HOME)
+  : path.join(os.homedir(), '.newsletter-crawler');
+mkdirSync(NC_HOME, { recursive: true });
+
+// .env do usuário/global (destino do `ncrawl key set`). Precedência final sobre o .env do repo.
+export const ENV_PATH = path.join(NC_HOME, '.env');
+
+/** Copia `src` -> `dest` só se `dest` ainda não existe (semeia o arquivo do usuário 1x, não-destrutivo). */
+function seedFile(dest, src) {
+  try {
+    if (!existsSync(dest) && existsSync(src)) copyFileSync(src, dest);
+  } catch {
+    /* semeadura é best-effort: se falhar, os loaders caem no default do repo */
+  }
+}
 
 // Carrega o .env do projeto e faz OVERRIDE de variáveis herdadas do shell.
 // (Tanto `node --env-file` quanto process.loadEnvFile NÃO sobrescrevem variáveis
@@ -35,7 +58,11 @@ function loadDotEnvOverride(file) {
     if (key) process.env[key] = val;
   }
 }
+// Precedência (o último a rodar vence): env do shell < .env do repo (dev) < NC_HOME/.env (usuário).
+// Mantém a regra "o .env do projeto sobrescreve variáveis herdadas do shell" E ainda deixa a chave
+// salva pelo `ncrawl key set` (em NC_HOME/.env) ter a palavra final quando se roda global.
 loadDotEnvOverride(path.join(ROOT, '.env'));
+loadDotEnvOverride(ENV_PATH);
 
 export const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || '';
 export const HAS_LLM = Boolean(OPENROUTER_API_KEY);
@@ -52,9 +79,13 @@ export const USER_AGENT =
 export const HTTP_REFERER = process.env.OPENROUTER_REFERER || 'https://example.com';
 export const X_TITLE = 'NewsletterArchiver';
 
+// Banco em NC_HOME (previsível/global). `DB_PATH` relativo resolve contra NC_HOME; absoluto vale como é.
 export const DB_PATH = process.env.DB_PATH
-  ? path.resolve(ROOT, process.env.DB_PATH)
-  : path.join(ROOT, 'data', 'crawler.db');
+  ? path.resolve(NC_HOME, process.env.DB_PATH)
+  : path.join(NC_HOME, 'crawler.db');
+
+// Destino dos exports (`ncrawl export`). Também em NC_HOME, longe do repo.
+export const EXPORT_DIR = path.join(NC_HOME, 'export');
 
 export const CONCURRENCY = Number(process.env.CONCURRENCY || 3);
 export const PER_HOST_CONCURRENCY = Number(process.env.PER_HOST_CONCURRENCY || 2);
@@ -170,7 +201,11 @@ export const SEARCH_MAX_CHARS = Number(process.env.SEARCH_MAX_CHARS || 8000);
 // Guard de custo: acima disto de artigos, o modo A exige --yes (evita varredura cara acidental).
 export const SEARCH_MODE_A_CONFIRM = Number(process.env.SEARCH_MODE_A_CONFIRM || 200);
 
-export const SOURCES_PATH = path.join(ROOT, 'config', 'sources.json');
+// sources.json do USUÁRIO mora em NC_HOME (o `ncrawl add`/assistente grava aqui). É semeado 1x a
+// partir do default versionado do repo, para não perder as fontes que já vêm no projeto.
+export const DEFAULT_SOURCES_PATH = path.join(ROOT, 'config', 'sources.json');
+export const SOURCES_PATH = path.join(NC_HOME, 'sources.json');
+seedFile(SOURCES_PATH, DEFAULT_SOURCES_PATH);
 
 export function loadSources() {
   try {
@@ -182,9 +217,9 @@ export function loadSources() {
 }
 
 /**
- * Persiste (upsert por URL normalizada) uma fonte em config/sources.json, para ela ficar
- * PERMANENTE: aparece no seletor da UI e é re-semeada a cada crawl. `configPath` é injetável
- * p/ teste. Retorna { added, total }.
+ * Persiste (upsert por URL normalizada) uma fonte no sources.json do usuário (NC_HOME por
+ * default), para ela ficar PERMANENTE: aparece no seletor da UI e é re-semeada a cada crawl.
+ * `configPath` é injetável p/ teste. Retorna { added, total }.
  */
 export function addSourceToConfig({ url, name, type, maxIndexPages }, configPath = SOURCES_PATH) {
   let data = { sources: [] };

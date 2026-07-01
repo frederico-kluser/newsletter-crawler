@@ -41,8 +41,22 @@ npx playwright install chromium      # baixa o browser headless
 cp .env.example .env                 # e preencha OPENROUTER_API_KEY
 ```
 
+## Instalação global (`ncrawl`)
+Para chamar o crawler **de qualquer diretório** como um comando único:
+```bash
+npm run link          # install + playwright + `npm link` + status (setup completo)
+ncrawl key set <sua-chave-openrouter>   # valida na OpenRouter e salva em ~/.newsletter-crawler/.env
+ncrawl status         # já funciona de qualquer pasta
+ncrawl                # sem args, em TTY: abre o menu guiado
+npm run unlink        # remove o link global quando quiser
+```
+- O comando é **`ncrawl`** (e o alias longo `newsletter-crawler`). Não é `nc` de propósito: `nc` já é o **netcat** no sistema — usar esse nome o sombrearia.
+- **`NC_HOME` (default `~/.newsletter-crawler/`)** é o lugar **previsível** onde ficam os **dados do usuário**: o banco SQLite (`crawler.db`), o `.env` (segredos), o `sources.json` (fontes que você adiciona) e os `export/`. Assim o binário linkado não depende de onde o repo está. Mude com `NC_HOME=/outro/caminho ncrawl ...`.
+- **Chave OpenRouter pelo CLI:** `ncrawl key set <chave>` faz um *probe* (`GET /api/v1/key`) e **só grava se a chave for válida**; `ncrawl key test` valida a chave atual. A chave em `NC_HOME/.env` tem **precedência** sobre o `.env` do repo.
+- O `sources.json` do usuário é **semeado** uma vez a partir do default versionado do repo (`config/sources.json`) — suas fontes de fábrica não se perdem. Dados já coletados em `./data/` **não** são migrados; se quiser reaproveitá-los, copie `data/crawler.db` para `~/.newsletter-crawler/crawler.db`.
+
 ## Configuração
-- **`.env`** — segredos e overrides (veja `.env.example`). Nunca é commitado.
+- **`.env`** — segredos e overrides (veja `.env.example`). Nunca é commitado. No uso global, prefira `ncrawl key set <chave>` (grava em `~/.newsletter-crawler/.env`).
 - **`config/sources.json`** — as newsletters a raspar:
   ```json
   {
@@ -80,6 +94,7 @@ npm run export -- --format md          # escreve data/export/<fonte>/*.md  (ou -
 npm run summarize                      # resumo + título em PT-BR p/ cada artigo (Flash; idempotente)
 npm run search -- react server components --mode B   # busca por tags (5 Pro, rápido)
 npm run search -- "local llm" --mode A --limit 20 --yes   # busca exaustiva (Flash, varre tudo)
+npm run key -- set <chave>             # valida a chave OpenRouter e salva em ~/.newsletter-crawler/.env (ou: ncrawl key set)
 npm run reset -- --yes                 # APAGA TODOS OS DADOS (slate limpo); respeita DB_PATH
 npm test                               # node:test (datas, anti-bot, busca por tags, menu)
 ```
@@ -116,6 +131,7 @@ src/classify.js   classificação multi-faceta de tags (vocabulário controlado)
 src/taxonomy.js   vocabulário/facetas + prompts (classificação e busca por tags)
 src/summarize.js  resumo + título PT-BR por artigo (Flash)
 src/search.js     busca na base: modo A (Flash, varre tudo) + modo B (Pro, por tags)
+src/keys.js       chave OpenRouter: probe (GET /api/v1/key) + upsert idempotente em NC_HOME/.env
 src/commands.js   implementação dos comandos (compartilhada CLI + UI) + getStatus
 src/index.js      CLI (parseFlags + dispatch) + gate do menu guiado
 src/ui/           menu Ink/React (htm, sem build): App, screens, RunView (painel ao vivo), i18n

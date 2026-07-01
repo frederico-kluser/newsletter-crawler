@@ -8,6 +8,7 @@
     "node": ">=22"
   },
   "bin": {
+    "ncrawl": "src/index.js",
     "newsletter-crawler": "src/index.js"
   },
   "scripts": {
@@ -18,11 +19,14 @@
     "classify": "node --env-file=.env src/index.js classify",
     "summarize": "node --env-file=.env src/index.js summarize",
     "search": "node --env-file=.env src/index.js search",
+    "key": "node src/index.js key",
     "reset": "node --env-file=.env src/index.js reset",
     "test": "node --test",
     "ui": "NODE_NO_WARNINGS=1 node --env-file=.env src/index.js ui",
     "menu": "NODE_NO_WARNINGS=1 node --env-file=.env src/index.js menu",
-    "start": "node --env-file=.env src/index.js"
+    "start": "node --env-file=.env src/index.js",
+    "link": "npm install && npx playwright install chromium && npm link && node src/index.js status",
+    "unlink": "npm rm -g newsletter-crawler"
   },
   "dependencies": {
     "@inkjs/ui": "^2.0.0",

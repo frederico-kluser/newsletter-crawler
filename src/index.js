@@ -5,7 +5,7 @@ import { db } from './db.js';
 import { closeBrowser } from './fetch.js';
 import { errorLog } from './util.js';
 import {
-  printStatus, cmdCrawl, cmdAdd, cmdReset, cmdExport, cmdClassify, cmdSummarize, cmdSearch,
+  printStatus, cmdCrawl, cmdAdd, cmdReset, cmdExport, cmdClassify, cmdSummarize, cmdSearch, cmdKey,
 } from './commands.js';
 
 function parseFlags(argv) {
@@ -44,8 +44,10 @@ function printHelp() {
       '  node src/index.js classify [--limit N] [--force]',
       '  node src/index.js summarize [--limit N] [--force]   resumo/título PT-BR',
       '  node src/index.js search <consulta> [--mode A|B] [--limit N] [--yes]',
+      '  node src/index.js key set <chave> | key test   valida/salva a chave OpenRouter (em ~/.newsletter-crawler/.env)',
       '  node src/index.js reset --yes     APAGA TODOS OS DADOS (slate limpo)',
       '',
+      'Global: instale com `npm run link` e use `ncrawl <comando>` de qualquer lugar (dados em NC_HOME=~/.newsletter-crawler).',
       'Flags globais: --no-input (nunca abre a UI). Idioma da UI: CRAWLER_LANG=pt|en. NO_COLOR respeitado.',
     ].join('\n'),
   );
@@ -94,13 +96,16 @@ try {
     } else if (cmd === 'search') {
       await cmdSearch(rest, flags);
       db.close();
+    } else if (cmd === 'key') {
+      await cmdKey(rest, flags);
+      db.close();
     } else if (cmd === 'reset' || cmd === 'clean') {
       cmdReset(flags);
       db.close();
     } else {
       errorLog(
         `comando desconhecido: ${cmd} ` +
-          '(use: crawl | status | add | export | classify | summarize | search | reset | ui)',
+          '(use: crawl | status | add | export | classify | summarize | search | key | reset | ui)',
       );
       process.exit(1);
     }

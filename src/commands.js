@@ -6,14 +6,15 @@ import path from 'node:path';
 import pLimit from 'p-limit';
 import { stmts, wipeAll } from './db.js';
 import {
-  ROOT, DB_PATH, CONCURRENCY, MAX_RETRIES, HAS_LLM, CLASSIFY_AFTER_CRAWL, SUMMARIZE_AFTER_CRAWL,
-  SEARCH_MODE_A_CONFIRM, loadSources, addSourceToConfig,
+  EXPORT_DIR, DB_PATH, CONCURRENCY, MAX_RETRIES, HAS_LLM, CLASSIFY_AFTER_CRAWL, SUMMARIZE_AFTER_CRAWL,
+  SEARCH_MODE_A_CONFIRM, OPENROUTER_API_KEY, ENV_PATH, loadSources, addSourceToConfig,
 } from './config.js';
 import { processJob, enqueue, upsertSource } from './crawl.js';
 import { classifyPending } from './classify.js';
 import { summarizePending } from './summarize.js';
 import { runSearch, getSearchProgress } from './search.js';
 import { closeBrowser } from './fetch.js';
+import { probeOpenRouterKey, upsertEnvVar, maskKey } from './keys.js';
 import { slugify, normalizeUrl, parseDate, log, errorLog } from './util.js';
 
 // Re-export p/ a UI importar de um lugar só (igual getStatus).
@@ -167,7 +168,7 @@ export function cmdAdd(rest, flags) {
     maxIndexPages: flags['max-index-pages'] ? Number(flags['max-index-pages']) : undefined,
   });
   enqueue(url, 'listing', null, src.id, 0);
-  // Persiste em config/sources.json (permanente: aparece no seletor da UI e re-semeia todo crawl).
+  // Persiste no sources.json do usuário (NC_HOME): permanente, aparece no seletor da UI e re-semeia todo crawl.
   const { added } = addSourceToConfig({
     url: src.base_url,
     name: src.name,
@@ -176,7 +177,7 @@ export function cmdAdd(rest, flags) {
   });
   log(
     `fonte ${added ? 'adicionada' : 'atualizada'}: ${src.base_url} (id ${src.id}, type=${src.type}) ` +
-      '— salva em config/sources.json',
+      '— salva em sources.json (permanente)',
   );
 }
 
@@ -230,7 +231,7 @@ function articleMarkdown(a, facets) {
 
 export function cmdExport(flags) {
   const format = flags.format === 'json' ? 'json' : 'md';
-  const outDir = path.join(ROOT, 'data', 'export');
+  const outDir = EXPORT_DIR;
   mkdirSync(outDir, { recursive: true });
   let n = 0;
   for (const s of stmts.listSources.all()) {
@@ -301,4 +302,51 @@ export async function cmdSearch(rest, flags) {
     }
   }
   return runSearch(query, { mode, limit, yes: flags.yes === true });
+}
+
+// Gerência da chave OpenRouter. `key set <chave>` valida (probe) e grava em NC_HOME/.env; `key test`
+// valida a chave atual. Sem subcomando: mostra o estado. A validação impede salvar uma chave ruim.
+export async function cmdKey(rest, flags) {
+  // `rest` já vem SEM o "key" (index.js faz rest.shift()): rest[0]=subcomando, rest[1]=chave.
+  const sub = String(rest[0] || '').toLowerCase();
+
+  if (sub === 'set') {
+    const key = rest[1] || (typeof flags.key === 'string' ? flags.key : '');
+    if (!key) {
+      errorLog('uso: ncrawl key set <OPENROUTER_API_KEY>');
+      process.exit(1);
+    }
+    log('validando a chave na OpenRouter (GET /api/v1/key)…');
+    const r = await probeOpenRouterKey(key);
+    if (!r.ok) {
+      errorLog(
+        `chave INVÁLIDA (HTTP ${r.status || '—'}${r.reason ? `: ${r.reason}` : ''}) — nada foi salvo.`,
+      );
+      process.exit(1);
+    }
+    const { updated, file } = upsertEnvVar('OPENROUTER_API_KEY', key);
+    log(`chave válida ✓ ${maskKey(key)} — ${updated ? 'atualizada' : 'salva'} em ${file}`);
+    return;
+  }
+
+  if (sub === 'test') {
+    if (!OPENROUTER_API_KEY) {
+      errorLog(`nenhuma chave configurada. Rode: ncrawl key set <chave>  (será salva em ${ENV_PATH})`);
+      process.exit(1);
+    }
+    log(`testando a chave atual ${maskKey(OPENROUTER_API_KEY)}…`);
+    const r = await probeOpenRouterKey(OPENROUTER_API_KEY);
+    if (!r.ok) {
+      errorLog(`chave INVÁLIDA (HTTP ${r.status || '—'}). Rode: ncrawl key set <chave>`);
+      process.exit(1);
+    }
+    log('chave válida ✓ (HTTP 200)');
+    return;
+  }
+
+  // Sem subcomando: estado atual + uso (não é erro).
+  if (OPENROUTER_API_KEY) log(`chave configurada: ${maskKey(OPENROUTER_API_KEY)} — arquivo previsível: ${ENV_PATH}`);
+  else log(`nenhuma chave configurada ainda — arquivo previsível: ${ENV_PATH}`);
+  log('uso: ncrawl key set <chave>   valida na OpenRouter e salva');
+  log('     ncrawl key test          valida a chave atual');
 }

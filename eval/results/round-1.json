@@ -1,0 +1,817 @@
+{
+  "round": 1,
+  "effort": "high",
+  "poolSize": 36,
+  "scenarios": 5,
+  "at": "2026-07-01T20:43:28.455Z",
+  "cells": {
+    "v0_baseline||flash": {
+      "variant": "v0_baseline",
+      "model": "flash",
+      "n": 180,
+      "macroF1": 0.7488,
+      "macroPrecision": 0.6174,
+      "macroRecall": 0.9667,
+      "acc3way": 0.8611,
+      "kindAcc": 0.9667,
+      "meanMs": 3866,
+      "jsonFails": 0,
+      "perScenario": {
+        "S1": {
+          "tp": 5,
+          "fp": 3,
+          "fn": 1,
+          "tn": 27,
+          "precision": 0.625,
+          "recall": 0.833,
+          "f1": 0.714
+        },
+        "S2": {
+          "tp": 6,
+          "fp": 5,
+          "fn": 0,
+          "tn": 25,
+          "precision": 0.545,
+          "recall": 1,
+          "f1": 0.706
+        },
+        "S3": {
+          "tp": 6,
+          "fp": 3,
+          "fn": 0,
+          "tn": 27,
+          "precision": 0.667,
+          "recall": 1,
+          "f1": 0.8
+        },
+        "S4": {
+          "tp": 6,
+          "fp": 2,
+          "fn": 0,
+          "tn": 28,
+          "precision": 0.75,
+          "recall": 1,
+          "f1": 0.857
+        },
+        "S5": {
+          "tp": 6,
+          "fp": 6,
+          "fn": 0,
+          "tn": 24,
+          "precision": 0.5,
+          "recall": 1,
+          "f1": 0.667
+        }
+      },
+      "misses": {
+        "fp": [
+          "S1:3",
+          "S1:17",
+          "S1:16",
+          "S2:95",
+          "S2:60",
+          "S2:25",
+          "S2:26",
+          "S3:25",
+          "S2:157",
+          "S3:187",
+          "S4:60",
+          "S4:155",
+          "S3:56",
+          "S5:56",
+          "S5:3",
+          "S5:128",
+          "S5:157",
+          "S5:28",
+          "S5:14"
+        ],
+        "fn": [
+          "S1:60"
+        ]
+      }
+    },
+    "v0_baseline||pro": {
+      "variant": "v0_baseline",
+      "model": "pro",
+      "n": 180,
+      "macroF1": 0.7875,
+      "macroPrecision": 0.7167,
+      "macroRecall": 0.9,
+      "acc3way": 0.9056,
+      "kindAcc": 0.9444,
+      "meanMs": 6814,
+      "jsonFails": 0,
+      "perScenario": {
+        "S1": {
+          "tp": 6,
+          "fp": 3,
+          "fn": 0,
+          "tn": 27,
+          "precision": 0.667,
+          "recall": 1,
+          "f1": 0.8
+        },
+        "S2": {
+          "tp": 4,
+          "fp": 4,
+          "fn": 2,
+          "tn": 26,
+          "precision": 0.5,
+          "recall": 0.667,
+          "f1": 0.571
+        },
+        "S3": {
+          "tp": 6,
+          "fp": 2,
+          "fn": 0,
+          "tn": 28,
+          "precision": 0.75,
+          "recall": 1,
+          "f1": 0.857
+        },
+        "S4": {
+          "tp": 5,
+          "fp": 0,
+          "fn": 1,
+          "tn": 30,
+          "precision": 1,
+          "recall": 0.833,
+          "f1": 0.909
+        },
+        "S5": {
+          "tp": 6,
+          "fp": 3,
+          "fn": 0,
+          "tn": 27,
+          "precision": 0.667,
+          "recall": 1,
+          "f1": 0.8
+        }
+      },
+      "misses": {
+        "fp": [
+          "S1:3",
+          "S1:16",
+          "S1:17",
+          "S2:60",
+          "S2:87",
+          "S2:157",
+          "S2:14",
+          "S3:78",
+          "S5:3",
+          "S3:136",
+          "S5:28",
+          "S5:56"
+        ],
+        "fn": [
+          "S2:56",
+          "S2:197",
+          "S4:23"
+        ]
+      }
+    },
+    "v1_rubric||flash": {
+      "variant": "v1_rubric",
+      "model": "flash",
+      "n": 180,
+      "macroF1": 0.743,
+      "macroPrecision": 0.6694,
+      "macroRecall": 0.8667,
+      "acc3way": 0.8667,
+      "kindAcc": 0.9667,
+      "meanMs": 5095,
+      "jsonFails": 0,
+      "perScenario": {
+        "S1": {
+          "tp": 6,
+          "fp": 3,
+          "fn": 0,
+          "tn": 27,
+          "precision": 0.667,
+          "recall": 1,
+          "f1": 0.8
+        },
+        "S2": {
+          "tp": 5,
+          "fp": 4,
+          "fn": 1,
+          "tn": 26,
+          "precision": 0.556,
+          "recall": 0.833,
+          "f1": 0.667
+        },
+        "S3": {
+          "tp": 5,
+          "fp": 3,
+          "fn": 1,
+          "tn": 27,
+          "precision": 0.625,
+          "recall": 0.833,
+          "f1": 0.714
+        },
+        "S4": {
+          "tp": 5,
+          "fp": 0,
+          "fn": 1,
+          "tn": 30,
+          "precision": 1,
+          "recall": 0.833,
+          "f1": 0.909
+        },
+        "S5": {
+          "tp": 5,
+          "fp": 5,
+          "fn": 1,
+          "tn": 25,
+          "precision": 0.5,
+          "recall": 0.833,
+          "f1": 0.625
+        }
+      },
+      "misses": {
+        "fp": [
+          "S1:3",
+          "S1:16",
+          "S1:17",
+          "S2:25",
+          "S2:60",
+          "S2:157",
+          "S2:87",
+          "S3:56",
+          "S3:187",
+          "S3:136",
+          "S5:56",
+          "S5:16",
+          "S5:30",
+          "S5:28",
+          "S5:3"
+        ],
+        "fn": [
+          "S2:56",
+          "S3:156",
+          "S5:54",
+          "S4:23"
+        ]
+      }
+    },
+    "v1_rubric||pro": {
+      "variant": "v1_rubric",
+      "model": "pro",
+      "n": 180,
+      "macroF1": 0.7751,
+      "macroPrecision": 0.7075,
+      "macroRecall": 0.8667,
+      "acc3way": 0.8778,
+      "kindAcc": 0.95,
+      "meanMs": 8561,
+      "jsonFails": 0,
+      "perScenario": {
+        "S1": {
+          "tp": 5,
+          "fp": 3,
+          "fn": 1,
+          "tn": 27,
+          "precision": 0.625,
+          "recall": 0.833,
+          "f1": 0.714
+        },
+        "S2": {
+          "tp": 4,
+          "fp": 4,
+          "fn": 2,
+          "tn": 26,
+          "precision": 0.5,
+          "recall": 0.667,
+          "f1": 0.571
+        },
+        "S3": {
+          "tp": 6,
+          "fp": 1,
+          "fn": 0,
+          "tn": 29,
+          "precision": 0.857,
+          "recall": 1,
+          "f1": 0.923
+        },
+        "S4": {
+          "tp": 6,
+          "fp": 0,
+          "fn": 0,
+          "tn": 30,
+          "precision": 1,
+          "recall": 1,
+          "f1": 1
+        },
+        "S5": {
+          "tp": 5,
+          "fp": 4,
+          "fn": 1,
+          "tn": 26,
+          "precision": 0.556,
+          "recall": 0.833,
+          "f1": 0.667
+        }
+      },
+      "misses": {
+        "fp": [
+          "S1:17",
+          "S1:3",
+          "S1:16",
+          "S2:95",
+          "S2:60",
+          "S2:25",
+          "S2:51",
+          "S3:136",
+          "S5:3",
+          "S5:21",
+          "S5:56",
+          "S5:28"
+        ],
+        "fn": [
+          "S1:60",
+          "S2:197",
+          "S2:56",
+          "S5:54"
+        ]
+      }
+    },
+    "v2_fewshot||flash": {
+      "variant": "v2_fewshot",
+      "model": "flash",
+      "n": 180,
+      "macroF1": 0.8648,
+      "macroPrecision": 0.8167,
+      "macroRecall": 0.9333,
+      "acc3way": 0.9333,
+      "kindAcc": 0.9278,
+      "meanMs": 5243,
+      "jsonFails": 0,
+      "perScenario": {
+        "S1": {
+          "tp": 6,
+          "fp": 3,
+          "fn": 0,
+          "tn": 27,
+          "precision": 0.667,
+          "recall": 1,
+          "f1": 0.8
+        },
+        "S2": {
+          "tp": 4,
+          "fp": 2,
+          "fn": 2,
+          "tn": 28,
+          "precision": 0.667,
+          "recall": 0.667,
+          "f1": 0.667
+        },
+        "S3": {
+          "tp": 6,
+          "fp": 0,
+          "fn": 0,
+          "tn": 30,
+          "precision": 1,
+          "recall": 1,
+          "f1": 1
+        },
+        "S4": {
+          "tp": 6,
+          "fp": 0,
+          "fn": 0,
+          "tn": 30,
+          "precision": 1,
+          "recall": 1,
+          "f1": 1
+        },
+        "S5": {
+          "tp": 6,
+          "fp": 2,
+          "fn": 0,
+          "tn": 28,
+          "precision": 0.75,
+          "recall": 1,
+          "f1": 0.857
+        }
+      },
+      "misses": {
+        "fp": [
+          "S1:3",
+          "S1:17",
+          "S1:16",
+          "S2:60",
+          "S2:95",
+          "S5:56",
+          "S5:28"
+        ],
+        "fn": [
+          "S2:56",
+          "S2:197"
+        ]
+      }
+    },
+    "v2_fewshot||pro": {
+      "variant": "v2_fewshot",
+      "model": "pro",
+      "n": 180,
+      "macroF1": 0.766,
+      "macroPrecision": 0.7695,
+      "macroRecall": 0.7667,
+      "acc3way": 0.9222,
+      "kindAcc": 0.8833,
+      "meanMs": 6889,
+      "jsonFails": 0,
+      "perScenario": {
+        "S1": {
+          "tp": 4,
+          "fp": 2,
+          "fn": 2,
+          "tn": 28,
+          "precision": 0.667,
+          "recall": 0.667,
+          "f1": 0.667
+        },
+        "S2": {
+          "tp": 4,
+          "fp": 1,
+          "fn": 2,
+          "tn": 29,
+          "precision": 0.8,
+          "recall": 0.667,
+          "f1": 0.727
+        },
+        "S3": {
+          "tp": 5,
+          "fp": 2,
+          "fn": 1,
+          "tn": 28,
+          "precision": 0.714,
+          "recall": 0.833,
+          "f1": 0.769
+        },
+        "S4": {
+          "tp": 5,
+          "fp": 1,
+          "fn": 1,
+          "tn": 29,
+          "precision": 0.833,
+          "recall": 0.833,
+          "f1": 0.833
+        },
+        "S5": {
+          "tp": 5,
+          "fp": 1,
+          "fn": 1,
+          "tn": 29,
+          "precision": 0.833,
+          "recall": 0.833,
+          "f1": 0.833
+        }
+      },
+      "misses": {
+        "fp": [
+          "S1:16",
+          "S1:17",
+          "S2:60",
+          "S3:56",
+          "S4:25",
+          "S3:136",
+          "S5:56"
+        ],
+        "fn": [
+          "S1:60",
+          "S1:101",
+          "S2:197",
+          "S2:56",
+          "S4:23",
+          "S3:156",
+          "S5:54"
+        ]
+      }
+    },
+    "v3_evidence||flash": {
+      "variant": "v3_evidence",
+      "model": "flash",
+      "n": 180,
+      "macroF1": 0.7886,
+      "macroPrecision": 0.7083,
+      "macroRecall": 0.9,
+      "acc3way": 0.8944,
+      "kindAcc": 0.9333,
+      "meanMs": 5463,
+      "jsonFails": 0,
+      "perScenario": {
+        "S1": {
+          "tp": 5,
+          "fp": 3,
+          "fn": 1,
+          "tn": 27,
+          "precision": 0.625,
+          "recall": 0.833,
+          "f1": 0.714
+        },
+        "S2": {
+          "tp": 4,
+          "fp": 4,
+          "fn": 2,
+          "tn": 26,
+          "precision": 0.5,
+          "recall": 0.667,
+          "f1": 0.571
+        },
+        "S3": {
+          "tp": 6,
+          "fp": 2,
+          "fn": 0,
+          "tn": 28,
+          "precision": 0.75,
+          "recall": 1,
+          "f1": 0.857
+        },
+        "S4": {
+          "tp": 6,
+          "fp": 0,
+          "fn": 0,
+          "tn": 30,
+          "precision": 1,
+          "recall": 1,
+          "f1": 1
+        },
+        "S5": {
+          "tp": 6,
+          "fp": 3,
+          "fn": 0,
+          "tn": 27,
+          "precision": 0.667,
+          "recall": 1,
+          "f1": 0.8
+        }
+      },
+      "misses": {
+        "fp": [
+          "S1:5",
+          "S1:3",
+          "S1:16",
+          "S2:26",
+          "S2:60",
+          "S2:101",
+          "S2:157",
+          "S3:136",
+          "S3:187",
+          "S5:3",
+          "S5:56",
+          "S5:28"
+        ],
+        "fn": [
+          "S1:60",
+          "S2:56",
+          "S2:197"
+        ]
+      }
+    },
+    "v3_evidence||pro": {
+      "variant": "v3_evidence",
+      "model": "pro",
+      "n": 180,
+      "macroF1": 0.8113,
+      "macroPrecision": 0.825,
+      "macroRecall": 0.8333,
+      "acc3way": 0.9,
+      "kindAcc": 0.9222,
+      "meanMs": 7619,
+      "jsonFails": 0,
+      "perScenario": {
+        "S1": {
+          "tp": 4,
+          "fp": 0,
+          "fn": 2,
+          "tn": 30,
+          "precision": 1,
+          "recall": 0.667,
+          "f1": 0.8
+        },
+        "S2": {
+          "tp": 5,
+          "fp": 3,
+          "fn": 1,
+          "tn": 27,
+          "precision": 0.625,
+          "recall": 0.833,
+          "f1": 0.714
+        },
+        "S3": {
+          "tp": 5,
+          "fp": 1,
+          "fn": 1,
+          "tn": 29,
+          "precision": 0.833,
+          "recall": 0.833,
+          "f1": 0.833
+        },
+        "S4": {
+          "tp": 5,
+          "fp": 0,
+          "fn": 1,
+          "tn": 30,
+          "precision": 1,
+          "recall": 0.833,
+          "f1": 0.909
+        },
+        "S5": {
+          "tp": 6,
+          "fp": 3,
+          "fn": 0,
+          "tn": 27,
+          "precision": 0.667,
+          "recall": 1,
+          "f1": 0.8
+        }
+      },
+      "misses": {
+        "fp": [
+          "S2:60",
+          "S2:25",
+          "S2:157",
+          "S3:136",
+          "S5:3",
+          "S5:56",
+          "S5:28"
+        ],
+        "fn": [
+          "S1:60",
+          "S1:27",
+          "S2:56",
+          "S3:156",
+          "S4:23"
+        ]
+      }
+    },
+    "v4_decompose||flash": {
+      "variant": "v4_decompose",
+      "model": "flash",
+      "n": 180,
+      "macroF1": 0.7838,
+      "macroPrecision": 0.7166,
+      "macroRecall": 0.9,
+      "acc3way": 0.8944,
+      "kindAcc": 0.8444,
+      "meanMs": 7710,
+      "jsonFails": 0,
+      "perScenario": {
+        "S1": {
+          "tp": 6,
+          "fp": 5,
+          "fn": 0,
+          "tn": 25,
+          "precision": 0.545,
+          "recall": 1,
+          "f1": 0.706
+        },
+        "S2": {
+          "tp": 5,
+          "fp": 4,
+          "fn": 1,
+          "tn": 26,
+          "precision": 0.556,
+          "recall": 0.833,
+          "f1": 0.667
+        },
+        "S3": {
+          "tp": 6,
+          "fp": 1,
+          "fn": 0,
+          "tn": 29,
+          "precision": 0.857,
+          "recall": 1,
+          "f1": 0.923
+        },
+        "S4": {
+          "tp": 5,
+          "fp": 0,
+          "fn": 1,
+          "tn": 30,
+          "precision": 1,
+          "recall": 0.833,
+          "f1": 0.909
+        },
+        "S5": {
+          "tp": 5,
+          "fp": 3,
+          "fn": 1,
+          "tn": 27,
+          "precision": 0.625,
+          "recall": 0.833,
+          "f1": 0.714
+        }
+      },
+      "misses": {
+        "fp": [
+          "S1:3",
+          "S1:16",
+          "S1:155",
+          "S1:87",
+          "S1:17",
+          "S2:25",
+          "S2:60",
+          "S2:27",
+          "S2:157",
+          "S3:136",
+          "S5:3",
+          "S5:56",
+          "S5:28"
+        ],
+        "fn": [
+          "S2:56",
+          "S4:23",
+          "S5:136"
+        ]
+      }
+    },
+    "v4_decompose||pro": {
+      "variant": "v4_decompose",
+      "model": "pro",
+      "n": 180,
+      "macroF1": 0.7342,
+      "macroPrecision": 0.6236,
+      "macroRecall": 0.9333,
+      "acc3way": 0.8389,
+      "kindAcc": 0.8389,
+      "meanMs": 12906,
+      "jsonFails": 0,
+      "perScenario": {
+        "S1": {
+          "tp": 6,
+          "fp": 7,
+          "fn": 0,
+          "tn": 23,
+          "precision": 0.462,
+          "recall": 1,
+          "f1": 0.632
+        },
+        "S2": {
+          "tp": 4,
+          "fp": 5,
+          "fn": 2,
+          "tn": 25,
+          "precision": 0.444,
+          "recall": 0.667,
+          "f1": 0.533
+        },
+        "S3": {
+          "tp": 6,
+          "fp": 3,
+          "fn": 0,
+          "tn": 27,
+          "precision": 0.667,
+          "recall": 1,
+          "f1": 0.8
+        },
+        "S4": {
+          "tp": 6,
+          "fp": 0,
+          "fn": 0,
+          "tn": 30,
+          "precision": 1,
+          "recall": 1,
+          "f1": 1
+        },
+        "S5": {
+          "tp": 6,
+          "fp": 5,
+          "fn": 0,
+          "tn": 25,
+          "precision": 0.545,
+          "recall": 1,
+          "f1": 0.706
+        }
+      },
+      "misses": {
+        "fp": [
+          "S1:3",
+          "S1:56",
+          "S1:144",
+          "S1:16",
+          "S1:87",
+          "S1:17",
+          "S2:26",
+          "S1:155",
+          "S2:60",
+          "S2:87",
+          "S2:128",
+          "S2:73",
+          "S3:56",
+          "S3:78",
+          "S3:136",
+          "S5:56",
+          "S5:3",
+          "S5:28",
+          "S5:87",
+          "S5:161"
+        ],
+        "fn": [
+          "S2:197",
+          "S2:56"
+        ]
+      }
+    }
+  }
+}

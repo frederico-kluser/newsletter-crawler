@@ -55,6 +55,8 @@ NO_COLOR=1 npm run ui          # sem cores
 ```
 > Mudança: `node src/index.js` sem args agora abre o **menu** (TTY) ou imprime **ajuda** (não-TTY/`--no-input`), em vez de rodar o crawl. Use `npm run crawl` para coletar. Ctrl-C sai limpo (restaura o terminal; jobs `in_progress` são retomados no próximo run).
 
+**Adicionar newsletter pela interface:** menu → **Adicionar fonte** → assistente (URL → nome → tipo `listing`/`index` → maxIndexPages). A fonte é **persistida em `config/sources.json`** (upsert por URL) — fica permanente, passa a aparecer no seletor da tela **Coletar** e é re-semeada a cada crawl. Equivale a `npm run add -- <url> --name "..." --type index --max-index-pages 1`.
+
 ## Uso
 ```bash
 npm run crawl                          # semeia do config e roda até esvaziar a fila (resumível)

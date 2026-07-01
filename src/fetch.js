@@ -97,7 +97,9 @@ export async function fetchRendered(url) {
   return hostLimit(host)(async () => {
     await jitterDelay(REQUEST_DELAY_MS);
     const browser = await getBrowser();
-    const ctx = await browser.newContext({ userAgent: USER_AGENT });
+    // ignoreHTTPSErrors: alguns veículos têm cert com CN inválido (ex.: kedglobal.com ->
+    // ERR_CERT_COMMON_NAME_INVALID). Para crawler de artigos públicos, seguir mesmo assim.
+    const ctx = await browser.newContext({ userAgent: USER_AGENT, ignoreHTTPSErrors: true });
     const page = await ctx.newPage();
     try {
       await page.route('**/*', (route) => {

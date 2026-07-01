@@ -4,7 +4,8 @@
 import OpenAI from 'openai';
 import { z } from 'zod';
 import {
-  OPENROUTER_API_KEY, HTTP_REFERER, X_TITLE, HAS_LLM, MAX_HTML_FOR_LLM, SEARCH_MAX_CHARS, stageModel,
+  OPENROUTER_API_KEY, HTTP_REFERER, X_TITLE, HAS_LLM, MAX_HTML_FOR_LLM, SEARCH_MAX_CHARS,
+  MODELS, stageModel,
 } from './config.js';
 import { warn } from './util.js';
 
@@ -50,7 +51,9 @@ function tryParseJSON(content) {
 }
 
 let _warnedMaxEffort = false;
-async function callJSON({ model, reasoning, schema, schemaName, system, user, retries = 2 }) {
+async function callJSON({
+  model, reasoning, schema, schemaName, system, user, retries = 2, fallbackModel = MODELS.pro,
+}) {
   // Guard: "max" não é suportado pelo DeepSeek V4 (HTTP 400); rebaixa para "xhigh".
   if (reasoning?.effort === 'max') {
     if (!_warnedMaxEffort) {
@@ -66,14 +69,21 @@ async function callJSON({ model, reasoning, schema, schemaName, system, user, re
   const response_format = responseFormat(schemaName, schema);
 
   // Retry no JSON inválido: o Flash às vezes trunca/malforma a resposta (esp. com reasoning alto).
-  // Uma nova amostragem costuma resolver (a chamada não tem temperatura 0). maxRetries do SDK
-  // já cobre 429/5xx; aqui cobrimos resposta 200 com conteúdo não-parseável.
+  // Estratégia: até `retries+1` tentativas re-amostrando o MESMO modelo (a chamada não é
+  // temperatura 0, então uma nova amostra costuma resolver); na ÚLTIMA tentativa, se o modelo é
+  // Flash, escala p/ o Pro (`fallbackModel`), que é mais confiável no JSON. maxRetries do SDK já
+  // cobre 429/5xx; aqui cobrimos resposta 200 com conteúdo não-parseável.
   for (let attempt = 0; ; attempt++) {
-    const resp = await client().chat.completions.create({ model, reasoning, response_format, messages });
+    const isLast = attempt >= retries;
+    const useModel = isLast && fallbackModel && model !== fallbackModel ? fallbackModel : model;
+    const resp = await client().chat.completions.create({
+      model: useModel, reasoning, response_format, messages,
+    });
     const parsed = tryParseJSON(resp.choices?.[0]?.message?.content ?? '');
     if (parsed !== undefined) return parsed;
-    if (attempt >= retries) throw new Error('JSON inválido retornado pelo LLM');
-    warn(`JSON inválido do LLM (tentativa ${attempt + 1}/${retries + 1}); repetindo…`);
+    if (isLast) throw new Error('JSON inválido retornado pelo LLM');
+    const next = attempt + 1 >= retries && fallbackModel && model !== fallbackModel ? fallbackModel : model;
+    warn(`JSON inválido do LLM (tentativa ${attempt + 1}/${retries + 1}); repetindo com ${next}…`);
   }
 }
 

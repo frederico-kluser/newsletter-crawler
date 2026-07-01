@@ -84,8 +84,9 @@ npm test                               # node:test (datas, anti-bot, busca por t
 
 ## Modelos (OpenRouter / DeepSeek V4)
 - **Pro** `deepseek/deepseek-v4-pro` com `reasoning.effort: "xhigh"` — deriva/repara seletores (1 chamada amortizada por template). Use `"xhigh"`, **nunca** `"max"`.
-- **Flash** `deepseek/deepseek-v4-flash` com `reasoning.effort: "high"` — fallback item-a-item, próxima página, extração de artigo.
+- **Flash** `deepseek/deepseek-v4-flash` com `reasoning.effort: "high"` — fallback item-a-item, próxima página, extração de artigo, resumo PT-BR, busca modo A.
 - Saídas estruturadas via `response_format: json_schema` (strict) + validação `zod`.
+- **JSON inválido é retomável:** o Flash às vezes trunca a resposta; `callJSON` re-amostra **2× no Flash** e, se ainda falhar, faz **uma última tentativa no Pro** (mais confiável no JSON). O `maxRetries` do SDK cobre 429/5xx à parte.
 
 ## Estrutura
 ```

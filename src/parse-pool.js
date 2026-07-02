@@ -63,13 +63,16 @@ function spawn() {
     }
     return null;
   }
-  worker.unref(); // não segura o processo vivo quando ocioso
+  worker.unref(); // ocioso não segura o processo vivo; assign() faz ref() enquanto há task
   const rec = { worker, task: null };
 
   worker.on('message', ({ id, ok, result, error }) => {
     const task = rec.task;
     if (!task || task.id !== id) return; // mensagem órfã (task já resolvida por timeout)
     rec.task = null;
+    // Volta a não segurar o event loop: worker ocupado é ref'd (senão, numa janela em que SÓ
+    // há parses em voo — sem sockets/timers ref'd — o loop esvazia e o processo sai no meio).
+    worker.unref();
     if (!ok) debug(`parse (${task.op}) erro no worker: ${error}`);
     settle(task, ok ? result : task.safeDefault);
     pump();
@@ -106,8 +109,10 @@ function pump() {
   while (state.queue.length && state.workers.length < PARSE_WORKERS) {
     const rec = spawn();
     if (!rec) {
-      // Não subiu: drena a fila inline p/ não travar (respeita a desativação do pool).
-      if (state.disabled) {
+      // Não subiu: com ZERO workers vivos, a fila não tem quem a atenda — e task na FILA não
+      // tem timer (só ganha em assign). Sem drenar aqui, runParse penduraria p/ sempre.
+      // Fail-open: roda inline (com workers vivos, deixa na fila — eles drenam ao terminar).
+      if (state.disabled || state.workers.length === 0) {
         for (const t of state.queue.splice(0)) settle(t, runInline(t.op, t.args, t.safeDefault));
       }
       return;
@@ -118,6 +123,7 @@ function pump() {
 
 function assign(rec, task) {
   rec.task = task;
+  rec.worker.ref(); // ocupado segura o event loop (a resposta do parse é trabalho pendente real)
   task.timer = setTimeout(() => {
     // Task travada: mata o worker (pode estar num loop nativo), respawna e resolve com o default.
     warn(`parse-pool: timeout (${PARSE_TIMEOUT_MS}ms) em ${task.op}; reciclando worker.`);

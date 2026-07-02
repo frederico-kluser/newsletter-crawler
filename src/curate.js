@@ -59,6 +59,9 @@ const SECTION_WORDS =
 export function sectionTitleOf(line) {
   const s = String(line || '').trim();
   if (!s || s.length > 60) return null;
+  // Linha com URL/link markdown é um ITEM, nunca um rótulo de seção — sem este guard, um
+  // heading de item ("## [Deno 2.9](url)") virava "seção" e fatiava o item p/ fora do contexto.
+  if (/https?:|\]\(/i.test(s)) return null;
   let m = s.match(/^#{1,6}\s+(.+?)\s*#*$/); // heading ATX (## Code & Tools)
   if (m) return m[1].replace(/\*\*/g, '').trim();
   m = s.match(/^\*\*(.{2,48}?):?\*\*$/); // linha só com negrito (**IN BRIEF:**)
@@ -69,7 +72,9 @@ export function sectionTitleOf(line) {
     .replace(/^[^\p{L}\p{N}]+/u, '')
     .replace(/[:\s]+$/, '')
     .trim();
-  if (stripped.length >= 2 && stripped.length <= 40 && SECTION_WORDS.test(stripped) && !/https?:/i.test(stripped)) {
+  // Terminou como frase ([.!?]) é prosa ("More news next week."), não rótulo de seção.
+  if (/[.!?…]$/.test(stripped)) return null;
+  if (stripped.length >= 2 && stripped.length <= 40 && SECTION_WORDS.test(stripped)) {
     return stripped;
   }
   return null;

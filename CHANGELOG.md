@@ -31,13 +31,23 @@ As 5 melhorias de paralelismo/robustez apontadas no `ARQUITETURA.html` — todas
   detectáveis (< 2), cai p/ chunk por tamanho. `sectionTitleOf` reconhece heading/negrito/rótulo com emoji.
 - **Testes:** `test/parse-pool.test.js` (echo, op desconhecida, **restart on crash** e **timeout** via
   fixture `crash-worker.js`), `test/commands.timeout.test.js` (deadline), `test/events.buffer.test.js`
-  (auto-flush + flush), e casos de seção em `test/curate.consolidate.test.js`. 97 no total, verdes.
+  (auto-flush + flush), e casos de seção em `test/curate.consolidate.test.js`. 100 no total, verdes.
 
 ### Corrigido
 - `clean.js` virou uma **fachada** (re-exporta o núcleo puro + as versões async do pool) — a superfície de
   import do resto do app e dos testes não mudou.
 - Deadline por job era aplicado a TODOS os jobs e cortava a curadoria dos roundups em 90s (abortando a
   issue inteira); passou a valer só p/ jobs de artigo.
+- **parse-pool: `runParse` pendurava p/ SEMPRE** quando o spawn do worker falhava de forma síncrona com
+  ZERO workers vivos (task na fila não tem timer — só ganha um em `assign`): a fila agora é drenada
+  INLINE (fail-open) nesse caso; após `MAX_SPAWN_FAILS` o pool se desativa de vez. Teste de regressão
+  `test/parse-pool.spawnfail.test.js` (força o ctor a lançar via `PARSE_WORKER_PATH` https).
+- **parse-pool: worker ocupado agora é `ref()`** (e volta a `unref()` ao ficar ocioso) — todos unref'd, o
+  event loop podia esvaziar numa janela em que SÓ havia parses em voo e o processo saía no meio do crawl.
+- **`sectionTitleOf` promovia item/prosa a "seção"**: heading de item com link (`## [Deno 2.9](url)`)
+  fatiava o item p/ fora do contexto, e frase curta com palavra de seção ("More news next week.") virava
+  rótulo. Guards: linha com URL/`](` nunca é seção; rótulo solto não termina em `[.!?…]`.
+- Log do crawl: plural "seçãoões" -> "seções".
 
 ## [1.3.0] - 2026-07-02
 

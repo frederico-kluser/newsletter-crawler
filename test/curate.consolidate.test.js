@@ -37,6 +37,14 @@ test('sectionTitleOf: heading, negrito e rótulo com emoji; ignora linha comum',
   assert.equal(sectionTitleOf('Fastify 5.9 melhora o request.mediaType e corrige bugs'), null);
 });
 
+test('sectionTitleOf: NUNCA promove item/prosa a seção (link em heading, frase com [.!?])', () => {
+  assert.equal(sectionTitleOf('## [Deno 2.9](https://deno.com)'), null, 'heading de ITEM com link');
+  assert.equal(sectionTitleOf('[Tools](https://ex.com/tools)'), null, 'link puro com palavra de seção');
+  assert.equal(sectionTitleOf('More news next week.'), null, 'frase de prosa');
+  assert.equal(sectionTitleOf('Try these tools today!'), null, 'frase de prosa com "tools"');
+  assert.equal(sectionTitleOf('In other news'), 'In other news', 'rótulo real sem pontuação segue valendo');
+});
+
 test('splitIntoSections: 1 fatia por seção + intro; sem seções cai p/ chunk', () => {
   const md = [
     'Destaque do topo com bastante texto para virar a fatia intro da edição sem heading.',

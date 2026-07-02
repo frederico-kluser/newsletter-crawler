@@ -161,8 +161,12 @@ export async function curateRoundup({ html, url, source, runId = null, depth = 0
   const coverage = { recoveredUrls: [], filteredUrls: [], otherUrls: [] };
   if (leftovers.length && leftovers.length <= 40) {
     try {
+      // Contexto do passe = HTML PODADO da página INTEIRA (não o corpo Readability): os blocos
+      // que o Readability descartou — exatamente os dos itens omitidos — precisam estar visíveis,
+      // senão o agente conclui "secundário" por não achar o bloco do link.
+      const pageContext = await cpuParse(() => pruneForLLM(capped));
       const extra = await curateLeftoverLinks({
-        markdown: md.slice(0, CURATE_CHUNK_CHARS), baseUrl: url, leftovers,
+        pageContext: pageContext.slice(0, CURATE_CHUNK_CHARS), baseUrl: url, leftovers,
       });
       const cons2 = consolidateItems([{ issue_date: null, items: extra.items }], { baseUrl: url });
       const realUrls = new Set(cons2.items.map((i) => i.url));

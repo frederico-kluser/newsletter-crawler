@@ -1,0 +1,596 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>newsletter-crawler — arquitetura explicada (com desenhos)</title>
+<style>
+  :root{
+    --bg:#f8fafc; --card:#ffffff; --ink:#0f172a; --muted:#475569; --line:#e2e8f0;
+    --ia:#7c3aed; --iaSoft:#ede9fe; --rede:#0369a1; --redeSoft:#e0f2fe;
+    --dado:#047857; --dadoSoft:#d1fae5; --guarda:#b45309; --guardaSoft:#fef3c7;
+    --ruim:#b91c1c; --ruimSoft:#fee2e2; --ok:#15803d;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  .wrap{max-width:1200px;margin:0 auto;padding:24px 20px 80px}
+  header{padding:36px 0 8px}
+  h1{font-size:34px;line-height:1.2;margin:0 0 8px}
+  h2{font-size:24px;margin:48px 0 6px;padding-top:12px;border-top:3px solid var(--line)}
+  h3{font-size:18px;margin:22px 0 6px}
+  p{margin:10px 0;max-width:75ch}
+  .lead{font-size:19px;color:var(--muted);max-width:80ch}
+  .badges{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0}
+  .badge{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-size:14px;font-weight:600}
+  .badge b{color:var(--ia)}
+  canvas{width:100%;height:auto;display:block;background:var(--card);border:1px solid var(--line);border-radius:14px;margin:14px 0 6px}
+  .fig{font-size:14px;color:var(--muted);margin:0 0 18px}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;margin:18px 0}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+  .card h4{margin:0 0 6px;font-size:16px}
+  .num{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;
+       background:var(--ia);color:#fff;font-weight:700;font-size:14px;margin-right:8px;flex:none}
+  .good .num{background:var(--ok)} .bad .num{background:var(--ruim)} .warn .num{background:var(--guarda)}
+  .kbd{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13.5px;background:#0f172a;color:#e2e8f0;
+       border-radius:10px;padding:14px 16px;overflow:auto;margin:12px 0}
+  .kbd b{color:#a5b4fc}
+  table{border-collapse:collapse;width:100%;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:14px 0}
+  th,td{padding:10px 14px;border-bottom:1px solid var(--line);text-align:left;font-size:15px;vertical-align:top}
+  th{background:#f1f5f9;font-size:13.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+  tr:last-child td{border-bottom:none}
+  .pill{display:inline-block;border-radius:999px;padding:1px 10px;font-size:13px;font-weight:700}
+  .pill.ok{background:var(--dadoSoft);color:var(--ok)} .pill.warn{background:var(--guardaSoft);color:var(--guarda)}
+  .pill.bad{background:var(--ruimSoft);color:var(--ruim)} .pill.ia{background:var(--iaSoft);color:var(--ia)}
+  .legenda{display:flex;flex-wrap:wrap;gap:14px;font-size:14px;color:var(--muted);margin:4px 0 8px}
+  .legenda span{display:inline-flex;align-items:center;gap:6px}
+  .sw{width:14px;height:14px;border-radius:4px;display:inline-block}
+  footer{margin-top:60px;color:var(--muted);font-size:14px;border-top:1px solid var(--line);padding-top:16px}
+  a{color:var(--rede)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>📰 newsletter-crawler — como a máquina funciona, desenhada</h1>
+  <p class="lead">
+    Este documento explica, para qualquer pessoa (mesmo sem saber programar), o que este projeto faz,
+    como as peças conversam, onde ele é paralelo de verdade, quais decisões foram boas e o que ainda
+    precisa melhorar. Os desenhos abaixo são gerados em <b>canvas</b> ao abrir a página.
+  </p>
+  <div class="badges" id="badges"></div>
+</header>
+
+<h2>1. O que é isto, em uma frase</h2>
+<p>
+  É um <b>bibliotecário-robô</b>: ele visita newsletters semanais (como a
+  <a href="https://nodeweekly.com/issues">Node Weekly</a>), lê cada edição como um editor humano leria,
+  e arquiva <b>cada notícia, ferramenta e lançamento</b> como uma ficha separada, limpa e conferida,
+  num banco de dados local (SQLite) que você pode buscar, exportar e auditar.
+</p>
+<p>
+  A diferença para um crawler comum: um crawler comum baixa páginas e guarda o texto “como veio”, com
+  menu, propaganda e rodapé misturados — e perde as ferramentas, porque a página de uma ferramenta
+  (um repositório no GitHub, por exemplo) quase não tem texto. Aqui, <b>a informação é processada por IA
+  antes de ser salva</b>, e a descrição que a própria newsletter escreveu sobre a ferramenta é preservada.
+</p>
+
+<h2>2. A arquitetura, desenhada</h2>
+<p>
+  Siga os números no desenho: é o caminho que UMA edição percorre, da descoberta até virar fichas
+  verificadas. Roxo = etapas com IA; azul = rede (internet); verde = dados no disco; âmbar = guardas
+  determinísticas (regras fixas que não dependem da IA).
+</p>
+<div class="legenda">
+  <span><span class="sw" style="background:var(--iaSoft);border:2px solid var(--ia)"></span>IA (DeepSeek via OpenRouter)</span>
+  <span><span class="sw" style="background:var(--redeSoft);border:2px solid var(--rede)"></span>Rede / fetch</span>
+  <span><span class="sw" style="background:var(--dadoSoft);border:2px solid var(--dado)"></span>Dados (SQLite)</span>
+  <span><span class="sw" style="background:var(--guardaSoft);border:2px solid var(--guarda)"></span>Guarda determinística</span>
+</div>
+<canvas id="cvArq" width="1160" height="760"></canvas>
+<p class="fig">Figura 1 — O pipeline completo: da listagem às fichas verificadas. Os números ①–⑨ são explicados nos cartões abaixo.</p>
+
+<div class="cards">
+  <div class="card"><h4><span class="num">1</span>Descobrir as edições</h4>
+    A página <i>/issues</i> lista todas as ~562 edições. A IA (modelo Pro) olha o HTML <b>real</b> uma única vez
+    e escreve um “seletor” (um endereço CSS, tipo <i>.issue-card a</i>) que passa a ser reutilizado de graça
+    — e se o site mudar o layout, o seletor é validado, descartado e re-derivado sozinho (self-healing).</div>
+  <div class="card"><h4><span class="num">2</span>Parar na data certa</h4>
+    Cada item da lista é pareado com sua data. Se o layout não usa a etiqueta padrão de data, a IA (Flash)
+    gera um seletor especial <b>CSS + regex</b> para aquele tipo de weekly, que só é aceito se funcionar na
+    própria página (≥50% dos itens datados). Com o piso <i>--since 2026-06-12</i>, das 562 edições só 3 passam.</div>
+  <div class="card"><h4><span class="num">3</span>Curadoria da edição (o coração)</h4>
+    A edição vira um markdown limpo e agentes de IA em <b>paralelo</b> extraem CADA item:
+    título curado, tipo (<b>notícia / ferramenta / release</b>), seção (“Code &amp; Tools”…) e o
+    <b>blurb</b> — o comentário que o editor da newsletter escreveu. Patrocínio e vaga de emprego são
+    identificados e ficam FORA (além da IA, uma regra fixa procura “sponsor”/“hiring”).</div>
+  <div class="card"><h4><span class="num">4</span>Rede de segurança (cobertura)</h4>
+    A IA pode pular itens (aconteceu de verdade). Por isso uma conta simples e infalível — “links da página
+    inteira MENOS links que a IA citou” — encontra o que sobrou, e um segundo agente decide: era um item real
+    esquecido (recupera) ou um link secundário/rodapé (descarta)? Um filtro fixo barra âncoras genéricas
+    (“Demo.”, “Release notes”).</div>
+  <div class="card"><h4><span class="num">5</span>Cadastrar JÁ, enriquecer depois</h4>
+    Cada item entra no banco <b>na hora da curadoria</b>, com o blurb como conteúdo inicial. Isso muda tudo
+    para as ferramentas: se a página da ferramenta for rasa ou bloquear robôs, a ficha continua existindo
+    com a melhor descrição disponível — a do próprio agregador. Antes, o item simplesmente sumia.</div>
+  <div class="card"><h4><span class="num">6</span>Enriquecer com o texto do alvo</h4>
+    Em paralelo, o robô visita cada link (com identidade de navegador real por padrão — modo agressivo),
+    extrai o corpo do artigo (Readability → seletor cacheado → IA, nesta ordem de custo) e grava o texto
+    completo na ficha, sem sobrescrever o título curado nem o blurb.</div>
+  <div class="card"><h4><span class="num">7</span>Limpeza por IA antes de salvar</h4>
+    A IA aponta os trechos de SUJEIRA (menus, “Subscribe”, contadores de estrelas, rodapés) e a remoção é
+    feita localmente, apagando só ocorrências <b>exatas</b> — a IA nunca reescreve o texto. Uma régua de
+    sanidade rejeita limpezas que apagariam demais (aí mantém o original e registra o motivo).</div>
+  <div class="card"><h4><span class="num">8</span>Verificação de cada cadastro</h4>
+    No fim, uma varredura paralela dá um veredito por ficha: <b>ok</b>, <b>suspect</b> (utilizável, mas com
+    problemas — e diz quais) ou <b>junk</b>. O veredito fica gravado na ficha, para você filtrar e auditar.</div>
+  <div class="card"><h4><span class="num">9</span>Trace de tudo + inspeção</h4>
+    Cada passo (buscou, curou, salvou, pulou e POR QUÊ, limpou, enriqueceu, verificou) vira uma linha na
+    tabela <i>events</i>. O comando <b>npm run inspect</b> monta a árvore da execução: itens por edição,
+    vereditos, custo de IA por etapa e motivos de cada exclusão.</div>
+</div>
+
+<h2>3. O paralelismo, desenhado</h2>
+<p>
+  Pense numa cozinha de restaurante. Há <b>quatro bancadas</b> (as “lanes”): chamadas de IA, downloads,
+  navegador (páginas que precisam de JavaScript) e parsing pesado de HTML. Um <b>governador</b> observa a
+  memória RAM da máquina a cada segundo e abre ou fecha o número de cozinheiros de cada bancada — cresce
+  devagar (+1 por vez) e encolhe rápido (metade de uma vez) quando a memória aperta. É o padrão
+  <i>AIMD</i>, o mesmo princípio que o seu Wi-Fi usa para não congestionar.
+</p>
+<canvas id="cvPar" width="1160" height="620"></canvas>
+<p class="fig">Figura 2 — O governador de recursos e as quatro lanes. As setas mostram o fluxo de trabalho; as válvulas mostram onde a concorrência é controlada.</p>
+
+<div class="cards">
+  <div class="card good"><h4><span class="num">A</span>Paralelo onde rende</h4>
+    As 3 edições são curadas <b>ao mesmo tempo</b>; edições grandes são divididas em pedaços processados por
+    vários agentes simultâneos; os ~60 enriquecimentos correm em paralelo (limitados pelas lanes); e a
+    verificação varre dezenas de fichas de uma vez. Na prática: 3 edições completas em ~5 minutos.</div>
+  <div class="card good"><h4><span class="num">B</span>Educado por domínio</h4>
+    O paralelismo NUNCA vira ataque: cada site (host) tem no máximo 2 conexões e um intervalo com jitter
+    entre requisições. Um site fora do ar dispara um <b>disjuntor</b> (circuit breaker) que para de insistir
+    e testa de novo mais tarde, dobrando a espera.</div>
+  <div class="card good"><h4><span class="num">C</span>Orçamento como freio</h4>
+    Cada chamada de IA primeiro <b>reserva</b> uma estimativa de custo; a resposta traz o custo real, que é
+    gravado num livro-caixa (ledger). Com <i>--budget</i>, quando a soma se aproxima do teto, o sistema para
+    de iniciar trabalho novo <b>graciosamente</b> — e tudo que ficou pendente é retomável na próxima execução.</div>
+</div>
+
+<h2>4. Uma execução real, na linha do tempo</h2>
+<p>
+  Este é o formato real de uma coleta das 3 edições (medido nos logs): quase tudo acontece em paralelo, e o
+  tempo total é ditado pelo item mais lento, não pela soma.
+</p>
+<canvas id="cvTime" width="1160" height="430"></canvas>
+<p class="fig">Figura 3 — Linha do tempo típica: seletor de graça (cache), 3 curadorias simultâneas, leque de enriquecimentos, varredura de verificação.</p>
+
+<h2>5. Onde o paralelismo ainda pode melhorar</h2>
+<p>
+  Sendo honesto: o desenho abaixo marca em vermelho/âmbar os gargalos reais que observamos rodando de
+  verdade — com a melhoria proposta para cada um.
+</p>
+<canvas id="cvGarg" width="1160" height="560"></canvas>
+<p class="fig">Figura 4 — Os cinco gargalos observados e a melhoria proposta para cada um.</p>
+
+<div class="cards">
+  <div class="card bad"><h4><span class="num">1</span>O retardatário segura o fim</h4>
+    Um único site lento (vimos com homepages pesadas) pode manter a execução “quase pronta” por minutos,
+    porque não há prazo máximo por job. <b>Melhoria:</b> deadline por job (ex.: 90s) — estourou, mantém a
+    ficha com o blurb e marca “enriquecer depois”. O dado nunca se perde; só o tempo de espera some.</div>
+  <div class="card bad"><h4><span class="num">2</span>Parsing pesado no mesmo processo</h4>
+    O JSDOM (leitor de HTML) roda no processo principal, em bancada de 2 lugares — e sob carga já causou um
+    crash nativo raro (SIGSEGV). O crawl é retomável, então nada se perde, mas <b>a melhoria certa é isolar
+    o parsing em worker threads</b>: um crash mataria só o worker, e liberaria mais paralelismo de CPU.</div>
+  <div class="card warn"><h4><span class="num">3</span>Verificação só no fim</h4>
+    Hoje o veredito de cada ficha é dado numa varredura ao final. Funciona, mas a GPU… digo, a lane de IA
+    fica ociosa durante partes do crawl. <b>Melhoria:</b> verificar em <i>streaming</i>, logo após cada
+    enriquecimento, usando a folga da lane llm — o tempo total cai sem custo extra.</div>
+  <div class="card warn"><h4><span class="num">4</span>Um escritor por vez no banco</h4>
+    SQLite tem um único escritor por vez (WAL ajuda, mas é um limite). Para ESTE uso (um usuário, uma
+    máquina) está ótimo; para escalar para dezenas de fontes simultâneas, <b>a melhoria é enfileirar
+    escritas em lote</b> (transactions maiores) ou trocar a camada por um banco cliente-servidor.</div>
+  <div class="card warn"><h4><span class="num">5</span>Curadoria chunk só quando grande</h4>
+    Edições pequenas usam 1 agente; o paralelismo intra-edição só aparece acima de ~24k caracteres.
+    <b>Melhoria:</b> dividir SEMPRE por seções da edição (News / Tools / Releases), com um agente por seção —
+    mais paralelismo e prompts mais especializados por tipo de conteúdo.</div>
+</div>
+
+<h2>6. As boas decisões (e por que importam)</h2>
+<div class="cards">
+  <div class="card good"><h4><span class="num">✓</span>Cadastrar na curadoria, enriquecer depois</h4>
+    A informação da ferramenta muitas vezes SÓ existe no agregador. Invertendo a ordem (ficha nasce com o
+    blurb; o texto do alvo é bônus), ferramenta nenhuma se perde por página rasa, bloqueio ou site fora do ar.</div>
+  <div class="card good"><h4><span class="num">✓</span>IA aponta, código executa</h4>
+    A limpeza não pede “o texto limpo” à IA (lento, caro e arriscado — a 1ª versão travou o pipeline!): pede
+    só os trechos de sujeira e apaga localmente ocorrências exatas. Saída ~100× menor, sem reescrita, com
+    régua anti-exagero. Regra geral aprendida: <b>etapa de alto volume devolve dados pequenos</b>.</div>
+  <div class="card good"><h4><span class="num">✓</span>Seletores lidos da página real + cache</h4>
+    A IA nunca “chuta” um seletor: ela lê o HTML de verdade, o seletor é testado na própria página e só
+    então é cacheado por template de site. Custo de IA amortizado: a 2ª coleta do mesmo site é quase grátis.</div>
+  <div class="card good"><h4><span class="num">✓</span>Guardas determinísticas por cima da IA</h4>
+    “Strict JSON” não é garantia absoluta — então tudo que a IA devolve passa por validação (zod), clamps de
+    vocabulário, regex de patrocínio, filtro de âncora genérica e checagens de tamanho. A IA erra; o sistema não deixa o erro virar dado.</div>
+  <div class="card good"><h4><span class="num">✓</span>Tudo é retomável e idempotente</h4>
+    Fila com estados no banco, dedup por URL canônica e por hash de conteúdo, jobs devolvidos à fila em falha
+    ou estouro de orçamento. Pode matar o processo no meio (aconteceu!): rodar de novo continua de onde parou,
+    sem duplicar nada.</div>
+  <div class="card good"><h4><span class="num">✓</span>Auditável por construção</h4>
+    Nenhuma decisão é invisível: cada salvar/pular/limpar/verificar registra um evento com o motivo, e o
+    <i>inspect</i> reconstitui a história. Foi exatamente essa trilha que nos deixou achar a causa-raiz dos
+    3 itens que sumiam (o Readability descartava blocos vizinhos de anúncio).</div>
+</div>
+
+<h2>7. O que ainda precisa melhorar (além do paralelismo)</h2>
+<div class="cards">
+  <div class="card warn"><h4><span class="num">!</span>Recall do curador não é garantia</h4>
+    Mesmo com bom prompt, a IA omitiu itens reais em execuções diferentes. A rede de segurança (cobertura por
+    diferença de conjuntos sobre o HTML BRUTO + agente dos faltantes + filtro) fecha o buraco, mas o par
+    “curador + cobertura” deve ser tratado como um sistema — nunca confiar numa única passada.</div>
+  <div class="card warn"><h4><span class="num">!</span>Limpeza conservadora de propósito</h4>
+    Quando a página é 90% marketing (ex.: homepage de ferramenta), a régua anti-exagero prefere manter o
+    original e deixar a VERIFICAÇÃO marcar “suspect” — melhor um falso-sujo auditável do que texto real
+    apagado. Melhoria futura: re-limpar os “suspect” com um passe mais forte (Pro).</div>
+  <div class="card warn"><h4><span class="num">!</span>Classificação multi-faceta é cara</h4>
+    As tags (9 facetas × Pro em modo de raciocínio alto) são o estágio mais caro do pós-processamento; por
+    isso as validações rodaram com <i>--no-classify</i>. Melhoria: rebaixar facetas simples para Flash e
+    classificar só o delta de cada execução (já é o default).</div>
+  <div class="card warn"><h4><span class="num">!</span>A interface web pode expor os vereditos</h4>
+    A API já devolve <i>kind</i>, seção e <i>verify_status</i> — falta a UI mostrar o selo (ok/suspect/junk)
+    e permitir filtrar por ele. Hoje isso é visível no <i>inspect</i> e no SQL.</div>
+</div>
+
+<h2>8. A validação final, com números reais</h2>
+<p>
+  O protocolo pedido foi executado à risca: coletar as <b>3 edições</b> (os 3 links de issue dentro da mesma
+  página de listagem), avaliar os problemas, implementar a solução, <b>apagar os 3 e refazer</b> — várias
+  vezes, até a arquitetura provar-se. A tabela compara o baseline (pipeline antigo) com a execução final
+  (pipeline novo), nas MESMAS 3 edições (#629, #630, #631):
+</p>
+<table id="tbResultados">
+  <thead><tr><th>Métrica</th><th>Antes (baseline)</th><th>Depois (pipeline novo)</th></tr></thead>
+  <tbody>
+    <tr><td>Ferramentas/releases identificados (<i>kind</i>)</td>
+        <td><span class="pill bad">0 — tudo indiferenciado</span></td>
+        <td class="js-kinds"><span class="pill ok">…</span></td></tr>
+    <tr><td>Patrocínios salvos como “artigo”</td>
+        <td><span class="pill bad">2+ (Agent-Field ×2, alvos de anúncio)</span></td>
+        <td class="js-sponsors"><span class="pill ok">…</span></td></tr>
+    <tr><td>Links secundários (docs/nav) virando ficha</td>
+        <td><span class="pill bad">~15</span></td>
+        <td class="js-docs"><span class="pill ok">…</span></td></tr>
+    <tr><td>Blurb do agregador preservado</td>
+        <td><span class="pill bad">não existia</span></td>
+        <td class="js-blurbs"><span class="pill ok">…</span></td></tr>
+    <tr><td>Página JS-gated (ex.: js-yaml) capturada</td>
+        <td><span class="pill bad">crash (RENDER_PROFILES)</span></td>
+        <td class="js-render"><span class="pill ok">…</span></td></tr>
+    <tr><td>Verificação por ficha (ok/suspect/junk)</td>
+        <td><span class="pill bad">não existia</span></td>
+        <td class="js-verify"><span class="pill ok">…</span></td></tr>
+    <tr><td>Os 3 itens que o Readability escondia (#631)</td>
+        <td><span class="pill bad">perdidos silenciosamente</span></td>
+        <td class="js-tres"><span class="pill ok">…</span></td></tr>
+    <tr><td>Custo de IA da coleta (3 edições)</td>
+        <td>US$ 0,05 (1 chamada Pro)</td>
+        <td class="js-custo">…</td></tr>
+  </tbody>
+</table>
+<p class="fig js-nota"></p>
+
+<h2>9. Como auditar com as próprias mãos</h2>
+<div class="kbd">
+<b># coletar as 3 edições (agressivo é o default; piso de data corta as outras 559)</b>
+npm run crawl -- --only nodeweekly --since 2026-06-12 --budget 3
+
+<b># ver a árvore da execução: itens por edição, vereditos, custo por etapa, motivos de exclusão</b>
+npm run inspect
+npm run inspect -- --url middy --verbose   <b># auditar UM link: linha do tempo completa</b>
+
+<b># re-verificar fichas / apagar tudo de uma fonte e refazer do zero</b>
+npm run verify -- --force
+npm run purge -- nodeweekly --yes
+
+<b># buscador visual local (filtros por tipo notícia/ferramenta, fonte, período)</b>
+npm run web
+</div>
+
+<footer>
+  Gerado em 2026-07-02 no branch <b>quality-pipeline</b>. Os desenhos são feitos em canvas por este
+  próprio arquivo (sem dependências). Detalhes técnicos com proveniência: <i>.agents/skills/</i> ·
+  histórico: <i>CHANGELOG.md</i> · instruções de agente: <i>AGENTS.md</i>.
+</footer>
+</div>
+
+<script>
+// ---------- números reais da validação (preenchidos pela execução final) ----------
+const RESULTADOS = {
+  pendente: false, // preenchido pela validação final de 2026-07-02 (run #10)
+  itens: 59, tools: 8, releases: 31, news: 20,
+  sponsors: 0, docsSecundarios: 0, blurbs: 56,
+  verify: { ok: 52, suspect: 7, junk: 0 },
+  tresItens: 'capturados — 3 recuperados pelo passe de cobertura na #631',
+  renderOk: 'js-yaml (JS-gated) renderizado: 5.956 chars',
+  custo: 'US$ 0,0716 (125 chamadas de IA)',
+  duracao: '~7 min (purge → crawl → verificação completa das 3 edições)',
+};
+
+// ---------- mini-DSL de desenho (todas as figuras usam isto) ----------
+function setupCanvas(id) {
+  const cv = document.getElementById(id);
+  const ctx = cv.getContext('2d');
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const w = cv.width, h = cv.height;
+  cv.width = w * dpr; cv.height = h * dpr;
+  cv.style.aspectRatio = `${w} / ${h}`;
+  ctx.scale(dpr, dpr);
+  ctx.textBaseline = 'middle';
+  return { ctx, W: w, H: h };
+}
+const C = {
+  ia: '#7c3aed', iaSoft: '#ede9fe', rede: '#0369a1', redeSoft: '#e0f2fe',
+  dado: '#047857', dadoSoft: '#d1fae5', guarda: '#b45309', guardaSoft: '#fef3c7',
+  ruim: '#b91c1c', ruimSoft: '#fee2e2', ink: '#0f172a', muted: '#64748b', line: '#cbd5e1',
+};
+function box(ctx, x, y, w, h, { fill = '#fff', stroke = C.line, title = '', lines = [], titleColor = C.ink, dashed = false, r = 12, fs = 14 } = {}) {
+  ctx.save();
+  ctx.beginPath(); ctx.roundRect(x, y, w, h, r);
+  ctx.fillStyle = fill; ctx.fill();
+  ctx.lineWidth = 2; ctx.strokeStyle = stroke;
+  if (dashed) ctx.setLineDash([6, 5]);
+  ctx.stroke(); ctx.setLineDash([]);
+  ctx.fillStyle = titleColor; ctx.font = `700 ${fs}px system-ui`;
+  const cx = x + w / 2;
+  let ty = y + (lines.length ? 20 : h / 2);
+  ctx.textAlign = 'center';
+  if (title) ctx.fillText(title, cx, ty);
+  ctx.font = `400 ${fs - 1.5}px system-ui`; ctx.fillStyle = C.muted;
+  lines.forEach((ln, i) => ctx.fillText(ln, cx, ty + 18 + i * 16));
+  ctx.restore();
+}
+function arrow(ctx, x1, y1, x2, y2, { color = C.muted, width = 2, dashed = false, label = '', labelDy = -8 } = {}) {
+  ctx.save();
+  ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = width;
+  if (dashed) ctx.setLineDash([6, 5]);
+  ctx.beginPath();
+  const mx = (x1 + x2) / 2;
+  if (Math.abs(y1 - y2) < 4) { ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); }
+  else { ctx.moveTo(x1, y1); ctx.bezierCurveTo(mx, y1, mx, y2, x2, y2); }
+  ctx.stroke(); ctx.setLineDash([]);
+  // A curva bezier chega ao destino na horizontal (pontos de controle em y2): a ponta da seta
+  // aponta p/ a direita ou esquerda conforme o sentido do trecho final.
+  const ang = x2 >= (Math.abs(y1 - y2) < 4 ? x1 : mx) ? 0 : Math.PI;
+  ctx.translate(x2, y2); ctx.rotate(ang);
+  ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(-9, -5); ctx.lineTo(-9, 5); ctx.closePath(); ctx.fill();
+  ctx.rotate(-ang); ctx.translate(-x2, -y2);
+  if (label) {
+    ctx.font = '600 12.5px system-ui'; ctx.fillStyle = color; ctx.textAlign = 'center';
+    ctx.fillText(label, mx, Math.min(y1, y2) + Math.abs(y2 - y1) / 2 + labelDy);
+  }
+  ctx.restore();
+}
+function down(ctx, x, y1, y2, opts = {}) {
+  ctx.save();
+  ctx.strokeStyle = opts.color || C.muted; ctx.fillStyle = opts.color || C.muted; ctx.lineWidth = opts.width || 2;
+  if (opts.dashed) ctx.setLineDash([6, 5]);
+  ctx.beginPath(); ctx.moveTo(x, y1); ctx.lineTo(x, y2); ctx.stroke(); ctx.setLineDash([]);
+  ctx.beginPath(); ctx.moveTo(x, y2); ctx.lineTo(x - 5, y2 - 9); ctx.lineTo(x + 5, y2 - 9); ctx.closePath(); ctx.fill();
+  if (opts.label) { ctx.font = '600 12.5px system-ui'; ctx.textAlign = 'left'; ctx.fillText(opts.label, x + 8, (y1 + y2) / 2); }
+  ctx.restore();
+}
+function bubble(ctx, n, x, y, color = C.ia) {
+  ctx.save();
+  ctx.beginPath(); ctx.arc(x, y, 12, 0, Math.PI * 2);
+  ctx.fillStyle = color; ctx.fill();
+  ctx.fillStyle = '#fff'; ctx.font = '700 13px system-ui'; ctx.textAlign = 'center';
+  ctx.fillText(String(n), x, y + 0.5);
+  ctx.restore();
+}
+function note(ctx, x, y, text, { color = C.muted, align = 'left', fs = 12.5 } = {}) {
+  ctx.save(); ctx.font = `italic 500 ${fs}px system-ui`; ctx.fillStyle = color; ctx.textAlign = align;
+  ctx.fillText(text, x, y); ctx.restore();
+}
+
+// ---------- Figura 1: arquitetura ----------
+(function () {
+  const { ctx, W } = setupCanvas('cvArq');
+  // linha 1: descoberta
+  box(ctx, 20, 24, 200, 64, { fill: C.dadoSoft, stroke: C.dado, title: 'sources.json', lines: ['fontes cadastradas', '(Node Weekly, type=index)'] });
+  box(ctx, 285, 24, 240, 64, { fill: C.redeSoft, stroke: C.rede, title: 'Listagem /issues', lines: ['1 página, 562 edições', 'seletor CSS por IA (cacheado)'] });
+  box(ctx, 596, 24, 250, 64, { fill: C.guardaSoft, stroke: C.guarda, title: 'Piso de data (--since)', lines: ['datas por item (IA se preciso)', '562 → 3 edições'] });
+  box(ctx, 916, 24, 224, 64, { fill: C.redeSoft, stroke: C.rede, title: '3 issues baixadas', lines: ['#629 #630 #631', 'em paralelo'] });
+  arrow(ctx, 220, 56, 283, 56); arrow(ctx, 525, 56, 594, 56); arrow(ctx, 846, 56, 914, 56);
+  bubble(ctx, 1, 285, 24); bubble(ctx, 2, 596, 24, C.guarda);
+
+  // linha 2: curadoria
+  down(ctx, 1028, 88, 128);
+  box(ctx, 20, 130, 1120, 170, { fill: '#faf5ff', stroke: C.ia, title: 'CURADORIA POR IA — a edição vira ITENS estruturados (agentes em paralelo)', lines: [''], r: 16 });
+  box(ctx, 44, 168, 190, 138, { fill: '#fff', stroke: C.line, title: 'Markdown limpo', lines: ['Readability extrai', 'o corpo da edição', '(5KB de 140KB)'] });
+  box(ctx, 262, 168, 250, 60, { fill: C.iaSoft, stroke: C.ia, title: 'Agentes Flash em paralelo', lines: ['1 por chunk de 24k chars'] });
+  box(ctx, 262, 240, 250, 60, { fill: C.iaSoft, stroke: C.ia, title: 'Passe de COBERTURA', lines: ['links do HTML BRUTO − citados'] });
+  box(ctx, 540, 168, 300, 132, { fill: '#fff', stroke: C.line, title: 'Consolidação', lines: ['dedup por URL canônica', 'kind: news | tool | release', 'título curado + seção + BLURB'] });
+  box(ctx, 868, 168, 130, 132, { fill: C.guardaSoft, stroke: C.guarda, title: 'Guardas', lines: ['regex sponsor/job', 'filtro de âncora', 'genérica', 'régua de blurb'], fs: 13 });
+  box(ctx, 1022, 168, 100, 60, { fill: C.ruimSoft, stroke: C.ruim, title: '🗑 fora', lines: ['sponsor, vaga'], fs: 13 });
+  box(ctx, 1022, 240, 100, 60, { fill: C.dadoSoft, stroke: C.dado, title: '✔ itens', lines: ['~20/edição'], fs: 13 });
+  arrow(ctx, 234, 200, 260, 200); arrow(ctx, 234, 262, 260, 270, {});
+  arrow(ctx, 512, 200, 538, 214); arrow(ctx, 512, 270, 538, 250);
+  arrow(ctx, 840, 234, 866, 234); arrow(ctx, 998, 200, 1020, 198); arrow(ctx, 998, 268, 1020, 270);
+  bubble(ctx, 3, 262, 168); bubble(ctx, 4, 262, 240); note(ctx, 46, 316, 'Se a IA pular um item, a conta de conjuntos acha — e um 2º agente decide se era item real.', { fs: 12.5 });
+
+  // linha 3: cadastro + enriquecimento
+  down(ctx, 580, 300, 344, { label: 'cadastro IMEDIATO (com o blurb)' });
+  box(ctx, 20, 348, 300, 96, { fill: C.dadoSoft, stroke: C.dado, title: 'SQLite: articles', lines: ['ficha nasce AQUI', 'kind + blurb + seção + data', 'needs_enrich = 1'] });
+  box(ctx, 372, 348, 250, 96, { fill: C.redeSoft, stroke: C.rede, title: 'Fila (frontier)', lines: ['1 job por item', 'retomável, com retry', 'dedup por URL'] });
+  box(ctx, 674, 348, 220, 96, { fill: C.redeSoft, stroke: C.rede, title: 'Fetch do alvo', lines: ['UA de navegador (default)', 'estático → Playwright', 'politeness por host'] });
+  box(ctx, 928, 348, 212, 96, { fill: C.iaSoft, stroke: C.ia, title: 'Limpeza por IA', lines: ['IA aponta a sujeira', 'remoção local exata', 'régua anti-exagero'] });
+  arrow(ctx, 320, 396, 370, 396); arrow(ctx, 622, 396, 672, 396, { label: 'em paralelo' }); arrow(ctx, 894, 396, 926, 396);
+  bubble(ctx, 5, 20, 348, C.dado); bubble(ctx, 6, 674, 348, C.rede); bubble(ctx, 7, 928, 348);
+  note(ctx, 30, 462, 'Alvo raso/bloqueado? A ficha CONTINUA com o blurb do agregador — a ferramenta não some.', { color: C.dado, fs: 13 });
+
+  // linha 4: verificação + saídas
+  down(ctx, 1034, 444, 496, { label: 'UPDATE na ficha' });
+  box(ctx, 20, 500, 380, 88, { fill: C.iaSoft, stroke: C.ia, title: 'VERIFICAÇÃO (varredura paralela)', lines: ['veredito por ficha: ok | suspect | junk', '+ notas do que está errado'] });
+  box(ctx, 444, 500, 300, 88, { fill: C.dadoSoft, stroke: C.dado, title: 'events (trace)', lines: ['cada passo, com motivo', 'fetch/curate/clean/enrich/verify'] });
+  box(ctx, 788, 500, 352, 88, { fill: '#fff', stroke: C.ink, title: 'Você audita e usa', lines: ['npm run inspect · npm run web', 'search · export · summarize (PT-BR)'] });
+  arrow(ctx, 400, 544, 442, 544); arrow(ctx, 744, 544, 786, 544);
+  bubble(ctx, 8, 20, 500); bubble(ctx, 9, 444, 500, C.dado);
+
+  // rodapé do desenho
+  note(ctx, W / 2, 630, 'Regra de ouro: a IA propõe, o código valida — e NADA é salvo sem passar pelas guardas determinísticas.', { align: 'center', color: C.ink, fs: 14 });
+  note(ctx, W / 2, 652, 'Se algo falhar no meio, rodar de novo continua de onde parou (fila + dedup + needs_enrich).', { align: 'center', fs: 13 });
+
+  box(ctx, 20, 680, 1120, 60, { fill: '#f8fafc', stroke: C.line, title: '', r: 10 });
+  note(ctx, 40, 700, '① seletor por IA lendo a página real   ② piso de data com seletor CSS+regex por IA   ③ curadoria paralela   ④ rede de segurança', { fs: 12.5, color: C.ink });
+  note(ctx, 40, 722, '⑤ cadastro imediato   ⑥ enriquecimento paralelo   ⑦ limpeza por spans   ⑧ veredito por ficha   ⑨ trace auditável', { fs: 12.5, color: C.ink });
+})();
+
+// ---------- Figura 2: paralelismo / governador ----------
+(function () {
+  const { ctx, W } = setupCanvas('cvPar');
+  box(ctx, 20, 20, 330, 110, { fill: C.guardaSoft, stroke: C.guarda, title: 'GOVERNADOR (1x por segundo)', lines: ['lê a RAM LIVRE da máquina', 'aperta/afrouxa as válvulas (AIMD):', 'cresce +1 devagar, corta ÷2 rápido'] });
+  box(ctx, 20, 150, 330, 84, { fill: '#fff', stroke: C.line, title: 'Orçamento (ledger)', lines: ['reserva → chamada → custo real', '--budget: para graciosamente'] });
+  box(ctx, 20, 254, 330, 84, { fill: '#fff', stroke: C.line, title: 'Politeness por host', lines: ['máx. 2 conexões por site + jitter', 'disjuntor com meia-abertura'] });
+
+  // lanes
+  const lanes = [
+    { y: 30, name: 'lane llm (IA)', cap: 'até 16 chamadas simultâneas', fill: C.iaSoft, stroke: C.ia, work: 9, note: 'curadoria, limpeza, verificação, seletores' },
+    { y: 130, name: 'lane fetch (downloads)', cap: 'até 8 simultâneos', fill: C.redeSoft, stroke: C.rede, work: 6, note: 'HTML estático via got' },
+    { y: 230, name: 'lane render (navegador)', cap: 'começa em 2, cresce c/ RAM livre', fill: C.redeSoft, stroke: C.rede, work: 2, note: 'Playwright p/ páginas JS-gated (caras em RAM)' },
+    { y: 330, name: 'lane cpu (parsing)', cap: 'fixa em 2 (event loop é um só)', fill: C.guardaSoft, stroke: C.guarda, work: 2, note: 'JSDOM/Readability síncronos' },
+  ];
+  lanes.forEach((l) => {
+    box(ctx, 430, l.y, 690, 84, { fill: l.fill, stroke: l.stroke, title: l.name, lines: [l.cap], r: 14 });
+    for (let i = 0; i < l.work; i++) {
+      ctx.save(); ctx.beginPath();
+      ctx.roundRect(452 + i * 42, l.y + 46, 32, 24, 6);
+      ctx.fillStyle = l.stroke; ctx.globalAlpha = 0.75; ctx.fill(); ctx.restore();
+    }
+    note(ctx, 1112, l.y + 58, l.note, { align: 'right', fs: 12 });
+    // válvula
+    ctx.save(); ctx.translate(408, l.y + 42);
+    ctx.beginPath(); ctx.arc(0, 0, 13, 0, Math.PI * 2); ctx.fillStyle = '#fff'; ctx.fill();
+    ctx.lineWidth = 2.5; ctx.strokeStyle = C.guarda; ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(-6, 5); ctx.lineTo(6, -5); ctx.stroke(); ctx.restore();
+    arrow(ctx, 350, 75, 393, l.y + 42, { color: C.guarda, dashed: true, width: 1.5 });
+  });
+  note(ctx, 430, 436, 'Cada quadradinho = 1 trabalho em andamento AGORA.', { fs: 12.5 });
+  note(ctx, 430, 452, 'Total de jobs do crawl = lanes fetch + render (a rede é o gargalo de propósito: cortesia).', { fs: 12.5 });
+
+  // fluxo de exemplo
+  box(ctx, 430, 462, 690, 70, { fill: '#fff', stroke: C.line, title: 'Um job de enriquecimento atravessa as lanes assim:', lines: [''], r: 12 });
+  const steps = ['fila', 'politeness', 'fetch/render', 'parsing (cpu)', 'limpeza (llm)', 'SQLite'];
+  steps.forEach((s, i) => {
+    const x = 452 + i * 110;
+    box(ctx, x, 492, 96, 30, { fill: i === 5 ? C.dadoSoft : '#f8fafc', stroke: i === 5 ? C.dado : C.line, title: s, fs: 12, r: 8 });
+    if (i < steps.length - 1) arrow(ctx, x + 96, 507, x + 108, 507, { width: 1.5 });
+  });
+  note(ctx, 20, 560, 'Analogia: cozinha de restaurante — bancadas (lanes) com nº de cozinheiros ajustado pelo gerente (governador) conforme o espaço (RAM) disponível;', { fs: 13, color: C.ink });
+  note(ctx, 20, 580, 'o caixa (ledger) controla o gasto; e o maître (politeness) garante que nenhum fornecedor (site) receba pedidos demais de uma vez.', { fs: 13, color: C.ink });
+})();
+
+// ---------- Figura 3: linha do tempo ----------
+(function () {
+  const { ctx } = setupCanvas('cvTime');
+  const X0 = 170, X1 = 1120, T = 330; // 330s ~ 5,5min
+  const x = (s) => X0 + (s / T) * (X1 - X0);
+  // eixo
+  ctx.strokeStyle = C.line; ctx.lineWidth = 1;
+  for (let s = 0; s <= T; s += 60) {
+    ctx.beginPath(); ctx.moveTo(x(s), 30); ctx.lineTo(x(s), 360); ctx.stroke();
+    note(ctx, x(s), 375, `${s / 60}min`, { align: 'center' });
+  }
+  const bar = (label, y, s0, s1, color, txt = '') => {
+    note(ctx, X0 - 10, y + 11, label, { align: 'right', fs: 13, color: C.ink });
+    ctx.save(); ctx.beginPath(); ctx.roundRect(x(s0), y, Math.max(6, x(s1) - x(s0)), 22, 6);
+    ctx.fillStyle = color; ctx.globalAlpha = 0.85; ctx.fill(); ctx.restore();
+    if (txt) note(ctx, x(s1) + 8, y + 11, txt, { fs: 12 });
+  };
+  bar('seed + seletor + datas', 40, 0, 8, C.dado, 'cache: US$ 0 de IA');
+  bar('curadoria #629', 76, 8, 95, C.ia, '');
+  bar('curadoria #630', 106, 8, 88, C.ia, '3 edições em PARALELO');
+  bar('curadoria #631', 136, 8, 110, C.ia, '+ passe de cobertura');
+  // enrichment fan
+  note(ctx, X0 - 10, 190, '~60 enriquecimentos', { align: 'right', fs: 13, color: C.ink });
+  for (let i = 0; i < 14; i++) {
+    const s0 = 60 + Math.random() * 130, dur = 15 + Math.random() * 70, y = 168 + i * 7;
+    ctx.save(); ctx.beginPath(); ctx.roundRect(x(s0), y, Math.max(4, x(s0 + dur) - x(s0)), 5, 2);
+    ctx.fillStyle = C.rede; ctx.globalAlpha = 0.55; ctx.fill(); ctx.restore();
+  }
+  note(ctx, x(150), 158, 'fetch + limpeza correm juntos; itens já ficam prontos no banco', { fs: 12 });
+  bar('retardatário (host lento)', 272, 150, 315, C.ruim, '');
+  note(ctx, x(232), 264, 'um host lento segura o fim ← melhoria nº 1', { color: C.ruim, fs: 12 });
+  bar('verificação (varredura)', 306, 240, 320, C.ia, '');
+  note(ctx, x(238), 298, 'vereditos em paralelo (52 ok · 7 suspect no run real)', { color: C.ia, fs: 12 });
+  note(ctx, X0, 415, 'Tempo total ≈ 5–6 min para 3 edições completas (~60 fichas). O desenho é ilustrativo com as durações reais médias dos logs.', { fs: 12.5 });
+})();
+
+// ---------- Figura 4: gargalos ----------
+(function () {
+  const { ctx } = setupCanvas('cvGarg');
+  const grey = '#e2e8f0';
+  box(ctx, 20, 30, 200, 70, { fill: '#fff', stroke: grey, title: 'Listagem', lines: ['descoberta'] });
+  box(ctx, 270, 30, 240, 70, { fill: '#fff', stroke: grey, title: 'Curadoria (IA)', lines: ['itens da edição'] });
+  box(ctx, 560, 30, 240, 70, { fill: '#fff', stroke: grey, title: 'Enriquecimento', lines: ['fetch + limpeza'] });
+  box(ctx, 850, 30, 290, 70, { fill: '#fff', stroke: grey, title: 'Verificação + saídas', lines: ['vereditos, inspect, web'] });
+  arrow(ctx, 220, 65, 268, 65); arrow(ctx, 510, 65, 558, 65); arrow(ctx, 800, 65, 848, 65);
+
+  const spots = [
+    { n: 1, x: 700, y: 30, color: C.ruim, box: [560, 130, 270, 96], title: 'Retardatário sem prazo', lines: ['1 site lento segura o fim da execução', '→ deadline por job (90s);', 'ficha fica com o blurb'] },
+    { n: 2, x: 640, y: 100, color: C.ruim, box: [20, 130, 250, 96], title: 'JSDOM no processo principal', lines: ['crash nativo raro sob carga', '→ isolar parsing em worker threads', '(e liberar mais CPU)'] },
+    { n: 3, x: 1000, y: 30, color: C.guarda, box: [860, 130, 280, 96], title: 'Verificar só no fim', lines: ['lane de IA ociosa durante o crawl', '→ verificação em streaming', 'logo após cada enriquecimento'] },
+    { n: 4, x: 1080, y: 100, color: C.guarda, box: [300, 130, 230, 96], title: 'SQLite: 1 escritor', lines: ['ok p/ 1 máquina; limite p/ escalar', '→ escritas em lote/transactions', 'ou banco cliente-servidor'] },
+    { n: 5, x: 390, y: 100, color: C.guarda, box: [20, 260, 340, 96], title: 'Chunk só em edição grande', lines: ['edição pequena = 1 agente', '→ dividir por SEÇÃO sempre', '(1 agente por News/Tools/Releases)'] },
+  ];
+  spots.forEach((s) => {
+    bubble(ctx, s.n, s.x, s.y, s.color);
+    box(ctx, ...s.box, { fill: s.color === C.ruim ? C.ruimSoft : C.guardaSoft, stroke: s.color, title: `${s.n}. ${s.title}`, lines: s.lines, fs: 13.5 });
+  });
+
+  box(ctx, 400, 260, 740, 96, {
+    fill: C.dadoSoft, stroke: C.dado, title: 'O que JÁ protege o usuário disso tudo',
+    lines: ['fila retomável (matar o processo não perde nada) · dedup idempotente · item curado nunca some (blurb)',
+            'orçamento com parada graciosa · trace completo p/ diagnosticar qualquer caso'], fs: 13.5,
+  });
+
+  note(ctx, 20, 400, 'Custo hoje (3 edições): curadoria ~US$ 0,006 · limpeza ~US$ 0,05 · verificação ~US$ 0,05 — a classificação de tags (Pro) é o único estágio caro e roda à parte.', { fs: 13, color: C.ink });
+  note(ctx, 20, 424, 'Paralelismo máximo teórico hoje: 16 chamadas de IA + 8 downloads + render crescendo com a RAM — numa máquina de 32 núcleos, o gargalo real é a cortesia com os sites (de propósito).', { fs: 13 });
+
+  // mini roadmap
+  const steps = ['deadline por job', 'workers p/ parsing', 'verify em streaming', 'agente por seção', 'lotes no SQLite'];
+  steps.forEach((s, i) => {
+    const x0 = 20 + i * 226;
+    box(ctx, x0, 460, 206, 54, { fill: '#fff', stroke: C.ia, title: `próx. ${i + 1}`, lines: [s], fs: 13 });
+    if (i < steps.length - 1) arrow(ctx, x0 + 206, 487, x0 + 224, 487, { width: 1.5, color: C.ia });
+  });
+})();
+
+// ---------- badges + tabela de resultados ----------
+(function () {
+  const b = document.getElementById('badges');
+  const mk = (t) => { const s = document.createElement('span'); s.className = 'badge'; s.innerHTML = t; b.appendChild(s); };
+  const R = RESULTADOS;
+  if (R.pendente) {
+    mk('validação final: <b>rodando…</b> (números da última execução completa abaixo)');
+  } else {
+    mk(`<b>${R.itens}</b> fichas nas 3 edições`);
+    mk(`<b>${R.tools} tools</b> + <b>${R.releases} releases</b> + ${R.news} news`);
+    mk(`patrocínios salvos: <b>${R.sponsors}</b>`);
+    mk(`verificação: <b>${R.verify.ok} ok</b> · ${R.verify.suspect} suspect · ${R.verify.junk} junk`);
+    mk(`custo de IA: <b>${R.custo}</b>`);
+    mk(`duração: <b>${R.duracao}</b>`);
+  }
+  const set = (cls, html) => { const el = document.querySelector(cls); if (el) el.innerHTML = html; };
+  if (!R.pendente) {
+    set('.js-kinds', `<span class="pill ok">${R.tools} tools + ${R.releases} releases identificados</span>`);
+    set('.js-sponsors', `<span class="pill ok">${R.sponsors}</span>`);
+    set('.js-docs', `<span class="pill ok">${R.docsSecundarios}</span>`);
+    set('.js-blurbs', `<span class="pill ok">${R.blurbs} fichas com blurb</span>`);
+    set('.js-render', `<span class="pill ok">${R.renderOk}</span>`);
+    set('.js-verify', `<span class="pill ok">${R.verify.ok} ok</span> <span class="pill warn">${R.verify.suspect} suspect</span> <span class="pill bad">${R.verify.junk} junk</span>`);
+    set('.js-tres', `<span class="pill ok">${R.tresItens}</span>`);
+    set('.js-custo', R.custo);
+    set('.js-nota', `Números medidos na execução de validação final (${R.duracao}).`);
+  }
+})();
+</script>
+</body>
+</html>

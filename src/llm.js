@@ -438,7 +438,7 @@ export async function curateRoundupItems({ markdown, baseUrl, part = null }) {
 // Passe de COBERTURA da curadoria: o curador pode omitir itens (recall imperfeito); a
 // diferença determinística de conjuntos (links do corpo − itens emitidos) chega aqui, e um
 // agente decide o que é item real que FALTOU vs link secundário/patrocínio. Mesmo schema.
-export async function curateLeftoverLinks({ markdown, baseUrl, leftovers }) {
+export async function curateLeftoverLinks({ pageContext, baseUrl, leftovers }) {
   const { model, effort } = stageModel('curate');
   const list = leftovers
     .map((l) => `- ${l.url}${l.anchor ? ` (âncora: ${JSON.stringify(l.anchor.slice(0, 80))})` : ''}`)
@@ -453,8 +453,10 @@ export async function curateLeftoverLinks({ markdown, baseUrl, leftovers }) {
       'Você é o curador de uma edição de newsletter agregadora, fazendo o passe de COBERTURA: ' +
       'classificar links que ficaram fora da primeira extração. Responda apenas com JSON.',
     user:
-      `Edição de newsletter (URL ${baseUrl}) em markdown, seguida de LINKS do corpo que ficaram ` +
-      'FORA da curadoria. Para CADA link listado, devolva um item {url,title,kind,section,blurb}:\n' +
+      `Edição de newsletter (URL ${baseUrl}): abaixo vai o HTML PODADO da página INTEIRA — ele ` +
+      'INCLUI blocos que o extrator de corpo pode ter descartado (ex.: destaques vizinhos de ' +
+      'anúncio); procure o bloco de cada link NELE. Depois vêm os LINKS que ficaram FORA da ' +
+      'curadoria. Para CADA link listado, devolva um item {url,title,kind,section,blurb}:\n' +
       '- Se o link tem um BLOCO PRÓPRIO na edição (título/manchete + comentário do agregador — típico ' +
       'dos destaques do topo), ele é um ITEM REAL que faltou: use kind news|tool|release e COPIE o ' +
       'título e o comentário (blurb) do agregador. Na dúvida entre item real e secundário, se o link ' +
@@ -466,7 +468,7 @@ export async function curateLeftoverLinks({ markdown, baseUrl, leftovers }) {
       'item) é SEMPRE "other".\n' +
       '- Se é patrocínio/anúncio pago, kind "sponsor"; vaga/classificado, kind "job".\n' +
       'Devolva um item por link listado (issue_date pode ser null).\n\n' +
-      `LINKS FORA DA CURADORIA:\n${list}\n\nMARKDOWN DA EDIÇÃO:\n${clamp(markdown)}`,
+      `LINKS FORA DA CURADORIA:\n${list}\n\nHTML PODADO DA PÁGINA INTEIRA:\n${clamp(pageContext)}`,
   });
   return curateZ.parse(out);
 }

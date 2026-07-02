@@ -3,7 +3,7 @@ import Database from 'better-sqlite3';
 import { mkdirSync } from 'node:fs';
 import path from 'node:path';
 import { DB_PATH } from './config.js';
-import { foldText, parseDate } from './util.js';
+import { parseDate } from './util.js';
 
 mkdirSync(path.dirname(DB_PATH), { recursive: true });
 
@@ -13,10 +13,6 @@ db.pragma('foreign_keys = ON');
 // Dois processos `ncrawl` podem compartilhar este DB (ex.: crawl + search em terminais
 // diferentes). Sem busy_timeout, o segundo escritor falharia na hora com SQLITE_BUSY.
 db.pragma('busy_timeout = 5000');
-
-// Busca do buscador web case/acento-insensível de verdade: o lower()/LIKE nativos só dobram
-// ASCII. O chamador aplica o MESMO foldText à consulta (util.js é a única fonte do fold).
-db.function('fold', { deterministic: true }, (s) => foldText(s));
 
 // published_at é string CRUA do scrape (nem sempre ISO — ex.: "June 18, 2026"), e o date() do
 // SQLite só entende ISO (senão NULL). iso_date normaliza via o MESMO parseDate do crawler p/
@@ -206,17 +202,16 @@ ensureColumn('selectors', 'date_regex', 'date_regex TEXT');
 
 // WHERE compartilhado do buscador web (`ncrawl web`): filtros combináveis via params ANULÁVEIS
 // (NULL = filtro desligado), p/ manter UM prepared statement em vez de SQL dinâmico.
-// - @q: consulta já passada por foldText (a função SQL fold dobra o texto dos artigos igual).
+// Busca por TEXTO saiu daqui de propósito: toda busca com consulta é IA (POST /api/search);
+// este WHERE atende só o BROWSE (lista sem consulta) e seus filtros.
 // - @facets: objeto JSON {faceta:[tags]} — OR dentro da faceta, AND entre facetas: json_each no
 //   objeto dá (key=faceta, value=array); "NOT EXISTS(faceta sem tag casando)" = todas casam.
-// - @kind: 'tool'|'news' — mesma semântica de isToolByTags (taxonomy.js): ferramenta = tag da
-//   faceta framework-library-tool OU content-type ∈ @toolTypes (JSON, vem de TOOL_CONTENT_TYPES).
-//   A igualdade booleana `(@kind='tool') = EXISTS(...)` cobre os dois lados (news = NÃO-ferramenta).
+// - @kind: 'news'|'tool'|'release' — release é match EXATO da coluna; news/tool mantêm a semântica
+//   de isToolByTags (taxonomy.js): ferramenta = tag da faceta framework-library-tool OU
+//   content-type ∈ @toolTypes (JSON, de TOOL_CONTENT_TYPES); release segue contando como tool.
+//   A igualdade booleana `(@kind='tool') = (...)` cobre os dois lados (news = NÃO-ferramenta).
 const WEB_WHERE = `
-  WHERE (@q IS NULL OR instr(
-          fold(coalesce(a.title,'') || ' ' || coalesce(a.title_pt,'') || ' ' ||
-               coalesce(a.summary_pt,'') || ' ' || coalesce(a.content,'')), @q) > 0)
-    AND (@sourceId IS NULL OR a.source_id = @sourceId)
+  WHERE (@sourceId IS NULL OR a.source_id = @sourceId)
     AND (@from IS NULL OR coalesce(iso_date(a.published_at), date(a.extracted_at)) >= @from)
     AND (@to IS NULL OR coalesce(iso_date(a.published_at), date(a.extracted_at)) <= @to)
     AND (@facets IS NULL OR NOT EXISTS (
@@ -227,17 +222,27 @@ const WEB_WHERE = `
                AND at.tag IN (SELECT value FROM json_each(f.value))
           )
         ))
-    AND (@kind IS NULL OR (@kind = 'tool') = (CASE
-          WHEN a.kind IN ('tool', 'release') THEN 1
-          WHEN a.kind = 'news' THEN 0
-          ELSE EXISTS (
-            SELECT 1 FROM article_tags tk
-             WHERE tk.article_id = a.id
-               AND (tk.facet = 'framework-library-tool'
-                    OR (tk.facet = 'content-type'
-                        AND tk.tag IN (SELECT value FROM json_each(@toolTypes))))
-          ) END))
+    AND (@kind IS NULL OR CASE
+          WHEN @kind = 'release' THEN a.kind = 'release'
+          ELSE (@kind = 'tool') = (CASE
+            WHEN a.kind IN ('tool', 'release') THEN 1
+            WHEN a.kind = 'news' THEN 0
+            ELSE EXISTS (
+              SELECT 1 FROM article_tags tk
+               WHERE tk.article_id = a.id
+                 AND (tk.facet = 'framework-library-tool'
+                      OR (tk.facet = 'content-type'
+                          AND tk.tag IN (SELECT value FROM json_each(@toolTypes))))
+            ) END)
+          END)
     AND (@verify IS NULL OR a.verify_status = @verify)`;
+
+// Escopo da busca IA da web (soft e hard): fontes (array JSON de ids via json_each) + período
+// (mesma cláusula de data do WEB_WHERE: iso_date(published_at) com fallback em extracted_at).
+const SEARCH_SCOPE_WHERE = `
+  WHERE (@sources IS NULL OR a.source_id IN (SELECT value FROM json_each(@sources)))
+    AND (@from IS NULL OR coalesce(iso_date(a.published_at), date(a.extracted_at)) >= @from)
+    AND (@to IS NULL OR coalesce(iso_date(a.published_at), date(a.extracted_at)) <= @to)`;
 
 // Índice do delta por execução (run_id vem via ensureColumn, então não existe no CREATE base).
 db.exec('CREATE INDEX IF NOT EXISTS idx_articles_run ON articles(run_id)');
@@ -317,20 +322,31 @@ export const stmts = {
   ),
   countSummaries: db.prepare(`SELECT COUNT(*) c FROM articles WHERE summary_pt IS NOT NULL`),
 
-  // busca: varredura completa (modo A) e retrieval por conjunto de tags (modo B, via json_each)
+  // busca: varredura completa (modo A) e retrieval por conjunto de tags (modo B, via json_each).
+  // Todos trazem fonte + data ISO (join por PK, custo ~zero) p/ a lista/preview da TUI.
   listAllArticlesForSearch: db.prepare(
-    `SELECT id, url, title, title_pt, summary_pt, content FROM articles ORDER BY id LIMIT ?`,
+    `SELECT a.id, a.url, a.title, a.title_pt, a.summary_pt, a.content,
+            s.name AS source_name,
+            coalesce(iso_date(a.published_at), date(a.extracted_at)) AS date_iso
+       FROM articles a LEFT JOIN sources s ON s.id = a.source_id
+      ORDER BY a.id LIMIT ?`,
   ),
   // delta: varredura (modo A) restrita a uma execução (run).
   listRunArticlesForSearch: db.prepare(
-    `SELECT id, url, title, title_pt, summary_pt, content
-       FROM articles WHERE run_id = ? ORDER BY id LIMIT ?`,
+    `SELECT a.id, a.url, a.title, a.title_pt, a.summary_pt, a.content,
+            s.name AS source_name,
+            coalesce(iso_date(a.published_at), date(a.extracted_at)) AS date_iso
+       FROM articles a LEFT JOIN sources s ON s.id = a.source_id
+      WHERE a.run_id = ? ORDER BY a.id LIMIT ?`,
   ),
   articlesByTags: db.prepare(
     `SELECT a.id, a.url, a.title, a.title_pt, a.summary_pt, a.content,
+            s.name AS source_name,
+            coalesce(iso_date(a.published_at), date(a.extracted_at)) AS date_iso,
             COUNT(DISTINCT at.tag) AS matches
        FROM article_tags at
        JOIN articles a ON a.id = at.article_id
+       LEFT JOIN sources s ON s.id = a.source_id
       WHERE at.tag IN (SELECT value FROM json_each(@tags))
       GROUP BY a.id
       ORDER BY matches DESC
@@ -339,14 +355,33 @@ export const stmts = {
   // delta: retrieval por tags (modo B) restrito a uma execução (run).
   articlesByTagsForRun: db.prepare(
     `SELECT a.id, a.url, a.title, a.title_pt, a.summary_pt, a.content,
+            s.name AS source_name,
+            coalesce(iso_date(a.published_at), date(a.extracted_at)) AS date_iso,
             COUNT(DISTINCT at.tag) AS matches
        FROM article_tags at
        JOIN articles a ON a.id = at.article_id
+       LEFT JOIN sources s ON s.id = a.source_id
       WHERE at.tag IN (SELECT value FROM json_each(@tags))
         AND a.run_id = @runId
       GROUP BY a.id
       ORDER BY matches DESC
       LIMIT @limit`,
+  ),
+
+  // busca IA da web (soft/hard): contagem do escopo (guard de custo) + candidatos filtrados
+  webSearchScopeCount: db.prepare(`SELECT COUNT(*) c FROM articles a ${SEARCH_SCOPE_WHERE}`),
+  // hard (por artigo): content inteiro (judgeRelevance corta em SEARCH_MAX_CHARS)
+  webSearchCandidates: db.prepare(
+    `SELECT a.id, a.url, a.title, a.title_pt, a.summary_pt, a.content
+       FROM articles a ${SEARCH_SCOPE_WHERE}
+      ORDER BY a.id`,
+  ),
+  // soft (lote): entrada mínima por artigo — summary_pt, senão blurb, senão a cabeça do content
+  webSearchCandidatesLite: db.prepare(
+    `SELECT a.id, a.title, a.title_pt, a.summary_pt, a.blurb,
+            substr(coalesce(a.content, ''), 1, 400) AS content_head
+       FROM articles a ${SEARCH_SCOPE_WHERE}
+      ORDER BY a.id`,
   ),
 
   // buscador web (ncrawl web): página filtrada + count com o MESMO WHERE (params anuláveis)
@@ -365,6 +400,15 @@ export const stmts = {
     `SELECT a.*, s.name AS source_name
        FROM articles a LEFT JOIN sources s ON s.id = a.source_id
       WHERE a.id = ?`,
+  ),
+  // resultados da busca IA: re-select por ids (a ordem de relevância é restaurada em JS via Map)
+  webArticlesByIds: db.prepare(
+    `SELECT a.id, a.url, a.title, a.title_pt, a.summary_pt, a.published_at, a.extracted_at,
+            a.source_id, s.name AS source_name, a.kind, a.section, a.verify_status, a.verify_notes,
+            substr(coalesce(a.blurb, a.content, ''), 1, 280) AS snippet
+       FROM articles a
+       LEFT JOIN sources s ON s.id = a.source_id
+      WHERE a.id IN (SELECT value FROM json_each(@ids))`,
   ),
   webMetaSources: db.prepare(
     `SELECT s.id, s.name, s.base_url, COUNT(a.id) AS c
@@ -503,6 +547,9 @@ export const stmts = {
   startDeltaRun: db.prepare(`INSERT INTO runs (started_at) VALUES (datetime('now')) RETURNING id`),
   finishDeltaRun: db.prepare(`UPDATE runs SET finished_at = datetime('now'), new_count = ? WHERE id = ?`),
   getLatestRunId: db.prepare(`SELECT MAX(id) AS id FROM runs`),
+  // âncora do ESCOPO da busca: a última run que DESCOBRIU artigos (search/verify/web-search
+  // também abrem runs, mas nunca setam articles.run_id — MAX(runs.id) zeraria o delta).
+  maxArticleRunId: db.prepare(`SELECT MAX(run_id) AS id FROM articles`),
   // inspect: a última run DE CRAWL (um verify/classify avulso também abre run, mas sem artigos)
   getLatestCrawlRunId: db.prepare(`SELECT MAX(id) AS id FROM runs WHERE command = 'crawl'`),
   countArticlesByRun: db.prepare(`SELECT COUNT(*) c FROM articles WHERE run_id = ?`),
@@ -571,6 +618,10 @@ export const stmts = {
     `SELECT COALESCE(SUM(cost_usd), 0) usd, COUNT(*) n FROM llm_usage WHERE run_id = ?`,
   ),
   sumUsageTotal: db.prepare(`SELECT COALESCE(SUM(cost_usd), 0) usd, COUNT(*) n FROM llm_usage`),
+  // média REAL do custo por chamada de um estágio (estimativa exibida ANTES de rodar uma busca)
+  avgUsageByStage: db.prepare(
+    `SELECT COALESCE(AVG(cost_usd), 0) avg, COUNT(*) n FROM llm_usage WHERE stage = ? AND cost_usd > 0`,
+  ),
   usageByStage: db.prepare(
     `SELECT stage, COUNT(*) n, COALESCE(SUM(cost_usd), 0) usd
        FROM llm_usage WHERE run_id = ? GROUP BY stage ORDER BY usd DESC`,

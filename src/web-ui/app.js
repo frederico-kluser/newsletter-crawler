@@ -13,8 +13,8 @@ const STR = {
   brand: 'newsletter-crawler',
   brandSep: ' · buscador',
   heroTitle: 'Todos os seus artigos.',
-  heroSub: 'Busque e filtre tudo o que o crawler já arquivou.',
-  searchPlaceholder: 'Buscar por título, resumo ou conteúdo…',
+  heroSub: 'Pergunte à IA — ela lê o acervo e separa o que responde de verdade.',
+  searchPlaceholder: 'Busque com IA: tema, pergunta, tecnologia…',
   clear: 'Limpar busca',
   segAll: 'Tudo',
   segNews: 'Notícias',
@@ -49,6 +49,38 @@ const STR = {
   showMore: (n) => `+ ${n} mais`,
   showLess: 'mostrar menos',
   noDate: 'sem data',
+  // busca IA (soft em lote / profunda por artigo)
+  searchBtn: 'Buscar',
+  searchHint: 'Enter busca com IA · fonte e período limitam o escopo',
+  searchDeep: 'Busca profunda',
+  searchDeepHint: 'Lê o conteúdo completo de cada artigo do escopo (1 chamada de IA por artigo — mais cara e lenta).',
+  searchSlowHint: 'Analisando com IA — a busca profunda pode levar alguns minutos…',
+  searchSoftHint: 'Analisando com IA…',
+  aiResultsFor: (q) => `Resultados da IA para “${q}”`,
+  aiStats: (rel, total) => `${rel} relevante(s) de ${total} analisados`,
+  aiTruncated: (n) => `mostrando os ${n} primeiros`,
+  aiSkipped: (n) => `${n} não avaliados (orçamento)`,
+  aiClear: 'Limpar resultados',
+  relationDirect: 'Direta',
+  relationSimilar: 'Similar',
+  segReleases: 'Releases',
+  confirmTitle: 'Confirmar busca com IA',
+  confirmBody: (n, usd) => `O escopo atual tem ${n} artigo(s) — custo estimado ~US$ ${usd}. Rodar a busca?`,
+  confirmRun: 'Rodar busca',
+  cancel: 'Cancelar',
+  busyMsg: 'Já existe uma busca em andamento — aguarde ela terminar.',
+  scopeEmpty: 'O escopo atual (fonte/período) não tem nenhum artigo.',
+  noResults: (q) => `A IA não achou nada relevante para “${q}”.`,
+  searchFailed: 'A busca falhou — veja o terminal do servidor e tente de novo.',
+  sourcesScope: 'Fontes no escopo',
+  allSelected: 'todas',
+  keyTitle: 'Configurar a chave do OpenRouter',
+  keyBody: 'A busca por IA usa o OpenRouter (DeepSeek). Cole sua chave: ela é validada na API e salva em ~/.newsletter-crawler/.env — vale também para o CLI.',
+  keyPlaceholder: 'sk-or-v1-…',
+  keySave: 'Validar e salvar',
+  keyChecking: 'Validando…',
+  keyInvalid: 'Chave inválida (a API do OpenRouter recusou). Confira e tente de novo.',
+  keyNetwork: 'Não deu para validar (sem rede?). Tente de novo.',
 };
 
 const FACET_LABEL = {
@@ -72,13 +104,23 @@ async function fetchJSON(url, signal) {
   return r.json();
 }
 
-function useDebounced(value, ms) {
-  const [v, setV] = useState(value);
-  useEffect(() => {
-    const id = setTimeout(() => setV(value), ms);
-    return () => clearTimeout(id);
-  }, [value, ms]);
-  return v;
+// POST JSON sem timeout do lado do cliente (a busca profunda responde em minutos). Erros HTTP
+// viram Error com {status, code, data} p/ o chamador rotear (409 ocupado, 428 confirmação, NO_KEY).
+async function postJSON(url, body) {
+  const r = await fetch(url, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) {
+    const err = new Error(data.error || `HTTP ${r.status}`);
+    err.status = r.status;
+    err.code = data.code;
+    err.data = data;
+    throw err;
+  }
+  return data;
 }
 
 const fmtDate = (iso) => {
@@ -143,12 +185,13 @@ function ThemeToggle() {
 }
 
 // ---- controles ----
-function Segmented({ value, onChange }) {
+function Segmented({ value, onChange, withRelease = false }) {
   const opts = [
     ['all', STR.segAll],
     ['news', STR.segNews],
     ['tool', STR.segTools],
   ];
+  if (withRelease) opts.push(['release', STR.segReleases]); // só no browse (a IA julga news|tool)
   return html`<div className="segmented" role="group">
     ${opts.map(
       ([v, label]) => html`<button key=${v} aria-pressed=${value === v} onClick=${() => onChange(v)}>
@@ -212,6 +255,10 @@ function ArticleCard({ a, onOpen }) {
     <h3>${title}</h3>
     ${summary && html`<p className="summary">${summary}</p>`}
     <span className="card-foot">
+      ${a.relation &&
+      html`<span className=${`tag relation-${a.relation}`}>
+        ${a.relation === 'direct' ? STR.relationDirect : STR.relationSimilar}
+      </span>`}
       ${kindBadge(a.kind)}
       ${verifyBadge(a)}
       ${chipTags.map((t) => html`<span key=${t} className="tag">${t}</span>`)}
@@ -284,13 +331,102 @@ function DetailSheet({ id, onClose }) {
   </div>`;
 }
 
+// Chips multi-select de fontes: o ESCOPO da busca profunda (mesmo visual .chip do FacetGroup).
+function SourceChips({ sources, selected, onToggle }) {
+  return html`<div className="facet-group source-chips">
+    <span className="facet-label">
+      ${STR.sourcesScope}${selected.length ? '' : ` (${STR.allSelected})`}
+    </span>
+    <div className="chip-row">
+      ${sources.map(
+        (s) => html`<button
+          key=${s.id}
+          className="chip"
+          aria-pressed=${selected.includes(s.id)}
+          onClick=${() => onToggle(s.id)}
+        >
+          ${s.name} <span className="count">${s.count}</span>
+        </button>`,
+      )}
+    </div>
+  </div>`;
+}
+
+// Diálogo de confirmação (guard de custo da busca IA): overlay pequeno, Esc/backdrop cancelam.
+function ConfirmDialog({ title, body, confirmLabel, onConfirm, onCancel }) {
+  useEffect(() => {
+    const onKey = (e) => e.key === 'Escape' && onCancel();
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onCancel]);
+  return html`<div className="overlay" onClick=${(e) => e.target === e.currentTarget && onCancel()}>
+    <div className="dialog" role="dialog" aria-modal="true" aria-label=${title}>
+      <h2>${title}</h2>
+      <p>${body}</p>
+      <div className="dialog-actions">
+        <button className="btn-ghost" onClick=${onCancel}>${STR.cancel}</button>
+        <button className="btn-primary" onClick=${onConfirm}>${confirmLabel}</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+// Modal da key OpenRouter: valida no servidor (probe) e persiste em NC_HOME/.env; a busca
+// pendente re-dispara via onSaved. A key só é gravada se o probe passar.
+function KeyModal({ onSaved, onClose }) {
+  const [key, setKey] = useState('');
+  const [checking, setChecking] = useState(false);
+  const [errMsg, setErrMsg] = useState('');
+  useEffect(() => {
+    const onKey = (e) => e.key === 'Escape' && onClose();
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
+  const save = async () => {
+    const k = key.trim();
+    if (!k || checking) return;
+    setChecking(true);
+    setErrMsg('');
+    try {
+      const r = await postJSON('/api/key', { key: k });
+      if (r.ok) return onSaved();
+      setErrMsg(r.status === 0 ? STR.keyNetwork : STR.keyInvalid);
+    } catch (e) {
+      setErrMsg(e.message || STR.keyNetwork);
+    } finally {
+      setChecking(false);
+    }
+  };
+  return html`<div className="overlay" onClick=${(e) => e.target === e.currentTarget && onClose()}>
+    <div className="dialog" role="dialog" aria-modal="true" aria-label=${STR.keyTitle}>
+      <h2>${STR.keyTitle}</h2>
+      <p>${STR.keyBody}</p>
+      <input
+        className="control key-input"
+        type="password"
+        value=${key}
+        placeholder=${STR.keyPlaceholder}
+        onInput=${(e) => setKey(e.target.value)}
+        onKeyDown=${(e) => e.key === 'Enter' && save()}
+        autoFocus
+      />
+      ${errMsg && html`<p className="key-error">${errMsg}</p>`}
+      <div className="dialog-actions">
+        <button className="btn-ghost" onClick=${onClose}>${STR.cancel}</button>
+        <button className="btn-primary" onClick=${save} disabled=${checking || !key.trim()}>
+          ${checking ? STR.keyChecking : STR.keySave}
+        </button>
+      </div>
+    </div>
+  </div>`;
+}
+
 // ---- app ----
 function App() {
   const [meta, setMeta] = useState(null);
   const [metaError, setMetaError] = useState(null);
 
   const [q, setQ] = useState('');
-  const dq = useDebounced(q, 250);
   const [kind, setKind] = useState('all');
   const [verify, setVerify] = useState('all');
   const [sourceId, setSourceId] = useState('');
@@ -298,6 +434,17 @@ function App() {
   const [to, setTo] = useState('');
   const [facetSel, setFacetSel] = useState({}); // { faceta: [tags] }
   const [showFacets, setShowFacets] = useState(false);
+
+  // Busca IA: digitar NÃO filtra nada — Enter/botão dispara a IA; `ai` != null é o modo
+  // resultados (o grid passa a ser dos itens julgados) até "Limpar resultados".
+  const [deep, setDeep] = useState(false);
+  const [deepSources, setDeepSources] = useState([]); // ids das fontes do escopo da profunda
+  const [ai, setAi] = useState(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState(null);
+  const [confirmInfo, setConfirmInfo] = useState(null); // {count, usd} vindos do preflight
+  const [hasKey, setHasKey] = useState(null); // null = ainda não checado
+  const [keyOpen, setKeyOpen] = useState(false);
 
   const [items, setItems] = useState([]);
   const [total, setTotal] = useState(0);
@@ -313,7 +460,6 @@ function App() {
   const buildQuery = useCallback(
     (offset) => {
       const sp = new URLSearchParams();
-      if (dq.trim()) sp.set('q', dq.trim());
       if (kind !== 'all') sp.set('kind', kind);
       if (verify !== 'all') sp.set('verify', verify);
       if (sourceId) sp.set('source', sourceId);
@@ -324,7 +470,7 @@ function App() {
       if (offset) sp.set('offset', String(offset));
       return `/api/articles?${sp}`;
     },
-    [dq, kind, verify, sourceId, from, to, facetKey],
+    [kind, verify, sourceId, from, to, facetKey],
   );
 
   const loadMeta = useCallback(() => {
@@ -335,8 +481,16 @@ function App() {
   }, []);
   useEffect(loadMeta, [loadMeta]);
 
+  // A key do LLM existe? (o modal só abre quando o usuário tenta BUSCAR sem key)
+  useEffect(() => {
+    fetchJSON('/api/key/status')
+      .then((r) => setHasKey(Boolean(r.hasKey)))
+      .catch(() => setHasKey(null));
+  }, []);
+
   // Recarrega a primeira página a cada mudança de filtro (cancelando a anterior).
   useEffect(() => {
+    if (ai || aiLoading) return; // modo resultados IA: o grid é da IA, o browse pausa
     abortRef.current?.abort();
     const ac = new AbortController();
     abortRef.current = ac;
@@ -354,9 +508,10 @@ function App() {
         setLoading(false);
       });
     return () => ac.abort();
-  }, [buildQuery]);
+  }, [buildQuery, ai, aiLoading]);
 
   const loadMore = useCallback(() => {
+    if (ai || aiLoading) return; // a lista IA já vem inteira (sem paginação)
     if (loading || loadingMore || items.length >= total) return;
     setLoadingMore(true);
     fetchJSON(buildQuery(items.length))
@@ -366,7 +521,7 @@ function App() {
         setLoadingMore(false);
       })
       .catch(() => setLoadingMore(false));
-  }, [buildQuery, items.length, total, loading, loadingMore]);
+  }, [buildQuery, items.length, total, loading, loadingMore, ai, aiLoading]);
 
   // Scroll infinito: sentinela + IntersectionObserver (o botão continua p/ acessibilidade).
   useEffect(() => {
@@ -378,6 +533,74 @@ function App() {
     io.observe(el);
     return () => io.disconnect();
   }, [loadMore]);
+
+  // Dispara a busca IA (Enter/botão): preflight de escopo/custo -> confirmação (profunda sempre;
+  // soft só acima do limiar) -> POST único (a resposta demora o que a IA demorar; spinner cobre).
+  // Função simples (não useCallback): só roda em handler de evento, sempre com estado fresco.
+  const doSearch = async (opts = {}) => {
+    const query = q.trim();
+    if (!query || aiLoading) return;
+    setAiError(null);
+    if (hasKey === false) {
+      setKeyOpen(true); // a "busca pendente" fica nos próprios states (q/deep/escopo)
+      return;
+    }
+    const sources = deep ? deepSources : sourceId ? [Number(sourceId)] : [];
+    try {
+      if (!opts.confirmed) {
+        const sp = new URLSearchParams();
+        if (deep) sp.set('deep', '1');
+        if (sources.length) sp.set('sources', JSON.stringify(sources));
+        if (from) sp.set('from', from);
+        if (to) sp.set('to', to);
+        const pre = await fetchJSON(`/api/search/scope?${sp}`);
+        if (pre.hasKey === false) {
+          setHasKey(false);
+          setKeyOpen(true);
+          return;
+        }
+        if (pre.count === 0) {
+          setAiError(STR.scopeEmpty);
+          return;
+        }
+        if (deep || pre.needsConfirm) {
+          setConfirmInfo({ count: pre.count, usd: pre.estimatedUsd });
+          return; // o ConfirmDialog re-chama doSearch({confirmed:true})
+        }
+      }
+      setConfirmInfo(null);
+      setAiLoading(true);
+      const r = await postJSON('/api/search', {
+        query,
+        deep,
+        sources: sources.length ? sources : null,
+        from: from || null,
+        to: to || null,
+        confirm: true,
+      });
+      setAi(r);
+      if (kind === 'release') setKind('all'); // Release não existe no julgamento da IA
+    } catch (e) {
+      if (e.code === 'NO_KEY') {
+        setHasKey(false);
+        setKeyOpen(true);
+      } else if (e.status === 409) {
+        setAiError(STR.busyMsg);
+      } else if (e.status === 428) {
+        setConfirmInfo({ count: e.data?.count ?? 0, usd: null }); // corrida rara: preflight mudou
+      } else {
+        setAiError(STR.searchFailed);
+      }
+    } finally {
+      setAiLoading(false);
+      loadMeta(); // badge de custo re-sincroniza (a busca pode ter gastado mesmo falhando)
+    }
+  };
+
+  const clearAi = () => {
+    setAi(null);
+    setAiError(null);
+  };
 
   const toggleTag = (facet, tag) => {
     setFacetSel((cur) => {
@@ -396,11 +619,14 @@ function App() {
   }
   if (from) activePills.push({ label: `${STR.from.toLowerCase()} ${fmtDate(from)}`, clear: () => setFrom('') });
   if (to) activePills.push({ label: `${STR.to.toLowerCase()} ${fmtDate(to)}`, clear: () => setTo('') });
-  for (const [facet, tags] of Object.entries(facetSel)) {
-    for (const tag of tags) activePills.push({ label: tag, clear: () => toggleTag(facet, tag) });
+  if (!ai) {
+    // facetas não se aplicam aos resultados IA — pills delas só no browse
+    for (const [facet, tags] of Object.entries(facetSel)) {
+      for (const tag of tags) activePills.push({ label: tag, clear: () => toggleTag(facet, tag) });
+    }
   }
   const nFacetSel = Object.values(facetSel).reduce((n, l) => n + l.length, 0);
-  const hasAnyFilter = Boolean(dq.trim() || kind !== 'all' || activePills.length);
+  const hasAnyFilter = Boolean(q.trim() || kind !== 'all' || activePills.length);
 
   const clearAll = () => {
     setQ('');
@@ -409,7 +635,15 @@ function App() {
     setFrom('');
     setTo('');
     setFacetSel({});
+    setDeep(false);
+    setDeepSources([]);
+    clearAi();
   };
+
+  // Itens do modo IA filtrados pelo Segmented (paridade com os buckets do CLI: kind do JUIZ).
+  const aiItems = ai
+    ? ai.items.filter((it) => kind === 'all' || (it.judge_kind || it.kind) === kind)
+    : [];
 
   const dbEmpty = meta && meta.totals.articles === 0;
 
@@ -439,12 +673,43 @@ function App() {
             value=${q}
             placeholder=${STR.searchPlaceholder}
             onInput=${(e) => setQ(e.target.value)}
+            onKeyDown=${(e) => e.key === 'Enter' && doSearch()}
             aria-label=${STR.searchPlaceholder}
             autoFocus
           />
-          ${q && html`<button className="clear" onClick=${() => setQ('')} aria-label=${STR.clear}>✕</button>`}
+          ${q &&
+          html`<button
+            className="clear"
+            onClick=${() => {
+              setQ('');
+              clearAi();
+            }}
+            aria-label=${STR.clear}
+          >✕</button>`}
+          <button
+            className="btn-primary search-btn"
+            onClick=${() => doSearch()}
+            disabled=${aiLoading || !q.trim()}
+          >
+            ${STR.searchBtn}
+          </button>
         </div>
-        <${Segmented} value=${kind} onChange=${setKind} />
+        <div className="deep-row">
+          <label className="deep-toggle">
+            <input type="checkbox" checked=${deep} onChange=${(e) => setDeep(e.target.checked)} />
+            ${STR.searchDeep}
+          </label>
+          <span className="muted">${deep ? STR.searchDeepHint : STR.searchHint}</span>
+        </div>
+        ${deep &&
+        meta &&
+        html`<${SourceChips}
+          sources=${meta.sources}
+          selected=${deepSources}
+          onToggle=${(id) =>
+            setDeepSources((cur) => (cur.includes(id) ? cur.filter((x) => x !== id) : [...cur, id]))}
+        />`}
+        <${Segmented} value=${kind} onChange=${setKind} withRelease=${!ai} />
 
         <div className="filterbar">
           <select
@@ -452,6 +717,7 @@ function App() {
             value=${sourceId}
             onChange=${(e) => setSourceId(e.target.value)}
             aria-label=${STR.allSources}
+            disabled=${deep}
           >
             <option value="">${STR.allSources}</option>
             ${meta &&
@@ -459,7 +725,8 @@ function App() {
               (s) => html`<option key=${s.id} value=${s.id}>${s.name} (${s.count})</option>`,
             )}
           </select>
-          <select
+          ${!ai &&
+          html`<select
             className="control"
             value=${verify}
             onChange=${(e) => setVerify(e.target.value)}
@@ -469,7 +736,7 @@ function App() {
             <option value="ok">✓ ${STR.verifyOk}</option>
             <option value="suspect">⚠ ${STR.verifySuspect}</option>
             <option value="junk">✕ ${STR.verifyJunk}</option>
-          </select>
+          </select>`}
           <input
             className="control"
             type="date"
@@ -506,7 +773,7 @@ function App() {
           >
             ${STR.last30}
           </button>
-          ${meta && meta.facets.length
+          ${!ai && meta && meta.facets.length
             ? html`<button
                 className="control"
                 data-on=${showFacets || nFacetSel > 0}
@@ -518,7 +785,8 @@ function App() {
             : null}
         </div>
 
-        ${showFacets &&
+        ${!ai &&
+        showFacets &&
         meta &&
         html`<div className="facet-panel">
           ${meta.facets.map(
@@ -544,10 +812,38 @@ function App() {
           : null}
       </section>
 
-      <div className="results-meta" aria-live="polite">
-        ${loading ? html`<span className="spinner" />` : null}
-        ${!loading && !error ? STR.results(total) : null}
-      </div>
+      ${aiLoading &&
+      html`<div className="state ai-loading">
+        <span className="spinner" />
+        <p>${deep ? STR.searchSlowHint : STR.searchSoftHint}</p>
+      </div>`}
+
+      ${aiError &&
+      html`<div className="results-banner banner-error">
+        <span>${aiError}</span>
+        <button className="link-btn" onClick=${() => setAiError(null)}>✕</button>
+      </div>`}
+
+      ${ai &&
+      !aiLoading &&
+      html`<div className="results-banner" aria-live="polite">
+        <span>
+          <strong>${STR.aiResultsFor(ai.query)}</strong>
+          <span className="muted">
+            ${` · ${STR.aiStats(ai.relevant, ai.total)}`}
+            ${ai.truncated ? ` · ${STR.aiTruncated(ai.items.length)}` : ''}
+            ${ai.skipped ? ` · ${STR.aiSkipped(ai.skipped)}` : ''}
+          </span>
+        </span>
+        <button className="link-btn" onClick=${clearAi}>${STR.aiClear}</button>
+      </div>`}
+
+      ${!ai && !aiLoading
+        ? html`<div className="results-meta" aria-live="polite">
+            ${loading ? html`<span className="spinner" />` : null}
+            ${!loading && !error ? STR.results(total) : null}
+          </div>`
+        : null}
 
       ${metaError || error
         ? html`<div className="state">
@@ -559,7 +855,7 @@ function App() {
           </div>`
         : null}
 
-      ${!loading && !error && items.length === 0
+      ${!ai && !aiLoading && !loading && !error && items.length === 0
         ? html`<div className="state">
             <${Icon.empty} />
             ${dbEmpty && !hasAnyFilter
@@ -574,12 +870,25 @@ function App() {
           </div>`
         : null}
 
+      ${ai && !aiLoading && aiItems.length === 0
+        ? html`<div className="state">
+            <${Icon.empty} />
+            ${ai.items.length === 0
+              ? html`<${Fragment}><h2>${STR.noResults(ai.query)}</h2>
+                  <button className="btn-ghost" onClick=${clearAi}>${STR.aiClear}</button><//>`
+              : html`<${Fragment}><h2>${STR.emptyTitle}</h2>
+                  <button className="btn-ghost" onClick=${() => setKind('all')}>${STR.segAll}</button><//>`}
+          </div>`
+        : null}
+
       <div className="grid">
-        ${items.map((a) => html`<${ArticleCard} key=${a.id} a=${a} onOpen=${setDetailId} />`)}
+        ${(ai ? aiItems : aiLoading ? [] : items).map(
+          (a) => html`<${ArticleCard} key=${a.id} a=${a} onOpen=${setDetailId} />`,
+        )}
       </div>
 
       <div ref=${sentinel}></div>
-      ${items.length < total && !loading
+      ${!ai && !aiLoading && items.length < total && !loading
         ? html`<div className="load-more-wrap">
             <button className="btn-ghost" onClick=${loadMore}>
               ${loadingMore ? html`<span className="spinner" />` : null} ${STR.loadMore}
@@ -589,6 +898,26 @@ function App() {
     </main>
 
     ${detailId != null && html`<${DetailSheet} id=${detailId} onClose=${() => setDetailId(null)} />`}
+    ${confirmInfo &&
+    html`<${ConfirmDialog}
+      title=${STR.confirmTitle}
+      body=${STR.confirmBody(confirmInfo.count, confirmInfo.usd != null ? confirmInfo.usd.toFixed(2) : '?')}
+      confirmLabel=${STR.confirmRun}
+      onConfirm=${() => {
+        setConfirmInfo(null);
+        doSearch({ confirmed: true });
+      }}
+      onCancel=${() => setConfirmInfo(null)}
+    />`}
+    ${keyOpen &&
+    html`<${KeyModal}
+      onSaved=${() => {
+        setHasKey(true);
+        setKeyOpen(false);
+        doSearch();
+      }}
+      onClose=${() => setKeyOpen(false)}
+    />`}
   <//>`;
 }
 

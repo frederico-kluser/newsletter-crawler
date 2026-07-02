@@ -64,8 +64,18 @@ function loadDotEnvOverride(file) {
 loadDotEnvOverride(path.join(ROOT, '.env'));
 loadDotEnvOverride(ENV_PATH);
 
-export const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || '';
-export const HAS_LLM = Boolean(OPENROUTER_API_KEY);
+// Key com LIVE BINDING (export let): a web UI seta a key em runtime (POST /api/key) e TODOS os
+// importadores (llm.js, commands.js, crawl.js, screens.js) enxergam o valor novo sem reiniciar —
+// semântica de live bindings do ESM. Não capture em const local ao importar.
+export let OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || '';
+export let HAS_LLM = Boolean(OPENROUTER_API_KEY);
+/** Atualiza a chave em RUNTIME (web UI / `ncrawl key set` no mesmo processo). */
+export function setRuntimeKey(key) {
+  const k = String(key || '');
+  process.env.OPENROUTER_API_KEY = k;
+  OPENROUTER_API_KEY = k;
+  HAS_LLM = Boolean(k);
+}
 
 export const MODELS = {
   pro: process.env.LLM_PRO_MODEL || 'deepseek/deepseek-v4-pro',
@@ -220,6 +230,7 @@ export const STAGE_KEYS = [
   'classify', // classificação multi-faceta de tags
   'summarize', // resumo + título em PT-BR (Flash high)
   'searchRelevance', // busca modo A: julga artigo vs consulta (Flash high, 50x)
+  'searchBatch', // busca soft da web: julga um LOTE de ~40 artigos vs consulta (Flash xhigh)
   'searchTags', // busca modo B: mapeia consulta -> tags por faceta (Pro)
   'curate', // curadoria da issue: itens estruturados news/tool/release (Flash, chunks paralelos)
   'articleClean', // limpeza pré-save do conteúdo extraído (Flash)
@@ -323,6 +334,16 @@ export const SEARCH_FLASH_CONCURRENCY = envIntOr0('SEARCH_FLASH_CONCURRENCY');
 export const SEARCH_MAX_CHARS = Number(process.env.SEARCH_MAX_CHARS || 8000);
 // Guard de custo: acima disto de artigos, o modo A exige --yes (evita varredura cara acidental).
 export const SEARCH_MODE_A_CONFIRM = Number(process.env.SEARCH_MODE_A_CONFIRM || 200);
+
+// ---- busca IA da web UI (soft em lote / hard por artigo) ----
+// Soft: 1 chamada Flash julga um LOTE de artigos (título+resumo) de uma vez.
+export const SEARCH_BATCH_SIZE = Number(process.env.SEARCH_BATCH_SIZE || 40);
+// Lotes simultâneos (0 = a lane llm do governador decide).
+export const SEARCH_BATCH_CONCURRENCY = envIntOr0('SEARCH_BATCH_CONCURRENCY');
+// Guard da soft (barata: ~n/40 chamadas): só exige confirmação em escopos muito grandes.
+export const SEARCH_SOFT_CONFIRM = Number(process.env.SEARCH_SOFT_CONFIRM || 4000);
+// Teto de itens devolvidos ao navegador numa busca IA (os contadores seguem com o total real).
+export const SEARCH_WEB_MAX_ITEMS = Number(process.env.SEARCH_WEB_MAX_ITEMS || 500);
 
 // sources.json do USUÁRIO mora em NC_HOME (o `ncrawl add`/assistente grava aqui). É semeado 1x a
 // partir do default versionado do repo, para não perder as fontes que já vêm no projeto.

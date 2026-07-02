@@ -1,59 +1,211 @@
-// Tela de RESULTADOS da busca (rolável). Usa SÓ useInput do ink (sem Select) — respeita a regra
-// "um input por vez". Mostra 2 seções: Notícias e Ferramentas, com título_pt + resumo_pt.
-import { useState } from 'react';
-import { Box, Text, useInput } from 'ink';
+// Tela de RESULTADOS da busca: lista NAVEGÁVEL (seleção por item) + PREVIEW rolável na própria
+// tela. Um ÚNICO useInput ramifica por modo (lista|preview) — regra "um input por vez" do repo.
+// Componente 100% puro: DB e browser chegam por props (getArticle/onOpen), então testes injetam
+// fakes. NÃO toca em setLogSink (nenhum comando roda aqui; a busca já terminou).
+import { useMemo, useState } from 'react';
+import { Box, Text, useInput, useStdout } from 'ink';
 import { html } from './html.js';
 import { t } from './i18n.js';
+import { hostOf } from '../util.js';
 
-const WINDOW = 14; // nº de "blocos" visíveis (cabeçalho = 1 bloco; item = 1 bloco de ~2 linhas)
+const MAX_BODY_LINES = 5000; // teto p/ content patológico (o wrap é O(len), roda 1x por Enter)
 
-export function ResultsView({ result, onDone }) {
+/**
+ * Quebra texto plano em linhas de até `width` colunas (greedy por palavra): \n\n+ = parágrafo
+ * (vira linha em branco), \n simples vira espaço; palavra maior que a largura sofre corte duro.
+ * Exportada p/ teste unitário direto.
+ */
+export function wrapPlainText(text, width) {
+  const out = [];
+  for (const para of String(text || '').replace(/\r\n?/g, '\n').split(/\n{2,}/)) {
+    const words = para.replace(/\s+/g, ' ').trim().split(' ');
+    if (!words[0]) continue;
+    let line = '';
+    for (let w of words) {
+      while (w.length > width) {
+        if (line) {
+          out.push(line);
+          line = '';
+        }
+        out.push(w.slice(0, width));
+        w = w.slice(width);
+      }
+      if (!line) line = w;
+      else if (line.length + 1 + w.length <= width) line += ` ${w}`;
+      else {
+        out.push(line);
+        line = w;
+      }
+    }
+    if (line) out.push(line);
+    out.push(''); // separador de parágrafo
+  }
+  if (out.at(-1) === '') out.pop();
+  return out;
+}
+
+// Corpo da preview: resumo PT primeiro, depois o conteúdo completo (ou blurb/snippet).
+function buildBodyLines(item, article, width) {
+  const lines = [];
+  if (item.summary_pt) lines.push(...wrapPlainText(item.summary_pt, width), '');
+  const body = article?.content || article?.blurb || item.snippet || '';
+  if (body) lines.push(...wrapPlainText(body, width));
+  if (!lines.length) lines.push(t('previewNoContent'));
+  if (lines.length > MAX_BODY_LINES) {
+    lines.length = MAX_BODY_LINES;
+    lines.push(t('previewTruncated', { n: MAX_BODY_LINES }));
+  }
+  return lines;
+}
+
+export function ResultsView({ result, onDone, onOpen, getArticle }) {
   const r = result || { buckets: { noticias: [], ferramentas: [] } };
   const noticias = r.buckets?.noticias || [];
   const ferramentas = r.buckets?.ferramentas || [];
-  const total = noticias.length + ferramentas.length;
+  const nNot = noticias.length;
 
-  const blocks = [];
-  const pushSection = (titleKey, items) => {
-    blocks.push({ kind: 'header', text: `— ${t(titleKey)} (${items.length}) —` });
-    for (const it of items) blocks.push({ kind: 'item', it });
+  // Lista plana selecionável; a seção vira anotação _sec (o modo B não tem kind por item).
+  const items = useMemo(
+    () => [
+      ...noticias.map((it) => ({ ...it, _sec: 'news' })),
+      ...ferramentas.map((it) => ({ ...it, _sec: 'tool' })),
+    ],
+    [result],
+  );
+  // Blocos renderizáveis: cabeçalhos (não selecionáveis) intercalados com os itens.
+  const blocks = useMemo(() => {
+    const out = [{ kind: 'header', text: `— ${t('resultsNoticias')} (${nNot}) —` }];
+    items.slice(0, nNot).forEach((it, i) => out.push({ kind: 'item', it, idx: i }));
+    out.push({ kind: 'header', text: `— ${t('resultsFerramentas')} (${items.length - nNot}) —` });
+    items.slice(nNot).forEach((it, j) => out.push({ kind: 'item', it, idx: nNot + j }));
+    return out;
+  }, [items, nNot]);
+  const blockOf = (i) => (i < nNot ? i + 1 : i + 2); // compensa os 2 cabeçalhos
+
+  // Dimensões com clamps (ink-testing-library não tem rows -> fallbacks determinísticos).
+  const { stdout } = useStdout();
+  const cols = stdout?.columns || 80;
+  const rows = stdout?.rows || 24;
+  const textWidth = Math.max(20, cols - 6);
+  const LIST_WINDOW = Math.max(6, Math.min(20, Math.floor((rows - 10) / 2))); // blocos (~2 linhas)
+  const BODY_H = Math.max(5, rows - 16); // altura do corpo da preview
+
+  const [nav, setNav] = useState({ selected: 0, offset: 0 }); // offset em BLOCOS
+  const [preview, setPreview] = useState(null); // null | { item, article, lines, off }
+
+  // Updaters funcionais e autocontidos: imunes a closure velha em rajadas de tecla.
+  const move = (d) =>
+    setNav(({ selected, offset }) => {
+      const s = Math.min(items.length - 1, Math.max(0, selected + d));
+      const b = blockOf(s);
+      const top = blocks[b - 1]?.kind === 'header' ? b - 1 : b; // 1º da seção puxa o cabeçalho
+      let o = offset;
+      if (top < o) o = top;
+      else if (b >= o + LIST_WINDOW) o = b - LIST_WINDOW + 1;
+      o = Math.max(0, Math.min(o, Math.max(0, blocks.length - LIST_WINDOW)));
+      return { selected: s, offset: o };
+    });
+
+  const openPreview = () => {
+    const it = items[nav.selected];
+    if (!it) return;
+    let article = null;
+    try {
+      article = it.id != null ? (getArticle?.(it.id) ?? null) : null;
+    } catch {
+      article = null; // id sumiu (purge/reset noutro processo): preview cai nos dados da busca
+    }
+    setPreview({ item: it, article, lines: buildBodyLines(it, article, textWidth), off: 0 });
   };
-  pushSection('resultsNoticias', noticias);
-  pushSection('resultsFerramentas', ferramentas);
 
-  const [offset, setOffset] = useState(0);
-  const maxOffset = Math.max(0, blocks.length - WINDOW);
   useInput((input, key) => {
-    if (key.downArrow || input === 'j') setOffset((o) => Math.min(maxOffset, o + 1));
-    else if (key.upArrow || input === 'k') setOffset((o) => Math.max(0, o - 1));
-    else if (input === 'b') onDone('menu');
-    else if (input === 'q') onDone('quit');
+    if (preview) {
+      if (key.escape || input === 'b') return setPreview(null);
+      if (input === 'q') return onDone('quit');
+      if (input === 'o') {
+        const url = preview.article?.url || preview.item?.url;
+        if (url) onOpen?.(url);
+        return;
+      }
+      const d = key.downArrow || input === 'j' ? 1
+        : key.upArrow || input === 'k' ? -1
+        : key.pageDown ? BODY_H
+        : key.pageUp ? -BODY_H
+        : 0;
+      if (d) {
+        setPreview((p) => {
+          if (!p) return p;
+          const max = Math.max(0, p.lines.length - BODY_H);
+          return { ...p, off: Math.max(0, Math.min(max, p.off + d)) };
+        });
+      }
+      return;
+    }
+    if (key.return) return openPreview();
+    if (input === 'b') return onDone('menu');
+    if (input === 'q') return onDone('quit');
+    const d = key.downArrow || input === 'j' ? 1
+      : key.upArrow || input === 'k' ? -1
+      : key.pageDown ? LIST_WINDOW
+      : key.pageUp ? -LIST_WINDOW
+      : 0;
+    if (d) move(d);
   });
 
   const header = `busca "${r.query || ''}" (modo ${r.mode || '?'})`;
-  if (total === 0) {
+
+  if (preview) {
+    const { item, article, lines, off } = preview;
+    const title = item.title_pt || item.title || item.url || '';
+    const src = article?.source_name || item.source_name || hostOf(item.url || '') || '—';
+    const date = item.date_iso || String(article?.extracted_at || '').slice(0, 10) || '—';
+    const url = article?.url || item.url || '';
+    const end = Math.min(off + BODY_H, lines.length);
     return html`<${Box} flexDirection="column">
-      <${Text}>${header}</${Text}>
-      <${Text} color="yellow">${r.needsClassification ? t('searchNoClass') : t('resultsNone')}</${Text}>
-      <${Box} marginTop=${1}><${Text} dimColor>${t('resultsScroll')}</${Text}></${Box}>
+      <${Text} bold wrap="wrap">${title}</${Text}>
+      <${Text} dimColor>${`${t('previewSource')}: ${src} · ${t('previewDate')}: ${date}`}</${Text}>
+      <${Text} color="cyan">${`[${item.relation}] · ${t(item._sec === 'tool' ? 'kindTool' : 'kindNews')}`}</${Text}>
+      ${url
+        ? html`<${Text} color="blue" wrap="truncate-end">${url}</${Text}>`
+        : html`<${Text} dimColor>${t('previewNoUrl')}</${Text}>`}
+      ${!article && item.id != null
+        ? html`<${Text} color="yellow">${t('previewMissing', { id: item.id })}</${Text}>`
+        : null}
+      <${Box} flexDirection="column" height=${BODY_H} marginY=${1}>
+        ${lines.slice(off, end).map((ln, i) => html`<${Text} key=${off + i} wrap="truncate-end">${ln || ' '}</${Text}>`)}
+      </${Box}>
+      <${Text} dimColor>${`${t('previewHint')} · ${Math.min(off + 1, lines.length)}–${end}/${lines.length}`}</${Text}>
     </${Box}>`;
   }
 
-  const view = blocks.slice(offset, offset + WINDOW);
+  if (items.length === 0) {
+    return html`<${Box} flexDirection="column">
+      <${Text}>${header}</${Text}>
+      <${Text} color="yellow">${r.needsClassification ? t('searchNoClass') : t('resultsNone')}</${Text}>
+      <${Box} marginTop=${1}><${Text} dimColor>${t('resultsHintEmpty')}</${Text}></${Box}>
+    </${Box}>`;
+  }
+
+  const view = blocks.slice(nav.offset, nav.offset + LIST_WINDOW);
+  const skippedNote = r.skipped ? ` · ${r.skipped} ⏭` : '';
   return html`<${Box} flexDirection="column">
-    <${Text}>${`${header} · ${r.relevant}/${r.total}`}</${Text}>
+    <${Text}>${`${header} · ${r.relevant}/${r.total} · ${nav.selected + 1}/${items.length}${skippedNote}`}</${Text}>
     <${Box} flexDirection="column" marginY=${1}>
-      ${view.map((b, i) =>
-        b.kind === 'header'
-          ? html`<${Text} key=${i} bold color="magenta">${b.text}</${Text}>`
-          : html`<${Box} key=${i} flexDirection="column">
-              <${Text} wrap="truncate-end">
-                <${Text} color="cyan">[${b.it.relation}]</${Text}> ${b.it.title_pt || b.it.title || ''}
-              </${Text}>
-              <${Text} dimColor wrap="truncate-end">  ${(b.it.summary_pt || b.it.snippet || '').slice(0, 160)}</${Text}>
-            </${Box}>`,
-      )}
+      ${view.map((b) => {
+        if (b.kind === 'header') {
+          return html`<${Text} key=${`h-${b.text}`} bold color="magenta">${b.text}</${Text}>`;
+        }
+        const sel = b.idx === nav.selected;
+        const meta = `${b.it.source_name || hostOf(b.it.url || '') || '—'} · ${b.it.date_iso || '—'}`;
+        const resumo = (b.it.summary_pt || b.it.snippet || '').slice(0, 160);
+        return html`<${Box} key=${b.it.id ?? `i${b.idx}`} flexDirection="column">
+          ${sel
+            ? html`<${Text} wrap="truncate-end" inverse>${`❯ [${b.it.relation}] ${b.it.title_pt || b.it.title || ''}`}</${Text}>`
+            : html`<${Text} wrap="truncate-end">${'  '}<${Text} color="cyan">[${b.it.relation}]</${Text}> ${b.it.title_pt || b.it.title || ''}</${Text}>`}
+          <${Text} dimColor wrap="truncate-end">${`    ${meta} · ${resumo}`}</${Text}>
+        </${Box}>`;
+      })}
     </${Box}>
-    <${Text} dimColor>${t('resultsScroll')}</${Text}>
+    <${Text} dimColor>${t('resultsHintList')}</${Text}>
   </${Box}>`;
 }

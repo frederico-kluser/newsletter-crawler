@@ -3,13 +3,16 @@
 //  B) por tags: 5 chamadas Pro (1 por faceta de retrieval) -> une as tags -> retrieval por article_tags.
 // Resultado é EFÊMERO (não persiste): { query, mode, scanned, total, relevant, buckets:{noticias,ferramentas} }.
 // Cada item também é renderizado via log() (paridade CLI) e devolvido como objeto (a UI mostra rico).
+// A web UI tem motor próprio no fim do arquivo (searchWeb: soft em LOTE / hard por artigo).
 import pLimit from 'p-limit';
 import { stmts } from './db.js';
-import { judgeRelevance, mapQueryToFacetTags } from './llm.js';
+import { judgeRelevance, judgeRelevanceBatch, mapQueryToFacetTags } from './llm.js';
 import {
   getFacets, RETRIEVAL_FACETS, buildFacetQueryPrompt, validateFacetTags, isToolByTags,
 } from './taxonomy.js';
-import { SEARCH_FLASH_CONCURRENCY } from './config.js';
+import {
+  SEARCH_FLASH_CONCURRENCY, SEARCH_BATCH_SIZE, SEARCH_BATCH_CONCURRENCY, SEARCH_WEB_MAX_ITEMS,
+} from './config.js';
 import { stageWindow } from './governor.js';
 import { shouldStop } from './budget.js';
 import { log, warn } from './util.js';
@@ -31,6 +34,8 @@ const toItem = (a) => ({
   title_pt: a.title_pt,
   summary_pt: a.summary_pt,
   snippet: snippet(a.content),
+  source_name: a.source_name || null, // join sources (NULL em linhas órfãs)
+  date_iso: a.date_iso || null, // iso_date(published_at) com fallback em extracted_at
 });
 
 function bucketize(hits, isTool) {
@@ -42,21 +47,20 @@ function bucketize(hits, isTool) {
 
 const RANK = { direct: 0, similar: 1 };
 
-async function runModeA(query, limit, { all = false, runId = null } = {}) {
-  const lim = Number.isFinite(limit) ? limit : -1;
-  const rows = all || runId == null
-    ? stmts.listAllArticlesForSearch.all(lim)
-    : stmts.listRunArticlesForSearch.all(runId, lim);
-  resetProgress(rows.length);
+/**
+ * Julga CADA linha individualmente (1 Flash/artigo) preenchendo `verdicts` (id -> {relation,kind}).
+ * Compartilhado pelo modo A do CLI e pela busca hard da web. Fail-open: erro vira 'none' com warn;
+ * orçamento (shouldStop/BUDGET_EXCEEDED) NÃO vira 'none' silencioso — conta no retorno (skipped).
+ */
+async function judgeRowsIndividually(query, rows, verdicts, label = 'A') {
   // Janela = min(override de env, capacidade atual da lane llm do governador).
   const gate = pLimit(stageWindow(SEARCH_FLASH_CONCURRENCY));
-  const hits = [];
-  let budgetSkipped = 0;
+  let skipped = 0;
   await Promise.all(
     rows.map((a) =>
       gate(async () => {
         if (shouldStop()) {
-          budgetSkipped++; // orçamento NÃO pode virar "none" silencioso: conta como não-avaliado
+          skipped++; // orçamento NÃO pode virar "none" silencioso: conta como não-avaliado
           return;
         }
         let rel = { relation: 'none', kind: 'news' };
@@ -64,21 +68,37 @@ async function runModeA(query, limit, { all = false, runId = null } = {}) {
           rel = await judgeRelevance({ query, title: a.title, content: a.content });
         } catch (e) {
           if (e?.code === 'BUDGET_EXCEEDED') {
-            budgetSkipped++;
+            skipped++;
             return;
           }
-          warn(`busca[A] ${a.url}: ${e.message}`); // fail-open -> none
+          warn(`busca[${label}] ${a.url}: ${e.message}`); // fail-open -> none
         }
         _progress.scanned++;
-        if (rel.relation === 'none') return;
-        _progress.relevant++;
+        if (rel.relation !== 'none') _progress.relevant++;
         if (_progress.scanned % 25 === 0) {
-          log(`busca A: ${_progress.scanned}/${rows.length} avaliados · ${_progress.relevant} relevantes`);
+          log(`busca ${label}: ${_progress.scanned}/${rows.length} avaliados · ${_progress.relevant} relevantes`);
         }
-        hits.push({ ...toItem(a), relation: rel.relation, score: rel.relation, kind: rel.kind });
+        verdicts.set(a.id, rel);
       }),
     ),
   );
+  return skipped;
+}
+
+async function runModeA(query, limit, { all = false, runId = null } = {}) {
+  const lim = Number.isFinite(limit) ? limit : -1;
+  const rows = all || runId == null
+    ? stmts.listAllArticlesForSearch.all(lim)
+    : stmts.listRunArticlesForSearch.all(runId, lim);
+  resetProgress(rows.length);
+  const verdicts = new Map();
+  const budgetSkipped = await judgeRowsIndividually(query, rows, verdicts, 'A');
+  const hits = [];
+  for (const a of rows) {
+    const rel = verdicts.get(a.id);
+    if (!rel || rel.relation === 'none') continue;
+    hits.push({ ...toItem(a), relation: rel.relation, score: rel.relation, kind: rel.kind });
+  }
   hits.sort((x, y) => RANK[x.relation] - RANK[y.relation]); // direct antes de similar (estável)
   const buckets = bucketize(hits, (h) => h.kind === 'tool');
   if (budgetSkipped) {
@@ -158,4 +178,136 @@ export async function runSearch(
   const r = mode === 'B' ? await runModeB(query, limit, scope) : await runModeA(query, limit, scope);
   renderResults(r);
   return r;
+}
+
+// ---- busca IA da web (`ncrawl web`): soft em LOTE / hard por artigo, escopo fontes+período ----
+
+// Entrada mínima por artigo no juiz em lote (título + o melhor texto curto disponível).
+const toBatchItem = (a) => ({
+  id: a.id,
+  title: String(a.title || a.title_pt || '').slice(0, 200),
+  summary: String(a.summary_pt || a.blurb || a.content_head || '').replace(/\s+/g, ' ').trim().slice(0, 400),
+});
+
+/** Divide `rows` em lotes de `size` preservando a ordem (exportada p/ teste). */
+export function chunkBatches(rows, size) {
+  const n = Math.max(1, Math.floor(size) || 1);
+  const out = [];
+  for (let i = 0; i < rows.length; i += n) out.push(rows.slice(i, i + n));
+  return out;
+}
+
+/**
+ * Funde a resposta de UM lote em `verdicts` (id -> {relation,kind}): id faltando -> 'none'
+ * (fail-open), id desconhecido -> ignorado, duplicado -> a primeira entrada vence.
+ * Exportada p/ teste. Retorna { missing, unknown }.
+ */
+export function mergeBatchVerdicts(batch, results, verdicts) {
+  const ids = new Set(batch.map((a) => a.id));
+  const byId = new Map();
+  let unknown = 0;
+  for (const r of results || []) {
+    if (!ids.has(r.id)) {
+      unknown++;
+      continue;
+    }
+    if (!byId.has(r.id)) byId.set(r.id, r);
+  }
+  let missing = 0;
+  for (const a of batch) {
+    const v = byId.get(a.id);
+    if (!v) {
+      verdicts.set(a.id, { relation: 'none', kind: 'news' });
+      missing++;
+    } else {
+      verdicts.set(a.id, { relation: v.relation, kind: v.kind });
+    }
+  }
+  return { missing, unknown };
+}
+
+/**
+ * Busca da web UI (POST /api/search). deep=false (soft): 1 chamada Flash(xhigh) por lote de
+ * SEARCH_BATCH_SIZE artigos, entrada título + summary_pt|blurb|cabeça do content. deep=true
+ * (hard): judgeRelevance por artigo (content até SEARCH_MAX_CHARS), como o modo A do CLI.
+ * Retorna hits CRUS {id, relation, kind} ordenados (direct antes de similar) e capados em
+ * SEARCH_WEB_MAX_ITEMS — o enriquecimento p/ os cards (fonte/data/tags) fica no web.js.
+ */
+export async function searchWeb(query, { deep = false, sources = null, from = null, to = null } = {}) {
+  const params = {
+    sources: Array.isArray(sources) && sources.length ? JSON.stringify(sources) : null,
+    from,
+    to,
+  };
+  const rows = deep
+    ? stmts.webSearchCandidates.all(params)
+    : stmts.webSearchCandidatesLite.all(params);
+  resetProgress(rows.length);
+  const verdicts = new Map();
+  let skipped = 0;
+
+  if (deep) {
+    skipped = await judgeRowsIndividually(query, rows, verdicts, 'profunda');
+  } else {
+    // Item sem título E sem texto não gasta token: veredito local 'none'.
+    const pend = [];
+    for (const a of rows) {
+      const it = toBatchItem(a);
+      if (!it.title && !it.summary) verdicts.set(a.id, { relation: 'none', kind: 'news' });
+      else pend.push(a);
+    }
+    _progress.scanned = rows.length - pend.length;
+    const gate = pLimit(stageWindow(SEARCH_BATCH_CONCURRENCY));
+    await Promise.all(
+      chunkBatches(pend, SEARCH_BATCH_SIZE).map((batch) =>
+        gate(async () => {
+          if (shouldStop()) {
+            skipped += batch.length; // orçamento: lote não avaliado (não vira 'none' silencioso)
+            return;
+          }
+          try {
+            const results = await judgeRelevanceBatch({ query, items: batch.map(toBatchItem) });
+            const { missing, unknown } = mergeBatchVerdicts(batch, results, verdicts);
+            if (missing || unknown) {
+              warn(`busca[soft]: lote com ${missing} id(s) sem veredito / ${unknown} desconhecido(s)`);
+            }
+          } catch (e) {
+            if (e?.code === 'BUDGET_EXCEEDED') {
+              skipped += batch.length;
+              return;
+            }
+            warn(`busca[soft] lote de ${batch.length}: ${e.message}`); // fail-open -> none
+            for (const a of batch) verdicts.set(a.id, { relation: 'none', kind: 'news' });
+          }
+          _progress.scanned += batch.length;
+          let rel = 0;
+          for (const v of verdicts.values()) if (v.relation !== 'none') rel++;
+          _progress.relevant = rel;
+        }),
+      ),
+    );
+  }
+
+  const hits = [];
+  for (const a of rows) {
+    const rel = verdicts.get(a.id);
+    if (!rel || rel.relation === 'none') continue;
+    hits.push({ id: a.id, relation: rel.relation, kind: rel.kind });
+  }
+  hits.sort((x, y) => RANK[x.relation] - RANK[y.relation] || y.id - x.id); // direct 1º; empate: mais novo 1º
+  const truncated = hits.length > SEARCH_WEB_MAX_ITEMS;
+  log(
+    `busca web "${query}" (${deep ? 'profunda' : 'soft'}): ${hits.length} relevante(s) de ${rows.length}` +
+      (skipped ? ` (${skipped} pulados por orçamento)` : ''),
+  );
+  return {
+    query,
+    deep,
+    scanned: _progress.scanned,
+    total: rows.length,
+    relevant: hits.length,
+    skipped,
+    truncated,
+    hits: hits.slice(0, SEARCH_WEB_MAX_ITEMS),
+  };
 }

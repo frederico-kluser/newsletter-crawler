@@ -23,7 +23,7 @@ Usa um **LLM no OpenRouter (DeepSeek V4)** para *derivar seletores CSS reutiliz�
 - **Trace total + `ncrawl inspect`:** todo estágio (fetch, curadoria, item salvo/ignorado com motivo, limpeza, enriquecimento, verificação) grava na tabela `events`; `inspect` mostra a árvore da run (itens por issue, vereditos, custos por etapa) e `--url <substr>` audita um link específico.
 - **Seletores por IA lendo a página real:** links/conteúdo (Pro) e **data por item** (Flash, par CSS+regex) são derivados do HTML real, validados contra a própria página, cacheados por template de weekly e re-derivados quando quebram (self-healing).
 - **Tags multi-faceta** contra um vocabulário controlado (9 facetas, ~800 tags) e **resumos + títulos em PT-BR**.
-- **Busca na base** em 2 modos: exaustivo (Flash, avalia todo artigo) ou por tags (Pro), devolvendo **Notícias** e **Ferramentas**.
+- **Busca na base 100% IA:** no CLI/TUI, exaustiva (Flash, avalia cada artigo do escopo) ou por tags (Pro); no **buscador web**, soft **em lote** (1 Flash por ~40 artigos) ou **profunda** por artigo com escopo de **fontes+período** e confirmação de custo — sempre devolvendo **Notícias** e **Ferramentas**. Na TUI os resultados são navegáveis, com **preview** do artigo e abertura do link no navegador.
 - **Menu guiado (TUI)** bilíngue PT/EN que monta os parâmetros, mostra o comando equivalente e exibe progresso ao vivo — sem substituir as flags.
 
 ## Como funciona (visão geral)
@@ -113,16 +113,19 @@ npm run export -- --format md          # data/export/<fonte>/*.md — só a últ
 npm run summarize                      # resumo + título em PT-BR p/ cada artigo (Flash; idempotente)
 npm run search -- react server components --mode B   # por tags (5 Pro); só a última run (--all = acervo)
 npm run search -- "local llm" --mode A --limit 20 --yes --all   # exaustiva no acervo todo (Flash)
+npm run web                            # buscador no navegador (localhost:8477): busca IA soft/profunda + browse
 npm run key -- set <chave>             # valida a chave OpenRouter e salva em ~/.newsletter-crawler/.env (ou: ncrawl key set)
 npm run reset -- --yes                 # APAGA TODOS OS DADOS (slate limpo); respeita DB_PATH
-npm test                               # node:test (datas, anti-bot, busca por tags, menu)
+npm test                               # node:test (datas, anti-bot, busca em lote, API web, menu e preview da TUI)
 ```
 
 ### Resumos PT-BR e busca na base
 - **Resumos:** `summarize` gera `title_pt` + `summary_pt` (resumo legível em **português do Brasil**) por artigo. O `content` original é mantido (busca/tags usam ele). Roda **automático pós-crawl** (desligue com `SUMMARIZE_AFTER_CRAWL=false` ou `--no-summarize`).
 - **Busca — Modo A (exaustivo):** `--mode A` faz **1 chamada Flash por artigo** (concorrência 50), julgando `direto`/`parecido`; rankeia direto>parecido. Guard de custo: acima de `SEARCH_MODE_A_CONFIRM` (~200) artigos exige `--yes`. O prompt de relevância foi **calibrado por avaliação** (`eval/`, rubrica + few-shot): F1 macro no Flash 0.73 → **0.85**, cortando falsos positivos.
 - **Busca — Modo B (por tags):** `--mode B` faz **5 chamadas Pro** (1 por faceta de retrieval) → une as tags → traz artigos cujas tags cruzam. Rápido; **exige classificação feita**.
-- Toda busca devolve dois grupos: **Notícias** e **Ferramentas** (artigo que é *sobre* uma ferramenta vai p/ Ferramentas). Disponível também no menu (`npm run ui` → Buscar).
+- **Buscador web (`npm run web`):** a busca digitada é **100% IA** — Enter dispara a **soft** (1 Flash `xhigh` por lote de ~40 artigos, lendo título+resumo) e o toggle **Busca profunda** avalia artigo a artigo (conteúdo), com **fontes (chips) + período** como escopo e um diálogo de confirmação com contagem + ~US$. Sem key configurada, um **modal** valida e salva a key OpenRouter em `~/.newsletter-crawler/.env` (vale na hora, sem reiniciar). O browse sem consulta continua instantâneo por filtros SQL (fonte/período/facetas/kind — incl. `release`); a busca por palavras foi **removida**.
+- Toda busca devolve dois grupos: **Notícias** e **Ferramentas** (artigo que é *sobre* uma ferramenta vai p/ Ferramentas). Na TUI (`npm run ui` → Buscar), os resultados são **navegáveis**: ↑/↓ selecionam, **Enter** abre a preview (conteúdo completo, rolável), **`o`** abre o link no navegador, Esc/b volta.
+- **Escopo padrão** do `search`: a última run **que trouxe artigos** (delta real); `--all` = acervo todo.
 
 ### Seleção de fonte e parada por data
 - **`--source "<nome|url>"`** semeia só uma fonte (nome exato ou URL); **`--only <substr>`** casa por substring.
@@ -150,7 +153,9 @@ src/crawl.js      frontier + processJob + crawlArchive + paginação
 src/classify.js   classificação multi-faceta de tags (vocabulário controlado)
 src/taxonomy.js   vocabulário/facetas + prompts (classificação e busca por tags)
 src/summarize.js  resumo + título PT-BR por artigo (Flash)
-src/search.js     busca na base: modo A (Flash, varre tudo) + modo B (Pro, por tags)
+src/search.js     busca na base: modo A (Flash, varre o escopo) + modo B (Pro, por tags) + searchWeb (web: soft em lote / profunda)
+src/web.js        buscador web: servidor node:http zero-dep (API JSON + busca IA + key) — `npm run web`
+src/web-ui/       app React zero-build do buscador (htm + UMD servidos de node_modules)
 src/keys.js       chave OpenRouter: probe (GET /api/v1/key) + upsert idempotente em NC_HOME/.env
 src/commands.js   implementação dos comandos (compartilhada CLI + UI) + getStatus
 src/index.js      CLI (parseFlags + dispatch) + gate do menu guiado

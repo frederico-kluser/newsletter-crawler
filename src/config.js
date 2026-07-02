@@ -100,6 +100,27 @@ export const REQUEST_DELAY_MS = Number(process.env.REQUEST_DELAY_MS || 1000);
 export const MAX_RETRIES = Number(process.env.MAX_RETRIES || 3);
 export const MAX_HTML_FOR_LLM = Number(process.env.MAX_HTML_FOR_LLM || 120000);
 export const RESPECT_ROBOTS = process.env.CRAWLER_RESPECT_ROBOTS !== 'false';
+// Modo agressivo é o DEFAULT (pedido do usuário): ignora robots.txt + identidade de navegador
+// real. Desligue por run com --no-aggressive ou globalmente com CRAWLER_AGGRESSIVE=false.
+// isBlockedPage e o circuit breaker seguem valendo — agressivo nunca salva página de desafio.
+export const AGGRESSIVE_DEFAULT = process.env.CRAWLER_AGGRESSIVE !== 'false';
+
+// ---- pipeline de qualidade por IA (curadoria de roundup, limpeza pré-save, verificação) ----
+// Curadoria: a página do agregador é processada por LLM em ITENS estruturados (news/tool/
+// release + blurb da própria issue); o item é CADASTRADO já na curadoria e depois enriquecido.
+export const CURATE_ROUNDUPS = process.env.CURATE_ROUNDUPS !== 'false';
+// Tamanho de cada chunk do markdown da issue enviado a um agente de curadoria (issues maiores
+// que isso são divididas e processadas por agentes EM PARALELO na lane llm).
+export const CURATE_CHUNK_CHARS = Number(process.env.CURATE_CHUNK_CHARS || 24000);
+// Limpeza por IA antes de salvar: remove sujeira de UI (menus/subscribe/rodapé) do conteúdo
+// extraído, preservando o texto do artigo. Recorte de custo em CLEAN_MAX_CHARS.
+export const CLEAN_BEFORE_SAVE = process.env.CLEAN_BEFORE_SAVE !== 'false';
+export const CLEAN_MAX_CHARS = Number(process.env.CLEAN_MAX_CHARS || 20000);
+// Verificação pós-cadastro (varredura paralela ao fim do crawl + comando `ncrawl verify`):
+// veredito ok|suspect|junk + notas por artigo, persistidos p/ auditoria via `ncrawl inspect`.
+export const VERIFY_AFTER_CRAWL = process.env.VERIFY_AFTER_CRAWL !== 'false';
+export const VERIFY_MAX_CHARS = Number(process.env.VERIFY_MAX_CHARS || 4000);
+export const VERIFY_CONCURRENCY = envIntOr0('VERIFY_CONCURRENCY');
 
 // ---- paralelismo global + orçamento (governor/budget) ----
 // Teto GLOBAL de operações simultâneas (--parallel). Deriva dos núcleos como proxy do porte
@@ -153,6 +174,10 @@ export const STAGE_KEYS = [
   'summarize', // resumo + título em PT-BR (Flash high)
   'searchRelevance', // busca modo A: julga artigo vs consulta (Flash high, 50x)
   'searchTags', // busca modo B: mapeia consulta -> tags por faceta (Pro)
+  'curate', // curadoria da issue: itens estruturados news/tool/release (Flash, chunks paralelos)
+  'articleClean', // limpeza pré-save do conteúdo extraído (Flash)
+  'verifyRecord', // verificação pós-cadastro: veredito ok|suspect|junk (Flash)
+  'dateSelector', // seletor de DATA da listagem (CSS + regex) lendo a página real (Flash)
 ];
 const DEFAULT_MODEL = MODELS.pro;
 const DEFAULT_EFFORT = 'xhigh';

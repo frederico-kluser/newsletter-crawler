@@ -1,0 +1,89 @@
+// Verificação pós-cadastro: cada artigo salvo recebe um veredito ok|suspect|junk + notas
+// (persistidos em articles.verify_status/verify_notes e no trace de events) — é o "conferir o
+// que foi feito a cada cadastro". Heurística barata primeiro (anti-bot óbvio), LLM (Flash) no
+// resto, em paralelo pela lane llm. Idempotente (verify_status IS NULL) e retomável — espelha
+// summarize.js. Nunca apaga: junk é marcado e aparece no `ncrawl inspect`.
+import pLimit from 'p-limit';
+import { stmts } from './db.js';
+import { verifyRecordLLM } from './llm.js';
+import { isBlockedPage } from './clean.js';
+import { logEvent } from './events.js';
+import { VERIFY_CONCURRENCY, VERIFY_MAX_CHARS } from './config.js';
+import { stageWindow } from './governor.js';
+import { shouldStop, getBudgetState } from './budget.js';
+import { log, errorLog } from './util.js';
+
+/** Verifica os artigos sem veredito (ou todos, com force). Retorna { verified, byVerdict }. */
+export async function verifyPending({ limit = Infinity, force = false } = {}) {
+  const lim = Number.isFinite(limit) ? limit : -1; // SQLite: LIMIT -1 = sem limite
+  const rows = force
+    ? stmts.listArticlesForReverify.all(lim)
+    : stmts.listArticlesToVerify.all(lim);
+  if (!rows.length) {
+    log('verify: nada a verificar.');
+    return { verified: 0, byVerdict: {} };
+  }
+  const runId = getBudgetState().runId ?? null; // events apontam p/ a run que VERIFICOU
+  log(`verify: ${rows.length} artigo(s) — veredito ok|suspect|junk, force=${force}.`);
+
+  const gate = pLimit(stageWindow(VERIFY_CONCURRENCY));
+  const byVerdict = {};
+  let done = 0;
+  let skipped = 0;
+  await Promise.all(
+    rows.map((a) =>
+      gate(async () => {
+        if (shouldStop()) {
+          skipped++;
+          return; // orçamento: a linha NULL segue retomável via `ncrawl verify`
+        }
+        try {
+          // Heurística grátis primeiro: interstitial anti-bot que escapou é junk na certa.
+          let verdict;
+          let problems;
+          if (isBlockedPage(a.title, a.content)) {
+            verdict = 'junk';
+            problems = ['página de desafio anti-bot salva como conteúdo'];
+          } else {
+            const out = await verifyRecordLLM({
+              url: a.url,
+              kind: a.kind,
+              title: a.title,
+              blurb: a.blurb,
+              content: String(a.content || '').slice(0, VERIFY_MAX_CHARS),
+            });
+            verdict = out.verdict;
+            problems = out.problems;
+          }
+          stmts.setVerify.run({
+            id: a.id,
+            verify_status: verdict,
+            verify_notes: problems.length ? problems.join('; ') : null,
+          });
+          logEvent({
+            runId, url: a.url, stage: 'verify', status: verdict,
+            detail: problems.length ? { problems } : null,
+          });
+          byVerdict[verdict] = (byVerdict[verdict] || 0) + 1;
+          done++;
+          if (verdict !== 'ok') {
+            log(`verify ${verdict} [${done}/${rows.length}] ${(a.title || a.url).slice(0, 60)} — ${problems.join('; ').slice(0, 120)}`);
+          }
+        } catch (e) {
+          if (e?.code === 'BUDGET_EXCEEDED') {
+            skipped++;
+            return;
+          }
+          errorLog(`verify falhou (${a.url}): ${e.message}`);
+        }
+      }),
+    ),
+  );
+
+  const parts = Object.entries(byVerdict).map(([k, n]) => `${k}=${n}`).join(' ');
+  log(
+    `verify concluído: ${done}/${rows.length} (${parts || '—'})` +
+      `${skipped ? ` (${skipped} pulados por orçamento — retome com \`ncrawl verify\`)` : ''}.`,
+  );
+  return { verified: done, byVerdict };
+}

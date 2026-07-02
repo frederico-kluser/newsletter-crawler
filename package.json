@@ -14,6 +14,9 @@
   "scripts": {
     "crawl": "node --env-file-if-exists=.env src/index.js crawl",
     "status": "node --env-file-if-exists=.env src/index.js status",
+    "inspect": "node --env-file-if-exists=.env src/index.js inspect",
+    "verify": "node --env-file-if-exists=.env src/index.js verify",
+    "purge": "node --env-file-if-exists=.env src/index.js purge",
     "add": "node --env-file-if-exists=.env src/index.js add",
     "export": "node --env-file-if-exists=.env src/index.js export",
     "classify": "node --env-file-if-exists=.env src/index.js classify",

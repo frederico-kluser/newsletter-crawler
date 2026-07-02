@@ -23,9 +23,14 @@ test('UI: dá para chegar na busca pelo menu (Buscar -> consulta -> modo)', asyn
   await wait(80);
   assert.ok((lastFrame() || '').includes('buscar'), 'deve abrir o prompt da consulta');
 
-  // Digita a consulta e envia.
+  // Digita a consulta e envia -> passo de escopo (novo vs. acervo).
   stdin.write('react server components');
   await wait(40);
+  stdin.write(ENTER);
+  await wait(80);
+  assert.ok((lastFrame() || '').includes('trazer'), 'deve mostrar o passo de escopo (novo vs. acervo)');
+
+  // Escopo: "Apenas o novo" (1º) -> avança p/ a escolha de modo.
   stdin.write(ENTER);
   await wait(80);
   const frame = lastFrame() || '';

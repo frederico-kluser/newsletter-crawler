@@ -11,7 +11,7 @@ test('UI: o menu lista as ações principais (PT)', () => {
   const frame = lastFrame() || '';
   for (const label of [
     'newsletter-crawler', 'Coletar', 'Buscar', 'Status', 'Exportar', 'Classificar', 'Resumir',
-    'Adicionar', 'Limpar', 'Sair',
+    'Adicionar', 'Limites', 'Limpar',
   ]) {
     assert.ok(frame.includes(label), `o menu deve conter "${label}"\n--- frame ---\n${frame}`);
   }

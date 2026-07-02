@@ -83,6 +83,17 @@ CREATE TABLE IF NOT EXISTS frontier (
 CREATE INDEX IF NOT EXISTS idx_frontier_state ON frontier(state);
 CREATE UNIQUE INDEX IF NOT EXISTS idx_articles_hash ON articles(content_hash);
 
+CREATE TABLE IF NOT EXISTS runs (
+  id INTEGER PRIMARY KEY,
+  command TEXT,
+  args TEXT,
+  budget_usd REAL,
+  new_count INTEGER DEFAULT 0,
+  status TEXT DEFAULT 'running',
+  started_at TEXT DEFAULT (datetime('now')),
+  finished_at TEXT
+);
+
 CREATE TABLE IF NOT EXISTS classifications (
   article_id INTEGER PRIMARY KEY REFERENCES articles(id) ON DELETE CASCADE,
   result_json TEXT NOT NULL,
@@ -110,16 +121,6 @@ CREATE TABLE IF NOT EXISTS classification_uncovered (
   created_at TEXT DEFAULT (datetime('now'))
 );
 
-CREATE TABLE IF NOT EXISTS runs (
-  id INTEGER PRIMARY KEY,
-  command TEXT NOT NULL,
-  args TEXT,
-  budget_usd REAL,
-  status TEXT DEFAULT 'running',
-  started_at TEXT DEFAULT (datetime('now')),
-  finished_at TEXT
-);
-
 CREATE TABLE IF NOT EXISTS llm_usage (
   id INTEGER PRIMARY KEY,
   run_id INTEGER REFERENCES runs(id),
@@ -145,6 +146,15 @@ ensureColumn('sources', 'max_index_pages', 'max_index_pages INTEGER');
 // Resumo PT-BR p/ leitura (o `content` segue original, p/ busca/tags). Ambos nullable.
 ensureColumn('articles', 'title_pt', 'title_pt TEXT');
 ensureColumn('articles', 'summary_pt', 'summary_pt TEXT');
+// Marca d'água do delta: a execução (run) que DESCOBRIU o artigo. Linhas antigas ficam NULL.
+ensureColumn('articles', 'run_id', 'run_id INTEGER');
+// Colunas adicionais da tabela runs (unificada: paralel + robot-bypass). DBs antigos podem
+// ter só o schema original de um dos branches; ensureColumn garante que todas existam.
+ensureColumn('runs', 'command', 'command TEXT');
+ensureColumn('runs', 'args', 'args TEXT');
+ensureColumn('runs', 'budget_usd', 'budget_usd REAL');
+ensureColumn('runs', 'status', "status TEXT DEFAULT 'running'");
+ensureColumn('runs', 'new_count', 'new_count INTEGER DEFAULT 0');
 
 // Dedup de conteúdo à prova de concorrência: promove idx_articles_hash a UNIQUE em DBs
 // antigos (CREATE UNIQUE ... IF NOT EXISTS não converte um índice já existente). Só age se
@@ -191,6 +201,8 @@ const WEB_WHERE = `
                       AND tk.tag IN (SELECT value FROM json_each(@toolTypes))))
         ))`;
 
+// Índice do delta por execução (run_id vem via ensureColumn, então não existe no CREATE base).
+db.exec('CREATE INDEX IF NOT EXISTS idx_articles_run ON articles(run_id)');
 export const stmts = {
   // sources
   upsertSource: db.prepare(
@@ -214,12 +226,16 @@ export const stmts = {
 
   // articles
   insertArticle: db.prepare(
-    `INSERT OR IGNORE INTO articles (source_id, url, title, content, content_hash, published_at)
-     VALUES (@source_id, @url, @title, @content, @content_hash, @published_at)`,
+    `INSERT OR IGNORE INTO articles (source_id, url, title, content, content_hash, published_at, run_id)
+     VALUES (@source_id, @url, @title, @content, @content_hash, @published_at, @run_id)`,
   ),
   getArticleByHash: db.prepare(`SELECT id FROM articles WHERE content_hash = ?`),
   getArticleByUrl: db.prepare(`SELECT id FROM articles WHERE url = ?`),
   listArticlesBySource: db.prepare(`SELECT * FROM articles WHERE source_id = ? ORDER BY id`),
+  // delta: só os artigos descobertos numa execução (run) específica.
+  listArticlesForRunBySource: db.prepare(
+    `SELECT * FROM articles WHERE source_id = ? AND run_id = ? ORDER BY id`,
+  ),
 
   // resumos PT-BR (title_pt/summary_pt; LIMIT -1 = sem limite, como em classify)
   setSummary: db.prepare(`UPDATE articles SET title_pt = @title_pt, summary_pt = @summary_pt WHERE id = @id`),
@@ -235,12 +251,29 @@ export const stmts = {
   listAllArticlesForSearch: db.prepare(
     `SELECT id, url, title, title_pt, summary_pt, content FROM articles ORDER BY id LIMIT ?`,
   ),
+  // delta: varredura (modo A) restrita a uma execução (run).
+  listRunArticlesForSearch: db.prepare(
+    `SELECT id, url, title, title_pt, summary_pt, content
+       FROM articles WHERE run_id = ? ORDER BY id LIMIT ?`,
+  ),
   articlesByTags: db.prepare(
     `SELECT a.id, a.url, a.title, a.title_pt, a.summary_pt, a.content,
             COUNT(DISTINCT at.tag) AS matches
        FROM article_tags at
        JOIN articles a ON a.id = at.article_id
       WHERE at.tag IN (SELECT value FROM json_each(@tags))
+      GROUP BY a.id
+      ORDER BY matches DESC
+      LIMIT @limit`,
+  ),
+  // delta: retrieval por tags (modo B) restrito a uma execução (run).
+  articlesByTagsForRun: db.prepare(
+    `SELECT a.id, a.url, a.title, a.title_pt, a.summary_pt, a.content,
+            COUNT(DISTINCT at.tag) AS matches
+       FROM article_tags at
+       JOIN articles a ON a.id = at.article_id
+      WHERE at.tag IN (SELECT value FROM json_each(@tags))
+        AND a.run_id = @runId
       GROUP BY a.id
       ORDER BY matches DESC
       LIMIT @limit`,
@@ -311,6 +344,18 @@ export const stmts = {
   bumpRetry: db.prepare(`UPDATE frontier SET retries = retries + 1, state = 'pending' WHERE url = ?`),
   getRetries: db.prepare(`SELECT retries FROM frontier WHERE url = ?`),
   resetInProgress: db.prepare(`UPDATE frontier SET state = 'pending' WHERE state = 'in_progress'`),
+  // Re-crawl incremental: re-ativa o seed de listagem de UMA fonte (done/failed -> pending) p/
+  // re-visitar a listagem e descobrir só o que é novo. Só 'listing' (seeds); roundup/article ficam.
+  refreshListing: db.prepare(
+    `UPDATE frontier SET state = 'pending', retries = 0
+      WHERE url = ? AND kind = 'listing' AND state IN ('done', 'failed')`,
+  ),
+
+  // runs / marca d'água por execução (delta de "novo desde a última execução")
+  startDeltaRun: db.prepare(`INSERT INTO runs (started_at) VALUES (datetime('now')) RETURNING id`),
+  finishDeltaRun: db.prepare(`UPDATE runs SET finished_at = datetime('now'), new_count = ? WHERE id = ?`),
+  getLatestRunId: db.prepare(`SELECT MAX(id) AS id FROM runs`),
+  countArticlesByRun: db.prepare(`SELECT COUNT(*) c FROM articles WHERE run_id = ?`),
 
   // stats
   countFrontierByState: db.prepare(`SELECT state, COUNT(*) c FROM frontier GROUP BY state`),

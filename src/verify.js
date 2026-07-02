@@ -13,6 +13,37 @@ import { stageWindow } from './governor.js';
 import { shouldStop, getBudgetState } from './budget.js';
 import { log, errorLog } from './util.js';
 
+/**
+ * Verifica UMA ficha (heurística grátis anti-bot -> LLM), persiste o veredito + notas e loga o
+ * evento. Compartilhado pelo sweep (verifyPending) e pela verificação em STREAMING do crawl
+ * (commands.js), logo após cada enriquecimento. `a` precisa de {id,url,title,kind,blurb,content}.
+ */
+export async function verifyArticleRow(a, { runId = null } = {}) {
+  let verdict;
+  let problems;
+  if (isBlockedPage(a.title, a.content)) {
+    verdict = 'junk';
+    problems = ['página de desafio anti-bot salva como conteúdo'];
+  } else {
+    const out = await verifyRecordLLM({
+      url: a.url,
+      kind: a.kind,
+      title: a.title,
+      blurb: a.blurb,
+      content: String(a.content || '').slice(0, VERIFY_MAX_CHARS),
+    });
+    verdict = out.verdict;
+    problems = out.problems;
+  }
+  stmts.setVerify.run({
+    id: a.id,
+    verify_status: verdict,
+    verify_notes: problems.length ? problems.join('; ') : null,
+  });
+  logEvent({ runId, url: a.url, stage: 'verify', status: verdict, detail: problems.length ? { problems } : null });
+  return { verdict, problems };
+}
+
 /** Verifica os artigos sem veredito (ou todos, com force). Retorna { verified, byVerdict }. */
 export async function verifyPending({ limit = Infinity, force = false } = {}) {
   const lim = Number.isFinite(limit) ? limit : -1; // SQLite: LIMIT -1 = sem limite
@@ -38,32 +69,7 @@ export async function verifyPending({ limit = Infinity, force = false } = {}) {
           return; // orçamento: a linha NULL segue retomável via `ncrawl verify`
         }
         try {
-          // Heurística grátis primeiro: interstitial anti-bot que escapou é junk na certa.
-          let verdict;
-          let problems;
-          if (isBlockedPage(a.title, a.content)) {
-            verdict = 'junk';
-            problems = ['página de desafio anti-bot salva como conteúdo'];
-          } else {
-            const out = await verifyRecordLLM({
-              url: a.url,
-              kind: a.kind,
-              title: a.title,
-              blurb: a.blurb,
-              content: String(a.content || '').slice(0, VERIFY_MAX_CHARS),
-            });
-            verdict = out.verdict;
-            problems = out.problems;
-          }
-          stmts.setVerify.run({
-            id: a.id,
-            verify_status: verdict,
-            verify_notes: problems.length ? problems.join('; ') : null,
-          });
-          logEvent({
-            runId, url: a.url, stage: 'verify', status: verdict,
-            detail: problems.length ? { problems } : null,
-          });
+          const { verdict, problems } = await verifyArticleRow(a, { runId });
           byVerdict[verdict] = (byVerdict[verdict] || 0) + 1;
           done++;
           if (verdict !== 'ok') {

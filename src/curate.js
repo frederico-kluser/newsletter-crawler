@@ -3,9 +3,9 @@
 // PARALELO, e cada ITEM curado ({url,title,kind,section,blurb}) é CADASTRADO já aqui — com o
 // blurb do próprio agregador como conteúdo inicial. O fetch do alvo vira ENRIQUECIMENTO
 // (needs_enrich=1): se o alvo for raso/bloqueado (ferramentas!), a informação não se perde.
-import { stmts } from './db.js';
+import { db, stmts } from './db.js';
 import {
-  extractArticle, htmlToMarkdown, pruneForLLM, extractPublishedDate, cpuParse, capHtml,
+  extractArticleAsync, htmlToMarkdown, pruneForLLM, extractPublishedDate, cpuParse, capHtml,
   linksInHtml,
 } from './clean.js';
 import { curateRoundupItems, curateLeftoverLinks } from './llm.js';
@@ -49,6 +49,65 @@ export function chunkMarkdown(md, max = CURATE_CHUNK_CHARS) {
   }
   if (cur) chunks.push(cur);
   return chunks;
+}
+
+// Palavras que denunciam um RÓTULO DE SEÇÃO de newsletter (linha curta, com/sem emoji/negrito).
+const SECTION_WORDS =
+  /\b(in brief|code (?:&|and) tools|tools|releases?|news|elsewhere|classifieds?|jobs?|community|quick (?:bytes|hits|links)|in other news|from (?:our )?sponsor|opinion|tutorials?|articles?)\b/i;
+
+/** O título de seção desta linha (heading markdown / negrito / rótulo curto conhecido) ou null. */
+export function sectionTitleOf(line) {
+  const s = String(line || '').trim();
+  if (!s || s.length > 60) return null;
+  let m = s.match(/^#{1,6}\s+(.+?)\s*#*$/); // heading ATX (## Code & Tools)
+  if (m) return m[1].replace(/\*\*/g, '').trim();
+  m = s.match(/^\*\*(.{2,48}?):?\*\*$/); // linha só com negrito (**IN BRIEF:**)
+  if (m) return m[1].trim();
+  // "🛠 Code & Tools" solto: tira markdown, emoji/símbolo à esquerda e ':' à direita.
+  const stripped = s
+    .replace(/[*_>#`]/g, '')
+    .replace(/^[^\p{L}\p{N}]+/u, '')
+    .replace(/[:\s]+$/, '')
+    .trim();
+  if (stripped.length >= 2 && stripped.length <= 40 && SECTION_WORDS.test(stripped) && !/https?:/i.test(stripped)) {
+    return stripped;
+  }
+  return null;
+}
+
+/**
+ * Divide a edição SEMPRE por SEÇÃO (News/Tools/Releases/IN BRIEF…), 1 fatia por seção — assim
+ * há paralelismo intra-edição mesmo em issue pequena, e cada agente recebe um hint do tipo de
+ * conteúdo. O conteúdo ANTES da 1ª seção (destaques do topo, sem heading) é uma fatia "intro".
+ * Sem seções detectáveis (< 2), cai p/ chunk por tamanho. Seção maior que o teto é sub-chunkada.
+ * Retorna [{section, text}]. MAX_SECTIONS evita um flood patológico de micro-agentes.
+ */
+const MAX_SECTIONS = 12;
+export function splitIntoSections(md, { maxChars = CURATE_CHUNK_CHARS } = {}) {
+  const text = String(md || '').trim();
+  if (!text) return [];
+  const lines = text.split('\n');
+  const marks = [];
+  for (let i = 0; i < lines.length; i++) {
+    const title = sectionTitleOf(lines[i]);
+    if (title) marks.push({ idx: i, title });
+  }
+  if (marks.length < 2 || marks.length > MAX_SECTIONS) {
+    return chunkMarkdown(text, maxChars).map((c) => ({ section: null, text: c }));
+  }
+  const out = [];
+  const push = (section, body) => {
+    const b = body.trim();
+    if (b.length < 20) return;
+    if (b.length > maxChars) for (const c of chunkMarkdown(b, maxChars)) out.push({ section, text: c });
+    else out.push({ section, text: b });
+  };
+  if (marks[0].idx > 0) push(null, lines.slice(0, marks[0].idx).join('\n')); // intro (destaques)
+  for (let m = 0; m < marks.length; m++) {
+    const end = m + 1 < marks.length ? marks[m + 1].idx : lines.length;
+    push(marks[m].title, lines.slice(marks[m].idx, end).join('\n'));
+  }
+  return out.length ? out : chunkMarkdown(text, maxChars).map((c) => ({ section: null, text: c }));
 }
 
 /**
@@ -104,20 +163,22 @@ export function consolidateItems(results, { baseUrl }) {
 export async function curateRoundup({ html, url, source, runId = null, depth = 0, sinceDate = null }) {
   const ev = { runId, sourceId: source?.id ?? null, url };
   const capped = capHtml(html);
-  const art = await cpuParse(() => extractArticle(capped, url));
+  const art = await extractArticleAsync(capped, url); // JSDOM no pool de workers
   const md = art?.content
     ? htmlToMarkdown(art.content)
     : await cpuParse(() => pruneForLLM(capped));
   if (!md || md.trim().length < 200) return null; // sem corpo curável: fluxo antigo decide
 
-  // Chunks em PARALELO: mais agentes p/ o MESMO agregador; a lane llm do governador admite.
-  const chunks = chunkMarkdown(md);
+  // Por SEÇÃO em PARALELO: 1 agente por seção (News/Tools/Releases/…) — mais paralelismo intra-
+  // edição e um hint especializado por agente. A lane llm do governador admite quantos couberem.
+  const sections = splitIntoSections(md);
   const settled = await Promise.allSettled(
-    chunks.map((c, i) =>
+    sections.map((sec, i) =>
       curateRoundupItems({
-        markdown: c,
+        markdown: sec.text,
         baseUrl: url,
-        part: chunks.length > 1 ? `${i + 1}/${chunks.length}` : null,
+        section: sec.section,
+        part: sections.length > 1 ? `${i + 1}/${sections.length}` : null,
       }),
     ),
   );
@@ -125,9 +186,9 @@ export async function curateRoundup({ html, url, source, runId = null, depth = 0
   for (const s of settled) {
     if (s.status === 'fulfilled') results.push(s.value);
     else if (s.reason?.code === 'BUDGET_EXCEEDED') throw s.reason; // job volta a pending
-    else warn(`curadoria: chunk falhou (${url}): ${s.reason?.message}`);
+    else warn(`curadoria: seção falhou (${url}): ${s.reason?.message}`);
   }
-  if (!results.length) return null; // todos os chunks falharam: fluxo antigo
+  if (!results.length) return null; // todas as seções falharam: fluxo antigo
 
   const { items, skipped, issueDateRaw } = consolidateItems(results, { baseUrl: url });
 
@@ -149,7 +210,8 @@ export async function curateRoundup({ html, url, source, runId = null, depth = 0
   {
     const host = hostOf(url);
     const seenBody = new Set();
-    for (const l of linksInHtml(capped, url)) {
+    const bodyLinks = await cpuParse(() => linksInHtml(capped, url)); // cheerio: cede o loop
+    for (const l of bodyLinks) {
       const abs = normalizeUrl(l.url, url);
       if (!abs || !/^https?:/i.test(abs) || hostOf(abs) === host) continue;
       if (seenBody.has(abs) || emitted.has(abs)) continue;
@@ -220,51 +282,58 @@ export async function curateRoundup({ html, url, source, runId = null, depth = 0
   let saved = 0;
   let dup = 0;
   let enqueued = 0;
-  for (const it of items) {
-    // Conteúdo inicial = título + blurb DO AGREGADOR (fica como registro definitivo se o alvo
-    // for raso/bloqueado). Título no hash: releases recorrentes repetem o blurb entre semanas.
-    const content = it.blurb ? `${it.title} — ${it.blurb}` : it.title;
-    const res = stmts.insertArticle.run({
-      source_id: source?.id ?? null,
-      url: it.url,
-      title: it.title,
-      content,
-      content_hash: sha256(content),
-      published_at: issueDate || null,
-      run_id: runId,
-      kind: it.kind,
-      issue_url: url,
-      section: it.section,
-      blurb: it.blurb,
-      content_source: 'aggregator',
-      cleaned: 0,
-      needs_enrich: 1,
-    });
-    if (res.changes > 0) {
-      saved++;
-      byKind[it.kind] = (byKind[it.kind] || 0) + 1;
-      logEvent({
-        ...ev, url: it.url,
-        stage: 'item', status: 'saved',
-        detail: { kind: it.kind, section: it.section, title: it.title, issue: url },
+  // Escritas em LOTE: cadastro de todos os itens + enfileiramentos numa ÚNICA transação (o loop
+  // é síncrono; better-sqlite3 exige transação síncrona). Corta o fsync por item. logEvent aqui
+  // só empilha no buffer (não escreve), então é seguro dentro da transação.
+  const applyItems = db.transaction(() => {
+    for (const it of items) {
+      // Conteúdo inicial = título + blurb DO AGREGADOR (fica como registro definitivo se o alvo
+      // for raso/bloqueado). Título no hash: releases recorrentes repetem o blurb entre semanas.
+      const content = it.blurb ? `${it.title} — ${it.blurb}` : it.title;
+      const res = stmts.insertArticle.run({
+        source_id: source?.id ?? null,
+        url: it.url,
+        title: it.title,
+        content,
+        content_hash: sha256(content),
+        published_at: issueDate || null,
+        run_id: runId,
+        kind: it.kind,
+        issue_url: url,
+        section: it.section,
+        blurb: it.blurb,
+        content_source: 'aggregator',
+        cleaned: 0,
+        needs_enrich: 1,
       });
-    } else {
-      dup++;
-      logEvent({ ...ev, url: it.url, stage: 'item', status: 'dup', detail: { issue: url } });
-      // Registro antigo ainda sem corpo (run anterior falhou)? Re-ativa o job de enriquecimento.
-      const prev = stmts.getArticleFullByUrl.get(it.url);
-      if (prev?.needs_enrich) stmts.requeueUrl.run(it.url);
-      else continue; // já completo: nem re-enfileira
+      if (res.changes > 0) {
+        saved++;
+        byKind[it.kind] = (byKind[it.kind] || 0) + 1;
+        logEvent({
+          ...ev, url: it.url,
+          stage: 'item', status: 'saved',
+          detail: { kind: it.kind, section: it.section, title: it.title, issue: url },
+        });
+      } else {
+        dup++;
+        logEvent({ ...ev, url: it.url, stage: 'item', status: 'dup', detail: { issue: url } });
+        // Registro antigo ainda sem corpo (run anterior falhou)? Re-ativa o job de enriquecimento.
+        const prev = stmts.getArticleFullByUrl.get(it.url);
+        if (prev?.needs_enrich) stmts.requeueUrl.run(it.url);
+        else continue; // já completo: nem re-enfileira
+      }
+      if (stmts.enqueue.run(it.url, 'article', url, source?.id ?? null, depth + 1).changes > 0) enqueued++;
     }
-    if (stmts.enqueue.run(it.url, 'article', url, source?.id ?? null, depth + 1).changes > 0) enqueued++;
-  }
+  });
+  applyItems();
   for (const [k, n] of Object.entries(skipped)) {
     if (n > 0) logEvent({ ...ev, stage: 'item', status: 'skipped', detail: { kind: k, count: n, issue: url } });
   }
 
   const summary = {
     itemsTotal: items.length, saved, dup, enqueued, byKind, skipped, recovered,
-    chunks: chunks.length, issueDate: issueDate || null,
+    sections: sections.length, sectionNames: sections.map((s) => s.section).filter(Boolean),
+    issueDate: issueDate || null,
   };
   logEvent({ ...ev, stage: 'curate', status: 'ok', detail: summary });
   debug(`curadoria ${url}: ${JSON.stringify(summary)}`);

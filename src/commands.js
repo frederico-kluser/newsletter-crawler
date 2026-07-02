@@ -7,7 +7,7 @@ import { stmts, wipeAll } from './db.js';
 import {
   EXPORT_DIR, DB_PATH, CONCURRENCY, MAX_RETRIES, HAS_LLM, CLASSIFY_AFTER_CRAWL, SUMMARIZE_AFTER_CRAWL,
   SEARCH_MODE_A_CONFIRM, OPENROUTER_API_KEY, ENV_PATH, BUDGET_USD, MAX_PARALLEL, RAM_MAX_PCT,
-  AGGRESSIVE_DEFAULT, VERIFY_AFTER_CRAWL,
+  AGGRESSIVE_DEFAULT, VERIFY_AFTER_CRAWL, VERIFY_STREAMING, JOB_TIMEOUT_MS,
   defaultParallel, loadSources, addSourceToConfig,
 } from './config.js';
 import {
@@ -17,15 +17,40 @@ import { beginRun, endRun, shouldStop, getBudgetState } from './budget.js';
 import { processJob, enqueue, upsertSource } from './crawl.js';
 import { classifyPending } from './classify.js';
 import { summarizePending } from './summarize.js';
-import { verifyPending } from './verify.js';
+import { verifyPending, verifyArticleRow } from './verify.js';
 import { runSearch, getSearchProgress } from './search.js';
 import { closeBrowser } from './fetch.js';
+import { closeParsePool } from './parse-pool.js';
+import { logEvent, flushEvents } from './events.js';
 import { startWebServer } from './web.js';
 import { probeOpenRouterKey, upsertEnvVar, maskKey } from './keys.js';
-import { slugify, normalizeUrl, parseDate, hostOf, log, warn, errorLog } from './util.js';
+import { slugify, normalizeUrl, parseDate, hostOf, log, warn, errorLog, debug } from './util.js';
 
 // Re-export p/ a UI importar de um lugar só (igual getStatus).
 export { getSearchProgress };
+
+/**
+ * Deadline por job: corre `promise` contra um timeout de `ms`; estourou, REJEITA com
+ * code JOB_TIMEOUT (o dispatch mantém a ficha com o blurb e marca "enriquecer depois"). A
+ * promise abandonada segue rodando ao fundo, mas suas escritas são idempotentes
+ * (INSERT OR IGNORE / UPDATE), então uma conclusão tardia é inofensiva. ms<=0 desliga.
+ * Exportado p/ teste (padrão do repo, como createBreaker/createHostGate).
+ */
+export function withTimeout(promise, ms) {
+  if (!ms || ms <= 0) return promise;
+  return new Promise((resolve, reject) => {
+    const t = setTimeout(() => {
+      const e = new Error(`job excedeu o deadline de ${ms}ms`);
+      e.code = 'JOB_TIMEOUT';
+      reject(e);
+    }, ms);
+    t.unref?.();
+    promise.then(
+      (v) => { clearTimeout(t); resolve(v); },
+      (err) => { clearTimeout(t); reject(err); },
+    );
+  });
+}
 
 /** Telemetria viva (governador + orçamento) p/ o painel da UI pollar junto do getStatus. */
 export function getRunTelemetry() {
@@ -58,6 +83,7 @@ async function runWithLimits({ command, flags = {}, profile }, fn) {
     failed = true;
     throw e;
   } finally {
+    flushEvents(); // grava o que sobrou no buffer de eventos (escritas em lote) antes de fechar
     endRun(failed ? 'failed' : undefined);
     stopGovernor();
   }
@@ -162,6 +188,10 @@ async function crawlRun(flags) {
       const r = stmts.refreshListing.run(src.base_url); // base_url normalizada = url no frontier
       if (r.changes) log(`refresh: ${s.url} re-enfileirado (re-visita a listagem)`);
     }
+    // "Enriquecer depois": re-ativa jobs de itens que ficaram só com o blurb (needs_enrich=1),
+    // inclusive os cortados por deadline num run anterior — o dado ganha o corpo do alvo agora.
+    const re = stmts.requeueNeedsEnrichForSource.run(src.id);
+    if (re.changes) log(`enriquecer: ${re.changes} item(ns) só-blurb re-enfileirado(s) p/ pegar o corpo do alvo`);
   }
 
   // --since <YYYY-MM-DD|ISO>: piso de data (coleta do mais novo até esse piso e para). Aplica
@@ -196,16 +226,40 @@ async function crawlRun(flags) {
   // (as lanes de fetch/render dentro do job limitam o trabalho pesado).
   const capacity = () =>
     CONCURRENCY > 0 ? Math.min(CONCURRENCY, jobsCapacity()) : jobsCapacity();
-  const inflight = new Set();
+  const inflight = new Set(); // jobs (limitados por fetch+render)
+  const verifying = new Set(); // verificação em streaming (lane llm; NÃO conta na capacity)
   let processedArticles = 0;
   let budgetRequeued = 0;
+  let timedOut = 0;
+
+  // Verificação em STREAMING: logo após salvar/enriquecer uma ficha, verifica na folga da lane
+  // llm (o sweep final segue como rede de segurança p/ os NULL restantes). Rastreada num set à
+  // parte p/ o loop esperar por ela sem roubar capacidade de fetch/render.
+  const streamVerify = (verifyUrl) => {
+    if (!(VERIFY_STREAMING && HAS_LLM && verifyUrl) || shouldStop()) return;
+    const p = (async () => {
+      try {
+        const a = stmts.getArticleFullByUrl.get(verifyUrl);
+        if (!a || a.verify_status != null) return; // já verificada (ou sumiu): pula
+        await verifyArticleRow(a, { runId });
+      } catch (e) {
+        if (e?.code !== 'BUDGET_EXCEEDED') debug(`verify streaming falhou (${verifyUrl}): ${e.message}`);
+      }
+    })().finally(() => verifying.delete(p));
+    verifying.add(p);
+  };
 
   const dispatch = (job) => {
     const p = (async () => {
       try {
-        await processJob(job, opts);
+        // Deadline SÓ p/ jobs de artigo (o "retardatário" é um fetch/enriquecimento lento). Jobs
+        // de listing/roundup fazem trabalho de LLM legítimo e mais longo (curadoria por seções +
+        // cobertura), já limitado por LLM_TIMEOUT_MS/orçamento — cortá-los abortaria a curadoria.
+        const deadline = job.kind === 'article' ? JOB_TIMEOUT_MS : 0;
+        const res = await withTimeout(processJob(job, opts), deadline);
         if (job.kind === 'article') processedArticles++;
         stmts.finish.run('done', job.url);
+        if (res?.verifyUrl) streamVerify(res.verifyUrl); // salvou/enriqueceu -> verifica já
       } catch (e) {
         if (e?.code === 'BUDGET_EXCEEDED') {
           // Orçamento: devolve à fila SEM consumir retry — retomável no próximo run. O loop
@@ -214,10 +268,25 @@ async function crawlRun(flags) {
           budgetRequeued++;
           return;
         }
+        if (e?.code === 'JOB_TIMEOUT') {
+          timedOut++;
+          logEvent({ runId, url: job.url, stage: 'job', status: 'timeout', detail: { ms: JOB_TIMEOUT_MS, kind: job.kind } });
+          const row = job.kind === 'article' ? stmts.getArticleFullByUrl.get(normalizeUrl(job.url) || job.url) : null;
+          if (row?.needs_enrich) {
+            // A ficha JÁ existe com o blurb do agregador: encerra o job (não re-tenta agora, senão
+            // trava de novo) e deixa needs_enrich=1 — o próximo crawl re-enfileira p/ enriquecer.
+            stmts.finish.run('done', job.url);
+            log(`job estourou ${JOB_TIMEOUT_MS}ms — ficha mantida com o blurb (enriquece depois): ${job.url.slice(0, 70)}`);
+            return;
+          }
+          // avulso/listing/roundup: sem ficha a preservar — trata como falha comum (retry/fail).
+          errorLog(`job estourou o deadline (${job.kind} ${job.url})`);
+        } else {
+          errorLog(`job falhou (${job.kind} ${job.url}): ${e.message}`);
+        }
         const r = stmts.getRetries.get(job.url);
         if ((r?.retries ?? 0) < MAX_RETRIES) stmts.bumpRetry.run(job.url);
         else stmts.finish.run('failed', job.url);
-        errorLog(`job falhou (${job.kind} ${job.url}): ${e.message}`);
       }
     })().finally(() => inflight.delete(p));
     inflight.add(p);
@@ -229,12 +298,14 @@ async function crawlRun(flags) {
       if (!job) break;
       dispatch(job);
     }
-    if (inflight.size === 0) break; // nada rodando e nada a reivindicar => fim
-    await Promise.race(inflight);
+    if (inflight.size === 0 && verifying.size === 0) break; // nada rodando e nada a reivindicar => fim
+    await Promise.race([...inflight, ...verifying]);
   }
-  await Promise.allSettled(inflight);
+  await Promise.allSettled([...inflight, ...verifying]);
   await closeBrowser();
+  await closeParsePool(); // encerra os workers de parsing (o pós-crawl não parseia HTML)
   if (budgetRequeued) log(`orçamento: ${budgetRequeued} jobs devolvidos à fila (retomáveis no próximo run)`);
+  if (timedOut) log(`deadline: ${timedOut} job(s) cortado(s) em ${JOB_TIMEOUT_MS}ms (ficha mantida com o blurb; enriquece no próximo crawl)`);
   log('crawl concluído.');
 
   // Registra na run quantos artigos novos ela descobriu (o delta desta execução).

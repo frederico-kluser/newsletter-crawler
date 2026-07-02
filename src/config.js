@@ -121,6 +121,27 @@ export const CLEAN_MAX_CHARS = Number(process.env.CLEAN_MAX_CHARS || 20000);
 export const VERIFY_AFTER_CRAWL = process.env.VERIFY_AFTER_CRAWL !== 'false';
 export const VERIFY_MAX_CHARS = Number(process.env.VERIFY_MAX_CHARS || 4000);
 export const VERIFY_CONCURRENCY = envIntOr0('VERIFY_CONCURRENCY');
+// Verificação em STREAMING: verifica cada ficha logo após salvar/enriquecer (aproveitando a
+// folga da lane llm durante o crawl), em vez de só num sweep no fim. O sweep final segue ligado
+// como rede de segurança (idempotente, NULL-only) p/ os blurb-only que nunca enriqueceram.
+export const VERIFY_STREAMING = process.env.VERIFY_STREAMING !== 'false';
+
+// ---- worker pool de parsing (isola o JSDOM do processo principal) ----
+// O parse JSDOM/Readability (causa de um SIGSEGV nativo raro do parser de CSS do JSDOM) sai do
+// processo principal p/ um pool de workers: um crash mata só o worker, o pool respawna e a task
+// resolve p/ um default seguro (o chamador degrada). Também libera paralelismo de CPU real.
+export const PARSE_WORKERS =
+  envIntOr0('PARSE_WORKERS') || Math.max(1, Math.min(4, os.availableParallelism() - 1));
+// Timeout por task de parse: um JSDOM travado não segura um worker p/ sempre (mata e respawna).
+export const PARSE_TIMEOUT_MS = Number(process.env.PARSE_TIMEOUT_MS || 30000);
+// =false força o caminho INLINE (parse no processo principal, comportamento antigo) — útil em
+// ambientes sem worker_threads ou p/ depurar. O pool também cai p/ inline sozinho se não subir.
+export const PARSE_IN_WORKERS = process.env.PARSE_IN_WORKERS !== 'false';
+
+// ---- deadline por job (o retardatário não segura o fim da execução) ----
+// Um job que passa deste tempo é CORTADO (0 = sem deadline). Item curado mantém o blurb do
+// agregador (needs_enrich=1) e é re-enfileirado p/ enriquecer num próximo crawl; nada se perde.
+export const JOB_TIMEOUT_MS = Number(process.env.JOB_TIMEOUT_MS || 90000);
 
 // ---- paralelismo global + orçamento (governor/budget) ----
 // Teto GLOBAL de operações simultâneas (--parallel). Deriva dos núcleos como proxy do porte

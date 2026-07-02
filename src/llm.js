@@ -399,8 +399,23 @@ const curateZ = z.object({
     }),
   ),
 });
-export async function curateRoundupItems({ markdown, baseUrl, part = null }) {
+// Hint por SEÇÃO: o tipo de conteúdo mais provável de cada seção, p/ o agente especializar o
+// kind. É só um viés (o agente decide item a item), não uma regra dura.
+function sectionHint(section) {
+  if (!section) return '';
+  const s = String(section).toLowerCase();
+  let tip = '';
+  if (/release|version|changelog/.test(s)) tip = 'Tende a ser kind "release" (novas versões de libs/ferramentas).';
+  else if (/tool|code/.test(s)) tip = 'Tende a ser kind "tool" (bibliotecas/ferramentas/serviços a usar).';
+  else if (/brief|news|elsewhere|other news|community/.test(s)) tip = 'Tende a ser kind "news" (notícias curtas).';
+  else if (/classified|job/.test(s)) tip = 'Tende a ser kind "job" (vagas/classificados) — normalmente NÃO se salva.';
+  else if (/sponsor/.test(s)) tip = 'Tende a ser kind "sponsor" (anúncio pago) — NÃO se salva.';
+  return `Esta parte é a seção «${section}» da edição. ${tip}`.trim();
+}
+
+export async function curateRoundupItems({ markdown, baseUrl, section = null, part = null }) {
   const { model, effort } = stageModel('curate');
+  const hint = sectionHint(section);
   const out = await callJSON({
     model,
     reasoning: { effort },
@@ -412,7 +427,9 @@ export async function curateRoundupItems({ markdown, baseUrl, part = null }) {
       'total ao texto do agregador. Responda apenas com JSON.',
     user:
       `Edição/roundup de newsletter (URL ${baseUrl}${part ? `, parte ${part}` : ''}) em markdown. ` +
+      (hint ? `${hint}\n` : '') +
       'Extraia TODOS os itens curados como {issue_date, items:[{url,title,kind,section,blurb}]}.\n' +
+      (section ? `Use "${section}" como section dos itens desta parte, salvo se o texto indicar outra.\n` : '') +
       'REGRAS:\n' +
       '- Um item = uma notícia/ferramenta/release apresentada pela edição. Uma edição típica tem 15–25 ' +
       'itens: TODOS os DESTAQUES do topo (cada bloco título+comentário é um item — não pule os vizinhos ' +

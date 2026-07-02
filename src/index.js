@@ -3,6 +3,7 @@
 // dispatch direto das flags/comandos (comportamento inalterado). Os comandos vivem em commands.js.
 import { db } from './db.js';
 import { closeBrowser } from './fetch.js';
+import { closeParsePool } from './parse-pool.js';
 import { errorLog } from './util.js';
 import {
   printStatus, cmdCrawl, cmdAdd, cmdReset, cmdExport, cmdClassify, cmdSummarize, cmdSearch, cmdKey,
@@ -139,5 +140,6 @@ try {
 } catch (e) {
   errorLog(e.stack || e.message);
   await closeBrowser();
+  await closeParsePool();
   process.exit(1);
 }

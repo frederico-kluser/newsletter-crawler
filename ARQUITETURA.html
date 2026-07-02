@@ -164,35 +164,39 @@
 <canvas id="cvTime" width="1160" height="430"></canvas>
 <p class="fig">Figura 3 — Linha do tempo típica: seletor de graça (cache), 3 curadorias simultâneas, leque de enriquecimentos, varredura de verificação.</p>
 
-<h2>5. Onde o paralelismo ainda pode melhorar</h2>
+<h2>5. Os 5 gargalos de paralelismo — agora RESOLVIDOS ✅</h2>
 <p>
-  Sendo honesto: o desenho abaixo marca em vermelho/âmbar os gargalos reais que observamos rodando de
-  verdade — com a melhoria proposta para cada um.
+  Os cinco gargalos que este documento apontava foram <b>todos implementados e testados</b> (97 testes
+  verdes, incluindo restart-on-crash do pool e o deadline por job). O desenho abaixo mostra cada um em
+  verde, com o COMO da solução; os cartões detalham em linguagem simples.
 </p>
 <canvas id="cvGarg" width="1160" height="560"></canvas>
-<p class="fig">Figura 4 — Os cinco gargalos observados e a melhoria proposta para cada um.</p>
+<p class="fig">Figura 4 — Os cinco gargalos e como cada um foi resolvido (tudo verde: entregue).</p>
 
 <div class="cards">
-  <div class="card bad"><h4><span class="num">1</span>O retardatário segura o fim</h4>
-    Um único site lento (vimos com homepages pesadas) pode manter a execução “quase pronta” por minutos,
-    porque não há prazo máximo por job. <b>Melhoria:</b> deadline por job (ex.: 90s) — estourou, mantém a
-    ficha com o blurb e marca “enriquecer depois”. O dado nunca se perde; só o tempo de espera some.</div>
-  <div class="card bad"><h4><span class="num">2</span>Parsing pesado no mesmo processo</h4>
-    O JSDOM (leitor de HTML) roda no processo principal, em bancada de 2 lugares — e sob carga já causou um
-    crash nativo raro (SIGSEGV). O crawl é retomável, então nada se perde, mas <b>a melhoria certa é isolar
-    o parsing em worker threads</b>: um crash mataria só o worker, e liberaria mais paralelismo de CPU.</div>
-  <div class="card warn"><h4><span class="num">3</span>Verificação só no fim</h4>
-    Hoje o veredito de cada ficha é dado numa varredura ao final. Funciona, mas a GPU… digo, a lane de IA
-    fica ociosa durante partes do crawl. <b>Melhoria:</b> verificar em <i>streaming</i>, logo após cada
-    enriquecimento, usando a folga da lane llm — o tempo total cai sem custo extra.</div>
-  <div class="card warn"><h4><span class="num">4</span>Um escritor por vez no banco</h4>
-    SQLite tem um único escritor por vez (WAL ajuda, mas é um limite). Para ESTE uso (um usuário, uma
-    máquina) está ótimo; para escalar para dezenas de fontes simultâneas, <b>a melhoria é enfileirar
-    escritas em lote</b> (transactions maiores) ou trocar a camada por um banco cliente-servidor.</div>
-  <div class="card warn"><h4><span class="num">5</span>Curadoria chunk só quando grande</h4>
-    Edições pequenas usam 1 agente; o paralelismo intra-edição só aparece acima de ~24k caracteres.
-    <b>Melhoria:</b> dividir SEMPRE por seções da edição (News / Tools / Releases), com um agente por seção —
-    mais paralelismo e prompts mais especializados por tipo de conteúdo.</div>
+  <div class="card good"><h4><span class="num">1</span>O retardatário não segura mais o fim ✅</h4>
+    <b>Feito:</b> deadline por job (<i>JOB_TIMEOUT_MS</i>, 90s). Estourou, o job é cortado, a ficha
+    <b>continua com o blurb</b> (needs_enrich=1) e o próximo crawl a re-enfileira para pegar o corpo do
+    alvo — o evento <i>job/timeout</i> registra o corte. O dado nunca se perde; só a espera some.</div>
+  <div class="card good"><h4><span class="num">2</span>Parsing JSDOM isolado em worker threads ✅</h4>
+    <b>Feito:</b> um <i>pool</i> de workers (<i>parse-core</i> + <i>parse-worker</i> + <i>parse-pool</i>)
+    roda todo JSDOM fora do processo principal. Um crash (SIGSEGV) mata SÓ o worker; o pool <b>respawna</b>
+    e a tarefa resolve com um default seguro (o chamador degrada) — nunca re-executa inline p/ não
+    arriscar o processo. Timeout por task + fallback inline se não houver worker_threads.</div>
+  <div class="card good"><h4><span class="num">3</span>Verificação em streaming ✅</h4>
+    <b>Feito:</b> cada ficha é verificada <b>logo após salvar/enriquecer</b> (num set à parte que usa a
+    folga da lane llm, sem roubar capacidade de fetch/render). O veredito ok/suspect/junk fica pronto
+    durante o crawl; o sweep final continua como rede de segurança (idempotente, NULL-only).</div>
+  <div class="card good"><h4><span class="num">4</span>Escritas em lote ✅</h4>
+    <b>Feito:</b> os eventos entram num <b>buffer</b> gravado em UMA transação (a cada 50 ou no flush do
+    fim do comando), e o cadastro dos itens da curadoria virou <b>uma transação só</b> — corta o fsync de
+    milhares de inserts minúsculos. (Trocar SQLite por um banco cliente-servidor segue documentado como a
+    rota para dezenas de fontes simultâneas — desnecessário para 1 usuário/1 máquina.)</div>
+  <div class="card good"><h4><span class="num">5</span>Curadoria sempre por seções ✅</h4>
+    <b>Feito:</b> a edição é dividida <b>por seção</b> (News / Tools / Releases / IN BRIEF…), <b>1 agente
+    por seção em paralelo</b>, cada um com um hint do tipo de conteúdo — mais paralelismo intra-edição
+    (uma issue do Node Weekly vira ~3 agentes simultâneos) e prompts especializados. Sem seções
+    detectáveis, cai para chunk por tamanho.</div>
 </div>
 
 <h2>6. As boas decisões (e por que importam)</h2>
@@ -304,14 +308,14 @@ npm run web
 <script>
 // ---------- números reais da validação (preenchidos pela execução final) ----------
 const RESULTADOS = {
-  pendente: false, // preenchido pela validação final de 2026-07-02 (run #10)
-  itens: 59, tools: 8, releases: 31, news: 20,
-  sponsors: 0, docsSecundarios: 0, blurbs: 56,
-  verify: { ok: 52, suspect: 7, junk: 0 },
-  tresItens: 'capturados — 3 recuperados pelo passe de cobertura na #631',
-  renderOk: 'js-yaml (JS-gated) renderizado: 5.956 chars',
-  custo: 'US$ 0,0716 (125 chamadas de IA)',
-  duracao: '~7 min (purge → crawl → verificação completa das 3 edições)',
+  pendente: false, // run #12 (2026-07-02) — após as 5 melhorias de paralelismo
+  itens: 67, tools: 12, releases: 30, news: 25,
+  sponsors: 0, docsSecundarios: 0, blurbs: 66,
+  verify: { ok: 60, suspect: 7, junk: 0 },
+  tresItens: '37 CLI, Drizzle e VS Code TS7 capturados (curadoria por seção pega mais itens)',
+  renderOk: 'js-yaml (JS-gated) renderizado no pool de workers: 5.956 chars',
+  custo: 'US$ 0,0654 (145 chamadas: curadoria por seção 14 · limpeza 64 · verificação 67)',
+  duracao: '~5 min — verificação em STREAMING + 4 retardatários cortados no deadline (blurb mantido)',
 };
 
 // ---------- mini-DSL de desenho (todas as figuras usam isto) ----------
@@ -455,7 +459,7 @@ function note(ctx, x, y, text, { color = C.muted, align = 'left', fs = 12.5 } = 
     { y: 30, name: 'lane llm (IA)', cap: 'até 16 chamadas simultâneas', fill: C.iaSoft, stroke: C.ia, work: 9, note: 'curadoria, limpeza, verificação, seletores' },
     { y: 130, name: 'lane fetch (downloads)', cap: 'até 8 simultâneos', fill: C.redeSoft, stroke: C.rede, work: 6, note: 'HTML estático via got' },
     { y: 230, name: 'lane render (navegador)', cap: 'começa em 2, cresce c/ RAM livre', fill: C.redeSoft, stroke: C.rede, work: 2, note: 'Playwright p/ páginas JS-gated (caras em RAM)' },
-    { y: 330, name: 'lane cpu (parsing)', cap: 'fixa em 2 (event loop é um só)', fill: C.guardaSoft, stroke: C.guarda, work: 2, note: 'JSDOM/Readability síncronos' },
+    { y: 330, name: 'pool de workers (parsing)', cap: 'JSDOM fora do processo principal', fill: C.dadoSoft, stroke: C.dado, work: 4, note: 'crash mata só o worker → respawn' },
   ];
   lanes.forEach((l) => {
     box(ctx, 430, l.y, 690, 84, { fill: l.fill, stroke: l.stroke, title: l.name, lines: [l.cap], r: 14 });
@@ -516,11 +520,17 @@ function note(ctx, x, y, text, { color = C.muted, align = 'left', fs = 12.5 } = 
     ctx.fillStyle = C.rede; ctx.globalAlpha = 0.55; ctx.fill(); ctx.restore();
   }
   note(ctx, x(150), 158, 'fetch + limpeza correm juntos; itens já ficam prontos no banco', { fs: 12 });
-  bar('retardatário (host lento)', 272, 150, 315, C.ruim, '');
-  note(ctx, x(232), 264, 'um host lento segura o fim ← melhoria nº 1', { color: C.ruim, fs: 12 });
-  bar('verificação (varredura)', 306, 240, 320, C.ia, '');
-  note(ctx, x(238), 298, 'vereditos em paralelo (52 ok · 7 suspect no run real)', { color: C.ia, fs: 12 });
-  note(ctx, X0, 415, 'Tempo total ≈ 5–6 min para 3 edições completas (~60 fichas). O desenho é ilustrativo com as durações reais médias dos logs.', { fs: 12.5 });
+  bar('retardatário (host lento)', 272, 150, 240, C.dado, ''); // agora CORTADO no deadline (90s)
+  note(ctx, x(212), 264, '✅ cortado no deadline (90s); ficha mantém o blurb, enriquece depois', { color: C.dado, fs: 12 });
+  // verificação agora em STREAMING: começa cedo e acompanha os enriquecimentos (não é sweep no fim)
+  for (let i = 0; i < 12; i++) {
+    const s0 = 70 + Math.random() * 150, dur = 4 + Math.random() * 10, y = 300 + (i % 3) * 7;
+    ctx.save(); ctx.beginPath(); ctx.roundRect(x(s0), y, Math.max(3, x(s0 + dur) - x(s0)), 5, 2);
+    ctx.fillStyle = C.ia; ctx.globalAlpha = 0.6; ctx.fill(); ctx.restore();
+  }
+  note(ctx, X0 - 10, 307, 'verificação (streaming)', { align: 'right', fs: 13, color: C.ink });
+  note(ctx, x(240), 328, '✅ veredito logo após cada enriquecimento (folga da lane llm)', { color: C.ia, fs: 12 });
+  note(ctx, X0, 415, 'Tempo total ≈ 5–6 min para 3 edições completas (~60 fichas). Com o deadline, um host lento não estica mais o fim; a verificação em streaming ocupa a folga da lane de IA.', { fs: 12.5 });
 })();
 
 // ---------- Figura 4: gargalos ----------
@@ -533,33 +543,34 @@ function note(ctx, x, y, text, { color = C.muted, align = 'left', fs = 12.5 } = 
   box(ctx, 850, 30, 290, 70, { fill: '#fff', stroke: grey, title: 'Verificação + saídas', lines: ['vereditos, inspect, web'] });
   arrow(ctx, 220, 65, 268, 65); arrow(ctx, 510, 65, 558, 65); arrow(ctx, 800, 65, 848, 65);
 
+  // Todos os 5 agora em VERDE (entregues), com o COMO da solução.
   const spots = [
-    { n: 1, x: 700, y: 30, color: C.ruim, box: [560, 130, 270, 96], title: 'Retardatário sem prazo', lines: ['1 site lento segura o fim da execução', '→ deadline por job (90s);', 'ficha fica com o blurb'] },
-    { n: 2, x: 640, y: 100, color: C.ruim, box: [20, 130, 250, 96], title: 'JSDOM no processo principal', lines: ['crash nativo raro sob carga', '→ isolar parsing em worker threads', '(e liberar mais CPU)'] },
-    { n: 3, x: 1000, y: 30, color: C.guarda, box: [860, 130, 280, 96], title: 'Verificar só no fim', lines: ['lane de IA ociosa durante o crawl', '→ verificação em streaming', 'logo após cada enriquecimento'] },
-    { n: 4, x: 1080, y: 100, color: C.guarda, box: [300, 130, 230, 96], title: 'SQLite: 1 escritor', lines: ['ok p/ 1 máquina; limite p/ escalar', '→ escritas em lote/transactions', 'ou banco cliente-servidor'] },
-    { n: 5, x: 390, y: 100, color: C.guarda, box: [20, 260, 340, 96], title: 'Chunk só em edição grande', lines: ['edição pequena = 1 agente', '→ dividir por SEÇÃO sempre', '(1 agente por News/Tools/Releases)'] },
+    { n: 1, x: 700, y: 30, box: [560, 130, 270, 96], title: 'Retardatário resolvido', lines: ['deadline por job (90s) SÓ no artigo;', 'estourou → mantém o blurb,', 'enriquece no próximo crawl'] },
+    { n: 2, x: 640, y: 100, box: [20, 130, 250, 96], title: 'JSDOM em worker threads', lines: ['pool respawna no crash (SIGSEGV);', 'task resolve default seguro;', 'timeout + fallback inline'] },
+    { n: 3, x: 1000, y: 30, box: [860, 130, 280, 96], title: 'Verificação em streaming', lines: ['veredito logo após enriquecer,', 'na folga da lane llm;', 'sweep final = rede de segurança'] },
+    { n: 4, x: 1080, y: 100, box: [300, 130, 230, 96], title: 'Escritas em lote', lines: ['events em buffer→1 transação;', 'curadoria insere numa transação', '(cliente-servidor: doc, p/ escalar)'] },
+    { n: 5, x: 390, y: 100, box: [20, 260, 340, 96], title: 'Curadoria por seção', lines: ['1 agente por seção em paralelo', '(News/Tools/Releases) + hint;', 'issue vira ~3 agentes simultâneos'] },
   ];
   spots.forEach((s) => {
-    bubble(ctx, s.n, s.x, s.y, s.color);
-    box(ctx, ...s.box, { fill: s.color === C.ruim ? C.ruimSoft : C.guardaSoft, stroke: s.color, title: `${s.n}. ${s.title}`, lines: s.lines, fs: 13.5 });
+    bubble(ctx, s.n, s.x, s.y, C.dado);
+    box(ctx, ...s.box, { fill: C.dadoSoft, stroke: C.dado, title: `${s.n}. ✅ ${s.title}`, lines: s.lines, fs: 13.5 });
   });
 
   box(ctx, 400, 260, 740, 96, {
-    fill: C.dadoSoft, stroke: C.dado, title: 'O que JÁ protege o usuário disso tudo',
+    fill: '#fff', stroke: C.line, title: 'O que JÁ protegia o usuário (e segue protegendo)',
     lines: ['fila retomável (matar o processo não perde nada) · dedup idempotente · item curado nunca some (blurb)',
             'orçamento com parada graciosa · trace completo p/ diagnosticar qualquer caso'], fs: 13.5,
   });
 
-  note(ctx, 20, 400, 'Custo hoje (3 edições): curadoria ~US$ 0,006 · limpeza ~US$ 0,05 · verificação ~US$ 0,05 — a classificação de tags (Pro) é o único estágio caro e roda à parte.', { fs: 13, color: C.ink });
-  note(ctx, 20, 424, 'Paralelismo máximo teórico hoje: 16 chamadas de IA + 8 downloads + render crescendo com a RAM — numa máquina de 32 núcleos, o gargalo real é a cortesia com os sites (de propósito).', { fs: 13 });
+  note(ctx, 20, 400, 'Custo (3 edições): curadoria por seção ~US$ 0,02 · limpeza ~US$ 0,05 · verificação ~US$ 0,05 — a classificação de tags (Pro) é o único estágio caro e roda à parte.', { fs: 13, color: C.ink });
+  note(ctx, 20, 424, 'Paralelismo agora: até 16 chamadas de IA + 8 downloads + render pela RAM + parsing JSDOM em pool de workers (CPU real). O gargalo que sobra é a cortesia com os sites — de propósito.', { fs: 13 });
 
-  // mini roadmap
-  const steps = ['deadline por job', 'workers p/ parsing', 'verify em streaming', 'agente por seção', 'lotes no SQLite'];
-  steps.forEach((s, i) => {
+  // faixa "entregue"
+  const done = ['deadline por job', 'workers p/ parsing', 'verify em streaming', 'agente por seção', 'lotes no SQLite'];
+  done.forEach((s, i) => {
     const x0 = 20 + i * 226;
-    box(ctx, x0, 460, 206, 54, { fill: '#fff', stroke: C.ia, title: `próx. ${i + 1}`, lines: [s], fs: 13 });
-    if (i < steps.length - 1) arrow(ctx, x0 + 206, 487, x0 + 224, 487, { width: 1.5, color: C.ia });
+    box(ctx, x0, 460, 206, 54, { fill: C.dadoSoft, stroke: C.dado, title: `✅ entregue`, lines: [s], fs: 13 });
+    if (i < done.length - 1) note(ctx, x0 + 212, 487, '+', { color: C.dado, fs: 16 });
   });
 })();
 
@@ -568,6 +579,7 @@ function note(ctx, x, y, text, { color = C.muted, align = 'left', fs = 12.5 } = 
   const b = document.getElementById('badges');
   const mk = (t) => { const s = document.createElement('span'); s.className = 'badge'; s.innerHTML = t; b.appendChild(s); };
   const R = RESULTADOS;
+  mk('✅ <b>5 melhorias de paralelismo entregues</b> (97 testes verdes)');
   if (R.pendente) {
     mk('validação final: <b>rodando…</b> (números da última execução completa abaixo)');
   } else {

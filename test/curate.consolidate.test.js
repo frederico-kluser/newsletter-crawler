@@ -8,7 +8,8 @@ import path from 'node:path';
 import os from 'node:os';
 
 process.env.NC_HOME = mkdtempSync(path.join(os.tmpdir(), 'nc-curate-'));
-const { chunkMarkdown, consolidateItems, isRealRecoveredItem } = await import('../src/curate.js');
+const { chunkMarkdown, consolidateItems, isRealRecoveredItem, splitIntoSections, sectionTitleOf } =
+  await import('../src/curate.js');
 const { db } = await import('../src/db.js');
 
 after(() => {
@@ -25,6 +26,37 @@ test('chunkMarkdown: 1 chunk quando cabe; quebra em linha vazia sem cortar item'
   const chunks = chunkMarkdown(md, 20);
   assert.equal(chunks.length, 3);
   assert.ok(chunks.every((c) => c.startsWith('item')));
+});
+
+test('sectionTitleOf: heading, negrito e rótulo com emoji; ignora linha comum', () => {
+  assert.equal(sectionTitleOf('## Code & Tools'), 'Code & Tools');
+  assert.equal(sectionTitleOf('**IN BRIEF:**'), 'IN BRIEF');
+  assert.equal(sectionTitleOf('🛠 Code & Tools'), 'Code & Tools');
+  assert.equal(sectionTitleOf('Releases'), 'Releases');
+  assert.equal(sectionTitleOf('Um parágrafo qualquer com https://ex.com no meio'), null);
+  assert.equal(sectionTitleOf('Fastify 5.9 melhora o request.mediaType e corrige bugs'), null);
+});
+
+test('splitIntoSections: 1 fatia por seção + intro; sem seções cai p/ chunk', () => {
+  const md = [
+    'Destaque do topo com bastante texto para virar a fatia intro da edição sem heading.',
+    '',
+    '**IN BRIEF:**',
+    'npm agora trava contas de alto impacto por 72h ao trocar email.',
+    'Deno mostra um gerador de apps desktop novo.',
+    '',
+    '🛠 Code & Tools',
+    'Node-GTK 4.0 — bindings GTK para Node com suporte a Node 26.',
+    'Vercel AI SDK 7 — biblioteca provider-agnostic para apps de IA.',
+  ].join('\n');
+  const secs = splitIntoSections(md);
+  assert.deepEqual(secs.map((s) => s.section), [null, 'IN BRIEF', 'Code & Tools']);
+  assert.ok(secs[0].text.startsWith('Destaque do topo'));
+
+  // texto sem seção detectável -> fatia única (section null)
+  const plain = splitIntoSections('Só um blob sem títulos, curtinho.');
+  assert.equal(plain.length, 1);
+  assert.equal(plain[0].section, null);
 });
 
 test('isRealRecoveredItem: âncora genérica/sem blurb é secundário; item com blurb real entra', () => {

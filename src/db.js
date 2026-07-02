@@ -420,6 +420,13 @@ export const stmts = {
     `UPDATE frontier SET state = 'pending', retries = 0
       WHERE url = ? AND state IN ('done', 'failed')`,
   ),
+  // "Enriquecer depois": no início do crawl, re-ativa os jobs de artigos que ficaram só com o
+  // blurb (needs_enrich=1) — inclui os cortados por deadline no run anterior. Escopo por fonte.
+  requeueNeedsEnrichForSource: db.prepare(
+    `UPDATE frontier SET state = 'pending', retries = 0
+      WHERE kind = 'article' AND state IN ('done', 'failed')
+        AND url IN (SELECT url FROM articles WHERE needs_enrich = 1 AND source_id = ?)`,
+  ),
 
   // events (trace por item: cada estágio grava o que fez/decidiu; `ncrawl inspect` lê daqui)
   insertEvent: db.prepare(

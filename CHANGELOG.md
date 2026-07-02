@@ -3,6 +3,42 @@
 Todas as mudanças relevantes deste projeto. Formato baseado em
 [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/); versionamento [SemVer](https://semver.org/lang/pt-BR/).
 
+## [1.4.0] - 2026-07-02
+
+As 5 melhorias de paralelismo/robustez apontadas no `ARQUITETURA.html` — todas implementadas e testadas.
+
+### Adicionado
+- **Pool de workers de parsing (isola o JSDOM do processo principal):** `src/parse-core.js` (funções
+  puras JSDOM/cheerio/turndown, sem deps de db/governor) + `src/parse-worker.js` + `src/parse-pool.js`.
+  Todo JSDOM/Readability roda num worker; um crash NATIVO (SIGSEGV do parser de CSS do JSDOM) mata SÓ o
+  worker — o pool **respawna** e a task resolve com um default seguro (o chamador degrada; nunca
+  re-executa inline p/ não arriscar o processo). Timeout por task (`PARSE_TIMEOUT_MS`) + fallback inline
+  se não houver worker_threads (`PARSE_IN_WORKERS=false`). `PARSE_WORKERS` dimensiona o pool.
+- **Deadline por job (`JOB_TIMEOUT_MS`, 90s):** um artigo cujo fetch/enriquecimento passa do tempo é
+  CORTADO; a ficha **continua com o blurb** (needs_enrich=1) e o próximo crawl a re-enfileira (novo stmt
+  `requeueNeedsEnrichForSource`, rodado no seed). Evento `job/timeout`. Só vale p/ jobs de **artigo** — a
+  curadoria (listing/roundup) faz trabalho de LLM legítimo mais longo e é isenta.
+- **Verificação em STREAMING (`VERIFY_STREAMING`):** cada ficha é verificada logo após salvar/enriquecer,
+  na folga da lane llm (num set à parte que não rouba capacidade de fetch/render); o veredito fica pronto
+  DURANTE o crawl. `verifyArticleRow` foi extraído p/ ser compartilhado com o sweep final, que segue como
+  rede de segurança (idempotente, NULL-only). `processArticle` retorna a URL a verificar.
+- **Escritas em lote:** `events` entram num **buffer** gravado em UMA transação (a cada `EVENTS_FLUSH_AT`
+  ou no flush do fim do comando, em `runWithLimits`); o cadastro dos itens da curadoria virou **uma
+  transação** better-sqlite3 — corta o fsync de milhares de inserts minúsculos.
+- **Curadoria SEMPRE por seção:** `splitIntoSections` divide a edição por seção (News/Tools/Releases/IN
+  BRIEF…), **1 agente por seção em paralelo** com um hint do tipo de conteúdo — mais paralelismo
+  intra-edição (uma issue do Node Weekly vira ~3 agentes simultâneos) e prompts especializados. Sem seções
+  detectáveis (< 2), cai p/ chunk por tamanho. `sectionTitleOf` reconhece heading/negrito/rótulo com emoji.
+- **Testes:** `test/parse-pool.test.js` (echo, op desconhecida, **restart on crash** e **timeout** via
+  fixture `crash-worker.js`), `test/commands.timeout.test.js` (deadline), `test/events.buffer.test.js`
+  (auto-flush + flush), e casos de seção em `test/curate.consolidate.test.js`. 97 no total, verdes.
+
+### Corrigido
+- `clean.js` virou uma **fachada** (re-exporta o núcleo puro + as versões async do pool) — a superfície de
+  import do resto do app e dos testes não mudou.
+- Deadline por job era aplicado a TODOS os jobs e cortava a curadoria dos roundups em 90s (abortando a
+  issue inteira); passou a valer só p/ jobs de artigo.
+
 ## [1.3.0] - 2026-07-02
 
 ### Adicionado

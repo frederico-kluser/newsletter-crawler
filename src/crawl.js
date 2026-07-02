@@ -3,7 +3,7 @@ import * as cheerio from 'cheerio';
 import { stmts } from './db.js';
 import { fetchSmart, checkRobots } from './fetch.js';
 import {
-  pruneForLLM, extractArticle, fallbackTitle, readableLinks, linksInHtml, isBlockedPage,
+  pruneForLLM, extractArticleAsync, fallbackTitle, readableLinksAsync, linksInHtml, isBlockedPage,
   extractPublishedDate, cpuParse, capHtml, applyJunkSpans,
 } from './clean.js';
 import {
@@ -62,7 +62,7 @@ function externalLinks(links, pageUrl) {
  */
 async function roundupLinks(html, pageUrl) {
   const capped = capHtml(html);
-  const { links } = await cpuParse(() => readableLinks(capped, pageUrl));
+  const { links } = await readableLinksAsync(capped, pageUrl); // JSDOM no pool de workers
   let ext = externalLinks(links, pageUrl);
   debug(`roundup ${pageUrl}: ${ext.length} links externos via Readability`);
   if (ext.length >= ROUNDUP_MIN_LINKS) return ext;
@@ -398,7 +398,7 @@ async function processRoundup(job, source, opts = {}) {
         const kinds = Object.entries(cur.byKind).filter(([, n]) => n > 0).map(([k, n]) => `${k}=${n}`).join(' ');
         const skipped = Object.entries(cur.skipped).filter(([, n]) => n > 0).map(([k, n]) => `${k}=${n}`).join(' ');
         log(
-          `roundup curado (${cur.chunks} chunk${cur.chunks > 1 ? 's' : ''}): ${cur.saved} itens novos ` +
+          `roundup curado (${cur.sections} seção${cur.sections > 1 ? 'ões' : ''} em paralelo): ${cur.saved} itens novos ` +
             `(${kinds || '—'})${cur.recovered ? ` [${cur.recovered} do passe de cobertura]` : ''}` +
             `${cur.dup ? ` +${cur.dup} já conhecidos` : ''}` +
             `${skipped ? `, fora: ${skipped}` : ''} em ${url.slice(0, 80)}`,
@@ -481,7 +481,8 @@ async function processArticle(job, source, opts) {
   let method = null;
 
   // 1) Readability (uma vez; reaproveitado p/ roundup-detection e p/ extração do corpo).
-  const art = await cpuParse(() => extractArticle(capHtml(html), finalUrl));
+  // JSDOM roda no pool de workers (isolado do processo principal); null se crashou/timeout.
+  const art = await extractArticleAsync(capHtml(html), finalUrl);
 
   // Roundup-detection: às vezes um "link" aponta p/ uma página que é uma COLEÇÃO de várias
   // notícias. NUNCA p/ item curado (o item é UM registro — um repo GitHub tem dezenas de links
@@ -640,7 +641,7 @@ async function processArticle(job, source, opts) {
       detail: { method, chars: content.length, cleaned: Boolean(cleaned), targetDate: published || null },
     });
     log(`item enriquecido [${enriching.kind || 'news'}]: ${(enriching.title || canonicalUrl).slice(0, 70)}`);
-    return;
+    return { verifyUrl: enriching.url }; // streaming verify: verifica esta ficha já
   }
 
   stmts.insertArticle.run({
@@ -661,4 +662,5 @@ async function processArticle(job, source, opts) {
   });
   logEvent({ ...ev, stage: 'save', status: 'ok', detail: { method, chars: content.length, cleaned: Boolean(cleaned) } });
   log(`artigo salvo: ${(title || canonicalUrl).slice(0, 80)}`);
+  return { verifyUrl: canonicalUrl }; // streaming verify: verifica esta ficha já
 }

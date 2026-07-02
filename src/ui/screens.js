@@ -105,7 +105,7 @@ export function CrawlConfig({ onRun, onBack }) {
   }
   if (step === 'since') {
     return html`<${Field} label=${t('sincePrompt')} error=${err}>
-      <${TextInput} placeholder="2026-06-25" onSubmit=${(val) => {
+      <${TextInput} key=${step} placeholder="2026-06-25" onSubmit=${(val) => {
         const v = val.trim();
         if (v && !parseDate(v)) return setErr(t('sinceInvalid'));
         setErr(null);
@@ -116,7 +116,7 @@ export function CrawlConfig({ onRun, onBack }) {
   }
   if (step === 'maxpages') {
     return html`<${Field} label=${t('maxPagesPrompt')} error=${err}>
-      <${TextInput} placeholder="" onSubmit=${(val) => {
+      <${TextInput} key=${step} placeholder="" onSubmit=${(val) => {
         const r = parseIntFlag(val);
         if (!r.ok) return setErr(t('numInvalid'));
         setErr(null);
@@ -127,13 +127,24 @@ export function CrawlConfig({ onRun, onBack }) {
   }
   if (step === 'maxarticles') {
     return html`<${Field} label=${t('maxArticlesPrompt')} error=${err}>
-      <${TextInput} placeholder="" onSubmit=${(val) => {
+      <${TextInput} key=${step} placeholder="" onSubmit=${(val) => {
         const r = parseIntFlag(val);
         if (!r.ok) return setErr(t('numInvalid'));
         setErr(null);
         if (r.value) set({ 'max-articles': r.value });
-        setStep(HAS_LLM ? 'classify' : 'review');
+        setStep('aggressive');
       }} />
+    </${Field}>`;
+  }
+  if (step === 'aggressive') {
+    return html`<${Field} label=${t('aggressivePrompt')}>
+      <${Box} flexDirection="column">
+        <${StatusMessage} variant="warning">${t('aggressiveWarn')}</${StatusMessage}>
+        <${Select} options=${yesNo()} onChange=${(v) => {
+          if (v === 'yes') set({ aggressive: true });
+          setStep(HAS_LLM ? 'classify' : 'review');
+        }} />
+      </${Box}>
     </${Field}>`;
   }
   if (step === 'classify') {
@@ -144,19 +155,50 @@ export function CrawlConfig({ onRun, onBack }) {
       }} />
     </${Field}>`;
   }
-  return html`<${Review} sub="crawl" flags=${flags} onRun=${onRun} onBack=${onBack} />`;
+  // Resumo pré-execução: mostra as opções resolvidas (com destaque p/ o modo agressivo) e, abaixo,
+  // o Review genérico (comando equivalente + Executar/Voltar).
+  return html`<${Box} flexDirection="column">
+    <${Text} bold>${t('crawlSummary')}</${Text}>
+    <${Box} flexDirection="column" marginY=${1}>
+      <${Text}>${t('sinceLabel')}: <${Text} color="cyan">${flags.since || t('noneVal')}</${Text}></${Text}>
+      <${Text}>${t('maxPagesLabel')}: <${Text} color="cyan">${flags['max-pages'] || t('noLimitVal')}</${Text}></${Text}>
+      <${Text}>${t('maxArticlesLabel')}: <${Text} color="cyan">${flags['max-articles'] || t('noLimitVal')}</${Text}></${Text}>
+      <${Text}>${t('aggressiveLabel')}: <${Text} color=${flags.aggressive ? 'red' : 'green'}>${flags.aggressive ? t('on') : t('off')}</${Text}></${Text}>
+    </${Box}>
+    ${flags.aggressive ? html`<${Alert} variant="warning">${t('aggressiveOn')}</${Alert}>` : null}
+    <${Review} sub="crawl" flags=${flags} onRun=${onRun} onBack=${onBack} />
+  </${Box}>`;
 }
 
 export function ExportConfig({ onRun, onBack }) {
-  const [flags, setFlags] = useState(null);
-  if (!flags) {
+  const [step, setStep] = useState('format');
+  const [flags, setFlags] = useState({});
+  const set = (patch) => setFlags((f) => ({ ...f, ...patch }));
+  if (step === 'format') {
     return html`<${Field} label=${t('exportFormat')}>
       <${Select}
         options=${[
           { label: 'Markdown (.md)', value: 'md' },
           { label: 'JSON (.json)', value: 'json' },
         ]}
-        onChange=${(v) => setFlags({ format: v })}
+        onChange=${(v) => {
+          set({ format: v });
+          setStep('scope');
+        }}
+      />
+    </${Field}>`;
+  }
+  if (step === 'scope') {
+    return html`<${Field} label=${t('scopePrompt')}>
+      <${Select}
+        options=${[
+          { label: t('scopeNew'), value: 'new' },
+          { label: t('scopeAll'), value: 'all' },
+        ]}
+        onChange=${(v) => {
+          if (v === 'all') set({ all: true });
+          setStep('review');
+        }}
       />
     </${Field}>`;
   }
@@ -175,7 +217,7 @@ export function ClassifyConfig({ onRun, onBack }) {
   }
   if (step === 'limit') {
     return html`<${Field} label=${t('classifyLimit')} error=${err}>
-      <${TextInput} placeholder="" onSubmit=${(val) => {
+      <${TextInput} key=${step} placeholder="" onSubmit=${(val) => {
         const r = parseIntFlag(val);
         if (!r.ok) return setErr(t('numInvalid'));
         setErr(null);
@@ -207,7 +249,7 @@ export function SummarizeConfig({ onRun, onBack }) {
   }
   if (step === 'limit') {
     return html`<${Field} label=${t('summarizeLimit')} error=${err}>
-      <${TextInput} placeholder="" onSubmit=${(val) => {
+      <${TextInput} key=${step} placeholder="" onSubmit=${(val) => {
         const r = parseIntFlag(val);
         if (!r.ok) return setErr(t('numInvalid'));
         setErr(null);
@@ -240,11 +282,22 @@ export function SearchConfig({ onRun, onBack }) {
   }
   if (step === 'query') {
     return html`<${Field} label=${t('searchQuery')} error=${err}>
-      <${TextInput} placeholder="ex.: react server components" onSubmit=${(val) => {
+      <${TextInput} key=${step} placeholder="ex.: react server components" onSubmit=${(val) => {
         const v = val.trim();
         if (!v) return setErr(t('searchEmptyQuery'));
         setErr(null);
         setQuery(v);
+        setStep('scope');
+      }} />
+    </${Field}>`;
+  }
+  if (step === 'scope') {
+    return html`<${Field} label=${t('scopePrompt')}>
+      <${Select} options=${[
+        { label: t('scopeNew'), value: 'new' },
+        { label: t('scopeAll'), value: 'all' },
+      ]} onChange=${(v) => {
+        if (v === 'all') setFlags((f) => ({ ...f, all: true }));
         setStep('mode');
       }} />
     </${Field}>`;
@@ -294,7 +347,7 @@ export function AddConfig({ onRun, onBack }) {
 
   if (step === 'url') {
     return html`<${Field} label=${t('addUrl')} error=${err}>
-      <${TextInput} placeholder="https://exemplo.com/arquivo" onSubmit=${(val) => {
+      <${TextInput} key=${step} placeholder="https://exemplo.com/arquivo" onSubmit=${(val) => {
         const v = val.trim();
         if (!v) return setErr(t('urlRequired'));
         setErr(null);
@@ -305,7 +358,7 @@ export function AddConfig({ onRun, onBack }) {
   }
   if (step === 'name') {
     return html`<${Field} label=${t('addName')}>
-      <${TextInput} placeholder="" onSubmit=${(val) => {
+      <${TextInput} key=${step} placeholder="" onSubmit=${(val) => {
         const v = val.trim();
         if (v) setFlags((f) => ({ ...f, name: v }));
         setStep('type');
@@ -325,7 +378,7 @@ export function AddConfig({ onRun, onBack }) {
   }
   if (step === 'maxidx') {
     return html`<${Field} label=${t('addMaxIdx')} error=${err}>
-      <${TextInput} placeholder="" onSubmit=${(val) => {
+      <${TextInput} key=${step} placeholder="" onSubmit=${(val) => {
         const r = parseIntFlag(val);
         if (!r.ok) return setErr(t('numInvalid'));
         setErr(null);

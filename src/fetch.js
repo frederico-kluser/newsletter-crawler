@@ -7,6 +7,30 @@ import * as cheerio from 'cheerio';
 import { USER_AGENT, REQUEST_DELAY_MS, PER_HOST_CONCURRENCY, MAX_RETRIES } from './config.js';
 import { hostOf, jitterDelay, log, warn } from './util.js';
 
+// ---- modo agressivo: identidade de navegador real (UA + headers/client-hints) ----
+// Opt-in por execução (--aggressive). MANTENHA sec-ch-ua em sincronia com a versão do BROWSER_UA.
+// Override do UA via env CRAWLER_AGGRESSIVE_UA (mesma convenção de CRAWLER_UA).
+const BROWSER_UA =
+  process.env.CRAWLER_AGGRESSIVE_UA ||
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
+const AGGRESSIVE_CH = {
+  'sec-ch-ua': '"Google Chrome";v="131", "Chromium";v="131", "Not_A Brand";v="24"',
+  'sec-ch-ua-mobile': '?0',
+  'sec-ch-ua-platform': '"Windows"',
+};
+// Conjunto completo de headers de uma navegação de documento real (caminho estático via got).
+const AGGRESSIVE_HEADERS = {
+  'user-agent': BROWSER_UA,
+  accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+  'accept-language': 'en-US,en;q=0.9',
+  ...AGGRESSIVE_CH,
+  'sec-fetch-dest': 'document',
+  'sec-fetch-mode': 'navigate',
+  'sec-fetch-site': 'none',
+  'sec-fetch-user': '?1',
+  'upgrade-insecure-requests': '1',
+};
+
 // ---- concorrência e circuit breaker por host ----
 const hostLimiters = new Map();
 function hostLimit(host) {
@@ -50,13 +74,15 @@ export async function checkRobots(url) {
 }
 
 // ---- fetch estático ----
-export async function fetchStatic(url) {
+export async function fetchStatic(url, { aggressive = false } = {}) {
   const host = hostOf(url);
   return hostLimit(host)(async () => {
     await jitterDelay(REQUEST_DELAY_MS);
     try {
       const res = await got(url, {
-        headers: { 'user-agent': USER_AGENT, accept: 'text/html,application/xhtml+xml' },
+        headers: aggressive
+          ? AGGRESSIVE_HEADERS
+          : { 'user-agent': USER_AGENT, accept: 'text/html,application/xhtml+xml' },
         timeout: { request: 20000 },
         retry: { limit: MAX_RETRIES, methods: ['GET'], statusCodes: [408, 429, 500, 502, 503, 504] },
         followRedirect: true,
@@ -92,14 +118,25 @@ export async function closeBrowser() {
   }
 }
 
-export async function fetchRendered(url) {
+export async function fetchRendered(url, { aggressive = false } = {}) {
   const host = hostOf(url);
   return hostLimit(host)(async () => {
     await jitterDelay(REQUEST_DELAY_MS);
     const browser = await getBrowser();
     // ignoreHTTPSErrors: alguns veículos têm cert com CN inválido (ex.: kedglobal.com ->
     // ERR_CERT_COMMON_NAME_INVALID). Para crawler de artigos públicos, seguir mesmo assim.
-    const ctx = await browser.newContext({ userAgent: USER_AGENT, ignoreHTTPSErrors: true });
+    // Modo agressivo: UA de navegador real + locale (define Accept-Language) + client-hints. Os
+    // sec-fetch-* ficam a cargo do Chromium (evita inconsistência). --no-sandbox permanece.
+    const ctx = await browser.newContext(
+      aggressive
+        ? {
+            userAgent: BROWSER_UA,
+            locale: 'en-US',
+            ignoreHTTPSErrors: true,
+            extraHTTPHeaders: { ...AGGRESSIVE_CH, 'upgrade-insecure-requests': '1' },
+          }
+        : { userAgent: USER_AGENT, ignoreHTTPSErrors: true },
+    );
     const page = await ctx.newPage();
     try {
       await page.route('**/*', (route) => {
@@ -166,17 +203,17 @@ function looksEmpty(html) {
 // Decisão "precisa de JS" cacheada por host para não pagar o custo do browser à toa.
 const needsJs = new Map();
 
-export async function fetchSmart(url, { forceRender = false } = {}) {
+export async function fetchSmart(url, { forceRender = false, aggressive = false } = {}) {
   const host = hostOf(url);
   if (isBroken(host)) throw new Error(`circuit breaker aberto para host ${host}`);
 
   if (forceRender || needsJs.get(host)) {
-    return fetchRendered(url);
+    return fetchRendered(url, { aggressive });
   }
 
   let staticRes = null;
   try {
-    staticRes = await fetchStatic(url);
+    staticRes = await fetchStatic(url, { aggressive });
   } catch (e) {
     warn(`estático falhou (${url}): ${e.message}; tentando Playwright`);
   }
@@ -184,5 +221,5 @@ export async function fetchSmart(url, { forceRender = false } = {}) {
 
   needsJs.set(host, true);
   log(`conteúdo ausente no HTML cru de ${host} -> usando Playwright`);
-  return fetchRendered(url);
+  return fetchRendered(url, { aggressive });
 }

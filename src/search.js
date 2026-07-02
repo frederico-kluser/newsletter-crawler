@@ -40,9 +40,11 @@ function bucketize(hits, isTool) {
 
 const RANK = { direct: 0, similar: 1 };
 
-async function runModeA(query, limit) {
+async function runModeA(query, limit, { all = false, runId = null } = {}) {
   const lim = Number.isFinite(limit) ? limit : -1;
-  const rows = stmts.listAllArticlesForSearch.all(lim);
+  const rows = all || runId == null
+    ? stmts.listAllArticlesForSearch.all(lim)
+    : stmts.listRunArticlesForSearch.all(runId, lim);
   resetProgress(rows.length);
   const gate = pLimit(SEARCH_FLASH_CONCURRENCY);
   const hits = [];
@@ -70,7 +72,7 @@ async function runModeA(query, limit) {
   return { query, mode: 'A', scanned: rows.length, total: rows.length, relevant: hits.length, buckets };
 }
 
-async function runModeB(query, limit) {
+async function runModeB(query, limit, { all = false, runId = null } = {}) {
   if (stmts.countClassifications.get().c === 0) {
     warn('busca[B]: nenhuma classificação — rode "classify" ou use o Modo A.');
     return {
@@ -101,7 +103,9 @@ async function runModeB(query, limit) {
     return { query, mode: 'B', scanned: 0, total: 0, relevant: 0, buckets: { noticias: [], ferramentas: [] } };
   }
   const lim = Number.isFinite(limit) ? limit : -1;
-  const rows = stmts.articlesByTags.all({ tags: JSON.stringify([...derived]), limit: lim });
+  const rows = all || runId == null
+    ? stmts.articlesByTags.all({ tags: JSON.stringify([...derived]), limit: lim })
+    : stmts.articlesByTagsForRun.all({ tags: JSON.stringify([...derived]), runId, limit: lim });
   const hits = rows.map((a) => ({ ...toItem(a), relation: `${a.matches} tags`, score: a.matches }));
   const buckets = bucketize(hits, (h) => isToolByTags(stmts.getTagsForArticle.all(h.id)));
   return {
@@ -126,9 +130,13 @@ function renderResults(r) {
   sec('FERRAMENTAS', r.buckets.ferramentas);
 }
 
-export async function runSearch(query, { mode = 'A', limit = Infinity, yes = false } = {}) {
+export async function runSearch(
+  query,
+  { mode = 'A', limit = Infinity, yes = false, all = false, runId = null } = {},
+) {
   void yes; // o guard de custo é aplicado no comando (cmdSearch)
-  const r = mode === 'B' ? await runModeB(query, limit) : await runModeA(query, limit);
+  const scope = { all, runId };
+  const r = mode === 'B' ? await runModeB(query, limit, scope) : await runModeA(query, limit, scope);
   renderResults(r);
   return r;
 }

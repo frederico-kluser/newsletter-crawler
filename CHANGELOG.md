@@ -3,6 +3,29 @@
 Todas as mudanças relevantes deste projeto. Formato baseado em
 [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/); versionamento [SemVer](https://semver.org/lang/pt-BR/).
 
+## [1.2.0] - 2026-07-01
+
+### Adicionado
+- **Modo agressivo (`--aggressive`)** por execução (flag na CLI + toggle no menu Coletar): ignora o
+  `robots.txt` e usa **User-Agent de navegador real + headers/client-hints** (`Accept-Language`,
+  `sec-ch-ua`, `sec-fetch-*`) no fetch estático e no Playwright, para passar por 403/anti-bot em sites
+  que você tem direito de arquivar. **Não** relaxa o circuit breaker/delays e **não** salva páginas de
+  desafio (o descarte anti-bot continua ativo). UA sobrescrevível por `CRAWLER_AGGRESSIVE_UA`.
+- **Re-crawl incremental automático:** rodar de novo re-visita as listagens das fontes e traz **só o que
+  é novo** — a paginação para na 1ª página sem itens novos e a dedup de artigo impede re-baixar o já
+  salvo. Desligue a re-visita com `--no-refresh`.
+- **Marca d'água por execução (delta):** tabela `runs` + coluna `articles.run_id`. `export` e `search`
+  mostram por padrão **só o novo desde a última execução**; use `--all` para o acervo inteiro.
+
+### Corrigido
+- **TUI (Ink): o valor do 1º campo do wizard vazava para os campos seguintes.** O `TextInput` do
+  `@inkjs/ui` é não-controlado e era reaproveitado entre os passos; agora cada campo tem `key=${step}`
+  (remonta com buffer limpo). Cobre os fluxos Coletar e Adicionar; teste de regressão adicionado.
+
+### Alterado
+- Menu **Coletar** ganhou um **resumo pré-execução** (mostra `--since`, máx. páginas/artigos e o estado do
+  modo agressivo, com aviso) e **Exportar/Buscar** ganharam um passo **"apenas o novo / todo o acervo"**.
+
 ## [1.1.0] - 2026-07-01
 
 ### Adicionado
@@ -43,5 +66,6 @@ Todas as mudanças relevantes deste projeto. Formato baseado em
   **Notícias** e **Ferramentas**.
 - **Menu guiado (TUI)** Ink/React (htm, sem build), bilíngue PT/EN, com painel de progresso ao vivo.
 
+[1.2.0]: https://github.com/frederico-kluser/newsletter-crawler/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/frederico-kluser/newsletter-crawler/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/frederico-kluser/newsletter-crawler/releases/tag/v1.0.0

@@ -25,9 +25,25 @@ function telemetryLine(tele) {
   }
   const b = tele.budget;
   if (b && (b.spentUsd > 0 || b.budgetUsd > 0)) {
-    parts.push(`US$ ${b.spentUsd.toFixed(2)}${b.budgetUsd > 0 ? `/${b.budgetUsd.toFixed(2)}` : ''}`);
+    let money = `US$ ${b.spentUsd.toFixed(2)}${b.budgetUsd > 0 ? `/${b.budgetUsd.toFixed(2)}` : ''}`;
+    if (b.calls > 0) money += ` · ${b.calls} ch`;
+    if (b.reservedUsd > 0.001) money += ` · +${b.reservedUsd.toFixed(2)} em voo`;
+    parts.push(money);
   }
   return parts.length ? parts.join(' · ') : null;
+}
+
+// Custo de IA POR ETAPA ao vivo (top 5 por gasto): mostra ONDE o dinheiro está indo em tempo
+// real — curadoria/limpeza/verificação/classificação. Lê o mesmo snapshot em memória (sem SQL).
+function budgetStageLine(tele) {
+  const by = tele?.budget?.byStage;
+  if (!by) return null;
+  const entries = Object.entries(by)
+    .filter(([, s]) => s && s.costUsd > 0)
+    .sort((a, b) => b[1].costUsd - a[1].costUsd)
+    .slice(0, 5);
+  if (!entries.length) return null;
+  return 'IA/etapa · ' + entries.map(([stage, s]) => `${stage} $${s.costUsd.toFixed(3)}`).join(' · ');
 }
 
 const LEVEL_COLOR = { warn: 'yellow', error: 'red', debug: 'gray' };
@@ -101,6 +117,7 @@ export function RunView({ spec, onDone, onResults }) {
     </${Box}>
     <${Box} marginY=${1}><${Text} color="cyan">${counters}</${Text}></${Box}>
     ${telemetryLine(tele) ? html`<${Box}><${Text} dimColor>${telemetryLine(tele)}</${Text}></${Box}>` : null}
+    ${budgetStageLine(tele) ? html`<${Box}><${Text} dimColor>${budgetStageLine(tele)}</${Text}></${Box}>` : null}
     <${Box} flexDirection="column" height=${VISIBLE}>
       ${lines.slice(-VISIBLE).map((l, i) =>
         html`<${Text} key=${i} color=${LEVEL_COLOR[l.level]} wrap="truncate-end">${l.text}</${Text}>`,

@@ -65,6 +65,13 @@ function buildSearchParams(sp) {
     kind = kindRaw;
   }
 
+  let verify = null;
+  const verifyRaw = sp.get('verify');
+  if (verifyRaw) {
+    if (!['ok', 'suspect', 'junk'].includes(verifyRaw)) return { error: 'verify deve ser ok|suspect|junk' };
+    verify = verifyRaw;
+  }
+
   // facets: objeto JSON {faceta:[tags]}; entradas vazias/não-string são descartadas.
   let facets = null;
   if (sp.get('facets')) {
@@ -98,6 +105,7 @@ function buildSearchParams(sp) {
       from,
       to,
       kind,
+      verify,
       facets,
       toolTypes: JSON.stringify([...TOOL_CONTENT_TYPES]),
     },
@@ -119,7 +127,7 @@ function apiArticles(sp) {
   const total = stmts.webCountArticles.get(r.params).c;
   const items = stmts.webSearchArticles.all({ ...r.params, limit: r.limit, offset: r.offset }).map((a) => {
     const { rows, byFacet } = tagsOf(a.id);
-    return { ...a, tags: byFacet, kind: isToolByTags(rows) ? 'tool' : 'news' };
+    return { ...a, tags: byFacet, kind: a.kind || (isToolByTags(rows) ? 'tool' : 'news') };
   });
   return { status: 200, body: { total, limit: r.limit, offset: r.offset, items } };
 }
@@ -128,7 +136,7 @@ function apiArticle(id) {
   const a = stmts.webGetArticle.get(id);
   if (!a) return { status: 404, body: { error: 'artigo não encontrado' } };
   const { rows, byFacet } = tagsOf(a.id);
-  return { status: 200, body: { ...a, tags: byFacet, kind: isToolByTags(rows) ? 'tool' : 'news' } };
+  return { status: 200, body: { ...a, tags: byFacet, kind: a.kind || (isToolByTags(rows) ? 'tool' : 'news') } };
 }
 
 function apiMeta() {
@@ -148,6 +156,10 @@ function apiMeta() {
     /* mantém a ordem do banco */
   }
   const dates = stmts.webMetaDates.get();
+  // Custo de IA: acumulado (todas as runs) + última execução — o buscador é pós-crawl, então
+  // "tempo real" aqui é o gasto consolidado da coleta que gerou o acervo.
+  const usage = stmts.sumUsageTotal.get();
+  const lastRun = stmts.getLastRun.get();
   return {
     status: 200,
     body: {
@@ -155,6 +167,13 @@ function apiMeta() {
         articles: stmts.countArticles.get().c,
         summaries: stmts.countSummaries.get().c,
         classified: stmts.countClassifications.get().c,
+      },
+      cost: {
+        totalUsd: usage.usd,
+        totalCalls: usage.n,
+        lastRun: lastRun
+          ? { id: lastRun.id, spentUsd: lastRun.spent_usd, budgetUsd: lastRun.budget_usd, status: lastRun.status }
+          : null,
       },
       sources: stmts.webMetaSources.all().map((s) => ({ id: s.id, name: s.name || s.base_url, count: s.c })),
       facets: order.map((name) => ({ name, tags: grouped.get(name) })),

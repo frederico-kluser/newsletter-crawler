@@ -225,22 +225,31 @@
 </div>
 
 <h2>7. O que ainda precisa melhorar (além do paralelismo)</h2>
+<p>
+  Rodada de <b>finalização (2026-07-02, branch development)</b>: os três itens abaixo marcados ✅ foram
+  implementados e validados (<b>112 testes verdes</b> + crawl real isolado). Vieram junto quatro entregas
+  novas: o <b>guard de texto puro no armazenamento</b> (o “HTML cru na UI” era conteúdo <i>salvo</i> com tags,
+  nunca renderização — a extração já é escopada ao corpo via Readability <i>.textContent</i>); o <b>custo de IA
+  ao vivo</b> (painel da TUI por etapa + linha <i>gasto parcial</i> no CLI + acumulado na web); o <b>streaming
+  de verificação, tags e resumos</b> logo após cada enriquecimento; e um <b>pool de reivindicação próprio para
+  a curadoria</b> (a fase de LLM longa não trava mais o fetch dos artigos).
+</p>
 <div class="cards">
   <div class="card warn"><h4><span class="num">!</span>Recall do curador não é garantia</h4>
     Mesmo com bom prompt, a IA omitiu itens reais em execuções diferentes. A rede de segurança (cobertura por
     diferença de conjuntos sobre o HTML BRUTO + agente dos faltantes + filtro) fecha o buraco, mas o par
     “curador + cobertura” deve ser tratado como um sistema — nunca confiar numa única passada.</div>
-  <div class="card warn"><h4><span class="num">!</span>Limpeza conservadora de propósito</h4>
-    Quando a página é 90% marketing (ex.: homepage de ferramenta), a régua anti-exagero prefere manter o
-    original e deixar a VERIFICAÇÃO marcar “suspect” — melhor um falso-sujo auditável do que texto real
-    apagado. Melhoria futura: re-limpar os “suspect” com um passe mais forte (Pro).</div>
-  <div class="card warn"><h4><span class="num">!</span>Classificação multi-faceta é cara</h4>
-    As tags (9 facetas × Pro em modo de raciocínio alto) são o estágio mais caro do pós-processamento; por
-    isso as validações rodaram com <i>--no-classify</i>. Melhoria: rebaixar facetas simples para Flash e
-    classificar só o delta de cada execução (já é o default).</div>
-  <div class="card warn"><h4><span class="num">!</span>A interface web pode expor os vereditos</h4>
-    A API já devolve <i>kind</i>, seção e <i>verify_status</i> — falta a UI mostrar o selo (ok/suspect/junk)
-    e permitir filtrar por ele. Hoje isso é visível no <i>inspect</i> e no SQL.</div>
+  <div class="card good"><h4><span class="num">✓</span>Re-limpeza dos “suspect” com passe forte ✅</h4>
+    <b>Feito:</b> <i>npm run reclean</i> pega os vereditos <b>suspect</b>, re-limpa com um passe <b>Pro</b>
+    (stage <i>articleReclean</i>) — mesma mecânica de junk-spans + guarda anti over-deletion — e re-verifica.
+    A limpeza do crawl segue conservadora de propósito (melhor um falso-sujo auditável que texto real apagado).</div>
+  <div class="card good"><h4><span class="num">✓</span>Classificação multi-faceta mais barata ✅</h4>
+    <b>Feito:</b> <b>modelo por faceta</b> (<i>classify:&lt;faceta&gt;</i> no models.json) rebaixa as facetas
+    simples (difficulty, content-type, trending) para <b>Flash</b>, mantendo Pro nas caras; agora roda em
+    <b>streaming</b> durante o crawl e classifica só o delta de cada execução.</div>
+  <div class="card good"><h4><span class="num">✓</span>A interface web expõe os vereditos ✅</h4>
+    <b>Feito:</b> a web mostra o <b>selo colorido</b> ok/suspect/junk e <b>filtra</b> por ele; de quebra, o
+    <i>kind</i> <b>release</b> deixou de colapsar em news/tool (a API passou a devolver o kind do banco).</div>
 </div>
 
 <h2>8. A validação final, com números reais</h2>
@@ -299,7 +308,8 @@ npm run web
 </div>
 
 <footer>
-  Gerado em 2026-07-02 no branch <b>quality-pipeline</b>. Os desenhos são feitos em canvas por este
+  Gerado em 2026-07-02 no branch <b>development</b> (rodada de finalização: HTML cru, custo ao vivo, streaming
+  de classify/summarize, pool de curadoria + seção 7). Os desenhos são feitos em canvas por este
   próprio arquivo (sem dependências). Detalhes técnicos com proveniência: <i>.agents/skills/</i> ·
   histórico: <i>CHANGELOG.md</i> · instruções de agente: <i>AGENTS.md</i>.
 </footer>
@@ -579,7 +589,7 @@ function note(ctx, x, y, text, { color = C.muted, align = 'left', fs = 12.5 } = 
   const b = document.getElementById('badges');
   const mk = (t) => { const s = document.createElement('span'); s.className = 'badge'; s.innerHTML = t; b.appendChild(s); };
   const R = RESULTADOS;
-  mk('✅ <b>5 melhorias de paralelismo entregues</b> (100 testes verdes)');
+  mk('✅ <b>5 gargalos + finalização (4 workstreams)</b> entregues (112 testes verdes)');
   if (R.pendente) {
     mk('validação final: <b>rodando…</b> (números da última execução completa abaixo)');
   } else {

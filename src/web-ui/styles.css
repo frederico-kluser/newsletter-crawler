@@ -126,6 +126,17 @@ a:hover { text-decoration: underline; }
 }
 .brand { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
 .brand .muted { color: var(--text-2); font-weight: 400; }
+.topbar-right { display: flex; align-items: center; gap: 12px; }
+.cost-badge {
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  padding: 4px 10px;
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.cost-badge .muted { color: var(--text-2); }
 .icon-btn {
   display: inline-flex;
   align-items: center;
@@ -425,6 +436,11 @@ input.control[type='date']::-webkit-calendar-picker-indicator { opacity: 0.55; }
   align-items: center;
 }
 .tag.tool { background: var(--tool-tint); color: var(--tool-fg); font-weight: 600; }
+.tag.release { background: rgba(139, 92, 246, 0.16); color: #8b5cf6; font-weight: 600; }
+.tag.verify { font-weight: 600; }
+.tag.verify-ok { background: rgba(34, 197, 94, 0.16); color: #16a34a; }
+.tag.verify-suspect { background: rgba(245, 158, 11, 0.18); color: #d97706; }
+.tag.verify-junk { background: rgba(239, 68, 68, 0.16); color: #dc2626; }
 
 /* ---- estados ---- */
 .state {

@@ -38,6 +38,13 @@ const STR = {
   openOriginal: 'Ler o artigo original',
   close: 'Fechar',
   toolBadge: 'Ferramenta',
+  releaseBadge: 'Release',
+  costTitle: 'Custo de IA acumulado (todas as coletas)',
+  verifyAll: 'Verificação: todas',
+  verifyOk: 'ok',
+  verifySuspect: 'suspect',
+  verifyJunk: 'junk',
+  verifyTitle: (v, notes) => `Verificação: ${v}${notes ? ` — ${notes}` : ''}`,
   theme: 'Alternar tema claro/escuro',
   showMore: (n) => `+ ${n} mais`,
   showLess: 'mostrar menos',
@@ -177,6 +184,23 @@ function FacetGroup({ facet, selected, onToggle }) {
   </div>`;
 }
 
+// Selo de tipo (ferramenta/release) e de verificação (ok/suspect/junk): release deixou de colapsar
+// em news/tool, e o veredito da verificação agora aparece na UI (antes só no inspect/SQL).
+function kindBadge(kind) {
+  if (kind === 'tool') return html`<span className="tag tool">${STR.toolBadge}</span>`;
+  if (kind === 'release') return html`<span className="tag release">${STR.releaseBadge}</span>`;
+  return null;
+}
+const VERIFY_LABEL = { ok: STR.verifyOk, suspect: STR.verifySuspect, junk: STR.verifyJunk };
+function verifyBadge(a) {
+  const v = a.verify_status;
+  if (!v) return null;
+  return html`<span
+    className=${`tag verify verify-${v}`}
+    title=${STR.verifyTitle(v, a.verify_notes)}
+  >${VERIFY_LABEL[v] || v}</span>`;
+}
+
 function ArticleCard({ a, onOpen }) {
   const title = a.title_pt || a.title || a.url;
   const summary = a.summary_pt || a.snippet || '';
@@ -188,7 +212,8 @@ function ArticleCard({ a, onOpen }) {
     <h3>${title}</h3>
     ${summary && html`<p className="summary">${summary}</p>`}
     <span className="card-foot">
-      ${a.kind === 'tool' && html`<span className="tag tool">${STR.toolBadge}</span>`}
+      ${kindBadge(a.kind)}
+      ${verifyBadge(a)}
       ${chipTags.map((t) => html`<span key=${t} className="tag">${t}</span>`)}
     </span>
   </button>`;
@@ -234,7 +259,8 @@ function DetailSheet({ id, onClose }) {
       html`<${Fragment}>
         <div className="eyebrow">
           ${data.source_name || '—'} · ${bestDate(data)}
-          ${data.kind === 'tool' ? html` · <span>${STR.toolBadge}</span>` : null}
+          ${data.kind === 'tool' || data.kind === 'release' ? html` · ${kindBadge(data.kind)}` : null}
+          ${data.verify_status ? html` · ${verifyBadge(data)}` : null}
         </div>
         <h2>${data.title_pt || data.title || data.url}</h2>
         ${data.title_pt && data.title && data.title_pt !== data.title
@@ -266,6 +292,7 @@ function App() {
   const [q, setQ] = useState('');
   const dq = useDebounced(q, 250);
   const [kind, setKind] = useState('all');
+  const [verify, setVerify] = useState('all');
   const [sourceId, setSourceId] = useState('');
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
@@ -288,6 +315,7 @@ function App() {
       const sp = new URLSearchParams();
       if (dq.trim()) sp.set('q', dq.trim());
       if (kind !== 'all') sp.set('kind', kind);
+      if (verify !== 'all') sp.set('verify', verify);
       if (sourceId) sp.set('source', sourceId);
       if (from) sp.set('from', from);
       if (to) sp.set('to', to);
@@ -296,7 +324,7 @@ function App() {
       if (offset) sp.set('offset', String(offset));
       return `/api/articles?${sp}`;
     },
-    [dq, kind, sourceId, from, to, facetKey],
+    [dq, kind, verify, sourceId, from, to, facetKey],
   );
 
   const loadMeta = useCallback(() => {
@@ -389,7 +417,14 @@ function App() {
     <header className="topbar">
       <div className="container topbar-row">
         <span className="brand">${STR.brand}<span className="muted">${STR.brandSep}</span></span>
-        <${ThemeToggle} />
+        <div className="topbar-right">
+          ${meta && meta.cost && meta.cost.totalUsd > 0 &&
+          html`<span className="cost-badge" title=${STR.costTitle}>
+            💸 US$ ${meta.cost.totalUsd.toFixed(2)}
+            <span className="muted"> · ${meta.cost.totalCalls} chamadas</span>
+          </span>`}
+          <${ThemeToggle} />
+        </div>
       </div>
     </header>
 
@@ -423,6 +458,17 @@ function App() {
             meta.sources.map(
               (s) => html`<option key=${s.id} value=${s.id}>${s.name} (${s.count})</option>`,
             )}
+          </select>
+          <select
+            className="control"
+            value=${verify}
+            onChange=${(e) => setVerify(e.target.value)}
+            aria-label=${STR.verifyAll}
+          >
+            <option value="all">${STR.verifyAll}</option>
+            <option value="ok">✓ ${STR.verifyOk}</option>
+            <option value="suspect">⚠ ${STR.verifySuspect}</option>
+            <option value="junk">✕ ${STR.verifyJunk}</option>
           </select>
           <input
             className="control"

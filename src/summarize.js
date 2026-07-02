@@ -9,6 +9,20 @@ import { stageWindow } from './governor.js';
 import { shouldStop } from './budget.js';
 import { log, errorLog } from './util.js';
 
+/**
+ * Resume UMA ficha (title_pt/summary_pt em PT-BR) e persiste. Compartilhado pelo sweep
+ * (summarizePending) e pelo streaming pós-save do crawl (commands.js). NULL-only é decidido pelo
+ * chamador; aqui só resume e grava.
+ */
+export async function summarizeArticleRow(a) {
+  const { title_pt, summary_pt } = await summarizeArticle({
+    title: a.title,
+    content: String(a.content || '').slice(0, SUMMARIZE_MAX_CHARS),
+  });
+  stmts.setSummary.run({ id: a.id, title_pt, summary_pt });
+  return { title_pt, summary_pt };
+}
+
 /** Resume os artigos sem summary_pt (ou todos, com force). Retorna { summarized, total }. */
 export async function summarizePending({ limit = Infinity, force = false } = {}) {
   const lim = Number.isFinite(limit) ? limit : -1; // SQLite: LIMIT -1 = sem limite
@@ -33,11 +47,7 @@ export async function summarizePending({ limit = Infinity, force = false } = {})
           return; // orçamento: a linha NULL de summary já é retomável no próximo run
         }
         try {
-          const { title_pt, summary_pt } = await summarizeArticle({
-            title: a.title,
-            content: String(a.content || '').slice(0, SUMMARIZE_MAX_CHARS),
-          });
-          stmts.setSummary.run({ id: a.id, title_pt, summary_pt });
+          await summarizeArticleRow(a);
           done++;
           log(`summarize ok [${done}/${rows.length}] ${(a.title || a.url || '').slice(0, 60)}`);
         } catch (e) {

@@ -9,7 +9,7 @@ import { runParse } from './parse-pool.js';
 export {
   capHtml, extractArticle, linksInHtml, readableLinks, probablyArticle, pruneForLLM,
   htmlToMarkdown, isBlockedPage, extractPublishedDate, fallbackTitle, applyJunkSpans,
-  sanityCheckCleaned,
+  sanityCheckCleaned, ensurePlainText, looksLikeHtml,
 } from './parse-core.js';
 
 // Cede o event loop antes de um parse cheerio SÍNCRONO leve (prune), sob a lane cpu do

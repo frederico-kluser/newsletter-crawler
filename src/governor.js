@@ -14,8 +14,9 @@ import {
 import { debug, warn } from './util.js';
 
 const GIB = 1024 ** 3;
-// Pisos incondicionais (garantia de progresso): nenhuma lane chega a 0.
-const FLOORS = { llm: 2, fetch: 1, render: 1, cpu: 1 };
+// Pisos incondicionais (garantia de progresso): nenhuma lane chega a 0. llm=3 dá folga p/ o
+// fan-out por seção (curadoria) + o streaming de verify/summarize/classify nas máquinas menores.
+const FLOORS = { llm: 3, fetch: 1, render: 1, cpu: 1 };
 // A lane cpu limita parses SÍNCRONOS (JSDOM/Readability/prune) — o teto é fixo e baixo de
 // propósito: 32 núcleos não ajudam num event loop só; o que importa é o débito de latência.
 const CPU_CAP = 2;
@@ -101,8 +102,11 @@ function safeRead() {
 
 function computeAlloc(profile, n, ramRenderCap) {
   if (profile === 'crawl') {
+    // llm=0.6n (era 0.5): as lanes são p-limits INDEPENDENTES (llm = custo/API, RAM-independente;
+    // fetch/render = rede/RAM), então 0.6+0.25+0.25 = 1.1n é ok e não rouba fetch. Ajuda o fan-out
+    // por seção + o streaming pós-save. Salvaguardas de custo intactas (429 halving + orçamento).
     return {
-      llm: Math.max(FLOORS.llm, Math.ceil(n * 0.5)),
+      llm: Math.max(FLOORS.llm, Math.ceil(n * 0.6)),
       fetch: Math.max(FLOORS.fetch, Math.ceil(n * 0.25)),
       render: Math.max(FLOORS.render, Math.min(Math.ceil(n * 0.25), ramRenderCap)),
     };

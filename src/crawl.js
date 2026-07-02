@@ -4,7 +4,7 @@ import { stmts } from './db.js';
 import { fetchSmart, checkRobots } from './fetch.js';
 import {
   pruneForLLM, extractArticleAsync, fallbackTitle, readableLinksAsync, linksInHtml, isBlockedPage,
-  extractPublishedDate, cpuParse, capHtml, applyJunkSpans,
+  extractPublishedDate, cpuParse, capHtml, applyJunkSpans, ensurePlainText, htmlToMarkdown,
 } from './clean.js';
 import {
   getCachedSelector, putSelector, validateLinkSelector, applyLinkSelector,
@@ -541,7 +541,9 @@ async function processArticle(job, source, opts) {
     // 3) Fallback final: extração direta via LLM (Flash).
     if (!content && HAS_LLM) {
       try {
-        const out = await extractArticleViaLLM(await cpuParse(() => pruneForLLM(capHtml(html))));
+        // Entrada em MARKDOWN (não HTML) p/ o LLM: sem tags p/ o modelo ecoar, mas preserva a
+        // estrutura (títulos/listas) que ajuda a separar o corpo do boilerplate.
+        const out = await extractArticleViaLLM(await cpuParse(() => htmlToMarkdown(pruneForLLM(capHtml(html)))));
         title = out.title;
         content = out.content;
         published = out.published_at;
@@ -614,6 +616,10 @@ async function processArticle(job, source, opts) {
       logEvent({ ...ev, stage: 'clean', status: 'fail', detail: { error: e.message } });
     }
   }
+
+  // Guarda de texto puro no armazenamento (anti "HTML cru" na UI): o caminho Readability já é
+  // texto garantido; o seletor e o fallback LLM podem trazer marcação — normaliza SÓ esses.
+  content = method === 'readability' ? content : ensurePlainText(content);
 
   const contentHash = sha256(content);
   const dupHash = stmts.getArticleByHash.get(contentHash);

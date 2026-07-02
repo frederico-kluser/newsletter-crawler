@@ -177,6 +177,7 @@ export function validateLinkSelector(html, selector, attribute, baseUrl, { min =
 export function applyContentSelector(html, selector) {
   try {
     const $ = cheerio.load(html);
+    $('script, style, noscript, template').remove(); // .text() suga o CÓDIGO-FONTE de script/style
     const node = $(selector).first();
     if (!node || node.length === 0) return null;
     return { text: node.text().replace(/\s+/g, ' ').trim(), html: node.html() || '' };

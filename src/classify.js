@@ -21,7 +21,7 @@ async function classifyOne(article, gate) {
       gate(async () => {
         const { system, user } = buildFacetPrompt(facet, article);
         try {
-          const raw = await classifyFacet({ system, user });
+          const raw = await classifyFacet({ facet: facet.name, system, user });
           const { tags, dropped } = validateFacetTags(facet.name, raw.tags);
           if (dropped.length) {
             warn(
@@ -92,6 +92,17 @@ const persist = db.transaction((article, result) => {
     stmts.insertUncovered.run({ article_id: article.id, facet: u.facet ?? null, term: u.term });
   }
 });
+
+/**
+ * Classifica UMA ficha (fan-out por faceta na folga da lane llm) e persiste atomicamente.
+ * Compartilhado pelo sweep (classifyPending) e pelo streaming pós-save (commands.js). classifyOne
+ * re-lança BUDGET_EXCEEDED ANTES de persistir, então um estouro no meio não deixa parcial.
+ */
+export async function classifyArticleRow(article) {
+  const result = await classifyOne(article, (fn) => fn());
+  persist(article, result);
+  return result;
+}
 
 /**
  * Classifica os artigos pendentes (ou todos, com force). Idempotente e retomável: sem force

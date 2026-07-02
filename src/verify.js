@@ -5,13 +5,13 @@
 // summarize.js. Nunca apaga: junk é marcado e aparece no `ncrawl inspect`.
 import pLimit from 'p-limit';
 import { stmts } from './db.js';
-import { verifyRecordLLM } from './llm.js';
-import { isBlockedPage } from './clean.js';
+import { verifyRecordLLM, cleanArticleContent } from './llm.js';
+import { isBlockedPage, applyJunkSpans, ensurePlainText } from './clean.js';
 import { logEvent } from './events.js';
-import { VERIFY_CONCURRENCY, VERIFY_MAX_CHARS } from './config.js';
+import { VERIFY_CONCURRENCY, VERIFY_MAX_CHARS, CLEAN_MAX_CHARS } from './config.js';
 import { stageWindow } from './governor.js';
 import { shouldStop, getBudgetState } from './budget.js';
-import { log, errorLog } from './util.js';
+import { sha256, log, errorLog } from './util.js';
 
 /**
  * Verifica UMA ficha (heurística grátis anti-bot -> LLM), persiste o veredito + notas e loga o
@@ -92,4 +92,68 @@ export async function verifyPending({ limit = Infinity, force = false } = {}) {
       `${skipped ? ` (${skipped} pulados por orçamento — retome com \`ncrawl verify\`)` : ''}.`,
   );
   return { verified: done, byVerdict };
+}
+
+/**
+ * Re-limpa os vereditos 'suspect' com um passe FORTE (Pro, stage articleReclean) e re-verifica —
+ * a melhoria da seção 7: um "falso-sujo" auditável pode virar 'ok' com uma limpeza melhor. Mesma
+ * mecânica do pré-save (junk_spans -> remoção local exata + guarda anti over-deletion + texto puro),
+ * agora com o modelo caro. Idempotente/retomável (o item segue 'suspect' se pular por orçamento).
+ */
+export async function recleanSuspects({ limit = Infinity } = {}) {
+  const lim = Number.isFinite(limit) ? limit : -1;
+  const rows = stmts.listSuspectArticles.all(lim);
+  if (!rows.length) {
+    log('reclean: nenhum suspect a reprocessar.');
+    return { recleaned: 0, upgraded: 0 };
+  }
+  const runId = getBudgetState().runId ?? null;
+  log(`reclean: ${rows.length} suspect(s) — limpeza forte (Pro) + re-verify.`);
+
+  const gate = pLimit(stageWindow(VERIFY_CONCURRENCY));
+  let recleaned = 0;
+  let upgraded = 0;
+  let skipped = 0;
+  await Promise.all(
+    rows.map((a) =>
+      gate(async () => {
+        if (shouldStop()) {
+          skipped++;
+          return; // orçamento: o item segue 'suspect', retomável com `ncrawl reclean`
+        }
+        try {
+          const full = String(a.content || '');
+          const head = full.slice(0, CLEAN_MAX_CHARS);
+          const tail = full.length > CLEAN_MAX_CHARS ? full.slice(CLEAN_MAX_CHARS) : '';
+          const out = await cleanArticleContent({ title: a.title, content: head, stage: 'articleReclean' });
+          const res = applyJunkSpans(head, out.junk_spans);
+          if (!res.rejected && res.applied > 0) {
+            const content = ensurePlainText(res.text + tail);
+            const hash = sha256(content);
+            const dup = stmts.getArticleByHash.get(hash);
+            if (!dup || dup.id === a.id) {
+              stmts.setContentCleaned.run({ id: a.id, content, content_hash: hash });
+              a.content = content; // o re-verify abaixo já enxerga o texto novo
+              recleaned++;
+              logEvent({ runId, url: a.url, stage: 'clean', status: 'reclean', detail: { spans: res.applied, removidos: res.removed } });
+            }
+          }
+          const { verdict } = await verifyArticleRow(a, { runId });
+          if (verdict === 'ok') upgraded++;
+        } catch (e) {
+          if (e?.code === 'BUDGET_EXCEEDED') {
+            skipped++;
+            return;
+          }
+          errorLog(`reclean falhou (${a.url}): ${e.message}`);
+        }
+      }),
+    ),
+  );
+
+  log(
+    `reclean concluído: ${recleaned} re-limpo(s), ${upgraded} viraram ok` +
+      `${skipped ? ` (${skipped} pulados por orçamento — retome com \`ncrawl reclean\`)` : ''}.`,
+  );
+  return { recleaned, upgraded };
 }

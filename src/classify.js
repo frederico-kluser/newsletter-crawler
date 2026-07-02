@@ -7,6 +7,8 @@ import { stmts, db } from './db.js';
 import { getFacets, buildFacetPrompt, validateFacetTags, taxonomyVersion } from './taxonomy.js';
 import { classifyFacet } from './llm.js';
 import { CLASSIFY_MODEL, CLASSIFY_CONCURRENCY, ARTICLE_CONCURRENCY } from './config.js';
+import { stageWindow } from './governor.js';
+import { shouldStop } from './budget.js';
 import { log, warn, errorLog } from './util.js';
 
 // Classifica 1 artigo: dispara as 9 facetas pelo gate e monta o objeto de resultado.
@@ -34,6 +36,9 @@ async function classifyOne(article, gate) {
             .slice(0, 3);
           return { facet: facet.name, tags, uncovered, confidence, ok: true };
         } catch (e) {
+          // Orçamento: rethrow p/ NÃO persistir classificação parcial — o artigo segue
+          // elegível (sem linha em classifications) e é retomado no próximo run.
+          if (e?.code === 'BUDGET_EXCEEDED') throw e;
           warn(`classify[${facet.name}] falhou (${article.url}): ${e.message}`);
           return { facet: facet.name, tags: [], uncovered: [], confidence: 0, ok: false };
         }
@@ -108,14 +113,23 @@ export async function classifyPending({ limit = Infinity, force = false } = {}) 
       `${facetCount} facetas/artigo, force=${force}.`,
   );
 
-  const gate = pLimit(CLASSIFY_CONCURRENCY); // teto GLOBAL de chamadas de faceta
-  const outer = pLimit(ARTICLE_CONCURRENCY); // janela de artigos simultâneos
+  // O gate global de facetas morreu: a lane llm (no transporte do callJSON) já limita o total
+  // simultâneo na OpenRouter. CLASSIFY_CONCURRENCY > 0 segue como teto fino opcional.
+  const gate = CLASSIFY_CONCURRENCY > 0 ? pLimit(CLASSIFY_CONCURRENCY) : (fn) => fn();
+  // Janela de artigos: min(override, capacidade atual da lane llm) — evita abrir milhares de
+  // artigos "em voo" cujo trabalho real fica todo enfileirado na lane.
+  const outer = pLimit(stageWindow(ARTICLE_CONCURRENCY));
   let done = 0;
   let partial = 0;
+  let skipped = 0;
 
   await Promise.all(
     rows.map((article) =>
       outer(async () => {
+        if (shouldStop()) {
+          skipped++;
+          return; // orçamento: não INICIA artigo novo; os pulados retomam no próximo run
+        }
         try {
           const result = await classifyOne(article, gate);
           persist(article, result);
@@ -124,12 +138,19 @@ export async function classifyPending({ limit = Infinity, force = false } = {}) 
           const label = (article.title || article.url || '').slice(0, 60);
           log(`classify ok [${done}/${rows.length}] ${label} (${result.status})`);
         } catch (e) {
+          if (e?.code === 'BUDGET_EXCEEDED') {
+            skipped++; // nada persistido: o artigo continua elegível
+            return;
+          }
           errorLog(`classify falhou (${article.url}): ${e.message}`);
         }
       }),
     ),
   );
 
-  log(`classify concluído: ${done}/${rows.length} (partial=${partial}).`);
+  log(
+    `classify concluído: ${done}/${rows.length} (partial=${partial}` +
+      `${skipped ? `, ${skipped} pulados por orçamento — retome com \`ncrawl classify\`` : ''}).`,
+  );
   return { classified: done, total: rows.length };
 }

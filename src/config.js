@@ -87,12 +87,39 @@ export const DB_PATH = process.env.DB_PATH
 // Destino dos exports (`ncrawl export`). Também em NC_HOME, longe do repo.
 export const EXPORT_DIR = path.join(NC_HOME, 'export');
 
-export const CONCURRENCY = Number(process.env.CONCURRENCY || 3);
+// Overrides finos por estágio: 0/ausente = delega ao governador; setado = teto duro
+// (o efetivo vira min(override, lane)). Inteiro > 0, senão 0.
+export const envIntOr0 = (k) => {
+  const v = Number(process.env[k]);
+  return Number.isFinite(v) && v > 0 ? Math.floor(v) : 0;
+};
+
+export const CONCURRENCY = envIntOr0('CONCURRENCY');
 export const PER_HOST_CONCURRENCY = Number(process.env.PER_HOST_CONCURRENCY || 2);
 export const REQUEST_DELAY_MS = Number(process.env.REQUEST_DELAY_MS || 1000);
 export const MAX_RETRIES = Number(process.env.MAX_RETRIES || 3);
 export const MAX_HTML_FOR_LLM = Number(process.env.MAX_HTML_FOR_LLM || 120000);
 export const RESPECT_ROBOTS = process.env.CRAWLER_RESPECT_ROBOTS !== 'false';
+
+// ---- paralelismo global + orçamento (governor/budget) ----
+// Teto GLOBAL de operações simultâneas (--parallel). Deriva dos núcleos como proxy do porte
+// da máquina (o trabalho é I/O-bound, não CPU-bound); clamp p/ ser útil de VPS a workstation.
+export function defaultParallel() {
+  return Math.min(64, Math.max(4, os.availableParallelism()));
+}
+export const MAX_PARALLEL = envIntOr0('MAX_PARALLEL') || defaultParallel();
+// Orçamento por execução em USD (0 = ilimitado). O ledger grava o custo real SEMPRE.
+export const BUDGET_USD = Number(process.env.BUDGET_USD || 0);
+// Teto de uso de RAM DO SISTEMA: o governador mantém MemAvailable >= max(total*(1-pct/100), 2 GiB).
+// É a RAM da máquina inteira (desktop incluso), não o RSS do processo — Chromium é filho externo.
+export const RAM_MAX_PCT = Number(process.env.RAM_MAX_PCT || 80);
+export const RAM_HYSTERESIS_PCT = Number(process.env.RAM_HYSTERESIS_PCT || 10);
+export const GOVERNOR_TICK_MS = Number(process.env.GOVERNOR_TICK_MS || 1000);
+// Estimativa de RAM de um render Chromium (contexto+página) p/ o ramp da lane render.
+export const RENDER_EST_MB = Number(process.env.RENDER_EST_MB || 300);
+// Timeout por chamada LLM. O default do SDK seria 10 min E re-tentado — em paralelismo alto,
+// um lote pendurado seguraria slots por até 40 min e cegaria o governador.
+export const LLM_TIMEOUT_MS = Number(process.env.LLM_TIMEOUT_MS || 180000);
 
 // ---- crawl multinível (índice -> roundup/issue -> artigo) ----
 // Profundidade máxima da recursão (índice=0, issue=1, artigo=2, roundup-do-artigo=3...).
@@ -177,10 +204,10 @@ export function stageModel(stage) {
 // Aliases legados da etapa classify (usados por classify.js para logar/persistir model_used).
 export const CLASSIFY_MODEL = STAGE_MODELS.classify.model;
 export const CLASSIFY_EFFORT = STAGE_MODELS.classify.effort;
-// Gate GLOBAL de chamadas de faceta (limita o total simultâneo na OpenRouter).
-export const CLASSIFY_CONCURRENCY = Number(process.env.CLASSIFY_CONCURRENCY || 6);
-// Janela de artigos processados ao mesmo tempo (cada um abre N facetas no gate global).
-export const ARTICLE_CONCURRENCY = Number(process.env.ARTICLE_CONCURRENCY || 2);
+// Teto fino de chamadas de faceta simultâneas (0 = a lane llm do governador decide).
+export const CLASSIFY_CONCURRENCY = envIntOr0('CLASSIFY_CONCURRENCY');
+// Janela de artigos processados ao mesmo tempo (cada um abre N facetas na lane llm).
+export const ARTICLE_CONCURRENCY = envIntOr0('ARTICLE_CONCURRENCY');
 // Recorte do corpo do artigo enviado a CADA agente (controle de custo de tokens).
 export const CLASSIFY_MAX_CHARS = Number(process.env.CLASSIFY_MAX_CHARS || 12000);
 // Hook pós-crawl: classifica os novos artigos ao fim do `crawl` (desligue com =false ou --no-classify).
@@ -188,14 +215,14 @@ export const CLASSIFY_AFTER_CRAWL = process.env.CLASSIFY_AFTER_CRAWL !== 'false'
 
 // ---- resumos PT-BR (pós-processamento) ----
 // 1 chamada/artigo (Flash high): título + resumo em português do Brasil. `content` segue original.
-export const SUMMARIZE_CONCURRENCY = Number(process.env.SUMMARIZE_CONCURRENCY || 6);
+export const SUMMARIZE_CONCURRENCY = envIntOr0('SUMMARIZE_CONCURRENCY');
 export const SUMMARIZE_MAX_CHARS = Number(process.env.SUMMARIZE_MAX_CHARS || 12000);
 // Hook pós-crawl: gera os resumos ao fim do crawl (desligue com =false ou --no-summarize).
 export const SUMMARIZE_AFTER_CRAWL = process.env.SUMMARIZE_AFTER_CRAWL !== 'false';
 
 // ---- busca na base ----
 // Modo A (exaustivo): 50 chamadas Flash simultâneas julgando CADA artigo vs a consulta.
-export const SEARCH_FLASH_CONCURRENCY = Number(process.env.SEARCH_FLASH_CONCURRENCY || 50);
+export const SEARCH_FLASH_CONCURRENCY = envIntOr0('SEARCH_FLASH_CONCURRENCY');
 // Recorte do corpo enviado por artigo no modo A (controle de custo a 50x).
 export const SEARCH_MAX_CHARS = Number(process.env.SEARCH_MAX_CHARS || 8000);
 // Guard de custo: acima disto de artigos, o modo A exige --yes (evita varredura cara acidental).

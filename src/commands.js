@@ -3,12 +3,16 @@
 // captura tudo via setLogSink. As contagens vêm de getStatus() (dado), reusado pela UI.
 import { mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-import pLimit from 'p-limit';
 import { stmts, wipeAll } from './db.js';
 import {
   EXPORT_DIR, DB_PATH, CONCURRENCY, MAX_RETRIES, HAS_LLM, CLASSIFY_AFTER_CRAWL, SUMMARIZE_AFTER_CRAWL,
-  SEARCH_MODE_A_CONFIRM, OPENROUTER_API_KEY, ENV_PATH, loadSources, addSourceToConfig,
+  SEARCH_MODE_A_CONFIRM, OPENROUTER_API_KEY, ENV_PATH, BUDGET_USD, MAX_PARALLEL, RAM_MAX_PCT,
+  defaultParallel, loadSources, addSourceToConfig,
 } from './config.js';
+import {
+  initGovernor, stopGovernor, setProfile, jobsCapacity, getTelemetry,
+} from './governor.js';
+import { beginRun, endRun, shouldStop, getBudgetState } from './budget.js';
 import { processJob, enqueue, upsertSource } from './crawl.js';
 import { classifyPending } from './classify.js';
 import { summarizePending } from './summarize.js';
@@ -20,13 +24,58 @@ import { slugify, normalizeUrl, parseDate, log, errorLog } from './util.js';
 // Re-export p/ a UI importar de um lugar só (igual getStatus).
 export { getSearchProgress };
 
+/** Telemetria viva (governador + orçamento) p/ o painel da UI pollar junto do getStatus. */
+export function getRunTelemetry() {
+  return { governor: getTelemetry(), budget: getBudgetState() };
+}
+
+/**
+ * Envelope de execução com limites: valida --budget/--parallel, sobe o governador no perfil
+ * do comando e abre o run do ledger; endRun (extrato) e stopGovernor rodam SEMPRE (finally).
+ */
+async function runWithLimits({ command, flags = {}, profile }, fn) {
+  const budgetUsd = flags.budget != null ? Number(flags.budget) : BUDGET_USD;
+  if (!Number.isFinite(budgetUsd) || budgetUsd < 0) {
+    errorLog(`--budget inválido (USD >= 0, 0 = ilimitado): ${flags.budget}`);
+    process.exit(1);
+  }
+  const parallel = flags.parallel != null ? Number(flags.parallel) : undefined;
+  if (flags.parallel != null && (!Number.isFinite(parallel) || parallel < 1)) {
+    errorLog(`--parallel inválido (inteiro >= 1): ${flags.parallel}`);
+    process.exit(1);
+  }
+  // Freio de emergência do governador: RAM crítica sustentada -> recicla o browser (o getter
+  // lazy de fetch.js relança sozinho no próximo render).
+  initGovernor({ parallel, profile, onEmergencyBrake: () => void closeBrowser().catch(() => {}) });
+  beginRun({ command, budgetUsd, args: flags });
+  let failed = false;
+  try {
+    return await fn();
+  } catch (e) {
+    failed = true;
+    throw e;
+  } finally {
+    endRun(failed ? 'failed' : undefined);
+    stopGovernor();
+  }
+}
+
 /** Contagens do banco como DADO (reusado pela UI e pelo printStatus). */
 export function getStatus() {
   const f = Object.fromEntries(stmts.countFrontierByState.all().map((r) => [r.state, r.c]));
   const articles = stmts.countArticles.get().c;
   const classified = stmts.countClassifications.get().c;
   const summaries = stmts.countSummaries.get().c;
+  // Gasto LLM acumulado (ledger). Aditivo e tolerante: telemetria não pode derrubar o status.
+  let spend = { totalUsd: 0, calls: 0, lastRun: null };
+  try {
+    const t = stmts.sumUsageTotal.get();
+    spend = { totalUsd: t.usd, calls: t.n, lastRun: stmts.getLastRun.get() || null };
+  } catch {
+    /* tabelas do ledger ausentes (DB antigo): segue sem gasto */
+  }
   return {
+    spend,
     sources: stmts.countSources.get().c,
     pages: stmts.countPages.get().c,
     articles,
@@ -53,6 +102,7 @@ export function printStatus() {
   log(`selectors: ${s.selectors}`);
   log(`classif.:  done=${s.classified} pending=${s.pendingClassif}`);
   log(`resumos:   done=${s.summaries} pending=${s.pendingSummary}`);
+  log(`gasto LLM: US$ ${s.spend.totalUsd.toFixed(4)} em ${s.spend.calls} chamadas`);
   log(
     `frontier:  pending=${s.frontier.pending} in_progress=${s.frontier.in_progress} ` +
       `done=${s.frontier.done} failed=${s.frontier.failed}`,
@@ -60,6 +110,10 @@ export function printStatus() {
 }
 
 export async function cmdCrawl(flags) {
+  return runWithLimits({ command: 'crawl', flags, profile: 'crawl' }, () => crawlRun(flags));
+}
+
+async function crawlRun(flags) {
   if (!HAS_LLM) {
     log('AVISO: OPENROUTER_API_KEY ausente — só o caminho estático/cache roda; sem derivação de seletor.');
   }
@@ -101,28 +155,40 @@ export async function cmdCrawl(flags) {
   };
   const maxArticles = flags['max-articles'] ? Number(flags['max-articles']) : Infinity;
 
-  const limit = pLimit(CONCURRENCY);
+  // Capacidade DINÂMICA do loop: o governador redimensiona as lanes fetch+render pela RAM;
+  // env CONCURRENCY > 0 vira teto duro por cima. Sem gate p-limit: o próprio loop é o gate
+  // (as lanes de fetch/render dentro do job limitam o trabalho pesado).
+  const capacity = () =>
+    CONCURRENCY > 0 ? Math.min(CONCURRENCY, jobsCapacity()) : jobsCapacity();
   const inflight = new Set();
   let processedArticles = 0;
+  let budgetRequeued = 0;
 
   const dispatch = (job) => {
-    const p = limit(async () => {
+    const p = (async () => {
       try {
         await processJob(job, opts);
         if (job.kind === 'article') processedArticles++;
         stmts.finish.run('done', job.url);
       } catch (e) {
+        if (e?.code === 'BUDGET_EXCEEDED') {
+          // Orçamento: devolve à fila SEM consumir retry — retomável no próximo run. O loop
+          // já parou de reivindicar (shouldStop), então não há hot-loop aqui.
+          stmts.finish.run('pending', job.url);
+          budgetRequeued++;
+          return;
+        }
         const r = stmts.getRetries.get(job.url);
         if ((r?.retries ?? 0) < MAX_RETRIES) stmts.bumpRetry.run(job.url);
         else stmts.finish.run('failed', job.url);
         errorLog(`job falhou (${job.kind} ${job.url}): ${e.message}`);
       }
-    }).finally(() => inflight.delete(p));
+    })().finally(() => inflight.delete(p));
     inflight.add(p);
   };
 
   for (;;) {
-    while (processedArticles < maxArticles && inflight.size < CONCURRENCY) {
+    while (processedArticles < maxArticles && !shouldStop() && inflight.size < capacity()) {
       const job = stmts.claimNext.get();
       if (!job) break;
       dispatch(job);
@@ -132,24 +198,23 @@ export async function cmdCrawl(flags) {
   }
   await Promise.allSettled(inflight);
   await closeBrowser();
+  if (budgetRequeued) log(`orçamento: ${budgetRequeued} jobs devolvidos à fila (retomáveis no próximo run)`);
   log('crawl concluído.');
 
-  // Hook pós-crawl: classifica os novos artigos (configurável). `--no-classify` pula esta execução.
-  if (CLASSIFY_AFTER_CRAWL && HAS_LLM && flags['no-classify'] !== true) {
-    try {
-      await classifyPending({});
-    } catch (e) {
-      errorLog(`classify pós-crawl falhou: ${e.message}`);
-    }
+  // Hooks pós-crawl EM PARALELO (classify e summarize são independentes — ambos só leem
+  // articles e escrevem tabelas próprias); o perfil llm-only dá o teto todo à lane llm.
+  const post = [];
+  if (CLASSIFY_AFTER_CRAWL && HAS_LLM && flags['no-classify'] !== true && !shouldStop()) {
+    post.push(classifyPending({}).catch((e) => errorLog(`classify pós-crawl falhou: ${e.message}`)));
   }
-
-  // Hook pós-crawl: gera os resumos PT-BR (configurável). `--no-summarize` pula.
-  if (SUMMARIZE_AFTER_CRAWL && HAS_LLM && flags['no-summarize'] !== true) {
-    try {
-      await summarizePending({});
-    } catch (e) {
-      errorLog(`summarize pós-crawl falhou: ${e.message}`);
-    }
+  if (SUMMARIZE_AFTER_CRAWL && HAS_LLM && flags['no-summarize'] !== true && !shouldStop()) {
+    post.push(summarizePending({}).catch((e) => errorLog(`summarize pós-crawl falhou: ${e.message}`)));
+  }
+  if (post.length) {
+    setProfile('llm-only');
+    await Promise.all(post);
+  } else if (shouldStop()) {
+    log('orçamento atingido: classify/summarize pulados — retome com `ncrawl classify` / `ncrawl summarize`');
   }
 
   printStatus();
@@ -186,7 +251,7 @@ export function cmdReset(flags) {
   if (flags.yes !== true) {
     errorLog(
       `reset APAGA TODOS OS DADOS de ${DB_PATH} (articles, frontier, pages, selectors, ` +
-        'classifications, article_tags, classification_uncovered, sources).',
+        'classifications, article_tags, classification_uncovered, sources, runs, llm_usage).',
     );
     errorLog('Confirme com:  npm run reset -- --yes');
     process.exit(1);
@@ -262,7 +327,8 @@ export async function cmdClassify(flags) {
   }
   const limit = flags.limit ? Number(flags.limit) : Infinity;
   const force = flags.force === true;
-  await classifyPending({ limit, force });
+  await runWithLimits({ command: 'classify', flags, profile: 'llm-only' }, () =>
+    classifyPending({ limit, force }));
   printStatus();
 }
 
@@ -273,7 +339,8 @@ export async function cmdSummarize(flags) {
   }
   const limit = flags.limit ? Number(flags.limit) : Infinity;
   const force = flags.force === true;
-  await summarizePending({ limit, force });
+  await runWithLimits({ command: 'summarize', flags, profile: 'llm-only' }, () =>
+    summarizePending({ limit, force }));
   printStatus();
 }
 
@@ -301,7 +368,78 @@ export async function cmdSearch(rest, flags) {
       process.exit(1);
     }
   }
-  return runSearch(query, { mode, limit, yes: flags.yes === true });
+  return runWithLimits({ command: 'search', flags, profile: 'llm-only' }, () =>
+    runSearch(query, { mode, limit, yes: flags.yes === true }));
+}
+
+// Limites de execução (orçamento/paralelismo/RAM). `limits set` persiste em NC_HOME/.env (mesmo
+// arquivo e helper do `key set`); `limits show` (default) mostra os efetivos + origem + gasto.
+export function cmdLimits(rest, flags) {
+  const sub = String(rest[0] || '').toLowerCase();
+
+  if (sub === 'set') {
+    let n = 0;
+    if (flags.budget != null) {
+      const v = Number(flags.budget);
+      if (!Number.isFinite(v) || v < 0) {
+        errorLog(`--budget inválido (USD >= 0, 0 = ilimitado): ${flags.budget}`);
+        process.exit(1);
+      }
+      upsertEnvVar('BUDGET_USD', String(v));
+      n++;
+    }
+    if (flags.parallel != null) {
+      const v = Number(flags.parallel);
+      if (!Number.isInteger(v) || v < 0) {
+        errorLog(`--parallel inválido (inteiro >= 1, ou 0 = auto pelos núcleos): ${flags.parallel}`);
+        process.exit(1);
+      }
+      upsertEnvVar('MAX_PARALLEL', String(v));
+      n++;
+    }
+    if (flags['ram-max-pct'] != null) {
+      const v = Number(flags['ram-max-pct']);
+      if (!Number.isFinite(v) || v < 10 || v > 95) {
+        errorLog(`--ram-max-pct inválido (10..95): ${flags['ram-max-pct']}`);
+        process.exit(1);
+      }
+      upsertEnvVar('RAM_MAX_PCT', String(v));
+      n++;
+    }
+    if (!n) {
+      errorLog('uso: ncrawl limits set [--budget USD] [--parallel N] [--ram-max-pct P]');
+      process.exit(1);
+    }
+    log(`limites salvos em ${ENV_PATH} (valem p/ os próximos runs; flags por-run têm precedência)`);
+    return;
+  }
+
+  // show (default): valor efetivo + origem (env = setado no .env/shell; auto = derivado).
+  const origem = (k) => (process.env[k] != null && process.env[k] !== '' ? 'env' : 'auto');
+  const N = MAX_PARALLEL;
+  log('— limites —');
+  log(`parallel:    ${N} (${origem('MAX_PARALLEL')}; auto = núcleos clamp 4..64 = ${defaultParallel()})`);
+  log(`budget:      ${BUDGET_USD > 0 ? `US$ ${BUDGET_USD.toFixed(2)}/run` : 'ilimitado'} (${origem('BUDGET_USD')})`);
+  log(`ram-max-pct: ${RAM_MAX_PCT}% (${origem('RAM_MAX_PCT')})`);
+  log(
+    `lanes (perfil crawl):    llm=${Math.ceil(N / 2)} fetch=${Math.ceil(N / 4)} render<=${Math.ceil(N / 4)} (RAM manda)`,
+  );
+  log(`lanes (perfil llm-only): llm=${N}`);
+  try {
+    const t = stmts.sumUsageTotal.get();
+    log(`gasto all-time: US$ ${t.usd.toFixed(4)} em ${t.n} chamadas LLM`);
+    const runs = stmts.listRuns.all(10);
+    if (runs.length) {
+      log('últimos runs:');
+      for (const r of runs) {
+        const cap = r.budget_usd != null ? `/${Number(r.budget_usd).toFixed(2)}` : '';
+        log(`  #${r.id} ${r.command} — US$ ${Number(r.spent_usd).toFixed(4)}${cap} (${r.status}, ${r.started_at})`);
+      }
+    }
+  } catch {
+    /* ledger vazio/DB antigo: os limites acima já foram mostrados */
+  }
+  log('uso: ncrawl limits set [--budget USD] [--parallel N] [--ram-max-pct P]');
 }
 
 // Gerência da chave OpenRouter. `key set <chave>` valida (probe) e grava em NC_HOME/.env; `key test`

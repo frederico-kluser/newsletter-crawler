@@ -9,6 +9,9 @@ mkdirSync(path.dirname(DB_PATH), { recursive: true });
 export const db = new Database(DB_PATH);
 db.pragma('journal_mode = WAL');
 db.pragma('foreign_keys = ON');
+// Dois processos `ncrawl` podem compartilhar este DB (ex.: crawl + search em terminais
+// diferentes). Sem busy_timeout, o segundo escritor falharia na hora com SQLITE_BUSY.
+db.pragma('busy_timeout = 5000');
 
 db.exec(`
 CREATE TABLE IF NOT EXISTS sources (
@@ -93,6 +96,28 @@ CREATE TABLE IF NOT EXISTS classification_uncovered (
   term TEXT NOT NULL,
   created_at TEXT DEFAULT (datetime('now'))
 );
+
+CREATE TABLE IF NOT EXISTS runs (
+  id INTEGER PRIMARY KEY,
+  command TEXT NOT NULL,
+  args TEXT,
+  budget_usd REAL,
+  status TEXT DEFAULT 'running',
+  started_at TEXT DEFAULT (datetime('now')),
+  finished_at TEXT
+);
+
+CREATE TABLE IF NOT EXISTS llm_usage (
+  id INTEGER PRIMARY KEY,
+  run_id INTEGER REFERENCES runs(id),
+  stage TEXT,
+  model TEXT,
+  prompt_tokens INTEGER,
+  completion_tokens INTEGER,
+  cost_usd REAL,
+  created_at TEXT DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_llm_usage_run ON llm_usage(run_id);
 `);
 
 // Migração leve p/ DBs criados antes das colunas multinível (CREATE TABLE IF NOT EXISTS
@@ -199,9 +224,11 @@ export const stmts = {
     `INSERT OR IGNORE INTO frontier (url, kind, discovered_from, source_id, depth)
      VALUES (?, ?, ?, ?, ?)`,
   ),
+  // retries ASC: um job devolvido a 'pending' por falha só volta DEPOIS dos jobs frescos —
+  // sem isso o FIFO puro reivindica a falha de novo em segundos (hot-loop num host quebrado).
   claimNext: db.prepare(
     `UPDATE frontier SET state = 'in_progress'
-     WHERE id = (SELECT id FROM frontier WHERE state = 'pending' ORDER BY id LIMIT 1)
+     WHERE id = (SELECT id FROM frontier WHERE state = 'pending' ORDER BY retries ASC, id ASC LIMIT 1)
      RETURNING *`,
   ),
   finish: db.prepare(`UPDATE frontier SET state = ? WHERE url = ?`),
@@ -257,6 +284,36 @@ export const stmts = {
   topUncovered: db.prepare(
     `SELECT term, COUNT(*) c FROM classification_uncovered GROUP BY term ORDER BY c DESC LIMIT ?`,
   ),
+
+  // runs / llm_usage (ledger de custo: 1 linha por run + 1 linha por chamada LLM cobrada)
+  insertRun: db.prepare(
+    `INSERT INTO runs (command, args, budget_usd) VALUES (@command, @args, @budget_usd) RETURNING id`,
+  ),
+  finishRun: db.prepare(
+    `UPDATE runs SET status = @status, finished_at = datetime('now') WHERE id = @id`,
+  ),
+  insertLlmUsage: db.prepare(
+    `INSERT INTO llm_usage (run_id, stage, model, prompt_tokens, completion_tokens, cost_usd)
+     VALUES (@run_id, @stage, @model, @prompt_tokens, @completion_tokens, @cost_usd)`,
+  ),
+  sumUsageForRun: db.prepare(
+    `SELECT COALESCE(SUM(cost_usd), 0) usd, COUNT(*) n FROM llm_usage WHERE run_id = ?`,
+  ),
+  sumUsageTotal: db.prepare(`SELECT COALESCE(SUM(cost_usd), 0) usd, COUNT(*) n FROM llm_usage`),
+  usageByStage: db.prepare(
+    `SELECT stage, COUNT(*) n, COALESCE(SUM(cost_usd), 0) usd
+       FROM llm_usage WHERE run_id = ? GROUP BY stage ORDER BY usd DESC`,
+  ),
+  listRuns: db.prepare(
+    `SELECT r.id, r.command, r.budget_usd, r.status, r.started_at, r.finished_at,
+            (SELECT COALESCE(SUM(cost_usd), 0) FROM llm_usage u WHERE u.run_id = r.id) spent_usd
+       FROM runs r ORDER BY r.id DESC LIMIT ?`,
+  ),
+  getLastRun: db.prepare(
+    `SELECT r.id, r.command, r.budget_usd, r.status, r.started_at, r.finished_at,
+            (SELECT COALESCE(SUM(cost_usd), 0) FROM llm_usage u WHERE u.run_id = r.id) spent_usd
+       FROM runs r ORDER BY r.id DESC LIMIT 1`,
+  ),
 };
 
 // Limpeza total (slate limpo). Ordem filho->pai porque foreign_keys=ON. VACUUM fora da
@@ -270,6 +327,8 @@ export function wipeAll() {
     'pages',
     'selectors',
     'frontier',
+    'llm_usage',
+    'runs',
     'sources',
   ];
   const tx = db.transaction(() => {

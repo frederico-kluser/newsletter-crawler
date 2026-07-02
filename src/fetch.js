@@ -4,8 +4,11 @@ import { chromium } from 'playwright';
 import robotsParser from 'robots-parser';
 import pLimit from 'p-limit';
 import * as cheerio from 'cheerio';
-import { USER_AGENT, REQUEST_DELAY_MS, PER_HOST_CONCURRENCY, MAX_RETRIES } from './config.js';
-import { hostOf, jitterDelay, log, warn } from './util.js';
+import {
+  USER_AGENT, REQUEST_DELAY_MS, PER_HOST_CONCURRENCY, MAX_RETRIES, RESPECT_ROBOTS,
+} from './config.js';
+import { getLane } from './governor.js';
+import { hostOf, sleep, log, warn, debug } from './util.js';
 
 // ---- concorrência e circuit breaker por host ----
 const hostLimiters = new Map();
@@ -14,11 +17,100 @@ function hostLimit(host) {
   return hostLimiters.get(host);
 }
 
-const hostErrors = new Map();
-const BREAK_THRESHOLD = 5;
-const recordError = (h) => hostErrors.set(h, (hostErrors.get(h) || 0) + 1);
-const recordOk = (h) => hostErrors.set(h, 0);
-const isBroken = (h) => (hostErrors.get(h) || 0) >= BREAK_THRESHOLD;
+/**
+ * Circuit breaker por host com half-open: N falhas consecutivas abrem; após o cooldown,
+ * UMA probe passa — sucesso fecha, falha reabre dobrando o cooldown (até o teto). Fábrica
+ * pura (clock injetável) p/ teste; o singleton do módulo usa Date.now.
+ */
+export function createBreaker({
+  now = Date.now, threshold = 5, baseCooldownMs = 60_000, maxCooldownMs = 900_000,
+} = {}) {
+  const m = new Map();
+  const get = (h) => {
+    if (!m.has(h)) m.set(h, { fails: 0, state: 'closed', cooldownMs: baseCooldownMs, openedAt: 0, probing: false });
+    return m.get(h);
+  };
+  return {
+    canRequest(h) {
+      const b = get(h);
+      if (b.state === 'closed') return true;
+      if (b.state === 'open') {
+        if (now() - b.openedAt < b.cooldownMs) return false;
+        b.state = 'halfOpen';
+        debug(`breaker: ${h} half-open (probe única)`);
+      }
+      if (b.probing) return false; // já há uma probe em voo
+      b.probing = true;
+      return true;
+    },
+    recordOk(h) {
+      const b = get(h);
+      m.set(h, { ...b, fails: 0, state: 'closed', probing: false, cooldownMs: baseCooldownMs });
+    },
+    recordError(h) {
+      const b = get(h);
+      if (b.state === 'halfOpen') {
+        b.state = 'open';
+        b.openedAt = now();
+        b.probing = false;
+        b.cooldownMs = Math.min(b.cooldownMs * 2, maxCooldownMs);
+        warn(`breaker: probe de ${h} falhou — reaberto por ${Math.round(b.cooldownMs / 1000)}s`);
+        return;
+      }
+      b.fails += 1;
+      if (b.state === 'closed' && b.fails >= threshold) {
+        b.state = 'open';
+        b.openedAt = now();
+        warn(`breaker: ${h} aberto (${b.fails} falhas consecutivas) por ${Math.round(b.cooldownMs / 1000)}s`);
+      }
+    },
+    stateOf(h) {
+      return get(h).state;
+    },
+  };
+}
+const breaker = createBreaker();
+const recordError = (h) => breaker.recordError(h);
+const recordOk = (h) => breaker.recordOk(h);
+
+/**
+ * Politeness por host: gap INTER-REQUEST serializado (reserva de timeline), honrando o
+ * crawl-delay do robots (cap 30s) e no mínimo o jitter de REQUEST_DELAY_MS. Com N slots por
+ * host, vira fila — é exatamente o que a politeness pede. Fábrica pura p/ teste de gaps.
+ */
+export function createHostGate({
+  now = Date.now, wait = sleep, baseDelayMs = REQUEST_DELAY_MS, maxCrawlDelayMs = 30_000,
+  random = Math.random,
+} = {}) {
+  const nextAllowedAt = new Map();
+  return {
+    /** Aguarda a vez deste host e reserva o gap p/ o próximo request. */
+    async pause(host, crawlDelayMs = 0) {
+      const gap = Math.max(
+        Math.min(crawlDelayMs || 0, maxCrawlDelayMs),
+        Math.round(baseDelayMs * (0.5 + random())),
+      );
+      const t = now();
+      const at = Math.max(t, nextAllowedAt.get(host) || 0);
+      nextAllowedAt.set(host, at + gap);
+      if (at > t) await wait(at - t);
+    },
+  };
+}
+const hostGate = createHostGate();
+
+/** Gap de politeness do host (dentro do slot do host-limiter), com o crawl-delay do robots. */
+async function politePause(host, url) {
+  let crawlDelay = 0;
+  if (RESPECT_ROBOTS) {
+    try {
+      crawlDelay = (await checkRobots(url)).crawlDelay || 0;
+    } catch {
+      /* robots é best-effort; o jitter mínimo ainda vale */
+    }
+  }
+  await hostGate.pause(host, crawlDelay);
+}
 
 // ---- robots.txt ----
 const robotsCache = new Map();
@@ -50,23 +142,27 @@ export async function checkRobots(url) {
 }
 
 // ---- fetch estático ----
+// Host limiter por FORA (politeness é invariante, não escala com a máquina); a lane fetch do
+// governador por dentro limita o total de requests simultâneos na máquina inteira.
 export async function fetchStatic(url) {
   const host = hostOf(url);
   return hostLimit(host)(async () => {
-    await jitterDelay(REQUEST_DELAY_MS);
-    try {
-      const res = await got(url, {
-        headers: { 'user-agent': USER_AGENT, accept: 'text/html,application/xhtml+xml' },
-        timeout: { request: 20000 },
-        retry: { limit: MAX_RETRIES, methods: ['GET'], statusCodes: [408, 429, 500, 502, 503, 504] },
-        followRedirect: true,
-      });
-      recordOk(host);
-      return { html: res.body, status: res.statusCode, url: res.url, rendered: false };
-    } catch (e) {
-      recordError(host);
-      throw e;
-    }
+    await politePause(host, url);
+    return getLane('fetch')(async () => {
+      try {
+        const res = await got(url, {
+          headers: { 'user-agent': USER_AGENT, accept: 'text/html,application/xhtml+xml' },
+          timeout: { request: 20000 },
+          retry: { limit: MAX_RETRIES, methods: ['GET'], statusCodes: [408, 429, 500, 502, 503, 504] },
+          followRedirect: true,
+        });
+        recordOk(host);
+        return { html: res.body, status: res.statusCode, url: res.url, rendered: false };
+      } catch (e) {
+        recordError(host);
+        throw e;
+      }
+    });
   });
 }
 
@@ -92,40 +188,54 @@ export async function closeBrowser() {
   }
 }
 
-export async function fetchRendered(url) {
+// Perfis de render (B5): um ARTIGO não tem scroll infinito nem "carregar mais" — rolar 60
+// rounds e clicar 50 botões nele só queima slot/RAM. O deadline é o teto de TEMPO do render
+// (pior caso caía em ~12 min; com perfis vira <=90s p/ artigo e <=240s p/ listagem).
+const RENDER_PROFILES = {
+  article: { scrollRounds: 8, loadMore: false, deadlineMs: 90_000 },
+  listing: { scrollRounds: 60, loadMore: true, deadlineMs: 240_000 },
+};
+
+export async function fetchRendered(url, { profile = 'listing' } = {}) {
   const host = hostOf(url);
+  const prof = RENDER_PROFILES[profile] || RENDER_PROFILES.listing;
   return hostLimit(host)(async () => {
-    await jitterDelay(REQUEST_DELAY_MS);
-    const browser = await getBrowser();
-    // ignoreHTTPSErrors: alguns veículos têm cert com CN inválido (ex.: kedglobal.com ->
-    // ERR_CERT_COMMON_NAME_INVALID). Para crawler de artigos públicos, seguir mesmo assim.
-    const ctx = await browser.newContext({ userAgent: USER_AGENT, ignoreHTTPSErrors: true });
-    const page = await ctx.newPage();
-    try {
-      await page.route('**/*', (route) => {
-        const t = route.request().resourceType();
-        return ['image', 'media', 'font'].includes(t) ? route.abort() : route.continue();
-      });
-      await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 45000 });
-      await autoScroll(page);
-      await clickLoadMore(page);
-      const html = await page.content();
-      const visibleText = await page.evaluate(() => document.body?.innerText || '').catch(() => '');
-      recordOk(host);
-      return { html, visibleText, status: 200, url: page.url(), rendered: true };
-    } catch (e) {
-      recordError(host);
-      throw e;
-    } finally {
-      await ctx.close().catch(() => {});
-    }
+    await politePause(host, url);
+    // Lane render cobre a vida INTEIRA do contexto (newContext -> close): o permit da lane é
+    // exatamente a pegada de RAM de um Chromium context — é isso que o governador conta.
+    return getLane('render')(async () => {
+      const deadline = Date.now() + prof.deadlineMs;
+      const browser = await getBrowser();
+      // ignoreHTTPSErrors: alguns veículos têm cert com CN inválido (ex.: kedglobal.com ->
+      // ERR_CERT_COMMON_NAME_INVALID). Para crawler de artigos públicos, seguir mesmo assim.
+      const ctx = await browser.newContext({ userAgent: USER_AGENT, ignoreHTTPSErrors: true });
+      const page = await ctx.newPage();
+      try {
+        await page.route('**/*', (route) => {
+          const t = route.request().resourceType();
+          return ['image', 'media', 'font'].includes(t) ? route.abort() : route.continue();
+        });
+        await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 45000 });
+        await autoScroll(page, { maxRounds: prof.scrollRounds, deadline });
+        if (prof.loadMore) await clickLoadMore(page, undefined, 50, deadline);
+        if (Date.now() >= deadline) log(`render truncado pelo deadline (${profile}): ${url.slice(0, 80)}`);
+        const html = await page.content();
+        recordOk(host);
+        return { html, status: 200, url: page.url(), rendered: true };
+      } catch (e) {
+        recordError(host);
+        throw e;
+      } finally {
+        await ctx.close().catch(() => {});
+      }
+    });
   });
 }
 
-/** Rola até a altura parar de crescer (detecta fim de scroll infinito). */
-export async function autoScroll(page, { step = 1200, pause = 800, maxRounds = 60 } = {}) {
+/** Rola até a altura parar de crescer (detecta fim de scroll infinito) ou até o deadline. */
+export async function autoScroll(page, { step = 1200, pause = 800, maxRounds = 60, deadline = Infinity } = {}) {
   let prev = 0;
-  for (let i = 0; i < maxRounds; i++) {
+  for (let i = 0; i < maxRounds && Date.now() < deadline; i++) {
     const h = await page.evaluate(() => document.body.scrollHeight).catch(() => 0);
     if (!h || h === prev) break;
     prev = h;
@@ -134,13 +244,14 @@ export async function autoScroll(page, { step = 1200, pause = 800, maxRounds = 6
   }
 }
 
-/** Clica repetidamente em botões "carregar mais / mais antigos / próximo". */
+/** Clica repetidamente em botões "carregar mais / mais antigos / próximo" (até o deadline). */
 export async function clickLoadMore(
   page,
   label = /mais|more|older|antig|load|próxim|proxim|next/i,
   maxClicks = 50,
+  deadline = Infinity,
 ) {
-  for (let i = 0; i < maxClicks; i++) {
+  for (let i = 0; i < maxClicks && Date.now() < deadline; i++) {
     const btn = page.locator('button, a').filter({ hasText: label }).first();
     if ((await btn.count().catch(() => 0)) === 0) break;
     if (!(await btn.isVisible().catch(() => false))) break;
@@ -166,12 +277,12 @@ function looksEmpty(html) {
 // Decisão "precisa de JS" cacheada por host para não pagar o custo do browser à toa.
 const needsJs = new Map();
 
-export async function fetchSmart(url, { forceRender = false } = {}) {
+export async function fetchSmart(url, { forceRender = false, profile = 'listing' } = {}) {
   const host = hostOf(url);
-  if (isBroken(host)) throw new Error(`circuit breaker aberto para host ${host}`);
+  if (!breaker.canRequest(host)) throw new Error(`circuit breaker aberto para host ${host}`);
 
   if (forceRender || needsJs.get(host)) {
-    return fetchRendered(url);
+    return fetchRendered(url, { profile });
   }
 
   let staticRes = null;
@@ -184,5 +295,5 @@ export async function fetchSmart(url, { forceRender = false } = {}) {
 
   needsJs.set(host, true);
   log(`conteúdo ausente no HTML cru de ${host} -> usando Playwright`);
-  return fetchRendered(url);
+  return fetchRendered(url, { profile });
 }

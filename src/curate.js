@@ -141,11 +141,15 @@ export async function curateRoundup({ html, url, source, runId = null, depth = 0
       if (abs) emitted.add(abs);
     }
   }
-  let leftovers = [];
-  if (art?.content) {
+  // IMPORTANTE: o diff usa o HTML BRUTO da página, não o corpo do Readability — o Readability
+  // às vezes DESCARTA blocos reais vizinhos de anúncio (observado ao vivo: 3 destaques da
+  // issue sumiam do corpo e, por isso, nem apareciam como leftovers). Links de rodapé/social
+  // externos que entram aqui são classificados como secundários pelo agente + pós-filtro.
+  const leftovers = [];
+  {
     const host = hostOf(url);
     const seenBody = new Set();
-    for (const l of linksInHtml(art.content, url)) {
+    for (const l of linksInHtml(capped, url)) {
       const abs = normalizeUrl(l.url, url);
       if (!abs || !/^https?:/i.test(abs) || hostOf(abs) === host) continue;
       if (seenBody.has(abs) || emitted.has(abs)) continue;

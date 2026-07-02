@@ -3,6 +3,103 @@
 Todas as mudanças relevantes deste projeto. Formato baseado em
 [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/); versionamento [SemVer](https://semver.org/lang/pt-BR/).
 
+## [1.4.0] - 2026-07-02
+
+As 5 melhorias de paralelismo/robustez apontadas no `ARQUITETURA.html` — todas implementadas e testadas.
+
+### Adicionado
+- **Pool de workers de parsing (isola o JSDOM do processo principal):** `src/parse-core.js` (funções
+  puras JSDOM/cheerio/turndown, sem deps de db/governor) + `src/parse-worker.js` + `src/parse-pool.js`.
+  Todo JSDOM/Readability roda num worker; um crash NATIVO (SIGSEGV do parser de CSS do JSDOM) mata SÓ o
+  worker — o pool **respawna** e a task resolve com um default seguro (o chamador degrada; nunca
+  re-executa inline p/ não arriscar o processo). Timeout por task (`PARSE_TIMEOUT_MS`) + fallback inline
+  se não houver worker_threads (`PARSE_IN_WORKERS=false`). `PARSE_WORKERS` dimensiona o pool.
+- **Deadline por job (`JOB_TIMEOUT_MS`, 90s):** um artigo cujo fetch/enriquecimento passa do tempo é
+  CORTADO; a ficha **continua com o blurb** (needs_enrich=1) e o próximo crawl a re-enfileira (novo stmt
+  `requeueNeedsEnrichForSource`, rodado no seed). Evento `job/timeout`. Só vale p/ jobs de **artigo** — a
+  curadoria (listing/roundup) faz trabalho de LLM legítimo mais longo e é isenta.
+- **Verificação em STREAMING (`VERIFY_STREAMING`):** cada ficha é verificada logo após salvar/enriquecer,
+  na folga da lane llm (num set à parte que não rouba capacidade de fetch/render); o veredito fica pronto
+  DURANTE o crawl. `verifyArticleRow` foi extraído p/ ser compartilhado com o sweep final, que segue como
+  rede de segurança (idempotente, NULL-only). `processArticle` retorna a URL a verificar.
+- **Escritas em lote:** `events` entram num **buffer** gravado em UMA transação (a cada `EVENTS_FLUSH_AT`
+  ou no flush do fim do comando, em `runWithLimits`); o cadastro dos itens da curadoria virou **uma
+  transação** better-sqlite3 — corta o fsync de milhares de inserts minúsculos.
+- **Curadoria SEMPRE por seção:** `splitIntoSections` divide a edição por seção (News/Tools/Releases/IN
+  BRIEF…), **1 agente por seção em paralelo** com um hint do tipo de conteúdo — mais paralelismo
+  intra-edição (uma issue do Node Weekly vira ~3 agentes simultâneos) e prompts especializados. Sem seções
+  detectáveis (< 2), cai p/ chunk por tamanho. `sectionTitleOf` reconhece heading/negrito/rótulo com emoji.
+- **Testes:** `test/parse-pool.test.js` (echo, op desconhecida, **restart on crash** e **timeout** via
+  fixture `crash-worker.js`), `test/commands.timeout.test.js` (deadline), `test/events.buffer.test.js`
+  (auto-flush + flush), e casos de seção em `test/curate.consolidate.test.js`. 100 no total, verdes.
+
+### Corrigido
+- `clean.js` virou uma **fachada** (re-exporta o núcleo puro + as versões async do pool) — a superfície de
+  import do resto do app e dos testes não mudou.
+- Deadline por job era aplicado a TODOS os jobs e cortava a curadoria dos roundups em 90s (abortando a
+  issue inteira); passou a valer só p/ jobs de artigo.
+- **parse-pool: `runParse` pendurava p/ SEMPRE** quando o spawn do worker falhava de forma síncrona com
+  ZERO workers vivos (task na fila não tem timer — só ganha um em `assign`): a fila agora é drenada
+  INLINE (fail-open) nesse caso; após `MAX_SPAWN_FAILS` o pool se desativa de vez. Teste de regressão
+  `test/parse-pool.spawnfail.test.js` (força o ctor a lançar via `PARSE_WORKER_PATH` https).
+- **parse-pool: worker ocupado agora é `ref()`** (e volta a `unref()` ao ficar ocioso) — todos unref'd, o
+  event loop podia esvaziar numa janela em que SÓ havia parses em voo e o processo saía no meio do crawl.
+- **`sectionTitleOf` promovia item/prosa a "seção"**: heading de item com link (`## [Deno 2.9](url)`)
+  fatiava o item p/ fora do contexto, e frase curta com palavra de seção ("More news next week.") virava
+  rótulo. Guards: linha com URL/`](` nunca é seção; rótulo solto não termina em `[.!?…]`.
+- Log do crawl: plural "seçãoões" -> "seções".
+
+## [1.3.0] - 2026-07-02
+
+### Adicionado
+- **Curadoria por IA do agregador (default ON):** cada issue de fonte `index` é processada por agentes
+  Flash **em paralelo** (chunks de `CURATE_CHUNK_CHARS`) e vira **itens estruturados** — `kind`
+  news|tool|release, seção e o **blurb do próprio agregador**. O item é **cadastrado já na curadoria**
+  (`needs_enrich=1`, conteúdo inicial = título+blurb) e o fetch do alvo vira **enriquecimento**: ferramenta
+  com alvo raso/bloqueado (GitHub, release page) **não se perde mais**; patrocínio/vaga ficam FORA
+  (rótulo do LLM + backstop determinístico `sponsor|hiring|classifieds`). Links secundários de dentro dos
+  blurbs deixam de virar registros.
+- **Limpeza por IA antes de salvar (default ON):** o conteúdo extraído passa pelo Flash p/ remover sujeira
+  de UI (menus, contadores de stars/downloads, subscribe, rodapé) preservando o texto real; régua
+  anti-truncamento `sanityCheckCleaned` (rejeitou → mantém original e registra motivo).
+- **Verificação pós-cadastro (default ON) + `ncrawl verify`:** varredura paralela dá veredito
+  `ok|suspect|junk` + notas a cada artigo (colunas `verify_status/verify_notes`), auto pós-crawl.
+- **Trace por item (tabela `events`) + `ncrawl inspect`:** todo estágio grava o que fez/decidiu (fetch,
+  curadoria, item salvo/ignorado com motivo, limpeza, enriquecimento, verificação, seletor de data);
+  `inspect` mostra a run em árvore (itens por issue, vereditos, custo por etapa), `--url <substr>` audita
+  um link, `--verbose` inclui as notas.
+- **Seletor de DATA por IA lendo a página real:** quando `--since` está ativo e o layout não expõe
+  `<time datetime>` (Node Weekly usa `<span class="issue-date">`), o Flash deriva um par **CSS + regex**
+  por template de weekly, validado contra a própria página (≥50% dos itens datados) e cacheado em
+  `selectors.date_selector/date_attribute/date_regex`; fallbacks genéricos (`[class*=date]`, regex estrita)
+  continuam de custo zero.
+- **`ncrawl purge <fonte> --yes [--selectors]`:** apaga os DADOS de uma fonte (artigos+tags, pages,
+  frontier, events; a fonte continua cadastrada) p/ refazer um crawl do zero de forma reprodutível.
+- **Passe de COBERTURA da curadoria:** o recall do curador não é garantido (observado: 3 itens do meio
+  da issue omitidos) — a diferença determinística de conjuntos (links externos do corpo − itens
+  emitidos) alimenta um agente extra que decide item real que faltou vs link secundário; um pós-filtro
+  determinístico (`isRealRecoveredItem`: exige blurb real e título não-genérico) impede que âncoras
+  como "Demo."/"Release notes" virem registros. O diff usa o HTML BRUTO e o agente dos faltantes
+  recebe o HTML PODADO da página INTEIRA como contexto (o Readability descarta blocos reais vizinhos
+  de anúncio — sem isso os itens omitidos nem apareciam no funil). Evento `curate/coverage` audita o
+  funil por URL. Validado end-to-end (run #10): 59 fichas, 3 itens recuperados na #631, 0 patrocínios.
+- **`ARQUITETURA.html`** na raiz: a arquitetura desenhada em canvas (pipeline, paralelismo, gargalos,
+  números reais) explicada p/ leigos — zero dependências, abre direto no navegador.
+
+### Corrigido
+- **`RENDER_PROFILES` não existia em fetch.js** (perdido no merge dos branches): TODO fetch renderizado
+  (Playwright) crashava com `RENDER_PROFILES is not defined` — páginas JS-gated nunca eram capturadas.
+- **Crawl abria 2 linhas em `runs`** (ledger + `startDeltaRun`) e **crashava** em DBs criados pelo branch
+  robot-bypass (`runs.command NOT NULL`); agora a marca d'água do delta reusa o run do ledger.
+- **Duplicação de logs** no fim do crawl (bloco repetido do merge).
+
+### Alterado
+- **Modo agressivo virou o DEFAULT** (`CRAWLER_AGGRESSIVE=false` ou `--no-aggressive` p/ modo educado);
+  segue NÃO salvando páginas de desafio e NÃO relaxando breaker/delays.
+- No fluxo de item curado, o **título do agregador é autoritativo** (ex.: "Node-GTK 4.0" em vez de
+  "The GTK Project - …") e a **data-âncora é a da issue**; artigo curado com data própria antiga não é
+  mais censurado pelo piso `--since` (o piso segue valendo p/ artigos avulsos e p/ as issues).
+
 ## [1.2.0] - 2026-07-01
 
 ### Adicionado

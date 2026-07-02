@@ -202,6 +202,14 @@ const CHROMIUM_ARGS = (process.env.CRAWLER_CHROMIUM_ARGS
   .map((s) => s.trim())
   .filter(Boolean);
 
+// Perfis de render (constante perdida no merge paralel+robot-bypass — sem ela TODO fetch
+// renderizado crashava com "RENDER_PROFILES is not defined"): listagem rola até o fim e
+// clica "load more" (arquivo infinito); artigo é curto e sem cliques (só precisa do corpo).
+const RENDER_PROFILES = {
+  listing: { deadlineMs: 90_000, scrollRounds: 60, loadMore: true },
+  article: { deadlineMs: 30_000, scrollRounds: 8, loadMore: false },
+};
+
 let _browser = null;
 async function getBrowser() {
   if (!_browser) _browser = await chromium.launch({ headless: true, args: CHROMIUM_ARGS });

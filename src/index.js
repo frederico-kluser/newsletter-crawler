@@ -3,11 +3,13 @@
 // dispatch direto das flags/comandos (comportamento inalterado). Os comandos vivem em commands.js.
 import { db } from './db.js';
 import { closeBrowser } from './fetch.js';
+import { closeParsePool } from './parse-pool.js';
 import { errorLog } from './util.js';
 import {
   printStatus, cmdCrawl, cmdAdd, cmdReset, cmdExport, cmdClassify, cmdSummarize, cmdSearch, cmdKey,
   cmdWeb,
   cmdLimits,
+  cmdVerify, cmdInspect, cmdPurge,
 } from './commands.js';
 
 function parseFlags(argv) {
@@ -39,11 +41,14 @@ function printHelp() {
       '  node src/index.js                 menu guiado (terminal interativo)  [npm start]',
       '  node src/index.js ui | menu       abre o menu guiado                  [npm run ui]',
       '  node src/index.js crawl [--source "Nome" | --only <substr>] [--since <data>]',
-      '                          [--max-pages N] [--max-articles N] [--aggressive] [--no-refresh] [--no-classify]',
-      '                          [--budget USD] [--parallel N]',
-      '                          --aggressive: ignora robots.txt + UA de navegador real (para 403/anti-bot)',
-      '                          --no-refresh: não re-visita as listagens (só drena a fila pendente)',
+      '                          [--max-pages N] [--max-articles N] [--no-aggressive] [--no-refresh]',
+      '                          [--no-classify] [--no-summarize] [--no-verify] [--budget USD] [--parallel N]',
+      '                          modo agressivo é o DEFAULT (ignora robots.txt + UA de navegador real);',
+      '                          --no-aggressive volta ao modo educado. --no-refresh: só drena a fila.',
       '  node src/index.js status',
+      '  node src/index.js inspect [--run N] [--url <substr>] [--verbose]   auditoria da run (itens, vereditos, motivos)',
+      '  node src/index.js verify [--limit N] [--force]   verificação pós-cadastro (ok|suspect|junk) sob demanda',
+      '  node src/index.js purge <fonte> --yes [--selectors]   apaga os DADOS de uma fonte p/ refazer do zero',
       '  node src/index.js add <url> [--name "Nome"] [--type index|listing] [--max-index-pages N]',
       '  node src/index.js export [--format md|json] [--all]   (--all: acervo todo, não só a última run)',
       '  node src/index.js classify [--limit N] [--force] [--budget USD] [--parallel N]',
@@ -88,6 +93,15 @@ try {
     } else if (cmd === 'status') {
       printStatus();
       db.close();
+    } else if (cmd === 'inspect') {
+      cmdInspect(flags);
+      db.close();
+    } else if (cmd === 'verify') {
+      await cmdVerify(flags);
+      db.close();
+    } else if (cmd === 'purge') {
+      cmdPurge(rest, flags);
+      db.close();
     } else if (cmd === 'add') {
       cmdAdd(rest, flags);
       db.close();
@@ -118,7 +132,7 @@ try {
     } else {
       errorLog(
         `comando desconhecido: ${cmd} ` +
-          '(use: crawl | status | add | export | classify | summarize | search | web | key | limits | reset | ui)',
+          '(use: crawl | status | inspect | verify | purge | add | export | classify | summarize | search | web | key | limits | reset | ui)',
       );
       process.exit(1);
     }
@@ -126,5 +140,6 @@ try {
 } catch (e) {
   errorLog(e.stack || e.message);
   await closeBrowser();
+  await closeParsePool();
   process.exit(1);
 }

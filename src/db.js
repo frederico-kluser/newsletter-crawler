@@ -132,6 +132,19 @@ CREATE TABLE IF NOT EXISTS llm_usage (
   created_at TEXT DEFAULT (datetime('now'))
 );
 CREATE INDEX IF NOT EXISTS idx_llm_usage_run ON llm_usage(run_id);
+
+CREATE TABLE IF NOT EXISTS events (
+  id INTEGER PRIMARY KEY,
+  run_id INTEGER,
+  source_id INTEGER,
+  url TEXT,
+  stage TEXT NOT NULL,
+  status TEXT NOT NULL,
+  detail TEXT,
+  created_at TEXT DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_events_run ON events(run_id);
+CREATE INDEX IF NOT EXISTS idx_events_url ON events(url);
 `);
 
 // Migração leve p/ DBs criados antes das colunas multinível (CREATE TABLE IF NOT EXISTS
@@ -155,6 +168,27 @@ ensureColumn('runs', 'args', 'args TEXT');
 ensureColumn('runs', 'budget_usd', 'budget_usd REAL');
 ensureColumn('runs', 'status', "status TEXT DEFAULT 'running'");
 ensureColumn('runs', 'new_count', 'new_count INTEGER DEFAULT 0');
+// Pipeline de qualidade (curadoria de agregador + limpeza IA + verificação pós-cadastro):
+// - kind: news|tool|release (item curado; NULL em linhas antigas/avulsas)
+// - issue_url/section/blurb: proveniência e a descrição do PRÓPRIO agregador sobre o item
+// - content_source: 'aggregator' (só o blurb) | 'target' (corpo extraído do alvo)
+// - needs_enrich: 1 = cadastrado na curadoria, aguardando o corpo do alvo
+// - cleaned: 1 = conteúdo passou pela limpeza por IA antes de salvar
+// - verify_status/notes: veredito da verificação pós-cadastro (ok|suspect|junk)
+ensureColumn('articles', 'kind', 'kind TEXT');
+ensureColumn('articles', 'issue_url', 'issue_url TEXT');
+ensureColumn('articles', 'section', 'section TEXT');
+ensureColumn('articles', 'blurb', 'blurb TEXT');
+ensureColumn('articles', 'content_source', 'content_source TEXT');
+ensureColumn('articles', 'needs_enrich', 'needs_enrich INTEGER DEFAULT 0');
+ensureColumn('articles', 'cleaned', 'cleaned INTEGER DEFAULT 0');
+ensureColumn('articles', 'verify_status', 'verify_status TEXT');
+ensureColumn('articles', 'verify_notes', 'verify_notes TEXT');
+// Seletor de DATA da listagem derivado por IA lendo a página real (CSS e/ou regex), por
+// template de weekly — usado pelo piso --since quando o layout não expõe <time datetime>.
+ensureColumn('selectors', 'date_selector', 'date_selector TEXT');
+ensureColumn('selectors', 'date_attribute', 'date_attribute TEXT');
+ensureColumn('selectors', 'date_regex', 'date_regex TEXT');
 
 // Dedup de conteúdo à prova de concorrência: promove idx_articles_hash a UNIQUE em DBs
 // antigos (CREATE UNIQUE ... IF NOT EXISTS não converte um índice já existente). Só age se
@@ -193,13 +227,16 @@ const WEB_WHERE = `
                AND at.tag IN (SELECT value FROM json_each(f.value))
           )
         ))
-    AND (@kind IS NULL OR (@kind = 'tool') = EXISTS (
-          SELECT 1 FROM article_tags tk
-           WHERE tk.article_id = a.id
-             AND (tk.facet = 'framework-library-tool'
-                  OR (tk.facet = 'content-type'
-                      AND tk.tag IN (SELECT value FROM json_each(@toolTypes))))
-        ))`;
+    AND (@kind IS NULL OR (@kind = 'tool') = (CASE
+          WHEN a.kind IN ('tool', 'release') THEN 1
+          WHEN a.kind = 'news' THEN 0
+          ELSE EXISTS (
+            SELECT 1 FROM article_tags tk
+             WHERE tk.article_id = a.id
+               AND (tk.facet = 'framework-library-tool'
+                    OR (tk.facet = 'content-type'
+                        AND tk.tag IN (SELECT value FROM json_each(@toolTypes))))
+          ) END))`;
 
 // Índice do delta por execução (run_id vem via ensureColumn, então não existe no CREATE base).
 db.exec('CREATE INDEX IF NOT EXISTS idx_articles_run ON articles(run_id)');
@@ -224,13 +261,36 @@ export const stmts = {
        pagination_depth = excluded.pagination_depth, fetched_at = datetime('now')`,
   ),
 
-  // articles
+  // articles (o INSERT único cobre o fluxo avulso E o item curado — needs_enrich distingue)
   insertArticle: db.prepare(
-    `INSERT OR IGNORE INTO articles (source_id, url, title, content, content_hash, published_at, run_id)
-     VALUES (@source_id, @url, @title, @content, @content_hash, @published_at, @run_id)`,
+    `INSERT OR IGNORE INTO articles
+       (source_id, url, title, content, content_hash, published_at, run_id,
+        kind, issue_url, section, blurb, content_source, cleaned, needs_enrich)
+     VALUES (@source_id, @url, @title, @content, @content_hash, @published_at, @run_id,
+        @kind, @issue_url, @section, @blurb, @content_source, @cleaned, @needs_enrich)`,
   ),
   getArticleByHash: db.prepare(`SELECT id FROM articles WHERE content_hash = ?`),
   getArticleByUrl: db.prepare(`SELECT id FROM articles WHERE url = ?`),
+  getArticleFullByUrl: db.prepare(`SELECT * FROM articles WHERE url = ?`),
+  // Enriquecimento de item curado: preenche o corpo vindo do ALVO sem tocar kind/blurb/section.
+  enrichArticle: db.prepare(
+    `UPDATE articles SET title = @title, content = @content, content_hash = @content_hash,
+        published_at = @published_at, content_source = @content_source, cleaned = @cleaned,
+        needs_enrich = 0
+      WHERE id = @id`,
+  ),
+  finishEnrich: db.prepare(`UPDATE articles SET needs_enrich = 0 WHERE id = ?`),
+  // verificação pós-cadastro (veredito por artigo) + varredura idempotente (NULL-only)
+  setVerify: db.prepare(
+    `UPDATE articles SET verify_status = @verify_status, verify_notes = @verify_notes WHERE id = @id`,
+  ),
+  listArticlesToVerify: db.prepare(
+    `SELECT id, url, title, kind, blurb, content, content_source FROM articles
+      WHERE verify_status IS NULL ORDER BY id LIMIT ?`,
+  ),
+  listArticlesForReverify: db.prepare(
+    `SELECT id, url, title, kind, blurb, content, content_source FROM articles ORDER BY id LIMIT ?`,
+  ),
   listArticlesBySource: db.prepare(`SELECT * FROM articles WHERE source_id = ? ORDER BY id`),
   // delta: só os artigos descobertos numa execução (run) específica.
   listArticlesForRunBySource: db.prepare(
@@ -282,8 +342,8 @@ export const stmts = {
   // buscador web (ncrawl web): página filtrada + count com o MESMO WHERE (params anuláveis)
   webSearchArticles: db.prepare(
     `SELECT a.id, a.url, a.title, a.title_pt, a.summary_pt, a.published_at, a.extracted_at,
-            a.source_id, s.name AS source_name,
-            substr(coalesce(a.content, ''), 1, 280) AS snippet
+            a.source_id, s.name AS source_name, a.kind, a.section, a.verify_status,
+            substr(coalesce(a.blurb, a.content, ''), 1, 280) AS snippet
        FROM articles a
        LEFT JOIN sources s ON s.id = a.source_id
      ${WEB_WHERE}
@@ -311,18 +371,23 @@ export const stmts = {
        FROM articles`,
   ),
 
-  // selectors
+  // selectors (CSS de links/conteúdo/next + o par CSS+regex de DATA, tudo por template_sig)
   getSelector: db.prepare(`SELECT * FROM selectors WHERE template_sig = ?`),
   putSelector: db.prepare(
     `INSERT INTO selectors
-       (template_sig, link_selector, link_attribute, content_selector, next_selector, model_used, confidence, last_validated)
+       (template_sig, link_selector, link_attribute, content_selector, next_selector,
+        date_selector, date_attribute, date_regex, model_used, confidence, last_validated)
      VALUES
-       (@template_sig, @link_selector, @link_attribute, @content_selector, @next_selector, @model_used, @confidence, datetime('now'))
+       (@template_sig, @link_selector, @link_attribute, @content_selector, @next_selector,
+        @date_selector, @date_attribute, @date_regex, @model_used, @confidence, datetime('now'))
      ON CONFLICT(template_sig) DO UPDATE SET
        link_selector   = excluded.link_selector,
        link_attribute  = excluded.link_attribute,
        content_selector= excluded.content_selector,
        next_selector   = excluded.next_selector,
+       date_selector   = excluded.date_selector,
+       date_attribute  = excluded.date_attribute,
+       date_regex      = excluded.date_regex,
        model_used      = excluded.model_used,
        confidence      = excluded.confidence,
        last_validated  = datetime('now')`,
@@ -350,11 +415,71 @@ export const stmts = {
     `UPDATE frontier SET state = 'pending', retries = 0
       WHERE url = ? AND kind = 'listing' AND state IN ('done', 'failed')`,
   ),
+  // Item curado ainda needs_enrich cujo job já terminou (run anterior): re-ativa p/ tentar de novo.
+  requeueUrl: db.prepare(
+    `UPDATE frontier SET state = 'pending', retries = 0
+      WHERE url = ? AND state IN ('done', 'failed')`,
+  ),
+  // "Enriquecer depois": no início do crawl, re-ativa os jobs de artigos que ficaram só com o
+  // blurb (needs_enrich=1) — inclui os cortados por deadline no run anterior. Escopo por fonte.
+  requeueNeedsEnrichForSource: db.prepare(
+    `UPDATE frontier SET state = 'pending', retries = 0
+      WHERE kind = 'article' AND state IN ('done', 'failed')
+        AND url IN (SELECT url FROM articles WHERE needs_enrich = 1 AND source_id = ?)`,
+  ),
+
+  // events (trace por item: cada estágio grava o que fez/decidiu; `ncrawl inspect` lê daqui)
+  insertEvent: db.prepare(
+    `INSERT INTO events (run_id, source_id, url, stage, status, detail)
+     VALUES (@run_id, @source_id, @url, @stage, @status, @detail)`,
+  ),
+  listEventsForRun: db.prepare(`SELECT * FROM events WHERE run_id = ? ORDER BY id`),
+  listEventsForUrl: db.prepare(`SELECT * FROM events WHERE url LIKE ? ORDER BY id LIMIT ?`),
+  countEventsByStage: db.prepare(
+    `SELECT stage, status, COUNT(*) c FROM events WHERE run_id = ?
+      GROUP BY stage, status ORDER BY stage, status`,
+  ),
+
+  // inspect (auditoria de uma run: artigos com veredito + agrupamento por issue de origem)
+  getRunById: db.prepare(
+    `SELECT r.*,
+            (SELECT COALESCE(SUM(cost_usd), 0) FROM llm_usage u WHERE u.run_id = r.id) spent_usd
+       FROM runs r WHERE r.id = ?`,
+  ),
+  listArticlesForRunInspect: db.prepare(
+    `SELECT id, url, title, kind, section, issue_url, content_source, cleaned, needs_enrich,
+            verify_status, verify_notes, published_at, length(coalesce(content,'')) AS content_len
+       FROM articles WHERE run_id = ?
+      ORDER BY coalesce(issue_url, ''), CASE coalesce(kind,'news')
+        WHEN 'news' THEN 0 WHEN 'tool' THEN 1 WHEN 'release' THEN 2 ELSE 3 END, id`,
+  ),
+  countArticlesByKindForRun: db.prepare(
+    `SELECT coalesce(kind, '(sem kind)') kind, COUNT(*) c FROM articles WHERE run_id = ?
+      GROUP BY 1 ORDER BY c DESC`,
+  ),
+  countVerifyForRun: db.prepare(
+    `SELECT coalesce(verify_status, '(pendente)') s, COUNT(*) c FROM articles WHERE run_id = ?
+      GROUP BY 1 ORDER BY c DESC`,
+  ),
+  listArticlesLikeUrl: db.prepare(
+    `SELECT id, url, title, kind, verify_status, verify_notes, content_source, needs_enrich
+       FROM articles WHERE url LIKE ? ORDER BY id LIMIT 20`,
+  ),
+
+  // purge por fonte (protocolo "apague e refaça" reprodutível; a fonte continua cadastrada)
+  countArticlesBySource: db.prepare(`SELECT COUNT(*) c FROM articles WHERE source_id = ?`),
+  deleteArticlesBySource: db.prepare(`DELETE FROM articles WHERE source_id = ?`),
+  deletePagesBySource: db.prepare(`DELETE FROM pages WHERE source_id = ?`),
+  deleteFrontierBySource: db.prepare(`DELETE FROM frontier WHERE source_id = ?`),
+  deleteEventsBySource: db.prepare(`DELETE FROM events WHERE source_id = ?`),
+  deleteSelectorsLike: db.prepare(`DELETE FROM selectors WHERE template_sig LIKE ?`),
 
   // runs / marca d'água por execução (delta de "novo desde a última execução")
   startDeltaRun: db.prepare(`INSERT INTO runs (started_at) VALUES (datetime('now')) RETURNING id`),
   finishDeltaRun: db.prepare(`UPDATE runs SET finished_at = datetime('now'), new_count = ? WHERE id = ?`),
   getLatestRunId: db.prepare(`SELECT MAX(id) AS id FROM runs`),
+  // inspect: a última run DE CRAWL (um verify/classify avulso também abre run, mas sem artigos)
+  getLatestCrawlRunId: db.prepare(`SELECT MAX(id) AS id FROM runs WHERE command = 'crawl'`),
   countArticlesByRun: db.prepare(`SELECT COUNT(*) c FROM articles WHERE run_id = ?`),
 
   // stats
@@ -448,6 +573,7 @@ export function wipeAll() {
     'pages',
     'selectors',
     'frontier',
+    'events',
     'llm_usage',
     'runs',
     'sources',

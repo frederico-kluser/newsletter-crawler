@@ -356,6 +356,275 @@ export async function extractArticleViaLLM(prunedHtmlOrText) {
   return articleZ.parse(out);
 }
 
+// ---------- etapa curate: itens estruturados de uma issue/roundup (Flash, chunks paralelos) ----------
+// O agregador é a FONTE DA VERDADE do item: título curado, blurb (a descrição da própria
+// newsletter — muitas vezes a única informação boa sobre uma ferramenta) e o tipo. Sem enum
+// no json_schema (strict não é garantia); o clamp fica no zod (desconhecido -> 'news',
+// fail-open p/ salvar — o backstop determinístico de sponsor fica em curate.js).
+export const CURATE_KINDS = new Set(['news', 'tool', 'release', 'sponsor', 'job', 'other']);
+const curateSchema = {
+  type: 'object',
+  properties: {
+    issue_date: { type: ['string', 'null'], description: 'data de publicação da edição (ISO se possível)' },
+    items: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          url: { type: 'string' },
+          title: { type: 'string' },
+          kind: { type: 'string', description: 'news | tool | release | sponsor | job | other' },
+          section: { type: ['string', 'null'] },
+          blurb: { type: ['string', 'null'] },
+        },
+        required: ['url', 'title', 'kind', 'section', 'blurb'],
+        additionalProperties: false,
+      },
+    },
+  },
+  required: ['issue_date', 'items'],
+  additionalProperties: false,
+};
+const curateZ = z.object({
+  issue_date: z.string().nullish(),
+  items: z.array(
+    z.object({
+      url: z.string(),
+      title: z.string(),
+      kind: z
+        .string()
+        .transform((s) => (CURATE_KINDS.has(String(s).toLowerCase().trim()) ? String(s).toLowerCase().trim() : 'news')),
+      section: z.string().nullish(),
+      blurb: z.string().nullish(),
+    }),
+  ),
+});
+// Hint por SEÇÃO: o tipo de conteúdo mais provável de cada seção, p/ o agente especializar o
+// kind. É só um viés (o agente decide item a item), não uma regra dura.
+function sectionHint(section) {
+  if (!section) return '';
+  const s = String(section).toLowerCase();
+  let tip = '';
+  if (/release|version|changelog/.test(s)) tip = 'Tende a ser kind "release" (novas versões de libs/ferramentas).';
+  else if (/tool|code/.test(s)) tip = 'Tende a ser kind "tool" (bibliotecas/ferramentas/serviços a usar).';
+  else if (/brief|news|elsewhere|other news|community/.test(s)) tip = 'Tende a ser kind "news" (notícias curtas).';
+  else if (/classified|job/.test(s)) tip = 'Tende a ser kind "job" (vagas/classificados) — normalmente NÃO se salva.';
+  else if (/sponsor/.test(s)) tip = 'Tende a ser kind "sponsor" (anúncio pago) — NÃO se salva.';
+  return `Esta parte é a seção «${section}» da edição. ${tip}`.trim();
+}
+
+export async function curateRoundupItems({ markdown, baseUrl, section = null, part = null }) {
+  const { model, effort } = stageModel('curate');
+  const hint = sectionHint(section);
+  const out = await callJSON({
+    model,
+    reasoning: { effort },
+    stage: 'curate',
+    schemaName: 'curated_items',
+    schema: curateSchema,
+    system:
+      'Você é o curador de uma edição de newsletter agregadora. Extrai CADA item curado com fidelidade ' +
+      'total ao texto do agregador. Responda apenas com JSON.',
+    user:
+      `Edição/roundup de newsletter (URL ${baseUrl}${part ? `, parte ${part}` : ''}) em markdown. ` +
+      (hint ? `${hint}\n` : '') +
+      'Extraia TODOS os itens curados como {issue_date, items:[{url,title,kind,section,blurb}]}.\n' +
+      (section ? `Use "${section}" como section dos itens desta parte, salvo se o texto indicar outra.\n` : '') +
+      'REGRAS:\n' +
+      '- Um item = uma notícia/ferramenta/release apresentada pela edição. Uma edição típica tem 15–25 ' +
+      'itens: TODOS os DESTAQUES do topo (cada bloco título+comentário é um item — não pule os vizinhos ' +
+      'de um patrocínio) E os de UMA LINHA (listas rápidas tipo "IN BRIEF" e listas de releases — cada ' +
+      'linha com link próprio é um item).\n' +
+      '- url: o link PRINCIPAL do item (a fonte externa). Links secundários dentro do comentário ' +
+      '(documentação, "more info", release notes complementares) NÃO são itens separados.\n' +
+      '- title: o título dado pelo AGREGADOR (ex.: "Node-GTK 4.0: GTK Bindings for Node"), não o da página alvo.\n' +
+      '- kind: "news" (notícia/artigo/tutorial/opinião), "tool" (biblioteca/ferramenta/framework/serviço ' +
+      'apresentado como coisa a usar), "release" (anúncio de NOVA VERSÃO, ex.: "Fastify 5.9"), ' +
+      '"sponsor" (patrocínio/anúncio pago — geralmente marcado "sponsor"), "job" (vaga/classificado), ' +
+      '"other" (navegação/social/interno/assinatura).\n' +
+      '- section: o nome da seção da edição em que o item aparece (ex.: "Code & Tools", "Releases", ' +
+      '"In Brief"), ou null.\n' +
+      '- blurb: a descrição/comentário DO PRÓPRIO agregador sobre o item, em texto corrido limpo ' +
+      '(sem markdown, sem emojis de seção, sem créditos de autor soltos), ou null se não houver.\n' +
+      '- issue_date: a data de publicação da edição, se visível (ex.: "#631 — July 2, 2026" -> "2026-07-02").\n\n' +
+      `MARKDOWN DA EDIÇÃO:\n${clamp(markdown)}`,
+  });
+  return curateZ.parse(out);
+}
+
+// Passe de COBERTURA da curadoria: o curador pode omitir itens (recall imperfeito); a
+// diferença determinística de conjuntos (links do corpo − itens emitidos) chega aqui, e um
+// agente decide o que é item real que FALTOU vs link secundário/patrocínio. Mesmo schema.
+export async function curateLeftoverLinks({ pageContext, baseUrl, leftovers }) {
+  const { model, effort } = stageModel('curate');
+  const list = leftovers
+    .map((l) => `- ${l.url}${l.anchor ? ` (âncora: ${JSON.stringify(l.anchor.slice(0, 80))})` : ''}`)
+    .join('\n');
+  const out = await callJSON({
+    model,
+    reasoning: { effort },
+    stage: 'curate',
+    schemaName: 'curated_items',
+    schema: curateSchema,
+    system:
+      'Você é o curador de uma edição de newsletter agregadora, fazendo o passe de COBERTURA: ' +
+      'classificar links que ficaram fora da primeira extração. Responda apenas com JSON.',
+    user:
+      `Edição de newsletter (URL ${baseUrl}): abaixo vai o HTML PODADO da página INTEIRA — ele ` +
+      'INCLUI blocos que o extrator de corpo pode ter descartado (ex.: destaques vizinhos de ' +
+      'anúncio); procure o bloco de cada link NELE. Depois vêm os LINKS que ficaram FORA da ' +
+      'curadoria. Para CADA link listado, devolva um item {url,title,kind,section,blurb}:\n' +
+      '- Se o link tem um BLOCO PRÓPRIO na edição (título/manchete + comentário do agregador — típico ' +
+      'dos destaques do topo), ele é um ITEM REAL que faltou: use kind news|tool|release e COPIE o ' +
+      'título e o comentário (blurb) do agregador. Na dúvida entre item real e secundário, se o link ' +
+      'tem manchete própria, é item real.\n' +
+      '- Se é link SECUNDÁRIO (aparece dentro do comentário de OUTRO item: documentação, "more info", ' +
+      'release notes complementares, demo, o site do projeto citado de passagem), navegação, social ou ' +
+      'assinatura, use kind "other". Um item REAL tem título próprio dado pelo agregador E comentário ' +
+      'próprio; âncora genérica ("Demo", "Release notes", nome solto citado no meio do blurb de outro ' +
+      'item) é SEMPRE "other".\n' +
+      '- Se é patrocínio/anúncio pago, kind "sponsor"; vaga/classificado, kind "job".\n' +
+      'Devolva um item por link listado (issue_date pode ser null).\n\n' +
+      `LINKS FORA DA CURADORIA:\n${list}\n\nHTML PODADO DA PÁGINA INTEIRA:\n${clamp(pageContext)}`,
+  });
+  return curateZ.parse(out);
+}
+
+// ---------- etapa articleClean: limpeza do conteúdo extraído antes de salvar (Flash) ----------
+// Saída = LISTA DE SPANS de sujeira a remover (verbatim), NÃO o texto reescrito: a remoção
+// acontece localmente (clean.js applyJunkSpans), o que torna a saída ~100x menor (rápida, sem
+// risco de truncamento/alucinação — só se DELETA texto, nunca se reescreve).
+const cleanSchema = {
+  type: 'object',
+  properties: {
+    title: { type: ['string', 'null'] },
+    junk_spans: { type: 'array', items: { type: 'string' } },
+    published_at: { type: ['string', 'null'] },
+  },
+  required: ['title', 'junk_spans', 'published_at'],
+  additionalProperties: false,
+};
+const cleanZ = z.object({
+  title: z.string().nullish(),
+  junk_spans: z.array(z.string()),
+  published_at: z.string().nullish(),
+});
+export async function cleanArticleContent({ title, content }) {
+  const { model, effort } = stageModel('articleClean');
+  const out = await callJSON({
+    model,
+    reasoning: { effort },
+    stage: 'articleClean',
+    schemaName: 'clean_article',
+    schema: cleanSchema,
+    system:
+      'Você identifica sujeira de interface em texto extraído de páginas web. Você copia os trechos ' +
+      'EXATAMENTE como aparecem (verbatim) — nunca resume nem reescreve. Responda apenas com JSON.',
+    user:
+      'O texto abaixo foi extraído de uma página web e pode conter SUJEIRA de interface misturada ao ' +
+      'conteúdo real: menus, breadcrumbs, botões ("Subscribe", "Sign up", "Share"), contadores ' +
+      '("stars", "downloads", "contributors"), navegação de repositório, banners de cookie/paywall, ' +
+      'listas de "related posts", créditos de rodapé, links de navegação soltos.\n' +
+      'Devolva {title, junk_spans, published_at}:\n' +
+      '- junk_spans: os trechos de SUJEIRA copiados VERBATIM do texto (cada um contíguo, até ~300 ' +
+      'caracteres; divida sujeira longa em vários spans). Lista vazia se o texto já estiver limpo. ' +
+      'NUNCA inclua texto do conteúdo real.\n' +
+      '- title: o título real limpo de sufixos de site ("… | npm Docs", "GitHub - x/y: …"), ou null p/ manter.\n' +
+      '- published_at: data de publicação se aparecer no texto (ISO 8601), senão null.\n\n' +
+      `TÍTULO ATUAL: ${title || '(sem título)'}\n\nTEXTO:\n${clamp(content)}`,
+  });
+  return cleanZ.parse(out);
+}
+
+// ---------- etapa verifyRecord: verificação pós-cadastro (Flash, varredura paralela) ----------
+const VERIFY_VERDICTS = new Set(['ok', 'suspect', 'junk']);
+const verifySchema = {
+  type: 'object',
+  properties: {
+    verdict: { type: 'string', description: 'ok | suspect | junk' },
+    problems: { type: 'array', items: { type: 'string' } },
+  },
+  required: ['verdict', 'problems'],
+  additionalProperties: false,
+};
+const verifyZ = z.object({
+  verdict: z
+    .string()
+    .transform((s) => (VERIFY_VERDICTS.has(String(s).toLowerCase().trim()) ? String(s).toLowerCase().trim() : 'suspect')),
+  problems: z.array(z.string()),
+});
+export async function verifyRecordLLM({ url, kind, title, blurb, content }) {
+  const { model, effort } = stageModel('verifyRecord');
+  const out = await callJSON({
+    model,
+    reasoning: { effort },
+    stage: 'verifyRecord',
+    schemaName: 'verify_record',
+    schema: verifySchema,
+    system:
+      'Você audita registros salvos por um crawler de newsletters. Seja rigoroso e específico. ' +
+      'Responda apenas com JSON.',
+    user:
+      'Avalie o REGISTRO salvo abaixo e devolva {verdict, problems}.\n' +
+      'verdict:\n' +
+      '- "ok": registro limpo e coerente (título condiz com o conteúdo; conteúdo é texto real e legível).\n' +
+      '- "suspect": utilizável, mas com problemas (restos de interface/menu/marketing no conteúdo, título ' +
+      'sujo, conteúdo raso demais p/ o título, kind aparentemente errado). Liste-os em problems.\n' +
+      '- "junk": não é conteúdo real (página de erro/bloqueio/captcha, só navegação, propaganda pura, ' +
+      'stub de paywall, texto ilegível).\n' +
+      'problems: lista curta e específica em PT-BR (vazia se ok).\n\n' +
+      `REGISTRO\nurl: ${url}\nkind: ${kind || '(sem kind)'}\ntítulo: ${title || '(vazio)'}\n` +
+      `blurb do agregador: ${blurb || '(nenhum)'}\n\nconteúdo (recorte):\n${clamp(content)}`,
+  });
+  return verifyZ.parse(out);
+}
+
+// ---------- etapa dateSelector: seletor de DATA da listagem (CSS + regex) lendo a página real ----------
+// Gerado POR template de weekly quando o layout não expõe <time datetime> nem classe de data
+// reconhecível; o chamador VALIDA contra a própria página antes de cachear (self-healing).
+const dateSelectorSchema = {
+  type: 'object',
+  properties: {
+    date_selector: { type: ['string', 'null'], description: 'seletor CSS do elemento que carrega a data do item' },
+    date_attribute: { type: ['string', 'null'], description: 'atributo com a data (ex.: datetime, content) ou null p/ texto' },
+    date_regex: { type: ['string', 'null'], description: 'regex JS que captura a data (grupo 1) do texto/atributo' },
+    confidence: { type: 'number' },
+  },
+  required: ['date_selector', 'date_attribute', 'date_regex', 'confidence'],
+  additionalProperties: false,
+};
+const dateSelectorZ = z.object({
+  date_selector: z.string().nullish(),
+  date_attribute: z.string().nullish(),
+  date_regex: z.string().nullish(),
+  confidence: z.number().nullish(),
+});
+export async function deriveDateSelector(prunedHtml, baseUrl) {
+  const { model, effort } = stageModel('dateSelector');
+  const out = await callJSON({
+    model,
+    reasoning: { effort },
+    stage: 'dateSelector',
+    schemaName: 'date_selector',
+    schema: dateSelectorSchema,
+    system:
+      'Você é um especialista em CSS, regex e web scraping. Você lê o HTML REAL e devolve seletores ' +
+      'que funcionam nesta página específica. Responda apenas com JSON.',
+    user:
+      `Página de arquivo/listagem de newsletter (URL ${baseUrl}). Cada item da lista aponta p/ uma ` +
+      'edição/artigo e tem uma DATA associada (no próprio item). Devolva como extrair essa data de ' +
+      'CADA item: {date_selector, date_attribute, date_regex, confidence}.\n' +
+      '- date_selector: seletor CSS do elemento da data DENTRO do container do item (ex.: ".issue-date", ' +
+      '"time", "span.meta"). Deve casar 1 elemento por item, não um global da página.\n' +
+      '- date_attribute: atributo que carrega a data (ex.: "datetime", "content"), ou null se a data é o TEXTO.\n' +
+      '- date_regex: regex JavaScript (sem flags) que captura a data no grupo 1 a partir do texto/atributo ' +
+      '(ex.: "(\\\\d{4}-\\\\d{2}-\\\\d{2})"), ou null se o valor inteiro já é a data.\n' +
+      'Se a página realmente não tiver data por item, devolva tudo null com confidence baixa.\n\n' +
+      `HTML (podado):\n${clamp(prunedHtml)}`,
+  });
+  return dateSelectorZ.parse(out);
+}
+
 // ---------- etapa classify: classificação multi-faceta (1 agente por faceta) ----------
 // Schema/zod UNIFORMES: tags são strings simples — SEM enum no json_schema. O suporte a
 // enum/minItems no strict do DeepSeek V4 não é comprovado; a garantia real de vocabulário é

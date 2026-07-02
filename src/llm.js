@@ -62,20 +62,26 @@ function bumpPenalty(err) {
   reportRateLimit();
 }
 
-async function createOnce({ stage, model, reasoning, response_format, messages }) {
+async function createOnce({ stage, model, reasoning, response_format, messages, signal }) {
   return getLane('llm')(async () => {
+    if (signal?.aborted) throw signal.reason || new Error('chamada LLM abortada');
     await awaitPenalty();
+    if (signal?.aborted) throw signal.reason || new Error('chamada LLM abortada');
     const resv = budgetReserve(stage, model); // lança BudgetExceededError quando esgotado
     try {
-      const resp = await client().chat.completions.create({
-        model,
-        reasoning,
-        response_format,
-        messages,
-        // OpenRouter usage accounting: a resposta traz usage.cost (USD) — o custo REAL que
-        // alimenta o ledger/orçamento. Passa pelo SDK como campo extra, igual ao `reasoning`.
-        usage: { include: true },
-      });
+      const resp = await client().chat.completions.create(
+        {
+          model,
+          reasoning,
+          response_format,
+          messages,
+          // OpenRouter usage accounting: a resposta traz usage.cost (USD) — o custo REAL que
+          // alimenta o ledger/orçamento. Passa pelo SDK como campo extra, igual ao `reasoning`.
+          usage: { include: true },
+        },
+        // Abort do job (teto duro): cancela a chamada em voo e devolve o slot da lane já.
+        signal ? { signal } : undefined,
+      );
       // Commit ANTES do parse de JSON: um 200 malformado também custou dinheiro.
       resv.commit({ model: resp.model || model, usage: resp.usage });
       if (Date.now() >= _penaltyUntil) _penaltyK = 0; // janela limpa: zera o backoff
@@ -89,10 +95,11 @@ async function createOnce({ stage, model, reasoning, response_format, messages }
 
 async function createWithRateLimitRetry(args) {
   for (let attempt = 0; ; attempt++) {
+    if (args.signal?.aborted) throw args.signal.reason || new Error('chamada LLM abortada');
     try {
       return await createOnce(args);
     } catch (e) {
-      if (e?.status === 429 && attempt < 3) {
+      if (e?.status === 429 && attempt < 3 && !args.signal?.aborted) {
         bumpPenalty(e);
         warn(`429 do OpenRouter (${args.stage}); aguardando a janela de penalidade…`);
         continue; // re-admite pela lane e espera a penalidade
@@ -135,6 +142,7 @@ let _warnedMaxEffort = false;
 export async function callJSON({
   model, reasoning, schema, schemaName, system, user, retries = 2, fallbackModel = MODELS.pro,
   stage = 'other', // rótulo do estágio p/ o ledger de custo (default p/ usos avulsos/eval)
+  signal = null, // AbortSignal do job (teto duro): cancela a chamada em voo e os retries
 }) {
   // Guard: "max" não é suportado pelo DeepSeek V4 (HTTP 400); rebaixa para "xhigh".
   if (reasoning?.effort === 'max') {
@@ -161,7 +169,7 @@ export async function callJSON({
     // Cada tentativa (inclusive a escalada p/ o Pro) é uma admissão própria no transporte:
     // lane llm + reserva de orçamento com o modelo certo + registro do custo real.
     const resp = await createWithRateLimitRetry({
-      stage, model: useModel, reasoning, response_format, messages,
+      stage, model: useModel, reasoning, response_format, messages, signal,
     });
     const parsed = tryParseJSON(resp.choices?.[0]?.message?.content ?? '');
     if (parsed !== undefined) return parsed;
@@ -223,11 +231,12 @@ const contentSelectorZ = z.object({
   content_selector: z.string().min(1),
   confidence: z.number().nullish(),
 });
-export async function deriveContentSelector(prunedHtml) {
+export async function deriveContentSelector(prunedHtml, { signal = null } = {}) {
   const { model, effort } = stageModel('contentSelector');
   const out = await callJSON({
     model,
     reasoning: { effort },
+    signal,
     stage: 'contentSelector',
     schemaName: 'content_selector',
     schema: contentSelectorSchema,
@@ -340,11 +349,12 @@ const articleZ = z.object({
   content: z.string(),
   published_at: z.string().nullable(),
 });
-export async function extractArticleViaLLM(prunedHtmlOrText) {
+export async function extractArticleViaLLM(prunedHtmlOrText, { signal = null } = {}) {
   const { model, effort } = stageModel('articleExtract');
   const out = await callJSON({
     model,
     reasoning: { effort },
+    signal,
     stage: 'articleExtract',
     schemaName: 'article',
     schema: articleSchema,
@@ -509,11 +519,12 @@ const cleanZ = z.object({
   junk_spans: z.array(z.string()),
   published_at: z.string().nullish(),
 });
-export async function cleanArticleContent({ title, content, stage = 'articleClean' }) {
+export async function cleanArticleContent({ title, content, stage = 'articleClean' }, { signal = null } = {}) {
   const { model, effort } = stageModel(stage);
   const out = await callJSON({
     model,
     reasoning: { effort },
+    signal,
     stage,
     schemaName: 'clean_article',
     schema: cleanSchema,

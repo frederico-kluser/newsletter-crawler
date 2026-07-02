@@ -6,9 +6,21 @@ import pLimit from 'p-limit';
 import * as cheerio from 'cheerio';
 import {
   USER_AGENT, REQUEST_DELAY_MS, PER_HOST_CONCURRENCY, MAX_RETRIES, RESPECT_ROBOTS,
+  SCROLL_STALL_CHECKS,
 } from './config.js';
 import { getLane } from './governor.js';
-import { hostOf, sleep, log, warn, debug } from './util.js';
+import { inStage } from './progress.js';
+import { abortErrorOf } from './deadline.js';
+import { hostOf, sleep, log, warn, debug, parseDate } from './util.js';
+
+// ---- integração com o relógio de trabalho do job (deadline.js) ----
+// `clock.run(fase, fn)` conta o tempo de fn no orçamento do job; sem clock, roda direto.
+// `throwIfAborted` corta cedo um job já abortado ANTES de ele reservar politeness/lane — é o
+// que impede o zumbi de continuar consumindo a timeline do host e as filas.
+const runOn = (clock, phase, fn) => (clock ? clock.run(phase, fn) : fn());
+const throwIfAborted = (signal) => {
+  if (signal?.aborted) throw abortErrorOf(signal);
+};
 
 // ---- modo agressivo: identidade de navegador real (UA + headers/client-hints) ----
 // Opt-in por execução (--aggressive). MANTENHA sec-ch-ua em sincronia com a versão do BROWSER_UA.
@@ -168,26 +180,39 @@ export async function checkRobots(url) {
 // ---- fetch estático ----
 // Host limiter por FORA (politeness é invariante, não escala com a máquina); a lane fetch do
 // governador por dentro limita o total de requests simultâneos na máquina inteira.
-export async function fetchStatic(url, { aggressive = false } = {}) {
+export async function fetchStatic(url, { aggressive = false, clock = null, signal = null } = {}) {
   const host = hostOf(url);
+  const tQueue = Date.now();
   return hostLimit(host)(async () => {
-    await politePause(host, url);
+    throwIfAborted(signal); // job abortado não reserva a timeline de politeness do host
+    clock?.noteWait('hostQueue', Date.now() - tQueue);
+    const pol = () => politePause(host, url);
+    await (clock ? clock.wait('polite', pol) : pol());
+    throwIfAborted(signal);
+    const tLane = Date.now();
     return getLane('fetch')(async () => {
-      try {
-        const res = await got(url, {
-          headers: aggressive
-            ? AGGRESSIVE_HEADERS
-            : { 'user-agent': USER_AGENT, accept: 'text/html,application/xhtml+xml' },
-          timeout: { request: 20000 },
-          retry: { limit: MAX_RETRIES, methods: ['GET'], statusCodes: [408, 429, 500, 502, 503, 504] },
-          followRedirect: true,
-        });
-        recordOk(host);
-        return { html: res.body, status: res.statusCode, url: res.url, rendered: false };
-      } catch (e) {
-        recordError(host);
-        throw e;
-      }
+      clock?.noteWait('fetchLane', Date.now() - tLane);
+      throwIfAborted(signal);
+      return inStage('fetch', () => runOn(clock, 'fetch', async () => {
+        try {
+          const res = await got(url, {
+            headers: aggressive
+              ? AGGRESSIVE_HEADERS
+              : { 'user-agent': USER_AGENT, accept: 'text/html,application/xhtml+xml' },
+            timeout: { request: 20000 },
+            retry: { limit: MAX_RETRIES, methods: ['GET'], statusCodes: [408, 429, 500, 502, 503, 504] },
+            followRedirect: true,
+            signal: signal || undefined, // abort do job cancela o request em voo
+          });
+          recordOk(host);
+          return { html: res.body, status: res.statusCode, url: res.url, rendered: false };
+        } catch (e) {
+          // Abort do job não é falha do host: não conta no circuit breaker.
+          if (signal?.aborted) throw abortErrorOf(signal);
+          recordError(host);
+          throw e;
+        }
+      }));
     });
   });
 }
@@ -222,14 +247,25 @@ export async function closeBrowser() {
   }
 }
 
-export async function fetchRendered(url, { profile = 'listing', aggressive = false } = {}) {
+export async function fetchRendered(url, {
+  profile = 'listing', aggressive = false, clock = null, signal = null, sinceDate = null,
+} = {}) {
   const host = hostOf(url);
   const prof = RENDER_PROFILES[profile] || RENDER_PROFILES.listing;
+  const tQueue = Date.now();
   return hostLimit(host)(async () => {
-    await politePause(host, url);
+    throwIfAborted(signal); // job abortado não reserva a timeline de politeness do host
+    clock?.noteWait('hostQueue', Date.now() - tQueue);
+    const pol = () => politePause(host, url);
+    await (clock ? clock.wait('polite', pol) : pol());
+    throwIfAborted(signal);
     // Lane render cobre a vida INTEIRA do contexto (newContext -> close): o permit da lane é
     // exatamente a pegada de RAM de um Chromium context — é isso que o governador conta.
+    const tLane = Date.now();
     return getLane('render')(async () => {
+      clock?.noteWait('renderLane', Date.now() - tLane);
+      throwIfAborted(signal);
+      return inStage('render', () => runOn(clock, 'render', async () => {
       const deadline = Date.now() + prof.deadlineMs;
       const browser = await getBrowser();
       // ignoreHTTPSErrors: alguns veículos têm cert com CN inválido (ex.: kedglobal.com ->
@@ -251,33 +287,145 @@ export async function fetchRendered(url, { profile = 'listing', aggressive = fal
           const t = route.request().resourceType();
           return ['image', 'media', 'font'].includes(t) ? route.abort() : route.continue();
         });
+        throwIfAborted(signal);
         await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 45000 });
-        await autoScroll(page, { maxRounds: prof.scrollRounds, deadline });
-        if (prof.loadMore) await clickLoadMore(page, undefined, 50, deadline);
+        // Listagem: scroll INTELIGENTE — colhe {href,texto,datetime} a cada rodada (aguenta feed
+        // virtualizado que descarta itens do DOM) e para por data (--since), estagnação ou teto.
+        const collect = profile === 'listing';
+        const scroll = await autoScroll(page, {
+          maxRounds: prof.scrollRounds, deadline, signal,
+          collect, sinceDate: collect ? sinceDate : null,
+        });
+        // Piso de data alcançado: clicar "older/load more" só traria itens ainda mais antigos.
+        if (prof.loadMore && scroll.reason !== 'piso') await clickLoadMore(page, undefined, 50, deadline, signal);
+        if (collect) scroll.harvest.push(...(await harvestNewLinks(page))); // o que o load-more trouxe
         if (Date.now() >= deadline) log(`render truncado pelo deadline (${profile}): ${url.slice(0, 80)}`);
+        if (collect && !['rodadas', 'plateau'].includes(scroll.reason)) {
+          log(`scroll parado (${scroll.reason}) após ${scroll.rounds} rodadas, ${scroll.harvest.length} links vistos: ${url.slice(0, 80)}`);
+        }
         const html = await page.content();
         recordOk(host);
-        return { html, status: 200, url: page.url(), rendered: true };
+        return { html, status: 200, url: page.url(), rendered: true, harvest: collect ? scroll.harvest : undefined };
       } catch (e) {
+        // Abort do job não é falha do host: não conta no circuit breaker.
+        if (signal?.aborted) throw abortErrorOf(signal);
         recordError(host);
         throw e;
       } finally {
         await ctx.close().catch(() => {});
       }
+      }));
     });
   });
 }
 
-/** Rola até a altura parar de crescer (detecta fim de scroll infinito) ou até o deadline. */
-export async function autoScroll(page, { step = 1200, pause = 800, maxRounds = 60, deadline = Infinity } = {}) {
+/**
+ * Decisão PURA de uma rodada de scroll (testável sem browser). Modo simples (artigo): para no
+ * platô de altura (comportamento clássico). Modo collect (listagem): NÃO confia na altura (feed
+ * virtualizado recicla DOM com altura ~constante) — para por 'piso' (>=2 itens novos datados e
+ * TODOS abaixo do --since) ou 'estagnado' (stallChecks checagens seguidas sem link novo).
+ */
+export function scrollRoundDecision({
+  collect = false, heightGrew = true, newCount = 0, newDatesMs = [], sinceMs = null,
+  stall = 0, stallChecks = SCROLL_STALL_CHECKS,
+} = {}) {
+  if (!collect) return { stop: heightGrew ? null : 'plateau', stall: 0 };
+  if (sinceMs != null && newDatesMs.length >= 2 && newDatesMs.every((t) => t < sinceMs)) {
+    return { stop: 'piso', stall };
+  }
+  const s = newCount === 0 ? stall + 1 : 0;
+  return { stop: s >= stallChecks ? 'estagnado' : null, stall: s };
+}
+
+// Colheita incremental no browser: só os links AINDA NÃO VISTOS (Set no window persiste entre
+// evaluates da mesma page), com a data <time datetime> do container do item quando houver. O
+// walk para no ancestral com >3 links (é a lista, não o item — evita "emprestar" a data do
+// primeiro item da página).
+function harvestNewLinks(page) {
+  return page
+    .evaluate(() => {
+      try {
+        const seen = (window.__ncSeenLinks ||= new Set());
+        const out = [];
+        for (const a of document.querySelectorAll('a[href]')) {
+          const href = a.href;
+          if (!href || seen.has(href)) continue;
+          seen.add(href);
+          let dt = null;
+          let n = a;
+          for (let i = 0; i < 4 && n && !dt; i++) {
+            if (i > 0 && n.querySelectorAll('a[href]').length > 3) break;
+            const t = n.querySelector('time[datetime]');
+            if (t) dt = t.getAttribute('datetime');
+            n = n.parentElement;
+          }
+          out.push({ href, text: (a.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 160), dt });
+        }
+        return out;
+      } catch {
+        return [];
+      }
+    })
+    .catch(() => []);
+}
+
+/**
+ * Rola a página até um motivo de parada. Retorna { rounds, reason, harvest }, onde harvest são
+ * os links colhidos DURANTE o scroll (modo collect) — inclui itens que um feed virtualizado já
+ * descartou do DOM final. reasons: plateau | piso | estagnado | deadline | abort | sem-altura | rodadas.
+ */
+export async function autoScroll(page, {
+  step = 1200, pause = 800, maxRounds = 60, deadline = Infinity,
+  signal = null, collect = false, sinceDate = null, stallChecks = SCROLL_STALL_CHECKS,
+} = {}) {
+  const sinceMs = sinceDate instanceof Date ? sinceDate.getTime() : null;
+  const harvest = [];
   let prev = 0;
-  for (let i = 0; i < maxRounds && Date.now() < deadline; i++) {
+  let stall = 0;
+  let rounds = 0;
+  let reason = null;
+  for (let i = 0; i < maxRounds; i++) {
+    if (signal?.aborted) {
+      reason = 'abort';
+      break;
+    }
+    if (Date.now() >= deadline) {
+      reason = 'deadline';
+      break;
+    }
     const h = await page.evaluate(() => document.body.scrollHeight).catch(() => 0);
-    if (!h || h === prev) break;
+    let fresh = [];
+    if (collect) {
+      fresh = await harvestNewLinks(page);
+      harvest.push(...fresh);
+    }
+    const dec = scrollRoundDecision({
+      collect,
+      heightGrew: h > 0 && h !== prev,
+      newCount: fresh.length,
+      newDatesMs:
+        collect && sinceMs != null
+          ? fresh.map((it) => parseDate(it.dt)).filter(Boolean).map((d) => d.getTime())
+          : [],
+      sinceMs,
+      stall,
+      stallChecks,
+    });
+    stall = dec.stall;
+    if (dec.stop) {
+      reason = dec.stop;
+      break;
+    }
+    if (!h) {
+      reason = 'sem-altura';
+      break;
+    }
     prev = h;
+    rounds = i + 1;
     await page.evaluate((s) => window.scrollBy(0, s), step).catch(() => {});
     await page.waitForTimeout(pause);
   }
+  return { rounds, reason: reason || 'rodadas', harvest };
 }
 
 /** Clica repetidamente em botões "carregar mais / mais antigos / próximo" (até o deadline). */
@@ -286,8 +434,10 @@ export async function clickLoadMore(
   label = /mais|more|older|antig|load|próxim|proxim|next/i,
   maxClicks = 50,
   deadline = Infinity,
+  signal = null,
 ) {
   for (let i = 0; i < maxClicks && Date.now() < deadline; i++) {
+    if (signal?.aborted) return;
     const btn = page.locator('button, a').filter({ hasText: label }).first();
     if ((await btn.count().catch(() => 0)) === 0) break;
     if (!(await btn.isVisible().catch(() => false))) break;
@@ -313,23 +463,27 @@ function looksEmpty(html) {
 // Decisão "precisa de JS" cacheada por host para não pagar o custo do browser à toa.
 const needsJs = new Map();
 
-export async function fetchSmart(url, { forceRender = false, profile = 'listing', aggressive = false } = {}) {
+export async function fetchSmart(url, {
+  forceRender = false, profile = 'listing', aggressive = false,
+  clock = null, signal = null, sinceDate = null,
+} = {}) {
   const host = hostOf(url);
   if (!breaker.canRequest(host)) throw new Error(`circuit breaker aberto para host ${host}`);
 
   if (forceRender || needsJs.get(host)) {
-    return fetchRendered(url, { profile, aggressive });
+    return fetchRendered(url, { profile, aggressive, clock, signal, sinceDate });
   }
 
   let staticRes = null;
   try {
-    staticRes = await fetchStatic(url, { aggressive });
+    staticRes = await fetchStatic(url, { aggressive, clock, signal });
   } catch (e) {
+    if (signal?.aborted) throw abortErrorOf(signal); // job morto: sem fallback p/ Playwright
     warn(`estático falhou (${url}): ${e.message}; tentando Playwright`);
   }
   if (staticRes && !looksEmpty(staticRes.html)) return staticRes;
 
   needsJs.set(host, true);
   log(`conteúdo ausente no HTML cru de ${host} -> usando Playwright`);
-  return fetchRendered(url, { profile, aggressive });
+  return fetchRendered(url, { profile, aggressive, clock, signal, sinceDate });
 }

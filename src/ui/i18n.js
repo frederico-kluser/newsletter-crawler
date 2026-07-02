@@ -102,6 +102,11 @@ const DICT = {
     selectors: 'seletores',
     classif: 'classif.',
     frontier: 'fila',
+    nowLabel: 'agora',
+    targetLabel: 'alvo',
+    timeoutsLabel: 'estouros',
+    savedLabel: 'salvos',
+    noDateLabel: 's/ data',
   },
   en: {
     title: 'newsletter-crawler',
@@ -203,6 +208,11 @@ const DICT = {
     selectors: 'selectors',
     classif: 'classif.',
     frontier: 'queue',
+    nowLabel: 'now',
+    targetLabel: 'target',
+    timeoutsLabel: 'timeouts',
+    savedLabel: 'saved',
+    noDateLabel: 'no date',
   },
 };
 

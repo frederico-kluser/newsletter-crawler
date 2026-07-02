@@ -4,8 +4,78 @@ import { Readability, isProbablyReaderable } from '@mozilla/readability';
 import TurndownService from 'turndown';
 import * as cheerio from 'cheerio';
 import { MAX_HTML_FOR_LLM } from './config.js';
+import { getLane } from './governor.js';
+import { debug } from './util.js';
 
 const turndown = new TurndownService({ headingStyle: 'atx', codeBlockStyle: 'fenced' });
+
+// Lane de CPU p/ parses SÍNCRONOS (JSDOM/Readability/prune, 50ms–5s cada): limita o DÉBITO
+// agregado de latência no event loop (timers do governador, CDP) — não a latência de um parse.
+// O setImmediate cede o loop antes do bloco síncrono; HTML gigante é truncado (fail-open)
+// antes do JSDOM p/ um outlier não segurar o processo por dezenas de segundos.
+// (Morava em crawl.js; vive aqui p/ crawl.js E curate.js usarem sem ciclo de import.)
+const MAX_PARSE_HTML = 2 * 1024 * 1024;
+export const capHtml = (html) => {
+  if (html && html.length > MAX_PARSE_HTML) {
+    debug(`parse: HTML de ${html.length} chars truncado em ${MAX_PARSE_HTML}`);
+    return html.slice(0, MAX_PARSE_HTML);
+  }
+  return html;
+};
+export async function cpuParse(fn) {
+  return getLane('cpu')(async () => {
+    await new Promise((r) => setImmediate(r));
+    return fn();
+  });
+}
+
+/**
+ * Aplica os junk_spans da limpeza por IA: remove do texto TODAS as ocorrências exatas de cada
+ * span (dedup, maiores primeiro; span não encontrado verbatim é ignorado — fail-open). A
+ * remoção nunca reescreve: só deleta. sanityCheckCleaned guarda contra over-deletion (se o
+ * resultado ficar implausivelmente pequeno, mantém o original). Puro/testável.
+ */
+export function applyJunkSpans(original, spans) {
+  const o = String(original || '');
+  const uniq = [...new Set((spans || []).map((s) => String(s || '')).filter((s) => s.trim().length >= 4))]
+    .sort((a, b) => b.length - a.length)
+    .slice(0, 60);
+  let text = o;
+  let applied = 0;
+  let notFound = 0;
+  for (const span of uniq) {
+    if (text.includes(span)) {
+      text = text.split(span).join(' ');
+      applied++;
+    } else {
+      notFound++;
+    }
+  }
+  if (!applied) return { text: o, applied: 0, notFound, removed: 0, rejected: false };
+  text = text.replace(/[ \t]{2,}/g, ' ').replace(/\n{3,}/g, '\n\n').trim();
+  const check = sanityCheckCleaned(o, text);
+  if (!check.ok) {
+    // Removeu demais p/ ser só sujeira: conservador, mantém o original (verify julga depois).
+    return { text: o, applied: 0, notFound, removed: 0, rejected: true, reason: check.reason };
+  }
+  return { text, applied, notFound, removed: o.length - text.length, rejected: false };
+}
+
+/**
+ * Sanidade da limpeza por IA (anti-alucinação/truncamento): o texto limpo precisa ser um
+ * recorte plausível do original — nem minúsculo (truncou), nem maior (inventou). Puro/testável.
+ */
+export function sanityCheckCleaned(original, cleaned) {
+  const o = String(original || '').trim();
+  const c = String(cleaned || '').trim();
+  if (!c) return { ok: false, reason: 'vazio' };
+  // Piso anti-truncamento: em texto longo, >= max(200, 15%); em texto curto, o teto de 60%
+  // do original governa (limpar um blurb de 80 chars pode legitimamente tirar um pedaço).
+  const min = Math.floor(Math.min(Math.max(200, o.length * 0.15), o.length * 0.6));
+  if (c.length < min) return { ok: false, reason: `curto demais (${c.length} < ${min})` };
+  if (c.length > o.length * 1.2 + 500) return { ok: false, reason: 'maior que o original' };
+  return { ok: true };
+}
 
 /** Extrai o corpo do artigo com o algoritmo do Reader View. Retorna objeto ou null. */
 export function extractArticle(html, url) {

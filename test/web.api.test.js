@@ -26,6 +26,14 @@ function seedArticle({ source, url, title, content, published, titlePt, summaryP
     content_hash: `hash-${url}`,
     published_at: published,
     run_id: null,
+    // colunas do pipeline de curadoria/limpeza (defaults de artigo avulso já completo)
+    kind: null,
+    issue_url: null,
+    section: null,
+    blurb: null,
+    content_source: 'target',
+    cleaned: 0,
+    needs_enrich: 0,
   });
   const id = Number(r.lastInsertRowid);
   if (titlePt || summaryPt) stmts.setSummary.run({ id, title_pt: titlePt || null, summary_pt: summaryPt || null });
@@ -211,4 +219,36 @@ test('web: serve a UI e os vendors locais (zero-build, sem CDN)', async () => {
 test('web: método não-GET é 405', async () => {
   const r = await fetch(`http://127.0.0.1:${srv.port}/api/meta`, { method: 'POST' });
   assert.equal(r.status, 405);
+});
+
+// ---- kind curado (coluna) tem precedência sobre as tags; NULL cai no fallback por tags ----
+test('web: coluna kind curada vence as tags no bucket tool/news', async (t) => {
+  const mk = (url, kind, tags = []) => {
+    const r = stmts.insertArticle.run({
+      source_id: alpha.id, url, title: `k-${kind}`, content: `conteúdo ${url}`,
+      content_hash: `hash-${url}`, published_at: '2026-06-30', run_id: null,
+      kind, issue_url: 'http://agg.test/issue/1', section: null, blurb: 'blurb do agregador',
+      content_source: 'aggregator', cleaned: 0, needs_enrich: 0,
+    });
+    const id = Number(r.lastInsertRowid);
+    tags.forEach(({ facet, tag }, i) => stmts.insertTag.run({ article_id: id, facet, tag, rank: i + 1 }));
+    return id;
+  };
+  const toolByCol = mk('http://agg.test/tool-sem-tags', 'tool');
+  const relByCol = mk('http://agg.test/release-sem-tags', 'release');
+  // rotulado news pela curadoria, mas com tag de ferramenta: a COLUNA decide (news)
+  const newsByCol = mk('http://agg.test/news-com-tag-tool', 'news', [
+    { facet: 'framework-library-tool', tag: 'vitest' },
+  ]);
+  t.after(() => {
+    for (const id of [toolByCol, relByCol, newsByCol]) db.prepare('DELETE FROM articles WHERE id = ?').run(id);
+  });
+  const tool = await json('/api/articles?kind=tool');
+  const toolIds = tool.body.items.map((a) => a.id);
+  assert.ok(toolIds.includes(toolByCol) && toolIds.includes(relByCol), 'tool/release por coluna entram no bucket tool');
+  assert.ok(!toolIds.includes(newsByCol), 'news por coluna fica fora mesmo com tag de ferramenta');
+  const news = await json('/api/articles?kind=news');
+  assert.ok(news.body.items.map((a) => a.id).includes(newsByCol));
+  // snippet prioriza o blurb curado
+  assert.ok(tool.body.items.find((a) => a.id === toolByCol).snippet.includes('blurb do agregador'));
 });

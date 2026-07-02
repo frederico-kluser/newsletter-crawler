@@ -3,6 +3,52 @@
 Todas as mudanças relevantes deste projeto. Formato baseado em
 [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/); versionamento [SemVer](https://semver.org/lang/pt-BR/).
 
+## [1.3.0] - 2026-07-02
+
+### Adicionado
+- **Curadoria por IA do agregador (default ON):** cada issue de fonte `index` é processada por agentes
+  Flash **em paralelo** (chunks de `CURATE_CHUNK_CHARS`) e vira **itens estruturados** — `kind`
+  news|tool|release, seção e o **blurb do próprio agregador**. O item é **cadastrado já na curadoria**
+  (`needs_enrich=1`, conteúdo inicial = título+blurb) e o fetch do alvo vira **enriquecimento**: ferramenta
+  com alvo raso/bloqueado (GitHub, release page) **não se perde mais**; patrocínio/vaga ficam FORA
+  (rótulo do LLM + backstop determinístico `sponsor|hiring|classifieds`). Links secundários de dentro dos
+  blurbs deixam de virar registros.
+- **Limpeza por IA antes de salvar (default ON):** o conteúdo extraído passa pelo Flash p/ remover sujeira
+  de UI (menus, contadores de stars/downloads, subscribe, rodapé) preservando o texto real; régua
+  anti-truncamento `sanityCheckCleaned` (rejeitou → mantém original e registra motivo).
+- **Verificação pós-cadastro (default ON) + `ncrawl verify`:** varredura paralela dá veredito
+  `ok|suspect|junk` + notas a cada artigo (colunas `verify_status/verify_notes`), auto pós-crawl.
+- **Trace por item (tabela `events`) + `ncrawl inspect`:** todo estágio grava o que fez/decidiu (fetch,
+  curadoria, item salvo/ignorado com motivo, limpeza, enriquecimento, verificação, seletor de data);
+  `inspect` mostra a run em árvore (itens por issue, vereditos, custo por etapa), `--url <substr>` audita
+  um link, `--verbose` inclui as notas.
+- **Seletor de DATA por IA lendo a página real:** quando `--since` está ativo e o layout não expõe
+  `<time datetime>` (Node Weekly usa `<span class="issue-date">`), o Flash deriva um par **CSS + regex**
+  por template de weekly, validado contra a própria página (≥50% dos itens datados) e cacheado em
+  `selectors.date_selector/date_attribute/date_regex`; fallbacks genéricos (`[class*=date]`, regex estrita)
+  continuam de custo zero.
+- **`ncrawl purge <fonte> --yes [--selectors]`:** apaga os DADOS de uma fonte (artigos+tags, pages,
+  frontier, events; a fonte continua cadastrada) p/ refazer um crawl do zero de forma reprodutível.
+- **Passe de COBERTURA da curadoria:** o recall do curador não é garantido (observado: 3 itens do meio
+  da issue omitidos) — a diferença determinística de conjuntos (links externos do corpo − itens
+  emitidos) alimenta um agente extra que decide item real que faltou vs link secundário; um pós-filtro
+  determinístico (`isRealRecoveredItem`: exige blurb real e título não-genérico) impede que âncoras
+  como "Demo."/"Release notes" virem registros. Evento `curate/coverage` audita o funil.
+
+### Corrigido
+- **`RENDER_PROFILES` não existia em fetch.js** (perdido no merge dos branches): TODO fetch renderizado
+  (Playwright) crashava com `RENDER_PROFILES is not defined` — páginas JS-gated nunca eram capturadas.
+- **Crawl abria 2 linhas em `runs`** (ledger + `startDeltaRun`) e **crashava** em DBs criados pelo branch
+  robot-bypass (`runs.command NOT NULL`); agora a marca d'água do delta reusa o run do ledger.
+- **Duplicação de logs** no fim do crawl (bloco repetido do merge).
+
+### Alterado
+- **Modo agressivo virou o DEFAULT** (`CRAWLER_AGGRESSIVE=false` ou `--no-aggressive` p/ modo educado);
+  segue NÃO salvando páginas de desafio e NÃO relaxando breaker/delays.
+- No fluxo de item curado, o **título do agregador é autoritativo** (ex.: "Node-GTK 4.0" em vez de
+  "The GTK Project - …") e a **data-âncora é a da issue**; artigo curado com data própria antiga não é
+  mais censurado pelo piso `--since` (o piso segue valendo p/ artigos avulsos e p/ as issues).
+
 ## [1.2.0] - 2026-07-01
 
 ### Adicionado

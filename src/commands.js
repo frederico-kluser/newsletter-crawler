@@ -7,6 +7,7 @@ import { stmts, wipeAll } from './db.js';
 import {
   EXPORT_DIR, DB_PATH, CONCURRENCY, MAX_RETRIES, HAS_LLM, CLASSIFY_AFTER_CRAWL, SUMMARIZE_AFTER_CRAWL,
   SEARCH_MODE_A_CONFIRM, OPENROUTER_API_KEY, ENV_PATH, BUDGET_USD, MAX_PARALLEL, RAM_MAX_PCT,
+  AGGRESSIVE_DEFAULT, VERIFY_AFTER_CRAWL,
   defaultParallel, loadSources, addSourceToConfig,
 } from './config.js';
 import {
@@ -16,11 +17,12 @@ import { beginRun, endRun, shouldStop, getBudgetState } from './budget.js';
 import { processJob, enqueue, upsertSource } from './crawl.js';
 import { classifyPending } from './classify.js';
 import { summarizePending } from './summarize.js';
+import { verifyPending } from './verify.js';
 import { runSearch, getSearchProgress } from './search.js';
 import { closeBrowser } from './fetch.js';
 import { startWebServer } from './web.js';
 import { probeOpenRouterKey, upsertEnvVar, maskKey } from './keys.js';
-import { slugify, normalizeUrl, parseDate, log, errorLog } from './util.js';
+import { slugify, normalizeUrl, parseDate, hostOf, log, warn, errorLog } from './util.js';
 
 // Re-export p/ a UI importar de um lugar só (igual getStatus).
 export { getSearchProgress };
@@ -123,8 +125,18 @@ async function crawlRun(flags) {
   const reset = stmts.resetInProgress.run();
   if (reset.changes) log(`resume: ${reset.changes} jobs in_progress -> pending`);
 
-  // Abre a execução (run): marca d'água do delta "novo desde a última execução".
-  const runId = stmts.startDeltaRun.get().id;
+  // Marca d'água do delta: REUSA o run do ledger (aberto por runWithLimits/beginRun). Antes
+  // havia um segundo INSERT aqui (startDeltaRun) — duplicava a linha de runs a cada crawl e
+  // crashava em DBs criados pelo branch robot-bypass (runs.command NOT NULL). Fallback
+  // defensivo só p/ o caso de o ledger não ter conseguido abrir o run.
+  let runId = getBudgetState().runId;
+  if (runId == null) {
+    try {
+      runId = stmts.startDeltaRun.get().id;
+    } catch (e) {
+      warn(`runs: sem marca d'água do delta (${e.message}) — artigos desta run ficarão sem run_id`);
+    }
+  }
 
   // Re-crawl incremental: por padrão re-visita as listagens das fontes a cada execução (só enfileira
   // o novo; a dedup de artigo impede re-baixar o existente). `--no-refresh` desliga a re-visita.
@@ -162,13 +174,21 @@ async function crawlRun(flags) {
   }
   if (sinceDate) log(`--since ativo: piso ${sinceDate.toISOString()}`);
 
+  // Agressivo é o DEFAULT (CRAWLER_AGGRESSIVE=false ou --no-aggressive desligam por completo;
+  // --aggressive força mesmo com env desligada). Páginas de desafio continuam descartadas.
+  const aggressive =
+    flags['no-aggressive'] === true ? false : flags.aggressive === true ? true : AGGRESSIVE_DEFAULT;
   const opts = {
     maxPages: flags['max-pages'] ? Number(flags['max-pages']) : Infinity,
     sinceDate,
-    aggressive: flags.aggressive === true,
+    aggressive,
     runId,
   };
-  if (opts.aggressive) log('modo agressivo ATIVO: ignorando robots.txt + User-Agent de navegador real');
+  if (opts.aggressive) {
+    log('modo agressivo ATIVO (default): ignorando robots.txt + User-Agent de navegador real (--no-aggressive p/ modo educado)');
+  } else {
+    log('modo educado: respeitando robots.txt e UA de bot');
+  }
   const maxArticles = flags['max-articles'] ? Number(flags['max-articles']) : Infinity;
 
   // Capacidade DINÂMICA do loop: o governador redimensiona as lanes fetch+render pela RAM;
@@ -217,17 +237,19 @@ async function crawlRun(flags) {
   if (budgetRequeued) log(`orçamento: ${budgetRequeued} jobs devolvidos à fila (retomáveis no próximo run)`);
   log('crawl concluído.');
 
-  if (budgetRequeued) log(`orçamento: ${budgetRequeued} jobs devolvidos à fila (retomáveis no próximo run)`);
-  log('crawl concluído.');
+  // Registra na run quantos artigos novos ela descobriu (o delta desta execução).
+  if (runId != null) {
+    const newCount = stmts.countArticlesByRun.get(runId).c;
+    stmts.finishDeltaRun.run(newCount, runId);
+    log(`run ${runId}: ${newCount} novo(s) artigo(s) desde a última execução.`);
+  }
 
-  // Fecha a run e registra quantos artigos novos ela descobriu (o delta desta execução).
-  const newCount = stmts.countArticlesByRun.get(runId).c;
-  stmts.finishDeltaRun.run(newCount, runId);
-  log(`run ${runId}: ${newCount} novo(s) artigo(s) desde a última execução.`);
-
-  // Hooks pós-crawl EM PARALELO (classify e summarize são independentes — ambos só leem
-  // articles e escrevem tabelas próprias); o perfil llm-only dá o teto todo à lane llm.
+  // Hooks pós-crawl EM PARALELO (verify, classify e summarize são independentes — todos só
+  // leem articles e escrevem colunas/tabelas próprias); o perfil llm-only dá o teto à lane llm.
   const post = [];
+  if (VERIFY_AFTER_CRAWL && HAS_LLM && flags['no-verify'] !== true && !shouldStop()) {
+    post.push(verifyPending({}).catch((e) => errorLog(`verify pós-crawl falhou: ${e.message}`)));
+  }
   if (CLASSIFY_AFTER_CRAWL && HAS_LLM && flags['no-classify'] !== true && !shouldStop()) {
     post.push(classifyPending({}).catch((e) => errorLog(`classify pós-crawl falhou: ${e.message}`)));
   }
@@ -238,7 +260,7 @@ async function crawlRun(flags) {
     setProfile('llm-only');
     await Promise.all(post);
   } else if (shouldStop()) {
-    log('orçamento atingido: classify/summarize pulados — retome com `ncrawl classify` / `ncrawl summarize`');
+    log('orçamento atingido: verify/classify/summarize pulados — retome com os comandos diretos');
   }
 
   printStatus();
@@ -371,6 +393,173 @@ export async function cmdSummarize(flags) {
   await runWithLimits({ command: 'summarize', flags, profile: 'llm-only' }, () =>
     summarizePending({ limit, force }));
   printStatus();
+}
+
+// Verificação pós-cadastro sob demanda (a automática roda no fim do crawl).
+export async function cmdVerify(flags) {
+  if (!HAS_LLM) {
+    errorLog('OPENROUTER_API_KEY ausente — a verificação requer o caminho LLM.');
+    process.exit(1);
+  }
+  const limit = flags.limit ? Number(flags.limit) : Infinity;
+  const force = flags.force === true;
+  await runWithLimits({ command: 'verify', flags, profile: 'llm-only' }, () =>
+    verifyPending({ limit, force }));
+  printStatus();
+}
+
+// Acha UMA fonte por nome/URL/substring (mesmo espírito do --only do crawl). Erro se 0 ou 2+.
+function findOneSource(query) {
+  const q = String(query || '').toLowerCase().trim();
+  if (!q) return { error: 'informe o nome/URL (ou parte) da fonte' };
+  const all = stmts.listSources.all();
+  const hits = all.filter((s) => `${s.name || ''} ${s.base_url}`.toLowerCase().includes(q));
+  if (hits.length === 1) return { source: hits[0] };
+  if (hits.length === 0) {
+    return { error: `nenhuma fonte casa com "${query}". Fontes: ${all.map((s) => s.name || s.base_url).join(' | ') || '(nenhuma)'}` };
+  }
+  return { error: `"${query}" é ambíguo: ${hits.map((s) => s.name || s.base_url).join(' | ')}` };
+}
+
+// Apaga os DADOS de uma fonte (artigos+tags/classificações via cascade, pages, frontier,
+// events; a fonte continua cadastrada) p/ refazer o processo do zero de forma reprodutível.
+// `--selectors` também derruba o cache de seletores dos hosts da fonte.
+export function cmdPurge(rest, flags) {
+  const { source, error } = findOneSource(rest[0]);
+  if (error) {
+    errorLog(`purge: ${error}`);
+    process.exit(1);
+  }
+  const nArticles = stmts.countArticlesBySource.get(source.id).c;
+  if (flags.yes !== true) {
+    errorLog(
+      `purge APAGA os dados de "${source.name || source.base_url}" (id ${source.id}): ` +
+        `${nArticles} artigo(s) + tags/classificações, pages, frontier e events.`,
+    );
+    errorLog(`Confirme com:  ncrawl purge ${JSON.stringify(rest[0])} --yes${flags.selectors ? ' --selectors' : ''}`);
+    process.exit(1);
+  }
+  const counts = {
+    articles: stmts.deleteArticlesBySource.run(source.id).changes,
+    pages: stmts.deletePagesBySource.run(source.id).changes,
+    frontier: stmts.deleteFrontierBySource.run(source.id).changes,
+    events: stmts.deleteEventsBySource.run(source.id).changes,
+  };
+  if (flags.selectors === true) {
+    const host = hostOf(source.base_url);
+    counts.selectors = host ? stmts.deleteSelectorsLike.run(`${host}:%`).changes : 0;
+  }
+  log(
+    `purge de "${source.name || source.base_url}": ` +
+      Object.entries(counts).map(([k, n]) => `${k}=${n}`).join(' ') +
+      ' apagados (a fonte segue cadastrada — o próximo crawl refaz tudo).',
+  );
+  printStatus();
+}
+
+// ---------------- inspect: auditoria de uma run (o "ver tudo" pedido) ----------------
+const parseDetail = (s) => {
+  try {
+    return s ? JSON.parse(s) : null;
+  } catch {
+    return null;
+  }
+};
+
+/** Relatório estruturado de uma run (dado puro; o cmdInspect imprime). */
+export function getRunReport(runId) {
+  const run = stmts.getRunById.get(runId);
+  if (!run) return null;
+  const articles = stmts.listArticlesForRunInspect.all(runId);
+  const byIssue = new Map();
+  for (const a of articles) {
+    const key = a.issue_url || '(avulsos — fora de curadoria)';
+    if (!byIssue.has(key)) byIssue.set(key, []);
+    byIssue.get(key).push(a);
+  }
+  return {
+    run,
+    kinds: stmts.countArticlesByKindForRun.all(runId),
+    verify: stmts.countVerifyForRun.all(runId),
+    stages: stmts.countEventsByStage.all(runId),
+    usage: stmts.usageByStage.all(runId),
+    byIssue,
+    events: stmts.listEventsForRun.all(runId),
+  };
+}
+
+export function cmdInspect(flags) {
+  // --url <substr>: linha do tempo de eventos + registros que casam (auditoria de UM link).
+  if (typeof flags.url === 'string' && flags.url) {
+    const like = `%${flags.url}%`;
+    const arts = stmts.listArticlesLikeUrl.all(like);
+    log(`— inspect --url "${flags.url}" —`);
+    for (const a of arts) {
+      log(
+        `artigo #${a.id} [${a.kind || 'sem kind'}] ${a.verify_status || 'não verificado'}` +
+          `${a.needs_enrich ? ' (aguardando corpo)' : ''} src=${a.content_source || '—'} ${a.title}`,
+      );
+      log(`  ${a.url}`);
+      if (a.verify_notes) log(`  notas: ${a.verify_notes}`);
+    }
+    if (!arts.length) log('nenhum artigo casa.');
+    const evs = stmts.listEventsForUrl.all(like, flags.verbose === true ? 500 : 100);
+    for (const e of evs) {
+      const d = parseDetail(e.detail);
+      log(`[run ${e.run_id ?? '—'}] ${e.created_at} ${e.stage}/${e.status}${d ? ` ${JSON.stringify(d)}` : ''}  ${e.url}`);
+    }
+    if (!evs.length) log('nenhum evento casa.');
+    return;
+  }
+
+  // Run alvo: --run N | default = última run DE CRAWL (verify/classify avulsos não têm artigos).
+  const latest = stmts.getLatestCrawlRunId.get().id ?? stmts.getLatestRunId.get().id;
+  const runId = flags.run ? Number(flags.run) : latest;
+  if (!runId) {
+    errorLog('inspect: nenhuma run registrada ainda (rode um crawl).');
+    process.exit(1);
+  }
+  const rep = getRunReport(runId);
+  if (!rep) {
+    errorLog(`inspect: run #${runId} não existe. Runs recentes: ${stmts.listRuns.all(5).map((r) => `#${r.id} ${r.command}`).join(', ') || '—'}`);
+    process.exit(1);
+  }
+  const { run } = rep;
+  log(`— inspect run #${run.id} (${run.command || '—'}, ${run.status}, início ${run.started_at}) —`);
+  log(`custo LLM: US$ ${Number(run.spent_usd).toFixed(4)}${run.budget_usd ? ` de US$ ${Number(run.budget_usd).toFixed(2)}` : ''}`);
+  if (rep.usage.length) {
+    log(`  por etapa: ${rep.usage.map((u) => `${u.stage}=${u.n}x/US$${u.usd.toFixed(4)}`).join(' ')}`);
+  }
+  log(`artigos da run: ${[...rep.byIssue.values()].reduce((n, a) => n + a.length, 0)} — ${rep.kinds.map((k) => `${k.kind}=${k.c}`).join(' ') || '—'}`);
+  log(`verificação: ${rep.verify.map((v) => `${v.s}=${v.c}`).join(' ') || '—'}`);
+  if (rep.stages.length) {
+    log(`eventos: ${rep.stages.map((s) => `${s.stage}/${s.status}=${s.c}`).join(' ')}`);
+  }
+
+  for (const [issue, arts] of rep.byIssue) {
+    log('');
+    log(`ISSUE ${issue} — ${arts.length} registro(s)`);
+    for (const a of arts) {
+      const v = a.verify_status || 'pend';
+      const srcTag = a.needs_enrich ? 'blurb (aguardando corpo)' : a.content_source === 'aggregator' ? 'blurb do agregador' : `alvo${a.cleaned ? '+limpo' : ''}`;
+      log(`  [${(a.kind || '—').padEnd(7)}] ${v.padEnd(7)} ${String(a.content_len).padStart(6)}ch ${srcTag.padEnd(24)} ${(a.title || a.url).slice(0, 76)}`);
+      if (flags.verbose === true && a.verify_notes) log(`      ⚠ ${a.verify_notes}`);
+    }
+  }
+
+  // Itens que a curadoria deixou de fora + jobs falhos: o "porquê" de cada ausência.
+  const skips = rep.events.filter((e) => (e.stage === 'item' && e.status === 'skipped') || (e.stage === 'article' && e.status === 'skip'));
+  if (skips.length) {
+    log('');
+    log('fora do cadastro (com motivo):');
+    for (const e of skips) {
+      const d = parseDetail(e.detail) || {};
+      log(`  ${e.stage === 'item' ? `curadoria: ${d.count ?? 1}x ${d.kind}` : `artigo: ${d.reason}`} — ${(d.issue || e.url || '').slice(0, 70)}`);
+    }
+  }
+  const failed = stmts.countFrontierByState.all().find((r) => r.state === 'failed');
+  if (failed?.c) log(`frontier: ${failed.c} job(s) em estado failed (use --url p/ investigar um link)`);
+  if (flags.verbose !== true) log('dica: --verbose mostra as notas de verificação; --url <substr> audita um link.');
 }
 
 // Busca na base. Modo A (Flash, varre tudo) ou B (Pro, por tags). RETORNA os resultados (a UI captura).

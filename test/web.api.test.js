@@ -113,11 +113,9 @@ test('web: lista tudo ordenado por data desc (published_at com fallback extracte
   assert.deepEqual(first.tags.domain, ['reactjs']);
 });
 
-test('web: busca textual é case/acento-insensível (fold)', async () => {
-  for (const q of ['épocas', 'EPOCAS', 'Épocas']) {
-    const { body } = await json(`/api/articles?q=${encodeURIComponent(q)}`);
-    assert.deepEqual(body.items.map((a) => a.id), [epoca], `q=${q}`);
-  }
+test('web: q não filtra mais o browse — busca com consulta agora é IA (POST /api/search)', async () => {
+  const { body } = await json(`/api/articles?q=${encodeURIComponent('épocas')}`);
+  assert.equal(body.total, 5, 'q é ignorado no browse (a busca digitada vive em /api/search)');
 });
 
 test('web: filtro por fonte', async () => {
@@ -169,8 +167,8 @@ test('web: paginação limit/offset mantém o total', async () => {
   assert.equal(new Set(ids).size, 4); // sem sobreposição
 });
 
-test('web: filtros combinados (q + fonte + kind)', async () => {
-  const { body } = await json(`/api/articles?q=vitest&source=${beta.id}&kind=tool`);
+test('web: filtros combinados (fonte + kind)', async () => {
+  const { body } = await json(`/api/articles?source=${beta.id}&kind=tool`);
   assert.deepEqual(body.items.map((a) => a.id), [vitest]);
 });
 
@@ -216,9 +214,24 @@ test('web: serve a UI e os vendors locais (zero-build, sem CDN)', async () => {
   assert.equal((await json('/nada')).status, 404);
 });
 
-test('web: método não-GET é 405', async () => {
-  const r = await fetch(`http://127.0.0.1:${srv.port}/api/meta`, { method: 'POST' });
-  assert.equal(r.status, 405);
+test('web: método errado é 405 (PUT em tudo; POST fora de /api/search e /api/key)', async () => {
+  assert.equal((await fetch(`http://127.0.0.1:${srv.port}/api/meta`, { method: 'PUT' })).status, 405);
+  assert.equal((await fetch(`http://127.0.0.1:${srv.port}/api/meta`, { method: 'POST' })).status, 405);
+});
+
+test('web: filtro kind=release retorna só releases (release segue contando como tool)', async (t) => {
+  const r = stmts.insertArticle.run({
+    source_id: beta.id, url: 'http://agg.test/rel-filter', title: 'Bun 2 released',
+    content: 'Bun 2 is out.', content_hash: 'hash-rel-filter', published_at: '2026-06-27',
+    run_id: null, kind: 'release', issue_url: null, section: null, blurb: null,
+    content_source: 'aggregator', cleaned: 0, needs_enrich: 0,
+  });
+  const id = Number(r.lastInsertRowid);
+  t.after(() => db.prepare('DELETE FROM articles WHERE id = ?').run(id));
+  const rel = await json('/api/articles?kind=release');
+  assert.deepEqual(rel.body.items.map((a) => a.id), [id], 'kind=release traz só o release');
+  const tool = await json('/api/articles?kind=tool');
+  assert.ok(tool.body.items.map((a) => a.id).includes(id), 'no bucket amplo tool, release continua dentro');
 });
 
 // ---- kind curado (coluna) tem precedência sobre as tags; NULL cai no fallback por tags ----

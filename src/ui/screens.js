@@ -7,10 +7,13 @@ import { Select, TextInput, Alert, StatusMessage, Spinner } from '@inkjs/ui';
 import { html } from './html.js';
 import { t } from './i18n.js';
 import { buildCommandPreview } from './commandPreview.js';
-import { loadSources, HAS_LLM, BUDGET_USD, MAX_PARALLEL, RAM_MAX_PCT, ENV_PATH } from '../config.js';
+import {
+  loadSources, HAS_LLM, BUDGET_USD, MAX_PARALLEL, RAM_MAX_PCT, ENV_PATH, stageModel,
+} from '../config.js';
 import { upsertEnvVar } from '../keys.js';
+import { estimateStageCallUsd } from '../budget.js';
 import { parseDate } from '../util.js';
-import { getStatus } from '../commands.js';
+import { getStatus, getSearchScope } from '../commands.js';
 import { startWebServer, openBrowser } from '../web.js';
 
 const yesNo = () => [
@@ -343,7 +346,28 @@ export function SearchConfig({ onRun, onBack }) {
     </${Box}>`;
   }
   if (step === 'confirmA') {
-    return html`<${Field} label=${t('searchCostWarn', { n: getStatus().articles })}>
+    // Contagem do ESCOPO real (novo vs acervo — a mesma conta do guard do CLI) + estimativa US$.
+    const scope = getSearchScope(flags);
+    if (!scope.all && scope.count === 0) {
+      // Escopo "novo" sem artigos novos: avaliar 0 é inútil — oferece o acervo todo ou voltar.
+      return html`<${Box} flexDirection="column">
+        <${StatusMessage} variant="warning">${t('searchScopeEmpty')}</${StatusMessage}>
+        <${Select} options=${[
+          { label: t('scopeAll'), value: 'all' },
+          { label: t('back'), value: 'back' },
+        ]} onChange=${(v) => {
+          if (v === 'back') return onBack();
+          setFlags((f) => ({ ...f, all: true })); // re-renderiza o confirmA já no acervo todo
+        }} />
+      </${Box}>`;
+    }
+    const { model } = stageModel('searchRelevance');
+    const usd = (scope.count * estimateStageCallUsd('searchRelevance', model)).toFixed(2);
+    return html`<${Field} label=${t('searchCostWarn', {
+      n: scope.count,
+      scope: t(scope.all ? 'scopeAllShort' : 'scopeNewShort'),
+      usd,
+    })}>
       <${Select} options=${yesNo()} onChange=${(v) => {
         if (v !== 'yes') return onBack();
         setFlags((f) => ({ ...f, yes: true }));

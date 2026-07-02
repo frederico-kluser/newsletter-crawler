@@ -12,9 +12,11 @@ import { reserve as budgetReserve } from './budget.js';
 import { warn, sleep } from './util.js';
 
 let _client = null;
+let _clientKey = null; // a key pode mudar em runtime (setRuntimeKey) — recria o client se mudou
 function client() {
   if (!HAS_LLM) throw new Error('OPENROUTER_API_KEY ausente: caminho LLM indisponível');
-  if (!_client) {
+  if (!_client || _clientKey !== OPENROUTER_API_KEY) {
+    _clientKey = OPENROUTER_API_KEY;
     _client = new OpenAI({
       baseURL: 'https://openrouter.ai/api/v1',
       apiKey: OPENROUTER_API_KEY,
@@ -706,6 +708,21 @@ export async function summarizeArticle({ title, content }) {
 // ---------- etapa searchRelevance: julga artigo vs consulta (modo A, Flash high, 50x) ----------
 const RELATIONS = new Set(['direct', 'similar', 'none']);
 const KINDS = new Set(['news', 'tool']);
+const clampRelation = (s) => (RELATIONS.has(String(s).toLowerCase()) ? String(s).toLowerCase() : 'none');
+const clampKind = (s) => (KINDS.has(String(s).toLowerCase()) ? String(s).toLowerCase() : 'news');
+// Rubrica + few-shots COMPARTILHADOS entre o juiz unitário (modo A) e o juiz em LOTE da busca
+// soft da web — mesmo critério nas duas buscas. Texto escolhido por avaliação (eval/): variante
+// "v2_fewshot" — 3 rodadas × 5 cenários × 36 artigos, gabarito Opus: F1 macro Flash 0.848 vs
+// baseline 0.731 (+0.117; precisão 0.59→0.79), Pro 0.807 vs 0.778. NÃO reescreva sem re-rodar o eval.
+const RELEVANCE_RUBRIC =
+  'RUBRICA relation: "direct"=foco central da consulta; "similar"=adjacente, não é o foco; "none"=sem resposta. ' +
+  'Mesmo tema amplo NÃO basta para "direct". kind: "tool"=sobre biblioteca/pacote/framework/CLI; senão "news".\n\n' +
+  'EXEMPLOS (consulta → artigo → saída):\n' +
+  '1) "bibliotecas de inferência de LLM" → "Lib X acelera serving de LLM em GPU" → {"relation":"direct","kind":"tool"}\n' +
+  '2) "bibliotecas de inferência de LLM" → "Startup de IA capta US$ 300M" → {"relation":"none","kind":"news"}\n' +
+  '3) "captação de startups de IA" → "Paper novo sobre compressão de KV cache" → {"relation":"none","kind":"news"}\n' +
+  '4) "regulação de IA" → "UE atrasa provisões do AI Act" → {"relation":"direct","kind":"news"}\n' +
+  '5) "modelos de pesos abertos" → "Modelo PROPRIETÁRIO Y desafia rivais" → {"relation":"none","kind":"news"}';
 export const relevanceSchema = {
   type: 'object',
   properties: {
@@ -717,8 +734,8 @@ export const relevanceSchema = {
 };
 // Sem enum no json_schema (strict não garante); a garantia real é o clamp do zod + fail-open.
 export const relevanceZ = z.object({
-  relation: z.string().transform((s) => (RELATIONS.has(String(s).toLowerCase()) ? String(s).toLowerCase() : 'none')),
-  kind: z.string().transform((s) => (KINDS.has(String(s).toLowerCase()) ? String(s).toLowerCase() : 'news')),
+  relation: z.string().transform(clampRelation),
+  kind: z.string().transform(clampKind),
 });
 export async function judgeRelevance({ query, title, content }) {
   const { model, effort } = stageModel('searchRelevance');
@@ -728,26 +745,75 @@ export async function judgeRelevance({ query, title, content }) {
     stage: 'searchRelevance',
     schemaName: 'relevance',
     schema: relevanceSchema,
-    // Prompt escolhido por avaliação (eval/): variante "v2_fewshot" — rubrica + few-shot contrastivo.
-    // 3 rodadas × 5 cenários × 36 artigos, gabarito Opus: F1 macro Flash 0.848 vs baseline 0.731
-    // (+0.117; precisão 0.59→0.79, corta falsos positivos), Pro 0.807 vs 0.778. Mesma latência, 0 falhas JSON.
     system:
       'Você é um avaliador de relevância de busca, rigoroso e consistente. Siga a rubrica e os EXEMPLOS. ' +
       'Responda APENAS com JSON válido.',
     user:
-      'RUBRICA relation: "direct"=foco central da consulta; "similar"=adjacente, não é o foco; "none"=sem resposta. ' +
-      'Mesmo tema amplo NÃO basta para "direct". kind: "tool"=sobre biblioteca/pacote/framework/CLI; senão "news".\n\n' +
-      'EXEMPLOS (consulta → artigo → saída):\n' +
-      '1) "bibliotecas de inferência de LLM" → "Lib X acelera serving de LLM em GPU" → {"relation":"direct","kind":"tool"}\n' +
-      '2) "bibliotecas de inferência de LLM" → "Startup de IA capta US$ 300M" → {"relation":"none","kind":"news"}\n' +
-      '3) "captação de startups de IA" → "Paper novo sobre compressão de KV cache" → {"relation":"none","kind":"news"}\n' +
-      '4) "regulação de IA" → "UE atrasa provisões do AI Act" → {"relation":"direct","kind":"news"}\n' +
-      '5) "modelos de pesos abertos" → "Modelo PROPRIETÁRIO Y desafia rivais" → {"relation":"none","kind":"news"}\n\n' +
+      RELEVANCE_RUBRIC + '\n\n' +
       `CONSULTA: ${query}\n\n` +
       `ARTIGO\nTítulo: ${title || ''}\n\nConteúdo:\n${String(content || '').slice(0, SEARCH_MAX_CHARS)}\n\n` +
       'Devolva JSON {"relation","kind"}.',
   });
   return relevanceZ.parse(out);
+}
+
+// ---------- etapa searchBatch: julga um LOTE de artigos vs consulta (busca soft da web) ----------
+export const relevanceBatchSchema = {
+  type: 'object',
+  properties: {
+    results: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          id: { type: 'integer', description: 'id do item, ecoado EXATAMENTE' },
+          relation: { type: 'string', description: 'direct | similar | none' },
+          kind: { type: 'string', description: 'news | tool' },
+        },
+        required: ['id', 'relation', 'kind'],
+        additionalProperties: false,
+      },
+    },
+  },
+  required: ['results'],
+  additionalProperties: false,
+};
+// Sem enum no json_schema; id coercível (o modelo às vezes ecoa o id como string).
+export const relevanceBatchZ = z.object({
+  results: z.array(
+    z.object({
+      id: z.coerce.number().int(),
+      relation: z.string().transform(clampRelation),
+      kind: z.string().transform(clampKind),
+    }),
+  ),
+});
+/**
+ * Julga um LOTE de itens {id, title, summary} contra a consulta em UMA chamada (busca soft da
+ * web: 1 Flash xhigh por ~SEARCH_BATCH_SIZE artigos; saída PEQUENA por item). A fusão tolerante
+ * a ids faltando/sobrando/duplicados fica no chamador (mergeBatchVerdicts, search.js).
+ */
+export async function judgeRelevanceBatch({ query, items, signal = null }) {
+  const { model, effort } = stageModel('searchBatch');
+  const out = await callJSON({
+    model,
+    reasoning: { effort },
+    stage: 'searchBatch',
+    schemaName: 'relevance_batch',
+    schema: relevanceBatchSchema,
+    signal,
+    system:
+      'Você é um avaliador de relevância de busca, rigoroso e consistente. Avalie CADA item da ' +
+      'lista de forma INDEPENDENTE, seguindo a rubrica e os EXEMPLOS. Responda APENAS com JSON válido.',
+    user:
+      RELEVANCE_RUBRIC + '\n\n' +
+      `CONSULTA: ${query}\n\n` +
+      'ITENS (um JSON por linha; "summary" pode estar em PT-BR):\n' +
+      items.map((it) => JSON.stringify(it)).join('\n') + '\n\n' +
+      'Devolva JSON {"results":[{"id","relation","kind"}]} com EXATAMENTE UMA entrada por item, ' +
+      'na MESMA ordem da lista, ecoando o id EXATO de cada um. Não invente ids; não omita nenhum.',
+  });
+  return relevanceBatchZ.parse(out).results;
 }
 
 // ---------- etapa searchTags: mapeia consulta -> tags de UMA faceta (modo B, Pro) ----------

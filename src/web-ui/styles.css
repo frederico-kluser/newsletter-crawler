@@ -499,6 +499,100 @@ input.control[type='date']::-webkit-calendar-picker-indicator { opacity: 0.55; }
 .btn-primary:hover { background: var(--accent-hover); text-decoration: none; }
 .btn-primary:active { transform: scale(0.98); }
 
+/* ---- busca IA (botão, toggle profunda, chips de fontes, banner, diálogos) ---- */
+.searchbar .search-btn {
+  flex: none;
+  height: 36px;
+  padding: 0 18px;
+  border-radius: 18px;
+  font-size: 14px;
+}
+.btn-primary:disabled { opacity: 0.5; cursor: default; transform: none; }
+select.control:disabled { opacity: 0.5; cursor: default; }
+.deep-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 14px;
+  font-size: 13px;
+  color: var(--text-2);
+}
+.deep-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+}
+.deep-toggle input { accent-color: var(--accent); width: 15px; height: 15px; }
+.deep-row .muted { color: var(--text-2); }
+.source-chips {
+  max-width: 780px;
+  margin: 14px auto 0;
+}
+.source-chips .chip-row { justify-content: center; }
+.tag.relation-direct { background: rgba(34, 197, 94, 0.16); color: #16a34a; font-weight: 600; }
+.tag.relation-similar { font-weight: 600; }
+.results-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  max-width: 980px;
+  margin: 24px auto 0;
+  padding: 12px 18px;
+  background: var(--card);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-m);
+  box-shadow: var(--shadow-card);
+  font-size: 14px;
+  text-align: left;
+}
+.results-banner .muted { color: var(--text-2); }
+.results-banner.banner-error {
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #dc2626;
+}
+.state.ai-loading { padding: 60px 20px; }
+.state.ai-loading .spinner { width: 26px; height: 26px; }
+.state.ai-loading p { margin: 14px 0 0; }
+.dialog {
+  position: relative;
+  width: 100%;
+  max-width: 460px;
+  background: var(--card);
+  border-radius: 20px;
+  box-shadow: var(--shadow-sheet);
+  padding: 26px 28px 22px;
+  animation: sheetIn 0.28s cubic-bezier(0.32, 0.72, 0, 1);
+  text-align: left;
+}
+.dialog h2 { margin: 0 0 10px; font-size: 19px; letter-spacing: -0.015em; }
+.dialog p { margin: 0 0 8px; color: var(--text-2); font-size: 14px; }
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+}
+.dialog-actions .btn-primary { height: 40px; padding: 0 20px; font-size: 14px; }
+.dialog .key-input {
+  width: 100%;
+  margin-top: 6px;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid var(--hairline);
+  background: var(--chip);
+  padding: 0 14px;
+  font-size: 14px;
+}
+.dialog .key-input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.key-error { color: #dc2626; font-size: 13px; margin: 8px 0 0; }
+
 /* ---- sheet de leitura ---- */
 .overlay {
   position: fixed;

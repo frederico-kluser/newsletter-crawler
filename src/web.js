@@ -8,9 +8,16 @@ import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 import { spawn } from 'node:child_process';
 import { stmts } from './db.js';
-import { WEB_PORT, WEB_HOST } from './config.js';
+import {
+  WEB_PORT, WEB_HOST, HAS_LLM, setRuntimeKey, BUDGET_USD,
+  SEARCH_MODE_A_CONFIRM, SEARCH_SOFT_CONFIRM, SEARCH_BATCH_SIZE, stageModel,
+} from './config.js';
 import { TOOL_CONTENT_TYPES, isToolByTags, getFacets } from './taxonomy.js';
-import { foldText, parseDate, log, warn, errorLog } from './util.js';
+import { parseDate, log, warn, errorLog } from './util.js';
+import { searchWeb } from './search.js';
+import { probeOpenRouterKey, upsertEnvVar } from './keys.js';
+import { initGovernor, stopGovernor } from './governor.js';
+import { beginRun, endRun, estimateStageCallUsd } from './budget.js';
 
 const UI_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), 'web-ui');
 
@@ -36,10 +43,8 @@ const asDateOnly = (raw) => {
   return d ? d.toISOString().slice(0, 10) : null;
 };
 
-/** Traduz a querystring em params dos stmts web* (NULL = filtro desligado). {error} se inválida. */
+/** Traduz a querystring do BROWSE em params dos stmts web* (NULL = filtro desligado). {error} se inválida. */
 function buildSearchParams(sp) {
-  const q = (sp.get('q') || '').trim();
-
   let sourceId = null;
   const sourceRaw = sp.get('source');
   if (sourceRaw) {
@@ -61,7 +66,7 @@ function buildSearchParams(sp) {
   let kind = null;
   const kindRaw = sp.get('kind');
   if (kindRaw) {
-    if (kindRaw !== 'news' && kindRaw !== 'tool') return { error: 'kind deve ser news|tool' };
+    if (!['news', 'tool', 'release'].includes(kindRaw)) return { error: 'kind deve ser news|tool|release' };
     kind = kindRaw;
   }
 
@@ -100,7 +105,6 @@ function buildSearchParams(sp) {
 
   return {
     params: {
-      q: q ? foldText(q) : null,
       sourceId,
       from,
       to,
@@ -182,6 +186,196 @@ function apiMeta() {
   };
 }
 
+// ---- busca IA (soft em lote / hard por artigo) + key ----
+
+const MAX_SCOPE_SOURCES = 50;
+const MAX_BODY_BYTES = 64 * 1024;
+
+/**
+ * Valida o ESCOPO da busca IA {sources, from, to} (querystring do preflight OU body do POST).
+ * sources: array de ids inteiros > 0 (máx. 50) ou null. Datas YYYY-MM-DD. {error} PT se inválido.
+ */
+function buildScopeParams({ sources, from, to }) {
+  let list = null;
+  if (sources != null && sources !== '') {
+    let arr = sources;
+    if (typeof arr === 'string') {
+      try {
+        arr = JSON.parse(arr);
+      } catch {
+        return { error: 'sources deve ser um array JSON de ids' };
+      }
+    }
+    if (!Array.isArray(arr)) return { error: 'sources deve ser um array JSON de ids' };
+    if (arr.length > MAX_SCOPE_SOURCES) return { error: `sources demais (máx. ${MAX_SCOPE_SOURCES})` };
+    const ids = [];
+    for (const v of arr) {
+      const n = Number(v);
+      if (!Number.isInteger(n) || n <= 0) return { error: 'sources deve conter ids numéricos' };
+      ids.push(n);
+    }
+    if (ids.length) list = ids;
+  }
+  let fromD = null;
+  if (from) {
+    fromD = asDateOnly(from);
+    if (!fromD) return { error: 'from inválido (use YYYY-MM-DD)' };
+  }
+  let toD = null;
+  if (to) {
+    toD = asDateOnly(to);
+    if (!toD) return { error: 'to inválido (use YYYY-MM-DD)' };
+  }
+  return {
+    sources: list,
+    params: { sources: list ? JSON.stringify(list) : null, from: fromD, to: toD },
+  };
+}
+
+/** Lê e parseia o body JSON de um POST. Resolve {body} ou {error, status} (413/400); nunca rejeita. */
+function readJsonBody(req) {
+  return new Promise((resolve) => {
+    let size = 0;
+    let tooBig = false;
+    const chunks = [];
+    req.on('data', (c) => {
+      size += c.length;
+      if (tooBig) return;
+      if (size > MAX_BODY_BYTES) {
+        tooBig = true; // não acumula mais; responde 413 no end (sem destruir o socket)
+        chunks.length = 0;
+      } else {
+        chunks.push(c);
+      }
+    });
+    req.on('end', () => {
+      if (tooBig) return resolve({ error: 'corpo grande demais', status: 413 });
+      try {
+        resolve({ body: JSON.parse(Buffer.concat(chunks).toString('utf8') || '{}') });
+      } catch {
+        resolve({ error: 'JSON inválido no corpo', status: 400 });
+      }
+    });
+    req.on('error', () => resolve({ error: 'falha ao ler o corpo', status: 400 }));
+  });
+}
+
+// UMA busca IA por vez neste processo: o run do ledger (budget.js beginRun/endRun) é um global
+// por processo, então buscas concorrentes se atropelariam — a 2ª leva 409.
+let _searchBusy = false;
+
+/**
+ * Mini-envelope do servidor (não dá p/ reusar runWithLimits: ciclo de import com commands.js e
+ * process.exit nas validações de lá). Governador em perfil llm-only (concorrência plena da lane
+ * llm p/ o modo por-artigo) + run próprio no ledger (custo real em runs/llm_usage).
+ */
+async function withSearchRun(args, fn) {
+  initGovernor({ profile: 'llm-only' });
+  beginRun({ command: 'web-search', budgetUsd: BUDGET_USD, args });
+  let failed = false;
+  try {
+    return await fn();
+  } catch (e) {
+    failed = true;
+    throw e;
+  } finally {
+    endRun(failed ? 'failed' : undefined);
+    stopGovernor();
+  }
+}
+
+/** Preflight do custo/escopo: contagem + estimativa US$ p/ o diálogo de confirmação do cliente. */
+function apiSearchScope(sp) {
+  const scope = buildScopeParams({ sources: sp.get('sources'), from: sp.get('from'), to: sp.get('to') });
+  if (scope.error) return { status: 400, body: { error: scope.error } };
+  const deep = sp.get('deep') === '1' || sp.get('deep') === 'true';
+  const count = stmts.webSearchScopeCount.get(scope.params).c;
+  const stage = deep ? 'searchRelevance' : 'searchBatch';
+  const calls = deep ? count : Math.ceil(count / SEARCH_BATCH_SIZE);
+  const estimatedUsd = calls * estimateStageCallUsd(stage, stageModel(stage).model);
+  const threshold = deep ? SEARCH_MODE_A_CONFIRM : SEARCH_SOFT_CONFIRM;
+  return {
+    status: 200,
+    body: { count, calls, estimatedUsd, threshold, needsConfirm: count > threshold, hasKey: HAS_LLM },
+  };
+}
+
+/** POST /api/search {query, deep, sources, from, to, confirm} — a resposta demora o que a IA demorar. */
+async function apiSearch(req, res, deps) {
+  const parsed = await readJsonBody(req);
+  if (parsed.error) return sendJSON(res, parsed.status, { error: parsed.error });
+  const body = parsed.body || {};
+  const query = String(body.query || '').trim().slice(0, 500);
+  if (!query) return sendJSON(res, 400, { error: 'informe uma consulta' });
+  if (!HAS_LLM) {
+    return sendJSON(res, 400, {
+      error: 'OPENROUTER_API_KEY ausente — configure a chave para buscar com IA.',
+      code: 'NO_KEY',
+    });
+  }
+  const deep = body.deep === true;
+  const scope = buildScopeParams(body);
+  if (scope.error) return sendJSON(res, 400, { error: scope.error });
+  const count = stmts.webSearchScopeCount.get(scope.params).c;
+  if (count === 0) {
+    return sendJSON(res, 200, {
+      query, deep, scanned: 0, total: 0, relevant: 0, skipped: 0, truncated: false, items: [],
+    });
+  }
+  // Guard re-validado no SERVIDOR (o diálogo do cliente vem do preflight /api/search/scope).
+  const threshold = deep ? SEARCH_MODE_A_CONFIRM : SEARCH_SOFT_CONFIRM;
+  if (count > threshold && body.confirm !== true) {
+    return sendJSON(res, 428, { error: `escopo com ${count} artigos exige confirmação`, needsConfirm: true, count });
+  }
+  if (_searchBusy) {
+    return sendJSON(res, 409, { error: 'Já existe uma busca em andamento — aguarde terminar.' });
+  }
+  _searchBusy = true;
+  try {
+    const r = await withSearchRun({ query, deep, ...scope.params }, () =>
+      deps.search(query, { deep, sources: scope.sources, from: scope.params.from, to: scope.params.to }),
+    );
+    // Enriquecimento p/ os cards: re-select por ids + a MESMA decoração de tags/kind do browse.
+    const rows = r.hits.length
+      ? stmts.webArticlesByIds.all({ ids: JSON.stringify(r.hits.map((h) => h.id)) })
+      : [];
+    const byId = new Map(rows.map((a) => [a.id, a]));
+    const items = [];
+    for (const h of r.hits) {
+      const a = byId.get(h.id);
+      if (!a) continue; // artigo sumiu entre a varredura e o select (purge concorrente)
+      const { rows: tagRows, byFacet } = tagsOf(a.id);
+      items.push({
+        ...a,
+        tags: byFacet,
+        kind: a.kind || (isToolByTags(tagRows) ? 'tool' : 'news'),
+        relation: h.relation,
+        judge_kind: h.kind,
+      });
+    }
+    const { hits: _drop, ...rest } = r;
+    return sendJSON(res, 200, { ...rest, items });
+  } catch (e) {
+    errorLog(`web /api/search: ${e.message}`);
+    return sendJSON(res, 500, { error: 'a busca falhou — veja o terminal do servidor' });
+  } finally {
+    _searchBusy = false;
+  }
+}
+
+/** POST /api/key {key}: valida no OpenRouter (probe) e só então persiste + ativa em runtime. */
+async function apiKeySet(req, res, deps) {
+  const parsed = await readJsonBody(req);
+  if (parsed.error) return sendJSON(res, parsed.status, { error: parsed.error });
+  const key = String(parsed.body?.key || '').trim();
+  if (!key) return sendJSON(res, 400, { error: 'informe a chave' });
+  const r = await deps.probeKey(key);
+  if (!r.ok) return sendJSON(res, 200, { ok: false, status: r.status, reason: r.reason || null });
+  upsertEnvVar('OPENROUTER_API_KEY', key); // persiste (NC_HOME/.env), igual `ncrawl key set`
+  setRuntimeKey(key); // live binding: HAS_LLM/client() enxergam a key nova sem reiniciar
+  return sendJSON(res, 200, { ok: true });
+}
+
 // ---- servidor ----
 
 function sendJSON(res, status, body) {
@@ -196,11 +390,19 @@ function sendFile(res, file, type, cache = 'no-store') {
   res.end(body);
 }
 
-function handleRequest(req, res) {
+async function handleRequest(req, res, deps) {
   const u = new URL(req.url, 'http://localhost');
   const p = u.pathname;
   try {
-    if (req.method !== 'GET') return sendJSON(res, 405, { error: 'somente GET' });
+    if (req.method !== 'GET' && req.method !== 'POST') {
+      return sendJSON(res, 405, { error: 'somente GET/POST' });
+    }
+    if (req.method === 'POST') {
+      // POST só nas rotas de AÇÃO (busca IA e key); todo o resto é GET.
+      if (p === '/api/search') return await apiSearch(req, res, deps);
+      if (p === '/api/key') return await apiKeySet(req, res, deps);
+      return sendJSON(res, 405, { error: 'somente GET nesta rota' });
+    }
     if (p === '/' || p === '/index.html') {
       return sendFile(res, path.join(UI_DIR, 'index.html'), 'text/html; charset=utf-8');
     }
@@ -221,6 +423,13 @@ function handleRequest(req, res) {
     if (p === '/api/articles') {
       const r = apiArticles(u.searchParams);
       return sendJSON(res, r.status, r.body);
+    }
+    if (p === '/api/search/scope') {
+      const r = apiSearchScope(u.searchParams);
+      return sendJSON(res, r.status, r.body);
+    }
+    if (p === '/api/key/status') {
+      return sendJSON(res, 200, { hasKey: HAS_LLM });
     }
     const m = p.match(/^\/api\/article\/(\d+)$/);
     if (m) {
@@ -254,10 +463,20 @@ export function openBrowser(url) {
 /**
  * Sobe o servidor do buscador. `port: 0` = porta efêmera (testes). Retorna { server, port, url,
  * close() } — o chamador (CLI/TUI) é dono do ciclo de vida; close() é await-ável.
+ * `deps` injeta o motor de busca/probe de key (testes trocam por fakes sem rede/LLM).
  */
-export function startWebServer({ port = WEB_PORT, host = WEB_HOST, open = false } = {}) {
+export function startWebServer({ port = WEB_PORT, host = WEB_HOST, open = false, deps = {} } = {}) {
+  const d = { search: searchWeb, probeKey: probeOpenRouterKey, ...deps };
   return new Promise((resolve, reject) => {
-    const server = http.createServer(handleRequest);
+    // A busca IA responde MINUTOS depois do request. Isso é seguro nos defaults do Node: o body
+    // do POST é consumido ANTES do trabalho (request "completo"), e o requestTimeout (5 min)
+    // só vale p/ requests INCOMPLETOS; keepAliveTimeout conta só ENTRE requests.
+    const server = http.createServer((req, res) => {
+      handleRequest(req, res, d).catch((e) => {
+        errorLog(`web ${req.method} ${req.url}: ${e.message}`);
+        if (!res.headersSent) sendJSON(res, 500, { error: 'erro interno' });
+      });
+    });
     server.once('error', reject); // ex.: EADDRINUSE antes do listen completar
     server.listen(port, host, () => {
       const actualPort = server.address().port;

@@ -9,7 +9,7 @@ import {
   SEARCH_MODE_A_CONFIRM, OPENROUTER_API_KEY, ENV_PATH, BUDGET_USD, MAX_PARALLEL, RAM_MAX_PCT,
   AGGRESSIVE_DEFAULT, VERIFY_AFTER_CRAWL, VERIFY_STREAMING, JOB_TIMEOUT_MS, JOB_HARD_TIMEOUT_MS,
   CLASSIFY_STREAMING, SUMMARIZE_STREAMING, CURATE_JOBS, ROUNDUP_TIMEOUT_MS, COST_LOG_INTERVAL_MS,
-  defaultParallel, loadSources, addSourceToConfig,
+  defaultParallel, loadSources, addSourceToConfig, setRuntimeKey,
 } from './config.js';
 import {
   initGovernor, stopGovernor, setProfile, jobsCapacity, getTelemetry,
@@ -33,6 +33,11 @@ import { slugify, normalizeUrl, parseDate, hostOf, log, warn, errorLog, debug } 
 
 // Re-export p/ a UI importar de um lugar só (igual getStatus).
 export { getSearchProgress };
+
+/** Artigo completo por id (SELECT a.* + source_name) p/ a preview da TUI. Síncrono e barato. */
+export function getArticle(id) {
+  return stmts.webGetArticle.get(id) ?? null;
+}
 
 /**
  * Deadline por job: corre `promise` contra um timeout de `ms`; estourou, REJEITA com
@@ -150,6 +155,22 @@ export function getStatus() {
       done: f.done || 0,
       failed: f.failed || 0,
     },
+  };
+}
+
+/**
+ * Escopo efetivo da busca (delta vs acervo) + contagem DESSE escopo — a MESMA conta para o
+ * guard de custo do CLI e para a confirmação da TUI (que antes contava o acervo inteiro).
+ * A âncora do delta é a última run QUE TROUXE ARTIGOS (maxArticleRunId), não MAX(runs.id):
+ * buscas/verify também abrem runs, e ancorar nelas zeraria o "apenas o novo".
+ */
+export function getSearchScope(flags = {}) {
+  const latest = stmts.maxArticleRunId.get().id;
+  const all = flags.all === true || latest == null;
+  return {
+    all,
+    runId: all ? null : latest,
+    count: all ? stmts.countArticles.get().c : stmts.countArticlesByRun.get(latest).c,
   };
 }
 
@@ -775,12 +796,11 @@ export async function cmdSearch(rest, flags) {
   const mode = String(flags.mode || 'A').toUpperCase() === 'B' ? 'B' : 'A';
   const limit = flags.limit ? Number(flags.limit) : Infinity;
   // Delta: por padrão busca só na última execução; --all (ou sem runs) busca no acervo inteiro.
-  const latest = stmts.getLatestRunId.get().id;
-  const all = flags.all === true || latest == null;
+  // O MESMO escopo alimenta o guard e o motor (runSearch) — guard e varredura nunca divergem.
+  const scope = getSearchScope(flags);
   if (mode === 'A') {
     // Guard de custo: o modo A faz 1 chamada Flash por artigo (estima contra o escopo real).
-    const total = all ? stmts.countArticles.get().c : stmts.countArticlesByRun.get(latest).c;
-    const n = Math.min(total, Number.isFinite(limit) ? limit : Infinity);
+    const n = Math.min(scope.count, Number.isFinite(limit) ? limit : Infinity);
     if (n > SEARCH_MODE_A_CONFIRM && flags.yes !== true) {
       errorLog(
         `Modo A vai avaliar ~${n} artigos (custo alto). Refaça com --yes, ou use --limit N / --mode B / --all.`,
@@ -789,7 +809,7 @@ export async function cmdSearch(rest, flags) {
     }
   }
   return runWithLimits({ command: 'search', flags, profile: 'llm-only' }, () =>
-    runSearch(query, { mode, limit, yes: flags.yes === true }));
+    runSearch(query, { mode, limit, yes: flags.yes === true, all: scope.all, runId: scope.runId }));
 }
 
 // Limites de execução (orçamento/paralelismo/RAM). `limits set` persiste em NC_HOME/.env (mesmo
@@ -905,6 +925,7 @@ export async function cmdKey(rest, flags) {
       process.exit(1);
     }
     const { updated, file } = upsertEnvVar('OPENROUTER_API_KEY', key);
+    setRuntimeKey(key); // vale JÁ neste processo (a TUI encadeia comandos sem reiniciar)
     log(`chave válida ✓ ${maskKey(key)} — ${updated ? 'atualizada' : 'salva'} em ${file}`);
     return;
   }

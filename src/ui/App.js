@@ -7,7 +7,9 @@ import { html } from './html.js';
 import { t } from './i18n.js';
 import {
   getStatus, cmdCrawl, cmdExport, cmdClassify, cmdAdd, cmdReset, cmdSummarize, cmdSearch,
+  getArticle,
 } from '../commands.js';
+import { openBrowser } from '../web.js';
 import {
   Menu, StatusScreen, CrawlConfig, ExportConfig, ClassifyConfig, AddConfig, ResetConfirm,
   SummarizeConfig, SearchConfig, WebConfig, LimitsConfig,
@@ -94,6 +96,8 @@ export default function App() {
   } else if (screen === 'results') {
     body = html`<${ResultsView}
       result=${runResult}
+      onOpen=${openBrowser}
+      getArticle=${getArticle}
       onDone=${(v) => (v === 'quit' ? exit() : toMenu())}
     />`;
   }

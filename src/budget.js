@@ -14,6 +14,8 @@ const SEED_PRO = 0.05;
 const RESERVE_CAP = 0.25;
 const EMA_ALPHA = 0.2;
 
+const seedForModel = (model) => (String(model || '').includes('flash') ? SEED_FLASH : SEED_PRO);
+
 export class BudgetExceededError extends Error {
   constructor(message = 'orçamento do run esgotado') {
     super(message);
@@ -37,7 +39,7 @@ export class BudgetLedger {
   }
 
   seedFor(model) {
-    return String(model || '').includes('flash') ? SEED_FLASH : SEED_PRO;
+    return seedForModel(model);
   }
 
   estimate(stage, model) {
@@ -237,4 +239,19 @@ export function getBudgetState() {
     totalUsd: (_run?.totalUsd ?? 0) + snap.spentUsd,
     totalCalls: (_run?.totalCalls ?? 0) + snap.calls,
   };
+}
+
+/**
+ * Custo esperado de UMA chamada do estágio, p/ EXIBIR antes de rodar (confirmA da TUI, preflight
+ * da busca web): média REAL do llm_usage quando há amostra (>=3 chamadas cobradas), senão o seed
+ * do tier. Não usa currentLedger().estimate() — aquilo é RESERVA (2x EMA) e morre no endRun.
+ */
+export function estimateStageCallUsd(stage, model) {
+  try {
+    const h = stmts.avgUsageByStage.get(stage);
+    if (h && h.n >= 3 && h.avg > 0) return h.avg;
+  } catch {
+    /* base antiga sem llm_usage: cai no seed */
+  }
+  return seedForModel(model);
 }

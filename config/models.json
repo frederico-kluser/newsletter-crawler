@@ -8,11 +8,15 @@
     "contentSelector": { "model": "deepseek/deepseek-v4-pro", "effort": "xhigh" },
     "articleExtract":  { "model": "deepseek/deepseek-v4-pro", "effort": "xhigh" },
     "classify":        { "model": "deepseek/deepseek-v4-pro", "effort": "xhigh" },
+    "classify:difficulty":        { "model": "deepseek/deepseek-v4-flash", "effort": "high" },
+    "classify:content-type":      { "model": "deepseek/deepseek-v4-flash", "effort": "high" },
+    "classify:trending-emerging": { "model": "deepseek/deepseek-v4-flash", "effort": "high" },
     "summarize":       { "model": "deepseek/deepseek-v4-flash", "effort": "high" },
     "searchRelevance": { "model": "deepseek/deepseek-v4-flash", "effort": "high" },
     "searchTags":      { "model": "deepseek/deepseek-v4-pro", "effort": "high" },
     "curate":          { "model": "deepseek/deepseek-v4-flash", "effort": "high" },
     "articleClean":    { "model": "deepseek/deepseek-v4-flash", "effort": "medium" },
+    "articleReclean":  { "model": "deepseek/deepseek-v4-pro", "effort": "high" },
     "verifyRecord":    { "model": "deepseek/deepseek-v4-flash", "effort": "high" },
     "dateSelector":    { "model": "deepseek/deepseek-v4-flash", "effort": "high" }
   }

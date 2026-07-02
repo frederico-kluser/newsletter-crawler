@@ -5,7 +5,7 @@ import OpenAI from 'openai';
 import { z } from 'zod';
 import {
   OPENROUTER_API_KEY, HTTP_REFERER, X_TITLE, HAS_LLM, MAX_HTML_FOR_LLM, SEARCH_MAX_CHARS,
-  MODELS, stageModel, LLM_TIMEOUT_MS,
+  MODELS, stageModel, classifyFacetModel, LLM_TIMEOUT_MS,
 } from './config.js';
 import { getLane, reportRateLimit } from './governor.js';
 import { reserve as budgetReserve } from './budget.js';
@@ -509,12 +509,12 @@ const cleanZ = z.object({
   junk_spans: z.array(z.string()),
   published_at: z.string().nullish(),
 });
-export async function cleanArticleContent({ title, content }) {
-  const { model, effort } = stageModel('articleClean');
+export async function cleanArticleContent({ title, content, stage = 'articleClean' }) {
+  const { model, effort } = stageModel(stage);
   const out = await callJSON({
     model,
     reasoning: { effort },
-    stage: 'articleClean',
+    stage,
     schemaName: 'clean_article',
     schema: cleanSchema,
     system:
@@ -645,12 +645,14 @@ const facetZ = z.object({
   uncovered: z.array(z.string()),
   confidence: z.number(),
 });
-export async function classifyFacet({ system, user }) {
-  const { model, effort } = stageModel('classify');
+export async function classifyFacet({ facet, system, user }) {
+  // Modelo POR FACETA: facetas de baixo valor caem p/ Flash (models.json), o resto segue Pro.
+  const { model, effort } = facet ? classifyFacetModel(facet) : stageModel('classify');
   const out = await callJSON({
     model,
     reasoning: { effort }, // default 'xhigh' = teto real do DeepSeek V4 ("max" => 400)
-    stage: 'classify',
+    stage: 'classify', // ledger/eventos agregam sob 'classify' (o EMA de custo é por stage:model)
+
     schemaName: 'facet_tags',
     schema: facetSchema,
     system,

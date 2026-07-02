@@ -236,7 +236,8 @@ const WEB_WHERE = `
                AND (tk.facet = 'framework-library-tool'
                     OR (tk.facet = 'content-type'
                         AND tk.tag IN (SELECT value FROM json_each(@toolTypes))))
-          ) END))`;
+          ) END))
+    AND (@verify IS NULL OR a.verify_status = @verify)`;
 
 // Índice do delta por execução (run_id vem via ensureColumn, então não existe no CREATE base).
 db.exec('CREATE INDEX IF NOT EXISTS idx_articles_run ON articles(run_id)');
@@ -291,6 +292,15 @@ export const stmts = {
   listArticlesForReverify: db.prepare(
     `SELECT id, url, title, kind, blurb, content, content_source FROM articles ORDER BY id LIMIT ?`,
   ),
+  // reclean: só os vereditos 'suspect' (utilizáveis, mas com problemas) p/ um passe de limpeza forte.
+  listSuspectArticles: db.prepare(
+    `SELECT id, url, title, kind, blurb, content, content_source FROM articles
+      WHERE verify_status = 'suspect' ORDER BY id LIMIT ?`,
+  ),
+  // reclean: atualiza SÓ o conteúdo limpo (passe Pro) + hash + marca cleaned; não toca em kind/blurb.
+  setContentCleaned: db.prepare(
+    `UPDATE articles SET content = @content, content_hash = @content_hash, cleaned = 1 WHERE id = @id`,
+  ),
   listArticlesBySource: db.prepare(`SELECT * FROM articles WHERE source_id = ? ORDER BY id`),
   // delta: só os artigos descobertos numa execução (run) específica.
   listArticlesForRunBySource: db.prepare(
@@ -342,7 +352,7 @@ export const stmts = {
   // buscador web (ncrawl web): página filtrada + count com o MESMO WHERE (params anuláveis)
   webSearchArticles: db.prepare(
     `SELECT a.id, a.url, a.title, a.title_pt, a.summary_pt, a.published_at, a.extracted_at,
-            a.source_id, s.name AS source_name, a.kind, a.section, a.verify_status,
+            a.source_id, s.name AS source_name, a.kind, a.section, a.verify_status, a.verify_notes,
             substr(coalesce(a.blurb, a.content, ''), 1, 280) AS snippet
        FROM articles a
        LEFT JOIN sources s ON s.id = a.source_id
@@ -403,6 +413,21 @@ export const stmts = {
   claimNext: db.prepare(
     `UPDATE frontier SET state = 'in_progress'
      WHERE id = (SELECT id FROM frontier WHERE state = 'pending' ORDER BY retries ASC, id ASC LIMIT 1)
+     RETURNING *`,
+  ),
+  // Claims SEPARADOS por pool: artigos (fetch/render — contam na capacity de fetch+render) vs
+  // curadoria (listing/roundup — fase de LLM longa, pool próprio p/ não travar o fetch dos artigos).
+  // Juntos são EXAUSTIVOS (article | não-article), então nenhum job pendente fica órfão.
+  claimNextArticle: db.prepare(
+    `UPDATE frontier SET state = 'in_progress'
+     WHERE id = (SELECT id FROM frontier WHERE state = 'pending' AND kind = 'article'
+                  ORDER BY retries ASC, id ASC LIMIT 1)
+     RETURNING *`,
+  ),
+  claimNextCurate: db.prepare(
+    `UPDATE frontier SET state = 'in_progress'
+     WHERE id = (SELECT id FROM frontier WHERE state = 'pending' AND (kind IS NULL OR kind != 'article')
+                  ORDER BY retries ASC, id ASC LIMIT 1)
      RETURNING *`,
   ),
   finish: db.prepare(`UPDATE frontier SET state = ? WHERE url = ?`),

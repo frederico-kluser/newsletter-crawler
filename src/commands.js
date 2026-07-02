@@ -8,6 +8,7 @@ import {
   EXPORT_DIR, DB_PATH, CONCURRENCY, MAX_RETRIES, HAS_LLM, CLASSIFY_AFTER_CRAWL, SUMMARIZE_AFTER_CRAWL,
   SEARCH_MODE_A_CONFIRM, OPENROUTER_API_KEY, ENV_PATH, BUDGET_USD, MAX_PARALLEL, RAM_MAX_PCT,
   AGGRESSIVE_DEFAULT, VERIFY_AFTER_CRAWL, VERIFY_STREAMING, JOB_TIMEOUT_MS,
+  CLASSIFY_STREAMING, SUMMARIZE_STREAMING, CURATE_JOBS, ROUNDUP_TIMEOUT_MS, COST_LOG_INTERVAL_MS,
   defaultParallel, loadSources, addSourceToConfig,
 } from './config.js';
 import {
@@ -15,9 +16,9 @@ import {
 } from './governor.js';
 import { beginRun, endRun, shouldStop, getBudgetState } from './budget.js';
 import { processJob, enqueue, upsertSource } from './crawl.js';
-import { classifyPending } from './classify.js';
-import { summarizePending } from './summarize.js';
-import { verifyPending, verifyArticleRow } from './verify.js';
+import { classifyPending, classifyArticleRow } from './classify.js';
+import { summarizePending, summarizeArticleRow } from './summarize.js';
+import { verifyPending, verifyArticleRow, recleanSuspects } from './verify.js';
 import { runSearch, getSearchProgress } from './search.js';
 import { closeBrowser } from './fetch.js';
 import { closeParsePool } from './parse-pool.js';
@@ -226,40 +227,68 @@ async function crawlRun(flags) {
   // (as lanes de fetch/render dentro do job limitam o trabalho pesado).
   const capacity = () =>
     CONCURRENCY > 0 ? Math.min(CONCURRENCY, jobsCapacity()) : jobsCapacity();
-  const inflight = new Set(); // jobs (limitados por fetch+render)
-  const verifying = new Set(); // verificação em streaming (lane llm; NÃO conta na capacity)
+  // Curadoria (listing/roundup) tem POOL PRÓPRIO: a fase de LLM longa não deve ocupar a capacity
+  // de fetch/render dos artigos (senão uma curadoria lenta trava o fetch). Default derivado do
+  // porte da máquina; CURATE_JOBS > 0 é teto duro por env.
+  const curateCapacity = () =>
+    CURATE_JOBS > 0 ? CURATE_JOBS : Math.max(2, Math.ceil(MAX_PARALLEL / 4));
+  const inflight = new Set(); // jobs de ARTIGO (limitados por fetch+render)
+  const curating = new Set(); // jobs de listing/roundup (pool próprio; fase LLM longa)
+  const streaming = new Set(); // pós-save: verify+summarize+classify (lane llm; NÃO conta na capacity)
   let processedArticles = 0;
   let budgetRequeued = 0;
   let timedOut = 0;
 
-  // Verificação em STREAMING: logo após salvar/enriquecer uma ficha, verifica na folga da lane
-  // llm (o sweep final segue como rede de segurança p/ os NULL restantes). Rastreada num set à
-  // parte p/ o loop esperar por ela sem roubar capacidade de fetch/render.
-  const streamVerify = (verifyUrl) => {
-    if (!(VERIFY_STREAMING && HAS_LLM && verifyUrl) || shouldStop()) return;
-    const p = (async () => {
-      try {
-        const a = stmts.getArticleFullByUrl.get(verifyUrl);
-        if (!a || a.verify_status != null) return; // já verificada (ou sumiu): pula
-        await verifyArticleRow(a, { runId });
-      } catch (e) {
-        if (e?.code !== 'BUDGET_EXCEEDED') debug(`verify streaming falhou (${verifyUrl}): ${e.message}`);
-      }
-    })().finally(() => verifying.delete(p));
-    verifying.add(p);
+  // STREAMING pós-save: logo após salvar/enriquecer uma ficha, roda verify + summarize + classify
+  // na FOLGA da lane llm (cada um idempotente, engolindo erro/orçamento). Rastreado num set à parte
+  // p/ o loop esperar sem roubar capacidade de fetch/render. Os sweeps pós-crawl seguem como rede
+  // de segurança (delta-only) p/ o que sobrar (blurb-only nunca enriquecido, pulados por orçamento).
+  const track = (task) => {
+    const p = task().finally(() => streaming.delete(p));
+    streaming.add(p);
+  };
+  const streamPostSave = (savedUrl) => {
+    if (!(HAS_LLM && savedUrl) || shouldStop()) return;
+    const a = stmts.getArticleFullByUrl.get(savedUrl);
+    if (!a) return; // sumiu: pula
+    if (VERIFY_STREAMING && a.verify_status == null) {
+      track(async () => {
+        try {
+          await verifyArticleRow(a, { runId });
+        } catch (e) {
+          if (e?.code !== 'BUDGET_EXCEEDED') debug(`verify streaming falhou (${savedUrl}): ${e.message}`);
+        }
+      });
+    }
+    if (SUMMARIZE_STREAMING && a.summary_pt == null) {
+      track(async () => {
+        try {
+          await summarizeArticleRow(a);
+        } catch (e) {
+          if (e?.code !== 'BUDGET_EXCEEDED') debug(`summarize streaming falhou (${savedUrl}): ${e.message}`);
+        }
+      });
+    }
+    if (CLASSIFY_STREAMING && !stmts.getClassification.get(a.id)) {
+      track(async () => {
+        try {
+          await classifyArticleRow(a);
+        } catch (e) {
+          if (e?.code !== 'BUDGET_EXCEEDED') debug(`classify streaming falhou (${savedUrl}): ${e.message}`);
+        }
+      });
+    }
   };
 
-  const dispatch = (job) => {
+  // Deadline vem do POOL (artigo = JOB_TIMEOUT_MS; curadoria = ROUNDUP_TIMEOUT_MS, default 0 = sem
+  // corte). `set` é o pool que rastreia o job (inflight p/ artigo, curating p/ listing/roundup).
+  const dispatch = (job, set, deadline) => {
     const p = (async () => {
       try {
-        // Deadline SÓ p/ jobs de artigo (o "retardatário" é um fetch/enriquecimento lento). Jobs
-        // de listing/roundup fazem trabalho de LLM legítimo e mais longo (curadoria por seções +
-        // cobertura), já limitado por LLM_TIMEOUT_MS/orçamento — cortá-los abortaria a curadoria.
-        const deadline = job.kind === 'article' ? JOB_TIMEOUT_MS : 0;
         const res = await withTimeout(processJob(job, opts), deadline);
         if (job.kind === 'article') processedArticles++;
         stmts.finish.run('done', job.url);
-        if (res?.verifyUrl) streamVerify(res.verifyUrl); // salvou/enriqueceu -> verifica já
+        if (res?.verifyUrl) streamPostSave(res.verifyUrl); // salvou/enriqueceu -> pós-processa já
       } catch (e) {
         if (e?.code === 'BUDGET_EXCEEDED') {
           // Orçamento: devolve à fila SEM consumir retry — retomável no próximo run. O loop
@@ -270,13 +299,13 @@ async function crawlRun(flags) {
         }
         if (e?.code === 'JOB_TIMEOUT') {
           timedOut++;
-          logEvent({ runId, url: job.url, stage: 'job', status: 'timeout', detail: { ms: JOB_TIMEOUT_MS, kind: job.kind } });
+          logEvent({ runId, url: job.url, stage: 'job', status: 'timeout', detail: { ms: deadline, kind: job.kind } });
           const row = job.kind === 'article' ? stmts.getArticleFullByUrl.get(normalizeUrl(job.url) || job.url) : null;
           if (row?.needs_enrich) {
             // A ficha JÁ existe com o blurb do agregador: encerra o job (não re-tenta agora, senão
             // trava de novo) e deixa needs_enrich=1 — o próximo crawl re-enfileira p/ enriquecer.
             stmts.finish.run('done', job.url);
-            log(`job estourou ${JOB_TIMEOUT_MS}ms — ficha mantida com o blurb (enriquece depois): ${job.url.slice(0, 70)}`);
+            log(`job estourou ${deadline}ms — ficha mantida com o blurb (enriquece depois): ${job.url.slice(0, 70)}`);
             return;
           }
           // avulso/listing/roundup: sem ficha a preservar — trata como falha comum (retry/fail).
@@ -288,20 +317,44 @@ async function crawlRun(flags) {
         if ((r?.retries ?? 0) < MAX_RETRIES) stmts.bumpRetry.run(job.url);
         else stmts.finish.run('failed', job.url);
       }
-    })().finally(() => inflight.delete(p));
-    inflight.add(p);
+    })().finally(() => set.delete(p));
+    set.add(p);
   };
 
-  for (;;) {
-    while (processedArticles < maxArticles && !shouldStop() && inflight.size < capacity()) {
-      const job = stmts.claimNext.get();
-      if (!job) break;
-      dispatch(job);
+  // Custo AO VIVO no CLI: timer independente do fim dos jobs (mais "tempo real" que esperar um job
+  // fechar). unref p/ não segurar o processo; só loga quando o nº de chamadas mudou (sem repetir).
+  let lastLoggedCalls = -1;
+  const costTimer = setInterval(() => {
+    const bs = getBudgetState();
+    if (bs.calls > 0 && bs.calls !== lastLoggedCalls) {
+      lastLoggedCalls = bs.calls;
+      log(
+        `gasto parcial: US$ ${bs.spentUsd.toFixed(4)} em ${bs.calls} chamadas` +
+          `${bs.budgetUsd > 0 ? ` / teto US$ ${bs.budgetUsd.toFixed(2)}` : ''}`,
+      );
     }
-    if (inflight.size === 0 && verifying.size === 0) break; // nada rodando e nada a reivindicar => fim
-    await Promise.race([...inflight, ...verifying]);
+  }, COST_LOG_INTERVAL_MS);
+  costTimer.unref?.();
+
+  for (;;) {
+    // Artigos: limitados pela capacity de fetch+render (+ --max-articles).
+    while (processedArticles < maxArticles && !shouldStop() && inflight.size < capacity()) {
+      const job = stmts.claimNextArticle.get();
+      if (!job) break;
+      dispatch(job, inflight, JOB_TIMEOUT_MS);
+    }
+    // Curadoria: pool PRÓPRIO (não rouba a capacity dos artigos). --max-articles também trava aqui
+    // (não faz sentido curar issue nova quando o teto de artigos já foi atingido).
+    while (processedArticles < maxArticles && !shouldStop() && curating.size < curateCapacity()) {
+      const job = stmts.claimNextCurate.get();
+      if (!job) break;
+      dispatch(job, curating, ROUNDUP_TIMEOUT_MS);
+    }
+    if (inflight.size === 0 && curating.size === 0 && streaming.size === 0) break; // nada => fim
+    await Promise.race([...inflight, ...curating, ...streaming]);
   }
-  await Promise.allSettled([...inflight, ...verifying]);
+  clearInterval(costTimer);
+  await Promise.allSettled([...inflight, ...curating, ...streaming]);
   await closeBrowser();
   await closeParsePool(); // encerra os workers de parsing (o pós-crawl não parseia HTML)
   if (budgetRequeued) log(`orçamento: ${budgetRequeued} jobs devolvidos à fila (retomáveis no próximo run)`);
@@ -476,6 +529,18 @@ export async function cmdVerify(flags) {
   const force = flags.force === true;
   await runWithLimits({ command: 'verify', flags, profile: 'llm-only' }, () =>
     verifyPending({ limit, force }));
+  printStatus();
+}
+
+// reclean: re-limpa os 'suspect' com o passe FORTE (Pro) e re-verifica (melhoria da seção 7).
+export async function cmdReclean(flags) {
+  if (!HAS_LLM) {
+    errorLog('OPENROUTER_API_KEY ausente — o reclean requer o caminho LLM.');
+    process.exit(1);
+  }
+  const limit = flags.limit ? Number(flags.limit) : Infinity;
+  await runWithLimits({ command: 'reclean', flags, profile: 'llm-only' }, () =>
+    recleanSuspects({ limit }));
   printStatus();
 }
 
@@ -714,7 +779,7 @@ export function cmdLimits(rest, flags) {
   log(`budget:      ${BUDGET_USD > 0 ? `US$ ${BUDGET_USD.toFixed(2)}/run` : 'ilimitado'} (${origem('BUDGET_USD')})`);
   log(`ram-max-pct: ${RAM_MAX_PCT}% (${origem('RAM_MAX_PCT')})`);
   log(
-    `lanes (perfil crawl):    llm=${Math.ceil(N / 2)} fetch=${Math.ceil(N / 4)} render<=${Math.ceil(N / 4)} (RAM manda)`,
+    `lanes (perfil crawl):    llm=${Math.ceil(N * 0.6)} fetch=${Math.ceil(N / 4)} render<=${Math.ceil(N / 4)} (RAM manda)`,
   );
   log(`lanes (perfil llm-only): llm=${N}`);
   try {

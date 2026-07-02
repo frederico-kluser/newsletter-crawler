@@ -9,7 +9,7 @@ import {
   printStatus, cmdCrawl, cmdAdd, cmdReset, cmdExport, cmdClassify, cmdSummarize, cmdSearch, cmdKey,
   cmdWeb,
   cmdLimits,
-  cmdVerify, cmdInspect, cmdPurge,
+  cmdVerify, cmdReclean, cmdInspect, cmdPurge,
 } from './commands.js';
 
 function parseFlags(argv) {
@@ -48,6 +48,7 @@ function printHelp() {
       '  node src/index.js status',
       '  node src/index.js inspect [--run N] [--url <substr>] [--verbose]   auditoria da run (itens, vereditos, motivos)',
       '  node src/index.js verify [--limit N] [--force]   verificação pós-cadastro (ok|suspect|junk) sob demanda',
+      '  node src/index.js reclean [--limit N]   re-limpa os "suspect" com passe forte (Pro) e re-verifica',
       '  node src/index.js purge <fonte> --yes [--selectors]   apaga os DADOS de uma fonte p/ refazer do zero',
       '  node src/index.js add <url> [--name "Nome"] [--type index|listing] [--max-index-pages N]',
       '  node src/index.js export [--format md|json] [--all]   (--all: acervo todo, não só a última run)',
@@ -98,6 +99,9 @@ try {
       db.close();
     } else if (cmd === 'verify') {
       await cmdVerify(flags);
+      db.close();
+    } else if (cmd === 'reclean') {
+      await cmdReclean(flags);
       db.close();
     } else if (cmd === 'purge') {
       cmdPurge(rest, flags);

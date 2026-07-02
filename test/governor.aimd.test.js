@@ -41,7 +41,7 @@ afterEach(() => stopGovernor());
 test('init (perfil crawl, N=32): split llm/fetch e slew de partida do render', () => {
   const env = makeEnv({});
   init(env);
-  assert.equal(getLane('llm').concurrency, 16, 'llm = ceil(N/2)');
+  assert.equal(getLane('llm').concurrency, 20, 'llm = ceil(N*0.6)');
   assert.equal(getLane('fetch').concurrency, 8, 'fetch = ceil(N/4)');
   assert.equal(getLane('render').concurrency, 2, 'render parte pequeno (slew), teto 8');
   assert.equal(jobsCapacity(), 10, 'jobs = fetch + render');
@@ -115,10 +115,10 @@ test('429: lane llm halva e recupera +1 por janela limpa de 10s', () => {
 
 test('stageWindow: min(override>0, capacidade llm) e setProfile realoca', () => {
   const env = makeEnv({});
-  init(env); // crawl: llm 16
-  assert.equal(stageWindow(0), 16, 'sem override: janela = lane llm');
+  init(env); // crawl: llm 20 (ceil(N*0.6))
+  assert.equal(stageWindow(0), 20, 'sem override: janela = lane llm');
   assert.equal(stageWindow(6), 6, 'override menor vale');
-  assert.equal(stageWindow(100), 16, 'override maior não fura a lane');
+  assert.equal(stageWindow(100), 20, 'override maior não fura a lane');
 
   setProfile('llm-only');
   assert.equal(getLane('llm').concurrency, 32, 'llm-only: N inteiro p/ a lane llm');

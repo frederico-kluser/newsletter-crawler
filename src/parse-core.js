@@ -115,6 +115,76 @@ export function htmlToMarkdown(html) {
   }
 }
 
+// ---- guarda de TEXTO PURO no armazenamento (anti "HTML cru" nas fichas) ----
+// A extração já devolve texto (Readability .textContent, cheerio .text()), mas o fallback por
+// LLM e o blurb do agregador podem ecoar marcação. ensurePlainText é a rede final: converte
+// SÓ quando a string é HTML de verdade — nunca mexe em prosa/código com "<" solto (a < b,
+// Array<T>, um "<div>" citado). Precisão > recall de propósito.
+const ATTR_TAG_RE = /<[a-z][\w-]*\s+[a-z][\w-]*\s*=/i; // <a href=, <img src=, <div class=
+const CLOSE_TAG_RE = /<\/[a-z][\w-]*\s*>/gi; // </p>, </strong>, </div>
+const ENTITY_RE = /&(?:amp|lt|gt|quot|apos|nbsp|#\d+|#x[0-9a-f]+);/i;
+const ENTITY_MAP = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ' };
+
+/**
+ * A string É markup HTML? Dispara com tag-com-atributo OU qualquer </tag> de fechamento. Prosa
+ * com "<" solto (a < b, Array<T>, um "<div>" citado só na ABERTURA) não tem fechamento => passa
+ * intacta; um blurb de UMA linha "<p>…</p>" (o caso das notícias) já dispara. Puro/testável.
+ */
+export function looksLikeHtml(s) {
+  const str = String(s || '');
+  if (!str) return false;
+  if (ATTR_TAG_RE.test(str)) return true; // atributo => HTML real
+  return Boolean(str.match(CLOSE_TAG_RE)); // qualquer </tag> => markup real (match, não test: /g é stateful)
+}
+
+// Decodifica um conjunto CONHECIDO de entidades sem tocar em "<" cru (preserva a < b, Array<T>).
+function decodeEntities(s) {
+  return String(s)
+    .replace(/&(?:([a-z]+)|#(\d+)|#x([0-9a-f]+));/gi, (m, name, dec, hex) => {
+      if (name) {
+        const k = name.toLowerCase();
+        return k in ENTITY_MAP ? ENTITY_MAP[k] : m;
+      }
+      const cp = dec ? parseInt(dec, 10) : parseInt(hex, 16);
+      if (!Number.isFinite(cp) || cp < 0 || cp > 0x10ffff) return m;
+      try {
+        return String.fromCodePoint(cp);
+      } catch {
+        return m;
+      }
+    })
+    .replace(/ /g, ' ');
+}
+
+// Converte um fragmento HTML em texto: cheerio já decodifica entidades; matamos ruído JS/CSS e
+// marcamos fronteiras de bloco p/ não colar palavras. Fail-open com strip por regex.
+function htmlFragmentToText(html) {
+  try {
+    const $ = cheerio.load(html);
+    $('script, style, noscript, template, svg, head').remove();
+    $('br').replaceWith(' ');
+    $('p, div, li, tr, section, article, blockquote, h1, h2, h3, h4, h5, h6, ul, ol, table, pre').append(' ');
+    const text = $('body').text() || $.root().text() || '';
+    return text
+      .replace(/ /g, ' ')
+      .replace(/[ \t]+/g, ' ')
+      .replace(/ *\n */g, '\n')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
+  } catch {
+    return decodeEntities(String(html || '').replace(/<[^>]+>/g, ' ')).replace(/\s+/g, ' ').trim();
+  }
+}
+
+/** Garante TEXTO limpo: converte só quando é markup HTML; senão devolve intacto. Puro/testável. */
+export function ensurePlainText(s) {
+  const str = String(s ?? '');
+  if (!str.trim()) return str;
+  if (looksLikeHtml(str)) return htmlFragmentToText(str); // tags reais: tira tags + decodifica
+  if (ENTITY_RE.test(str)) return decodeEntities(str); // só entidades: decodifica preservando "<T>"
+  return str; // texto puro / markdown / código: intacto
+}
+
 // Páginas de bloqueio/desafio anti-bot (Cloudflare etc.) que vêm com status 200 mas sem
 // conteúdo real — não devem virar "artigo". Detecta pelo título/início do corpo.
 const BLOCKED_PATTERNS = [

@@ -125,6 +125,11 @@ export const VERIFY_CONCURRENCY = envIntOr0('VERIFY_CONCURRENCY');
 // folga da lane llm durante o crawl), em vez de só num sweep no fim. O sweep final segue ligado
 // como rede de segurança (idempotente, NULL-only) p/ os blurb-only que nunca enriqueceram.
 export const VERIFY_STREAMING = process.env.VERIFY_STREAMING !== 'false';
+// Streaming de classify/summarize (espelha VERIFY_STREAMING): classifica/resume cada ficha logo
+// após salvar/enriquecer, na folga da lane llm, em vez de só no sweep pós-crawl. Os sweeps seguem
+// como rede de segurança idempotente (delta-only, needs-*).
+export const CLASSIFY_STREAMING = process.env.CLASSIFY_STREAMING !== 'false';
+export const SUMMARIZE_STREAMING = process.env.SUMMARIZE_STREAMING !== 'false';
 
 // ---- worker pool de parsing (isola o JSDOM do processo principal) ----
 // O parse JSDOM/Readability (causa de um SIGSEGV nativo raro do parser de CSS do JSDOM) sai do
@@ -142,6 +147,12 @@ export const PARSE_IN_WORKERS = process.env.PARSE_IN_WORKERS !== 'false';
 // Um job que passa deste tempo é CORTADO (0 = sem deadline). Item curado mantém o blurb do
 // agregador (needs_enrich=1) e é re-enfileirado p/ enriquecer num próximo crawl; nada se perde.
 export const JOB_TIMEOUT_MS = Number(process.env.JOB_TIMEOUT_MS || 90000);
+// Curadoria (listing/roundup) tem POOL de reivindicação próprio: a fase de LLM (por seção +
+// cobertura) é longa e NÃO deve ocupar a capacidade de fetch/render dos artigos. CURATE_JOBS=0
+// => default calculado em commands.js (max(2, ceil(MAX_PARALLEL/4))). Sem deadline duro por
+// default (a curadoria já é limitada por LLM_TIMEOUT_MS/orçamento; cortar no meio joga fora fan-out).
+export const CURATE_JOBS = envIntOr0('CURATE_JOBS');
+export const ROUNDUP_TIMEOUT_MS = Number(process.env.ROUNDUP_TIMEOUT_MS || 0);
 
 // ---- paralelismo global + orçamento (governor/budget) ----
 // Teto GLOBAL de operações simultâneas (--parallel). Deriva dos núcleos como proxy do porte
@@ -152,6 +163,9 @@ export function defaultParallel() {
 export const MAX_PARALLEL = envIntOr0('MAX_PARALLEL') || defaultParallel();
 // Orçamento por execução em USD (0 = ilimitado). O ledger grava o custo real SEMPRE.
 export const BUDGET_USD = Number(process.env.BUDGET_USD || 0);
+// Custo AO VIVO no CLI (npm run crawl): intervalo entre linhas de "gasto parcial" (lê o mesmo
+// snapshot em memória da TUI). Na TUI o painel já mostra ao vivo; isto cobre o CLI puro.
+export const COST_LOG_INTERVAL_MS = Number(process.env.COST_LOG_INTERVAL_MS || 10000);
 // Teto de uso de RAM DO SISTEMA: o governador mantém MemAvailable >= max(total*(1-pct/100), 2 GiB).
 // É a RAM da máquina inteira (desktop incluso), não o RSS do processo — Chromium é filho externo.
 export const RAM_MAX_PCT = Number(process.env.RAM_MAX_PCT || 80);
@@ -244,6 +258,24 @@ export const STAGE_MODELS = Object.fromEntries(STAGE_KEYS.map((s) => [s, resolve
 /** {model, effort} resolvido para uma etapa do pipeline (default: Pro + xhigh). */
 export function stageModel(stage) {
   return STAGE_MODELS[stage] || { model: DEFAULT_MODEL, effort: DEFAULT_EFFORT };
+}
+
+/**
+ * Modelo por FACETA da classificação (o estágio mais caro): models.json pode ter uma chave
+ * "classify:<faceta>" (ou env LLM_MODEL_CLASSIFY_<FACETA>) p/ rebaixar facetas de baixo valor
+ * (difficulty, content-type, trending-emerging) a Flash. SEM override, herda a etapa 'classify'
+ * (Pro/xhigh) — então nada muda p/ as facetas caras de alto valor.
+ */
+export function classifyFacetModel(facetName) {
+  const fileStage = _modelsCfg.stages && _modelsCfg.stages[`classify:${facetName}`];
+  const ek = `CLASSIFY_${String(facetName).replace(/[^a-z0-9]+/gi, '_').toUpperCase()}`;
+  const model = process.env[`LLM_MODEL_${ek}`] || (fileStage && fileStage.model);
+  let effort = process.env[`LLM_EFFORT_${ek}`] || (fileStage && fileStage.effort);
+  if (!model && !effort) return stageModel('classify'); // sem override: etapa base
+  const base = stageModel('classify');
+  effort = effort || base.effort;
+  if (effort === 'max') effort = 'xhigh'; // DeepSeek V4 rejeita "max"
+  return { model: model || base.model, effort };
 }
 
 // ---- classificação multi-faceta (pós-processamento) ----

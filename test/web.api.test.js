@@ -252,3 +252,47 @@ test('web: coluna kind curada vence as tags no bucket tool/news', async (t) => {
   // snippet prioriza o blurb curado
   assert.ok(tool.body.items.find((a) => a.id === toolByCol).snippet.includes('blurb do agregador'));
 });
+
+test('web: o kind do banco (release) chega ao cliente sem colapsar em news/tool', async (t) => {
+  const r = stmts.insertArticle.run({
+    source_id: beta.id, url: 'http://agg.test/rel-passthrough', title: 'Node 24 released',
+    content: 'Node.js 24 is out.', content_hash: 'hash-rel-passthrough', published_at: '2026-06-26',
+    run_id: null, kind: 'release', issue_url: null, section: null, blurb: null,
+    content_source: 'aggregator', cleaned: 0, needs_enrich: 0,
+  });
+  const id = Number(r.lastInsertRowid);
+  t.after(() => db.prepare('DELETE FROM articles WHERE id = ?').run(id));
+  const detail = await json(`/api/article/${id}`);
+  assert.equal(detail.body.kind, 'release', 'detalhe preserva release (antes colapsava em news/tool)');
+  const list = await json(`/api/articles?source=${beta.id}`);
+  assert.equal(list.body.items.find((a) => a.id === id).kind, 'release', 'listagem preserva release');
+});
+
+test('web: filtro por verify_status (ok/suspect/junk) e param inválido = 400', async (t) => {
+  const seed = (url, verdict) => {
+    const r = stmts.insertArticle.run({
+      source_id: alpha.id, url, title: `v-${verdict}`, content: `conteúdo ${verdict}`,
+      content_hash: `hash-${url}`, published_at: '2026-06-15', run_id: null, kind: null,
+      issue_url: null, section: null, blurb: null, content_source: 'target', cleaned: 0, needs_enrich: 0,
+    });
+    const id = Number(r.lastInsertRowid);
+    stmts.setVerify.run({ id, verify_status: verdict, verify_notes: verdict === 'suspect' ? 'blurb curto' : null });
+    return id;
+  };
+  const ok = seed('http://alpha.test/v-ok', 'ok');
+  const sus = seed('http://alpha.test/v-sus', 'suspect');
+  const junk = seed('http://alpha.test/v-junk', 'junk');
+  t.after(() => { for (const id of [ok, sus, junk]) db.prepare('DELETE FROM articles WHERE id = ?').run(id); });
+
+  const onlySus = await json('/api/articles?verify=suspect');
+  const susIds = onlySus.body.items.map((a) => a.id);
+  assert.ok(susIds.includes(sus) && !susIds.includes(ok) && !susIds.includes(junk), 'só o suspect');
+  assert.equal(onlySus.body.items.find((a) => a.id === sus).verify_status, 'suspect', 'API devolve o selo');
+
+  const okRes = await json('/api/articles?verify=ok');
+  const okIds = okRes.body.items.map((a) => a.id);
+  assert.ok(okIds.includes(ok) && !okIds.includes(sus), 'filtro ok exclui o suspect');
+
+  const bad = await json('/api/articles?verify=lixo');
+  assert.equal(bad.status, 400, 'verify inválido vira 400 (não é silenciosamente ignorado)');
+});

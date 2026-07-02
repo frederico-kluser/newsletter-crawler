@@ -6,7 +6,7 @@
 import { db, stmts } from './db.js';
 import {
   extractArticleAsync, htmlToMarkdown, pruneForLLM, extractPublishedDate, cpuParse, capHtml,
-  linksInHtml,
+  linksInHtml, ensurePlainText,
 } from './clean.js';
 import { curateRoundupItems, curateLeftoverLinks } from './llm.js';
 import { logEvent } from './events.js';
@@ -147,12 +147,15 @@ export function consolidateItems(results, { baseUrl }) {
         continue;
       }
       if (!seen.has(abs)) {
+        // Guarda de texto puro: o blurb (e às vezes o título) do agregador pode vir com marcação
+        // do LLM. É a rede PRIMÁRIA das notícias — o blurb vira o conteúdo definitivo do item que
+        // nunca enriquece, e é a fonte preferida do snippet no buscador (db.js coalesce blurb).
         seen.set(abs, {
           url: abs,
-          title: String(it.title || '').replace(/\s+/g, ' ').trim(),
+          title: ensurePlainText(String(it.title || '')).replace(/\s+/g, ' ').trim(),
           kind,
           section: it.section ? String(it.section).replace(/\s+/g, ' ').trim() : null,
-          blurb: it.blurb ? String(it.blurb).replace(/\s+/g, ' ').trim() : null,
+          blurb: it.blurb ? ensurePlainText(String(it.blurb)).replace(/\s+/g, ' ').trim() : null,
         });
       }
     }

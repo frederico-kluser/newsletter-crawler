@@ -33,7 +33,12 @@ Todas as mudanças relevantes deste projeto. Formato baseado em
   da issue omitidos) — a diferença determinística de conjuntos (links externos do corpo − itens
   emitidos) alimenta um agente extra que decide item real que faltou vs link secundário; um pós-filtro
   determinístico (`isRealRecoveredItem`: exige blurb real e título não-genérico) impede que âncoras
-  como "Demo."/"Release notes" virem registros. Evento `curate/coverage` audita o funil.
+  como "Demo."/"Release notes" virem registros. O diff usa o HTML BRUTO e o agente dos faltantes
+  recebe o HTML PODADO da página INTEIRA como contexto (o Readability descarta blocos reais vizinhos
+  de anúncio — sem isso os itens omitidos nem apareciam no funil). Evento `curate/coverage` audita o
+  funil por URL. Validado end-to-end (run #10): 59 fichas, 3 itens recuperados na #631, 0 patrocínios.
+- **`ARQUITETURA.html`** na raiz: a arquitetura desenhada em canvas (pipeline, paralelismo, gargalos,
+  números reais) explicada p/ leigos — zero dependências, abre direto no navegador.
 
 ### Corrigido
 - **`RENDER_PROFILES` não existia em fetch.js** (perdido no merge dos branches): TODO fetch renderizado

@@ -2,7 +2,11 @@
 
 > Crawler de newsletters em **Node.js puro** (ESM, Node ≥ 22, **sem build**) que descobre, extrai, classifica, resume em PT-BR e **busca** artigos — com **menu guiado no terminal** (Ink/React) e as flags diretas.
 
-> Histórico de versões em [CHANGELOG.md](CHANGELOG.md) — atual: **v1.2.0**.
+> Histórico de versões em [CHANGELOG.md](CHANGELOG.md) — atual: **v1.3.0**.
+
+> 🎨 **[ARQUITETURA.html](ARQUITETURA.html)** — a arquitetura inteira desenhada em canvas e explicada
+> para leigos: o pipeline, o paralelismo (governador/lanes), as boas decisões, os gargalos e os números
+> reais da validação. Abra no navegador (arquivo local, zero dependências).
 
 Usa um **LLM no OpenRouter (DeepSeek V4)** para *derivar seletores CSS reutilizáveis* — não para extrair página a página. O seletor é validado com Cheerio, **cacheado por template no SQLite** e só re-derivado quando o cache falha (**self-healing**) — então o custo de LLM da **descoberta/extração** fica próximo de zero por artigo depois do primeiro acerto. Classificação de tags e resumos PT-BR são passes **opcionais** por artigo (rodam automáticos pós-crawl e podem ser desligados).
 

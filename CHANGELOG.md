@@ -3,6 +3,48 @@
 Todas as mudanças relevantes deste projeto. Formato baseado em
 [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/); versionamento [SemVer](https://semver.org/lang/pt-BR/).
 
+## [1.5.0] - 2026-07-02
+
+Busca 100% IA no buscador web + resultados navegáveis com preview na TUI.
+
+### Adicionado
+- **Busca IA na web (`ncrawl web`):** a busca digitada virou IA de ponta a ponta (`POST /api/search`).
+  **Soft** (default): 1 chamada Flash `xhigh` por lote de ~40 artigos (título+resumo; fusão tolerante de
+  ids — faltou→`none`, inventado→ignorado, duplicado→1º vence). **Profunda** (toggle): 1 chamada por
+  artigo (conteúdo até `SEARCH_MAX_CHARS`) com escopo por **fontes (chips) + período** e diálogo de
+  confirmação com contagem + custo estimado (média real do `llm_usage` via `estimateStageCallUsd`).
+  Guards re-validados no servidor (`428` sem confirmação acima de `SEARCH_MODE_A_CONFIRM`/
+  `SEARCH_SOFT_CONFIRM`; `409` p/ busca concorrente — uma por processo, o run do ledger é global);
+  resultados no mesmo grid com selo **Direta/Similar** + fonte, Segmented filtrando por `judge_kind`;
+  teto `SEARCH_WEB_MAX_ITEMS`. Envs novos: `SEARCH_BATCH_SIZE`, `SEARCH_BATCH_CONCURRENCY`,
+  `SEARCH_SOFT_CONFIRM`, `SEARCH_WEB_MAX_ITEMS`; stage novo `searchBatch` (flash/xhigh) com a MESMA
+  rubrica calibrada por eval do juiz unitário.
+- **Modal de key na web:** sem `OPENROUTER_API_KEY`, buscar abre um modal que valida a key na OpenRouter
+  (probe) e salva em `~/.newsletter-crawler/.env` com **efeito imediato** — a key virou live binding ESM
+  (`export let` + `setRuntimeKey`) e o client do `llm.js` se recria quando ela muda; `ncrawl key set`
+  também ativa na hora no mesmo processo.
+- **TUI — resultados navegáveis com preview:** ↑/↓ selecionam (fonte·data por item), **Enter** abre a
+  preview (conteúdo completo do artigo, rolável, via `webGetArticle`), **`o`** abre o link no navegador,
+  Esc/b volta, q sai — um único `useInput` ramificando lista|preview. O confirm do modo A mostra a
+  contagem **do escopo real** + ~US$ e oferece o acervo todo quando o delta está vazio.
+- **Filtro `kind=release`** no browse da web (release segue contando como tool no bucket amplo) e a opção
+  **Releases** no Segmented.
+- **Testes:** `web.search` (deps fake: 428/409/413/NO_KEY/serialização/enriquecimento), `search.batch`
+  (lote + fusão + clamps zod), `config.key` (live binding), `ui.results` (seleção, preview, abrir link
+  via spy) + `web.api` atualizado. 150 no total, verdes.
+
+### Corrigido
+- **Escopo da busca valia só no guard:** `cmdSearch` não repassava `all`/`runId` ao motor — toda busca
+  varria o acervo inteiro, ignorando o passo "escopo" da TUI e o default delta. Agora o mesmo
+  `getSearchScope` alimenta guard e varredura.
+- **Âncora do delta:** "apenas o novo" ancorava em `MAX(runs.id)`, mas buscas/verify também abrem runs
+  (sem artigos) e o escopo zerava após qualquer busca. Nova âncora: `MAX(articles.run_id)` — a última
+  run **que trouxe artigos** (`stmts.maxArticleRunId`).
+
+### Removido
+- **Busca por texto no browse da web** (cláusula `@q` do `WEB_WHERE` + a função SQL `fold`): busca por
+  palavras/substring saiu de propósito — toda busca com consulta passa pela IA.
+
 ## [1.4.0] - 2026-07-02
 
 As 5 melhorias de paralelismo/robustez apontadas no `ARQUITETURA.html` — todas implementadas e testadas.

@@ -13,10 +13,10 @@ Single source of truth for agents working in this repo. Keep it short; scoped de
 - smoke test: `npm run status` (imports every module + boots the SQLite schema)
 - unit/eval: `npm test` (node:test — parseDate, extractPublishedDate, isBlockedPage, tag-search helpers, addSourceToConfig, UI menu + search-flow render)
 - guided menu (TUI): `npm run ui` (or `node src/index.js` with no args in a TTY). `CRAWLER_LANG=pt|en`, `--no-input` disables it.
-- run (bounded): `npm run crawl -- --max-pages 1 --max-articles 3`
+- run (bounded): `npm run crawl -- --max-pages 1 --max-articles 3`. Cada run re-visita as listagens e traz só o NOVO (`--no-refresh` desliga; a paginação para na 1ª página sem itens novos). `--aggressive` ignora robots.txt + usa UA de navegador real (403/anti-bot; NÃO salva página de desafio). Toda run grava em `runs` + `articles.run_id`.
 - summaries (PT-BR): `npm run summarize` (gera title_pt/summary_pt; auto pós-crawl). Tags: `npm run classify`.
-- search: `npm run search -- <consulta> --mode B` (por tags, 5 Pro) ou `--mode A --limit N --yes` (Flash, varre tudo).
-- add source: `npm run add -- <url> --name "..." [--type index|listing]` (persiste em config/sources.json). export: `npm run export -- --format md`. reset: `npm run reset -- --yes` (apaga tudo).
+- search: `npm run search -- <consulta> --mode B` (por tags, 5 Pro) ou `--mode A --limit N --yes` (Flash, varre tudo). Default busca só a última run; `--all` = acervo todo.
+- add source: `npm run add -- <url> --name "..." [--type index|listing]` (persiste em config/sources.json). export: `npm run export -- --format md [--all]` (default = última run; `--all` = acervo todo). reset: `npm run reset -- --yes` (apaga tudo).
 - skills lint/eval: `node .agents/skills/scripts/skill-lint.mjs --all` / `node .agents/skills/scripts/skill-eval.mjs --all`
 - (no linter / type-checker configured yet — see project-analysis.md)
 

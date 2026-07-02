@@ -77,10 +77,11 @@ async function roundupLinks(html, pageUrl) {
   return ext;
 }
 
-async function ensureAllowed(url) {
+async function ensureAllowed(url, opts = {}) {
+  if (opts.aggressive) return true; // modo agressivo: ignora robots.txt explicitamente
   if (!RESPECT_ROBOTS) return true;
   const { allowed } = await checkRobots(url);
-  if (!allowed) warn(`robots.txt bloqueia ${url} (defina CRAWLER_RESPECT_ROBOTS=false para ignorar)`);
+  if (!allowed) warn(`robots.txt bloqueia ${url} (use --aggressive ou CRAWLER_RESPECT_ROBOTS=false para ignorar)`);
   return allowed;
 }
 
@@ -130,9 +131,9 @@ async function processListing(job, source, opts) {
     }
   }
 
-  if (!(await ensureAllowed(url))) return;
+  if (!(await ensureAllowed(url, opts))) return;
 
-  const fetched = await fetchSmart(url);
+  const fetched = await fetchSmart(url, { aggressive: opts.aggressive });
   const html = fetched.html;
   const sig = domainSig(url, 'listing');
   let sel = getCachedSelector(sig);
@@ -169,7 +170,7 @@ async function processListing(job, source, opts) {
 
   if (sel?.link_selector) {
     await crawlArchive(url, source, sel, html, {
-      childKind, baseDepth: depth, maxPages, sinceDate: opts.sinceDate,
+      childKind, baseDepth: depth, maxPages, sinceDate: opts.sinceDate, aggressive: opts.aggressive,
     });
     return;
   }
@@ -187,14 +188,14 @@ async function processListing(job, source, opts) {
 
 /** Pagina do arquivo até parar: página vazia, hash repetido, ou sem "próximo". */
 async function crawlArchive(startUrl, source, sel, firstHtml, ctx) {
-  const { childKind = 'article', baseDepth = 0, maxPages = Infinity, sinceDate = null } = ctx || {};
+  const { childKind = 'article', baseDepth = 0, maxPages = Infinity, sinceDate = null, aggressive = false } = ctx || {};
   const seenHashes = new Set();
   let pageUrl = startUrl;
   let html = firstHtml;
   let depth = 0;
 
   while (pageUrl && depth < maxPages) {
-    if (html == null) html = (await fetchSmart(pageUrl)).html;
+    if (html == null) html = (await fetchSmart(pageUrl, { aggressive })).html;
 
     const h = sha256(html);
     if (seenHashes.has(h)) {
@@ -238,6 +239,12 @@ async function crawlArchive(startUrl, source, sel, firstHtml, ctx) {
 
     if (sinceDate && below > 0) {
       log(`--since: piso atingido, parando paginação em ${pageUrl}`);
+      break;
+    }
+    // Re-crawl incremental: página sem nenhum link novo => chegamos ao território já conhecido.
+    // O arquivo é decrescente (mesma premissa do piso --since acima), logo tudo adiante é conhecido.
+    if (added === 0) {
+      log(`paginação: 0 links novos em ${pageUrl}, parando (incremental)`);
       break;
     }
     if (depth + 1 >= maxPages) break; // não vamos paginar -> evita findNextPage (pode custar 1 LLM)
@@ -286,9 +293,9 @@ async function findNextPage(html, baseUrl, sel) {
 async function processRoundup(job, source, opts = {}) {
   const url = job.url;
   const depth = job.depth ?? 0;
-  if (!(await ensureAllowed(url))) return;
+  if (!(await ensureAllowed(url, opts))) return;
 
-  const fetched = await fetchSmart(url);
+  const fetched = await fetchSmart(url, { aggressive: opts.aggressive });
   const finalUrl = fetched.url || url;
 
   // Piso por data da ISSUE (backstop autoritativo p/ itens do índice sem data legível). Como
@@ -315,9 +322,9 @@ async function processRoundup(job, source, opts = {}) {
 async function processArticle(job, source, opts) {
   const url = job.url;
   const depth = job.depth ?? 0;
-  if (!(await ensureAllowed(url))) return;
+  if (!(await ensureAllowed(url, opts))) return;
 
-  const fetched = await fetchSmart(url);
+  const fetched = await fetchSmart(url, { aggressive: opts.aggressive });
   const html = fetched.html;
   const finalUrl = fetched.url || url;
   // Identidade canônica pós-redirect: dedup mesmo quando A->B (alias de redirect). Checa ANTES
@@ -429,6 +436,7 @@ async function processArticle(job, source, opts) {
     content,
     content_hash: contentHash,
     published_at: published || null,
+    run_id: opts.runId ?? null,
   });
   log(`artigo salvo: ${(title || canonicalUrl).slice(0, 80)}`);
 }

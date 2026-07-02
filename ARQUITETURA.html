@@ -166,7 +166,7 @@
 
 <h2>5. Os 5 gargalos de paralelismo — agora RESOLVIDOS ✅</h2>
 <p>
-  Os cinco gargalos que este documento apontava foram <b>todos implementados e testados</b> (97 testes
+  Os cinco gargalos que este documento apontava foram <b>todos implementados e testados</b> (100 testes
   verdes, incluindo restart-on-crash do pool e o deadline por job). O desenho abaixo mostra cada um em
   verde, com o COMO da solução; os cartões detalham em linguagem simples.
 </p>
@@ -579,7 +579,7 @@ function note(ctx, x, y, text, { color = C.muted, align = 'left', fs = 12.5 } = 
   const b = document.getElementById('badges');
   const mk = (t) => { const s = document.createElement('span'); s.className = 'badge'; s.innerHTML = t; b.appendChild(s); };
   const R = RESULTADOS;
-  mk('✅ <b>5 melhorias de paralelismo entregues</b> (97 testes verdes)');
+  mk('✅ <b>5 melhorias de paralelismo entregues</b> (100 testes verdes)');
   if (R.pendente) {
     mk('validação final: <b>rodando…</b> (números da última execução completa abaixo)');
   } else {

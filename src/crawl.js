@@ -398,7 +398,7 @@ async function processRoundup(job, source, opts = {}) {
         const kinds = Object.entries(cur.byKind).filter(([, n]) => n > 0).map(([k, n]) => `${k}=${n}`).join(' ');
         const skipped = Object.entries(cur.skipped).filter(([, n]) => n > 0).map(([k, n]) => `${k}=${n}`).join(' ');
         log(
-          `roundup curado (${cur.sections} seção${cur.sections > 1 ? 'ões' : ''} em paralelo): ${cur.saved} itens novos ` +
+          `roundup curado (${cur.sections} ${cur.sections === 1 ? 'seção' : 'seções'} em paralelo): ${cur.saved} itens novos ` +
             `(${kinds || '—'})${cur.recovered ? ` [${cur.recovered} do passe de cobertura]` : ''}` +
             `${cur.dup ? ` +${cur.dup} já conhecidos` : ''}` +
             `${skipped ? `, fora: ${skipped}` : ''} em ${url.slice(0, 80)}`,

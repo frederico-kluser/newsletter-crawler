@@ -144,9 +144,17 @@ export const PARSE_TIMEOUT_MS = Number(process.env.PARSE_TIMEOUT_MS || 30000);
 export const PARSE_IN_WORKERS = process.env.PARSE_IN_WORKERS !== 'false';
 
 // ---- deadline por job (o retardatário não segura o fim da execução) ----
-// Um job que passa deste tempo é CORTADO (0 = sem deadline). Item curado mantém o blurb do
-// agregador (needs_enrich=1) e é re-enfileirado p/ enriquecer num próximo crawl; nada se perde.
+// Orçamento de TRABALHO por job de artigo (0 = sem deadline): conta só as fases fetch/render/
+// parse (createJobClock); esperas de fila (lanes, politeness por host) e as fases LLM ficam com
+// o relógio PARADO — elas têm timeouts/orçamento próprios. Estourou: o job é ABORTADO de verdade
+// (AbortSignal — sem zumbi segurando lane); item curado mantém o blurb (needs_enrich=1) e é
+// re-enfileirado p/ enriquecer num próximo crawl; nada se perde.
 export const JOB_TIMEOUT_MS = Number(process.env.JOB_TIMEOUT_MS || 90000);
+// Teto DURO de tempo de PAREDE por job de artigo (rede de segurança p/ fase não instrumentada
+// ou espera patológica). 0 desliga; default 10x o orçamento de trabalho.
+export const JOB_HARD_TIMEOUT_MS = Number(
+  process.env.JOB_HARD_TIMEOUT_MS || (JOB_TIMEOUT_MS > 0 ? JOB_TIMEOUT_MS * 10 : 0),
+);
 // Curadoria (listing/roundup) tem POOL de reivindicação próprio: a fase de LLM (por seção +
 // cobertura) é longa e NÃO deve ocupar a capacidade de fetch/render dos artigos. CURATE_JOBS=0
 // => default calculado em commands.js (max(2, ceil(MAX_PARALLEL/4))). Sem deadline duro por
@@ -194,6 +202,10 @@ export const ROUNDUP_MAX_PROSE_CHARS = Number(process.env.ROUNDUP_MAX_PROSE_CHAR
 // Teto de segurança da paginação do índice quando `--since` está ativo (a parada por data
 // deve disparar antes; isto evita varrer um arquivo gigante se as datas faltarem/falharem).
 export const SINCE_MAX_INDEX_PAGES = Number(process.env.SINCE_MAX_INDEX_PAGES || 60);
+// Scroll infinito (perfil listing): nº de checagens CONSECUTIVAS sem nenhum link novo no DOM
+// p/ declarar o feed estagnado e parar de rolar (a parada por data --since e o teto de rodadas
+// continuam valendo). Evita gastar sempre as 60 rodadas/90s num feed que não cresce mais.
+export const SCROLL_STALL_CHECKS = Number(process.env.SCROLL_STALL_CHECKS || 3);
 
 // ---- modelos por etapa do pipeline (config/models.json + override por env) ----
 // Default de TODAS as etapas: deepseek/deepseek-v4-pro + xhigh ("ultrathink"). Para o

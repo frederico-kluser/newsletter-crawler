@@ -46,6 +46,41 @@ function budgetStageLine(tele) {
   return 'IA/etapa · ' + entries.map(([stage, s]) => `${stage} $${s.costUsd.toFixed(3)}`).join(' · ');
 }
 
+// Linha "o que está acontecendo AGORA" (fases ativas: fetch/render/limpeza/curadoria/verificação…)
+// + contadores da run (salvos/blurb/estouros). Snapshot em memória (progress.js), sem SQL.
+function progressNowLine(tele) {
+  const p = tele?.progress;
+  if (!p?.active) return null;
+  const parts = [];
+  const stages = Object.entries(p.stages || {});
+  if (stages.length) parts.push(`${t('nowLabel')}: ` + stages.map(([k, n]) => `${n} ${k}`).join(' · '));
+  const c = p.counts || {};
+  const novos = (c.salvos || 0) + (c.enriquecidos || 0);
+  if (novos || c.mantidosBlurb) {
+    parts.push(`✔ ${novos} ${t('savedLabel')}${c.mantidosBlurb ? ` (+${c.mantidosBlurb} blurb)` : ''}`);
+  }
+  if (c.itensCurados) parts.push(`▤ ${c.itensCurados} curados`);
+  if (c.estouros) parts.push(`⏱ ${c.estouros} ${t('timeoutsLabel')}`);
+  return parts.length ? parts.join(' · ') : null;
+}
+
+// Progresso % rumo à data-alvo (--since): (hoje − data mais antiga vista) ÷ (hoje − alvo),
+// global + as fontes mais atrasadas; ✓ = fonte que já ALCANÇOU o piso. Some sem --since.
+function progressDateLine(tele) {
+  const p = tele?.progress;
+  if (!p?.active || !p.since || p.pctGlobal == null) return null;
+  const atras = p.sources
+    .filter((s) => s.pct != null)
+    .sort((a, b) => a.pct - b.pct)
+    .slice(0, 3)
+    .map((s) => `${s.name} ${s.floorHit ? '✓' : `${s.pct}%`}`);
+  const semData = p.sources.filter((s) => s.pct == null).length;
+  let line = `${t('targetLabel')} ${p.since}: ${p.pctGlobal}%`;
+  if (atras.length) line += ` · ${atras.join(' · ')}`;
+  if (semData) line += ` · ${semData} ${t('noDateLabel')}`;
+  return line;
+}
+
 const LEVEL_COLOR = { warn: 'yellow', error: 'red', debug: 'gray' };
 const VISIBLE = 12;
 
@@ -101,11 +136,18 @@ export function RunView({ spec, onDone, onResults }) {
   const f = status.frontier;
   const dArticles = Math.max(0, status.articles - baseline.articles);
   const dClassif = Math.max(0, status.classified - baseline.classified);
+  // Progresso da run só vale p/ o crawl (outro comando na mesma sessão herdaria snapshot velho).
+  const isCrawl = spec.sub === 'crawl';
+  const p = isCrawl ? tele?.progress : null;
+  const fontes = p?.active && p.sourcesTotal ? `${t('sources')} ${p.sourcesListingDone}/${p.sourcesTotal} · ` : '';
   const counters =
     spec.sub === 'search' && prog
       ? t('searchScanning', { n: prog.scanned, total: prog.total, m: prog.relevant })
-      : `${t('articles')} +${dArticles} · ${t('classif')} +${dClassif} · ` +
+      : fontes +
+        `${t('articles')} +${dArticles} · ${t('classif')} +${dClassif} · ` +
         `${t('frontier')} ${f.pending}/${f.in_progress}/${f.done}/${f.failed}`;
+  const nowLine = isCrawl ? progressNowLine(tele) : null;
+  const dateLine = isCrawl ? progressDateLine(tele) : null;
 
   return html`<${Box} flexDirection="column">
     <${Box}>
@@ -116,6 +158,8 @@ export function RunView({ spec, onDone, onResults }) {
         : html`<${Spinner} label=${`${t('running')} (${spec.sub})`} />`}
     </${Box}>
     <${Box} marginY=${1}><${Text} color="cyan">${counters}</${Text}></${Box}>
+    ${nowLine ? html`<${Box}><${Text} color="green">${nowLine}</${Text}></${Box}>` : null}
+    ${dateLine ? html`<${Box}><${Text} color="magenta">${dateLine}</${Text}></${Box}>` : null}
     ${telemetryLine(tele) ? html`<${Box}><${Text} dimColor>${telemetryLine(tele)}</${Text}></${Box}>` : null}
     ${budgetStageLine(tele) ? html`<${Box}><${Text} dimColor>${budgetStageLine(tele)}</${Text}></${Box}>` : null}
     <${Box} flexDirection="column" height=${VISIBLE}>

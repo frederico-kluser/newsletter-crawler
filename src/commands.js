@@ -7,7 +7,7 @@ import { stmts, wipeAll } from './db.js';
 import {
   EXPORT_DIR, DB_PATH, CONCURRENCY, MAX_RETRIES, HAS_LLM, CLASSIFY_AFTER_CRAWL, SUMMARIZE_AFTER_CRAWL,
   SEARCH_MODE_A_CONFIRM, OPENROUTER_API_KEY, ENV_PATH, BUDGET_USD, MAX_PARALLEL, RAM_MAX_PCT,
-  AGGRESSIVE_DEFAULT, VERIFY_AFTER_CRAWL, VERIFY_STREAMING, JOB_TIMEOUT_MS,
+  AGGRESSIVE_DEFAULT, VERIFY_AFTER_CRAWL, VERIFY_STREAMING, JOB_TIMEOUT_MS, JOB_HARD_TIMEOUT_MS,
   CLASSIFY_STREAMING, SUMMARIZE_STREAMING, CURATE_JOBS, ROUNDUP_TIMEOUT_MS, COST_LOG_INTERVAL_MS,
   defaultParallel, loadSources, addSourceToConfig,
 } from './config.js';
@@ -23,6 +23,10 @@ import { runSearch, getSearchProgress } from './search.js';
 import { closeBrowser } from './fetch.js';
 import { closeParsePool } from './parse-pool.js';
 import { logEvent, flushEvents } from './events.js';
+import { createJobClock } from './deadline.js';
+import {
+  progressReset, progressSnapshot, sourceSeen, sourceListingDone, bump, inStage,
+} from './progress.js';
 import { startWebServer } from './web.js';
 import { probeOpenRouterKey, upsertEnvVar, maskKey } from './keys.js';
 import { slugify, normalizeUrl, parseDate, hostOf, log, warn, errorLog, debug } from './util.js';
@@ -53,9 +57,35 @@ export function withTimeout(promise, ms) {
   });
 }
 
-/** Telemetria viva (governador + orçamento) p/ o painel da UI pollar junto do getStatus. */
+/** Telemetria viva (governador + orçamento + progresso da run) p/ o painel da UI pollar. */
 export function getRunTelemetry() {
-  return { governor: getTelemetry(), budget: getBudgetState() };
+  return { governor: getTelemetry(), budget: getBudgetState(), progress: progressSnapshot() };
+}
+
+/** Linha periódica de progresso do CLI (a TUI tem o painel; isto cobre o `npm run crawl` puro). */
+function cliProgressLine() {
+  const p = progressSnapshot();
+  if (!p.active) return null;
+  const f = getStatus().frontier;
+  const c = p.counts;
+  const novos = (c.salvos || 0) + (c.enriquecidos || 0);
+  const parts = [
+    `fontes ${p.sourcesListingDone}/${p.sourcesTotal}`,
+    `artigos +${novos}${c.mantidosBlurb ? ` (+${c.mantidosBlurb} blurb)` : ''}`,
+    `fila ${f.pending}p/${f.in_progress}a/${f.done}d/${f.failed}x`,
+  ];
+  if (c.itensCurados) parts.push(`curados +${c.itensCurados}`);
+  if (c.classificados || c.resumidos || c.verificados) {
+    parts.push(`pós ${c.verificados || 0}v/${c.resumidos || 0}r/${c.classificados || 0}c`);
+  }
+  const agora = Object.entries(p.stages).map(([k, n]) => `${n} ${k}`).join(' ');
+  if (agora) parts.push(`agora: ${agora}`);
+  if (c.estouros) parts.push(`estouros ${c.estouros}`);
+  if (p.since && p.pctGlobal != null) {
+    const semData = p.sources.filter((s) => s.pct == null).length;
+    parts.push(`alvo ${p.since}: ${p.pctGlobal}%${semData ? ` (${semData} fonte(s) s/ data)` : ''}`);
+  }
+  return `progresso: ${parts.join(' · ')}`;
 }
 
 /**
@@ -165,6 +195,18 @@ async function crawlRun(flags) {
     }
   }
 
+  // --since <YYYY-MM-DD|ISO>: piso de data (coleta do mais novo até esse piso e para). Aplica
+  // à data da issue E do artigo. Data inválida aborta (em vez de ignorar o filtro silenciosamente).
+  // Parseado ANTES do seed p/ o rastreador de progresso nascer já com a data-alvo (% por fonte).
+  const sinceRaw = typeof flags.since === 'string' ? flags.since : null;
+  const sinceDate = sinceRaw ? parseDate(sinceRaw) : null;
+  if (sinceRaw && !sinceDate) {
+    errorLog(`--since inválido (use ISO, ex.: 2026-06-25): ${sinceRaw}`);
+    process.exit(1);
+  }
+  if (sinceDate) log(`--since ativo: piso ${sinceDate.toISOString()}`);
+  progressReset({ sinceDate });
+
   // Re-crawl incremental: por padrão re-visita as listagens das fontes a cada execução (só enfileira
   // o novo; a dedup de artigo impede re-baixar o existente). `--no-refresh` desliga a re-visita.
   const noRefresh = flags['no-refresh'] === true;
@@ -183,6 +225,7 @@ async function crawlRun(flags) {
       continue;
     }
     const src = upsertSource(s);
+    sourceSeen(src.id, src.name || s.name || hostOf(s.url)); // painel: fontes x/y + % por data
     const seeded = enqueue(s.url, 'listing', null, src.id, 0);
     if (seeded) log(`seed: ${s.url} (type=${src.type})`);
     else if (!noRefresh) {
@@ -194,16 +237,6 @@ async function crawlRun(flags) {
     const re = stmts.requeueNeedsEnrichForSource.run(src.id);
     if (re.changes) log(`enriquecer: ${re.changes} item(ns) só-blurb re-enfileirado(s) p/ pegar o corpo do alvo`);
   }
-
-  // --since <YYYY-MM-DD|ISO>: piso de data (coleta do mais novo até esse piso e para). Aplica
-  // à data da issue E do artigo. Data inválida aborta (em vez de ignorar o filtro silenciosamente).
-  const sinceRaw = typeof flags.since === 'string' ? flags.since : null;
-  const sinceDate = sinceRaw ? parseDate(sinceRaw) : null;
-  if (sinceRaw && !sinceDate) {
-    errorLog(`--since inválido (use ISO, ex.: 2026-06-25): ${sinceRaw}`);
-    process.exit(1);
-  }
-  if (sinceDate) log(`--since ativo: piso ${sinceDate.toISOString()}`);
 
   // Agressivo é o DEFAULT (CRAWLER_AGGRESSIVE=false ou --no-aggressive desligam por completo;
   // --aggressive força mesmo com env desligada). Páginas de desafio continuam descartadas.
@@ -252,41 +285,56 @@ async function crawlRun(flags) {
     const a = stmts.getArticleFullByUrl.get(savedUrl);
     if (!a) return; // sumiu: pula
     if (VERIFY_STREAMING && a.verify_status == null) {
-      track(async () => {
+      track(() => inStage('verificação', async () => {
         try {
           await verifyArticleRow(a, { runId });
+          bump('verificados');
         } catch (e) {
           if (e?.code !== 'BUDGET_EXCEEDED') debug(`verify streaming falhou (${savedUrl}): ${e.message}`);
         }
-      });
+      }));
     }
     if (SUMMARIZE_STREAMING && a.summary_pt == null) {
-      track(async () => {
+      track(() => inStage('resumo', async () => {
         try {
           await summarizeArticleRow(a);
+          bump('resumidos');
         } catch (e) {
           if (e?.code !== 'BUDGET_EXCEEDED') debug(`summarize streaming falhou (${savedUrl}): ${e.message}`);
         }
-      });
+      }));
     }
     if (CLASSIFY_STREAMING && !stmts.getClassification.get(a.id)) {
-      track(async () => {
+      track(() => inStage('classificação', async () => {
         try {
           await classifyArticleRow(a);
+          bump('classificados');
         } catch (e) {
           if (e?.code !== 'BUDGET_EXCEEDED') debug(`classify streaming falhou (${savedUrl}): ${e.message}`);
         }
-      });
+      }));
     }
   };
 
   // Deadline vem do POOL (artigo = JOB_TIMEOUT_MS; curadoria = ROUNDUP_TIMEOUT_MS, default 0 = sem
   // corte). `set` é o pool que rastreia o job (inflight p/ artigo, curating p/ listing/roundup).
+  // ARTIGO usa o relógio de TRABALHO (createJobClock): só fetch/render/parse contam; espera de
+  // fila (lanes/politeness) e fases LLM ficam de fora (têm timeouts/orçamento próprios). Ao
+  // estourar, o job é ABORTADO de verdade (AbortSignal) — sem zumbi segurando lane (a causa da
+  // cascata de 100% de estouros). JOB_HARD_TIMEOUT_MS é o teto DURO de parede (rede de segurança).
   const dispatch = (job, set, deadline) => {
     const p = (async () => {
+      const clock = job.kind === 'article' && deadline > 0 ? createJobClock(deadline) : null;
+      const jobOpts = clock ? { ...opts, clock, signal: clock.signal } : opts;
       try {
-        const res = await withTimeout(processJob(job, opts), deadline);
+        const work = processJob(job, jobOpts);
+        const res = await (clock
+          ? JOB_HARD_TIMEOUT_MS > 0
+            ? withTimeout(work, JOB_HARD_TIMEOUT_MS)
+            : work
+          : withTimeout(work, deadline)); // curadoria: deadline de parede antigo (0 = sem corte)
         if (job.kind === 'article') processedArticles++;
+        if (job.kind === 'listing') sourceListingDone(job.source_id); // fonte: descoberta concluída
         stmts.finish.run('done', job.url);
         if (res?.verifyUrl) streamPostSave(res.verifyUrl); // salvou/enriqueceu -> pós-processa já
       } catch (e) {
@@ -297,15 +345,24 @@ async function crawlRun(flags) {
           budgetRequeued++;
           return;
         }
-        if (e?.code === 'JOB_TIMEOUT') {
+        // Teto duro disparou (withTimeout) com o clock ainda vivo: aborta o trabalho em voo
+        // p/ ele não virar zumbi (é exatamente o buraco do withTimeout puro).
+        if (e?.code === 'JOB_TIMEOUT' && clock && !clock.expired()) clock.abort('hard-cap');
+        // O abort pode aflorar como erro de cancelamento (got/SDK), então o veredito de
+        // timeout vem do relógio, não só do code do erro.
+        if (e?.code === 'JOB_TIMEOUT' || clock?.expired()) {
           timedOut++;
-          logEvent({ runId, url: job.url, stage: 'job', status: 'timeout', detail: { ms: deadline, kind: job.kind } });
+          bump('estouros');
+          logEvent({
+            runId, url: job.url, stage: 'job', status: 'timeout',
+            detail: { ms: deadline, kind: job.kind, ...(clock ? clock.snapshot() : {}) },
+          });
           const row = job.kind === 'article' ? stmts.getArticleFullByUrl.get(normalizeUrl(job.url) || job.url) : null;
           if (row?.needs_enrich) {
             // A ficha JÁ existe com o blurb do agregador: encerra o job (não re-tenta agora, senão
             // trava de novo) e deixa needs_enrich=1 — o próximo crawl re-enfileira p/ enriquecer.
             stmts.finish.run('done', job.url);
-            log(`job estourou ${deadline}ms — ficha mantida com o blurb (enriquece depois): ${job.url.slice(0, 70)}`);
+            log(`job estourou ${deadline}ms de trabalho — ficha mantida com o blurb (enriquece depois): ${job.url.slice(0, 70)}`);
             return;
           }
           // avulso/listing/roundup: sem ficha a preservar — trata como falha comum (retry/fail).
@@ -321,9 +378,10 @@ async function crawlRun(flags) {
     set.add(p);
   };
 
-  // Custo AO VIVO no CLI: timer independente do fim dos jobs (mais "tempo real" que esperar um job
-  // fechar). unref p/ não segurar o processo; só loga quando o nº de chamadas mudou (sem repetir).
+  // Custo + PROGRESSO ao vivo no CLI: timer independente do fim dos jobs (mais "tempo real" que
+  // esperar um job fechar). unref p/ não segurar o processo; só loga quando o valor mudou.
   let lastLoggedCalls = -1;
+  let lastProgressLine = '';
   const costTimer = setInterval(() => {
     const bs = getBudgetState();
     if (bs.calls > 0 && bs.calls !== lastLoggedCalls) {
@@ -332,6 +390,11 @@ async function crawlRun(flags) {
         `gasto parcial: US$ ${bs.spentUsd.toFixed(4)} em ${bs.calls} chamadas` +
           `${bs.budgetUsd > 0 ? ` / teto US$ ${bs.budgetUsd.toFixed(2)}` : ''}`,
       );
+    }
+    const line = cliProgressLine();
+    if (line && line !== lastProgressLine) {
+      lastProgressLine = line;
+      log(line);
     }
   }, COST_LOG_INTERVAL_MS);
   costTimer.unref?.();
@@ -358,7 +421,7 @@ async function crawlRun(flags) {
   await closeBrowser();
   await closeParsePool(); // encerra os workers de parsing (o pós-crawl não parseia HTML)
   if (budgetRequeued) log(`orçamento: ${budgetRequeued} jobs devolvidos à fila (retomáveis no próximo run)`);
-  if (timedOut) log(`deadline: ${timedOut} job(s) cortado(s) em ${JOB_TIMEOUT_MS}ms (ficha mantida com o blurb; enriquece no próximo crawl)`);
+  if (timedOut) log(`deadline: ${timedOut} job(s) cortado(s) em ${JOB_TIMEOUT_MS}ms de TRABALHO (fila/LLM não contam; ficha mantida com o blurb; detalhe por fase no ncrawl inspect)`);
   log('crawl concluído.');
 
   // Registra na run quantos artigos novos ela descobriu (o delta desta execução).

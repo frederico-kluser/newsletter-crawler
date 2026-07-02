@@ -67,7 +67,14 @@ export function Menu({ onSelect }) {
   </${Box}>`;
 }
 
-export function StatusScreen({ status, onBack }) {
+export function StatusScreen({ status: initial, onBack }) {
+  // Auto-refresh: a tela re-lê as contagens sozinha enquanto aberta (era um snapshot morto —
+  // um crawl rodando em outro processo não aparecia). getStatus é só COUNTs, barato a 1s.
+  const [status, setStatus] = useState(initial);
+  useEffect(() => {
+    const id = setInterval(() => setStatus(getStatus()), 1000);
+    return () => clearInterval(id);
+  }, []);
   const f = status.frontier;
   const row = (k, v) => html`<${Text}>${k.padEnd(11)} <${Text} color="cyan">${v}</${Text}></${Text}>`;
   return html`<${Box} flexDirection="column">

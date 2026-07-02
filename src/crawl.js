@@ -16,6 +16,8 @@ import {
 } from './llm.js';
 import { curateRoundup } from './curate.js';
 import { logEvent } from './events.js';
+import { inStage, dateSeen, floorHit, bump } from './progress.js';
+import { abortErrorOf } from './deadline.js';
 import { isSubstack, substackArchive } from './substack.js';
 import {
   normalizeUrl, sha256, domainSig, hostOf, parseDate, log, warn, errorLog, debug,
@@ -122,13 +124,17 @@ async function processListing(job, source, opts) {
       const posts = await substackArchive(url);
       if (posts.length) {
         let n = 0;
+        let below = 0;
         for (const p of posts) {
-          if (opts.sinceDate) {
-            const d = parseDate(p.published_at);
-            if (d && d < opts.sinceDate) continue; // piso: pula posts mais antigos
+          const d = parseDate(p.published_at);
+          if (d) dateSeen(source?.id, d); // alimenta o % rumo ao --since
+          if (opts.sinceDate && d && d < opts.sinceDate) {
+            below++; // piso: pula posts mais antigos
+            continue;
           }
           if (enqueue(p.url, childKind, url, source?.id, depth + 1)) n++;
         }
+        if (opts.sinceDate && below > 0) floorHit(source?.id); // arquivo já passou do alvo
         log(`substack: ${posts.length} posts (${n} novos) de ${hostOf(url)}`);
         return;
       }
@@ -139,7 +145,10 @@ async function processListing(job, source, opts) {
 
   if (!(await ensureAllowed(url, opts))) return;
 
-  const fetched = await fetchSmart(url, { profile: 'listing', aggressive: opts.aggressive });
+  // sinceDate habilita a parada por DATA do scroll infinito dentro do render (perfil listing).
+  const fetched = await fetchSmart(url, {
+    profile: 'listing', aggressive: opts.aggressive, sinceDate: opts.sinceDate ?? null,
+  });
   const html = fetched.html;
   const sig = domainSig(url, 'listing');
   let sel = getCachedSelector(sig);
@@ -179,7 +188,7 @@ async function processListing(job, source, opts) {
   if (sel?.link_selector) {
     await crawlArchive(url, source, sel, html, {
       childKind, baseDepth: depth, maxPages, sinceDate: opts.sinceDate, aggressive: opts.aggressive,
-      sig, runId: opts.runId ?? null,
+      sig, runId: opts.runId ?? null, firstHarvest: fetched.harvest,
     });
     return;
   }
@@ -187,27 +196,61 @@ async function processListing(job, source, opts) {
   // Fallback item-a-item (Flash) quando não há seletor confiável.
   if (HAS_LLM) {
     const links = await extractLinksItemByItem(await cpuParse(() => pruneForLLM(capHtml(html))));
+    mergeScrollHarvest(links, fetched.harvest, url, source?.id);
     let n = 0;
-    for (const l of links) if (enqueue(l.url, childKind, url, source?.id, depth + 1)) n++;
+    for (const l of links) {
+      const d = l.date ? parseDate(l.date) : null;
+      if (d) dateSeen(source?.id, d);
+      if (opts.sinceDate && d && d < opts.sinceDate) continue; // piso vale p/ itens colhidos
+      if (enqueue(l.url, childKind, url, source?.id, depth + 1)) n++;
+    }
     log(`fallback Flash: ${n} links (${childKind}) enfileirados de ${url}`);
   } else {
     warn(`sem OPENROUTER_API_KEY e sem seletor cacheado — não há como descobrir links em ${url}`);
   }
 }
 
+/**
+ * Funde a colheita do scroll (links vistos DURANTE a rolagem) na lista extraída do HTML final —
+ * um feed virtualizado descarta itens antigos do DOM e o HTML final não os tem. Critério
+ * conservador p/ não enfileirar nav/rodapé: mesmo host da listagem E data pareada no próprio
+ * DOM (`<time datetime>` no container do item). Muta `items` ({url, date?}) e retorna o nº fundido.
+ */
+function mergeScrollHarvest(items, harvest, pageUrl, _sourceId) {
+  if (!harvest?.length) return 0;
+  const known = new Set(items.map((it) => normalizeUrl(it.url, pageUrl)).filter(Boolean));
+  const pageHost = hostOf(pageUrl);
+  let merged = 0;
+  for (const it of harvest) {
+    const abs = normalizeUrl(it.href, pageUrl);
+    if (!abs || known.has(abs) || hostOf(abs) !== pageHost) continue;
+    if (!parseDate(it.dt)) continue;
+    known.add(abs);
+    items.push({ url: abs, date: it.dt });
+    merged++;
+  }
+  if (merged) log(`scroll: +${merged} item(ns) colhido(s) fora do HTML final em ${pageUrl.slice(0, 80)}`);
+  return merged;
+}
+
 /** Pagina do arquivo até parar: página vazia, hash repetido, ou sem "próximo". */
 async function crawlArchive(startUrl, source, sel, firstHtml, ctx) {
   const {
     childKind = 'article', baseDepth = 0, maxPages = Infinity, sinceDate = null,
-    aggressive = false, sig = null, runId = null,
+    aggressive = false, sig = null, runId = null, firstHarvest = undefined,
   } = ctx || {};
   const seenHashes = new Set();
   let pageUrl = startUrl;
   let html = firstHtml;
+  let harvest = firstHarvest;
   let depth = 0;
 
   while (pageUrl && depth < maxPages) {
-    if (html == null) html = (await fetchSmart(pageUrl, { profile: 'listing', aggressive })).html;
+    if (html == null) {
+      const fr = await fetchSmart(pageUrl, { profile: 'listing', aggressive, sinceDate });
+      html = fr.html;
+      harvest = fr.harvest;
+    }
 
     const h = sha256(html);
     if (seenHashes.has(h)) {
@@ -268,10 +311,16 @@ async function crawlArchive(startUrl, source, sel, firstHtml, ctx) {
         warn(`deriveDateSelector falhou: ${e.message}`);
       }
     }
+    // Itens que só existiram DURANTE o scroll (feed virtualizado) entram no mesmo fluxo de
+    // piso/enfileiramento; a colheita é da página corrente (a próxima traz a sua).
+    mergeScrollHarvest(dated, harvest, pageUrl, source?.id);
+    harvest = undefined;
+
     let added = 0;
     let below = 0;
     for (const it of dated) {
-      const d = sinceDate ? parseDate(it.date) : null;
+      const d = it.date ? parseDate(it.date) : null;
+      if (d) dateSeen(source?.id, d); // % rumo ao --since: a data mais antiga vista conta
       if (sinceDate && d && d < sinceDate) {
         below++; // mais antigo que o piso: não enfileira
         continue;
@@ -297,6 +346,7 @@ async function crawlArchive(startUrl, source, sel, firstHtml, ctx) {
 
     if (sinceDate && below > 0) {
       log(`--since: piso atingido, parando paginação em ${pageUrl}`);
+      floorHit(source?.id); // esta fonte chegou à data-alvo: progresso = 100%
       break;
     }
     // Re-crawl incremental: página sem nenhum link novo => chegamos ao território já conhecido.
@@ -372,13 +422,13 @@ async function processRoundup(job, source, opts = {}) {
 
   // Piso por data da ISSUE (backstop autoritativo p/ itens do índice sem data legível). Como
   // descartamos a issue ANTES de enfileirar artigos, todo artigo enfileirado é de issue no piso.
-  if (opts.sinceDate) {
-    const d = parseDate(extractPublishedDate(fetched.html));
-    if (d && d < opts.sinceDate) {
-      log(`issue anterior a --since (${d.toISOString().slice(0, 10)}) ignorada: ${url}`);
-      logEvent({ ...ev, stage: 'roundup', status: 'skip', detail: { reason: 'below-since' } });
-      return;
-    }
+  const issueDate = parseDate(extractPublishedDate(fetched.html));
+  if (issueDate) dateSeen(source?.id, issueDate); // % rumo ao --since: a issue ancora a fonte
+  if (opts.sinceDate && issueDate && issueDate < opts.sinceDate) {
+    floorHit(source?.id); // já alcançamos issues anteriores à data-alvo
+    log(`issue anterior a --since (${issueDate.toISOString().slice(0, 10)}) ignorada: ${url}`);
+    logEvent({ ...ev, stage: 'roundup', status: 'skip', detail: { reason: 'below-since' } });
+    return;
   }
 
   // Curadoria por IA (caminho principal): a issue vira ITENS estruturados cadastrados já aqui
@@ -386,15 +436,20 @@ async function processRoundup(job, source, opts = {}) {
   // releases cuja informação só existe NO agregador deixam de se perder; patrocínio não entra.
   if (HAS_LLM && CURATE_ROUNDUPS) {
     try {
-      const cur = await curateRoundup({
+      const cur = await inStage('curadoria', () => curateRoundup({
         html: fetched.html, url: finalUrl, source, runId: opts.runId ?? null, depth,
         sinceDate: opts.sinceDate,
-      });
+      }));
       if (cur?.belowFloor) {
+        floorHit(source?.id); // a curadoria datou a issue abaixo do alvo
         log(`issue anterior a --since (${cur.issueDate}) ignorada pela curadoria: ${url}`);
         return;
       }
       if (cur) {
+        const cd = parseDate(cur.issueDate);
+        if (cd) dateSeen(source?.id, cd);
+        bump('issues');
+        if (cur.saved) bump('itensCurados', cur.saved);
         const kinds = Object.entries(cur.byKind).filter(([, n]) => n > 0).map(([k, n]) => `${k}=${n}`).join(' ');
         const skipped = Object.entries(cur.skipped).filter(([, n]) => n > 0).map(([k, n]) => `${k}=${n}`).join(' ');
         log(
@@ -429,6 +484,7 @@ async function processRoundup(job, source, opts = {}) {
 /** Item curado cujo alvo não rendeu corpo: o registro FICA com o blurb do agregador. */
 function keepAggregatorVersion(row, ev, reason) {
   stmts.finishEnrich.run(row.id);
+  bump('mantidosBlurb');
   logEvent({ ...ev, stage: 'enrich', status: 'kept-blurb', detail: { reason } });
   log(`item mantido com o blurb do agregador (${reason}): ${(row.title || row.url).slice(0, 70)}`);
 }
@@ -437,6 +493,11 @@ async function processArticle(job, source, opts) {
   const url = job.url;
   const depth = job.depth ?? 0;
   const ev = { runId: opts.runId ?? null, sourceId: source?.id ?? null, url };
+  // Relógio de trabalho + abort do job (deadline.js): as fases fetch/render/parse contam no
+  // orçamento; LLM e esperas de fila ficam de fora (têm limites próprios). Sem clock = sem corte.
+  const clock = opts.clock ?? null;
+  const signal = opts.signal ?? null;
+  const onClock = (phase, fn) => (clock ? clock.run(phase, fn) : fn());
 
   // Item curado aguardando corpo (needs_enrich=1)? Senão, dedup normal por URL.
   const jobNorm = normalizeUrl(url) || url;
@@ -455,7 +516,7 @@ async function processArticle(job, source, opts) {
 
   let fetched;
   try {
-    fetched = await fetchSmart(url, { profile: 'article', aggressive: opts.aggressive }); // sem load-more; scroll e deadline curtos
+    fetched = await fetchSmart(url, { profile: 'article', aggressive: opts.aggressive, clock, signal }); // sem load-more; scroll e deadline curtos
   } catch (e) {
     // Falha de fetch pode ser transitória: deixa o retry do job agir (needs_enrich continua 1;
     // esgotados os retries, o registro curado segue válido com o blurb e o inspect mostra o porquê).
@@ -482,7 +543,7 @@ async function processArticle(job, source, opts) {
 
   // 1) Readability (uma vez; reaproveitado p/ roundup-detection e p/ extração do corpo).
   // JSDOM roda no pool de workers (isolado do processo principal); null se crashou/timeout.
-  const art = await extractArticleAsync(capHtml(html), finalUrl);
+  const art = await onClock('parse', () => extractArticleAsync(capHtml(html), finalUrl));
 
   // Roundup-detection: às vezes um "link" aponta p/ uma página que é uma COLEÇÃO de várias
   // notícias. NUNCA p/ item curado (o item é UM registro — um repo GitHub tem dezenas de links
@@ -516,7 +577,7 @@ async function processArticle(job, source, opts) {
     let csel = getCachedSelector(sig);
     if (!csel?.content_selector && HAS_LLM) {
       try {
-        const cand = await deriveContentSelector(await cpuParse(() => pruneForLLM(capHtml(html))));
+        const cand = await deriveContentSelector(await cpuParse(() => pruneForLLM(capHtml(html))), { signal });
         if (validateContentSelector(html, cand.content_selector).ok) {
           csel = putSelector(sig, {
             content_selector: cand.content_selector,
@@ -528,6 +589,7 @@ async function processArticle(job, source, opts) {
       } catch (e) {
         // Orçamento: o próximo passo (extração via LLM) também seria negado — rethrow.
         if (e?.code === 'BUDGET_EXCEEDED') throw e;
+        if (signal?.aborted) throw abortErrorOf(signal); // job abortado: não degrada, encerra
         warn(`deriveContentSelector falhou: ${e.message}`);
       }
     }
@@ -543,7 +605,7 @@ async function processArticle(job, source, opts) {
       try {
         // Entrada em MARKDOWN (não HTML) p/ o LLM: sem tags p/ o modelo ecoar, mas preserva a
         // estrutura (títulos/listas) que ajuda a separar o corpo do boilerplate.
-        const out = await extractArticleViaLLM(await cpuParse(() => htmlToMarkdown(pruneForLLM(capHtml(html)))));
+        const out = await extractArticleViaLLM(await cpuParse(() => htmlToMarkdown(pruneForLLM(capHtml(html)))), { signal });
         title = out.title;
         content = out.content;
         published = out.published_at;
@@ -551,6 +613,7 @@ async function processArticle(job, source, opts) {
       } catch (e) {
         // Orçamento: sem o fallback LLM não há conteúdo — rethrow p/ o artigo seguir pending.
         if (e?.code === 'BUDGET_EXCEEDED') throw e;
+        if (signal?.aborted) throw abortErrorOf(signal); // job abortado: não degrada, encerra
         warn(`extractArticleViaLLM falhou: ${e.message}`);
       }
     }
@@ -579,6 +642,8 @@ async function processArticle(job, source, opts) {
   if (opts.sinceDate && !enriching) {
     const d = parseDate(published);
     if (d && d < opts.sinceDate) {
+      dateSeen(source?.id, d);
+      floorHit(source?.id); // a fonte já entrega artigos anteriores ao alvo
       log(`artigo anterior a --since (${published}) ignorado: ${url}`);
       logEvent({ ...ev, stage: 'article', status: 'skip', detail: { reason: 'below-since', published } });
       return;
@@ -593,7 +658,8 @@ async function processArticle(job, source, opts) {
     const head = content.slice(0, CLEAN_MAX_CHARS);
     const tail = content.length > CLEAN_MAX_CHARS ? content.slice(CLEAN_MAX_CHARS) : '';
     try {
-      const out = await cleanArticleContent({ title: title || enriching?.title, content: head });
+      const out = await inStage('limpeza', () =>
+        cleanArticleContent({ title: title || enriching?.title, content: head }, { signal }));
       cleaned = 1;
       const res = applyJunkSpans(head, out.junk_spans);
       if (res.rejected) {
@@ -612,6 +678,7 @@ async function processArticle(job, source, opts) {
       if (!published && out.published_at) published = out.published_at;
     } catch (e) {
       if (e?.code === 'BUDGET_EXCEEDED') throw e;
+      if (signal?.aborted) throw abortErrorOf(signal); // job abortado: não salva parcial aqui
       warn(`limpeza IA falhou (${url}): ${e.message} — salvando original`);
       logEvent({ ...ev, stage: 'clean', status: 'fail', detail: { error: e.message } });
     }
@@ -646,6 +713,8 @@ async function processArticle(job, source, opts) {
       ...ev, stage: 'enrich', status: 'ok',
       detail: { method, chars: content.length, cleaned: Boolean(cleaned), targetDate: published || null },
     });
+    bump('enriquecidos');
+    dateSeen(source?.id, parseDate(enriching.published_at || published));
     log(`item enriquecido [${enriching.kind || 'news'}]: ${(enriching.title || canonicalUrl).slice(0, 70)}`);
     return { verifyUrl: enriching.url }; // streaming verify: verifica esta ficha já
   }
@@ -667,6 +736,8 @@ async function processArticle(job, source, opts) {
     needs_enrich: 0,
   });
   logEvent({ ...ev, stage: 'save', status: 'ok', detail: { method, chars: content.length, cleaned: Boolean(cleaned) } });
+  bump('salvos');
+  dateSeen(source?.id, parseDate(published));
   log(`artigo salvo: ${(title || canonicalUrl).slice(0, 80)}`);
   return { verifyUrl: canonicalUrl }; // streaming verify: verifica esta ficha já
 }

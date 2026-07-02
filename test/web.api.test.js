@@ -25,6 +25,7 @@ function seedArticle({ source, url, title, content, published, titlePt, summaryP
     content,
     content_hash: `hash-${url}`,
     published_at: published,
+    run_id: null,
   });
   const id = Number(r.lastInsertRowid);
   if (titlePt || summaryPt) stmts.setSummary.run({ id, title_pt: titlePt || null, summary_pt: summaryPt || null });

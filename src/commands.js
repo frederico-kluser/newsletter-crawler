@@ -123,6 +123,13 @@ async function crawlRun(flags) {
   const reset = stmts.resetInProgress.run();
   if (reset.changes) log(`resume: ${reset.changes} jobs in_progress -> pending`);
 
+  // Abre a execução (run): marca d'água do delta "novo desde a última execução".
+  const runId = stmts.startDeltaRun.get().id;
+
+  // Re-crawl incremental: por padrão re-visita as listagens das fontes a cada execução (só enfileira
+  // o novo; a dedup de artigo impede re-baixar o existente). `--no-refresh` desliga a re-visita.
+  const noRefresh = flags['no-refresh'] === true;
+
   // Seleção de fonte ao executar: `--source "<nome exato>"` (ou a URL) seleciona UMA fonte;
   // `--only <substr>` casa por substring no nome/url. Sem nenhum, semeia todas do config.
   const only = typeof flags.only === 'string' ? flags.only.toLowerCase() : null;
@@ -137,7 +144,12 @@ async function crawlRun(flags) {
       continue;
     }
     const src = upsertSource(s);
-    if (enqueue(s.url, 'listing', null, src.id, 0)) log(`seed: ${s.url} (type=${src.type})`);
+    const seeded = enqueue(s.url, 'listing', null, src.id, 0);
+    if (seeded) log(`seed: ${s.url} (type=${src.type})`);
+    else if (!noRefresh) {
+      const r = stmts.refreshListing.run(src.base_url); // base_url normalizada = url no frontier
+      if (r.changes) log(`refresh: ${s.url} re-enfileirado (re-visita a listagem)`);
+    }
   }
 
   // --since <YYYY-MM-DD|ISO>: piso de data (coleta do mais novo até esse piso e para). Aplica
@@ -153,7 +165,10 @@ async function crawlRun(flags) {
   const opts = {
     maxPages: flags['max-pages'] ? Number(flags['max-pages']) : Infinity,
     sinceDate,
+    aggressive: flags.aggressive === true,
+    runId,
   };
+  if (opts.aggressive) log('modo agressivo ATIVO: ignorando robots.txt + User-Agent de navegador real');
   const maxArticles = flags['max-articles'] ? Number(flags['max-articles']) : Infinity;
 
   // Capacidade DINÂMICA do loop: o governador redimensiona as lanes fetch+render pela RAM;
@@ -201,6 +216,14 @@ async function crawlRun(flags) {
   await closeBrowser();
   if (budgetRequeued) log(`orçamento: ${budgetRequeued} jobs devolvidos à fila (retomáveis no próximo run)`);
   log('crawl concluído.');
+
+  if (budgetRequeued) log(`orçamento: ${budgetRequeued} jobs devolvidos à fila (retomáveis no próximo run)`);
+  log('crawl concluído.');
+
+  // Fecha a run e registra quantos artigos novos ela descobriu (o delta desta execução).
+  const newCount = stmts.countArticlesByRun.get(runId).c;
+  stmts.finishDeltaRun.run(newCount, runId);
+  log(`run ${runId}: ${newCount} novo(s) artigo(s) desde a última execução.`);
 
   // Hooks pós-crawl EM PARALELO (classify e summarize são independentes — ambos só leem
   // articles e escrevem tabelas próprias); o perfil llm-only dá o teto todo à lane llm.
@@ -299,9 +322,14 @@ export function cmdExport(flags) {
   const format = flags.format === 'json' ? 'json' : 'md';
   const outDir = EXPORT_DIR;
   mkdirSync(outDir, { recursive: true });
+  // Delta: por padrão exporta só a última execução; --all (ou sem runs) exporta o acervo inteiro.
+  const latest = stmts.getLatestRunId.get().id;
+  const all = flags.all === true || latest == null;
   let n = 0;
   for (const s of stmts.listSources.all()) {
-    const arts = stmts.listArticlesBySource.all(s.id);
+    const arts = all
+      ? stmts.listArticlesBySource.all(s.id)
+      : stmts.listArticlesForRunBySource.all(s.id, latest);
     if (!arts.length) continue;
     const dir = path.join(outDir, slugify(s.name || String(s.id)));
     mkdirSync(dir, { recursive: true });
@@ -318,7 +346,7 @@ export function cmdExport(flags) {
       n++;
     }
   }
-  log(`exportados ${n} artigos para ${outDir} (${format})`);
+  log(`exportados ${n} artigos para ${outDir} (${format})${all ? ' [todos]' : ` [run ${latest}]`}`);
 }
 
 export async function cmdClassify(flags) {
@@ -358,13 +386,16 @@ export async function cmdSearch(rest, flags) {
   }
   const mode = String(flags.mode || 'A').toUpperCase() === 'B' ? 'B' : 'A';
   const limit = flags.limit ? Number(flags.limit) : Infinity;
+  // Delta: por padrão busca só na última execução; --all (ou sem runs) busca no acervo inteiro.
+  const latest = stmts.getLatestRunId.get().id;
+  const all = flags.all === true || latest == null;
   if (mode === 'A') {
-    // Guard de custo: o modo A faz 1 chamada Flash por artigo.
-    const total = stmts.countArticles.get().c;
+    // Guard de custo: o modo A faz 1 chamada Flash por artigo (estima contra o escopo real).
+    const total = all ? stmts.countArticles.get().c : stmts.countArticlesByRun.get(latest).c;
     const n = Math.min(total, Number.isFinite(limit) ? limit : Infinity);
     if (n > SEARCH_MODE_A_CONFIRM && flags.yes !== true) {
       errorLog(
-        `Modo A vai avaliar ~${n} artigos (custo alto). Refaça com --yes, ou use --limit N / --mode B.`,
+        `Modo A vai avaliar ~${n} artigos (custo alto). Refaça com --yes, ou use --limit N / --mode B / --all.`,
       );
       process.exit(1);
     }

@@ -21,6 +21,7 @@
     "search": "node --env-file-if-exists=.env src/index.js search",
     "web": "node --env-file-if-exists=.env src/index.js web",
     "key": "node src/index.js key",
+    "limits": "node --env-file-if-exists=.env src/index.js limits",
     "reset": "node --env-file-if-exists=.env src/index.js reset",
     "test": "node --test",
     "ui": "NODE_NO_WARNINGS=1 node --env-file-if-exists=.env src/index.js ui",

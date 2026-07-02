@@ -10,7 +10,7 @@ import {
 } from '../commands.js';
 import {
   Menu, StatusScreen, CrawlConfig, ExportConfig, ClassifyConfig, AddConfig, ResetConfirm,
-  SummarizeConfig, SearchConfig, WebConfig,
+  SummarizeConfig, SearchConfig, WebConfig, LimitsConfig,
 } from './screens.js';
 import { RunView } from './RunView.js';
 import { ResultsView } from './ResultsView.js';
@@ -76,6 +76,8 @@ export default function App() {
     body = html`<${SearchConfig} onRun=${onRun} onBack=${toMenu} />`;
   } else if (screen === 'web') {
     body = html`<${WebConfig} onBack=${toMenu} />`;
+  } else if (screen === 'limits') {
+    body = html`<${LimitsConfig} onBack=${toMenu} />`;
   } else if (screen === 'add') {
     body = html`<${AddConfig} onRun=${onRun} onBack=${toMenu} />`;
   } else if (screen === 'reset') {

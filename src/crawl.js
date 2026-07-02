@@ -15,6 +15,7 @@ import {
   extractLinksItemByItem, extractArticleViaLLM, extractRoundupLinks,
 } from './llm.js';
 import { isSubstack, substackArchive } from './substack.js';
+import { getLane } from './governor.js';
 import {
   normalizeUrl, sha256, domainSig, hostOf, parseDate, log, warn, errorLog, debug,
 } from './util.js';
@@ -23,6 +24,25 @@ import {
   ARTICLE_ROUNDUP_MIN_LINKS, ARTICLE_ROUNDUP_MAX_LINKS, ROUNDUP_MAX_PROSE_CHARS,
   SINCE_MAX_INDEX_PAGES,
 } from './config.js';
+
+// Lane de CPU p/ parses SÍNCRONOS (JSDOM/Readability/prune, 50ms–5s cada): limita o DÉBITO
+// agregado de latência no event loop (timers do governador, CDP) — não a latência de um parse.
+// O setImmediate cede o loop antes do bloco síncrono; HTML gigante é truncado (fail-open)
+// antes do JSDOM p/ um outlier não segurar o processo por dezenas de segundos.
+const MAX_PARSE_HTML = 2 * 1024 * 1024;
+const capHtml = (html) => {
+  if (html && html.length > MAX_PARSE_HTML) {
+    debug(`parse: HTML de ${html.length} chars truncado em ${MAX_PARSE_HTML}`);
+    return html.slice(0, MAX_PARSE_HTML);
+  }
+  return html;
+};
+async function cpuParse(fn) {
+  return getLane('cpu')(async () => {
+    await new Promise((r) => setImmediate(r));
+    return fn();
+  });
+}
 
 export function enqueue(url, kind, fromUrl, sourceId, depth = 0) {
   const n = normalizeUrl(url, fromUrl);
@@ -59,18 +79,22 @@ function externalLinks(links, pageUrl) {
  * sem sponsor/nav); se vier pouco, cai p/ extração via LLM. Retorna links externos únicos.
  */
 async function roundupLinks(html, pageUrl) {
-  const { links } = readableLinks(html, pageUrl);
+  const capped = capHtml(html);
+  const { links } = await cpuParse(() => readableLinks(capped, pageUrl));
   let ext = externalLinks(links, pageUrl);
   debug(`roundup ${pageUrl}: ${ext.length} links externos via Readability`);
   if (ext.length >= ROUNDUP_MIN_LINKS) return ext;
 
   if (HAS_LLM) {
     try {
-      const llm = await extractRoundupLinks(pruneForLLM(html), pageUrl);
+      const llm = await extractRoundupLinks(await cpuParse(() => pruneForLLM(capped)), pageUrl);
       const ext2 = externalLinks(llm, pageUrl);
       debug(`roundup ${pageUrl}: ${ext2.length} links externos via LLM (fallback)`);
       if (ext2.length > ext.length) ext = ext2;
     } catch (e) {
+      // Orçamento: se o Readability já achou ALGO, degrada e segue com isso; sem nada,
+      // rethrow p/ o job voltar a pending (retomável) em vez de virar `done` vazio.
+      if (e?.code === 'BUDGET_EXCEEDED' && !ext.length) throw e;
       warn(`extractRoundupLinks falhou (${pageUrl}): ${e.message}`);
     }
   }
@@ -132,7 +156,7 @@ async function processListing(job, source, opts) {
 
   if (!(await ensureAllowed(url))) return;
 
-  const fetched = await fetchSmart(url);
+  const fetched = await fetchSmart(url, { profile: 'listing' });
   const html = fetched.html;
   const sig = domainSig(url, 'listing');
   let sel = getCachedSelector(sig);
@@ -149,7 +173,7 @@ async function processListing(job, source, opts) {
   // Deriva com o Pro (xhigh) se necessário.
   if (!sel?.link_selector && HAS_LLM) {
     try {
-      const cand = await deriveLinkSelector(pruneForLLM(html));
+      const cand = await deriveLinkSelector(await cpuParse(() => pruneForLLM(capHtml(html))));
       const v = validateLinkSelector(html, cand.selector, cand.attribute, url);
       if (v.ok) {
         sel = putSelector(sig, {
@@ -163,6 +187,8 @@ async function processListing(job, source, opts) {
         warn(`seletor do Pro inválido (${v.count} links) — fallback Flash item-a-item`);
       }
     } catch (e) {
+      // Orçamento: o fallback item-a-item também é LLM — rethrow p/ o job voltar a pending.
+      if (e?.code === 'BUDGET_EXCEEDED') throw e;
       warn(`deriveLinkSelector falhou: ${e.message}`);
     }
   }
@@ -176,7 +202,7 @@ async function processListing(job, source, opts) {
 
   // Fallback item-a-item (Flash) quando não há seletor confiável.
   if (HAS_LLM) {
-    const links = await extractLinksItemByItem(pruneForLLM(html));
+    const links = await extractLinksItemByItem(await cpuParse(() => pruneForLLM(capHtml(html))));
     let n = 0;
     for (const l of links) if (enqueue(l.url, childKind, url, source?.id, depth + 1)) n++;
     log(`fallback Flash: ${n} links (${childKind}) enfileirados de ${url}`);
@@ -194,7 +220,7 @@ async function crawlArchive(startUrl, source, sel, firstHtml, ctx) {
   let depth = 0;
 
   while (pageUrl && depth < maxPages) {
-    if (html == null) html = (await fetchSmart(pageUrl)).html;
+    if (html == null) html = (await fetchSmart(pageUrl, { profile: 'listing' })).html;
 
     const h = sha256(html);
     if (seenHashes.has(h)) {
@@ -241,7 +267,15 @@ async function crawlArchive(startUrl, source, sel, firstHtml, ctx) {
       break;
     }
     if (depth + 1 >= maxPages) break; // não vamos paginar -> evita findNextPage (pode custar 1 LLM)
-    const next = await findNextPage(html, pageUrl, sel);
+    let next = null;
+    try {
+      next = await findNextPage(html, pageUrl, sel);
+    } catch (e) {
+      if (e?.code !== 'BUDGET_EXCEEDED') throw e;
+      // Orçamento: o que já foi enfileirado nas páginas anteriores fica; só a paginação para.
+      log(`paginação: orçamento atingido — encerrando o walk do arquivo em ${pageUrl}`);
+      break;
+    }
     if (!next || normalizeUrl(next) === normalizeUrl(pageUrl)) {
       log(`paginação: sem próxima página após ${pageUrl}`);
       break;
@@ -276,6 +310,7 @@ async function findNextPage(html, baseUrl, sel) {
       if (out.selector) putSelector(domainSig(baseUrl, 'listing'), { next_selector: out.selector });
       if (out.next_url) return normalizeUrl(out.next_url, baseUrl);
     } catch (e) {
+      if (e?.code === 'BUDGET_EXCEEDED') throw e; // crawlArchive encerra a paginação com log
       warn(`deriveNextLink falhou: ${e.message}`);
     }
   }
@@ -288,7 +323,7 @@ async function processRoundup(job, source, opts = {}) {
   const depth = job.depth ?? 0;
   if (!(await ensureAllowed(url))) return;
 
-  const fetched = await fetchSmart(url);
+  const fetched = await fetchSmart(url, { profile: 'listing' }); // roundup é lista: rola/clica como listagem
   const finalUrl = fetched.url || url;
 
   // Piso por data da ISSUE (backstop autoritativo p/ itens do índice sem data legível). Como
@@ -317,7 +352,7 @@ async function processArticle(job, source, opts) {
   const depth = job.depth ?? 0;
   if (!(await ensureAllowed(url))) return;
 
-  const fetched = await fetchSmart(url);
+  const fetched = await fetchSmart(url, { profile: 'article' }); // sem load-more; scroll e deadline curtos
   const html = fetched.html;
   const finalUrl = fetched.url || url;
   // Identidade canônica pós-redirect: dedup mesmo quando A->B (alias de redirect). Checa ANTES
@@ -332,7 +367,7 @@ async function processArticle(job, source, opts) {
   let published = null;
 
   // 1) Readability (uma vez; reaproveitado p/ roundup-detection e p/ extração do corpo).
-  const art = extractArticle(html, finalUrl);
+  const art = await cpuParse(() => extractArticle(capHtml(html), finalUrl));
 
   // Roundup-detection: às vezes um "link" aponta p/ uma página que é uma COLEÇÃO de várias
   // notícias. Só dividimos quando a página é PREDOMINANTEMENTE uma lista de links (pouca prosa)
@@ -363,7 +398,7 @@ async function processArticle(job, source, opts) {
     let csel = getCachedSelector(sig);
     if (!csel?.content_selector && HAS_LLM) {
       try {
-        const cand = await deriveContentSelector(pruneForLLM(html));
+        const cand = await deriveContentSelector(await cpuParse(() => pruneForLLM(capHtml(html))));
         if (validateContentSelector(html, cand.content_selector).ok) {
           csel = putSelector(sig, {
             content_selector: cand.content_selector,
@@ -373,6 +408,8 @@ async function processArticle(job, source, opts) {
           log(`content selector derivado p/ ${sig}: "${cand.content_selector}"`);
         }
       } catch (e) {
+        // Orçamento: o próximo passo (extração via LLM) também seria negado — rethrow.
+        if (e?.code === 'BUDGET_EXCEEDED') throw e;
         warn(`deriveContentSelector falhou: ${e.message}`);
       }
     }
@@ -383,11 +420,13 @@ async function processArticle(job, source, opts) {
     // 3) Fallback final: extração direta via LLM (Flash).
     if (!content && HAS_LLM) {
       try {
-        const out = await extractArticleViaLLM(pruneForLLM(html));
+        const out = await extractArticleViaLLM(await cpuParse(() => pruneForLLM(capHtml(html))));
         title = out.title;
         content = out.content;
         published = out.published_at;
       } catch (e) {
+        // Orçamento: sem o fallback LLM não há conteúdo — rethrow p/ o artigo seguir pending.
+        if (e?.code === 'BUDGET_EXCEEDED') throw e;
         warn(`extractArticleViaLLM falhou: ${e.message}`);
       }
     }

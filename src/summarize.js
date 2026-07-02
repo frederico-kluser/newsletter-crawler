@@ -5,6 +5,8 @@ import pLimit from 'p-limit';
 import { stmts } from './db.js';
 import { summarizeArticle } from './llm.js';
 import { SUMMARIZE_CONCURRENCY, SUMMARIZE_MAX_CHARS } from './config.js';
+import { stageWindow } from './governor.js';
+import { shouldStop } from './budget.js';
 import { log, errorLog } from './util.js';
 
 /** Resume os artigos sem summary_pt (ou todos, com force). Retorna { summarized, total }. */
@@ -19,11 +21,17 @@ export async function summarizePending({ limit = Infinity, force = false } = {})
   }
   log(`summarize: ${rows.length} artigo(s) — PT-BR, force=${force}.`);
 
-  const gate = pLimit(SUMMARIZE_CONCURRENCY);
+  // Janela = min(override de env, capacidade atual da lane llm do governador).
+  const gate = pLimit(stageWindow(SUMMARIZE_CONCURRENCY));
   let done = 0;
+  let skipped = 0;
   await Promise.all(
     rows.map((a) =>
       gate(async () => {
+        if (shouldStop()) {
+          skipped++;
+          return; // orçamento: a linha NULL de summary já é retomável no próximo run
+        }
         try {
           const { title_pt, summary_pt } = await summarizeArticle({
             title: a.title,
@@ -33,12 +41,19 @@ export async function summarizePending({ limit = Infinity, force = false } = {})
           done++;
           log(`summarize ok [${done}/${rows.length}] ${(a.title || a.url || '').slice(0, 60)}`);
         } catch (e) {
+          if (e?.code === 'BUDGET_EXCEEDED') {
+            skipped++;
+            return;
+          }
           errorLog(`summarize falhou (${a.url}): ${e.message}`);
         }
       }),
     ),
   );
 
-  log(`summarize concluído: ${done}/${rows.length}.`);
+  log(
+    `summarize concluído: ${done}/${rows.length}` +
+      `${skipped ? ` (${skipped} pulados por orçamento — retome com \`ncrawl summarize\`)` : ''}.`,
+  );
   return { summarized: done, total: rows.length };
 }

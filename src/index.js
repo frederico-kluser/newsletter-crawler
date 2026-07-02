@@ -7,6 +7,7 @@ import { errorLog } from './util.js';
 import {
   printStatus, cmdCrawl, cmdAdd, cmdReset, cmdExport, cmdClassify, cmdSummarize, cmdSearch, cmdKey,
   cmdWeb,
+  cmdLimits,
 } from './commands.js';
 
 function parseFlags(argv) {
@@ -39,14 +40,16 @@ function printHelp() {
       '  node src/index.js ui | menu       abre o menu guiado                  [npm run ui]',
       '  node src/index.js crawl [--source "Nome" | --only <substr>] [--since <data>]',
       '                          [--max-pages N] [--max-articles N] [--no-classify]',
+      '                          [--budget USD] [--parallel N]',
       '  node src/index.js status',
       '  node src/index.js add <url> [--name "Nome"] [--type index|listing] [--max-index-pages N]',
       '  node src/index.js export [--format md|json]',
-      '  node src/index.js classify [--limit N] [--force]',
-      '  node src/index.js summarize [--limit N] [--force]   resumo/título PT-BR',
-      '  node src/index.js search <consulta> [--mode A|B] [--limit N] [--yes]',
-      '  node src/index.js web [--port N] [--no-open]   buscador web (React) com filtros da base',
+      '  node src/index.js classify [--limit N] [--force] [--budget USD] [--parallel N]',
+      '  node src/index.js summarize [--limit N] [--force] [--budget USD] [--parallel N]   resumo/título PT-BR',
+      '  node src/index.js search <consulta> [--mode A|B] [--limit N] [--yes] [--budget USD] [--parallel N]',
+      '  node src/index.js web [--port N] [--no-open]   buscador web (React) com filtros da base'
       '  node src/index.js key set <chave> | key test   valida/salva a chave OpenRouter (em ~/.newsletter-crawler/.env)',
+      '  node src/index.js limits [show | set --budget USD --parallel N --ram-max-pct P]   limites persistentes',
       '  node src/index.js reset --yes     APAGA TODOS OS DADOS (slate limpo)',
       '',
       'Global: instale com `npm run link` e use `ncrawl <comando>` de qualquer lugar (dados em NC_HOME=~/.newsletter-crawler).',
@@ -104,13 +107,16 @@ try {
     } else if (cmd === 'key') {
       await cmdKey(rest, flags);
       db.close();
+    } else if (cmd === 'limits') {
+      cmdLimits(rest, flags);
+      db.close();
     } else if (cmd === 'reset' || cmd === 'clean') {
       cmdReset(flags);
       db.close();
     } else {
       errorLog(
         `comando desconhecido: ${cmd} ` +
-          '(use: crawl | status | add | export | classify | summarize | search | web | key | reset | ui)',
+          '(use: crawl | status | add | export | classify | summarize | search | web | key | limits | reset | ui)',
       );
       process.exit(1);
     }

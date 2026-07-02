@@ -7,7 +7,8 @@ import { Select, TextInput, Alert, StatusMessage, Spinner } from '@inkjs/ui';
 import { html } from './html.js';
 import { t } from './i18n.js';
 import { buildCommandPreview } from './commandPreview.js';
-import { loadSources, HAS_LLM } from '../config.js';
+import { loadSources, HAS_LLM, BUDGET_USD, MAX_PARALLEL, RAM_MAX_PCT, ENV_PATH } from '../config.js';
+import { upsertEnvVar } from '../keys.js';
 import { parseDate } from '../util.js';
 import { getStatus } from '../commands.js';
 import { startWebServer, openBrowser } from '../web.js';
@@ -56,6 +57,7 @@ export function Menu({ onSelect }) {
     { label: t('menuClassify'), value: 'classify' },
     { label: t('menuSummarize'), value: 'summarize' },
     { label: t('menuAdd'), value: 'add' },
+    { label: t('menuLimits'), value: 'limits' },
     { label: t('menuReset'), value: 'reset' },
     { label: t('menuQuit'), value: 'quit' },
   ];
@@ -398,6 +400,62 @@ export function WebConfig({ onBack }) {
   return html`<${WebRun} port=${port} onBack=${onBack} />`;
 }
 
+// Tela de limites (orçamento/paralelismo/RAM): wizard por step; persiste em NC_HOME/.env com o
+// MESMO helper do `key set` (upsertEnvVar). Não é um "run": salva e volta ao menu.
+export function LimitsConfig({ onBack }) {
+  const [step, setStep] = useState('budget');
+  const [vals, setVals] = useState({});
+  const [err, setErr] = useState(null);
+  const [savedTo, setSavedTo] = useState(null);
+
+  if (step === 'budget') {
+    return html`<${Field} label=${t('limitsBudget')} error=${err}>
+      <${Text} dimColor>${BUDGET_USD > 0 ? `US$ ${BUDGET_USD.toFixed(2)}` : '∞'}</${Text}>
+      <${TextInput} placeholder="" onSubmit=${(val) => {
+        const v = val.trim();
+        if (v && (!Number.isFinite(Number(v)) || Number(v) < 0)) return setErr(t('limitsInvalidBudget'));
+        setErr(null);
+        if (v) setVals((x) => ({ ...x, BUDGET_USD: String(Number(v)) }));
+        setStep('parallel');
+      }} />
+    </${Field}>`;
+  }
+  if (step === 'parallel') {
+    return html`<${Field} label=${t('limitsParallel')} error=${err}>
+      <${Text} dimColor>${String(MAX_PARALLEL)}</${Text}>
+      <${TextInput} placeholder="" onSubmit=${(val) => {
+        const r = parseIntFlag(val);
+        if (!r.ok) return setErr(t('numInvalid'));
+        setErr(null);
+        if (r.value) setVals((x) => ({ ...x, MAX_PARALLEL: r.value }));
+        setStep('ram');
+      }} />
+    </${Field}>`;
+  }
+  if (step === 'ram') {
+    return html`<${Field} label=${t('limitsRam')} error=${err}>
+      <${Text} dimColor>${`${RAM_MAX_PCT}%`}</${Text}>
+      <${TextInput} placeholder="80" onSubmit=${(val) => {
+        const v = val.trim();
+        if (v && (!Number.isFinite(Number(v)) || Number(v) < 10 || Number(v) > 95)) {
+          return setErr(t('limitsInvalidRam'));
+        }
+        setErr(null);
+        const next = v ? { ...vals, RAM_MAX_PCT: String(Number(v)) } : vals;
+        let file = null;
+        for (const [k, value] of Object.entries(next)) file = upsertEnvVar(k, value).file;
+        setSavedTo(file);
+        setStep('done');
+      }} />
+    </${Field}>`;
+  }
+  return html`<${Box} flexDirection="column">
+    <${StatusMessage} variant=${savedTo ? 'success' : 'info'}>
+      ${savedTo ? t('limitsSaved', { file: savedTo }) : t('limitsNothing')}
+    </${StatusMessage}>
+    <${Select} options=${[{ label: t('back'), value: 'back' }]} onChange=${onBack} />
+  </${Box}>`;
+}
 export function ResetConfirm({ onRun, onBack }) {
   return html`<${Box} flexDirection="column">
     <${Alert} variant="error">${t('resetWarn')}</${Alert}>

@@ -5,9 +5,11 @@ import OpenAI from 'openai';
 import { z } from 'zod';
 import {
   OPENROUTER_API_KEY, HTTP_REFERER, X_TITLE, HAS_LLM, MAX_HTML_FOR_LLM, SEARCH_MAX_CHARS,
-  MODELS, stageModel,
+  MODELS, stageModel, LLM_TIMEOUT_MS,
 } from './config.js';
-import { warn } from './util.js';
+import { getLane, reportRateLimit } from './governor.js';
+import { reserve as budgetReserve } from './budget.js';
+import { warn, sleep } from './util.js';
 
 let _client = null;
 function client() {
@@ -17,10 +19,87 @@ function client() {
       baseURL: 'https://openrouter.ai/api/v1',
       apiKey: OPENROUTER_API_KEY,
       defaultHeaders: { 'HTTP-Referer': HTTP_REFERER, 'X-Title': X_TITLE },
-      maxRetries: 3, // cobre 429/5xx automaticamente
+      // maxRetries 1 + timeout curto: o default do SDK (3 retries × 10 min, timeouts
+      // re-tentados) deixaria uma chamada pendurada segurar um slot da lane por até 40 min.
+      // 429/5xx pontuais ainda têm 1 retry interno; tempestades de 429 são tratadas pelo
+      // gate de penalidade abaixo (que também recua a lane llm no governador).
+      maxRetries: 1,
+      timeout: LLM_TIMEOUT_MS,
     });
   }
   return _client;
+}
+
+// ---- transporte: 1 tentativa PAGA = lane llm -> penalidade 429 -> reserva -> create ----
+// A penalidade de 429 é um timestamp COMPARTILHADO: um 429 de qualquer chamada segura TODAS
+// as admissões novas (retry-after do provedor ou backoff exponencial, teto 60s), enquanto o
+// governador halva a lane llm (recupera +1/10s limpo). Sem token bucket: o 429 é o sinal-verdade.
+let _penaltyUntil = 0;
+let _penaltyK = 0;
+
+function retryAfterMsOf(err) {
+  const h = err?.headers;
+  const get = (k) => (typeof h?.get === 'function' ? h.get(k) : h?.[k]);
+  const ms = Number(get('retry-after-ms'));
+  if (Number.isFinite(ms) && ms > 0) return ms;
+  const s = Number(get('retry-after'));
+  return Number.isFinite(s) && s > 0 ? s * 1000 : 0;
+}
+
+async function awaitPenalty() {
+  for (;;) {
+    const waitMs = _penaltyUntil - Date.now();
+    if (waitMs <= 0) return;
+    await sleep(Math.min(waitMs, 5000)); // re-checa: a janela pode ter sido estendida por outro 429
+  }
+}
+
+function bumpPenalty(err) {
+  _penaltyK = Math.min(_penaltyK + 1, 6);
+  const backoff = Math.min(2 ** _penaltyK * 1000 * (0.5 + Math.random()), 60_000);
+  const until = Date.now() + Math.max(retryAfterMsOf(err), backoff);
+  if (until > _penaltyUntil) _penaltyUntil = until;
+  reportRateLimit();
+}
+
+async function createOnce({ stage, model, reasoning, response_format, messages }) {
+  return getLane('llm')(async () => {
+    await awaitPenalty();
+    const resv = budgetReserve(stage, model); // lança BudgetExceededError quando esgotado
+    try {
+      const resp = await client().chat.completions.create({
+        model,
+        reasoning,
+        response_format,
+        messages,
+        // OpenRouter usage accounting: a resposta traz usage.cost (USD) — o custo REAL que
+        // alimenta o ledger/orçamento. Passa pelo SDK como campo extra, igual ao `reasoning`.
+        usage: { include: true },
+      });
+      // Commit ANTES do parse de JSON: um 200 malformado também custou dinheiro.
+      resv.commit({ model: resp.model || model, usage: resp.usage });
+      if (Date.now() >= _penaltyUntil) _penaltyK = 0; // janela limpa: zera o backoff
+      return resp;
+    } catch (e) {
+      resv.cancel(); // falha de transporte não é cobrada; devolve a reserva
+      throw e;
+    }
+  });
+}
+
+async function createWithRateLimitRetry(args) {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await createOnce(args);
+    } catch (e) {
+      if (e?.status === 429 && attempt < 3) {
+        bumpPenalty(e);
+        warn(`429 do OpenRouter (${args.stage}); aguardando a janela de penalidade…`);
+        continue; // re-admite pela lane e espera a penalidade
+      }
+      throw e;
+    }
+  }
 }
 
 const responseFormat = (name, schema) => ({
@@ -55,6 +134,7 @@ let _warnedMaxEffort = false;
 // (reasoning-only, guard de 'max', retry de JSON). Passe fallbackModel:null p/ isolar o modelo.
 export async function callJSON({
   model, reasoning, schema, schemaName, system, user, retries = 2, fallbackModel = MODELS.pro,
+  stage = 'other', // rótulo do estágio p/ o ledger de custo (default p/ usos avulsos/eval)
 }) {
   // Guard: "max" não é suportado pelo DeepSeek V4 (HTTP 400); rebaixa para "xhigh".
   if (reasoning?.effort === 'max') {
@@ -78,8 +158,10 @@ export async function callJSON({
   for (let attempt = 0; ; attempt++) {
     const isLast = attempt >= retries;
     const useModel = isLast && fallbackModel && model !== fallbackModel ? fallbackModel : model;
-    const resp = await client().chat.completions.create({
-      model: useModel, reasoning, response_format, messages,
+    // Cada tentativa (inclusive a escalada p/ o Pro) é uma admissão própria no transporte:
+    // lane llm + reserva de orçamento com o modelo certo + registro do custo real.
+    const resp = await createWithRateLimitRetry({
+      stage, model: useModel, reasoning, response_format, messages,
     });
     const parsed = tryParseJSON(resp.choices?.[0]?.message?.content ?? '');
     if (parsed !== undefined) return parsed;
@@ -114,6 +196,7 @@ export async function deriveLinkSelector(prunedHtml) {
   const out = await callJSON({
     model,
     reasoning: { effort },
+    stage: 'linkSelector',
     schemaName: 'link_selector',
     schema: linkSelectorSchema,
     system: 'Você é um especialista em CSS e web scraping. Responda apenas com JSON.',
@@ -145,6 +228,7 @@ export async function deriveContentSelector(prunedHtml) {
   const out = await callJSON({
     model,
     reasoning: { effort },
+    stage: 'contentSelector',
     schemaName: 'content_selector',
     schema: contentSelectorSchema,
     system: 'Você é um especialista em CSS e web scraping. Responda apenas com JSON.',
@@ -172,6 +256,7 @@ export async function deriveNextLink(prunedHtml, baseUrl) {
   const out = await callJSON({
     model,
     reasoning: { effort },
+    stage: 'nextLink',
     schemaName: 'next_link',
     schema: nextSchema,
     system: 'Você localiza o link de próxima página de listagens. Responda apenas com JSON.',
@@ -206,6 +291,7 @@ export async function extractLinksItemByItem(prunedHtml) {
   const out = await callJSON({
     model,
     reasoning: { effort },
+    stage: 'linkExtract',
     schemaName: 'links',
     schema: linksSchema,
     system: 'Você extrai links de artigos. Responda apenas com JSON.',
@@ -224,6 +310,7 @@ export async function extractRoundupLinks(prunedHtml, baseUrl) {
   const out = await callJSON({
     model,
     reasoning: { effort },
+    stage: 'roundupExtract',
     schemaName: 'roundup_links',
     schema: linksSchema,
     system: 'Você extrai os links das fontes externas citadas numa edição de newsletter. Responda apenas com JSON.',
@@ -258,6 +345,7 @@ export async function extractArticleViaLLM(prunedHtmlOrText) {
   const out = await callJSON({
     model,
     reasoning: { effort },
+    stage: 'articleExtract',
     schemaName: 'article',
     schema: articleSchema,
     system: 'Você extrai o conteúdo principal de um artigo. Responda apenas com JSON.',
@@ -293,6 +381,7 @@ export async function classifyFacet({ system, user }) {
   const out = await callJSON({
     model,
     reasoning: { effort }, // default 'xhigh' = teto real do DeepSeek V4 ("max" => 400)
+    stage: 'classify',
     schemaName: 'facet_tags',
     schema: facetSchema,
     system,
@@ -314,6 +403,7 @@ export async function summarizeArticle({ title, content }) {
   const out = await callJSON({
     model,
     reasoning: { effort },
+    stage: 'summarize',
     schemaName: 'summary_pt',
     schema: summarySchema,
     system:
@@ -353,6 +443,7 @@ export async function judgeRelevance({ query, title, content }) {
   const out = await callJSON({
     model,
     reasoning: { effort },
+    stage: 'searchRelevance',
     schemaName: 'relevance',
     schema: relevanceSchema,
     // Prompt escolhido por avaliação (eval/): variante "v2_fewshot" — rubrica + few-shot contrastivo.
@@ -390,6 +481,7 @@ export async function mapQueryToFacetTags({ system, user }) {
   const out = await callJSON({
     model,
     reasoning: { effort },
+    stage: 'searchTags',
     schemaName: 'search_tags',
     schema: searchTagsSchema,
     system,

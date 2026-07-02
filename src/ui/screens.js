@@ -141,11 +141,13 @@ export function CrawlConfig({ onRun, onBack }) {
     </${Field}>`;
   }
   if (step === 'aggressive') {
+    // Agressivo é o DEFAULT do crawler: "sim" força; "não" emite --no-aggressive (modo educado).
     return html`<${Field} label=${t('aggressivePrompt')}>
       <${Box} flexDirection="column">
         <${StatusMessage} variant="warning">${t('aggressiveWarn')}</${StatusMessage}>
         <${Select} options=${yesNo()} onChange=${(v) => {
           if (v === 'yes') set({ aggressive: true });
+          else set({ 'no-aggressive': true });
           setStep(HAS_LLM ? 'classify' : 'review');
         }} />
       </${Box}>
@@ -160,16 +162,18 @@ export function CrawlConfig({ onRun, onBack }) {
     </${Field}>`;
   }
   // Resumo pré-execução: mostra as opções resolvidas (com destaque p/ o modo agressivo) e, abaixo,
-  // o Review genérico (comando equivalente + Executar/Voltar).
+  // o Review genérico (comando equivalente + Executar/Voltar). Agressivo é o DEFAULT do
+  // crawler: efetivo = ligado, a menos que o usuário tenha escolhido "não" (--no-aggressive).
+  const aggressiveOn = flags['no-aggressive'] !== true;
   return html`<${Box} flexDirection="column">
     <${Text} bold>${t('crawlSummary')}</${Text}>
     <${Box} flexDirection="column" marginY=${1}>
       <${Text}>${t('sinceLabel')}: <${Text} color="cyan">${flags.since || t('noneVal')}</${Text}></${Text}>
       <${Text}>${t('maxPagesLabel')}: <${Text} color="cyan">${flags['max-pages'] || t('noLimitVal')}</${Text}></${Text}>
       <${Text}>${t('maxArticlesLabel')}: <${Text} color="cyan">${flags['max-articles'] || t('noLimitVal')}</${Text}></${Text}>
-      <${Text}>${t('aggressiveLabel')}: <${Text} color=${flags.aggressive ? 'red' : 'green'}>${flags.aggressive ? t('on') : t('off')}</${Text}></${Text}>
+      <${Text}>${t('aggressiveLabel')}: <${Text} color=${aggressiveOn ? 'red' : 'green'}>${aggressiveOn ? t('on') : t('off')}</${Text}></${Text}>
     </${Box}>
-    ${flags.aggressive ? html`<${Alert} variant="warning">${t('aggressiveOn')}</${Alert}>` : null}
+    ${aggressiveOn ? html`<${Alert} variant="warning">${t('aggressiveOn')}</${Alert}>` : null}
     <${Review} sub="crawl" flags=${flags} onRun=${onRun} onBack=${onBack} />
   </${Box}>`;
 }

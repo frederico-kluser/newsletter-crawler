@@ -2,7 +2,11 @@
 
 > Crawler de newsletters em **Node.js puro** (ESM, Node ≥ 22, **sem build**) que descobre, extrai, classifica, resume em PT-BR e **busca** artigos — com **menu guiado no terminal** (Ink/React) e as flags diretas.
 
-> Histórico de versões em [CHANGELOG.md](CHANGELOG.md) — atual: **v1.2.0**.
+> Histórico de versões em [CHANGELOG.md](CHANGELOG.md) — atual: **v1.3.0**.
+
+> 🎨 **[ARQUITETURA.html](ARQUITETURA.html)** — a arquitetura inteira desenhada em canvas e explicada
+> para leigos: o pipeline, o paralelismo (governador/lanes), as boas decisões, os gargalos e os números
+> reais da validação. Abra no navegador (arquivo local, zero dependências).
 
 Usa um **LLM no OpenRouter (DeepSeek V4)** para *derivar seletores CSS reutilizáveis* — não para extrair página a página. O seletor é validado com Cheerio, **cacheado por template no SQLite** e só re-derivado quando o cache falha (**self-healing**) — então o custo de LLM da **descoberta/extração** fica próximo de zero por artigo depois do primeiro acerto. Classificação de tags e resumos PT-BR são passes **opcionais** por artigo (rodam automáticos pós-crawl e podem ser desligados).
 
@@ -12,7 +16,12 @@ Usa um **LLM no OpenRouter (DeepSeek V4)** para *derivar seletores CSS reutiliz�
 - **Dedup garantido:** o mesmo link nunca é cadastrado 2× (URL canônica pós-redirect + `content_hash` UNIQUE).
 - **Parada por data** (`--since`): coleta do mais novo ao mais antigo e para no piso (issue e artigo).
 - **Re-crawl incremental + delta:** rodar de novo re-visita as fontes e traz **só o que é novo** (para na 1ª página conhecida; nunca re-baixa o que já tem; `--no-refresh` desliga a re-visita). `export`/`busca` mostram só o novo da **última execução** por padrão (`--all` = acervo todo).
-- **Modo agressivo (`--aggressive`):** opt-in que ignora `robots.txt` e finge um navegador real (UA + headers/client-hints) para passar por 403/anti-bot — sem salvar páginas de desafio. Use só onde você tem direito de arquivar.
+- **Modo agressivo (DEFAULT):** ignora `robots.txt` e finge um navegador real (UA + headers/client-hints) para passar por 403/anti-bot — sem salvar páginas de desafio. `--no-aggressive` (ou `CRAWLER_AGGRESSIVE=false`) volta ao modo educado. Use só onde você tem direito de arquivar.
+- **Curadoria por IA do agregador:** cada issue de fonte `index` vira **itens estruturados** (`kind` news/tool/release + seção + o blurb do próprio agregador) extraídos por agentes Flash em paralelo (chunks). O item é **cadastrado já na curadoria** — se o alvo for raso/bloqueado (ferramenta em GitHub, release page…), a informação do agregador fica; o corpo do alvo é **enriquecimento**. Patrocínio/vaga não entram (backstop determinístico além do LLM).
+- **Limpeza por IA antes de salvar:** o conteúdo extraído passa pelo Flash p/ remover sujeira de UI (menus, contadores, subscribe, rodapé) preservando o texto real — com régua anti-truncamento (`sanityCheckCleaned`); rejeitou, mantém o original e registra o motivo.
+- **Verificação pós-cadastro:** varredura paralela dá um veredito `ok|suspect|junk` + notas a CADA artigo salvo (persistidos). `ncrawl verify` re-roda sob demanda.
+- **Trace total + `ncrawl inspect`:** todo estágio (fetch, curadoria, item salvo/ignorado com motivo, limpeza, enriquecimento, verificação) grava na tabela `events`; `inspect` mostra a árvore da run (itens por issue, vereditos, custos por etapa) e `--url <substr>` audita um link específico.
+- **Seletores por IA lendo a página real:** links/conteúdo (Pro) e **data por item** (Flash, par CSS+regex) são derivados do HTML real, validados contra a própria página, cacheados por template de weekly e re-derivados quando quebram (self-healing).
 - **Tags multi-faceta** contra um vocabulário controlado (9 facetas, ~800 tags) e **resumos + títulos em PT-BR**.
 - **Busca na base** em 2 modos: exaustivo (Flash, avalia todo artigo) ou por tags (Pro), devolvendo **Notícias** e **Ferramentas**.
 - **Menu guiado (TUI)** bilíngue PT/EN que monta os parâmetros, mostra o comando equivalente e exibe progresso ao vivo — sem substituir as flags.
@@ -92,9 +101,13 @@ npm run crawl                          # semeia do config e roda até esvaziar a
 npm run crawl -- --max-pages 2 --max-articles 5   # limita custo/tempo (ótimo p/ 1º teste)
 npm run crawl -- --source "AI Weekly"  # semeia só essa fonte (nome exato; ou --only <substr>)
 npm run crawl -- --source "AI Weekly" --since 2026-06-25   # piso de data (veja abaixo)
-npm run crawl -- --aggressive          # ignora robots.txt + UA de navegador real (403/anti-bot)
+npm run crawl -- --no-aggressive       # modo educado (agressivo é o default: robots ignorado + UA real)
 npm run crawl -- --no-refresh          # não re-visita as listagens; só drena a fila pendente
 npm run status                         # contagens de sources/pages/articles/selectors/frontier
+npm run inspect                        # auditoria da última run: itens por issue, vereditos, motivos, custo
+npm run inspect -- --url middy         # linha do tempo de eventos + registros de um link específico
+npm run verify -- --force              # re-verifica todos os artigos (veredito ok|suspect|junk)
+npm run purge -- "Node Weekly" --yes   # apaga os DADOS da fonte (fica cadastrada) p/ refazer do zero
 npm run add -- https://exemplo.com/arquivo --name "Minha" --type index --max-index-pages 1
 npm run export -- --format md          # data/export/<fonte>/*.md — só a última run (--all = tudo; ou --format json)
 npm run summarize                      # resumo + título em PT-BR p/ cada artigo (Flash; idempotente)

@@ -7,7 +7,28 @@ import { Spinner, Alert, Select } from '@inkjs/ui';
 import { html } from './html.js';
 import { t } from './i18n.js';
 import { setLogSink } from '../util.js';
-import { getStatus, getSearchProgress } from '../commands.js';
+import { getStatus, getSearchProgress, getRunTelemetry } from '../commands.js';
+
+// Linha compacta de telemetria do run: RAM/lane só quando o governador tem sinal; US$ sempre
+// que houver gasto ou orçamento. Ex.: `RAM 62% · llm 12/16 fetch 3/8 render 2/8 · US$ 0.42/2.00`.
+function telemetryLine(tele) {
+  if (!tele) return null;
+  const parts = [];
+  const g = tele.governor;
+  if (g?.ram?.totalBytes) {
+    parts.push(`RAM ${g.ram.usedPct}%${g.ram.state !== 'ok' ? ` (${g.ram.state})` : ''}`);
+    const l = g.lanes;
+    parts.push(
+      `llm ${l.llm.active}/${l.llm.capacity} fetch ${l.fetch.active}/${l.fetch.capacity} ` +
+        `render ${l.render.active}/${l.render.capacity}`,
+    );
+  }
+  const b = tele.budget;
+  if (b && (b.spentUsd > 0 || b.budgetUsd > 0)) {
+    parts.push(`US$ ${b.spentUsd.toFixed(2)}${b.budgetUsd > 0 ? `/${b.budgetUsd.toFixed(2)}` : ''}`);
+  }
+  return parts.length ? parts.join(' · ') : null;
+}
 
 const LEVEL_COLOR = { warn: 'yellow', error: 'red', debug: 'gray' };
 const VISIBLE = 12;
@@ -18,6 +39,7 @@ export function RunView({ spec, onDone, onResults }) {
   const [baseline] = useState(() => getStatus());
   const [result, setResult] = useState(null); // { ok, error }
   const [prog, setProg] = useState(null); // progresso da busca (modo A)
+  const [tele, setTele] = useState(null); // governador (RAM/lanes) + orçamento
   const mounted = useRef(true);
   const ring = useRef([]);
 
@@ -34,6 +56,7 @@ export function RunView({ spec, onDone, onResults }) {
       if (!mounted.current) return;
       setStatus(getStatus());
       if (spec.sub === 'search') setProg(getSearchProgress());
+      setTele(getRunTelemetry());
     }, 300);
     Promise.resolve()
       .then(() => spec.thunk())
@@ -77,6 +100,7 @@ export function RunView({ spec, onDone, onResults }) {
         : html`<${Spinner} label=${`${t('running')} (${spec.sub})`} />`}
     </${Box}>
     <${Box} marginY=${1}><${Text} color="cyan">${counters}</${Text}></${Box}>
+    ${telemetryLine(tele) ? html`<${Box}><${Text} dimColor>${telemetryLine(tele)}</${Text}></${Box}>` : null}
     <${Box} flexDirection="column" height=${VISIBLE}>
       ${lines.slice(-VISIBLE).map((l, i) =>
         html`<${Text} key=${i} color=${LEVEL_COLOR[l.level]} wrap="truncate-end">${l.text}</${Text}>`,

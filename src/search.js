@@ -10,6 +10,8 @@ import {
   getFacets, RETRIEVAL_FACETS, buildFacetQueryPrompt, validateFacetTags, isToolByTags,
 } from './taxonomy.js';
 import { SEARCH_FLASH_CONCURRENCY } from './config.js';
+import { stageWindow } from './governor.js';
+import { shouldStop } from './budget.js';
 import { log, warn } from './util.js';
 
 // Progresso global (a busca é efêmera, então getStatus() não se move) — a UI faz poll disto.
@@ -44,15 +46,25 @@ async function runModeA(query, limit) {
   const lim = Number.isFinite(limit) ? limit : -1;
   const rows = stmts.listAllArticlesForSearch.all(lim);
   resetProgress(rows.length);
-  const gate = pLimit(SEARCH_FLASH_CONCURRENCY);
+  // Janela = min(override de env, capacidade atual da lane llm do governador).
+  const gate = pLimit(stageWindow(SEARCH_FLASH_CONCURRENCY));
   const hits = [];
+  let budgetSkipped = 0;
   await Promise.all(
     rows.map((a) =>
       gate(async () => {
+        if (shouldStop()) {
+          budgetSkipped++; // orçamento NÃO pode virar "none" silencioso: conta como não-avaliado
+          return;
+        }
         let rel = { relation: 'none', kind: 'news' };
         try {
           rel = await judgeRelevance({ query, title: a.title, content: a.content });
         } catch (e) {
+          if (e?.code === 'BUDGET_EXCEEDED') {
+            budgetSkipped++;
+            return;
+          }
           warn(`busca[A] ${a.url}: ${e.message}`); // fail-open -> none
         }
         _progress.scanned++;
@@ -67,7 +79,13 @@ async function runModeA(query, limit) {
   );
   hits.sort((x, y) => RANK[x.relation] - RANK[y.relation]); // direct antes de similar (estável)
   const buckets = bucketize(hits, (h) => h.kind === 'tool');
-  return { query, mode: 'A', scanned: rows.length, total: rows.length, relevant: hits.length, buckets };
+  if (budgetSkipped) {
+    warn(`busca A: orçamento atingido — avaliados ${_progress.scanned}/${rows.length} (${budgetSkipped} pulados)`);
+  }
+  return {
+    query, mode: 'A', scanned: _progress.scanned, total: rows.length, relevant: hits.length,
+    skipped: budgetSkipped, buckets,
+  };
 }
 
 async function runModeB(query, limit) {
@@ -80,10 +98,11 @@ async function runModeB(query, limit) {
   }
   const facets = getFacets().filter((f) => RETRIEVAL_FACETS.includes(f.name)); // exatamente 5
   const derived = new Set();
-  const gate = pLimit(5); // 5 Pro em paralelo
+  const gate = pLimit(5); // exatamente 5 facetas -> 5 Pro em paralelo
   await Promise.all(
     facets.map((facet) =>
       gate(async () => {
+        if (shouldStop()) return; // orçamento: faceta não derivada (a união das demais segue)
         try {
           const { system, user } = buildFacetQueryPrompt(facet, query);
           const raw = await mapQueryToFacetTags({ system, user });

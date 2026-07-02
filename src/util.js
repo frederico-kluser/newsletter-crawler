@@ -85,6 +85,16 @@ export function slugify(s) {
   );
 }
 
+/** Fold p/ busca textual local: minúsculas + sem acentos (NFKD). O lower()/LIKE do SQLite só
+ * dobram ASCII, então o buscador web registra isto como função SQL (db.js) e aplica o MESMO
+ * fold à consulta, casando "Época" com "epoca". */
+export function foldText(s) {
+  return String(s ?? '')
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[̀-ͯ]/g, '');
+}
+
 const ts = () => new Date().toISOString();
 
 // Sink opcional de logs: quando setado (ex.: a UI Ink), TODO o output do crawl vai p/ ele em

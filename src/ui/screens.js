@@ -1,15 +1,16 @@
 // Telas do menu guiado. Regra de foco: o Select/TextInput do @inkjs/ui capturam input enquanto
 // montados, então renderizamos UM input por vez (wizard por `step`). onRun emite {sub,flags,rest};
 // o App monta o thunk (a partir de commands.js) e troca p/ a RunView.
-import { useState } from 'react';
-import { Box, Text } from 'ink';
-import { Select, TextInput, Alert, StatusMessage } from '@inkjs/ui';
+import { useState, useEffect, useRef } from 'react';
+import { Box, Text, useInput } from 'ink';
+import { Select, TextInput, Alert, StatusMessage, Spinner } from '@inkjs/ui';
 import { html } from './html.js';
 import { t } from './i18n.js';
 import { buildCommandPreview } from './commandPreview.js';
 import { loadSources, HAS_LLM } from '../config.js';
 import { parseDate } from '../util.js';
 import { getStatus } from '../commands.js';
+import { startWebServer, openBrowser } from '../web.js';
 
 const yesNo = () => [
   { label: t('yes'), value: 'yes' },
@@ -49,6 +50,7 @@ export function Menu({ onSelect }) {
   const options = [
     { label: t('menuCrawl'), value: 'crawl' },
     { label: t('menuSearch'), value: 'search' },
+    { label: t('menuWeb'), value: 'web' },
     { label: t('menuStatus'), value: 'status' },
     { label: t('menuExport'), value: 'export' },
     { label: t('menuClassify'), value: 'classify' },
@@ -58,7 +60,7 @@ export function Menu({ onSelect }) {
     { label: t('menuQuit'), value: 'quit' },
   ];
   return html`<${Box} flexDirection="column">
-    <${Select} options=${options} onChange=${onSelect} visibleOptionCount=${9} />
+    <${Select} options=${options} onChange=${onSelect} visibleOptionCount=${10} />
     <${Box} marginTop=${1}><${Text} dimColor>${t('hintNav')}</${Text}></${Box}>
   </${Box}>`;
 }
@@ -335,6 +337,65 @@ export function AddConfig({ onRun, onBack }) {
     </${Field}>`;
   }
   return html`<${Review} sub="add" flags=${flags} rest=${[url]} onRun=${onRun} onBack=${onBack} />`;
+}
+
+// Buscador web: servidor LONG-RUNNING, então a tela é dona do ciclo de vida (não passa pela
+// RunView, que espera um thunk finito): sobe no mount, fecha no unmount/q/Esc. Só useInput
+// montado na fase "run" (regra do foco: um input por vez).
+function WebRun({ port, onBack }) {
+  const [state, setState] = useState({ phase: 'starting' });
+  const srvRef = useRef(null);
+
+  useEffect(() => {
+    let alive = true;
+    startWebServer({ port, open: true })
+      .then((srv) => {
+        if (!alive) return srv.close(); // desmontou antes de subir
+        srvRef.current = srv;
+        setState({ phase: 'up', url: srv.url });
+      })
+      .catch((e) => alive && setState({ phase: 'error', error: e?.message || String(e) }));
+    return () => {
+      alive = false;
+      srvRef.current?.close();
+      srvRef.current = null;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useInput((input, key) => {
+    if (input === 'q' || key.escape) onBack(); // o cleanup do effect fecha o servidor
+    else if (input === 'o' && state.phase === 'up') openBrowser(state.url);
+  });
+
+  return html`<${Box} flexDirection="column">
+    ${state.phase === 'starting' ? html`<${Spinner} label=${t('webStarting')} />` : null}
+    ${state.phase === 'up'
+      ? html`<${StatusMessage} variant="success">${t('webUp', { url: state.url })}</${StatusMessage}>`
+      : null}
+    ${state.phase === 'error'
+      ? html`<${Alert} variant="error">${t('webFail', { err: state.error })}</${Alert}>`
+      : null}
+    <${Box} marginTop=${1}><${Text} dimColor>${t('webHint')}</${Text}></${Box}>
+  </${Box}>`;
+}
+
+export function WebConfig({ onBack }) {
+  const [step, setStep] = useState('port');
+  const [port, setPort] = useState(undefined);
+  const [err, setErr] = useState(null);
+  if (step === 'port') {
+    return html`<${Field} label=${t('webPortPrompt')} error=${err}>
+      <${TextInput} placeholder="8477" onSubmit=${(val) => {
+        const r = parseIntFlag(val);
+        if (!r.ok) return setErr(t('numInvalid'));
+        setErr(null);
+        setPort(r.value ? Number(r.value) : undefined);
+        setStep('run');
+      }} />
+    </${Field}>`;
+  }
+  return html`<${WebRun} port=${port} onBack=${onBack} />`;
 }
 
 export function ResetConfirm({ onRun, onBack }) {

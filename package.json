@@ -19,6 +19,7 @@
     "classify": "node --env-file-if-exists=.env src/index.js classify",
     "summarize": "node --env-file-if-exists=.env src/index.js summarize",
     "search": "node --env-file-if-exists=.env src/index.js search",
+    "web": "node --env-file-if-exists=.env src/index.js web",
     "key": "node src/index.js key",
     "reset": "node --env-file-if-exists=.env src/index.js reset",
     "test": "node --test",
@@ -42,6 +43,7 @@
     "p-limit": "^7.3.0",
     "playwright": "^1.61.1",
     "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "robots-parser": "^3.0.1",
     "turndown": "^7.2.4",
     "zod": "^4.4.3"

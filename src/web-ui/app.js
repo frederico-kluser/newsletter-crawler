@@ -1,0 +1,549 @@
+// Buscador — app React zero-build: React/ReactDOM chegam como globals (UMD em /vendor) e o
+// htm (tagged templates) faz o papel do JSX, exatamente como na TUI Ink. Strings em PT-BR.
+import htm from '/vendor/htm.js';
+
+const { useState, useEffect, useRef, useCallback, Fragment } = React;
+const html = htm.bind(React.createElement);
+// htm NÃO entende o fragment "nu" <>…</> do JSX (viraria tag '' e o React aborta);
+// fragments aqui são sempre <${Fragment}>…<//>.
+
+const PAGE = 24;
+
+const STR = {
+  brand: 'newsletter-crawler',
+  brandSep: ' · buscador',
+  heroTitle: 'Todos os seus artigos.',
+  heroSub: 'Busque e filtre tudo o que o crawler já arquivou.',
+  searchPlaceholder: 'Buscar por título, resumo ou conteúdo…',
+  clear: 'Limpar busca',
+  segAll: 'Tudo',
+  segNews: 'Notícias',
+  segTools: 'Ferramentas',
+  allSources: 'Todas as fontes',
+  from: 'De',
+  to: 'Até',
+  last7: '7 dias',
+  last30: '30 dias',
+  filters: 'Filtros',
+  clearFilters: 'Limpar filtros',
+  results: (n) => `${n} ${n === 1 ? 'artigo' : 'artigos'}`,
+  loadMore: 'Carregar mais',
+  loading: 'Carregando…',
+  emptyTitle: 'Nenhum artigo encontrado',
+  emptyBody: 'Tente outra busca ou remova alguns filtros.',
+  emptyDbTitle: 'Sua base ainda está vazia',
+  emptyDbBody: 'Rode um crawl para arquivar os primeiros artigos:',
+  errorTitle: 'Algo deu errado',
+  retry: 'Tentar de novo',
+  openOriginal: 'Ler o artigo original',
+  close: 'Fechar',
+  toolBadge: 'Ferramenta',
+  theme: 'Alternar tema claro/escuro',
+  showMore: (n) => `+ ${n} mais`,
+  showLess: 'mostrar menos',
+  noDate: 'sem data',
+};
+
+const FACET_LABEL = {
+  domain: 'Domínio',
+  'content-type': 'Tipo de conteúdo',
+  'topic-technology': 'Tópicos e tecnologias',
+  difficulty: 'Nível',
+  'ecosystem-language': 'Linguagens',
+  'company-vendor-model': 'Empresas e modelos',
+  'framework-library-tool': 'Frameworks, libs e ferramentas',
+  'concept-theme': 'Conceitos e temas',
+  'trending-emerging': 'Tendências',
+};
+
+async function fetchJSON(url, signal) {
+  const r = await fetch(url, { signal });
+  if (!r.ok) {
+    const body = await r.json().catch(() => ({}));
+    throw new Error(body.error || `HTTP ${r.status}`);
+  }
+  return r.json();
+}
+
+function useDebounced(value, ms) {
+  const [v, setV] = useState(value);
+  useEffect(() => {
+    const id = setTimeout(() => setV(value), ms);
+    return () => clearTimeout(id);
+  }, [value, ms]);
+  return v;
+}
+
+const fmtDate = (iso) => {
+  if (!iso) return STR.noDate;
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return STR.noDate;
+  // date-only (YYYY-MM-DD) parseia como meia-noite UTC; formatar no fuso local deslocaria 1 dia
+  const opts = { day: 'numeric', month: 'short', year: 'numeric' };
+  if (/^\d{4}-\d{2}-\d{2}$/.test(String(iso).trim())) opts.timeZone = 'UTC';
+  return d.toLocaleDateString('pt-BR', opts);
+};
+// published_at vem cru do scrape (pode ser imparseável); cai no extracted_at.
+const bestDate = (a) => {
+  const pub = a.published_at && !Number.isNaN(new Date(a.published_at).getTime());
+  return fmtDate(pub ? a.published_at : a.extracted_at);
+};
+const dateOnly = (d) => d.toISOString().slice(0, 10);
+const daysAgo = (n) => dateOnly(new Date(Date.now() - n * 86400000));
+
+// ---- ícones (SVG inline, traço fino estilo SF Symbols) ----
+const Icon = {
+  search: () => html`<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+    <circle cx="7" cy="7" r="5.2" stroke="currentColor" stroke-width="1.5" />
+    <path d="M11 11l3.4 3.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+  </svg>`,
+  sun: () => html`<svg width="17" height="17" viewBox="0 0 17 17" fill="none" aria-hidden="true">
+    <circle cx="8.5" cy="8.5" r="3.4" stroke="currentColor" stroke-width="1.5" />
+    <path d="M8.5 1v2M8.5 14v2M1 8.5h2M14 8.5h2M3.2 3.2l1.4 1.4M12.4 12.4l1.4 1.4M13.8 3.2l-1.4 1.4M4.6 12.4l-1.4 1.4"
+      stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+  </svg>`,
+  moon: () => html`<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+    <path d="M13.8 9.6A6 6 0 116.4 2.2a4.8 4.8 0 007.4 7.4z" stroke="currentColor" stroke-width="1.5"
+      stroke-linejoin="round" />
+  </svg>`,
+  empty: () => html`<svg width="44" height="44" viewBox="0 0 44 44" fill="none" aria-hidden="true">
+    <circle cx="19" cy="19" r="12.5" stroke="currentColor" stroke-width="2" />
+    <path d="M28.5 28.5l8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+    <path d="M14 19h10" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+  </svg>`,
+};
+
+// ---- tema ----
+function currentTheme() {
+  const explicit = document.documentElement.dataset.theme;
+  if (explicit === 'dark' || explicit === 'light') return explicit;
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+
+function ThemeToggle() {
+  const [theme, setTheme] = useState(currentTheme);
+  const flip = () => {
+    const next = currentTheme() === 'dark' ? 'light' : 'dark';
+    document.documentElement.dataset.theme = next;
+    try {
+      localStorage.setItem('nc-theme', next);
+    } catch { /* storage indisponível */ }
+    setTheme(next);
+  };
+  return html`<button className="icon-btn" onClick=${flip} title=${STR.theme} aria-label=${STR.theme}>
+    ${theme === 'dark' ? html`<${Icon.sun} />` : html`<${Icon.moon} />`}
+  </button>`;
+}
+
+// ---- controles ----
+function Segmented({ value, onChange }) {
+  const opts = [
+    ['all', STR.segAll],
+    ['news', STR.segNews],
+    ['tool', STR.segTools],
+  ];
+  return html`<div className="segmented" role="group">
+    ${opts.map(
+      ([v, label]) => html`<button key=${v} aria-pressed=${value === v} onClick=${() => onChange(v)}>
+        ${label}
+      </button>`,
+    )}
+  </div>`;
+}
+
+function FacetGroup({ facet, selected, onToggle }) {
+  const [expanded, setExpanded] = useState(false);
+  const CAP = 14;
+  const tags = expanded ? facet.tags : facet.tags.slice(0, CAP);
+  const hidden = facet.tags.length - CAP;
+  return html`<div className="facet-group">
+    <span className="facet-label">${FACET_LABEL[facet.name] || facet.name}</span>
+    <div className="chip-row">
+      ${tags.map(
+        ({ tag, count }) => html`<button
+          key=${tag}
+          className="chip"
+          aria-pressed=${selected.includes(tag)}
+          onClick=${() => onToggle(facet.name, tag)}
+        >
+          ${tag} <span className="count">${count}</span>
+        </button>`,
+      )}
+      ${hidden > 0 &&
+      html`<button className="chip chip-more" onClick=${() => setExpanded(!expanded)}>
+        ${expanded ? STR.showLess : STR.showMore(hidden)}
+      </button>`}
+    </div>
+  </div>`;
+}
+
+function ArticleCard({ a, onOpen }) {
+  const title = a.title_pt || a.title || a.url;
+  const summary = a.summary_pt || a.snippet || '';
+  const chipTags = [...(a.tags['domain'] || []), ...(a.tags['framework-library-tool'] || [])].slice(0, 2);
+  return html`<button className="card" onClick=${() => onOpen(a.id)}>
+    <span className="eyebrow">
+      ${a.source_name || '—'} <span className="dot">·</span> ${bestDate(a)}
+    </span>
+    <h3>${title}</h3>
+    ${summary && html`<p className="summary">${summary}</p>`}
+    <span className="card-foot">
+      ${a.kind === 'tool' && html`<span className="tag tool">${STR.toolBadge}</span>`}
+      ${chipTags.map((t) => html`<span key=${t} className="tag">${t}</span>`)}
+    </span>
+  </button>`;
+}
+
+function DetailSheet({ id, onClose }) {
+  const [data, setData] = useState(null);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const ac = new AbortController();
+    fetchJSON(`/api/article/${id}`, ac.signal)
+      .then(setData)
+      .catch((e) => e.name !== 'AbortError' && setError(e.message));
+    return () => ac.abort();
+  }, [id]);
+
+  useEffect(() => {
+    const onKey = (e) => e.key === 'Escape' && onClose();
+    window.addEventListener('keydown', onKey);
+    document.body.style.overflow = 'hidden';
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      document.body.style.overflow = '';
+    };
+  }, [onClose]);
+
+  const paragraphs = data
+    ? String(data.content || '')
+        .split(/\n{2,}/)
+        .map((p) => p.trim())
+        .filter(Boolean)
+        .slice(0, 200)
+    : [];
+  const allTags = data ? Object.values(data.tags || {}).flat() : [];
+
+  return html`<div className="overlay" onClick=${(e) => e.target === e.currentTarget && onClose()}>
+    <div className="sheet" role="dialog" aria-modal="true" aria-label=${data ? data.title_pt || data.title : STR.loading}>
+      <button className="close" onClick=${onClose} aria-label=${STR.close}>✕</button>
+      ${!data && !error && html`<div className="sheet-loading"><span className="spinner" /></div>`}
+      ${error && html`<div className="state"><h2>${STR.errorTitle}</h2><p>${error}</p></div>`}
+      ${data &&
+      html`<${Fragment}>
+        <div className="eyebrow">
+          ${data.source_name || '—'} · ${bestDate(data)}
+          ${data.kind === 'tool' ? html` · <span>${STR.toolBadge}</span>` : null}
+        </div>
+        <h2>${data.title_pt || data.title || data.url}</h2>
+        ${data.title_pt && data.title && data.title_pt !== data.title
+          ? html`<div className="eyebrow">${data.title}</div>`
+          : null}
+        ${allTags.length
+          ? html`<div className="tag-cloud">${allTags.map((t) => html`<span key=${t} className="tag">${t}</span>`)}</div>`
+          : null}
+        ${data.summary_pt && html`<p className="lead">${data.summary_pt}</p>`}
+        <hr />
+        <div className="content">
+          ${paragraphs.map((p, i) => html`<p key=${i}>${p}</p>`)}
+        </div>
+        <div className="sheet-actions">
+          <a className="btn-primary" href=${data.url} target="_blank" rel="noopener noreferrer">
+            ${STR.openOriginal} ↗
+          </a>
+        </div>
+      <//>`}
+    </div>
+  </div>`;
+}
+
+// ---- app ----
+function App() {
+  const [meta, setMeta] = useState(null);
+  const [metaError, setMetaError] = useState(null);
+
+  const [q, setQ] = useState('');
+  const dq = useDebounced(q, 250);
+  const [kind, setKind] = useState('all');
+  const [sourceId, setSourceId] = useState('');
+  const [from, setFrom] = useState('');
+  const [to, setTo] = useState('');
+  const [facetSel, setFacetSel] = useState({}); // { faceta: [tags] }
+  const [showFacets, setShowFacets] = useState(false);
+
+  const [items, setItems] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [error, setError] = useState(null);
+  const [detailId, setDetailId] = useState(null);
+
+  const facetKey = JSON.stringify(facetSel);
+  const sentinel = useRef(null);
+  const abortRef = useRef(null);
+
+  const buildQuery = useCallback(
+    (offset) => {
+      const sp = new URLSearchParams();
+      if (dq.trim()) sp.set('q', dq.trim());
+      if (kind !== 'all') sp.set('kind', kind);
+      if (sourceId) sp.set('source', sourceId);
+      if (from) sp.set('from', from);
+      if (to) sp.set('to', to);
+      if (Object.keys(facetSel).length) sp.set('facets', JSON.stringify(facetSel));
+      sp.set('limit', String(PAGE));
+      if (offset) sp.set('offset', String(offset));
+      return `/api/articles?${sp}`;
+    },
+    [dq, kind, sourceId, from, to, facetKey],
+  );
+
+  const loadMeta = useCallback(() => {
+    setMetaError(null);
+    fetchJSON('/api/meta')
+      .then(setMeta)
+      .catch((e) => setMetaError(e.message));
+  }, []);
+  useEffect(loadMeta, [loadMeta]);
+
+  // Recarrega a primeira página a cada mudança de filtro (cancelando a anterior).
+  useEffect(() => {
+    abortRef.current?.abort();
+    const ac = new AbortController();
+    abortRef.current = ac;
+    setLoading(true);
+    setError(null);
+    fetchJSON(buildQuery(0), ac.signal)
+      .then((r) => {
+        setItems(r.items);
+        setTotal(r.total);
+        setLoading(false);
+      })
+      .catch((e) => {
+        if (e.name === 'AbortError') return;
+        setError(e.message);
+        setLoading(false);
+      });
+    return () => ac.abort();
+  }, [buildQuery]);
+
+  const loadMore = useCallback(() => {
+    if (loading || loadingMore || items.length >= total) return;
+    setLoadingMore(true);
+    fetchJSON(buildQuery(items.length))
+      .then((r) => {
+        setItems((cur) => [...cur, ...r.items]);
+        setTotal(r.total);
+        setLoadingMore(false);
+      })
+      .catch(() => setLoadingMore(false));
+  }, [buildQuery, items.length, total, loading, loadingMore]);
+
+  // Scroll infinito: sentinela + IntersectionObserver (o botão continua p/ acessibilidade).
+  useEffect(() => {
+    const el = sentinel.current;
+    if (!el) return;
+    const io = new IntersectionObserver((entries) => entries[0].isIntersecting && loadMore(), {
+      rootMargin: '600px',
+    });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [loadMore]);
+
+  const toggleTag = (facet, tag) => {
+    setFacetSel((cur) => {
+      const list = cur[facet] || [];
+      const next = list.includes(tag) ? list.filter((t) => t !== tag) : [...list, tag];
+      const out = { ...cur, [facet]: next };
+      if (!next.length) delete out[facet];
+      return out;
+    });
+  };
+
+  const activePills = [];
+  if (sourceId && meta) {
+    const s = meta.sources.find((x) => String(x.id) === String(sourceId));
+    if (s) activePills.push({ label: s.name, clear: () => setSourceId('') });
+  }
+  if (from) activePills.push({ label: `${STR.from.toLowerCase()} ${fmtDate(from)}`, clear: () => setFrom('') });
+  if (to) activePills.push({ label: `${STR.to.toLowerCase()} ${fmtDate(to)}`, clear: () => setTo('') });
+  for (const [facet, tags] of Object.entries(facetSel)) {
+    for (const tag of tags) activePills.push({ label: tag, clear: () => toggleTag(facet, tag) });
+  }
+  const nFacetSel = Object.values(facetSel).reduce((n, l) => n + l.length, 0);
+  const hasAnyFilter = Boolean(dq.trim() || kind !== 'all' || activePills.length);
+
+  const clearAll = () => {
+    setQ('');
+    setKind('all');
+    setSourceId('');
+    setFrom('');
+    setTo('');
+    setFacetSel({});
+  };
+
+  const dbEmpty = meta && meta.totals.articles === 0;
+
+  return html`<${Fragment}>
+    <header className="topbar">
+      <div className="container topbar-row">
+        <span className="brand">${STR.brand}<span className="muted">${STR.brandSep}</span></span>
+        <${ThemeToggle} />
+      </div>
+    </header>
+
+    <main className="container">
+      <section className="hero">
+        <h1>${STR.heroTitle}</h1>
+        <p>${STR.heroSub}</p>
+        <div className="searchbar">
+          <${Icon.search} />
+          <input
+            type="search"
+            value=${q}
+            placeholder=${STR.searchPlaceholder}
+            onInput=${(e) => setQ(e.target.value)}
+            aria-label=${STR.searchPlaceholder}
+            autoFocus
+          />
+          ${q && html`<button className="clear" onClick=${() => setQ('')} aria-label=${STR.clear}>✕</button>`}
+        </div>
+        <${Segmented} value=${kind} onChange=${setKind} />
+
+        <div className="filterbar">
+          <select
+            className="control"
+            value=${sourceId}
+            onChange=${(e) => setSourceId(e.target.value)}
+            aria-label=${STR.allSources}
+          >
+            <option value="">${STR.allSources}</option>
+            ${meta &&
+            meta.sources.map(
+              (s) => html`<option key=${s.id} value=${s.id}>${s.name} (${s.count})</option>`,
+            )}
+          </select>
+          <input
+            className="control"
+            type="date"
+            value=${from}
+            max=${to || undefined}
+            onChange=${(e) => setFrom(e.target.value)}
+            aria-label=${STR.from}
+          />
+          <input
+            className="control"
+            type="date"
+            value=${to}
+            min=${from || undefined}
+            onChange=${(e) => setTo(e.target.value)}
+            aria-label=${STR.to}
+          />
+          <button
+            className="control"
+            data-on=${from === daysAgo(7) && !to}
+            onClick=${() => {
+              setFrom(daysAgo(7));
+              setTo('');
+            }}
+          >
+            ${STR.last7}
+          </button>
+          <button
+            className="control"
+            data-on=${from === daysAgo(30) && !to}
+            onClick=${() => {
+              setFrom(daysAgo(30));
+              setTo('');
+            }}
+          >
+            ${STR.last30}
+          </button>
+          ${meta && meta.facets.length
+            ? html`<button
+                className="control"
+                data-on=${showFacets || nFacetSel > 0}
+                onClick=${() => setShowFacets(!showFacets)}
+                aria-expanded=${showFacets}
+              >
+                ${STR.filters} ${nFacetSel > 0 ? html`<span className="badge">${nFacetSel}</span>` : '▾'}
+              </button>`
+            : null}
+        </div>
+
+        ${showFacets &&
+        meta &&
+        html`<div className="facet-panel">
+          ${meta.facets.map(
+            (f) => html`<${FacetGroup}
+              key=${f.name}
+              facet=${f}
+              selected=${facetSel[f.name] || []}
+              onToggle=${toggleTag}
+            />`,
+          )}
+        </div>`}
+
+        ${activePills.length
+          ? html`<div className="active-filters">
+              ${activePills.map(
+                (p, i) => html`<span key=${i} className="pill">
+                  ${p.label}
+                  <button onClick=${p.clear} aria-label="remover ${p.label}">✕</button>
+                </span>`,
+              )}
+              <button className="link-btn" onClick=${clearAll}>${STR.clearFilters}</button>
+            </div>`
+          : null}
+      </section>
+
+      <div className="results-meta" aria-live="polite">
+        ${loading ? html`<span className="spinner" />` : null}
+        ${!loading && !error ? STR.results(total) : null}
+      </div>
+
+      ${metaError || error
+        ? html`<div className="state">
+            <h2>${STR.errorTitle}</h2>
+            <p>${metaError || error}</p>
+            <button className="btn-ghost" onClick=${() => (metaError ? loadMeta() : setQ(q))}>
+              ${STR.retry}
+            </button>
+          </div>`
+        : null}
+
+      ${!loading && !error && items.length === 0
+        ? html`<div className="state">
+            <${Icon.empty} />
+            ${dbEmpty && !hasAnyFilter
+              ? html`<${Fragment}><h2>${STR.emptyDbTitle}</h2>
+                  <p>${STR.emptyDbBody}</p>
+                  <p><code>ncrawl crawl</code></p><//>`
+              : html`<${Fragment}><h2>${STR.emptyTitle}</h2>
+                  <p>${STR.emptyBody}</p>
+                  ${hasAnyFilter
+                    ? html`<button className="btn-ghost" onClick=${clearAll}>${STR.clearFilters}</button>`
+                    : null}<//>`}
+          </div>`
+        : null}
+
+      <div className="grid">
+        ${items.map((a) => html`<${ArticleCard} key=${a.id} a=${a} onOpen=${setDetailId} />`)}
+      </div>
+
+      <div ref=${sentinel}></div>
+      ${items.length < total && !loading
+        ? html`<div className="load-more-wrap">
+            <button className="btn-ghost" onClick=${loadMore}>
+              ${loadingMore ? html`<span className="spinner" />` : null} ${STR.loadMore}
+            </button>
+          </div>`
+        : null}
+    </main>
+
+    ${detailId != null && html`<${DetailSheet} id=${detailId} onClose=${() => setDetailId(null)} />`}
+  <//>`;
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(html`<${App} />`);

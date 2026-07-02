@@ -14,6 +14,7 @@ import { classifyPending } from './classify.js';
 import { summarizePending } from './summarize.js';
 import { runSearch, getSearchProgress } from './search.js';
 import { closeBrowser } from './fetch.js';
+import { startWebServer } from './web.js';
 import { probeOpenRouterKey, upsertEnvVar, maskKey } from './keys.js';
 import { slugify, normalizeUrl, parseDate, log, errorLog } from './util.js';
 
@@ -302,6 +303,28 @@ export async function cmdSearch(rest, flags) {
     }
   }
   return runSearch(query, { mode, limit, yes: flags.yes === true });
+}
+
+// Sobe o buscador web local (React zero-build, filtros sobre a base) e fica no ar até
+// SIGINT/SIGTERM. A TUI NÃO passa por aqui: chama startWebServer direto p/ ser dona do
+// ciclo de vida (parar por tecla, sem sinal).
+export async function cmdWeb(flags) {
+  let port; // undefined = WEB_PORT (config)
+  if (flags.port !== undefined) {
+    port = Number(flags.port);
+    if (flags.port === true || !Number.isInteger(port) || port < 0 || port > 65535) {
+      errorLog(`--port inválido: ${flags.port} (use 0–65535; 0 = porta efêmera)`);
+      process.exit(1);
+    }
+  }
+  const srv = await startWebServer({ port, open: flags['no-open'] !== true });
+  log('Ctrl+C encerra o buscador.');
+  await new Promise((resolve) => {
+    process.once('SIGINT', resolve);
+    process.once('SIGTERM', resolve);
+  });
+  log('encerrando o buscador web…');
+  await srv.close();
 }
 
 // Gerência da chave OpenRouter. `key set <chave>` valida (probe) e grava em NC_HOME/.env; `key test`

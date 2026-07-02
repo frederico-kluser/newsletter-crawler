@@ -193,6 +193,12 @@ export const SUMMARIZE_MAX_CHARS = Number(process.env.SUMMARIZE_MAX_CHARS || 120
 // Hook pós-crawl: gera os resumos ao fim do crawl (desligue com =false ou --no-summarize).
 export const SUMMARIZE_AFTER_CRAWL = process.env.SUMMARIZE_AFTER_CRAWL !== 'false';
 
+// ---- buscador web (`ncrawl web`) ----
+// Servidor local do buscador React (zero-build). Só escuta em loopback por padrão: a base é
+// pessoal e a API não tem auth — exponha em rede consciente via NC_WEB_HOST.
+export const WEB_PORT = Number(process.env.NC_WEB_PORT || 8477);
+export const WEB_HOST = process.env.NC_WEB_HOST || '127.0.0.1';
+
 // ---- busca na base ----
 // Modo A (exaustivo): 50 chamadas Flash simultâneas julgando CADA artigo vs a consulta.
 export const SEARCH_FLASH_CONCURRENCY = Number(process.env.SEARCH_FLASH_CONCURRENCY || 50);

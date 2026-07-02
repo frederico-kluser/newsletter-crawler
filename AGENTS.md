@@ -16,6 +16,7 @@ Single source of truth for agents working in this repo. Keep it short; scoped de
 - run (bounded): `npm run crawl -- --max-pages 1 --max-articles 3`
 - summaries (PT-BR): `npm run summarize` (gera title_pt/summary_pt; auto pós-crawl). Tags: `npm run classify`.
 - search: `npm run search -- <consulta> --mode B` (por tags, 5 Pro) ou `--mode A --limit N --yes` (Flash, varre tudo).
+- web UI (buscador): `npm run web` (ou `ncrawl web [--port N] [--no-open]`) — servidor local zero-build (React UMD + htm de node_modules, API JSON sobre o SQLite) em `http://localhost:8477`; filtros por texto/fonte/faceta/período/kind, dark+light.
 - add source: `npm run add -- <url> --name "..." [--type index|listing]` (persiste em config/sources.json). export: `npm run export -- --format md`. reset: `npm run reset -- --yes` (apaga tudo).
 - skills lint/eval: `node .agents/skills/scripts/skill-lint.mjs --all` / `node .agents/skills/scripts/skill-eval.mjs --all`
 - (no linter / type-checker configured yet — see project-analysis.md)

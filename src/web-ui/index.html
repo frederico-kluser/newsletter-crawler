@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light dark" />
+  <title>Buscador · newsletter-crawler</title>
+  <link rel="stylesheet" href="/assets/styles.css" />
+  <script>
+    // Aplica o tema salvo ANTES do primeiro paint (evita flash claro/escuro).
+    // Sem escolha salva: segue o sistema (prefers-color-scheme, via CSS).
+    try {
+      var t = localStorage.getItem('nc-theme');
+      if (t === 'dark' || t === 'light') document.documentElement.dataset.theme = t;
+    } catch (e) { /* storage indisponível: segue o sistema */ }
+  </script>
+  <!-- React UMD (globals) roda antes do módulo: defer clássico e module executam em ordem de documento. -->
+  <script src="/vendor/react.js" defer></script>
+  <script src="/vendor/react-dom.js" defer></script>
+  <script type="module" src="/assets/app.js"></script>
+</head>
+<body>
+  <div id="root"></div>
+</body>
+</html>

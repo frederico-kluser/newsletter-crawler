@@ -3,12 +3,25 @@ import Database from 'better-sqlite3';
 import { mkdirSync } from 'node:fs';
 import path from 'node:path';
 import { DB_PATH } from './config.js';
+import { foldText, parseDate } from './util.js';
 
 mkdirSync(path.dirname(DB_PATH), { recursive: true });
 
 export const db = new Database(DB_PATH);
 db.pragma('journal_mode = WAL');
 db.pragma('foreign_keys = ON');
+
+// Busca do buscador web case/acento-insensível de verdade: o lower()/LIKE nativos só dobram
+// ASCII. O chamador aplica o MESMO foldText à consulta (util.js é a única fonte do fold).
+db.function('fold', { deterministic: true }, (s) => foldText(s));
+
+// published_at é string CRUA do scrape (nem sempre ISO — ex.: "June 18, 2026"), e o date() do
+// SQLite só entende ISO (senão NULL). iso_date normaliza via o MESMO parseDate do crawler p/
+// YYYY-MM-DD, permitindo ordenar e filtrar período em SQL; inparseável -> NULL (cai no fallback).
+db.function('iso_date', { deterministic: true }, (s) => {
+  const d = parseDate(s);
+  return d ? d.toISOString().slice(0, 10) : null;
+});
 
 db.exec(`
 CREATE TABLE IF NOT EXISTS sources (
@@ -122,6 +135,37 @@ ensureColumn('articles', 'summary_pt', 'summary_pt TEXT');
   }
 }
 
+// WHERE compartilhado do buscador web (`ncrawl web`): filtros combináveis via params ANULÁVEIS
+// (NULL = filtro desligado), p/ manter UM prepared statement em vez de SQL dinâmico.
+// - @q: consulta já passada por foldText (a função SQL fold dobra o texto dos artigos igual).
+// - @facets: objeto JSON {faceta:[tags]} — OR dentro da faceta, AND entre facetas: json_each no
+//   objeto dá (key=faceta, value=array); "NOT EXISTS(faceta sem tag casando)" = todas casam.
+// - @kind: 'tool'|'news' — mesma semântica de isToolByTags (taxonomy.js): ferramenta = tag da
+//   faceta framework-library-tool OU content-type ∈ @toolTypes (JSON, vem de TOOL_CONTENT_TYPES).
+//   A igualdade booleana `(@kind='tool') = EXISTS(...)` cobre os dois lados (news = NÃO-ferramenta).
+const WEB_WHERE = `
+  WHERE (@q IS NULL OR instr(
+          fold(coalesce(a.title,'') || ' ' || coalesce(a.title_pt,'') || ' ' ||
+               coalesce(a.summary_pt,'') || ' ' || coalesce(a.content,'')), @q) > 0)
+    AND (@sourceId IS NULL OR a.source_id = @sourceId)
+    AND (@from IS NULL OR coalesce(iso_date(a.published_at), date(a.extracted_at)) >= @from)
+    AND (@to IS NULL OR coalesce(iso_date(a.published_at), date(a.extracted_at)) <= @to)
+    AND (@facets IS NULL OR NOT EXISTS (
+          SELECT 1 FROM json_each(@facets) f
+          WHERE NOT EXISTS (
+            SELECT 1 FROM article_tags at
+             WHERE at.article_id = a.id AND at.facet = f.key
+               AND at.tag IN (SELECT value FROM json_each(f.value))
+          )
+        ))
+    AND (@kind IS NULL OR (@kind = 'tool') = EXISTS (
+          SELECT 1 FROM article_tags tk
+           WHERE tk.article_id = a.id
+             AND (tk.facet = 'framework-library-tool'
+                  OR (tk.facet = 'content-type'
+                      AND tk.tag IN (SELECT value FROM json_each(@toolTypes))))
+        ))`;
+
 export const stmts = {
   // sources
   upsertSource: db.prepare(
@@ -175,6 +219,38 @@ export const stmts = {
       GROUP BY a.id
       ORDER BY matches DESC
       LIMIT @limit`,
+  ),
+
+  // buscador web (ncrawl web): página filtrada + count com o MESMO WHERE (params anuláveis)
+  webSearchArticles: db.prepare(
+    `SELECT a.id, a.url, a.title, a.title_pt, a.summary_pt, a.published_at, a.extracted_at,
+            a.source_id, s.name AS source_name,
+            substr(coalesce(a.content, ''), 1, 280) AS snippet
+       FROM articles a
+       LEFT JOIN sources s ON s.id = a.source_id
+     ${WEB_WHERE}
+      ORDER BY coalesce(iso_date(a.published_at), date(a.extracted_at)) DESC, a.id DESC
+      LIMIT @limit OFFSET @offset`,
+  ),
+  webCountArticles: db.prepare(`SELECT COUNT(*) c FROM articles a ${WEB_WHERE}`),
+  webGetArticle: db.prepare(
+    `SELECT a.*, s.name AS source_name
+       FROM articles a LEFT JOIN sources s ON s.id = a.source_id
+      WHERE a.id = ?`,
+  ),
+  webMetaSources: db.prepare(
+    `SELECT s.id, s.name, s.base_url, COUNT(a.id) AS c
+       FROM sources s LEFT JOIN articles a ON a.source_id = s.id
+      GROUP BY s.id
+      ORDER BY c DESC, s.name`,
+  ),
+  webMetaTags: db.prepare(
+    `SELECT facet, tag, COUNT(*) AS c FROM article_tags GROUP BY facet, tag ORDER BY facet, c DESC, tag`,
+  ),
+  webMetaDates: db.prepare(
+    `SELECT min(coalesce(iso_date(published_at), date(extracted_at))) AS min_d,
+            max(coalesce(iso_date(published_at), date(extracted_at))) AS max_d
+       FROM articles`,
   ),
 
   // selectors

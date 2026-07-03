@@ -15,8 +15,9 @@ import { getStatus, getSearchProgress, getRunTelemetry } from '../commands.js';
 import { subscribeRunEvents, emitRunEvent, bumpWarnCount } from '../run-events.js';
 import { CrawlDashboard } from './CrawlDashboard.js';
 import { telemetryLine, budgetStageLine } from './runLines.js';
+import { colors } from './theme.js';
 
-const LEVEL_COLOR = { warn: 'yellow', error: 'red', debug: 'gray' };
+const LEVEL_COLOR = { warn: colors.warn, error: colors.err, debug: colors.muted };
 const VISIBLE = 12;
 
 export function RunView({ spec, onDone, onResults }) {
@@ -148,7 +149,7 @@ export function RunView({ spec, onDone, onResults }) {
           }</${Alert}>`
         : html`<${Spinner} label=${`${t('running')} (${spec.sub})`} />`}
     </${Box}>
-    <${Box} marginY=${1}><${Text} color="cyan">${counters}</${Text}></${Box}>
+    <${Box} marginY=${1}><${Text} color=${colors.accent}>${counters}</${Text}></${Box}>
     ${telemetryLine(tele) ? html`<${Box}><${Text} dimColor>${telemetryLine(tele)}</${Text}></${Box}>` : null}
     ${budgetStageLine(tele) ? html`<${Box}><${Text} dimColor>${budgetStageLine(tele)}</${Text}></${Box}>` : null}
     <${Box} flexDirection="column" height=${VISIBLE}>

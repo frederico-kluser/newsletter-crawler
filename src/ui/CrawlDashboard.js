@@ -3,44 +3,32 @@
 // eventos e um rodapé. Tudo derivado do snapshot vivo (props) — o componente só pinta. Recebe dados
 // por PROPS (testável sem DB/Ink real). UM único timer de animação (useSpinnerFrame) alimenta todos
 // os glifos ativos; o RunView faz o poll de dados. Glifos carregam o estado (canal redundante p/ NO_COLOR).
-import { useState, useEffect } from 'react';
 import { Box, Text, useStdout } from 'ink';
 import { Badge, ProgressBar } from '@inkjs/ui';
 import { html } from './html.js';
 import { t } from './i18n.js';
 import { derivePhases, deriveBadge } from './crawlPhases.js';
 import { telemetryLine, budgetStageLine, progressDateLine, nowStagesLine } from './runLines.js';
+import { colors, glyphs } from './theme.js';
+import { useSpinnerFrame } from './hooks.js';
+import { Panel, FooterHints } from './widgets.js';
 
-const FRAMES = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
 const clamp = (lo, x, hi) => Math.max(lo, Math.min(hi, x));
 
-// Um só intervalo p/ toda a animação do painel (nunca N <Spinner>s do @inkjs/ui, cada um com o
-// próprio timer → dessincronia/flicker; o Ink já redesenha a árvore viva inteira a cada state change).
-function useSpinnerFrame(active) {
-  const [i, setI] = useState(0);
-  useEffect(() => {
-    if (!active) return undefined;
-    const id = setInterval(() => setI((n) => (n + 1) % FRAMES.length), 150);
-    id.unref?.(); // animação NUNCA segura o processo vivo (o Ink já mantém o loop enquanto renderiza)
-    return () => clearInterval(id);
-  }, [active]);
-  return FRAMES[i];
-}
-
-const STATE_COLOR = { done: 'green', active: 'cyan', idle: 'gray', error: 'red' };
+const STATE_COLOR = { done: colors.ok, active: colors.accent, idle: colors.muted, error: colors.err };
 function stateGlyph(state, frame) {
-  if (state === 'done') return '✓';
-  if (state === 'error') return '✗';
+  if (state === 'done') return glyphs.tick;
+  if (state === 'error') return glyphs.cross;
   if (state === 'active') return frame;
-  return '·';
+  return glyphs.idle;
 }
 
 const BADGE = {
-  preparando: { color: 'blue', key: 'badgePreparando' },
-  coletando: { color: 'cyan', key: 'badgeColetando' },
-  finalizando: { color: 'yellow', key: 'badgeFinalizando' },
-  done: { color: 'green', key: 'done' },
-  failed: { color: 'red', key: 'failed' },
+  preparando: { color: colors.link, key: 'badgePreparando' },
+  coletando: { color: colors.accent, key: 'badgeColetando' },
+  finalizando: { color: colors.warn, key: 'badgeFinalizando' },
+  done: { color: colors.ok, key: 'done' },
+  failed: { color: colors.err, key: 'failed' },
 };
 
 const KIND_ICON = {
@@ -57,8 +45,8 @@ const KIND_ICON = {
   'run-summary': '★',
   error: '✗',
 };
-const LEVEL_COLOR = { info: undefined, success: 'green', warn: 'yellow', error: 'red' };
-const RAW_COLOR = { warn: 'yellow', error: 'red', debug: 'gray' };
+const LEVEL_COLOR = { info: undefined, success: colors.ok, warn: colors.warn, error: colors.err };
+const RAW_COLOR = { warn: colors.warn, error: colors.err, debug: colors.muted };
 
 function fmtElapsed(ms) {
   const s = Math.max(0, Math.floor(ms / 1000));
@@ -125,15 +113,15 @@ export function CrawlDashboard({ status, tele, feed = [], ticker = null, warnCou
   const stageLine = budgetStageLine(tele);
 
   const ruleLabel = t('eventsLabel');
-  const ruleHead = `─ ${ruleLabel} `;
-  const rule = ruleHead + '─'.repeat(clamp(0, cols - ruleHead.length - 2, 200));
+  const ruleHead = `${glyphs.rule} ${ruleLabel} `;
+  const rule = ruleHead + glyphs.rule.repeat(clamp(0, cols - ruleHead.length - 2, 200));
 
   return html`<${Box} flexDirection="column">
     <${Box}>
-      <${Text} bold color="magenta">◆ ${t('crawlRunTitle')} </${Text}>
+      <${Text} bold color=${colors.title}>${glyphs.app} ${t('crawlRunTitle')} </${Text}>
       <${Badge} color=${badge.color}>${t(badge.key)}</${Badge}>
-      <${Text} dimColor> · ⏱ ${fmtElapsed(elapsedMs)}</${Text}>
-      ${running ? html`<${Text} color="cyan"> ${frame}</${Text}>` : null}
+      <${Text} dimColor> · ${glyphs.clock} ${fmtElapsed(elapsedMs)}</${Text}>
+      ${running ? html`<${Text} color=${colors.accent}> ${frame}</${Text}>` : null}
     </${Box}>
 
     <${Box} flexDirection="column" marginTop=${1}>
@@ -142,12 +130,12 @@ export function CrawlDashboard({ status, tele, feed = [], ticker = null, warnCou
 
     ${ticker
       ? html`<${Box} marginTop=${1}>
-          <${Text} color="green">✔ ${t('savedLabel')}: </${Text}>
+          <${Text} color=${colors.ok}>${glyphs.saved} ${t('savedLabel')}: </${Text}>
           <${Text} wrap="truncate-end">${ticker.detail || ''}</${Text}>
         </${Box}>`
       : null}
-    ${nowLine ? html`<${Box}><${Text} color="green">${nowLine}</${Text}></${Box}>` : null}
-    ${!tight && dateLine ? html`<${Box}><${Text} color="magenta">${dateLine}</${Text}></${Box}>` : null}
+    ${nowLine ? html`<${Box}><${Text} color=${colors.ok}>${nowLine}</${Text}></${Box}>` : null}
+    ${!tight && dateLine ? html`<${Box}><${Text} color=${colors.title}>${dateLine}</${Text}></${Box}>` : null}
     ${!tight && telLine ? html`<${Box}><${Text} dimColor>${telLine}</${Text}></${Box}>` : null}
     ${!tight && stageLine ? html`<${Box}><${Text} dimColor>${stageLine}</${Text}></${Box}>` : null}
 
@@ -160,18 +148,20 @@ export function CrawlDashboard({ status, tele, feed = [], ticker = null, warnCou
 
     <${Box} marginTop=${1}>
       ${warnCount > 0
-        ? html`<${Text} color="yellow">⚠ ${warnCount} ${t('warnsInternal')} · </${Text}>`
+        ? html`<${Text} color=${colors.warn}>${glyphs.warn} ${warnCount} ${t('warnsInternal')} · </${Text}>`
         : null}
-      <${Text} dimColor>${t('footerKeys')}</${Text}>
+      <${FooterHints} inline hints=${[
+        { k: 'v', label: t('hint_details') },
+        { k: 'q', label: t('hint_quit') },
+      ]} />
     </${Box}>
 
     ${verbose
-      ? html`<${Box} flexDirection="column" marginTop=${1} borderStyle="round" borderColor="gray" paddingX=${1}>
-          <${Text} dimColor>${t('verboseTitle')}</${Text}>
+      ? html`<${Panel} title=${t('verboseTitle')} marginTop=${1}>
           ${(rawLines.length ? rawLines.slice(-(feedHeight + 4)) : [{ level: 'log', text: t('verboseEmpty') }]).map(
             (l, i) => html`<${Text} key=${i} color=${RAW_COLOR[l.level]} wrap="truncate-end">${l.text}</${Text}>`,
           )}
-        </${Box}>`
+        </${Panel}>`
       : null}
   </${Box}>`;
 }

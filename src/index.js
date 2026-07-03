@@ -40,7 +40,7 @@ function printHelp() {
       'newsletter-crawler — uso:',
       '  node src/index.js                 menu guiado (terminal interativo)  [npm start]',
       '  node src/index.js ui | menu       abre o menu guiado                  [npm run ui]',
-      '  node src/index.js crawl [--source "Nome" | --only <substr>] [--since <data>]',
+      '  node src/index.js crawl [--sources "A,B" | --source "Nome" | --only <substr>] [--since <data>]',
       '                          [--max-pages N] [--max-articles N] [--no-aggressive] [--no-refresh]',
       '                          [--no-classify] [--no-summarize] [--no-verify] [--budget USD] [--parallel N]',
       '                          modo agressivo é o DEFAULT (ignora robots.txt + UA de navegador real);',

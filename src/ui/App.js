@@ -1,6 +1,6 @@
 // Raiz da UI: barra de status no topo + roteamento de telas. Monta o thunk do comando escolhido
 // (a partir de commands.js) e entrega à RunView. Sem hotkeys globais — navega por Select/onChange.
-import { useState } from 'react';
+import { useState, Fragment } from 'react';
 import { Box, Text, useApp } from 'ink';
 import { Badge } from '@inkjs/ui';
 import { html } from './html.js';
@@ -32,6 +32,12 @@ function StatusBar() {
   const s = getStatus();
   const f = s.frontier;
   const gap = html`<${Text}> </${Text}>`;
+  // "Falta terminar", separando o que precisa de Coletar (na fila = ainda não baixado) do que
+  // precisa de Finalizar (já salvo, sem tags/resumo). Cada badge só aparece quando > 0.
+  const pend = [];
+  if (f.pending > 0) pend.push([`${f.pending} ${t('queued')}`, 'yellow']);
+  if (s.pendingClassif > 0) pend.push([`${s.pendingClassif} ${t('noTags')}`, 'magenta']);
+  if (s.pendingSummary > 0) pend.push([`${s.pendingSummary} ${t('noSummary')}`, 'magenta']);
   return html`<${Box} flexDirection="column" marginBottom=${1}>
     <${Box}>
       <${Text} bold color="magenta">${t('title')} </${Text}>
@@ -40,8 +46,14 @@ function StatusBar() {
     <${Box} marginTop=${1}>
       <${Badge} color="green">${`${s.articles} ${t('articles')}`}</${Badge}>${gap}
       <${Badge} color="blue">${`${s.sources} ${t('sources')}`}</${Badge}>${gap}
-      <${Badge} color="yellow">${`${f.pending} ${t('frontier')}`}</${Badge}>${gap}
       <${Badge} color="cyan">${`${s.classified} ${t('classif')}`}</${Badge}>
+    </${Box}>
+    <${Box} marginTop=${1}>
+      <${Text} bold>${t('pendingLabel')}: </${Text}>
+      ${pend.length
+        ? pend.map(([label, color], i) =>
+            html`<${Fragment} key=${i}><${Badge} color=${color}>${label}</${Badge}>${gap}</${Fragment}>`)
+        : html`<${Text} color="green">${t('allProcessed')}</${Text}>`}
     </${Box}>
   </${Box}>`;
 }

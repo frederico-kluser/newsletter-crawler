@@ -1,7 +1,7 @@
 // Telas do menu guiado. Regra de foco: o Select/TextInput do @inkjs/ui capturam input enquanto
 // montados, então renderizamos UM input por vez (wizard por `step`). onRun emite {sub,flags,rest};
 // o App monta o thunk (a partir de commands.js) e troca p/ a RunView.
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, Fragment } from 'react';
 import { Box, Text, useInput } from 'ink';
 import { Select, TextInput, Alert, StatusMessage, Spinner } from '@inkjs/ui';
 import { html } from './html.js';
@@ -51,15 +51,23 @@ function Field({ label, error, children }) {
 }
 
 export function Menu({ onSelect }) {
+  // Anota Coletar (fila = ainda NÃO baixado) e Finalizar (sem tags/resumo = já salvo) com o quanto
+  // falta — as duas contagens que respondem "termine de onde parou". O suffix some quando é zero.
+  const s = getStatus();
+  const crawlSuffix = s.frontier.pending > 0 ? ` — ${s.frontier.pending} ${t('queued')}` : '';
+  const finishSuffix =
+    s.pendingClassif > 0 || s.pendingSummary > 0
+      ? ` — ${s.pendingClassif} ${t('noTags')} · ${s.pendingSummary} ${t('noSummary')}`
+      : '';
   const options = [
-    { label: t('menuCrawl'), value: 'crawl' },
+    { label: t('menuCrawl') + crawlSuffix, value: 'crawl' },
     { label: t('menuSearch'), value: 'search' },
     { label: t('menuWeb'), value: 'web' },
     { label: t('menuStatus'), value: 'status' },
     { label: t('menuExport'), value: 'export' },
     { label: t('menuClassify'), value: 'classify' },
     { label: t('menuSummarize'), value: 'summarize' },
-    { label: t('menuFinish'), value: 'finish' },
+    { label: t('menuFinish') + finishSuffix, value: 'finish' },
     { label: t('menuAdd'), value: 'add' },
     { label: t('menuLimits'), value: 'limits' },
     { label: t('menuReset'), value: 'reset' },
@@ -90,6 +98,19 @@ export function StatusScreen({ status: initial, onBack }) {
       ${row(`${t('selectors')}:`, status.selectors)}
       ${row(`${t('classif')}:`, `done=${status.classified} pending=${status.pendingClassif}`)}
       ${row(`${t('frontier')}:`, `pending=${f.pending} in_progress=${f.in_progress} done=${f.done} failed=${f.failed}`)}
+    </${Box}>
+    <${Box} flexDirection="column" marginBottom=${1}>
+      <${Text} bold>${t('pendingLabel')}:</${Text}>
+      ${f.pending > 0 || status.pendingClassif > 0 || status.pendingSummary > 0
+        ? html`<${Fragment}>
+            ${f.pending > 0
+              ? html`<${Text} color="yellow">  ${f.pending} ${t('queued')} — ${t('runCrawl')}</${Text}>`
+              : null}
+            ${status.pendingClassif > 0 || status.pendingSummary > 0
+              ? html`<${Text} color="magenta">  ${status.pendingClassif} ${t('noTags')} · ${status.pendingSummary} ${t('noSummary')} — ${t('runFinish')}</${Text}>`
+              : null}
+          </${Fragment}>`
+        : html`<${Text} color="green">  ${t('allProcessed')}</${Text}>`}
     </${Box}>
     <${Select} options=${[{ label: t('back'), value: 'back' }]} onChange=${onBack} />
   </${Box}>`;

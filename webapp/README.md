@@ -69,9 +69,16 @@ os `/data/*.json` já comprimidos (gzip/brotli) — o snapshot completo fica em 
 
 ## Atualizar o acervo depois de publicado
 
+Com o projeto Vercel conectado ao repo (caminho 2 acima), o fluxo é automático:
+
 1. Rode um crawl no CLI como de costume (ele já resume + classifica; ou `ncrawl finish` p/ terminar pendentes).
-2. `ncrawl export --format web` (regenera o snapshot).
-3. `git add webapp/public/data && git commit && git push`.
+2. `git push` na main. O hook versionado `.githooks/pre-push` (instalado por `npm install` do repo
+   raiz) re-exporta o snapshot do banco local e, se houver dado novo, commita `webapp/public/data`
+   e **interrompe o push** — repita o `git push` e a Vercel publica sozinha.
+
+O hook é fail-open: sem banco local ele não bloqueia nem commita nada (e nunca auto-commita um
+snapshot com MENOS artigos que o publicado — proteção contra máquina sem o banco). Manualmente,
+o equivalente segue sendo `ncrawl export --format web && git add webapp/public/data && git commit && git push`.
 
 No caminho **2** (GitHub), o push já redeploya. Nos caminhos 1/3, rode o deploy de novo.
 

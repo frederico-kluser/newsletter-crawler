@@ -1,9 +1,17 @@
+import { useEffect } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { fades, springs } from '../motion/transitions.js';
 import { STR, fmtUsd } from '../strings.js';
 
 /** Guard de custo da busca IA: mostra escopo, nº de chamadas e ~US$ antes de gastar. */
 export default function ConfirmDialog({ info, onConfirm, onCancel }) {
+  useEffect(() => {
+    if (!info) return undefined;
+    const onKey = (e) => e.key === 'Escape' && onCancel();
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [info, onCancel]);
+
   return (
     <AnimatePresence>
       {info && (

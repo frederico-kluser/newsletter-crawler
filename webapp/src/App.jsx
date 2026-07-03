@@ -2,6 +2,7 @@ import { useEffect, useMemo, useReducer, useState } from 'react';
 import { AnimatePresence, useMotionValueEvent, useScroll } from 'motion/react';
 import TopBar from './components/TopBar.jsx';
 import CostBadge from './components/CostBadge.jsx';
+import KeyButton from './components/KeyButton.jsx';
 import SearchBar from './components/SearchBar.jsx';
 import Segmented from './components/Segmented.jsx';
 import Sidebar from './components/Sidebar.jsx';
@@ -21,7 +22,9 @@ import { useSnapshot } from './hooks/useSnapshot.js';
 import { useAiSearch } from './hooks/useAiSearch.js';
 import { useVisibleCount } from './hooks/useVisibleCount.js';
 import { useMediaQuery } from './hooks/useMediaQuery.js';
+import { useDebouncedValue } from './hooks/useDebouncedValue.js';
 import { EMPTY_FILTERS, applyFilters, countActiveFilters, sortForDisplay } from './lib/filters.js';
+import { searchText } from './lib/textSearch.js';
 import { KIND_LABEL, STR } from './strings.js';
 import './styles/app.css';
 
@@ -56,8 +59,17 @@ export default function App() {
   const [filters, dispatch] = useReducer(filtersReducer, { ...EMPTY_FILTERS });
   const [detailId, setDetailId] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [textInput, setTextInput] = useState('');
+  const textQuery = useDebouncedValue(textInput, 180);
   const isDesktop = useMediaQuery('(min-width: 900px)');
   const ai = useAiSearch({ articles, meta, filters });
+
+  // Digitar filtra LOCALMENTE (sem chave). Se havia um resultado de IA na tela, editar o texto
+  // volta ao modo local (a IA é re-disparada só pelo botão) — evita confusão de dois modos.
+  const onTextChange = (v) => {
+    setTextInput(v);
+    if (ai.phase === 'done' || ai.phase === 'error') ai.clear();
+  };
 
   // topbar ganha borda ao rolar (sinal via MotionValue; a camada anima só opacity/transform)
   const { scrollY } = useScroll();
@@ -65,9 +77,10 @@ export default function App() {
   useMotionValueEvent(scrollY, 'change', (v) => setScrolled(v > 8));
 
   const toolTypes = meta?.toolContentTypes || [];
+  // Browse = filtros estruturados (sidebar) + busca textual LOCAL (o "search sem inteligência").
   const filtered = useMemo(
-    () => (articles ? sortForDisplay(applyFilters(articles, filters, toolTypes)) : []),
-    [articles, filters, toolTypes],
+    () => (articles ? sortForDisplay(searchText(applyFilters(articles, filters, toolTypes), textQuery)) : []),
+    [articles, filters, toolTypes, textQuery],
   );
 
   // modo IA: hits decorados com a ficha do snapshot; Segmented filtra pelo kind do JUIZ
@@ -96,8 +109,8 @@ export default function App() {
 
   const displayItems = aiShown ? aiShown.map((x) => x.article) : filtered;
   const resetKey = useMemo(
-    () => JSON.stringify(filters) + (aiActive ? `|ai:${ai.result.query}:${ai.result.hits.length}` : ''),
-    [filters, aiActive, ai.result],
+    () => JSON.stringify(filters) + `|q:${textQuery}` + (aiActive ? `|ai:${ai.result.query}:${ai.result.hits.length}` : ''),
+    [filters, textQuery, aiActive, ai.result],
   );
   const visible = useVisibleCount(displayItems.length, resetKey);
   const nActive = countActiveFilters(filters);
@@ -109,9 +122,24 @@ export default function App() {
         theme={theme}
         onToggleTheme={toggle}
         scrolled={scrolled}
-        right={meta ? <CostBadge baseUsd={meta.cost.totalUsd} sessionUsd={ai.sessionUsd} /> : null}
+        right={
+          meta ? (
+            <>
+              <KeyButton hasKey={ai.hasKey} onClick={ai.openKeyModal} />
+              <CostBadge baseUsd={meta.cost.totalUsd} sessionUsd={ai.sessionUsd} />
+            </>
+          ) : null
+        }
       >
-        {meta && <SearchBar onSubmit={ai.submit} busy={ai.phase === 'running'} />}
+        {meta && (
+          <SearchBar
+            text={textInput}
+            onTextChange={onTextChange}
+            onAiSearch={(deep) => ai.submit(textInput, deep)}
+            aiBusy={ai.phase === 'running'}
+            hasKey={ai.hasKey}
+          />
+        )}
       </TopBar>
 
       {error ? (
@@ -217,7 +245,7 @@ export default function App() {
       <ConfirmDialog info={ai.confirmInfo} onConfirm={ai.confirm} onCancel={ai.cancelConfirm} />
       <KeyModal
         modal={ai.keyModal}
-        hasStoredKey={ai.hasStoredKey}
+        hasStoredKey={ai.hasKey}
         onSave={ai.saveKey}
         onDismiss={ai.dismissKey}
         onForget={ai.forgetKey}

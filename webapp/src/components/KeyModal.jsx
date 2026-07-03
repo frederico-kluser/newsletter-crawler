@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { fades, springs } from '../motion/transitions.js';
 import { STR } from '../strings.js';
@@ -11,6 +11,13 @@ export default function KeyModal({ modal, hasStoredKey, onSave, onDismiss, onFor
   const [value, setValue] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (!modal) return undefined;
+    const onKey = (e) => e.key === 'Escape' && onDismiss();
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [modal, onDismiss]);
 
   const save = async () => {
     setBusy(true);
@@ -47,9 +54,9 @@ export default function KeyModal({ modal, hasStoredKey, onSave, onDismiss, onFor
             exit={{ opacity: 0, scale: 0.95, y: 6 }}
             transition={springs.snappy}
           >
-            <h2 className="dialog-title">{STR.keyTitle}</h2>
+            <h2 className="dialog-title">{modal.reason === 'manage' ? STR.keyManageTitle : STR.keyTitle}</h2>
             {modal.reason === 'invalid' && <p className="dialog-warn">{STR.keyExpired}</p>}
-            <p className="dialog-body">{STR.keyBody}</p>
+            <p className="dialog-body">{modal.reason === 'manage' ? STR.keyManageBody : STR.keyBody}</p>
             <form
               className="key-row"
               onSubmit={(e) => {

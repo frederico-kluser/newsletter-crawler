@@ -5,9 +5,12 @@ export const STR = {
   brand: 'Acervo',
   tagline: 'newsletters de tecnologia',
 
-  // busca IA
-  searchPlaceholder: 'Busque com IA no acervo…',
-  searchButton: 'Buscar',
+  // busca (texto local + IA opcional)
+  searchPlaceholder: 'Filtrar por texto…',
+  searchAi: 'Buscar com IA (semântica)',
+  searchAiShort: 'IA',
+  searchClear: 'limpar texto',
+  aiNoKeyHint: 'Sem chave você busca por texto e filtros. Adicione uma chave da OpenRouter para a busca inteligente (IA).',
   deepToggle: 'Busca profunda',
   deepHint: 'lê o conteúdo completo de cada artigo do escopo (1 chamada por artigo)',
   softHint: 'julga títulos e resumos em lotes (1 chamada a cada ~40 artigos)',
@@ -46,6 +49,11 @@ export const STR = {
   keyNetwork: 'Não deu para validar (rede). Tente de novo.',
   keyForget: 'Esquecer chave salva',
   keyExpired: 'A chave salva foi recusada pela OpenRouter (expirou ou foi revogada?). Cole outra.',
+  keyManageTitle: 'Chave da OpenRouter salva',
+  keyManageBody: 'Você já tem uma chave salva neste navegador — a busca com IA está liberada. Cole outra para trocar, ou esqueça a atual.',
+  keyBtnHas: 'Chave da OpenRouter salva — gerenciar',
+  keyBtnMissing: 'Adicionar chave da OpenRouter (busca com IA)',
+  keySaved: 'chave salva ✓',
 
   // filtros
   filters: 'Filtros',

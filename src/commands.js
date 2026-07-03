@@ -622,43 +622,6 @@ export function cmdExport(flags) {
   log(`exportados ${n} artigos para ${outDir} (${format})${all ? ' [todos]' : ` [run ${latest}]`}`);
 }
 
-export async function cmdClassify(flags) {
-  if (!HAS_LLM) {
-    errorLog('OPENROUTER_API_KEY ausente — a classificação requer o caminho LLM.');
-    process.exit(1);
-  }
-  const limit = flags.limit ? Number(flags.limit) : Infinity;
-  const force = flags.force === true;
-  await runWithLimits({ command: 'classify', flags, profile: 'llm-only' }, () =>
-    classifyPending({ limit, force }));
-  printStatus();
-}
-
-export async function cmdSummarize(flags) {
-  if (!HAS_LLM) {
-    errorLog('OPENROUTER_API_KEY ausente — o resumo PT-BR requer o caminho LLM.');
-    process.exit(1);
-  }
-  const limit = flags.limit ? Number(flags.limit) : Infinity;
-  const force = flags.force === true;
-  await runWithLimits({ command: 'summarize', flags, profile: 'llm-only' }, () =>
-    summarizePending({ limit, force }));
-  printStatus();
-}
-
-// Verificação pós-cadastro sob demanda (a automática roda no fim do crawl).
-export async function cmdVerify(flags) {
-  if (!HAS_LLM) {
-    errorLog('OPENROUTER_API_KEY ausente — a verificação requer o caminho LLM.');
-    process.exit(1);
-  }
-  const limit = flags.limit ? Number(flags.limit) : Infinity;
-  const force = flags.force === true;
-  await runWithLimits({ command: 'verify', flags, profile: 'llm-only' }, () =>
-    verifyPending({ limit, force }));
-  printStatus();
-}
-
 // Finaliza o PÓS-PROCESSAMENTO dos pendentes (verify + classify + summarize) num comando só, SEM
 // novo crawl — p/ terminar/retomar um backlog interrompido. Roda os 3 sweeps EM PARALELO (colunas
 // independentes) no perfil llm-only, honrando --limit/--force/--budget/--parallel e os --no-* p/

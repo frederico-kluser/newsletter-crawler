@@ -49,7 +49,7 @@ test('UI/RunView crawl: dashboard + marcos ao vivo; v abre o overlay; conclui co
 });
 
 test('UI/RunView não-crawl: painel simples (counters), sem dashboard', async () => {
-  const spec = { sub: 'classify', thunk: async () => {} };
+  const spec = { sub: 'finish', thunk: async () => {} };
   const { lastFrame, unmount } = render(
     html`<${RunView} spec=${spec} onDone=${() => {}} onResults=${() => {}} />`,
   );

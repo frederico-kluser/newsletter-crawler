@@ -11,6 +11,13 @@ Dois modos de busca:
   a chave do próprio usuário (BYOK), guardada só no navegador. Sem chave, o botão pede a chave —
   mas a busca por texto continua funcionando normalmente.
 
+**Histórico de buscas (no navegador):** toda busca IA concluída é **salva automaticamente** no
+`localStorage` (`src/lib/history.js`, sem backend). Ao focar o campo aparecem as **buscas recentes**,
+e o ícone de histórico na barra abre o **painel** com todas: **abrir** re-hidrata os resultados
+**congelados** do snapshot (consulta, custo real, cards) **sem gastar IA de novo**; **rodar de novo**
+re-executa com o mesmo escopo (passando pela confirmação de custo); dá p/ **apagar** um item ou
+**limpar tudo**. Auto-save sem limite; só poda os mais antigos se o `localStorage` recusar por quota.
+
 > Faz parte do repositório `newsletter-crawler`. O CLI continua sendo a fonte da verdade: ele
 > coleta/classifica os artigos e **gera o snapshot** que este site serve.
 

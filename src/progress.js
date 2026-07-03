@@ -1,7 +1,10 @@
 // Progresso AO VIVO da run em memória (sem SQL): o que está acontecendo AGORA (fases ativas),
 // contadores acumulados, fontes conhecidas/concluídas e o avanço por DATA rumo ao --since.
 // Alimentado por fetch/crawl/commands; lido pelo painel da TUI (getRunProgress) e pela linha
-// periódica do CLI. Módulo puro (sem imports) p/ qualquer camada usar sem ciclo.
+// periódica do CLI. Só importa run-events.js — uma folha SEM imports, então não há risco de ciclo:
+// os marcos "fonte concluída"/"data-alvo alcançada" nascem AQUI (na transição, com o nome do map).
+import { emitRunEvent } from './run-events.js';
+
 function fresh() {
   return {
     active: false,
@@ -50,7 +53,10 @@ export function sourceSeen(id, name) {
 }
 export function sourceListingDone(id) {
   const s = st.sources.get(id);
-  if (s) s.listingDone = true;
+  if (s && !s.listingDone) {
+    s.listingDone = true;
+    emitRunEvent({ phase: 'discovery', kind: 'source-done', level: 'success', source: s.name });
+  }
 }
 /** Registra uma data de item vista p/ a fonte (listagem pareada, issue curada, published do
  * artigo). Guardamos a MAIS ANTIGA: é ela que mede o quanto já andamos rumo ao --since. */
@@ -63,7 +69,10 @@ export function dateSeen(id, date) {
 /** A fonte ALCANÇOU o piso --since (paginação/scroll pararam por data): progresso = 100%. */
 export function floorHit(id) {
   const s = st.sources.get(id);
-  if (s) s.floorHit = true;
+  if (s && !s.floorHit) {
+    s.floorHit = true;
+    emitRunEvent({ phase: 'discovery', kind: 'floor-hit', level: 'success', source: s.name });
+  }
 }
 
 /** % de avanço no tempo: (agora − data mais antiga vista) ÷ (agora − since), clamp 0–100. */

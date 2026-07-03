@@ -16,6 +16,7 @@ import {
 } from './llm.js';
 import { curateRoundup } from './curate.js';
 import { logEvent } from './events.js';
+import { emitRunEvent } from './run-events.js';
 import { inStage, dateSeen, floorHit, bump } from './progress.js';
 import { abortErrorOf } from './deadline.js';
 import { isSubstack, substackArchive } from './substack.js';
@@ -458,6 +459,7 @@ async function processRoundup(job, source, opts = {}) {
             `${cur.dup ? ` +${cur.dup} já conhecidos` : ''}` +
             `${skipped ? `, fora: ${skipped}` : ''} em ${url.slice(0, 80)}`,
         );
+        emitRunEvent({ phase: 'curation', kind: 'issue-curated', level: 'success', source: source?.name, detail: `${cur.saved} itens` });
         return;
       }
       // cur == null: página sem corpo curável -> fluxo antigo de links abaixo
@@ -478,6 +480,7 @@ async function processRoundup(job, source, opts = {}) {
   for (const l of links) if (enqueue(l.url, 'article', url, source?.id, depth + 1)) n++;
   log(`roundup: ${links.length} links externos (${n} novos) em ${url.slice(0, 80)}`);
   logEvent({ ...ev, stage: 'roundup', status: 'ok', detail: { links: links.length, novos: n, curated: false } });
+  emitRunEvent({ phase: 'curation', kind: 'roundup-links', source: source?.name, detail: `${n} links` });
 }
 
 // ---------------- ARTICLE ----------------
@@ -487,6 +490,7 @@ function keepAggregatorVersion(row, ev, reason) {
   bump('mantidosBlurb');
   logEvent({ ...ev, stage: 'enrich', status: 'kept-blurb', detail: { reason } });
   log(`item mantido com o blurb do agregador (${reason}): ${(row.title || row.url).slice(0, 70)}`);
+  emitRunEvent({ phase: 'articles', kind: 'kept-blurb', level: 'warn', detail: reason });
 }
 
 async function processArticle(job, source, opts) {
@@ -562,6 +566,7 @@ async function processArticle(job, source, opts) {
       for (const l of ext) if (enqueue(l.url, 'article', url, source?.id, depth + 1)) n++;
       log(`artigo é roundup (${ext.length} links, ${proseLen} chars prosa) -> dividido em ${n}: ${url.slice(0, 60)}`);
       logEvent({ ...ev, stage: 'article', status: 'split', detail: { links: ext.length, proseLen, enfileirados: n } });
+      emitRunEvent({ phase: 'articles', kind: 'split', source: source?.name, detail: `${ext.length} links` });
       return;
     }
   }
@@ -716,6 +721,7 @@ async function processArticle(job, source, opts) {
     bump('enriquecidos');
     dateSeen(source?.id, parseDate(enriching.published_at || published));
     log(`item enriquecido [${enriching.kind || 'news'}]: ${(enriching.title || canonicalUrl).slice(0, 70)}`);
+    emitRunEvent({ phase: 'articles', kind: 'saved', channel: 'ticker', source: source?.name, detail: (enriching.title || canonicalUrl).slice(0, 80) });
     return { verifyUrl: enriching.url }; // streaming verify: verifica esta ficha já
   }
 
@@ -739,5 +745,6 @@ async function processArticle(job, source, opts) {
   bump('salvos');
   dateSeen(source?.id, parseDate(published));
   log(`artigo salvo: ${(title || canonicalUrl).slice(0, 80)}`);
+  emitRunEvent({ phase: 'articles', kind: 'saved', channel: 'ticker', source: source?.name, detail: (title || canonicalUrl).slice(0, 80) });
   return { verifyUrl: canonicalUrl }; // streaming verify: verifica esta ficha já
 }

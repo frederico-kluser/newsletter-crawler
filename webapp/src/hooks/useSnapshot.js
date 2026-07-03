@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { loadArticles, loadMeta } from '../lib/data.js';
+import { buildHaystack } from '../lib/textSearch.js';
 
 /** Carrega meta + artigos do snapshot (contents fica lazy). Expõe retry p/ o ErrorState. */
 export function useSnapshot() {
@@ -9,9 +10,14 @@ export function useSnapshot() {
     setState((s) => ({ ...s, error: null }));
     Promise.all([loadMeta(), loadArticles()])
       .then(([meta, articles]) => {
-        // o snapshot não repete source_name por artigo (economia de bytes) — decoramos aqui
+        // o snapshot não repete source_name por artigo (economia de bytes) — decoramos aqui;
+        // e pré-computamos `_search` (palheiro dobrado) 1x p/ a busca textual não refazer NFD a cada tecla
         const names = new Map(meta.sources.map((s) => [s.id, s.name]));
-        const decorated = articles.map((a) => ({ ...a, source_name: names.get(a.source_id) || null }));
+        const decorated = articles.map((a) => {
+          const withName = { ...a, source_name: names.get(a.source_id) || null };
+          withName._search = buildHaystack(withName);
+          return withName;
+        });
         setState({ meta, articles: decorated, error: null });
       })
       .catch((error) => setState({ meta: null, articles: null, error }));

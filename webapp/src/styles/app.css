@@ -809,6 +809,21 @@
 .searchbar-input::-webkit-search-cancel-button {
   -webkit-appearance: none;
 }
+.searchbar-x {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  color: var(--fg-muted);
+  font-size: 17px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.searchbar-x:hover {
+  background: var(--chip-bg);
+  color: var(--fg);
+}
 .deep-toggle {
   display: inline-flex;
   align-items: center;
@@ -823,13 +838,36 @@
   accent-color: var(--accent);
 }
 .searchbar-go {
-  padding: 7px 14px;
+  padding: 7px 13px;
   border-radius: var(--radius-pill);
   font-size: 13px;
+  gap: 6px;
+  flex-shrink: 0;
 }
 .searchbar-go:disabled {
   opacity: 0.55;
   cursor: default;
+}
+.ai-lock {
+  font-size: 11px;
+  line-height: 1;
+}
+.key-btn {
+  position: relative;
+}
+.key-btn[data-has] {
+  color: var(--ok);
+  border-color: color-mix(in oklab, var(--ok) 40%, var(--hairline));
+}
+.key-dot {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--ok);
+  box-shadow: 0 0 0 2px var(--bg-raised);
 }
 @media (max-width: 719px) {
   .deep-toggle span {

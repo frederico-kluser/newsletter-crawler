@@ -17,8 +17,9 @@ import { STR } from '../strings.js';
 export function useAiSearch({ articles, meta, filters }) {
   const [state, setState] = useState({ phase: 'idle', query: '', deep: false, progress: null, result: null, error: null });
   const [confirmInfo, setConfirmInfo] = useState(null); // {query, deep, count, calls, usd, candidates}
-  const [keyModal, setKeyModal] = useState(null); // {pending:{query,deep}|null, reason:'missing'|'invalid'}
+  const [keyModal, setKeyModal] = useState(null); // {pending:{query,deep}|null, reason:'missing'|'invalid'|'manage'}
   const [sessionUsd, setSessionUsd] = useState(0); // gasto REAL acumulado da sessão (CostBadge)
+  const [hasKey, setHasKey] = useState(() => Boolean(getApiKey())); // reativo p/ o botão de chave da topbar
   const abortRef = useRef(null);
 
   const scopeCandidates = useCallback(
@@ -65,6 +66,7 @@ export function useAiSearch({ articles, meta, filters }) {
         }
         if (e?.code === 'KEY_INVALID') {
           clearApiKey();
+          setHasKey(false);
           setKeyModal({ pending: { query, deep }, reason: 'invalid' });
           setState({ phase: 'idle', query: '', deep, progress: null, result: null, error: null });
           return;
@@ -103,6 +105,11 @@ export function useAiSearch({ articles, meta, filters }) {
 
   const cancelConfirm = useCallback(() => setConfirmInfo(null), []);
 
+  /** Abre o modal de chave PROATIVAMENTE (botão da topbar): gerenciar se já tem, senão pedir. */
+  const openKeyModal = useCallback(() => {
+    setKeyModal({ pending: null, reason: getApiKey() ? 'manage' : 'missing' });
+  }, []);
+
   const cancel = useCallback(() => {
     abortRef.current?.abort();
   }, []);
@@ -120,6 +127,7 @@ export function useAiSearch({ articles, meta, filters }) {
       const probe = await probeKey(k);
       if (!probe.ok) throw new Error(probe.status === 0 ? STR.keyNetwork : STR.keyInvalid);
       setApiKey(k);
+      setHasKey(true);
       const pending = keyModal?.pending;
       setKeyModal(null);
       if (pending) submit(pending.query, pending.deep);
@@ -130,6 +138,7 @@ export function useAiSearch({ articles, meta, filters }) {
   const dismissKey = useCallback(() => setKeyModal(null), []);
   const forgetKey = useCallback(() => {
     clearApiKey();
+    setHasKey(false);
     setKeyModal(null);
   }, []);
 
@@ -138,10 +147,11 @@ export function useAiSearch({ articles, meta, filters }) {
     confirmInfo,
     keyModal,
     sessionUsd,
-    hasStoredKey: Boolean(getApiKey()),
+    hasKey,
     submit,
     confirm,
     cancelConfirm,
+    openKeyModal,
     cancel,
     clear,
     saveKey,

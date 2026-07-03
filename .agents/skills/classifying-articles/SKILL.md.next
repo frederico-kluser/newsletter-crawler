@@ -1,14 +1,14 @@
 ---
 name: classifying-articles
-description: Multi-faceted post-processing classification of crawled articles against a controlled vocabulary (config/taxonomy.json) - the 9-facet fan-out (one LLM agent per facet) on Pro+xhigh, the no-enum schema with Set/alias validation, the classifications/article_tags/classification_uncovered tables, and the `classify` command plus post-crawl hook. Use whenever you edit src/classify.js, src/taxonomy.js, config/taxonomy.json, the classification schema, or change how tags are assigned, validated, stored, or exported.
+description: Multi-faceted post-processing classification of crawled articles against a controlled vocabulary (config/taxonomy.json) - the 9-facet fan-out (one LLM agent per facet) on Pro+xhigh, the no-enum schema with Set/alias validation, the classifications/article_tags/classification_uncovered tables, and the post-crawl hook (+ `finish`). Use whenever you edit src/classify.js, src/taxonomy.js, config/taxonomy.json, the classification schema, or change how tags are assigned, validated, stored, or exported.
 metadata:
   type: knowledge
-  verification_signal: npm run status (boots the 3 new tables) + node scratchpad taxonomy self-test (9 facets build, alias/Set validation) + a bounded `npm run classify -- --limit 1` (real Pro+xhigh round-trip, all tags in-vocab)
+  verification_signal: npm run status (boots the 3 new tables) + node scratchpad taxonomy self-test (9 facets build, alias/Set validation) + a bounded `ncrawl finish --no-verify --no-summarize --limit 1` (real Pro+xhigh classify round-trip, all tags in-vocab)
 ---
 # Classifying articles
 
 ## When to use
-Editing `src/classify.js`, `src/taxonomy.js`, `config/taxonomy.json`, the `classifications`/`article_tags`/`classification_uncovered` schema, the `classify` CLI command/hook, or changing how article tags are assigned, validated, persisted, or exported.
+Editing `src/classify.js`, `src/taxonomy.js`, `config/taxonomy.json`, the `classifications`/`article_tags`/`classification_uncovered` schema, the post-crawl classify hook / `finish`, or changing how article tags are assigned, validated, persisted, or exported.
 
 ## Injected knowledge
 - **Fan-out plano: 1 agente por faceta, 9 facetas/artigo, em paralelo.** `getFacets()` monta 9 facetas a partir de `config/taxonomy.json`; `topic-technology` e `framework-library-tool` são a UNIÃO de todos os domínios + `ai_engineering_cross` (526 e 331 slugs). `src/taxonomy.js`. Cada faceta vê só o seu vocabulário no prompt.
@@ -18,8 +18,8 @@ Editing `src/classify.js`, `src/taxonomy.js`, `config/taxonomy.json`, the `class
 - **`uncovered` é texto livre = o loop de qualidade.** O modelo registra assuntos centrais fora do vocab (ex.: "protein structure prediction") em `uncovered` (≤3/faceta); persiste em `classification_uncovered`; `stmts.topUncovered` agrega para a revisão trimestral. Tags inválidas devolvidas pelo modelo são DESCARTADAS (warn), não viram uncovered.
 - **Armazenamento híbrido, persistido em transação.** `classifications` (1 linha/artigo: `result_json` completo + `domain_confidence` + `taxonomy_version` + `model_used` + `status`) + índice normalizado `article_tags(article_id,facet,tag,rank)` (PK composta → re-tag sem duplicar) + `classification_uncovered`. `persist` é uma `db.transaction` que faz upsert + delete/insert dos tags/uncovered. Todo SQL no `stmts` de [[persisting-and-orchestrating]]. Faceta obrigatória vazia ⇒ `status='partial'`.
 - **Concorrência em 2 níveis.** Gate GLOBAL `pLimit(CLASSIFY_CONCURRENCY=6)` por onde passam TODAS as chamadas de faceta + janela `pLimit(ARTICLE_CONCURRENCY=2)` de artigos. Limita o total simultâneo na OpenRouter independentemente de quantos artigos estão em voo. Fail-open por faceta: uma faceta que falha vira `tags:[]` e não derruba o lote.
-- **CLI/execução.** `npm run classify [-- --limit N] [-- --force]` (pós-processamento idempotente: sem force só pega quem não tem classificação, via LEFT JOIN ... IS NULL). Hook pós-crawl em `cmdCrawl` atrás de `CLASSIFY_AFTER_CRAWL` (default on) e `--no-classify`. Export embute as tags (frontmatter YAML no `.md`, objeto no `.json`).
+- **Execução (sem comando solto).** Roda no crawl (streaming + sweep pós-crawl, hook `cmdCrawl` atrás de `CLASSIFY_AFTER_CRAWL` default on / `--no-classify`) e nos pendentes via `ncrawl finish` (idempotente: sem force só pega quem não tem classificação, via LEFT JOIN ... IS NULL). NÃO há mais comando `classify` avulso. Export embute as tags (frontmatter YAML no `.md`, objeto no `.json`).
 - **Vocabulário é dado versionado, não código.** `config/taxonomy.json` (`version`, `facets`, `topics_by_domain`, `tools_by_domain`, `ai_engineering_cross`, `aliases`, `limits`, `mandatory`); revisar trimestralmente sem tocar em `src/`. `loadTaxonomy()` em `config.js`; carga preguiçosa em `taxonomy.js` para não quebrar `npm run status`.
 
 ## Evolution
-On task completion, persist here only an important, externally-verified change to the classification subsystem (a green `npm run classify`, a schema/vocab change that booted via `npm run status`, or user confirmation). Update [[calling-the-llm-layer]] instead for generic LLM-layer facts; [[persisting-and-orchestrating]] for crawl-schema facts. See [[meta-skill-evolution]].
+On task completion, persist here only an important, externally-verified change to the classification subsystem (a green `ncrawl finish` classify sweep, a schema/vocab change that booted via `npm run status`, or user confirmation). Update [[calling-the-llm-layer]] instead for generic LLM-layer facts; [[persisting-and-orchestrating]] for crawl-schema facts. See [[meta-skill-evolution]].

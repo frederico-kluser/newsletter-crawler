@@ -69,8 +69,6 @@ export function Menu({ onSelect }) {
     { label: t('menuWeb'), value: 'web' },
     { label: t('menuStatus'), value: 'status' },
     { label: t('menuExport'), value: 'export' },
-    { label: t('menuClassify'), value: 'classify' },
-    { label: t('menuSummarize'), value: 'summarize' },
     { label: t('menuFinish') + finishSuffix, value: 'finish' },
     { label: t('menuAdd'), value: 'add' },
     { label: t('menuLimits'), value: 'limits' },
@@ -285,70 +283,6 @@ export function ExportConfig({ onRun, onBack }) {
     </${Field}>`;
   }
   return html`<${Review} sub="export" flags=${flags} onRun=${onRun} onBack=${onBack} />`;
-}
-
-export function ClassifyConfig({ onRun, onBack }) {
-  const [step, setStep] = useState('limit');
-  const [flags, setFlags] = useState({});
-  const [err, setErr] = useState(null);
-  if (!HAS_LLM) {
-    return html`<${Box} flexDirection="column">
-      <${Alert} variant="error">${t('classifyNoLLM')}</${Alert}>
-      <${Select} options=${[{ label: t('back'), value: 'back' }]} onChange=${onBack} />
-    </${Box}>`;
-  }
-  if (step === 'limit') {
-    return html`<${Field} label=${t('classifyLimit')} error=${err}>
-      <${TextInput} key=${step} placeholder="" onSubmit=${(val) => {
-        const r = parseIntFlag(val);
-        if (!r.ok) return setErr(t('numInvalid'));
-        setErr(null);
-        if (r.value) setFlags((f) => ({ ...f, limit: r.value }));
-        setStep('force');
-      }} />
-    </${Field}>`;
-  }
-  if (step === 'force') {
-    return html`<${Field} label=${t('classifyForce')}>
-      <${Select} options=${yesNo()} onChange=${(v) => {
-        setFlags((f) => (v === 'yes' ? { ...f, force: true } : f));
-        setStep('review');
-      }} />
-    </${Field}>`;
-  }
-  return html`<${Review} sub="classify" flags=${flags} onRun=${onRun} onBack=${onBack} />`;
-}
-
-export function SummarizeConfig({ onRun, onBack }) {
-  const [step, setStep] = useState('limit');
-  const [flags, setFlags] = useState({});
-  const [err, setErr] = useState(null);
-  if (!HAS_LLM) {
-    return html`<${Box} flexDirection="column">
-      <${Alert} variant="error">${t('summarizeNoLLM')}</${Alert}>
-      <${Select} options=${[{ label: t('back'), value: 'back' }]} onChange=${onBack} />
-    </${Box}>`;
-  }
-  if (step === 'limit') {
-    return html`<${Field} label=${t('summarizeLimit')} error=${err}>
-      <${TextInput} key=${step} placeholder="" onSubmit=${(val) => {
-        const r = parseIntFlag(val);
-        if (!r.ok) return setErr(t('numInvalid'));
-        setErr(null);
-        if (r.value) setFlags((f) => ({ ...f, limit: r.value }));
-        setStep('force');
-      }} />
-    </${Field}>`;
-  }
-  if (step === 'force') {
-    return html`<${Field} label=${t('summarizeForce')}>
-      <${Select} options=${yesNo()} onChange=${(v) => {
-        setFlags((f) => (v === 'yes' ? { ...f, force: true } : f));
-        setStep('review');
-      }} />
-    </${Field}>`;
-  }
-  return html`<${Review} sub="summarize" flags=${flags} onRun=${onRun} onBack=${onBack} />`;
 }
 
 // Finaliza os PENDENTES (verify+classify+summarize) sem novo crawl. Pergunta só o teto de gasto

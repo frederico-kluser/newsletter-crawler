@@ -557,9 +557,72 @@ select.control:disabled { opacity: 0.5; cursor: default; }
   border-color: rgba(239, 68, 68, 0.4);
   color: #dc2626;
 }
-.state.ai-loading { padding: 60px 20px; }
-.state.ai-loading .spinner { width: 26px; height: 26px; }
-.state.ai-loading p { margin: 14px 0 0; }
+/* loader da busca IA (streaming): barra + %, X/Y artigos, relevantes, custo, ETA, "não analisados" */
+.ai-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 980px;
+  margin: 24px auto 0;
+  padding: 12px 18px;
+  background: var(--card);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--hairline));
+  border-radius: var(--radius-m);
+  box-shadow: var(--shadow-card);
+}
+.ai-progress-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.ai-progress-track {
+  position: relative;
+  flex: 1;
+  height: 7px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  overflow: hidden;
+}
+.ai-progress-fill {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: var(--accent);
+  transform-origin: left center;
+  transition: transform 0.35s ease;
+}
+.ai-progress-pct {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+  min-width: 3.4ch;
+  text-align: right;
+}
+.ai-progress-cancel {
+  flex-shrink: 0;
+}
+.ai-progress-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  font-size: 12.5px;
+  color: var(--text-2);
+  font-variant-numeric: tabular-nums;
+}
+.ai-progress-strong {
+  color: var(--text-1, var(--text, inherit));
+  font-weight: 600;
+}
+.ai-progress-warn {
+  color: #d97706;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ai-progress-fill {
+    transition: none;
+  }
+}
 .dialog {
   position: relative;
   width: 100%;

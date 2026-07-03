@@ -6,6 +6,8 @@
 // - penalidade 429 COMPARTILHADA (Retry-After/backoff+jitter, teto 60s), módulo-level
 // - custo real via usage.cost (usage:{include:true}), entregue por callback onCost
 // NÃO enviar HTTP-Referer manual: `Referer` é forbidden header no fetch (o browser já manda).
+import { noteRateLimit } from './lane.js';
+
 const OR_BASE = 'https://openrouter.ai/api/v1';
 const LLM_TIMEOUT_MS = 180_000; // mesmo teto do CLI (LLM_TIMEOUT_MS)
 
@@ -55,6 +57,7 @@ function bumpPenalty(res) {
   const backoff = Math.min(2 ** _penaltyK * 1000 * (0.5 + Math.random()), 60_000);
   const until = Date.now() + Math.max(retryAfterMsOf(res), backoff);
   if (until > _penaltyUntil) _penaltyUntil = until;
+  noteRateLimit(); // AIMD: além do freio por TEMPO, encolhe a LARGURA da lane (igual ao governor)
 }
 
 // ---- parse defensivo (porta verbatim de llm.js tryParseJSON) ----

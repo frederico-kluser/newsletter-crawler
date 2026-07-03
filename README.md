@@ -109,12 +109,9 @@ npm run crawl -- --no-refresh          # não re-visita as listagens; só drena 
 npm run status                         # contagens de sources/pages/articles/selectors/frontier
 npm run inspect                        # auditoria da última run: itens por issue, vereditos, motivos, custo
 npm run inspect -- --url middy         # linha do tempo de eventos + registros de um link específico
-npm run verify -- --force              # re-verifica todos os artigos (veredito ok|suspect|junk)
 npm run purge -- "Node Weekly" --yes   # apaga os DADOS da fonte (fica cadastrada) p/ refazer do zero
 npm run add -- https://exemplo.com/arquivo --name "Minha" --type index --max-index-pages 1
 npm run export -- --format md          # data/export/<fonte>/*.md — só a última run (--all = tudo; ou --format json)
-npm run summarize                      # resumo + título em PT-BR p/ cada artigo (Flash; idempotente)
-npm run classify                       # tags multi-faceta (core no Pro, resto Flash); idempotente
 npm run finish -- --budget 2           # termina os PENDENTES (verify+classify+summarize) sem novo crawl; teto US$2, retomável
 npm run search -- react server components --mode B   # por tags (5 Pro); só a última run (--all = acervo)
 npm run search -- "local llm" --mode A --limit 20 --yes --all   # exaustiva no acervo todo (Flash)
@@ -125,7 +122,7 @@ npm test                               # node:test (datas, anti-bot, busca em lo
 ```
 
 ### Resumos PT-BR e busca na base
-- **Resumos:** `summarize` gera `title_pt` + `summary_pt` (resumo legível em **português do Brasil**) por artigo. O `content` original é mantido (busca/tags usam ele). Roda **automático pós-crawl** (desligue com `SUMMARIZE_AFTER_CRAWL=false` ou `--no-summarize`).
+- **Resumos:** o estágio de resumo gera `title_pt` + `summary_pt` (resumo legível em **português do Brasil**) por artigo. O `content` original é mantido (busca/tags usam ele). Roda **dentro do crawl** (streaming + sweep pós-crawl) e no `npm run finish` — não há comando solto (desligue no crawl com `SUMMARIZE_AFTER_CRAWL=false` ou `--no-summarize`).
 - **Busca — Modo A (exaustivo):** `--mode A` faz **1 chamada Flash por artigo** (concorrência 50), julgando `direto`/`parecido`; rankeia direto>parecido. Guard de custo: acima de `SEARCH_MODE_A_CONFIRM` (~200) artigos exige `--yes`. O prompt de relevância foi **calibrado por avaliação** (`eval/`, rubrica + few-shot): F1 macro no Flash 0.73 → **0.85**, cortando falsos positivos.
 - **Busca — Modo B (por tags):** `--mode B` faz **5 chamadas Pro** (1 por faceta de retrieval) → une as tags → traz artigos cujas tags cruzam. Rápido; **exige classificação feita**.
 - **Buscador web (`npm run web`):** a busca digitada é **100% IA** — Enter dispara a **soft** (1 Flash `xhigh` por lote de ~40 artigos, lendo título+resumo) e o toggle **Busca profunda** avalia artigo a artigo (conteúdo), com **fontes (chips) + período** como escopo e um diálogo de confirmação com contagem + ~US$. Sem key configurada, um **modal** valida e salva a key OpenRouter em `~/.newsletter-crawler/.env` (vale na hora, sem reiniciar). O browse sem consulta continua instantâneo por filtros SQL (fonte/período/facetas/kind — incl. `release`); a busca por palavras foi **removida**.

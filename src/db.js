@@ -425,6 +425,26 @@ export const stmts = {
        FROM articles`,
   ),
 
+  // snapshot estático do webapp (`ncrawl export --format web`): acervo COMPLETO, ordenado por id
+  // ASC (determinístico — diff de git append-only). date_iso é pré-computado aqui (o cliente
+  // nunca porta parseDate; filtro de período no browser vira comparação de string YYYY-MM-DD) e
+  // o snippet usa 400 chars (paridade com o content_head(400) da busca soft; o card corta visual).
+  webExportArticles: db.prepare(
+    `SELECT a.id, a.source_id, a.url, a.title, a.title_pt, a.summary_pt,
+            substr(coalesce(a.blurb, a.content, ''), 1, 400) AS snippet,
+            coalesce(iso_date(a.published_at), date(a.extracted_at)) AS date_iso,
+            a.kind, a.section, a.verify_status, a.verify_notes
+       FROM articles a
+      ORDER BY a.id`,
+  ),
+  webExportContents: db.prepare(
+    `SELECT id, coalesce(content, '') AS content FROM articles ORDER BY id`,
+  ),
+  // tags de TODOS os artigos numa query só (agrupadas em JS) — não 1 getTagsForArticle por artigo
+  webExportTags: db.prepare(
+    `SELECT article_id, facet, tag FROM article_tags ORDER BY article_id, facet, rank`,
+  ),
+
   // selectors (CSS de links/conteúdo/next + o par CSS+regex de DATA, tudo por template_sig)
   getSelector: db.prepare(`SELECT * FROM selectors WHERE template_sig = ?`),
   putSelector: db.prepare(

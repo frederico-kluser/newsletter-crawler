@@ -6,6 +6,8 @@ import { useMemo, useState } from 'react';
 import { Box, Text, useInput, useStdout } from 'ink';
 import { html } from './html.js';
 import { t } from './i18n.js';
+import { colors, glyphs } from './theme.js';
+import { FooterHints } from './widgets.js';
 import { hostOf } from '../util.js';
 
 const MAX_BODY_LINES = 5000; // teto p/ content patológico (o wrap é O(len), roda 1x por Enter)
@@ -164,25 +166,36 @@ export function ResultsView({ result, onDone, onOpen, getArticle }) {
     return html`<${Box} flexDirection="column">
       <${Text} bold wrap="wrap">${title}</${Text}>
       <${Text} dimColor>${`${t('previewSource')}: ${src} · ${t('previewDate')}: ${date}`}</${Text}>
-      <${Text} color="cyan">${`[${item.relation}] · ${t(item._sec === 'tool' ? 'kindTool' : 'kindNews')}`}</${Text}>
+      <${Text} color=${colors.accent}>${`[${item.relation}] · ${t(item._sec === 'tool' ? 'kindTool' : 'kindNews')}`}</${Text}>
       ${url
-        ? html`<${Text} color="blue" wrap="truncate-end">${url}</${Text}>`
+        ? html`<${Text} color=${colors.link} wrap="truncate-end">${url}</${Text}>`
         : html`<${Text} dimColor>${t('previewNoUrl')}</${Text}>`}
       ${!article && item.id != null
-        ? html`<${Text} color="yellow">${t('previewMissing', { id: item.id })}</${Text}>`
+        ? html`<${Text} color=${colors.warn}>${t('previewMissing', { id: item.id })}</${Text}>`
         : null}
       <${Box} flexDirection="column" height=${BODY_H} marginY=${1}>
         ${lines.slice(off, end).map((ln, i) => html`<${Text} key=${off + i} wrap="truncate-end">${ln || ' '}</${Text}>`)}
       </${Box}>
-      <${Text} dimColor>${`${t('previewHint')} · ${Math.min(off + 1, lines.length)}–${end}/${lines.length}`}</${Text}>
+      <${Box}>
+        <${FooterHints} inline hints=${[
+          { k: '↑/↓', label: t('hint_scroll') },
+          { k: 'o', label: t('hint_openBrowser') },
+          { k: 'Esc/b', label: t('hint_back') },
+          { k: 'q', label: t('hint_quit') },
+        ]} />
+        <${Text} dimColor>${` · ${Math.min(off + 1, lines.length)}–${end}/${lines.length}`}</${Text}>
+      </${Box}>
     </${Box}>`;
   }
 
   if (items.length === 0) {
     return html`<${Box} flexDirection="column">
       <${Text}>${header}</${Text}>
-      <${Text} color="yellow">${r.needsClassification ? t('searchNoClass') : t('resultsNone')}</${Text}>
-      <${Box} marginTop=${1}><${Text} dimColor>${t('resultsHintEmpty')}</${Text}></${Box}>
+      <${Text} color=${colors.warn}>${r.needsClassification ? t('searchNoClass') : t('resultsNone')}</${Text}>
+      <${FooterHints} hints=${[
+        { k: 'b', label: t('hint_back') },
+        { k: 'q', label: t('hint_quit') },
+      ]} />
     </${Box}>`;
   }
 
@@ -193,19 +206,24 @@ export function ResultsView({ result, onDone, onOpen, getArticle }) {
     <${Box} flexDirection="column" marginY=${1}>
       ${view.map((b) => {
         if (b.kind === 'header') {
-          return html`<${Text} key=${`h-${b.text}`} bold color="magenta">${b.text}</${Text}>`;
+          return html`<${Text} key=${`h-${b.text}`} bold color=${colors.title}>${b.text}</${Text}>`;
         }
         const sel = b.idx === nav.selected;
         const meta = `${b.it.source_name || hostOf(b.it.url || '') || '—'} · ${b.it.date_iso || '—'}`;
         const resumo = (b.it.summary_pt || b.it.snippet || '').slice(0, 160);
         return html`<${Box} key=${b.it.id ?? `i${b.idx}`} flexDirection="column">
           ${sel
-            ? html`<${Text} wrap="truncate-end" inverse>${`❯ [${b.it.relation}] ${b.it.title_pt || b.it.title || ''}`}</${Text}>`
-            : html`<${Text} wrap="truncate-end">${'  '}<${Text} color="cyan">[${b.it.relation}]</${Text}> ${b.it.title_pt || b.it.title || ''}</${Text}>`}
+            ? html`<${Text} wrap="truncate-end" inverse>${`${glyphs.pointer} [${b.it.relation}] ${b.it.title_pt || b.it.title || ''}`}</${Text}>`
+            : html`<${Text} wrap="truncate-end">${'  '}<${Text} color=${colors.accent}>[${b.it.relation}]</${Text}> ${b.it.title_pt || b.it.title || ''}</${Text}>`}
           <${Text} dimColor wrap="truncate-end">${`    ${meta} · ${resumo}`}</${Text}>
         </${Box}>`;
       })}
     </${Box}>
-    <${Text} dimColor>${t('resultsHintList')}</${Text}>
+    <${FooterHints} inline hints=${[
+      { k: 'Enter', label: t('hint_open') },
+      { k: '↑/↓', label: t('hint_move') },
+      { k: 'b', label: t('hint_back') },
+      { k: 'q', label: t('hint_quit') },
+    ]} />
   </${Box}>`;
 }

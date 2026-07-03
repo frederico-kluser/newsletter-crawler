@@ -63,7 +63,7 @@ test('UI/dashboard: cabeçalho, fases, ticker, métricas, feed curado e rodapé'
   assert.ok(frame.includes('tempo esgotado'), 'marco timeout em PT');
   // rodapé: avisos internos colapsados + atalhos
   assert.ok(frame.includes('3 avisos internos'), 'contador de avisos');
-  assert.ok(frame.includes('v: detalhes'), 'atalhos no rodapé');
+  assert.ok(frame.includes('v detalhes'), 'atalhos no rodapé');
   unmount();
 });
 

@@ -3,9 +3,11 @@
 // o App monta o thunk (a partir de commands.js) e troca p/ a RunView.
 import { useState, useEffect, useRef, Fragment } from 'react';
 import { Box, Text, useInput } from 'ink';
-import { Select, TextInput, Alert, StatusMessage, Spinner } from '@inkjs/ui';
+import { Select, MultiSelect, TextInput, Alert, StatusMessage, Spinner } from '@inkjs/ui';
 import { html } from './html.js';
 import { t } from './i18n.js';
+import { colors } from './theme.js';
+import { Panel, FooterHints } from './widgets.js';
 import { buildCommandPreview } from './commandPreview.js';
 import {
   loadSources, HAS_LLM, BUDGET_USD, MAX_PARALLEL, RAM_MAX_PCT, ENV_PATH, stageModel,
@@ -27,11 +29,13 @@ const parseIntFlag = (val) => {
   return { ok: true, value: v };
 };
 
-// Tela de revisão reusável: mostra o comando equivalente e confirma.
+// Tela de revisão reusável: o comando equivalente ganha um CARD com borda (o momento "contrato" —
+// artefato copiável; uma das DUAS únicas superfícies com borda do app) e o Select confirma abaixo.
 function Review({ sub, flags, rest = [], onRun, onBack }) {
   return html`<${Box} flexDirection="column">
-    <${Text} bold>${t('review')}</${Text}>
-    <${Box} marginY=${1}><${Text} color="cyan">${buildCommandPreview(sub, flags, rest)}</${Text}></${Box}>
+    <${Panel} title=${t('review')} marginY=${1}>
+      <${Text} color=${colors.accent}>${buildCommandPreview(sub, flags, rest)}</${Text}>
+    </${Panel}>
     <${Select}
       options=${[
         { label: t('runIt'), value: 'run' },
@@ -75,7 +79,11 @@ export function Menu({ onSelect }) {
   ];
   return html`<${Box} flexDirection="column">
     <${Select} options=${options} onChange=${onSelect} visibleOptionCount=${12} />
-    <${Box} marginTop=${1}><${Text} dimColor>${t('hintNav')}</${Text}></${Box}>
+    <${FooterHints} hints=${[
+      { k: '↑/↓', label: t('hint_move') },
+      { k: 'Enter', label: t('hint_select') },
+      { k: 'Ctrl-C', label: t('hint_quit') },
+    ]} />
   </${Box}>`;
 }
 
@@ -85,10 +93,11 @@ export function StatusScreen({ status: initial, onBack }) {
   const [status, setStatus] = useState(initial);
   useEffect(() => {
     const id = setInterval(() => setStatus(getStatus()), 1000);
+    id.unref?.(); // poll de contagens nunca segura o processo (nem o node --test)
     return () => clearInterval(id);
   }, []);
   const f = status.frontier;
-  const row = (k, v) => html`<${Text}>${k.padEnd(11)} <${Text} color="cyan">${v}</${Text}></${Text}>`;
+  const row = (k, v) => html`<${Text}>${k.padEnd(11)} <${Text} color=${colors.accent}>${v}</${Text}></${Text}>`;
   return html`<${Box} flexDirection="column">
     <${Text} bold>${t('statusTitle')}</${Text}>
     <${Box} flexDirection="column" marginY=${1}>
@@ -104,16 +113,54 @@ export function StatusScreen({ status: initial, onBack }) {
       ${f.pending > 0 || status.pendingClassif > 0 || status.pendingSummary > 0
         ? html`<${Fragment}>
             ${f.pending > 0
-              ? html`<${Text} color="yellow">  ${f.pending} ${t('queued')} — ${t('runCrawl')}</${Text}>`
+              ? html`<${Text} color=${colors.warn}>  ${f.pending} ${t('queued')} — ${t('runCrawl')}</${Text}>`
               : null}
             ${status.pendingClassif > 0 || status.pendingSummary > 0
-              ? html`<${Text} color="magenta">  ${status.pendingClassif} ${t('noTags')} · ${status.pendingSummary} ${t('noSummary')} — ${t('runFinish')}</${Text}>`
+              ? html`<${Text} color=${colors.title}>  ${status.pendingClassif} ${t('noTags')} · ${status.pendingSummary} ${t('noSummary')} — ${t('runFinish')}</${Text}>`
               : null}
           </${Fragment}>`
-        : html`<${Text} color="green">  ${t('allProcessed')}</${Text}>`}
+        : html`<${Text} color=${colors.ok}>  ${t('allProcessed')}</${Text}>`}
     </${Box}>
     <${Select} options=${[{ label: t('back'), value: 'back' }]} onChange=${onBack} />
   </${Box}>`;
+}
+
+// Passo de fontes do Coletar: CHECKBOX multi-select (espaço marca/desmarca, Enter confirma), todas
+// marcadas por padrão — Enter direto = coletar tudo (sem flag; subconjunto vira --sources "A,B").
+// O useInput paralelo (SÓ Esc) é seguro: o MultiSelect não tem campo de texto (↑/↓/espaço/Enter) e
+// o hook morre com o step. O erro de "0 marcadas" vive AQUI (não troca step → o MultiSelect não
+// remonta e a seleção sobrevive; defaultValue só é lido no mount). Exportado p/ teste direto.
+export function SourcesStep({ sources, onSubmit, onBack }) {
+  const [err, setErr] = useState(null);
+  const all = sources.map((s) => s.name || s.url);
+  useInput((input, key) => {
+    if (key.escape) onBack();
+  });
+  if (all.length === 0) {
+    return html`<${Box} flexDirection="column">
+      <${StatusMessage} variant="warning">${t('noSources')}</${StatusMessage}>
+      <${Select} options=${[{ label: t('back'), value: 'back' }]} onChange=${onBack} />
+    </${Box}>`;
+  }
+  return html`<${Field} label=${t('pickSources')} error=${err}>
+    <${MultiSelect}
+      options=${all.map((v) => ({ label: v, value: v }))}
+      defaultValue=${all}
+      visibleOptionCount=${Math.min(10, all.length)}
+      onChange=${(vals) => {
+        if (err && vals.length > 0) setErr(null);
+      }}
+      onSubmit=${(vals) => {
+        if (vals.length === 0) return setErr(t('sourcesPickAtLeastOne'));
+        onSubmit(vals.length === all.length ? null : vals);
+      }}
+    />
+    <${FooterHints} hints=${[
+      { k: t('keySpace'), label: t('hint_toggle') },
+      { k: 'Enter', label: t('hint_confirm') },
+      { k: 'Esc', label: t('hint_back') },
+    ]} />
+  </${Field}>`;
 }
 
 export function CrawlConfig({ onRun, onBack }) {
@@ -124,20 +171,14 @@ export function CrawlConfig({ onRun, onBack }) {
   const set = (patch) => setFlags((f) => ({ ...f, ...patch }));
 
   if (step === 'source') {
-    const options = [
-      { label: t('sourceAll'), value: '__all__' },
-      ...sources.map((s) => ({ label: s.name || s.url, value: s.name || s.url })),
-      { label: t('back'), value: '__back__' },
-    ];
-    return html`<${Box} flexDirection="column">
-      ${sources.length === 0 ? html`<${StatusMessage} variant="warning">${t('noSources')}</${StatusMessage}>` : null}
-      <${Text} bold>${t('pickSource')}</${Text}>
-      <${Select} options=${options} onChange=${(v) => {
-        if (v === '__back__') return onBack();
-        if (v !== '__all__') set({ source: v });
+    return html`<${SourcesStep}
+      sources=${sources}
+      onBack=${onBack}
+      onSubmit=${(sel) => {
+        if (sel) set({ sources: sel.join(',') });
         setStep('since');
-      }} />
-    </${Box}>`;
+      }}
+    />`;
   }
   if (step === 'since') {
     return html`<${Field} label=${t('sincePrompt')} error=${err}>
@@ -200,10 +241,11 @@ export function CrawlConfig({ onRun, onBack }) {
   return html`<${Box} flexDirection="column">
     <${Text} bold>${t('crawlSummary')}</${Text}>
     <${Box} flexDirection="column" marginY=${1}>
-      <${Text}>${t('sinceLabel')}: <${Text} color="cyan">${flags.since || t('noneVal')}</${Text}></${Text}>
-      <${Text}>${t('maxPagesLabel')}: <${Text} color="cyan">${flags['max-pages'] || t('noLimitVal')}</${Text}></${Text}>
-      <${Text}>${t('maxArticlesLabel')}: <${Text} color="cyan">${flags['max-articles'] || t('noLimitVal')}</${Text}></${Text}>
-      <${Text}>${t('aggressiveLabel')}: <${Text} color=${aggressiveOn ? 'red' : 'green'}>${aggressiveOn ? t('on') : t('off')}</${Text}></${Text}>
+      <${Text}>${t('sources')}: <${Text} color=${colors.accent}>${flags.sources || t('sourceAll')}</${Text}></${Text}>
+      <${Text}>${t('sinceLabel')}: <${Text} color=${colors.accent}>${flags.since || t('noneVal')}</${Text}></${Text}>
+      <${Text}>${t('maxPagesLabel')}: <${Text} color=${colors.accent}>${flags['max-pages'] || t('noLimitVal')}</${Text}></${Text}>
+      <${Text}>${t('maxArticlesLabel')}: <${Text} color=${colors.accent}>${flags['max-articles'] || t('noLimitVal')}</${Text}></${Text}>
+      <${Text}>${t('aggressiveLabel')}: <${Text} color=${aggressiveOn ? colors.err : colors.ok}>${aggressiveOn ? t('on') : t('off')}</${Text}></${Text}>
     </${Box}>
     ${aggressiveOn ? html`<${Alert} variant="warning">${t('aggressiveOn')}</${Alert}>` : null}
     <${Review} sub="crawl" flags=${flags} onRun=${onRun} onBack=${onBack} />
@@ -517,7 +559,10 @@ function WebRun({ port, onBack }) {
     ${state.phase === 'error'
       ? html`<${Alert} variant="error">${t('webFail', { err: state.error })}</${Alert}>`
       : null}
-    <${Box} marginTop=${1}><${Text} dimColor>${t('webHint')}</${Text}></${Box}>
+    <${FooterHints} hints=${[
+      { k: 'o', label: t('hint_openBrowser') },
+      { k: 'q/Esc', label: t('hint_stopServer') },
+    ]} />
   </${Box}>`;
 }
 

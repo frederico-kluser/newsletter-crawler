@@ -34,6 +34,20 @@ export const STR = {
   aiRelationDirect: 'direto',
   aiRelationSimilar: 'relacionado',
 
+  // histórico de buscas (localStorage; toda busca concluída entra sozinha)
+  historyTitle: 'Histórico de buscas',
+  historyOpen: 'Histórico de buscas',
+  historyEmpty: 'Nenhuma busca salva ainda — toda busca com IA aparece aqui.',
+  historyRecent: 'Buscas recentes',
+  historyReopen: 'Abrir o resultado salvo (sem custo)',
+  historyRerun: 'Rodar de novo',
+  historyDelete: 'Apagar',
+  historyClear: 'Limpar histórico',
+  historyClearConfirm: 'Apagar tudo? Clique de novo.',
+  historyFrozen: (when) => `salva em ${when}`,
+  historyMissing: (n) => `${n} item${n === 1 ? '' : 's'} fora do acervo`,
+  historyStats: (rel, total) => `${rel}/${total}`,
+
   // confirmação de custo
   confirmTitle: 'Confirmar busca com IA',
   confirmBody: (count, calls, usd) =>
@@ -126,6 +140,14 @@ export function fmtUsd(v) {
   const n = Number(v) || 0;
   const digits = n > 0 && n < 0.01 ? 4 : 2;
   return `US$ ${n.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: digits })}`;
+}
+
+/** Data+hora curtas de um ISO (createdAt do histórico); vazio p/ valor inválido. */
+export function fmtDateTime(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '';
+  return d.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
 }
 
 /** ETA legível a partir de segundos: "45s", "2min", "2min 30s". */

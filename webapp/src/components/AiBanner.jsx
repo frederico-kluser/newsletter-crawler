@@ -1,9 +1,13 @@
 import { motion } from 'motion/react';
 import { springs } from '../motion/transitions.js';
-import { STR, fmtUsd } from '../strings.js';
+import { STR, fmtUsd, fmtDateTime } from '../strings.js';
 
-/** Cabeçalho dos resultados da busca IA: consulta, contadores, custo real e "limpar". */
-export default function AiBanner({ result, onClear }) {
+/**
+ * Cabeçalho dos resultados da busca IA: consulta, contadores, custo real e "limpar". Quando o
+ * resultado veio do HISTÓRICO (frozen), anota quando foi salvo, itens que saíram do acervo e
+ * oferece "rodar de novo" (re-paga).
+ */
+export default function AiBanner({ result, missing = 0, onClear, onRerun }) {
   return (
     <motion.div
       className="ai-banner"
@@ -14,15 +18,24 @@ export default function AiBanner({ result, onClear }) {
       <div className="ai-banner-text">
         <strong>“{result.query}”</strong>
         <span>
+          {result.frozen ? `${STR.historyFrozen(fmtDateTime(result.createdAt))} · ` : ''}
           {STR.aiResults(result.relevant, result.scanned)}
           {result.truncated ? ` · ${STR.aiTruncated(result.hits?.length ?? 500)}` : ''}
           {' · '}
           {result.spentUsd > 0 ? STR.aiCost(fmtUsd(result.spentUsd)) : STR.aiCostUnknown}
+          {missing > 0 ? ` · ${STR.historyMissing(missing)}` : ''}
         </span>
       </div>
-      <button type="button" className="btn" onClick={onClear}>
-        {STR.aiClear}
-      </button>
+      <span className="ai-banner-actions">
+        {result.frozen && onRerun && (
+          <button type="button" className="btn" onClick={onRerun}>
+            ↻ {STR.historyRerun}
+          </button>
+        )}
+        <button type="button" className="btn" onClick={onClear}>
+          {STR.aiClear}
+        </button>
+      </span>
     </motion.div>
   );
 }

@@ -14,6 +14,7 @@ import DetailSheet from './components/DetailSheet.jsx';
 import AnimatedCount from './components/AnimatedCount.jsx';
 import ConfirmDialog from './components/ConfirmDialog.jsx';
 import KeyModal from './components/KeyModal.jsx';
+import HistoryPanel from './components/HistoryPanel.jsx';
 import AiProgress from './components/AiProgress.jsx';
 import AiBanner from './components/AiBanner.jsx';
 import { EmptyState, ErrorState } from './components/States.jsx';
@@ -59,6 +60,7 @@ export default function App() {
   const [filters, dispatch] = useReducer(filtersReducer, { ...EMPTY_FILTERS });
   const [detailId, setDetailId] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
   const [textInput, setTextInput] = useState('');
   const textQuery = useDebouncedValue(textInput, 180);
   const isDesktop = useMediaQuery('(min-width: 900px)');
@@ -69,6 +71,29 @@ export default function App() {
   const onTextChange = (v) => {
     setTextInput(v);
     if (ai.phase === 'done' || ai.phase === 'error') ai.clear();
+  };
+
+  // Restaura o ESCOPO salvo (fonte/período) nos filtros — pills/sidebar refletem a busca reaberta.
+  const restoreScope = (scope) => {
+    if (!scope) return;
+    dispatch({ type: 'set', key: 'sourceId', value: scope.sourceId ?? null });
+    dispatch({ type: 'setPeriod', from: scope.from || '', to: scope.to || '' });
+  };
+  const openFromHistory = (id) => {
+    setHistoryOpen(false);
+    const entry = ai.restore(id);
+    if (entry) {
+      setTextInput(entry.query);
+      restoreScope(entry.scope);
+    }
+  };
+  const rerunFromHistory = (id) => {
+    setHistoryOpen(false);
+    const entry = ai.rerun(id);
+    if (entry) {
+      setTextInput(entry.query);
+      restoreScope(entry.scope);
+    }
   };
 
   // topbar ganha borda ao rolar (sinal via MotionValue; a camada anima só opacity/transform)
@@ -102,6 +127,8 @@ export default function App() {
     if (!aiShown) return null;
     return new Map(aiShown.map((x) => [x.article.id, x.relation]));
   }, [aiShown]);
+  // resultado restaurado do histórico: quantos hits salvos não existem mais no acervo (purge/re-export)
+  const aiMissing = aiActive && ai.result.frozen ? ai.result.hits.length - (aiItems?.length ?? 0) : 0;
 
   // resultados IA não têm bucket release: se estava selecionado, volta pro Tudo
   useEffect(() => {
@@ -130,6 +157,19 @@ export default function App() {
         right={
           meta ? (
             <>
+              <button
+                type="button"
+                className="icon-btn"
+                onClick={() => setHistoryOpen(true)}
+                title={STR.historyOpen}
+                aria-label={STR.historyOpen}
+              >
+                <svg width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true">
+                  <path d="M2.6 8a5.4 5.4 0 105.4-5.4c-1.9 0-3.6 1-4.5 2.5" strokeLinecap="round" />
+                  <path d="M3.2 1.8v3.4h3.4" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M8 5.4V8l2 1.4" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
               <KeyButton hasKey={ai.hasKey} onClick={ai.openKeyModal} />
               <CostBadge baseUsd={meta.cost.totalUsd} sessionUsd={ai.sessionUsd} />
             </>
@@ -143,6 +183,8 @@ export default function App() {
             onAiSearch={(deep) => ai.submit(textInput, deep)}
             aiBusy={ai.phase === 'running'}
             hasKey={ai.hasKey}
+            recents={ai.history}
+            onPickRecent={openFromHistory}
           />
         )}
       </TopBar>
@@ -173,7 +215,7 @@ export default function App() {
             {ai.phase === 'running' && (
               <AiProgress progress={ai.progress} deep={ai.deep} startedAt={ai.startedAt} onCancel={ai.cancel} />
             )}
-            {aiActive && <AiBanner result={ai.result} onClear={ai.clear} />}
+            {aiActive && <AiBanner result={ai.result} missing={aiMissing} onClear={ai.clear} onRerun={() => ai.submit(ai.result.query, ai.result.deep)} />}
             {ai.phase === 'error' && (
               <div className="ai-error" role="alert">
                 <span>{ai.error}</span>
@@ -258,6 +300,15 @@ export default function App() {
         onSave={ai.saveKey}
         onDismiss={ai.dismissKey}
         onForget={ai.forgetKey}
+      />
+      <HistoryPanel
+        open={historyOpen}
+        items={ai.history}
+        onClose={() => setHistoryOpen(false)}
+        onOpen={openFromHistory}
+        onRerun={rerunFromHistory}
+        onDelete={ai.removeEntry}
+        onClear={ai.clearAll}
       />
     </div>
   );

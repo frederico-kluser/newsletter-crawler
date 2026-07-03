@@ -377,6 +377,70 @@ function enrichHit(h) {
   };
 }
 
+// ---- histórico de buscas (tabela `searches`; escrito por searchWeb/runSearch ao concluir) ----
+
+const parseJsonCol = (s) => {
+  try {
+    return JSON.parse(s || 'null');
+  } catch {
+    return null;
+  }
+};
+
+/** GET /api/searches — lista leve (sem hits): consulta, modo, escopo, stats e custo real. */
+function apiSearches() {
+  const searches = stmts.listSearches.all().map((s) => ({
+    id: s.id,
+    created_at: s.created_at,
+    origin: s.origin,
+    query: s.query,
+    mode: s.mode,
+    scope: parseJsonCol(s.scope_json) || {},
+    stats: parseJsonCol(s.stats_json) || {},
+    spent_usd: s.spent_usd || 0,
+  }));
+  return { status: 200, body: { searches } };
+}
+
+/**
+ * GET /api/searches/:id — a busca CONGELADA re-hidratada em cards (mesmo shape do POST
+ * /api/search), SEM tocar LLM. Id de artigo que sumiu (purge) vira `missing`, nunca 500.
+ */
+function apiSearchDetail(id) {
+  const s = stmts.getSearch.get(id);
+  if (!s) return { status: 404, body: { error: 'busca não encontrada' } };
+  const hits = parseJsonCol(s.hits_json) || [];
+  const items = [];
+  let missing = 0;
+  for (const h of hits) {
+    const card = enrichHit(h);
+    if (card) items.push(card);
+    else missing++;
+  }
+  const stats = parseJsonCol(s.stats_json) || {};
+  return {
+    status: 200,
+    body: {
+      id: s.id,
+      created_at: s.created_at,
+      origin: s.origin,
+      query: s.query,
+      mode: s.mode,
+      deep: s.mode === 'deep',
+      scope: parseJsonCol(s.scope_json) || {},
+      spentUsd: s.spent_usd || 0,
+      scanned: stats.scanned ?? null,
+      total: stats.total ?? null,
+      relevant: items.length,
+      failed: stats.failed || 0,
+      skipped: stats.skipped || 0,
+      truncated: !!stats.truncated,
+      missing,
+      items,
+    },
+  };
+}
+
 /**
  * GET /api/search/stream?q=&deep=&sources=&from=&to=&confirm= — a MESMA busca do POST /api/search,
  * mas em STREAMING (SSE): eventos `progress` (scanned/total/relevant/failed/spentUsd), `hit` (card
@@ -492,14 +556,28 @@ async function handleRequest(req, res, deps) {
   const u = new URL(req.url, 'http://localhost');
   const p = u.pathname;
   try {
-    if (req.method !== 'GET' && req.method !== 'POST') {
-      return sendJSON(res, 405, { error: 'somente GET/POST' });
+    if (req.method !== 'GET' && req.method !== 'POST' && req.method !== 'DELETE') {
+      return sendJSON(res, 405, { error: 'somente GET/POST/DELETE' });
     }
     if (req.method === 'POST') {
       // POST só nas rotas de AÇÃO (busca IA e key); todo o resto é GET.
       if (p === '/api/search') return await apiSearch(req, res, deps);
       if (p === '/api/key') return await apiKeySet(req, res, deps);
       return sendJSON(res, 405, { error: 'somente GET nesta rota' });
+    }
+    if (req.method === 'DELETE') {
+      // DELETE só no histórico de buscas (item ou tudo).
+      if (p === '/api/searches') {
+        return sendJSON(res, 200, { deleted: stmts.clearSearches.run().changes });
+      }
+      const dm = p.match(/^\/api\/searches\/(\d+)$/);
+      if (dm) {
+        const n = stmts.deleteSearch.run(Number(dm[1])).changes;
+        return n
+          ? sendJSON(res, 200, { deleted: 1 })
+          : sendJSON(res, 404, { error: 'busca não encontrada' });
+      }
+      return sendJSON(res, 405, { error: 'DELETE só no histórico de buscas' });
     }
     if (p === '/' || p === '/index.html') {
       return sendFile(res, path.join(UI_DIR, 'index.html'), 'text/html; charset=utf-8');
@@ -525,6 +603,15 @@ async function handleRequest(req, res, deps) {
     if (p === '/api/search/stream') return await apiSearchStream(req, res, deps, u);
     if (p === '/api/search/scope') {
       const r = apiSearchScope(u.searchParams);
+      return sendJSON(res, r.status, r.body);
+    }
+    if (p === '/api/searches') {
+      const r = apiSearches();
+      return sendJSON(res, r.status, r.body);
+    }
+    const sm = p.match(/^\/api\/searches\/(\d+)$/);
+    if (sm) {
+      const r = apiSearchDetail(Number(sm[1]));
       return sendJSON(res, r.status, r.body);
     }
     if (p === '/api/key/status') {

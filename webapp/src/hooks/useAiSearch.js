@@ -5,6 +5,7 @@ import { runSearch } from '../lib/search.js';
 import { probeKey } from '../lib/openrouter.js';
 import { applyFilters, EMPTY_FILTERS } from '../lib/filters.js';
 import { clearApiKey, getApiKey, setApiKey } from '../lib/storage.js';
+import { addToHistory, clearHistory, loadHistory, removeFromHistory } from '../lib/history.js';
 import { STR } from '../strings.js';
 
 /**
@@ -19,10 +20,11 @@ export function useAiSearch({ articles, meta, filters }) {
     phase: 'idle', query: '', deep: false, progress: null, result: null, error: null,
     partialHits: [], startedAt: null, // streaming: hits ao vivo + t0 p/ o ETA do loader
   });
-  const [confirmInfo, setConfirmInfo] = useState(null); // {query, deep, count, calls, usd, candidates}
-  const [keyModal, setKeyModal] = useState(null); // {pending:{query,deep}|null, reason:'missing'|'invalid'|'manage'}
+  const [confirmInfo, setConfirmInfo] = useState(null); // {query, deep, count, calls, usd, candidates, scope}
+  const [keyModal, setKeyModal] = useState(null); // {pending:{query,deep,scope}|null, reason:'missing'|'invalid'|'manage'}
   const [sessionUsd, setSessionUsd] = useState(0); // gasto REAL acumulado da sessão (CostBadge)
   const [hasKey, setHasKey] = useState(() => Boolean(getApiKey())); // reativo p/ o botão de chave da topbar
+  const [history, setHistory] = useState(() => loadHistory()); // buscas salvas (localStorage)
   const abortRef = useRef(null);
 
   const scopeCandidates = useCallback(
@@ -36,7 +38,7 @@ export function useAiSearch({ articles, meta, filters }) {
   );
 
   const start = useCallback(
-    async ({ query, deep, candidates }) => {
+    async ({ query, deep, candidates, scope = {} }) => {
       const apiKey = getApiKey();
       const controller = new AbortController();
       abortRef.current = controller;
@@ -66,6 +68,7 @@ export function useAiSearch({ articles, meta, filters }) {
         });
         if (result.spentUsd > lastSpent) setSessionUsd((v) => v + (result.spentUsd - lastSpent));
         setState({ phase: 'done', query, deep, progress: null, result, error: null, partialHits: [], startedAt: null });
+        setHistory(addToHistory(result, scope)); // auto-salva a busca concluída (fail-open)
       } catch (e) {
         if (controller.signal.aborted || e?.name === 'AbortError') {
           setState({ phase: 'idle', query: '', deep, progress: null, result: null, error: null, partialHits: [], startedAt: null });
@@ -86,25 +89,65 @@ export function useAiSearch({ articles, meta, filters }) {
     [meta],
   );
 
-  const submit = useCallback(
-    (query, deep) => {
+  // Dispara com um ESCOPO explícito {sourceId, from, to} — o re-rodar do histórico usa o escopo
+  // salvo (não os filtros atuais), então a busca reproduz o mesmo recorte independentemente do
+  // que estiver selecionado na tela.
+  const run = useCallback(
+    (query, deep, scope) => {
       const q = String(query || '').trim();
       if (!q || !articles || state.phase === 'running') return;
       if (!getApiKey()) {
-        setKeyModal({ pending: { query: q, deep }, reason: 'missing' });
+        setKeyModal({ pending: { query: q, deep, scope }, reason: 'missing' });
         return;
       }
-      const candidates = scopeCandidates(filters);
+      const candidates = scopeCandidates(scope);
       if (!candidates.length) {
         setState((s) => ({ ...s, phase: 'error', query: q, deep, error: STR.aiEmptyScope }));
         return;
       }
       const { calls, usd, needsConfirm } = estimateSearch({ count: candidates.length, deep, search: meta.search });
-      if (needsConfirm) setConfirmInfo({ query: q, deep, count: candidates.length, calls, usd, candidates });
-      else start({ query: q, deep, candidates });
+      if (needsConfirm) setConfirmInfo({ query: q, deep, count: candidates.length, calls, usd, candidates, scope });
+      else start({ query: q, deep, candidates, scope });
     },
-    [articles, filters, meta, scopeCandidates, start, state.phase],
+    [articles, meta, scopeCandidates, start, state.phase],
   );
+
+  const submit = useCallback(
+    (query, deep) => run(query, deep, { sourceId: filters.sourceId, from: filters.from, to: filters.to }),
+    [run, filters],
+  );
+
+  // Reabre uma busca salva SEM custo: vira um resultado "done" CONGELADO (App re-hidrata os hits
+  // via byId). Devolve a entrada p/ o App restaurar o escopo nos filtros (pills coerentes).
+  const restore = useCallback((id) => {
+    const entry = loadHistory().find((e) => e.id === id);
+    if (!entry) return null;
+    abortRef.current?.abort();
+    setState({
+      phase: 'done',
+      query: entry.query,
+      deep: entry.deep,
+      progress: null,
+      result: { ...entry.stats, query: entry.query, deep: entry.deep, hits: entry.hits, frozen: true, createdAt: entry.createdAt },
+      error: null,
+      partialHits: [],
+      startedAt: null,
+    });
+    return entry;
+  }, []);
+
+  // Re-roda uma busca salva com o MESMO escopo (passa pela confirmação de custo usual).
+  const rerun = useCallback(
+    (id) => {
+      const entry = loadHistory().find((e) => e.id === id);
+      if (entry) run(entry.query, entry.deep, entry.scope || {});
+      return entry || null;
+    },
+    [run],
+  );
+
+  const removeEntry = useCallback((id) => setHistory(removeFromHistory(id)), []);
+  const clearAll = useCallback(() => setHistory(clearHistory()), []);
 
   const confirm = useCallback(() => {
     if (confirmInfo) start(confirmInfo);
@@ -137,9 +180,10 @@ export function useAiSearch({ articles, meta, filters }) {
       setHasKey(true);
       const pending = keyModal?.pending;
       setKeyModal(null);
-      if (pending) submit(pending.query, pending.deep);
+      // re-dispara a busca pendente com o MESMO escopo que a originou (não os filtros atuais)
+      if (pending) run(pending.query, pending.deep, pending.scope || { sourceId: filters.sourceId, from: filters.from, to: filters.to });
     },
-    [keyModal, submit],
+    [keyModal, run, filters],
   );
 
   const dismissKey = useCallback(() => setKeyModal(null), []);
@@ -155,6 +199,7 @@ export function useAiSearch({ articles, meta, filters }) {
     keyModal,
     sessionUsd,
     hasKey,
+    history,
     submit,
     confirm,
     cancelConfirm,
@@ -164,5 +209,9 @@ export function useAiSearch({ articles, meta, filters }) {
     saveKey,
     dismissKey,
     forgetKey,
+    restore,
+    rerun,
+    removeEntry,
+    clearAll,
   };
 }

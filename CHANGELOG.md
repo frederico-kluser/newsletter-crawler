@@ -3,6 +3,27 @@
 Todas as mudanças relevantes deste projeto. Formato baseado em
 [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/); versionamento [SemVer](https://semver.org/lang/pt-BR/).
 
+## [1.9.0] - 2026-07-03
+
+Histórico de buscas IA com resultados persistidos — a busca deixou de ser efêmera nas três frentes.
+
+### Adicionado
+- **Tabela `searches` (SQLite) + histórico no CLI/TUI/web local:** toda busca IA concluída é salva
+  (consulta, modo, escopo, stats e os hits como ids+vereditos LEVES; custo real vem de `llm_usage`
+  via `run_id`). `persistSearch` no `runSearch`/`searchWeb`; helpers `listSearchHistory`/
+  `getSearchHistoryEntry` (re-hidrata a ficha do acervo, conta ids que sumiram)/`deleteSearchHistory`.
+- **Web local (`ncrawl web`):** endpoints `GET /api/searches`, `GET /api/searches/:id` (resultado
+  congelado re-hidratado, ZERO LLM), `DELETE /api/searches/:id` e `DELETE /api/searches`; dropdown de
+  recentes ao focar o campo + painel **Histórico** (abrir · re-rodar · apagar · limpar tudo). Reabrir
+  mostra os cards salvos sem custo; re-rodar restaura o escopo e passa pela confirmação de custo usual.
+- **TUI:** tela **Histórico de buscas** (`src/ui/HistoryView.js`) — lista navegável, Enter reabre o
+  resultado congelado na ResultsView, `r` re-roda (fluxo de busca pré-preenchido), `d` apaga, `x`×2
+  limpa tudo.
+- **Webapp estático (`webapp/`):** histórico no NAVEGADOR (localStorage, `webapp/src/lib/history.js`,
+  payload versionado `{v:1}`; auto-save SEM limite, poda só se a quota do localStorage estourar —
+  fail-open, nunca quebra a busca). Dropdown de recentes no campo + painel Histórico com abrir/re-rodar/
+  apagar; o banner marca o resultado restaurado ("salva em …", custo, itens fora do acervo).
+
 ## [1.8.0] - 2026-07-03
 
 Publicação do site automatizada: push na main = snapshot fresco + deploy (Vercel Git integration).

@@ -1,15 +1,34 @@
 {
   "sources": [
     {
-      "name": "The Batch — Research",
-      "url": "https://www.deeplearning.ai/the-batch/tag/research",
-      "render": "auto"
+      "name": "Node Weekly",
+      "url": "https://nodeweekly.com/issues",
+      "type": "index"
     },
     {
-      "name": "AI Weekly",
-      "url": "https://aiweekly.co/issues",
-      "type": "index",
-      "maxIndexPages": 1
+      "name": "JavaScript Weekly",
+      "url": "https://javascriptweekly.com/issues",
+      "type": "index"
+    },
+    {
+      "name": "Frontend Focus",
+      "url": "https://frontendfoc.us/issues",
+      "type": "index"
+    },
+    {
+      "name": "React Status",
+      "url": "https://react.statuscode.com/issues",
+      "type": "index"
+    },
+    {
+      "name": "Postgres Weekly",
+      "url": "https://postgresweekly.com/issues",
+      "type": "index"
+    },
+    {
+      "name": "Golang Weekly",
+      "url": "https://golangweekly.com/issues",
+      "type": "index"
     }
   ]
 }

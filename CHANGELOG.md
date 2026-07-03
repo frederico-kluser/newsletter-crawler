@@ -3,6 +3,45 @@
 Todas as mudanças relevantes deste projeto. Formato baseado em
 [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/); versionamento [SemVer](https://semver.org/lang/pt-BR/).
 
+## [1.7.0] - 2026-07-03
+
+Fontes de fábrica trocadas para 6 newsletters Cooperpress, seleção de fontes por **checkbox** na TUI
+(novo `--sources "A,B"`) e overhaul visual da TUI com camada de tema (tokens semânticos).
+
+### Adicionado
+- **`--sources "A,B"` no crawl:** lista por vírgula (cada item por **nome exato** ou **URL**, a mesma
+  regra do `--source`), com **precedência** sobre `--source`/`--only` (avisa ao ignorá-los) e aviso
+  por item sem match (nunca no-op silencioso). Helper puro `filterSeedSources` (`src/commands.js`)
+  coberto pela suíte `commands.sources-filter`.
+- **Checkbox de fontes na TUI (tela Coletar):** o passo de fonte virou **multi-select** (`MultiSelect`
+  do @inkjs/ui, dependência já existente e até então sem uso): **espaço** marca/desmarca, **Enter**
+  confirma, **Esc** volta; **todas marcadas por padrão** (Enter direto = coletar tudo, sem flag);
+  subconjunto emite `--sources "A,B"`; 0 marcadas → erro inline **sem perder a seleção** (o erro não
+  remonta o MultiSelect). Componente `SourcesStep` exportado + suíte `ui.crawl-sources`.
+- **Camada de tema da TUI (`src/ui/theme.js`):** tokens semânticos de cor por FUNÇÃO
+  (accent/title/ok/warn/err/link/muted), glifos (estado sempre redundante à cor — NO_COLOR legível) e
+  `uiTheme` via `extendTheme` recolorindo Select/MultiSelect/Spinner/ProgressBar do @inkjs/ui (foco
+  azul default → accent; barra magenta → accent). `ThemeProvider` na raiz do App.
+- **Widgets compartilhados (`src/ui/widgets.js`):** `Panel` (borda round; política: só **2**
+  superfícies com borda no app — o overlay `v` e o card do comando equivalente no Review — borda é
+  significado, não decoração), `FooterHints` (rodapé de atalhos padronizado `tecla verbo · …`, fim
+  das 5 strings divergentes) e `Header` (breadcrumb `◆ <tela>`). `useSpinnerFrame` movido p/
+  `src/ui/hooks.js` (regra: 1 timer de animação por árvore, sempre `.unref()`).
+- **Helper de teste `test/helpers/ink.js`:** navegação do menu por **label** (segue o ponteiro `❯`,
+  casando palavra inteira) — `ui.search`/`ui.web` não hard-codam mais DOWN×N nem a ordem do menu.
+
+### Alterado
+- **Fontes de fábrica (`config/sources.json` + `~/.newsletter-crawler/sources.json`):** saem
+  `The Batch — Research` e `AI Weekly`; entram **Node Weekly, JavaScript Weekly, Frontend Focus,
+  React Status, Postgres Weekly e Golang Weekly** (todas Cooperpress `/issues`, `type: "index"`,
+  mesma extração já provada no Node Weekly). Sem purga necessária (o acervo só tinha Node Weekly).
+  ATENÇÃO: a **1ª coleta** de cada fonte nova enxerga ~600 issues no arquivo — rode com
+  `--since`/`--max-articles` p/ controlar custo.
+- **Re-skin por tokens em toda a TUI** (StatusBar, Menu, Status, wizards, Review com card, RunView,
+  ResultsView, CrawlDashboard) **sem mudança estrutural** no dashboard (fases/feed/ticker intactos;
+  `crawlPhases.js`/`runLines.js` puros como antes). Rodapé do dashboard no formato novo
+  (`v detalhes · q sai`). StatusScreen ganhou `.unref()` no poll de 1s (não segura o `node --test`).
+
 ## [1.6.0] - 2026-07-03
 
 Painel do crawl reprojetado (dashboard "mission control" na TUI) + classificação muito mais barata e

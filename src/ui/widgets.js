@@ -28,6 +28,7 @@ const HEADER_KEY = {
   crawl: 'menuCrawl',
   search: 'menuSearch',
   results: 'menuSearch',
+  history: 'menuHistory',
   web: 'menuWeb',
   status: 'menuStatus',
   export: 'menuExport',

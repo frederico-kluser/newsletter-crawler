@@ -9,7 +9,7 @@ import { colors, space, uiTheme } from './theme.js';
 import { Header } from './widgets.js';
 import {
   getStatus, cmdCrawl, cmdExport, cmdAdd, cmdReset, cmdFinish, cmdSearch,
-  getArticle,
+  getArticle, listSearchHistory, getSearchHistoryEntry, deleteSearchHistory,
 } from '../commands.js';
 import { openBrowser } from '../web.js';
 import {
@@ -18,12 +18,14 @@ import {
 } from './screens.js';
 import { RunView } from './RunView.js';
 import { ResultsView } from './ResultsView.js';
+import { HistoryView } from './HistoryView.js';
 
 const THUNKS = {
   crawl: (flags) => cmdCrawl(flags),
   export: (flags) => cmdExport(flags),
   finish: (flags) => cmdFinish(flags),
-  search: (flags, rest) => cmdSearch(rest, flags), // retorna os resultados p/ a UI
+  // retorna os resultados p/ a UI; origem 'tui' marca o histórico de buscas
+  search: (flags, rest) => cmdSearch(rest, { ...flags, origin: 'tui' }),
   add: (flags, rest) => cmdAdd(rest, flags),
   reset: (flags) => cmdReset(flags),
 };
@@ -63,6 +65,7 @@ export default function App() {
   const [screen, setScreen] = useState('menu');
   const [runSpec, setRunSpec] = useState(null);
   const [runResult, setRunResult] = useState(null); // resultados da busca
+  const [searchInitial, setSearchInitial] = useState(null); // pré-preenchimento (re-rodar do histórico)
   const [, setRefresh] = useState(0);
 
   const onRun = ({ sub, flags = {}, rest = [] }) => {
@@ -71,12 +74,17 @@ export default function App() {
   };
   const toMenu = () => {
     setRefresh((k) => k + 1); // força StatusBar a reler getStatus() após um run
+    setSearchInitial(null); // pré-preenchimento do re-rodar não vaza pra próxima busca do menu
     setScreen('menu');
   };
 
   let body = null;
   if (screen === 'menu') {
-    body = html`<${Menu} onSelect=${(v) => (v === 'quit' ? exit() : setScreen(v))} />`;
+    body = html`<${Menu} onSelect=${(v) => {
+      if (v === 'quit') return exit();
+      setSearchInitial(null);
+      setScreen(v);
+    }} />`;
   } else if (screen === 'status') {
     body = html`<${StatusScreen} status=${getStatus()} onBack=${toMenu} />`;
   } else if (screen === 'crawl') {
@@ -86,7 +94,26 @@ export default function App() {
   } else if (screen === 'finish') {
     body = html`<${FinishConfig} onRun=${onRun} onBack=${toMenu} />`;
   } else if (screen === 'search') {
-    body = html`<${SearchConfig} onRun=${onRun} onBack=${toMenu} />`;
+    body = html`<${SearchConfig} onRun=${onRun} onBack=${toMenu} initial=${searchInitial} />`;
+  } else if (screen === 'history') {
+    // Histórico de buscas: abrir reabre o resultado CONGELADO na ResultsView (zero LLM);
+    // re-rodar cai no fluxo de busca pré-preenchido (confirmação de custo usual).
+    body = html`<${HistoryView}
+      entries=${listSearchHistory()}
+      onOpen=${(e) => {
+        const r = getSearchHistoryEntry(e.id);
+        if (!r) return;
+        setRunResult(r);
+        setScreen('results');
+      }}
+      onRerun=${(e) => {
+        setSearchInitial({ query: e.query, mode: e.mode === 'B' ? 'B' : 'A', all: Boolean(e.scope?.all) });
+        setScreen('search');
+      }}
+      onDelete=${(id) => deleteSearchHistory(id)}
+      onClearAll=${() => deleteSearchHistory(null)}
+      onDone=${(v) => (v === 'quit' ? exit() : toMenu())}
+    />`;
   } else if (screen === 'web') {
     body = html`<${WebConfig} onBack=${toMenu} />`;
   } else if (screen === 'limits') {

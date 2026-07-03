@@ -86,6 +86,18 @@ const STR = {
   keyChecking: 'Validando…',
   keyInvalid: 'Chave inválida (a API do OpenRouter recusou). Confira e tente de novo.',
   keyNetwork: 'Não deu para validar (sem rede?). Tente de novo.',
+  // histórico de buscas (persistido no SQLite; toda busca concluída entra sozinha)
+  historyTitle: 'Histórico de buscas',
+  historyEmpty: 'Nenhuma busca salva ainda — toda busca concluída com IA aparece aqui.',
+  historyOpen: 'Abrir o resultado salvo (sem custo)',
+  historyRerun: 'Rodar de novo',
+  historyDelete: 'Apagar',
+  historyClear: 'Limpar histórico',
+  historyClearConfirm: 'Apagar tudo? (clique de novo)',
+  historyRestored: (when) => `salva em ${when}`,
+  historyMissing: (n) => `${n} item(ns) saíram do acervo`,
+  historyModeLabel: { soft: 'soft', deep: 'profunda', A: 'CLI modo A', B: 'CLI modo B' },
+  recentLabel: 'Buscas recentes',
 };
 
 const FACET_LABEL = {
@@ -208,6 +220,15 @@ const fmtDate = (iso) => {
   if (/^\d{4}-\d{2}-\d{2}$/.test(String(iso).trim())) opts.timeZone = 'UTC';
   return d.toLocaleDateString('pt-BR', opts);
 };
+// created_at do histórico vem do SQLite em UTC 'YYYY-MM-DD HH:MM:SS' (sem T/Z — o Safari nem
+// parseia): normaliza p/ ISO UTC e exibe no fuso local.
+const fmtDateTime = (sq) => {
+  if (!sq) return '';
+  const s = String(sq);
+  const d = new Date(s.includes('T') ? s : `${s.replace(' ', 'T')}Z`);
+  if (Number.isNaN(d.getTime())) return s;
+  return d.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+};
 // published_at vem cru do scrape (pode ser imparseável); cai no extracted_at.
 const bestDate = (a) => {
   const pub = a.published_at && !Number.isNaN(new Date(a.published_at).getTime());
@@ -235,6 +256,12 @@ const Icon = {
     <circle cx="19" cy="19" r="12.5" stroke="currentColor" stroke-width="2" />
     <path d="M28.5 28.5l8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
     <path d="M14 19h10" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+  </svg>`,
+  history: () => html`<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+    <path d="M2.6 8a5.4 5.4 0 105.4-5.4c-1.9 0-3.6 1-4.5 2.5" stroke="currentColor" stroke-width="1.5"
+      stroke-linecap="round" />
+    <path d="M3.2 1.8v3.4h3.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M8 5.4V8l2 1.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
   </svg>`,
 };
 
@@ -497,6 +524,63 @@ function KeyModal({ onSaved, onClose }) {
   </div>`;
 }
 
+// Painel do histórico de buscas: lista completa (data, modo, stats, custo real) com abrir /
+// re-rodar / apagar; "limpar tudo" pede um 2º clique (confirmação inline, sem outro overlay).
+function HistoryPanel({ items, onClose, onOpen, onRerun, onDelete, onClear }) {
+  const [armClear, setArmClear] = useState(false);
+  useEffect(() => {
+    const onKey = (e) => e.key === 'Escape' && onClose();
+    window.addEventListener('keydown', onKey);
+    document.body.style.overflow = 'hidden';
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      document.body.style.overflow = '';
+    };
+  }, [onClose]);
+  return html`<div className="overlay" onClick=${(e) => e.target === e.currentTarget && onClose()}>
+    <div className="sheet history-sheet" role="dialog" aria-modal="true" aria-label=${STR.historyTitle}>
+      <button className="close" onClick=${onClose} aria-label=${STR.close}>✕</button>
+      <h2>${STR.historyTitle}</h2>
+      ${items.length === 0 && html`<p className="muted">${STR.historyEmpty}</p>`}
+      <div className="history-list">
+        ${items.map(
+          (h) => html`<div key=${h.id} className="history-row">
+            <button className="history-main" onClick=${() => onOpen(h.id)} title=${STR.historyOpen}>
+              <span className="shi-query">${h.query}</span>
+              <span className="shi-meta">
+                ${fmtDateTime(h.created_at)}
+                ${` · ${STR.historyModeLabel[h.mode] || h.mode}`}
+                ${` · ${h.stats?.relevant ?? '—'}/${h.stats?.total ?? '—'}`}
+                ${h.spent_usd > 0 ? ` · ${fmtUsd(h.spent_usd)}` : ''}
+              </span>
+            </button>
+            <span className="history-actions">
+              <button className="icon-btn" title=${STR.historyRerun} aria-label=${STR.historyRerun}
+                onClick=${() => onRerun(h.id)}>↻</button>
+              <button className="icon-btn" title=${STR.historyDelete} aria-label=${STR.historyDelete}
+                onClick=${() => onDelete(h.id)}>✕</button>
+            </span>
+          </div>`,
+        )}
+      </div>
+      ${items.length > 0 &&
+      html`<div className="sheet-actions">
+        <button
+          className="btn-ghost"
+          onClick=${() => {
+            if (armClear) {
+              setArmClear(false);
+              onClear();
+            } else setArmClear(true);
+          }}
+        >
+          ${armClear ? STR.historyClearConfirm : STR.historyClear}
+        </button>
+      </div>`}
+    </div>
+  </div>`;
+}
+
 // ---- app ----
 function App() {
   const [meta, setMeta] = useState(null);
@@ -520,9 +604,14 @@ function App() {
   const [aiError, setAiError] = useState(null);
   const [aiProgress, setAiProgress] = useState(null); // {scanned,total,relevant,failed,spentUsd,mode}
   const [streamItems, setStreamItems] = useState([]); // hits que já chegaram (streaming ao vivo)
-  const [confirmInfo, setConfirmInfo] = useState(null); // {count, usd} vindos do preflight
+  const [confirmInfo, setConfirmInfo] = useState(null); // {count, usd, opts} vindos do preflight
   const [hasKey, setHasKey] = useState(null); // null = ainda não checado
   const [keyOpen, setKeyOpen] = useState(false);
+
+  // Histórico de buscas (tabela `searches` no servidor): lista leve p/ dropdown+painel.
+  const [history, setHistory] = useState([]);
+  const [histPanel, setHistPanel] = useState(false);
+  const [histFocus, setHistFocus] = useState(false); // dropdown de recentes ao focar o campo
 
   const [items, setItems] = useState([]);
   const [total, setTotal] = useState(0);
@@ -567,6 +656,14 @@ function App() {
       .then((r) => setHasKey(Boolean(r.hasKey)))
       .catch(() => setHasKey(null));
   }, []);
+
+  // Histórico é acessório: falha de rede não pode quebrar o browse (fica a lista anterior).
+  const loadHistory = useCallback(() => {
+    fetchJSON('/api/searches')
+      .then((r) => setHistory(r.searches || []))
+      .catch(() => {});
+  }, []);
+  useEffect(loadHistory, [loadHistory]);
 
   // Recarrega a primeira página a cada mudança de filtro (cancelando a anterior).
   useEffect(() => {
@@ -617,22 +714,36 @@ function App() {
   // Dispara a busca IA (Enter/botão): preflight de escopo/custo -> confirmação (profunda sempre;
   // soft só acima do limiar) -> POST único (a resposta demora o que a IA demorar; spinner cobre).
   // Função simples (não useCallback): só roda em handler de evento, sempre com estado fresco.
+  // `opts` aceita OVERRIDES explícitos (query/deep/sources/from/to) — o re-rodar do histórico
+  // chama logo após restaurar e não pode depender do setState (assíncrono) já ter aplicado.
   const doSearch = async (opts = {}) => {
-    const query = q.trim();
+    const query = (opts.query ?? q).trim();
     if (!query || aiLoading) return;
+    const isDeep = opts.deep ?? deep;
     setAiError(null);
     if (hasKey === false) {
       setKeyOpen(true); // a "busca pendente" fica nos próprios states (q/deep/escopo)
       return;
     }
-    const sources = deep ? deepSources : sourceId ? [Number(sourceId)] : [];
+    const sources =
+      opts.sources !== undefined
+        ? opts.sources || []
+        : isDeep
+          ? deepSources
+          : sourceId
+            ? [Number(sourceId)]
+            : [];
+    const fromV = opts.from !== undefined ? opts.from : from;
+    const toV = opts.to !== undefined ? opts.to : to;
+    // Guarda os overrides p/ o ConfirmDialog re-disparar a MESMA busca.
+    const carry = { query, deep: isDeep, sources, from: fromV, to: toV };
     try {
       if (!opts.confirmed) {
         const sp = new URLSearchParams();
-        if (deep) sp.set('deep', '1');
+        if (isDeep) sp.set('deep', '1');
         if (sources.length) sp.set('sources', JSON.stringify(sources));
-        if (from) sp.set('from', from);
-        if (to) sp.set('to', to);
+        if (fromV) sp.set('from', fromV);
+        if (toV) sp.set('to', toV);
         const pre = await fetchJSON(`/api/search/scope?${sp}`);
         if (pre.hasKey === false) {
           setHasKey(false);
@@ -643,14 +754,15 @@ function App() {
           setAiError(STR.scopeEmpty);
           return;
         }
-        if (deep || pre.needsConfirm) {
-          setConfirmInfo({ count: pre.count, usd: pre.estimatedUsd });
-          return; // o ConfirmDialog re-chama doSearch({confirmed:true})
+        if (isDeep || pre.needsConfirm) {
+          setConfirmInfo({ count: pre.count, usd: pre.estimatedUsd, opts: carry });
+          return; // o ConfirmDialog re-chama doSearch({...opts, confirmed:true})
         }
       }
       setConfirmInfo(null);
+      setAi(null); // sai do modo resultados (inclusive congelado) — o grid mostra o streaming
       setStreamItems([]);
-      setAiProgress({ scanned: 0, total: 0, relevant: 0, failed: 0, spentUsd: 0, mode: deep ? 'deep' : 'soft' });
+      setAiProgress({ scanned: 0, total: 0, relevant: 0, failed: 0, spentUsd: 0, mode: isDeep ? 'deep' : 'soft' });
       aiStartRef.current = Date.now();
       setAiLoading(true);
       const ac = new AbortController();
@@ -658,20 +770,21 @@ function App() {
       const collected = [];
       const done = await streamSearch({
         query,
-        deep,
+        deep: isDeep,
         sources: sources.length ? sources : null,
-        from: from || null,
-        to: to || null,
+        from: fromV || null,
+        to: toV || null,
         signal: ac.signal,
         onHit: (item) => {
           collected.push(item);
           setStreamItems((cur) => [...cur, item]); // card AO VIVO
         },
-        onProgress: (p) => setAiProgress((cur) => ({ ...(cur || {}), ...p, mode: deep ? 'deep' : 'soft' })),
+        onProgress: (p) => setAiProgress((cur) => ({ ...(cur || {}), ...p, mode: isDeep ? 'deep' : 'soft' })),
       });
       collected.sort((a, b) => (a.relation === 'direct' ? 0 : 1) - (b.relation === 'direct' ? 0 : 1) || b.id - a.id); // direct 1º
       setAi({ ...done, items: collected });
       if (kind === 'release') setKind('all'); // Release não existe no julgamento da IA
+      loadHistory(); // a busca concluída acabou de entrar no histórico do servidor
     } catch (e) {
       if (e.name === 'AbortError') {
         /* Cancelar: sem erro, volta ao browse */
@@ -681,7 +794,7 @@ function App() {
       } else if (e.status === 409) {
         setAiError(STR.busyMsg);
       } else if (e.status === 428) {
-        setConfirmInfo({ count: e.data?.count ?? 0, usd: null }); // corrida rara: preflight mudou
+        setConfirmInfo({ count: e.data?.count ?? 0, usd: null, opts: carry }); // corrida rara: preflight mudou
       } else {
         setAiError(STR.searchFailed);
       }
@@ -697,6 +810,70 @@ function App() {
   const clearAi = () => {
     setAi(null);
     setAiError(null);
+  };
+
+  // Reabre uma busca salva SEM custo: o detalhe re-hidratado vira o próprio modo resultados
+  // (`ai` com frozen:true) e o ESCOPO salvo volta pros controles — re-rodar é só doSearch().
+  const restoreSearch = async (id) => {
+    setHistPanel(false);
+    setHistFocus(false);
+    try {
+      const d = await fetchJSON(`/api/searches/${id}`);
+      setQ(d.query);
+      setDeep(Boolean(d.deep));
+      const src = Array.isArray(d.scope?.sources) ? d.scope.sources : [];
+      if (d.deep) {
+        setDeepSources(src);
+        setSourceId('');
+      } else {
+        setSourceId(src.length === 1 ? String(src[0]) : '');
+      }
+      setFrom(d.scope?.from || '');
+      setTo(d.scope?.to || '');
+      if (kind === 'release') setKind('all');
+      setAiError(null);
+      setAi({ ...d, frozen: true });
+      return d;
+    } catch (e) {
+      setAiError(e.message || STR.searchFailed);
+      return null;
+    }
+  };
+
+  // Re-roda uma busca do histórico: restaura o escopo E dispara com overrides explícitos
+  // (o estado recém-setado ainda não está visível aqui dentro).
+  const rerunSearch = async (id) => {
+    const d = await restoreSearch(id);
+    if (!d) return;
+    const src = Array.isArray(d.scope?.sources) ? d.scope.sources : [];
+    doSearch({
+      query: d.query,
+      deep: Boolean(d.deep),
+      sources: src.length ? src : [],
+      from: d.scope?.from || '',
+      to: d.scope?.to || '',
+    });
+  };
+
+  const deleteHistoryEntry = async (id) => {
+    try {
+      await fetch(`/api/searches/${id}`, { method: 'DELETE' });
+    } catch {
+      /* offline: a lista re-sincroniza no próximo load */
+    }
+    if (ai?.frozen && ai.id === id) clearAi();
+    loadHistory();
+  };
+
+  const clearHistory = async () => {
+    try {
+      await fetch('/api/searches', { method: 'DELETE' });
+    } catch {
+      /* idem */
+    }
+    if (ai?.frozen) clearAi();
+    setHistPanel(false);
+    loadHistory();
   };
 
   const cancelAi = () => {
@@ -764,6 +941,17 @@ function App() {
             💸 US$ ${meta.cost.totalUsd.toFixed(2)}
             <span className="muted"> · ${meta.cost.totalCalls} chamadas</span>
           </span>`}
+          <button
+            className="icon-btn"
+            onClick=${() => {
+              loadHistory();
+              setHistPanel(true);
+            }}
+            title=${STR.historyTitle}
+            aria-label=${STR.historyTitle}
+          >
+            <${Icon.history} />
+          </button>
           <${ThemeToggle} />
         </div>
       </div>
@@ -781,9 +969,23 @@ function App() {
             placeholder=${STR.searchPlaceholder}
             onInput=${(e) => setQ(e.target.value)}
             onKeyDown=${(e) => e.key === 'Enter' && doSearch()}
+            onFocus=${() => setHistFocus(true)}
+            onBlur=${() => setHistFocus(false)}
             aria-label=${STR.searchPlaceholder}
             autoFocus
           />
+          ${histFocus && !q.trim() && history.length > 0 &&
+          html`<div className="search-history" onMouseDown=${(e) => e.preventDefault()}>
+            <span className="search-history-label">${STR.recentLabel}</span>
+            ${history.slice(0, 8).map(
+              (h) => html`<button key=${h.id} className="search-history-item" onClick=${() => restoreSearch(h.id)}>
+                <span className="shi-query">${h.query}</span>
+                <span className="shi-meta">
+                  ${fmtDateTime(h.created_at)} · ${h.stats?.relevant ?? 0} ${STR.aiRelevants(h.stats?.relevant ?? 0)}
+                </span>
+              </button>`,
+            )}
+          </div>`}
           ${q &&
           html`<button
             className="clear"
@@ -955,12 +1157,19 @@ function App() {
         <span>
           <strong>${STR.aiResultsFor(ai.query)}</strong>
           <span className="muted">
+            ${ai.frozen ? ` · ${STR.historyRestored(fmtDateTime(ai.created_at))}` : ''}
             ${` · ${STR.aiStats(ai.relevant, ai.total)}`}
             ${ai.truncated ? ` · ${STR.aiTruncated(ai.items.length)}` : ''}
             ${ai.skipped ? ` · ${STR.aiSkipped(ai.skipped)}` : ''}
+            ${ai.frozen && ai.spentUsd > 0 ? ` · ${fmtUsd(ai.spentUsd)}` : ''}
+            ${ai.frozen && ai.missing > 0 ? ` · ${STR.historyMissing(ai.missing)}` : ''}
           </span>
         </span>
-        <button className="link-btn" onClick=${clearAi}>${STR.aiClear}</button>
+        <span className="banner-actions">
+          ${ai.frozen &&
+          html`<button className="link-btn" onClick=${() => doSearch()}>↻ ${STR.historyRerun}</button>`}
+          <button className="link-btn" onClick=${clearAi}>${STR.aiClear}</button>
+        </span>
       </div>`}
 
       ${!ai && !aiLoading
@@ -1030,9 +1239,18 @@ function App() {
       confirmLabel=${STR.confirmRun}
       onConfirm=${() => {
         setConfirmInfo(null);
-        doSearch({ confirmed: true });
+        doSearch({ ...(confirmInfo.opts || {}), confirmed: true });
       }}
       onCancel=${() => setConfirmInfo(null)}
+    />`}
+    ${histPanel &&
+    html`<${HistoryPanel}
+      items=${history}
+      onClose=${() => setHistPanel(false)}
+      onOpen=${restoreSearch}
+      onRerun=${rerunSearch}
+      onDelete=${deleteHistoryEntry}
+      onClear=${clearHistory}
     />`}
     ${keyOpen &&
     html`<${KeyModal}

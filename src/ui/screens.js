@@ -66,6 +66,7 @@ export function Menu({ onSelect }) {
   const options = [
     { label: t('menuCrawl') + crawlSuffix, value: 'crawl' },
     { label: t('menuSearch'), value: 'search' },
+    { label: t('menuHistory'), value: 'history' },
     { label: t('menuWeb'), value: 'web' },
     { label: t('menuStatus'), value: 'status' },
     { label: t('menuExport'), value: 'export' },
@@ -314,10 +315,20 @@ export function FinishConfig({ onRun, onBack }) {
   return html`<${Review} sub="finish" flags=${flags} onRun=${onRun} onBack=${onBack} />`;
 }
 
-export function SearchConfig({ onRun, onBack }) {
-  const [step, setStep] = useState('query');
-  const [flags, setFlags] = useState({});
-  const [query, setQuery] = useState('');
+// `initial` (re-rodar do histórico): pula direto pra confirmação de CUSTO com consulta/modo/escopo
+// pré-preenchidos — re-rodar nunca dispara sem o aviso de custo usual do fluxo.
+export function SearchConfig({ onRun, onBack, initial = null }) {
+  const [step, setStep] = useState(() => {
+    if (!initial) return 'query';
+    if (initial.mode === 'B') return getStatus().classified === 0 ? 'noclass' : 'review';
+    return 'confirmA';
+  });
+  const [flags, setFlags] = useState(() =>
+    initial
+      ? { mode: initial.mode === 'B' ? 'B' : 'A', ...(initial.all ? { all: true } : {}) }
+      : {},
+  );
+  const [query, setQuery] = useState(initial?.query || '');
   const [err, setErr] = useState(null);
   if (!HAS_LLM) {
     return html`<${Box} flexDirection="column">

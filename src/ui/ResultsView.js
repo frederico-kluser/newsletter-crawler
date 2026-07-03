@@ -201,8 +201,18 @@ export function ResultsView({ result, onDone, onOpen, getArticle }) {
 
   const view = blocks.slice(nav.offset, nav.offset + LIST_WINDOW);
   const skippedNote = r.skipped ? ` · ${r.skipped} ⏭` : '';
+  // Resultado vindo do HISTÓRICO (congelado): anota quando foi salvo, custo real e itens que
+  // saíram do acervo desde então. Buscas ao vivo não têm created_at → linha ausente.
+  const frozenNote = r.created_at
+    ? [
+        t('histFrozen', { when: new Date(`${String(r.created_at).replace(' ', 'T')}Z`).toLocaleString() }),
+        r.spent_usd > 0 ? `US$ ${r.spent_usd.toFixed(r.spent_usd < 0.01 ? 4 : 2)}` : null,
+        r.missing > 0 ? t('histMissing', { n: r.missing }) : null,
+      ].filter(Boolean).join(' · ')
+    : null;
   return html`<${Box} flexDirection="column">
     <${Text}>${`${header} · ${r.relevant}/${r.total} · ${nav.selected + 1}/${items.length}${skippedNote}`}</${Text}>
+    ${frozenNote ? html`<${Text} dimColor>${frozenNote}</${Text}>` : null}
     <${Box} flexDirection="column" marginY=${1}>
       ${view.map((b) => {
         if (b.kind === 'header') {

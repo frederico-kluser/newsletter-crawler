@@ -843,7 +843,80 @@ export async function cmdSearch(rest, flags) {
     }
   }
   return runWithLimits({ command: 'search', flags, profile: 'llm-only' }, () =>
-    runSearch(query, { mode, limit, yes: flags.yes === true, all: scope.all, runId: scope.runId }));
+    runSearch(query, {
+      mode, limit, yes: flags.yes === true, all: scope.all, runId: scope.runId,
+      origin: flags.origin === 'tui' ? 'tui' : 'cli', // a TUI marca a origem p/ o histórico
+    }));
+}
+
+// ---- histórico de buscas (tabela `searches`): lido pela TUI e pela web UI local ----
+
+/** Lista o histórico (novo→antigo) com stats/escopo já parseados e custo real (llm_usage). */
+export function listSearchHistory() {
+  return stmts.listSearches.all().map((s) => ({
+    id: s.id,
+    created_at: s.created_at,
+    origin: s.origin,
+    query: s.query,
+    mode: s.mode,
+    scope: parseDetail(s.scope_json) || {},
+    stats: parseDetail(s.stats_json) || {},
+    spent_usd: s.spent_usd || 0,
+  }));
+}
+
+/**
+ * Reabre uma busca salva SEM LLM: re-hidrata os hits congelados (ids+vereditos) do acervo e
+ * remonta os buckets no MESMO shape do retorno de runSearch (a ResultsView da TUI consome
+ * direto). Ids que sumiram do acervo (purge) viram `missing` — aviso, nunca erro.
+ */
+export function getSearchHistoryEntry(id) {
+  const s = stmts.getSearch.get(id);
+  if (!s) return null;
+  const hits = parseDetail(s.hits_json) || [];
+  const rows = hits.length
+    ? stmts.searchArticlesByIds.all({ ids: JSON.stringify(hits.map((h) => h.id)) })
+    : [];
+  const byId = new Map(rows.map((a) => [a.id, a]));
+  const snippet = (t) => String(t || '').replace(/\s+/g, ' ').trim().slice(0, 200);
+  const buckets = { noticias: [], ferramentas: [] };
+  let missing = 0;
+  for (const h of hits) {
+    const a = byId.get(h.id);
+    if (!a) {
+      missing++;
+      continue;
+    }
+    const item = {
+      id: a.id, url: a.url, title: a.title, title_pt: a.title_pt, summary_pt: a.summary_pt,
+      snippet: snippet(a.content), source_name: a.source_name || null, date_iso: a.date_iso || null,
+      relation: h.relation, score: h.score ?? h.relation, kind: h.kind ?? undefined,
+    };
+    (h.bucket === 'ferramentas' || (!h.bucket && h.kind === 'tool') ? buckets.ferramentas : buckets.noticias)
+      .push(item);
+  }
+  const stats = parseDetail(s.stats_json) || {};
+  return {
+    historyId: s.id,
+    created_at: s.created_at,
+    origin: s.origin,
+    spent_usd: s.spent_usd || 0,
+    scope: parseDetail(s.scope_json) || {},
+    missing,
+    query: s.query,
+    mode: s.mode,
+    scanned: stats.scanned ?? null,
+    total: stats.total ?? null,
+    relevant: (buckets.noticias.length + buckets.ferramentas.length),
+    skipped: stats.skipped || 0,
+    buckets,
+  };
+}
+
+/** Apaga uma busca do histórico (ou todas, sem id). Retorna quantas linhas saíram. */
+export function deleteSearchHistory(id = null) {
+  const info = id == null ? stmts.clearSearches.run() : stmts.deleteSearch.run(id);
+  return info.changes;
 }
 
 // Limites de execução (orçamento/paralelismo/RAM). `limits set` persiste em NC_HOME/.env (mesmo

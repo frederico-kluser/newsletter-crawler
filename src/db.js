@@ -141,6 +141,18 @@ CREATE TABLE IF NOT EXISTS events (
 );
 CREATE INDEX IF NOT EXISTS idx_events_run ON events(run_id);
 CREATE INDEX IF NOT EXISTS idx_events_url ON events(url);
+
+CREATE TABLE IF NOT EXISTS searches (
+  id INTEGER PRIMARY KEY,
+  run_id INTEGER,
+  origin TEXT,
+  query TEXT NOT NULL,
+  mode TEXT,
+  scope_json TEXT,
+  stats_json TEXT,
+  hits_json TEXT,
+  created_at TEXT DEFAULT (datetime('now'))
+);
 `);
 
 // Migração leve p/ DBs criados antes das colunas multinível (CREATE TABLE IF NOT EXISTS
@@ -656,12 +668,44 @@ export const stmts = {
             (SELECT COALESCE(SUM(cost_usd), 0) FROM llm_usage u WHERE u.run_id = r.id) spent_usd
        FROM runs r ORDER BY r.id DESC LIMIT 1`,
   ),
+
+  // Histórico de buscas IA (CLI/TUI/web local): o resultado CONGELADO vive em hits_json como
+  // ids+vereditos (leve); título/resumo são RE-HIDRATADOS do acervo na leitura — id que sumiu
+  // (purge) é contado como ausente, nunca quebra. O custo real vem de llm_usage via run_id
+  // (1 run por busca: runWithLimits no CLI/TUI, withSearchRun na web), não de um campo salvo.
+  insertSearch: db.prepare(
+    `INSERT INTO searches (run_id, origin, query, mode, scope_json, stats_json, hits_json)
+     VALUES (@run_id, @origin, @query, @mode, @scope_json, @stats_json, @hits_json)`,
+  ),
+  listSearches: db.prepare(
+    `SELECT s.id, s.created_at, s.origin, s.query, s.mode, s.scope_json, s.stats_json,
+            (SELECT COALESCE(SUM(cost_usd), 0) FROM llm_usage u WHERE u.run_id = s.run_id) spent_usd
+       FROM searches s ORDER BY s.id DESC`,
+  ),
+  getSearch: db.prepare(
+    `SELECT s.*,
+            (SELECT COALESCE(SUM(cost_usd), 0) FROM llm_usage u WHERE u.run_id = s.run_id) spent_usd
+       FROM searches s WHERE s.id = ?`,
+  ),
+  deleteSearch: db.prepare(`DELETE FROM searches WHERE id = ?`),
+  clearSearches: db.prepare(`DELETE FROM searches`),
+  // Re-hidratação p/ a TUI/CLI: as MESMAS colunas do toItem da busca (search.js), por ids.
+  searchArticlesByIds: db.prepare(
+    `SELECT a.id, a.url, a.title, a.title_pt, a.summary_pt,
+            substr(coalesce(a.content, ''), 1, 400) AS content,
+            s.name AS source_name,
+            coalesce(iso_date(a.published_at), date(a.extracted_at)) AS date_iso
+       FROM articles a
+       LEFT JOIN sources s ON s.id = a.source_id
+      WHERE a.id IN (SELECT value FROM json_each(@ids))`,
+  ),
 };
 
 // Limpeza total (slate limpo). Ordem filho->pai porque foreign_keys=ON. VACUUM fora da
 // transação p/ recuperar espaço do arquivo/WAL. Opera no DB de DB_PATH (respeita o override).
 export function wipeAll() {
   const tables = [
+    'searches',
     'article_tags',
     'classification_uncovered',
     'classifications',

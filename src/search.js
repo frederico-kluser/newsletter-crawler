@@ -1,7 +1,9 @@
 // Busca na base salva, em 2 modos:
 //  A) exaustivo: 50 chamadas Flash (esforço alto) julgando CADA artigo vs a consulta (direto/parecido).
 //  B) por tags: 5 chamadas Pro (1 por faceta de retrieval) -> une as tags -> retrieval por article_tags.
-// Resultado é EFÊMERO (não persiste): { query, mode, scanned, total, relevant, buckets:{noticias,ferramentas} }.
+// Retorno: { query, mode, scanned, total, relevant, buckets:{noticias,ferramentas} }. Toda busca
+// CONCLUÍDA é gravada na tabela `searches` (histórico congelado: ids+vereditos; persistSearch,
+// fail-open) — restaurar do histórico re-hidrata do acervo SEM re-pagar LLM.
 // Cada item também é renderizado via log() (paridade CLI) e devolvido como objeto (a UI mostra rico).
 // A web UI tem motor próprio no fim do arquivo (searchWeb: soft em LOTE / hard por artigo).
 import pLimit from 'p-limit';
@@ -14,7 +16,7 @@ import {
   SEARCH_FLASH_CONCURRENCY, SEARCH_BATCH_SIZE, SEARCH_BATCH_CONCURRENCY, SEARCH_WEB_MAX_ITEMS,
 } from './config.js';
 import { stageWindow } from './governor.js';
-import { shouldStop } from './budget.js';
+import { shouldStop, getBudgetState } from './budget.js';
 import { log, warn } from './util.js';
 
 // Progresso global (a busca é efêmera, então getStatus() não se move) — a UI faz poll disto.
@@ -44,6 +46,29 @@ function bucketize(hits, isTool) {
   const ferramentas = [];
   for (const h of hits) (isTool(h) ? ferramentas : noticias).push(h);
   return { noticias, ferramentas };
+}
+
+/**
+ * Grava a busca concluída no histórico (`searches`). Congela só ids+vereditos (leve); o custo
+ * real fica em llm_usage via run_id (1 run por busca). Fail-open: histórico jamais derruba
+ * uma busca que já custou dinheiro. Retorna o id da linha (ou null).
+ */
+function persistSearch({ origin, query, mode, scope, stats, hits }) {
+  try {
+    const info = stmts.insertSearch.run({
+      run_id: getBudgetState()?.runId ?? null,
+      origin: origin || 'cli',
+      query,
+      mode,
+      scope_json: JSON.stringify(scope || {}),
+      stats_json: JSON.stringify(stats || {}),
+      hits_json: JSON.stringify(hits || []),
+    });
+    return Number(info.lastInsertRowid);
+  } catch (e) {
+    warn(`histórico de busca: falha ao salvar (${e.message})`);
+    return null;
+  }
 }
 
 const RANK = { direct: 0, similar: 1 };
@@ -180,12 +205,34 @@ function renderResults(r) {
 
 export async function runSearch(
   query,
-  { mode = 'A', limit = Infinity, yes = false, all = false, runId = null } = {},
+  { mode = 'A', limit = Infinity, yes = false, all = false, runId = null, origin = 'cli' } = {},
 ) {
   void yes; // o guard de custo é aplicado no comando (cmdSearch)
   const scope = { all, runId };
   const r = mode === 'B' ? await runModeB(query, limit, scope) : await runModeA(query, limit, scope);
   renderResults(r);
+  // Histórico: congela {id, relation, kind, score, bucket} por hit (a restauração re-hidrata
+  // título/resumo do acervo e remonta os buckets). Modo B abortado por falta de classificação
+  // não conta como busca feita.
+  if (!r.needsClassification) {
+    const hits = [];
+    for (const bucket of ['noticias', 'ferramentas']) {
+      for (const h of r.buckets[bucket] || []) {
+        hits.push({ id: h.id, relation: h.relation, kind: h.kind ?? null, score: h.score ?? null, bucket });
+      }
+    }
+    r.historyId = persistSearch({
+      origin,
+      query,
+      mode: r.mode,
+      scope,
+      stats: {
+        scanned: r.scanned, total: r.total, relevant: r.relevant,
+        skipped: r.skipped || 0, derivedTags: r.derivedTags || undefined,
+      },
+      hits,
+    });
+  }
   return r;
 }
 
@@ -323,6 +370,19 @@ export async function searchWeb(query, { deep = false, sources = null, from = nu
     `busca web "${query}" (${deep ? 'profunda' : 'soft'}): ${hits.length} relevante(s) de ${rows.length}` +
       (skipped ? ` (${skipped} pulados por orçamento)` : ''),
   );
+  const shown = hits.slice(0, SEARCH_WEB_MAX_ITEMS);
+  // Histórico: congela o que o usuário VIU (a lista capada; `truncated` registra que havia mais).
+  const historyId = persistSearch({
+    origin: 'web',
+    query,
+    mode: deep ? 'deep' : 'soft',
+    scope: { sources: Array.isArray(sources) && sources.length ? sources : null, from, to },
+    stats: {
+      scanned: _progress.scanned, total: rows.length, relevant: hits.length,
+      failed: _progress.failed, skipped, truncated,
+    },
+    hits: shown,
+  });
   return {
     query,
     deep,
@@ -332,6 +392,7 @@ export async function searchWeb(query, { deep = false, sources = null, from = nu
     failed: _progress.failed,
     skipped,
     truncated,
-    hits: hits.slice(0, SEARCH_WEB_MAX_ITEMS),
+    historyId,
+    hits: shown,
   };
 }

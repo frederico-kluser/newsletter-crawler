@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { STR } from '../strings.js';
+import { STR, fmtDateTime } from '../strings.js';
 
 const SearchIcon = () => (
   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
@@ -18,8 +18,10 @@ const SparkIcon = () => (
  * o botão "IA" (ou Enter) dispara a busca semântica — que pede a chave se faltar, mas NÃO
  * bloqueia o filtro por texto já aplicado. O cadeado no botão sinaliza "requer chave".
  */
-export default function SearchBar({ text, onTextChange, onAiSearch, aiBusy, hasKey }) {
+export default function SearchBar({ text, onTextChange, onAiSearch, aiBusy, hasKey, recents = [], onPickRecent }) {
   const [deep, setDeep] = useState(false);
+  const [focused, setFocused] = useState(false);
+  const showRecents = focused && !text.trim() && recents.length > 0;
   return (
     <form
       className="searchbar"
@@ -38,8 +40,29 @@ export default function SearchBar({ text, onTextChange, onAiSearch, aiBusy, hasK
         placeholder={STR.searchPlaceholder}
         value={text}
         onChange={(e) => onTextChange(e.target.value)}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
         aria-label={STR.searchPlaceholder}
       />
+      {showRecents && (
+        // onMouseDown preventDefault: clicar num item NÃO tira o foco antes do onClick disparar
+        <div className="searchbar-recents" onMouseDown={(e) => e.preventDefault()}>
+          <span className="searchbar-recents-label">{STR.historyRecent}</span>
+          {recents.slice(0, 8).map((h) => (
+            <button
+              key={h.id}
+              type="button"
+              className="searchbar-recent"
+              onClick={() => onPickRecent?.(h.id)}
+            >
+              <span className="searchbar-recent-q">{h.query}</span>
+              <span className="searchbar-recent-meta">
+                {fmtDateTime(h.createdAt)} · {STR.historyStats(h.stats?.relevant ?? 0, h.stats?.total ?? 0)}
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
       {text && (
         <button type="button" className="searchbar-x" onClick={() => onTextChange('')} aria-label={STR.searchClear}>
           ×

@@ -27,6 +27,7 @@ import { createJobClock } from './deadline.js';
 import {
   progressReset, progressSnapshot, sourceSeen, sourceListingDone, bump, inStage,
 } from './progress.js';
+import { runEventsReset, emitRunEvent } from './run-events.js';
 import { startWebServer } from './web.js';
 import { probeOpenRouterKey, upsertEnvVar, maskKey } from './keys.js';
 import { slugify, normalizeUrl, parseDate, hostOf, log, warn, errorLog, debug } from './util.js';
@@ -227,6 +228,7 @@ async function crawlRun(flags) {
   }
   if (sinceDate) log(`--since ativo: piso ${sinceDate.toISOString()}`);
   progressReset({ sinceDate });
+  runEventsReset(); // zera o feed de MARCOS do painel (o ring é global ao processo, como o progresso)
 
   // Re-crawl incremental: por padrão re-visita as listagens das fontes a cada execução (só enfileira
   // o novo; a dedup de artigo impede re-baixar o existente). `--no-refresh` desliga a re-visita.
@@ -374,6 +376,7 @@ async function crawlRun(flags) {
         if (e?.code === 'JOB_TIMEOUT' || clock?.expired()) {
           timedOut++;
           bump('estouros');
+          emitRunEvent({ phase: 'articles', kind: 'timeout', level: 'warn', detail: job.url.slice(0, 70) });
           logEvent({
             runId, url: job.url, stage: 'job', status: 'timeout',
             detail: { ms: deadline, kind: job.kind, ...(clock ? clock.snapshot() : {}) },
@@ -420,6 +423,7 @@ async function crawlRun(flags) {
   }, COST_LOG_INTERVAL_MS);
   costTimer.unref?.();
 
+  emitRunEvent({ phase: 'discovery', kind: 'phase-start', detail: 'Descoberta' });
   for (;;) {
     // Artigos: limitados pela capacity de fetch+render (+ --max-articles).
     while (processedArticles < maxArticles && !shouldStop() && inflight.size < capacity()) {
@@ -444,12 +448,14 @@ async function crawlRun(flags) {
   if (budgetRequeued) log(`orçamento: ${budgetRequeued} jobs devolvidos à fila (retomáveis no próximo run)`);
   if (timedOut) log(`deadline: ${timedOut} job(s) cortado(s) em ${JOB_TIMEOUT_MS}ms de TRABALHO (fila/LLM não contam; ficha mantida com o blurb; detalhe por fase no ncrawl inspect)`);
   log('crawl concluído.');
+  emitRunEvent({ phase: 'articles', kind: 'phase-end', level: 'success', detail: `${processedArticles} artigos` });
 
   // Registra na run quantos artigos novos ela descobriu (o delta desta execução).
   if (runId != null) {
     const newCount = stmts.countArticlesByRun.get(runId).c;
     stmts.finishDeltaRun.run(newCount, runId);
     log(`run ${runId}: ${newCount} novo(s) artigo(s) desde a última execução.`);
+    emitRunEvent({ phase: 'post', kind: 'run-summary', level: 'success', detail: `${newCount} novos` });
   }
 
   // Hooks pós-crawl EM PARALELO (verify, classify e summarize são independentes — todos só
@@ -466,6 +472,7 @@ async function crawlRun(flags) {
   }
   if (post.length) {
     setProfile('llm-only');
+    emitRunEvent({ phase: 'post', kind: 'phase-start', detail: 'Pós-processamento' });
     await Promise.all(post);
   } else if (shouldStop()) {
     log('orçamento atingido: verify/classify/summarize pulados — retome com os comandos diretos');

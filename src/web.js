@@ -17,7 +17,7 @@ import { parseDate, log, warn, errorLog } from './util.js';
 import { searchWeb } from './search.js';
 import { probeOpenRouterKey, upsertEnvVar } from './keys.js';
 import { initGovernor, stopGovernor } from './governor.js';
-import { beginRun, endRun, estimateStageCallUsd } from './budget.js';
+import { beginRun, endRun, estimateStageCallUsd, getBudgetState } from './budget.js';
 
 const UI_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), 'web-ui');
 
@@ -363,6 +363,104 @@ async function apiSearch(req, res, deps) {
   }
 }
 
+/** Enriquece 1 hit CRU {id,relation,kind} no card do browse (mesma decoração do apiSearch). */
+function enrichHit(h) {
+  const a = stmts.webArticlesByIds.all({ ids: JSON.stringify([h.id]) })[0];
+  if (!a) return null;
+  const { rows: tagRows, byFacet } = tagsOf(a.id);
+  return {
+    ...a,
+    tags: byFacet,
+    kind: a.kind || (isToolByTags(tagRows) ? 'tool' : 'news'),
+    relation: h.relation,
+    judge_kind: h.kind,
+  };
+}
+
+/**
+ * GET /api/search/stream?q=&deep=&sources=&from=&to=&confirm= — a MESMA busca do POST /api/search,
+ * mas em STREAMING (SSE): eventos `progress` (scanned/total/relevant/failed/spentUsd), `hit` (card
+ * enriquecido, AO VIVO) e `done` (resumo final). EventSource é GET-only → params na querystring.
+ * Guards idênticos ao POST: 400 sem query/sem key, 428 sem confirm, 409 se já há busca rodando. A
+ * busca roda até o fim (o governador cuida da concorrência adaptativa); se o cliente cai, paramos
+ * de escrever (`open=false`) e liberamos o lock no finally.
+ */
+async function apiSearchStream(req, res, deps, u) {
+  const sp = u.searchParams;
+  const query = String(sp.get('q') || '').trim().slice(0, 500);
+  if (!query) return sendJSON(res, 400, { error: 'informe uma consulta' });
+  if (!HAS_LLM) {
+    return sendJSON(res, 400, { error: 'OPENROUTER_API_KEY ausente — configure a chave para buscar com IA.', code: 'NO_KEY' });
+  }
+  const deep = sp.get('deep') === '1' || sp.get('deep') === 'true';
+  const scope = buildScopeParams({ sources: sp.get('sources'), from: sp.get('from'), to: sp.get('to') });
+  if (scope.error) return sendJSON(res, 400, { error: scope.error });
+  const count = stmts.webSearchScopeCount.get(scope.params).c;
+  const threshold = deep ? SEARCH_MODE_A_CONFIRM : SEARCH_SOFT_CONFIRM;
+  const confirm = sp.get('confirm') === '1' || sp.get('confirm') === 'true';
+  if (count > threshold && !confirm) {
+    return sendJSON(res, 428, { error: `escopo com ${count} artigos exige confirmação`, needsConfirm: true, count });
+  }
+  if (_searchBusy) {
+    return sendJSON(res, 409, { error: 'Já existe uma busca em andamento — aguarde terminar.' });
+  }
+  _searchBusy = true;
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream; charset=utf-8',
+    'Cache-Control': 'no-store',
+    Connection: 'keep-alive',
+    'X-Accel-Buffering': 'no', // não bufferizar atrás de proxies
+  });
+  let open = true;
+  const send = (event, data) => {
+    if (!open) return;
+    try {
+      res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+    } catch {
+      open = false;
+    }
+  };
+  req.on('close', () => {
+    open = false;
+  });
+  res.write(': stream aberto\n\n'); // comentário SSE: dispara o onopen do cliente já
+  if (count === 0) {
+    send('done', { query, deep, scanned: 0, total: 0, relevant: 0, failed: 0, skipped: 0, truncated: false });
+    _searchBusy = false;
+    return res.end();
+  }
+  let lastSpent = 0;
+  try {
+    const r = await withSearchRun({ query, deep, ...scope.params }, () =>
+      deps.search(query, {
+        deep,
+        sources: scope.sources,
+        from: scope.params.from,
+        to: scope.params.to,
+        onEvent: (ev) => {
+          if (!open) return;
+          if (ev.type === 'hit') {
+            const item = enrichHit(ev.hit);
+            if (item) send('hit', item);
+          } else if (ev.type === 'progress') {
+            lastSpent = getBudgetState().spentUsd;
+            send('progress', { ...ev, spentUsd: lastSpent });
+          }
+        },
+      }),
+    );
+    const { hits: _drop, ...rest } = r;
+    send('done', { ...rest, spentUsd: lastSpent });
+  } catch (e) {
+    errorLog(`web /api/search/stream: ${e.message}`);
+    send('error', { error: 'a busca falhou — veja o terminal do servidor' });
+  } finally {
+    _searchBusy = false;
+    open = false;
+    res.end();
+  }
+}
+
 /** POST /api/key {key}: valida no OpenRouter (probe) e só então persiste + ativa em runtime. */
 async function apiKeySet(req, res, deps) {
   const parsed = await readJsonBody(req);
@@ -424,6 +522,7 @@ async function handleRequest(req, res, deps) {
       const r = apiArticles(u.searchParams);
       return sendJSON(res, r.status, r.body);
     }
+    if (p === '/api/search/stream') return await apiSearchStream(req, res, deps, u);
     if (p === '/api/search/scope') {
       const r = apiSearchScope(u.searchParams);
       return sendJSON(res, r.status, r.body);

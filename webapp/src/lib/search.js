@@ -6,7 +6,12 @@
 // manual (sem zod no bundle): enums fora do json_schema de propósito — strict não é garantia.
 // Config (modelos/effort/lote/tetos) vem de meta.search (gerada pelo export do CLI).
 import { callJSON } from './openrouter.js';
-import { asyncPool } from './pool.js';
+import { adaptivePool } from './pool.js';
+import { configureLane, currentLimit } from './lane.js';
+
+// Teto de concorrência por modo quando meta.search.concurrency não vem no snapshot (export antigo).
+const DEFAULT_CONCURRENCY = { soft: 6, deep: 10 };
+const CONCURRENCY_FLOOR = 2;
 
 // ---- clamps (porta de llm.js:709-712) ----
 const RELATIONS = new Set(['direct', 'similar', 'none']);
@@ -161,35 +166,52 @@ const RANK = { direct: 0, similar: 1 };
  * KEY_INVALID propaga (o hook reabre o KeyModal). Retorna hits {id, relation, kind} direct-first
  * capados em search.maxItems + contadores + custo real acumulado.
  */
-export async function runSearch({ query, deep, candidates, search, apiKey, signal, onProgress, getContent }) {
+export async function runSearch({ query, deep, candidates, search, apiKey, signal, onProgress, onHit, getContent }) {
   const verdicts = new Map();
+  const hits = []; // acumulado AO VIVO (streaming) — o veredito de cada item empurra 1× aqui
   let spentUsd = 0;
   let scanned = 0;
+  let failed = 0; // itens que ESGOTARAM 429/erro (≠ 'none' legítimo) — vira "não analisados"
+  const total = candidates.length;
   const onCost = (c) => {
     spentUsd += c;
   };
-  const relevantNow = () => {
-    let n = 0;
-    for (const v of verdicts.values()) if (v.relation !== 'none') n++;
-    return n;
+  // Concorrência AIMD: começa no teto do modo (meta.search.concurrency ou default) e a lane
+  // encolhe/cresce sozinha (lane.js) conforme os 429; o pool relê currentLimit() a cada folga.
+  const conc = search.concurrency || DEFAULT_CONCURRENCY;
+  const ceil = Math.max(1, Math.floor((deep ? conc.deep : conc.soft) || DEFAULT_CONCURRENCY[deep ? 'deep' : 'soft']));
+  configureLane({ ceil, floor: Math.min(CONCURRENCY_FLOOR, ceil) });
+  const getLimit = () => currentLimit();
+  const emitProgress = (mode) => onProgress?.({ mode, done: scanned, total, relevant: hits.length, failed, spentUsd });
+  // Empurra o item p/ os resultados AO VIVO se o veredito for relevante (streaming via onHit).
+  const pushIfRelevant = (a) => {
+    const v = verdicts.get(a.id);
+    if (!v || v.relation === 'none') return;
+    const hit = { id: a.id, relation: v.relation, kind: v.kind };
+    hits.push(hit);
+    onHit?.(hit);
   };
 
   if (deep) {
-    const total = candidates.length;
-    await asyncPool(4, candidates, async (a) => {
-      if (signal?.aborted) throw signal.reason || new DOMException('abortado', 'AbortError');
-      let rel = { relation: 'none', kind: 'news' };
-      try {
-        const content = await getContent(a.id);
-        rel = await judgeOne({ query, title: a.title, content, search, apiKey, signal, onCost });
-      } catch (e) {
-        if (isAbort(e, signal) || e?.code === 'KEY_INVALID') throw e;
-        /* fail-open: erro por artigo vira 'none' */
-      }
-      verdicts.set(a.id, rel);
-      scanned++;
-      onProgress?.({ mode: 'deep', done: scanned, total, relevant: relevantNow(), spentUsd });
-    });
+    emitProgress('deep');
+    await adaptivePool(
+      candidates,
+      async (a) => {
+        if (signal?.aborted) throw signal.reason || new DOMException('abortado', 'AbortError');
+        try {
+          const content = await getContent(a.id);
+          verdicts.set(a.id, await judgeOne({ query, title: a.title, content, search, apiKey, signal, onCost }));
+        } catch (e) {
+          if (isAbort(e, signal) || e?.code === 'KEY_INVALID') throw e;
+          verdicts.set(a.id, { relation: 'none', kind: 'news' }); // fail-open
+          failed++;
+        }
+        pushIfRelevant(a);
+        scanned++;
+        emitProgress('deep');
+      },
+      { getLimit, signal },
+    );
   } else {
     // item sem título E sem texto não gasta token: veredito local 'none' (search.js:252-258)
     const pend = [];
@@ -200,30 +222,30 @@ export async function runSearch({ query, deep, candidates, search, apiKey, signa
     }
     scanned = candidates.length - pend.length;
     const batches = chunkBatches(pend, search.batchSize);
-    let doneBatches = 0;
-    onProgress?.({ mode: 'soft', done: 0, total: batches.length, relevant: 0, spentUsd });
-    await asyncPool(2, batches, async (batch) => {
-      if (signal?.aborted) throw signal.reason || new DOMException('abortado', 'AbortError');
-      try {
-        const results = await judgeBatch({ query, items: batch.map(toBatchItem), search, apiKey, signal, onCost });
-        mergeBatchVerdicts(batch, results, verdicts);
-      } catch (e) {
-        if (isAbort(e, signal) || e?.code === 'KEY_INVALID') throw e;
-        // fail-open: o lote inteiro vira 'none' (paridade search.js:274-281)
-        for (const a of batch) verdicts.set(a.id, { relation: 'none', kind: 'news' });
-      }
-      scanned += batch.length;
-      doneBatches++;
-      onProgress?.({ mode: 'soft', done: doneBatches, total: batches.length, relevant: relevantNow(), spentUsd });
-    });
+    emitProgress('soft');
+    await adaptivePool(
+      batches,
+      async (batch) => {
+        if (signal?.aborted) throw signal.reason || new DOMException('abortado', 'AbortError');
+        let batchFailed = false;
+        try {
+          const results = await judgeBatch({ query, items: batch.map(toBatchItem), search, apiKey, signal, onCost });
+          mergeBatchVerdicts(batch, results, verdicts);
+        } catch (e) {
+          if (isAbort(e, signal) || e?.code === 'KEY_INVALID') throw e;
+          // fail-open: o lote inteiro vira 'none' (paridade search.js:274-281)
+          for (const a of batch) verdicts.set(a.id, { relation: 'none', kind: 'news' });
+          batchFailed = true;
+        }
+        if (batchFailed) failed += batch.length;
+        else for (const a of batch) pushIfRelevant(a);
+        scanned += batch.length;
+        emitProgress('soft');
+      },
+      { getLimit, signal },
+    );
   }
 
-  const hits = [];
-  for (const a of candidates) {
-    const rel = verdicts.get(a.id);
-    if (!rel || rel.relation === 'none') continue;
-    hits.push({ id: a.id, relation: rel.relation, kind: rel.kind });
-  }
   hits.sort((x, y) => RANK[x.relation] - RANK[y.relation] || y.id - x.id); // direct 1º; empate: mais novo
   const truncated = hits.length > search.maxItems;
   return {
@@ -232,6 +254,7 @@ export async function runSearch({ query, deep, candidates, search, apiKey, signa
     scanned,
     total: candidates.length,
     relevant: hits.length,
+    failed,
     truncated,
     spentUsd,
     hits: hits.slice(0, search.maxItems),

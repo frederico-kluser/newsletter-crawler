@@ -61,6 +61,11 @@ const STR = {
   aiTruncated: (n) => `mostrando os ${n} primeiros`,
   aiSkipped: (n) => `${n} não avaliados (orçamento)`,
   aiClear: 'Limpar resultados',
+  // loader ao vivo (streaming): progresso nível-artigo
+  aiUnitArticles: 'artigos',
+  aiRelevants: (n) => `relevante${n === 1 ? '' : 's'}`,
+  aiEta: (label) => `~${label} restantes`,
+  aiFailed: (n) => `${n} não analisado${n === 1 ? '' : 's'}`,
   relationDirect: 'Direta',
   relationSimilar: 'Similar',
   segReleases: 'Releases',
@@ -122,6 +127,77 @@ async function postJSON(url, body) {
   }
   return data;
 }
+
+// Consome a busca SSE (GET /api/search/stream) via fetch: dá p/ ler status de erro (428/409/NO_KEY)
+// E é abortável (Cancelar) — ao contrário do EventSource. Chama onHit/onProgress AO VIVO e resolve
+// com o payload do evento `done`. Parse manual dos frames "event:/data:" separados por linha vazia.
+async function streamSearch({ query, deep, sources, from, to, signal, onHit, onProgress }) {
+  const sp = new URLSearchParams();
+  sp.set('q', query);
+  if (deep) sp.set('deep', '1');
+  if (sources && sources.length) sp.set('sources', JSON.stringify(sources));
+  if (from) sp.set('from', from);
+  if (to) sp.set('to', to);
+  sp.set('confirm', '1'); // o preflight/diálogo já confirmou antes de abrir o stream
+  const r = await fetch(`/api/search/stream?${sp}`, { signal });
+  if (!r.ok || !r.body) {
+    const data = await r.json().catch(() => ({}));
+    const err = new Error(data.error || `HTTP ${r.status}`);
+    err.status = r.status;
+    err.code = data.code;
+    err.data = data;
+    throw err;
+  }
+  const reader = r.body.getReader();
+  const decoder = new TextDecoder();
+  let buf = '';
+  let done = null;
+  for (;;) {
+    const { value, done: rdDone } = await reader.read();
+    if (rdDone) break;
+    buf += decoder.decode(value, { stream: true });
+    const frames = buf.split('\n\n');
+    buf = frames.pop(); // último frame (talvez incompleto) volta pro buffer
+    for (const frame of frames) {
+      if (!frame.trim() || frame.startsWith(':')) continue; // comentário SSE (abertura/keep-alive)
+      let event = 'message';
+      let data = '';
+      for (const line of frame.split('\n')) {
+        if (line.startsWith('event:')) event = line.slice(6).trim();
+        else if (line.startsWith('data:')) data += line.slice(5).trim();
+      }
+      if (!data) continue;
+      let payload;
+      try {
+        payload = JSON.parse(data);
+      } catch {
+        continue;
+      }
+      if (event === 'hit') onHit?.(payload);
+      else if (event === 'progress') onProgress?.(payload);
+      else if (event === 'done') done = payload;
+      else if (event === 'error') throw new Error(payload.error || 'a busca falhou');
+    }
+  }
+  if (!done) throw new Error('a busca terminou sem resultado');
+  return done;
+}
+
+/** US$ com 2–4 casas (custos de IA são fracionários) — espelho do fmtUsd do webapp. */
+const fmtUsd = (v) => {
+  const n = Number(v) || 0;
+  const digits = n > 0 && n < 0.01 ? 4 : 2;
+  return `US$ ${n.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: digits })}`;
+};
+
+/** ETA legível a partir de segundos: "45s", "2min", "2min 30s". */
+const fmtEtaSecs = (secs) => {
+  const s = Math.max(0, Math.round(Number(secs) || 0));
+  if (s < 60) return `${s}s`;
+  const m = Math.floor(s / 60);
+  const rem = s % 60;
+  return rem ? `${m}min ${rem}s` : `${m}min`;
+};
 
 const fmtDate = (iso) => {
   if (!iso) return STR.noDate;
@@ -442,6 +518,8 @@ function App() {
   const [ai, setAi] = useState(null);
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState(null);
+  const [aiProgress, setAiProgress] = useState(null); // {scanned,total,relevant,failed,spentUsd,mode}
+  const [streamItems, setStreamItems] = useState([]); // hits que já chegaram (streaming ao vivo)
   const [confirmInfo, setConfirmInfo] = useState(null); // {count, usd} vindos do preflight
   const [hasKey, setHasKey] = useState(null); // null = ainda não checado
   const [keyOpen, setKeyOpen] = useState(false);
@@ -456,6 +534,8 @@ function App() {
   const facetKey = JSON.stringify(facetSel);
   const sentinel = useRef(null);
   const abortRef = useRef(null);
+  const aiAbortRef = useRef(null); // aborta o stream da busca IA (Cancelar)
+  const aiStartRef = useRef(0); // t0 da busca p/ o ETA do loader
 
   const buildQuery = useCallback(
     (offset) => {
@@ -569,19 +649,33 @@ function App() {
         }
       }
       setConfirmInfo(null);
+      setStreamItems([]);
+      setAiProgress({ scanned: 0, total: 0, relevant: 0, failed: 0, spentUsd: 0, mode: deep ? 'deep' : 'soft' });
+      aiStartRef.current = Date.now();
       setAiLoading(true);
-      const r = await postJSON('/api/search', {
+      const ac = new AbortController();
+      aiAbortRef.current = ac;
+      const collected = [];
+      const done = await streamSearch({
         query,
         deep,
         sources: sources.length ? sources : null,
         from: from || null,
         to: to || null,
-        confirm: true,
+        signal: ac.signal,
+        onHit: (item) => {
+          collected.push(item);
+          setStreamItems((cur) => [...cur, item]); // card AO VIVO
+        },
+        onProgress: (p) => setAiProgress((cur) => ({ ...(cur || {}), ...p, mode: deep ? 'deep' : 'soft' })),
       });
-      setAi(r);
+      collected.sort((a, b) => (a.relation === 'direct' ? 0 : 1) - (b.relation === 'direct' ? 0 : 1) || b.id - a.id); // direct 1º
+      setAi({ ...done, items: collected });
       if (kind === 'release') setKind('all'); // Release não existe no julgamento da IA
     } catch (e) {
-      if (e.code === 'NO_KEY') {
+      if (e.name === 'AbortError') {
+        /* Cancelar: sem erro, volta ao browse */
+      } else if (e.code === 'NO_KEY') {
         setHasKey(false);
         setKeyOpen(true);
       } else if (e.status === 409) {
@@ -592,6 +686,9 @@ function App() {
         setAiError(STR.searchFailed);
       }
     } finally {
+      aiAbortRef.current = null;
+      setAiProgress(null);
+      setStreamItems([]);
       setAiLoading(false);
       loadMeta(); // badge de custo re-sincroniza (a busca pode ter gastado mesmo falhando)
     }
@@ -600,6 +697,10 @@ function App() {
   const clearAi = () => {
     setAi(null);
     setAiError(null);
+  };
+
+  const cancelAi = () => {
+    aiAbortRef.current?.abort(); // o finally do doSearch limpa loader/streamItems
   };
 
   const toggleTag = (facet, tag) => {
@@ -644,6 +745,12 @@ function App() {
   const aiItems = ai
     ? ai.items.filter((it) => kind === 'all' || (it.judge_kind || it.kind) === kind)
     : [];
+  // loader: % e ETA nível-artigo (ETA = elapsed/scanned · restantes; recalcula a cada progress tick)
+  const aiPct = aiProgress && aiProgress.total > 0 ? Math.round(Math.min(1, aiProgress.scanned / aiProgress.total) * 100) : 0;
+  const aiEtaSecs =
+    aiProgress && aiProgress.scanned > 0 && aiProgress.total > aiProgress.scanned && aiStartRef.current
+      ? ((Date.now() - aiStartRef.current) / aiProgress.scanned) * (aiProgress.total - aiProgress.scanned) / 1000
+      : null;
 
   const dbEmpty = meta && meta.totals.articles === 0;
 
@@ -813,9 +920,27 @@ function App() {
       </section>
 
       ${aiLoading &&
-      html`<div className="state ai-loading">
-        <span className="spinner" />
-        <p>${deep ? STR.searchSlowHint : STR.searchSoftHint}</p>
+      html`<div className="ai-progress" role="status" aria-live="polite">
+        <div className="ai-progress-bar-row">
+          <div className="ai-progress-track">
+            <div
+              className="ai-progress-fill"
+              style=${{ transform: `scaleX(${Math.max(aiProgress && aiProgress.total ? aiProgress.scanned / aiProgress.total : 0, 0.02)})` }}
+            />
+          </div>
+          <span className="ai-progress-pct">${aiPct}%</span>
+          <button className="btn-ghost ai-progress-cancel" onClick=${cancelAi}>${STR.cancel}</button>
+        </div>
+        <div className="ai-progress-meta">
+          <span className="ai-progress-strong">
+            ${aiProgress?.scanned ?? 0}/${aiProgress?.total ?? 0} ${STR.aiUnitArticles}
+          </span>
+          <span> · ${aiProgress?.relevant ?? 0} ${STR.aiRelevants(aiProgress?.relevant ?? 0)}</span>
+          ${aiProgress?.spentUsd > 0 ? html`<span> · ${fmtUsd(aiProgress.spentUsd)}</span>` : null}
+          ${aiEtaSecs != null ? html`<span> · ${STR.aiEta(fmtEtaSecs(aiEtaSecs))}</span>` : null}
+          ${aiProgress?.failed > 0 ? html`<span className="ai-progress-warn"> · ${STR.aiFailed(aiProgress.failed)}</span>` : null}
+          ${deep ? html`<span className="muted"> · ${STR.searchSlowHint}</span>` : null}
+        </div>
       </div>`}
 
       ${aiError &&
@@ -882,7 +1007,7 @@ function App() {
         : null}
 
       <div className="grid">
-        ${(ai ? aiItems : aiLoading ? [] : items).map(
+        ${(ai ? aiItems : aiLoading ? streamItems : items).map(
           (a) => html`<${ArticleCard} key=${a.id} a=${a} onOpen=${setDetailId} />`,
         )}
       </div>

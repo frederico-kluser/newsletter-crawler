@@ -8,13 +8,13 @@ import { t } from './i18n.js';
 import { colors, space, uiTheme } from './theme.js';
 import { Header } from './widgets.js';
 import {
-  getStatus, cmdCrawl, cmdExport, cmdClassify, cmdAdd, cmdReset, cmdSummarize, cmdFinish, cmdSearch,
+  getStatus, cmdCrawl, cmdExport, cmdAdd, cmdReset, cmdFinish, cmdSearch,
   getArticle,
 } from '../commands.js';
 import { openBrowser } from '../web.js';
 import {
-  Menu, StatusScreen, CrawlConfig, ExportConfig, ClassifyConfig, AddConfig, ResetConfirm,
-  SummarizeConfig, FinishConfig, SearchConfig, WebConfig, LimitsConfig,
+  Menu, StatusScreen, CrawlConfig, ExportConfig, AddConfig, ResetConfirm,
+  FinishConfig, SearchConfig, WebConfig, LimitsConfig,
 } from './screens.js';
 import { RunView } from './RunView.js';
 import { ResultsView } from './ResultsView.js';
@@ -22,8 +22,6 @@ import { ResultsView } from './ResultsView.js';
 const THUNKS = {
   crawl: (flags) => cmdCrawl(flags),
   export: (flags) => cmdExport(flags),
-  classify: (flags) => cmdClassify(flags),
-  summarize: (flags) => cmdSummarize(flags),
   finish: (flags) => cmdFinish(flags),
   search: (flags, rest) => cmdSearch(rest, flags), // retorna os resultados p/ a UI
   add: (flags, rest) => cmdAdd(rest, flags),
@@ -85,10 +83,6 @@ export default function App() {
     body = html`<${CrawlConfig} onRun=${onRun} onBack=${toMenu} />`;
   } else if (screen === 'export') {
     body = html`<${ExportConfig} onRun=${onRun} onBack=${toMenu} />`;
-  } else if (screen === 'classify') {
-    body = html`<${ClassifyConfig} onRun=${onRun} onBack=${toMenu} />`;
-  } else if (screen === 'summarize') {
-    body = html`<${SummarizeConfig} onRun=${onRun} onBack=${toMenu} />`;
   } else if (screen === 'finish') {
     body = html`<${FinishConfig} onRun=${onRun} onBack=${toMenu} />`;
   } else if (screen === 'search') {

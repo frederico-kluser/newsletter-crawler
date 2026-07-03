@@ -68971,7 +68971,41 @@
   "section": "IN BRIEF",
   "verify_status": "suspect",
   "verify_notes": "Conteúdo muito raso para o título; apenas o blurb foi salvo",
-  "tags": {}
+  "tags": {
+   "concept-theme": [
+    "open-source",
+    "testing"
+   ],
+   "content-type": [
+    "demo",
+    "project-spotlight"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "backend",
+    "ai-general",
+    "llm-models"
+   ],
+   "ecosystem-language": [
+    "rust",
+    "sql"
+   ],
+   "framework-library-tool": [
+    "postgresql"
+   ],
+   "topic-technology": [
+    "databases",
+    "ai-agents",
+    "model-context-protocol"
+   ],
+   "trending-emerging": [
+    "ai-coding-agents",
+    "ai-agents",
+    "agentic-ai"
+   ]
+  }
  },
  {
   "id": 1785,
@@ -68986,7 +69020,39 @@
   "section": "IN BRIEF",
   "verify_status": "suspect",
   "verify_notes": "Título não é um título adequado, parece uma frase solta; Conteúdo muito curto e raso, apenas repete o blurb",
-  "tags": {}
+  "tags": {
+   "company-vendor-model": [
+    "cloudflare"
+   ],
+   "concept-theme": [
+    "cloud",
+    "serverless"
+   ],
+   "content-type": [
+    "product-launch"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "backend",
+    "frontend"
+   ],
+   "ecosystem-language": [
+    "sql"
+   ],
+   "framework-library-tool": [
+    "cloudflare-workers",
+    "mysql"
+   ],
+   "topic-technology": [
+    "databases",
+    "serverless"
+   ],
+   "trending-emerging": [
+    "ai-data-centers"
+   ]
+  }
  },
  {
   "id": 1786,
@@ -69906,8 +69972,8 @@
   "source_id": 2,
   "url": "https://justatheory.com/2026/02/pg_clickhouse-0.1.4",
   "title": "pg_clickhouse v0.1.4",
-  "title_pt": null,
-  "summary_pt": null,
+  "title_pt": "pg_clickhouse v0.1.4",
+  "summary_pt": "Não foi possível gerar um resumo porque o conteúdo do artigo não foi fornecido. O título indica uma nova versão da extensão pg_clickhouse, que integra PostgreSQL ao ClickHouse, mas detalhes sobre mudanças estão ausentes.",
   "snippet": "pg_clickhouse v0.1.4",
   "date_iso": "2026-07-03",
   "kind": "tool",
@@ -69921,8 +69987,8 @@
   "source_id": 2,
   "url": "https://oapg-edu.org",
   "title": "Open Alliance for PostgreSQL Education",
-  "title_pt": null,
-  "summary_pt": null,
+  "title_pt": "PostgreSQL教育开放联盟",
+  "summary_pt": "PostgreSQL教育开放联盟（Open Alliance for PostgreSQL Education）正在招募技术贡献者，以协助审核其供应商中立的Postgres认证考试材料。该联盟致力于推动PostgreSQL的教育与认证，欢迎有技术背景的志愿者参与评审工作，确保考试内容的准确性与中立性。",
   "snippet": "The Open Alliance for PostgreSQL Education is looking for technical contributors to help review their vendor-neutral Postgres certification exam material.",
   "date_iso": "2026-07-03",
   "kind": "news",
@@ -69987,8 +70053,8 @@
   "date_iso": "2026-07-03",
   "kind": "tool",
   "section": "releases",
-  "verify_status": null,
-  "verify_notes": null,
+  "verify_status": "suspect",
+  "verify_notes": "Conteúdo raso demais para o título (apenas o blurb do agregador); Kind 'tool' parece inadequado (deveria ser 'article')",
   "tags": {}
  },
  {

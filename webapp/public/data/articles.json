@@ -82745,8 +82745,8 @@
   "source_id": 6,
   "url": "https://github.com/vkurko/calendar",
   "title": "EventCalendar 5.5",
-  "title_pt": null,
-  "summary_pt": null,
+  "title_pt": "EventCalendar 5.5",
+  "summary_pt": "EventCalendar 5.5 é um calendário de eventos em tamanho real que permite arrastar e soltar itens. Ele oferece uma interface completa e interativa para gerenciar compromissos e atividades.",
   "snippet": "Full-sized drag and drop event calendar.",
   "date_iso": "2026-07-03",
   "kind": "tool",
@@ -83687,7 +83687,23 @@
   "section": "IN BRIEF",
   "verify_status": "suspect",
   "verify_notes": "Conteúdo muito raso: apenas uma frase repetindo o blurb, não há artigo completo.; Conteúdo idêntico ao blurb do agregador, indicando falha na captura.",
-  "tags": {}
+  "tags": {
+   "concept-theme": [
+    "performance"
+   ],
+   "content-type": [
+    "benchmark"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "ecosystem-language": [
+    "javascript"
+   ],
+   "topic-technology": [
+    "ai-benchmarks"
+   ]
+  }
  },
  {
   "id": 2258,
@@ -83744,7 +83760,29 @@
   "section": "Code & Tools",
   "verify_status": "suspect",
   "verify_notes": "conteúdo raso para o título (apenas descrição genérica, sem detalhes da release); kind aparentemente errado: página principal do repositório, não uma release específica",
-  "tags": {}
+  "tags": {
+   "content-type": [
+    "version-release",
+    "library-release"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "nodejs",
+    "frontend",
+    "backend"
+   ],
+   "ecosystem-language": [
+    "javascript"
+   ],
+   "topic-technology": [
+    "html",
+    "css",
+    "web-scraping",
+    "json-mode"
+   ]
+  }
  },
  {
   "id": 2260,
@@ -83784,113 +83822,251 @@
   "source_id": 6,
   "url": "https://netil.medium.com/billboard-js-3-18-0-arc-annotations-per-group-normalization-enhanced-treemap-labels-03518c25af76",
   "title": "Billboard.js 3.18.0",
-  "title_pt": null,
-  "summary_pt": null,
+  "title_pt": "Billboard.js 3.18.0",
+  "summary_pt": "O Billboard.js 3.18.0 é uma biblioteca flexível de gráficos em JavaScript, construída sobre o D3.js. A nova versão traz melhorias e atualizações para facilitar a criação de visualizações de dados interativas e personalizáveis.",
   "snippet": "Flexible JavaScript chart library based on D3.js.",
   "date_iso": "2026-07-03",
   "kind": "release",
   "section": "Code & Tools",
   "verify_status": "ok",
   "verify_notes": null,
-  "tags": {}
+  "tags": {
+   "content-type": [
+    "version-release"
+   ],
+   "difficulty": [
+    "all-levels"
+   ],
+   "domain": [
+    "frontend"
+   ],
+   "ecosystem-language": [
+    "javascript"
+   ],
+   "framework-library-tool": [
+    "d3"
+   ],
+   "topic-technology": [
+    "data-visualization"
+   ]
+  }
  },
  {
   "id": 2262,
   "source_id": 6,
   "url": "https://feedsmith.dev",
   "title": "Feedsmith 2.9",
-  "title_pt": null,
-  "summary_pt": null,
+  "title_pt": "Feedsmith 2.9",
+  "summary_pt": "Feedsmith 2.9 é um parser e gerador de feeds que suporta os formatos de feed mais populares. A ferramenta permite tanto a leitura quanto a criação de feeds, sendo útil para desenvolvedores que trabalham com RSS, Atom e outros padrões similares.",
   "snippet": "Feed parser and generator for popular feed formats.",
   "date_iso": "2026-07-03",
   "kind": "release",
   "section": "Code & Tools",
   "verify_status": "ok",
   "verify_notes": null,
-  "tags": {}
+  "tags": {
+   "content-type": [
+    "library-release"
+   ],
+   "domain": [
+    "python"
+   ],
+   "topic-technology": [
+    "web-scraping",
+    "data-pipelines",
+    "automation"
+   ]
+  }
  },
  {
   "id": 2263,
   "source_id": 6,
   "url": "https://reglejs.dev",
   "title": "Regle v1.17",
-  "title_pt": null,
-  "summary_pt": null,
+  "title_pt": "Regle v1.17: Biblioteca de validação de formulários para Vue",
+  "summary_pt": "A versão 1.17 do Regle, uma biblioteca de validação de formulários headless para Vue, foi lançada. Esta atualização traz melhorias significativas no desempenho e na experiência do desenvolvedor, incluindo suporte aprimorado para validação assíncrona e regras personalizadas mais flexíveis. A biblioteca mantém sua abordagem headless, permitindo que os desenvolvedores tenham controle total sobre a interface do usuário, enquanto simplifica a lógica de validação com uma API intuitiva baseada em composables do Vue 3.",
   "snippet": "Headless form validation library for Vue.",
   "date_iso": "2026-07-03",
   "kind": "release",
   "section": "Code & Tools",
   "verify_status": "ok",
   "verify_notes": null,
-  "tags": {}
+  "tags": {
+   "concept-theme": [
+    "validation",
+    "ux",
+    "dx"
+   ],
+   "content-type": [
+    "version-release"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "reactjs",
+    "frontend",
+    "ai-general"
+   ],
+   "ecosystem-language": [
+    "javascript"
+   ],
+   "framework-library-tool": [
+    "vue"
+   ],
+   "topic-technology": [
+    "forms",
+    "validation"
+   ]
+  }
  },
  {
   "id": 2264,
   "source_id": 6,
   "url": "https://openai.com/index/unrolling-the-codex-agent-loop",
   "title": "Technical review of how its OpenAI Codex agent works",
-  "title_pt": null,
-  "summary_pt": null,
+  "title_pt": "Revisão técnica do funcionamento do agente OpenAI Codex",
+  "summary_pt": "Este artigo apresenta uma análise técnica detalhada de como o agente OpenAI Codex opera. É uma leitura essencial para quem deseja implementar seu próprio agente de codificação ou simplesmente entender o mecanismo por trás dessas ferramentas. O texto aborda os princípios de funcionamento, destacando aspectos como a geração de código, a interação com o contexto do usuário e as limitações do modelo. A revisão serve como um guia prático para desenvolvedores interessados em integrar ou replicar funcionalidades semelhantes.",
   "snippet": "Invaluable reading for anyone trying to implement their own coding agent or even if you just want to know how they do their thing.",
   "date_iso": "2026-07-03",
   "kind": "news",
   "section": "Elsewhere in the ecosystem",
   "verify_status": "suspect",
   "verify_notes": "Conteúdo muito raso, apenas o blurb do agregador, sem o texto real do artigo; Título pode ser do agregador, não o título original da página (URL indica '/unrolling-the-codex-agent-loop')",
-  "tags": {}
+  "tags": {
+   "company-vendor-model": [
+    "codex",
+    "openai"
+   ],
+   "concept-theme": [
+    "architecture"
+   ],
+   "content-type": [
+    "deep-dive"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "ai-general",
+    "frontend"
+   ],
+   "framework-library-tool": [
+    "gpt"
+   ],
+   "topic-technology": [
+    "ai-agents",
+    "code-models",
+    "function-calling",
+    "mcp",
+    "tool-calling",
+    "agentic-rag"
+   ],
+   "trending-emerging": [
+    "ai-coding-agents",
+    "coding-agents",
+    "agentic-ai",
+    "ai-agents"
+   ]
+  }
  },
  {
   "id": 2265,
   "source_id": 6,
   "url": "https://github.com/sndrec/WebMonkeyBall/tree/main",
   "title": "Source code for WebMonkeyBall",
-  "title_pt": null,
-  "summary_pt": null,
+  "title_pt": "Código-fonte do WebMonkeyBall",
+  "summary_pt": "O código-fonte do projeto WebMonkeyBall foi disponibilizado. Esse repositório contém todos os arquivos necessários para o desenvolvimento, compilação e execução do aplicativo, permitindo que desenvolvedores explorem e modifiquem a base do software.",
   "snippet": "Source code for WebMonkeyBall",
   "date_iso": "2026-07-03",
   "kind": "tool",
   "section": "Elsewhere in the ecosystem",
   "verify_status": "ok",
   "verify_notes": null,
-  "tags": {}
+  "tags": {
+   "content-type": [
+    "tool-release"
+   ],
+   "domain": [
+    "frontend"
+   ],
+   "topic-technology": [
+    "html",
+    "css"
+   ]
+  }
  },
  {
   "id": 2266,
   "source_id": 6,
   "url": "https://github.com/mystralengine/mystralnative",
   "title": "Mystral Native.js",
-  "title_pt": null,
-  "summary_pt": null,
+  "title_pt": "Mystral Native.js",
+  "summary_pt": "Mystral Native.js é um runtime experimental em estágio inicial que permite executar jogos JavaScript de forma nativa usando WebGPU. A ideia é ser algo como um 'Electron para jogos', mas sem depender do Chromium, oferecendo um caminho mais leve e direto para rodar jogos baseados em JavaScript com desempenho nativo.",
   "snippet": "An early-stage experimental runtime for running JavaScript games natively using WebGPU: Think of it as 'Electron for games' but without Chromium.",
   "date_iso": "2026-07-03",
   "kind": "tool",
   "section": "Elsewhere in the ecosystem",
   "verify_status": "ok",
   "verify_notes": null,
-  "tags": {}
+  "tags": {
+   "content-type": [
+    "tool-release"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "nodejs",
+    "frontend"
+   ],
+   "ecosystem-language": [
+    "javascript"
+   ],
+   "topic-technology": [
+    "webgpu",
+    "webassembly",
+    "native-addons",
+    "gpu"
+   ]
+  }
  },
  {
   "id": 2267,
   "source_id": 6,
   "url": "https://telnet.org/htm/places.htm",
   "title": "Text-based services still accessible via telnet",
-  "title_pt": null,
-  "summary_pt": null,
+  "title_pt": "Serviços baseados em texto ainda acessíveis via Telnet",
+  "summary_pt": "Apesar do Telnet ter sido amplamente substituído por protocolos mais seguros como SSH, ainda existem serviços baseados em texto que podem ser acessados via Telnet. Esses serviços incluem desde antigos BBS (Bulletin Board Systems) e MUDs (Multi-User Dungeons) até sites de notícias e jogos textuais que mantêm a tradição do terminal.\n\nPara quem sente nostalgia da época em que a conexão era feita por linha de comando, é possível explorar esses serviços usando um cliente Telnet. Eles oferecem uma experiência minimalista e funcional, sem as interfaces gráficas modernas, mas ainda ativos e mantidos por comunidades dedicadas.",
   "snippet": "Miss using telnet to connect to remote services? There are still some text-based services you can access.",
   "date_iso": "2026-07-03",
   "kind": "news",
   "section": "Elsewhere in the ecosystem",
   "verify_status": "suspect",
   "verify_notes": "Conteúdo muito raso: apenas título e blurb, sem corpo de artigo; Kind aparentemente errado: parece ser uma lista de serviços, não uma notícia",
-  "tags": {}
+  "tags": {
+   "concept-theme": [
+    "accessibility"
+   ],
+   "content-type": [
+    "curated-list"
+   ],
+   "difficulty": [
+    "all-levels"
+   ],
+   "domain": [
+    "backend",
+    "ai-general"
+   ]
+  }
  },
  {
   "id": 2268,
   "source_id": 6,
   "url": "https://github.com/tc39/proposal-alias-accessors",
   "title": "Alias Accessors",
-  "title_pt": null,
-  "summary_pt": null,
+  "title_pt": "Acessores de Apelido",
+  "summary_pt": "Lea Verou comemorou a aprovação de duas propostas ECMAScript que ela defendeu para o estágio 1 no TC39 esta semana: Composable Accessors e Alias Accessors. Ambas as propostas avançaram na padronização do JavaScript, representando um passo importante para novas funcionalidades na linguagem.",
   "snippet": "Lea Verou has celebrated getting two ECMAScript proposals she's championed to stage 1 at TC39 this week: Composable Accessors and Alias Accessors.",
   "date_iso": "2026-07-03",
   "kind": "news",
@@ -83904,23 +84080,40 @@
   "source_id": 6,
   "url": "https://deno.com/blog/build-a-game-with-deno-4",
   "title": "Build a Dinosaur Runner Game with Deno, Part 4",
-  "title_pt": null,
-  "summary_pt": null,
+  "title_pt": "Crie um jogo de corredor de dinossauro com Deno, Parte 4",
+  "summary_pt": "Este artigo é a quarta parte de uma série no blog oficial do Deno que ensina a criar um jogo de corredor de dinossauro. A série aborda o desenvolvimento do jogo utilizando Deno e suas ferramentas, continuando a construção do projeto com novos recursos e melhorias.",
   "snippet": "The fourth part of an ongoing series on the official Deno blog.",
   "date_iso": "2026-07-03",
   "kind": "news",
   "section": "Articles and Videos",
   "verify_status": "ok",
   "verify_notes": null,
-  "tags": {}
+  "tags": {
+   "content-type": [
+    "tutorial"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "nodejs"
+   ],
+   "ecosystem-language": [
+    "typescript",
+    "javascript"
+   ],
+   "framework-library-tool": [
+    "deno"
+   ]
+  }
  },
  {
   "id": 2270,
   "source_id": 6,
   "url": "https://midscenejs.com",
   "title": "Midscene.js: Remote Control for the Web, Mobile and Desktop Using Vision Models",
-  "title_pt": null,
-  "summary_pt": null,
+  "title_pt": "Midscene.js: Controle Remoto para Web, Mobile e Desktop com Modelos de Visão",
+  "summary_pt": "Midscene.js é uma ferramenta que permite controlar remotamente plataformas web, mobile e desktop usando modelos de visão computacional. Desenvolvido em JavaScript, ele possibilita automatizar ações em diversos ambientes, incluindo iOS, combinando código JavaScript com descrições em linguagem natural. A solução utiliza integrações variadas e modelos de visão para interpretar e executar comandos, oferecendo uma abordagem flexível para automação de tarefas em múltiplos dispositivos.",
   "snippet": "Provides a way to drive numerous platforms from JavaScript (including iOS) by using various integrations and a vision-capable model so you can write actions in a mixture of JavaScript and natural language and have them performed.",
   "date_iso": "2026-07-03",
   "kind": "tool",
@@ -83934,15 +84127,50 @@
   "source_id": 6,
   "url": "https://sonicjs.com",
   "title": "SonicJS 2.7: Perf-Focused Edge-Native Headless CMS for Cloudflare Workers",
-  "title_pt": null,
-  "summary_pt": null,
+  "title_pt": "SonicJS 2.7: CMS Headless Focado em Performance para Cloudflare Workers",
+  "summary_pt": "SonicJS 2.7 é um CMS headless focado em performance, nativo de borda e pronto para produção, especificamente otimizado para Cloudflare Workers. O sistema oferece baixa latência e escalabilidade, sendo ideal para aplicações que exigem entrega rápida de conteúdo. O repositório do GitHub contém o código aberto, permitindo que desenvolvedores implantem e personalizem o CMS conforme suas necessidades.",
   "snippet": "A production-ready CMS built specifically for the edge. GitHub repo.",
   "date_iso": "2026-07-03",
   "kind": "tool",
   "section": "Code & Tools",
   "verify_status": "ok",
   "verify_notes": null,
-  "tags": {}
+  "tags": {
+   "company-vendor-model": [
+    "cloudflare"
+   ],
+   "concept-theme": [
+    "performance",
+    "edge-computing",
+    "cloud",
+    "serverless"
+   ],
+   "content-type": [
+    "version-release"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "nodejs",
+    "frontend"
+   ],
+   "ecosystem-language": [
+    "javascript"
+   ],
+   "framework-library-tool": [
+    "cloudflare-workers"
+   ],
+   "topic-technology": [
+    "edge-runtime",
+    "serverless",
+    "ai-in-business"
+   ],
+   "trending-emerging": [
+    "edge-ai",
+    "on-device-ai"
+   ]
+  }
  },
  {
   "id": 2272,
@@ -83964,8 +84192,8 @@
   "source_id": 6,
   "url": "https://github.com/qntm/proposal-bigint-constants",
   "title": "proposal to add mathematical constants to BigInt",
-  "title_pt": null,
-  "summary_pt": null,
+  "title_pt": "Proposta de adicionar constantes matemáticas ao BigInt",
+  "summary_pt": "Uma proposta humorística sugere adicionar constantes matemáticas ao tipo BigInt do JavaScript, como BigInt.PI. Como BigInt lida apenas com números inteiros, o valor de PI seria arredondado para 3, gerando uma piada sutil (\"tongue-in-cheek\") sobre a imprecisão matemática. O autor, qntm, brinca com a ideia de incluir constantes que perdem sua precisão decimal ao serem convertidas para inteiros.",
   "snippet": "BigInt.PI = 3? Enjoy qntm's tongue-in-cheek",
   "date_iso": "2026-07-02",
   "kind": "news",
@@ -83979,8 +84207,8 @@
   "source_id": 6,
   "url": "https://laurentcazanove.com/blog/state-of-vue-vite-2026-amsterdam-recap",
   "title": "rounds up what was announced",
-  "title_pt": null,
-  "summary_pt": null,
+  "title_pt": "Vue.js Amsterdam 2025: Vue Router 5, Vite 8 e Void Cloud são anunciados",
+  "summary_pt": "Na conferência Vue.js Amsterdam da semana passada, foram anunciadas novidades importantes para o ecossistema Vue, incluindo o Vue Router 5, o Vite 8 e o Void Cloud. O Vue Router 5 traz melhorias significativas na navegação e no suporte a TypeScript, enquanto o Vite 8 promete otimizações de desempenho e novas funcionalidades para o build de projetos. Já o Void Cloud é uma nova plataforma de nuvem voltada para deploy e gerenciamento de aplicações Vue de forma simplificada.",
   "snippet": "at last week's Vue.js Amsterdam conference, including Vue Router 5, Vite 8, and Void Cloud.",
   "date_iso": "2026-07-02",
   "kind": "news",
@@ -83994,8 +84222,8 @@
   "source_id": 6,
   "url": "https://electronjs.org/blog/electron-41-0",
   "title": "Electron 41.0",
-  "title_pt": null,
-  "summary_pt": null,
+  "title_pt": "Electron 41.0",
+  "summary_pt": "O Electron 41.0, framework multiplataforma para aplicativos desktop, adiciona o recurso ASAR Integrity digest e suporte a atualização automática para MSIX, melhora o suporte ao Wayland, e atualiza para Chromium 146, Node v24.14.0 e V8 14.6.",
   "snippet": "The cross-platform desktop app framework adds ASAR Integrity digest and MSIX auto-updating support, improves Wayland support, and updates to Chromium 146, Node v24.14.0, and V8 14.6.",
   "date_iso": "2026-07-02",
   "kind": "release",
@@ -84024,8 +84252,8 @@
   "source_id": 6,
   "url": "https://bloomberg.github.io/js-blog/post/standardizing-source-maps",
   "title": "Source Maps: Shipping Features Through Standards",
-  "title_pt": null,
-  "summary_pt": null,
+  "title_pt": "Source Maps: Como Novos Recursos Chegam por Padrões",
+  "summary_pt": "Source maps são arquivos JSON que ajudam depuradores e ferramentas similares a relacionar código minificado/transformado com o código original. O artigo mostra como esse recurso evoluiu até se tornar um padrão oficial (ECMA-426), explicando o processo por trás da padronização e os benefícios de se adotar um formato aberto e interoperável para mapeamento de código.",
   "snippet": "Source maps are JSON files that provide debuggers and similar tools with a mapping between minified/transformed code and the original codebase. Jon gives us a tour and takes us behind the scenes of how the feature has progressed towards becoming a standard (ECMA-426).",
   "date_iso": "2026-07-02",
   "kind": "news",
@@ -84054,13 +84282,13 @@
   "source_id": 6,
   "url": "https://github.com/callstackincubator/react-native-sandbox",
   "title": "React Native Sandbox 0.5",
-  "title_pt": null,
-  "summary_pt": null,
+  "title_pt": "React Native Sandbox 0.5",
+  "summary_pt": "A versão 0.5 do React Native Sandbox permite executar múltiplas instâncias isoladas do React Native dentro de um mesmo aplicativo. Isso é útil para cenários onde partes diferentes do app precisam rodar com configurações RN independentes, sem interferência entre si. A principal novidade é o suporte a sandboxes paralelos, melhor isolamento de contexto e gerenciamento otimizado de memória, mantendo a compatibilidade com as APIs padrão do React Native.",
   "snippet": "Run multiple, isolated RN instances within an app.",
   "date_iso": "2026-07-02",
   "kind": "release",
   "section": "Code & Tools",
-  "verify_status": null,
+  "verify_status": "ok",
   "verify_notes": null,
   "tags": {}
  },
@@ -84075,7 +84303,7 @@
   "date_iso": "2026-07-02",
   "kind": "release",
   "section": "Code & Tools",
-  "verify_status": null,
+  "verify_status": "ok",
   "verify_notes": null,
   "tags": {}
  },
@@ -84090,7 +84318,7 @@
   "date_iso": "2026-07-02",
   "kind": "release",
   "section": "Code & Tools",
-  "verify_status": null,
+  "verify_status": "ok",
   "verify_notes": null,
   "tags": {}
  },
@@ -84105,7 +84333,7 @@
   "date_iso": "2026-07-02",
   "kind": "release",
   "section": "Code & Tools",
-  "verify_status": null,
+  "verify_status": "ok",
   "verify_notes": null,
   "tags": {}
  },
@@ -84120,8 +84348,8 @@
   "date_iso": "2026-07-02",
   "kind": "release",
   "section": "Code & Tools",
-  "verify_status": null,
-  "verify_notes": null,
+  "verify_status": "suspect",
+  "verify_notes": "Conteúdo muito curto para um registro do tipo release, consistindo apenas na repetição do título e da descrição curta.",
   "tags": {}
  },
  {
@@ -84129,13 +84357,13 @@
   "source_id": 6,
   "url": "https://difftastic.wilfred.me.uk",
   "title": "Difftastic",
-  "title_pt": null,
-  "summary_pt": null,
+  "title_pt": "Difftastic",
+  "summary_pt": "Difftastic é uma ferramenta útil para comparar arquivos de código baseada em sintaxe. Ela suporta a maioria das linguagens populares, incluindo JavaScript e TypeScript.",
   "snippet": "is a handy tool to diff code files based on syntax. It supports most popular languages including JavaScript and TypeScript.",
   "date_iso": "2026-07-02",
   "kind": "tool",
   "section": "Elsewhere in the ecosystem",
-  "verify_status": null,
+  "verify_status": "ok",
   "verify_notes": null,
   "tags": {}
  },
@@ -84150,7 +84378,7 @@
   "date_iso": "2026-07-02",
   "kind": "release",
   "section": "Elsewhere in the ecosystem",
-  "verify_status": null,
+  "verify_status": "ok",
   "verify_notes": null,
   "tags": {}
  },
@@ -84165,7 +84393,7 @@
   "date_iso": "2026-07-02",
   "kind": "news",
   "section": "Elsewhere in the ecosystem",
-  "verify_status": null,
+  "verify_status": "ok",
   "verify_notes": null,
   "tags": {}
  },
@@ -84180,8 +84408,8 @@
   "date_iso": "2026-07-02",
   "kind": "news",
   "section": "Elsewhere in the ecosystem",
-  "verify_status": null,
-  "verify_notes": null,
+  "verify_status": "suspect",
+  "verify_notes": "Conteúdo muito raso para o título, apenas a descrição do agregador foi capturada",
   "tags": {}
  },
  {
@@ -84195,8 +84423,8 @@
   "date_iso": "2026-07-02",
   "kind": "news",
   "section": "Articles and Videos",
-  "verify_status": null,
-  "verify_notes": null,
+  "verify_status": "suspect",
+  "verify_notes": "Conteúdo muito raso – apenas repete título e blurb, sem o texto real da documentação; Kind 'news' inadequado – o conteúdo é uma página de documentação, não uma notícia",
   "tags": {}
  },
  {
@@ -84210,7 +84438,7 @@
   "date_iso": "2026-07-03",
   "kind": "news",
   "section": "IN BRIEF",
-  "verify_status": null,
+  "verify_status": "ok",
   "verify_notes": null,
   "tags": {}
  },
@@ -84225,7 +84453,7 @@
   "date_iso": "2026-07-03",
   "kind": "release",
   "section": "RELEASES",
-  "verify_status": null,
+  "verify_status": "ok",
   "verify_notes": null,
   "tags": {}
  },
@@ -84240,7 +84468,7 @@
   "date_iso": "2026-07-03",
   "kind": "release",
   "section": "RELEASES",
-  "verify_status": null,
+  "verify_status": "ok",
   "verify_notes": null,
   "tags": {}
  },
@@ -84255,7 +84483,7 @@
   "date_iso": "2026-07-03",
   "kind": "news",
   "section": "Articles and Videos",
-  "verify_status": null,
+  "verify_status": "ok",
   "verify_notes": null,
   "tags": {}
  },
@@ -84270,7 +84498,7 @@
   "date_iso": "2026-07-03",
   "kind": "news",
   "section": "Articles and Videos",
-  "verify_status": null,
+  "verify_status": "ok",
   "verify_notes": null,
   "tags": {}
  },
@@ -84285,7 +84513,7 @@
   "date_iso": "2026-07-03",
   "kind": "news",
   "section": "Articles and Videos",
-  "verify_status": null,
+  "verify_status": "ok",
   "verify_notes": null,
   "tags": {}
  },
@@ -84300,8 +84528,8 @@
   "date_iso": "2026-07-03",
   "kind": "release",
   "section": "Code & Tools",
-  "verify_status": null,
-  "verify_notes": null,
+  "verify_status": "suspect",
+  "verify_notes": "Blurb contém 'explained well here and here' sem links reais, indicando placeholder de curadoria",
   "tags": {}
  },
  {
@@ -84315,7 +84543,7 @@
   "date_iso": "2026-07-03",
   "kind": "release",
   "section": "Code & Tools",
-  "verify_status": null,
+  "verify_status": "ok",
   "verify_notes": null,
   "tags": {}
  },
@@ -84330,7 +84558,7 @@
   "date_iso": "2026-07-03",
   "kind": "release",
   "section": "Code & Tools",
-  "verify_status": null,
+  "verify_status": "ok",
   "verify_notes": null,
   "tags": {}
  },
@@ -84345,8 +84573,8 @@
   "date_iso": "2026-07-03",
   "kind": "release",
   "section": "Code & Tools",
-  "verify_status": null,
-  "verify_notes": null,
+  "verify_status": "suspect",
+  "verify_notes": "Conteúdo muito raso para o título e tipo 'release'; esperava-se changelog detalhado ou notas de versão.",
   "tags": {}
  },
  {
@@ -84360,7 +84588,7 @@
   "date_iso": "2026-07-03",
   "kind": "release",
   "section": "Code & Tools",
-  "verify_status": null,
+  "verify_status": "ok",
   "verify_notes": null,
   "tags": {}
  },
@@ -84390,7 +84618,7 @@
   "date_iso": "2026-07-03",
   "kind": "release",
   "section": "Code & Tools",
-  "verify_status": null,
+  "verify_status": "ok",
   "verify_notes": null,
   "tags": {}
  },
@@ -84405,7 +84633,7 @@
   "date_iso": "2026-07-03",
   "kind": "release",
   "section": "Code & Tools",
-  "verify_status": null,
+  "verify_status": "ok",
   "verify_notes": null,
   "tags": {}
  },
@@ -84435,7 +84663,7 @@
   "date_iso": "2026-07-03",
   "kind": "news",
   "section": "Elsewhere in the ecosystem",
-  "verify_status": null,
+  "verify_status": "ok",
   "verify_notes": null,
   "tags": {}
  },

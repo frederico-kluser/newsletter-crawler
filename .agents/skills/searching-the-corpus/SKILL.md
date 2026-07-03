@@ -1,14 +1,14 @@
 ---
 name: searching-the-corpus
-description: How to search the saved newsletter base and generate PT-BR summaries - the two CLI LLM search modes (Flash per-article relevance vs 5 Pro tag-derivation + tag retrieval), the AI web search (batched soft + per-article deep with source/date scope, key modal), the news/tool bucketing, the summarize stage, and reuse of the existing tag taxonomy. Use whenever you change src/search.js, src/summarize.js, src/web.js, src/web-ui/, the search/summarize/web commands or UI, or add tag-based retrieval.
+description: How to search the saved newsletter base and generate PT-BR summaries - the two CLI LLM search modes (Flash per-article relevance vs 5 Pro tag-derivation + tag retrieval), the AI web search (batched soft + per-article deep with source/date scope, key modal), the news/tool bucketing, the summarize stage, and reuse of the existing tag taxonomy. Use whenever you change src/search.js, src/summarize.js, src/web.js, src/web-ui/, the search/web commands or UI, or add tag-based retrieval.
 metadata:
   type: task
-  verification_signal: npm test (taxonomy.search + web.api + web.search + search.batch + ui.results) + npm run summarize -- --limit 2 (writes PT-BR) + npm run search -- "<q>" --mode A --limit 3 --yes + a real POST /api/search (soft and deep) + SSE GET /api/search/stream (progress/hit/done events) against a live `ncrawl web`
+  verification_signal: npm test (taxonomy.search + web.api + web.search + search.batch + ui.results) + ncrawl finish --limit 2 (verify+classify+summarize dos pendentes; escreve PT-BR) + npm run search -- "<q>" --mode A --limit 3 --yes + a real POST /api/search (soft and deep) + SSE GET /api/search/stream (progress/hit/done events) against a live `ncrawl web`
 ---
 # Searching the corpus (+ PT-BR summaries)
 
 ## When to use
-Editing `src/search.js`, `src/summarize.js`, `src/web.js`, the `search`/`summarize`/`web` commands, or the search UIs (`SearchConfig`/`ResultsView` na TUI, `src/web-ui/` no navegador); adding tag-based retrieval.
+Editing `src/search.js`, `src/summarize.js`, `src/web.js`, the `search`/`web` commands, or the search UIs (`SearchConfig`/`ResultsView` na TUI, `src/web-ui/` no navegador); adding tag-based retrieval.
 
 ## Procedure / injected knowledge
 - **The tag system ALREADY EXISTS — reuse it.** 9 facets, `config/taxonomy.json` (8 domains, aliases, limits, mandatory), classification in `src/classify.js`/`src/taxonomy.js`, persisted to `article_tags` (article_id, facet, tag, rank), auto post-crawl. Do NOT rebuild the taxonomy.
@@ -25,4 +25,4 @@ Editing `src/search.js`, `src/summarize.js`, `src/web.js`, the `search`/`summari
 - **Results to the UI.** `cmdSearch` RETURNS the results object; `RunView` captures it and App swaps to `ResultsView` — agora NAVEGÁVEL: seleção ↑/↓ com auto-scroll, **Enter → preview** (conteúdo completo via `getArticle(id)` injetado; `stmts.webGetArticle`), `o` abre a URL (`openBrowser` injetado como `onOpen`), Esc/b volta. Itens de busca trazem `source_name`/`date_iso` (join nos 4 stmts de busca + `toItem`). `renderResults` (print CLI) ficou INTOCADO — paridade. Progresso via `getSearchProgress()`. `src/ui/ResultsView.js@6b1d77d`, `src/commands.js@6b1d77d` (`getArticle`). Verified: `test/ui.results.test.js`.
 
 ## <evolution>
-On completion, update this skill only for an important, externally-verified change (a green `npm test` + a live `search`/`summarize`/`web` run). See meta-skill-evolution.
+On completion, update this skill only for an important, externally-verified change (a green `npm test` + a live `search`/`web` run). See meta-skill-evolution.

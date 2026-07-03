@@ -69,7 +69,7 @@ os `/data/*.json` já comprimidos (gzip/brotli) — o snapshot completo fica em 
 
 ## Atualizar o acervo depois de publicado
 
-1. Rode um crawl/summarize/classify no CLI como de costume.
+1. Rode um crawl no CLI como de costume (ele já resume + classifica; ou `ncrawl finish` p/ terminar pendentes).
 2. `ncrawl export --format web` (regenera o snapshot).
 3. `git add webapp/public/data && git commit && git push`.
 

@@ -3,6 +3,19 @@
 Todas as mudanças relevantes deste projeto. Formato baseado em
 [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/); versionamento [SemVer](https://semver.org/lang/pt-BR/).
 
+## [1.8.0] - 2026-07-03
+
+Publicação do site automatizada: push na main = snapshot fresco + deploy (Vercel Git integration).
+
+### Adicionado
+- **Hook `pre-push` versionado (`.githooks/`):** ao pushar a main, re-exporta o snapshot do webapp
+  (`export --format web`) a partir do SQLite local e, se houver dado novo, auto-commita
+  `webapp/public/data` e interrompe o push (repita o `git push`); a Vercel conectada ao repo
+  publica sozinha. Instalação automática via `postinstall` (`git config core.hooksPath .githooks`).
+  Guards fail-open: export falhou → push segue; snapshot com MENOS artigos que o commitado
+  (máquina sem o banco exportaria um acervo vazio) → restaura sem commitar; mudança só no campo
+  volátil `generatedAt` do meta.json → restaura e segue sem ruído.
+
 ## [1.7.0] - 2026-07-03
 
 Fontes de fábrica trocadas para 6 newsletters Cooperpress, seleção de fontes por **checkbox** na TUI

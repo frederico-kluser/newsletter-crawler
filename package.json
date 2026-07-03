@@ -28,6 +28,7 @@
     "ui": "NODE_NO_WARNINGS=1 node --env-file-if-exists=.env src/index.js ui",
     "menu": "NODE_NO_WARNINGS=1 node --env-file-if-exists=.env src/index.js menu",
     "start": "node --env-file-if-exists=.env src/index.js",
+    "postinstall": "git config core.hooksPath .githooks 2>/dev/null || true",
     "link": "npm install && npx playwright install chromium && npm link && node src/index.js status",
     "unlink": "npm rm -g newsletter-crawler"
   },

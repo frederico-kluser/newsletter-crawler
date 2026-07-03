@@ -5,7 +5,7 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { stmts, wipeAll } from './db.js';
 import {
-  EXPORT_DIR, DB_PATH, CONCURRENCY, MAX_RETRIES, HAS_LLM, CLASSIFY_AFTER_CRAWL, SUMMARIZE_AFTER_CRAWL,
+  ROOT, EXPORT_DIR, DB_PATH, CONCURRENCY, MAX_RETRIES, HAS_LLM, CLASSIFY_AFTER_CRAWL, SUMMARIZE_AFTER_CRAWL,
   SEARCH_MODE_A_CONFIRM, OPENROUTER_API_KEY, ENV_PATH, BUDGET_USD, MAX_PARALLEL, RAM_MAX_PCT,
   AGGRESSIVE_DEFAULT, VERIFY_AFTER_CRAWL, VERIFY_STREAMING, JOB_TIMEOUT_MS, JOB_HARD_TIMEOUT_MS,
   CLASSIFY_STREAMING, SUMMARIZE_STREAMING, CURATE_JOBS, ROUNDUP_TIMEOUT_MS, COST_LOG_INTERVAL_MS,
@@ -16,6 +16,7 @@ import {
 } from './governor.js';
 import { beginRun, endRun, shouldStop, getBudgetState } from './budget.js';
 import { processJob, enqueue, upsertSource } from './crawl.js';
+import { exportWebSnapshot } from './export-web.js';
 import { classifyPending, classifyArticleRow } from './classify.js';
 import { summarizePending, summarizeArticleRow } from './summarize.js';
 import { verifyPending, verifyArticleRow, recleanSuspects } from './verify.js';
@@ -582,6 +583,15 @@ function articleMarkdown(a, facets) {
 }
 
 export function cmdExport(flags) {
+  // Formato web: snapshot JSON estático do acervo COMPLETO p/ o webapp (webapp/public/data),
+  // COMMITADO no repo e servido pela Vercel — por isso o destino default é o REPO (ROOT), não
+  // o EXPORT_DIR de NC_HOME como nos formatos md/json. Snapshot é estado, não delta.
+  if (flags.format === 'web') {
+    if (flags.all === true) warn('--all é ignorado no formato web (o snapshot é sempre o acervo completo).');
+    const outDir = flags.out ? path.resolve(String(flags.out)) : path.join(ROOT, 'webapp', 'public', 'data');
+    exportWebSnapshot({ outDir });
+    return;
+  }
   const format = flags.format === 'json' ? 'json' : 'md';
   const outDir = EXPORT_DIR;
   mkdirSync(outDir, { recursive: true });

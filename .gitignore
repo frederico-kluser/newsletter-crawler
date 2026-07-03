@@ -6,8 +6,9 @@ node_modules/
 .env.*
 !.env.example
 
-# dados em runtime (banco, exports, logs)
-data/
+# dados em runtime (banco, exports, logs) — ancorado na RAIZ de propósito: o snapshot do
+# webapp (webapp/public/data/) é COMMITADO (é a base que o site estático serve na Vercel)
+/data/
 *.db
 *.db-wal
 *.db-shm
@@ -22,6 +23,10 @@ memory/
 MEMORY.md
 .claude/memory/
 .claude/plans/
+
+# webapp (Vite): build e screenshots de verificação — o snapshot em webapp/public/data/ é versionado
+webapp/dist/
+webapp/scripts/out/
 
 # Playwright (caso configurem cache local)
 /test-results/

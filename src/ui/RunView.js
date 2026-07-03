@@ -7,7 +7,7 @@
 // assinatura — no `.finally` E no cleanup do effect. Comando I/O-bound → event loop livre p/ o Ink.
 import { useState, useEffect, useRef } from 'react';
 import { Box, Text, useInput } from 'ink';
-import { Spinner, Alert, Select } from '@inkjs/ui';
+import { Spinner, Alert, Select, ProgressBar } from '@inkjs/ui';
 import { html } from './html.js';
 import { t } from './i18n.js';
 import { setLogSink } from '../util.js';
@@ -19,6 +19,15 @@ import { colors } from './theme.js';
 
 const LEVEL_COLOR = { warn: colors.warn, error: colors.err, debug: colors.muted };
 const VISIBLE = 12;
+
+/** ETA legível a partir de segundos: "45s", "2min", "2min 30s". */
+const fmtEta = (secs) => {
+  const s = Math.max(0, Math.round(secs));
+  if (s < 60) return `${s}s`;
+  const m = Math.floor(s / 60);
+  const r = s % 60;
+  return r ? `${m}min ${r}s` : `${m}min`;
+};
 
 export function RunView({ spec, onDone, onResults }) {
   const isCrawl = spec.sub === 'crawl';
@@ -135,9 +144,19 @@ export function RunView({ spec, onDone, onResults }) {
   const f = status.frontier;
   const dArticles = Math.max(0, status.articles - baseline.articles);
   const dClassif = Math.max(0, status.classified - baseline.classified);
+  // Busca modo A / profunda: progresso por ARTIGO (barra + % + ETA + "não analisados"). O modo B
+  // não move _progress (5 facetas Pro), então total=0 → sem barra, só o spinner + contadores zerados.
+  const isSearch = spec.sub === 'search' && prog && prog.total > 0;
+  const searchEtaSecs =
+    isSearch && prog.scanned > 0 && prog.total > prog.scanned
+      ? ((Date.now() - startAt.current) / prog.scanned) * (prog.total - prog.scanned) / 1000
+      : null;
   const counters =
     spec.sub === 'search' && prog
-      ? t('searchScanning', { n: prog.scanned, total: prog.total, m: prog.relevant })
+      ? t('searchScanning', { n: prog.scanned, total: prog.total, m: prog.relevant }) +
+        (prog.total > 0 ? ` · ${Math.round((prog.scanned / prog.total) * 100)}%` : '') +
+        (searchEtaSecs != null ? ` · ${t('searchEta', { eta: fmtEta(searchEtaSecs) })}` : '') +
+        (prog.failed > 0 ? ` · ${t('searchFailed', { n: prog.failed })}` : '')
       : `${t('articles')} +${dArticles} · ${t('classif')} +${dClassif} · ` +
         `${t('frontier')} ${f.pending}/${f.in_progress}/${f.done}/${f.failed}`;
 
@@ -149,7 +168,12 @@ export function RunView({ spec, onDone, onResults }) {
           }</${Alert}>`
         : html`<${Spinner} label=${`${t('running')} (${spec.sub})`} />`}
     </${Box}>
-    <${Box} marginY=${1}><${Text} color=${colors.accent}>${counters}</${Text}></${Box}>
+    ${isSearch
+      ? html`<${Box} marginY=${1}>
+          <${Box} width=${26} marginRight=${1}><${ProgressBar} value=${Math.round(Math.min(1, prog.scanned / prog.total) * 100)} /></${Box}>
+          <${Text} color=${colors.accent}>${counters}</${Text}>
+        </${Box}>`
+      : html`<${Box} marginY=${1}><${Text} color=${colors.accent}>${counters}</${Text}></${Box}>`}
     ${telemetryLine(tele) ? html`<${Box}><${Text} dimColor>${telemetryLine(tele)}</${Text}></${Box}>` : null}
     ${budgetStageLine(tele) ? html`<${Box}><${Text} dimColor>${budgetStageLine(tele)}</${Text}></${Box}>` : null}
     <${Box} flexDirection="column" height=${VISIBLE}>

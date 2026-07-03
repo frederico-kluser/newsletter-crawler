@@ -16,8 +16,12 @@ export const STR = {
   softHint: 'julga títulos e resumos em lotes (1 chamada a cada ~40 artigos)',
   searching: 'buscando…',
   cancel: 'Cancelar',
-  aiProgressBatch: (done, total, relevant) => `lote ${done}/${total} · ${relevant} relevante${relevant === 1 ? '' : 's'} até agora`,
-  aiProgressDeep: (done, total, relevant) => `artigo ${done}/${total} · ${relevant} relevante${relevant === 1 ? '' : 's'}`,
+  // loader da busca IA — progresso nível-ARTIGO (barra + %, X/Y, relevantes, custo, ETA, falhas)
+  aiUnitArticles: 'artigos',
+  aiUnitRelevant: 'relevante',
+  aiUnitRelevants: 'relevantes',
+  aiEta: (label) => `~${label} restantes`,
+  aiFailed: (n) => `${n} não analisado${n === 1 ? '' : 's'}`,
   aiDeepWarning: 'a busca profunda pode levar alguns minutos',
   aiResults: (relevant, scanned) => `${relevant} relevante${relevant === 1 ? '' : 's'} de ${scanned} analisado${scanned === 1 ? '' : 's'}`,
   aiTruncated: (max) => `resultados limitados aos ${max} melhores`,
@@ -122,4 +126,13 @@ export function fmtUsd(v) {
   const n = Number(v) || 0;
   const digits = n > 0 && n < 0.01 ? 4 : 2;
   return `US$ ${n.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: digits })}`;
+}
+
+/** ETA legível a partir de segundos: "45s", "2min", "2min 30s". */
+export function fmtEta(secs) {
+  const s = Math.max(0, Math.round(Number(secs) || 0));
+  if (s < 60) return `${s}s`;
+  const m = Math.floor(s / 60);
+  const r = s % 60;
+  return r ? `${m}min ${r}s` : `${m}min`;
 }

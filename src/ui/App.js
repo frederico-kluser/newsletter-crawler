@@ -6,13 +6,13 @@ import { Badge } from '@inkjs/ui';
 import { html } from './html.js';
 import { t } from './i18n.js';
 import {
-  getStatus, cmdCrawl, cmdExport, cmdClassify, cmdAdd, cmdReset, cmdSummarize, cmdSearch,
+  getStatus, cmdCrawl, cmdExport, cmdClassify, cmdAdd, cmdReset, cmdSummarize, cmdFinish, cmdSearch,
   getArticle,
 } from '../commands.js';
 import { openBrowser } from '../web.js';
 import {
   Menu, StatusScreen, CrawlConfig, ExportConfig, ClassifyConfig, AddConfig, ResetConfirm,
-  SummarizeConfig, SearchConfig, WebConfig, LimitsConfig,
+  SummarizeConfig, FinishConfig, SearchConfig, WebConfig, LimitsConfig,
 } from './screens.js';
 import { RunView } from './RunView.js';
 import { ResultsView } from './ResultsView.js';
@@ -22,6 +22,7 @@ const THUNKS = {
   export: (flags) => cmdExport(flags),
   classify: (flags) => cmdClassify(flags),
   summarize: (flags) => cmdSummarize(flags),
+  finish: (flags) => cmdFinish(flags),
   search: (flags, rest) => cmdSearch(rest, flags), // retorna os resultados p/ a UI
   add: (flags, rest) => cmdAdd(rest, flags),
   reset: (flags) => cmdReset(flags),
@@ -74,6 +75,8 @@ export default function App() {
     body = html`<${ClassifyConfig} onRun=${onRun} onBack=${toMenu} />`;
   } else if (screen === 'summarize') {
     body = html`<${SummarizeConfig} onRun=${onRun} onBack=${toMenu} />`;
+  } else if (screen === 'finish') {
+    body = html`<${FinishConfig} onRun=${onRun} onBack=${toMenu} />`;
   } else if (screen === 'search') {
     body = html`<${SearchConfig} onRun=${onRun} onBack=${toMenu} />`;
   } else if (screen === 'web') {

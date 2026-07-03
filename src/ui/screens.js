@@ -59,13 +59,14 @@ export function Menu({ onSelect }) {
     { label: t('menuExport'), value: 'export' },
     { label: t('menuClassify'), value: 'classify' },
     { label: t('menuSummarize'), value: 'summarize' },
+    { label: t('menuFinish'), value: 'finish' },
     { label: t('menuAdd'), value: 'add' },
     { label: t('menuLimits'), value: 'limits' },
     { label: t('menuReset'), value: 'reset' },
     { label: t('menuQuit'), value: 'quit' },
   ];
   return html`<${Box} flexDirection="column">
-    <${Select} options=${options} onChange=${onSelect} visibleOptionCount=${10} />
+    <${Select} options=${options} onChange=${onSelect} visibleOptionCount=${12} />
     <${Box} marginTop=${1}><${Text} dimColor>${t('hintNav')}</${Text}></${Box}>
   </${Box}>`;
 }
@@ -285,6 +286,35 @@ export function SummarizeConfig({ onRun, onBack }) {
     </${Field}>`;
   }
   return html`<${Review} sub="summarize" flags=${flags} onRun=${onRun} onBack=${onBack} />`;
+}
+
+// Finaliza os PENDENTES (verify+classify+summarize) sem novo crawl. Pergunta só o teto de gasto
+// (--budget) — o knob que importa p/ terminar um backlog sem susto; vazio = sem teto.
+export function FinishConfig({ onRun, onBack }) {
+  const [step, setStep] = useState('budget');
+  const [flags, setFlags] = useState({});
+  const [err, setErr] = useState(null);
+  if (!HAS_LLM) {
+    return html`<${Box} flexDirection="column">
+      <${Alert} variant="error">${t('finishNoLLM')}</${Alert}>
+      <${Select} options=${[{ label: t('back'), value: 'back' }]} onChange=${onBack} />
+    </${Box}>`;
+  }
+  if (step === 'budget') {
+    return html`<${Field} label=${t('finishBudget')} error=${err}>
+      <${TextInput} key=${step} placeholder="" onSubmit=${(val) => {
+        const s = String(val).trim();
+        if (s) {
+          const n = Number(s);
+          if (!Number.isFinite(n) || n < 0) return setErr(t('finishBudgetInvalid'));
+          setFlags((f) => ({ ...f, budget: s }));
+        }
+        setErr(null);
+        setStep('review');
+      }} />
+    </${Field}>`;
+  }
+  return html`<${Review} sub="finish" flags=${flags} onRun=${onRun} onBack=${onBack} />`;
 }
 
 export function SearchConfig({ onRun, onBack }) {

@@ -3,6 +3,42 @@
 Todas as mudanças relevantes deste projeto. Formato baseado em
 [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/); versionamento [SemVer](https://semver.org/lang/pt-BR/).
 
+## [1.6.0] - 2026-07-03
+
+Painel do crawl reprojetado (dashboard "mission control" na TUI) + classificação muito mais barata e
+um comando para terminar/retomar o pós-processamento.
+
+### Adicionado
+- **Comando `ncrawl finish` (`npm run finish`):** termina os **PENDENTES** (verify+classify+summarize)
+  **sem novo crawl**, no perfil `llm-only`, honrando `--budget`/`--parallel`/`--limit` e
+  `--no-verify`/`--no-classify`/`--no-summarize`. Delta/idempotente; `--budget` **para no teto e
+  devolve os pendentes** (retomável) — dá p/ terminar um backlog grande em fatias com custo
+  controlado. Também no menu da TUI → **"Finalizar pendentes"**. Espelha o bloco pós-crawl
+  (`cmdFinish` em `src/commands.js`).
+- **Painel do crawl (TUI) reprojetado — dashboard "mission control":** uma região de **STATUS
+  persistente** (cabeçalho + badge de estado `Preparando→Coletando→Finalizando→Concluído/Falhou` +
+  cronômetro, **tabela de fases** Descoberta/Curadoria/Artigos/Pós com `ProgressBar` + contadores,
+  linha "agora", % por data, faixa de métricas RAM/lanes/US$) **separada** de um **feed curado de
+  eventos** (só marcos). O "salvo" de cada artigo virou **ticker no lugar** (não polui o feed) e o
+  ruído interno (parse-pool/governor/breaker) **colapsa** num contador `⚠ N avisos` com toggle **`v`**
+  (overlay do log cru). `RunView` virou um dispatcher fino (dashboard no crawl, painel simples nos
+  demais comandos). Camada de eventos estruturada nova (`src/run-events.js`) + derivação **pura** das
+  fases (`src/ui/crawlPhases.js`). Testes: `run-events`, `crawlPhases`, `ui.crawl-dashboard`,
+  `ui.runview`.
+
+### Alterado
+- **Custo da classificação cortado ~4× (só config, reversível por env):** classify já foi ~92% do
+  gasto de uma coleta longa (9 chamadas/artigo, 6 no **Pro/xhigh** com o corpo inteiro reenviado 9×).
+  Agora só as facetas **core** (`domain`, `topic-technology`) seguem no Pro (esforço `xhigh`→`high`);
+  as outras 7 em **Flash/medium**, e `CLASSIFY_MAX_CHARS` **12000→2000** (título+início bastam p/ o
+  vocabulário fixo). Ajuste por faceta com `LLM_MODEL_CLASSIFY_<FACETA>`/`LLM_EFFORT_CLASSIFY_<FACETA>`.
+  O maior salto (classificar em **lote** de artigos por chamada) fica anotado como próximo passo.
+
+### Corrigido
+- **Timers de animação da TUI usam `.unref()`:** um `setInterval` de spinner não-unref'd segurava o
+  processo vivo e **pendurava o `node --test`** (isolation=process) depois dos testes; o poll de dados
+  idem. O Ink já mantém o loop enquanto renderiza, então a animação nunca precisa segurar o processo.
+
 ## [1.5.0] - 2026-07-02
 
 Busca 100% IA no buscador web + resultados navegáveis com preview na TUI.

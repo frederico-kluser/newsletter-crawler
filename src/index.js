@@ -9,7 +9,7 @@ import {
   printStatus, cmdCrawl, cmdAdd, cmdReset, cmdExport, cmdClassify, cmdSummarize, cmdSearch, cmdKey,
   cmdWeb,
   cmdLimits,
-  cmdVerify, cmdReclean, cmdInspect, cmdPurge,
+  cmdVerify, cmdReclean, cmdInspect, cmdPurge, cmdFinish,
 } from './commands.js';
 
 function parseFlags(argv) {
@@ -54,6 +54,8 @@ function printHelp() {
       '  node src/index.js export [--format md|json] [--all]   (--all: acervo todo, não só a última run)',
       '  node src/index.js classify [--limit N] [--force] [--budget USD] [--parallel N]',
       '  node src/index.js summarize [--limit N] [--force] [--budget USD] [--parallel N]   resumo/título PT-BR',
+      '  node src/index.js finish [--budget USD] [--parallel N] [--limit N] [--no-verify|--no-classify|--no-summarize]',
+      '                          termina os PENDENTES (verify+classify+summarize) SEM novo crawl; use --budget p/ limitar e retomar',
       '  node src/index.js search <consulta> [--mode A|B] [--limit N] [--yes] [--all] [--budget USD] [--parallel N]',
       '  node src/index.js web [--port N] [--no-open]   buscador web (React) com filtros da base',
       '  node src/index.js key set <chave> | key test   valida/salva a chave OpenRouter (em ~/.newsletter-crawler/.env)',
@@ -118,6 +120,9 @@ try {
     } else if (cmd === 'summarize') {
       await cmdSummarize(flags);
       db.close();
+    } else if (cmd === 'finish') {
+      await cmdFinish(flags);
+      db.close();
     } else if (cmd === 'search') {
       await cmdSearch(rest, flags);
       db.close();
@@ -136,7 +141,7 @@ try {
     } else {
       errorLog(
         `comando desconhecido: ${cmd} ` +
-          '(use: crawl | status | inspect | verify | purge | add | export | classify | summarize | search | web | key | limits | reset | ui)',
+          '(use: crawl | status | inspect | verify | purge | add | export | classify | summarize | finish | search | web | key | limits | reset | ui)',
       );
       process.exit(1);
     }

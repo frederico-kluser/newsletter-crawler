@@ -1,4 +1,4 @@
-# Acervo — buscador web estático
+# Acervo — buscador web estático · v1.0.0
 
 Buscador do acervo de newsletters de tecnologia. É um app **estático** (Vite + React + Motion)
 que lê um **snapshot JSON commitado** (`public/data/`) — **sem backend nenhum**.

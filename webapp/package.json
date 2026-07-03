@@ -1,7 +1,7 @@
 {
   "name": "newsletter-webapp",
   "private": true,
-  "version": "0.1.0",
+  "version": "1.0.0",
   "type": "module",
   "description": "Buscador estático do acervo de newsletters — Vite + React + Motion, dados commitados (webapp/public/data), deploy Vercel sem backend.",
   "scripts": {

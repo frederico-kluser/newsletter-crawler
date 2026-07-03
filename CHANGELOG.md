@@ -15,6 +15,10 @@ um comando para terminar/retomar o pós-processamento.
   devolve os pendentes** (retomável) — dá p/ terminar um backlog grande em fatias com custo
   controlado. Também no menu da TUI → **"Finalizar pendentes"**. Espelha o bloco pós-crawl
   (`cmdFinish` em `src/commands.js`).
+- **Backlog pendente visível na TUI:** a **barra de status** do topo, o **item do menu** (Coletar /
+  Finalizar) e a **tela Status** agora mostram o que **falta terminar**, separando **"na fila"**
+  (ainda não baixado → resolve com **Coletar**) de **"sem tags / sem resumo"** (já salvo → resolve com
+  **Finalizar pendentes**). Antes o topo só mostrava os classificados FEITOS, o que escondia o backlog.
 - **Painel do crawl (TUI) reprojetado — dashboard "mission control":** uma região de **STATUS
   persistente** (cabeçalho + badge de estado `Preparando→Coletando→Finalizando→Concluído/Falhou` +
   cronômetro, **tabela de fases** Descoberta/Curadoria/Artigos/Pós com `ProgressBar` + contadores,

@@ -18,12 +18,13 @@ import { shouldStop } from './budget.js';
 import { log, warn } from './util.js';
 
 // Progresso global (a busca é efêmera, então getStatus() não se move) — a UI faz poll disto.
-let _progress = { scanned: 0, total: 0, relevant: 0 };
+// `failed` = itens que ESGOTARAM erro (fail-open p/ 'none'), ≠ 'none' legítimo → "não analisados".
+let _progress = { scanned: 0, total: 0, relevant: 0, failed: 0 };
 export function getSearchProgress() {
   return _progress;
 }
 const resetProgress = (total) => {
-  _progress = { scanned: 0, total, relevant: 0 };
+  _progress = { scanned: 0, total, relevant: 0, failed: 0 };
 };
 
 const snippet = (s) => String(s || '').replace(/\s+/g, ' ').trim().slice(0, 200);
@@ -52,7 +53,7 @@ const RANK = { direct: 0, similar: 1 };
  * Compartilhado pelo modo A do CLI e pela busca hard da web. Fail-open: erro vira 'none' com warn;
  * orçamento (shouldStop/BUDGET_EXCEEDED) NÃO vira 'none' silencioso — conta no retorno (skipped).
  */
-async function judgeRowsIndividually(query, rows, verdicts, label = 'A') {
+async function judgeRowsIndividually(query, rows, verdicts, label = 'A', onEvent = null) {
   // Janela = min(override de env, capacidade atual da lane llm do governador).
   const gate = pLimit(stageWindow(SEARCH_FLASH_CONCURRENCY));
   let skipped = 0;
@@ -64,6 +65,7 @@ async function judgeRowsIndividually(query, rows, verdicts, label = 'A') {
           return;
         }
         let rel = { relation: 'none', kind: 'news' };
+        let failedHere = false;
         try {
           rel = await judgeRelevance({ query, title: a.title, content: a.content });
         } catch (e) {
@@ -72,13 +74,20 @@ async function judgeRowsIndividually(query, rows, verdicts, label = 'A') {
             return;
           }
           warn(`busca[${label}] ${a.url}: ${e.message}`); // fail-open -> none
+          failedHere = true;
         }
         _progress.scanned++;
         if (rel.relation !== 'none') _progress.relevant++;
+        if (failedHere) _progress.failed++;
         if (_progress.scanned % 25 === 0) {
           log(`busca ${label}: ${_progress.scanned}/${rows.length} avaliados · ${_progress.relevant} relevantes`);
         }
         verdicts.set(a.id, rel);
+        // streaming (só a web passa onEvent): hit relevante AO VIVO + progresso por artigo
+        if (onEvent) {
+          if (rel.relation !== 'none') onEvent({ type: 'hit', hit: { id: a.id, relation: rel.relation, kind: rel.kind } });
+          onEvent({ type: 'progress', scanned: _progress.scanned, total: rows.length, relevant: _progress.relevant, failed: _progress.failed });
+        }
       }),
     ),
   );
@@ -233,7 +242,7 @@ export function mergeBatchVerdicts(batch, results, verdicts) {
  * Retorna hits CRUS {id, relation, kind} ordenados (direct antes de similar) e capados em
  * SEARCH_WEB_MAX_ITEMS — o enriquecimento p/ os cards (fonte/data/tags) fica no web.js.
  */
-export async function searchWeb(query, { deep = false, sources = null, from = null, to = null } = {}) {
+export async function searchWeb(query, { deep = false, sources = null, from = null, to = null, onEvent = null } = {}) {
   const params = {
     sources: Array.isArray(sources) && sources.length ? JSON.stringify(sources) : null,
     from,
@@ -245,9 +254,11 @@ export async function searchWeb(query, { deep = false, sources = null, from = nu
   resetProgress(rows.length);
   const verdicts = new Map();
   let skipped = 0;
+  const emitProgress = () =>
+    onEvent?.({ type: 'progress', scanned: _progress.scanned, total: rows.length, relevant: _progress.relevant, failed: _progress.failed });
 
   if (deep) {
-    skipped = await judgeRowsIndividually(query, rows, verdicts, 'profunda');
+    skipped = await judgeRowsIndividually(query, rows, verdicts, 'profunda', onEvent);
   } else {
     // Item sem título E sem texto não gasta token: veredito local 'none'.
     const pend = [];
@@ -257,6 +268,7 @@ export async function searchWeb(query, { deep = false, sources = null, from = nu
       else pend.push(a);
     }
     _progress.scanned = rows.length - pend.length;
+    emitProgress();
     const gate = pLimit(stageWindow(SEARCH_BATCH_CONCURRENCY));
     await Promise.all(
       chunkBatches(pend, SEARCH_BATCH_SIZE).map((batch) =>
@@ -265,6 +277,7 @@ export async function searchWeb(query, { deep = false, sources = null, from = nu
             skipped += batch.length; // orçamento: lote não avaliado (não vira 'none' silencioso)
             return;
           }
+          let batchFailed = false;
           try {
             const results = await judgeRelevanceBatch({ query, items: batch.map(toBatchItem) });
             const { missing, unknown } = mergeBatchVerdicts(batch, results, verdicts);
@@ -278,11 +291,21 @@ export async function searchWeb(query, { deep = false, sources = null, from = nu
             }
             warn(`busca[soft] lote de ${batch.length}: ${e.message}`); // fail-open -> none
             for (const a of batch) verdicts.set(a.id, { relation: 'none', kind: 'news' });
+            batchFailed = true;
           }
           _progress.scanned += batch.length;
+          if (batchFailed) _progress.failed += batch.length;
           let rel = 0;
           for (const v of verdicts.values()) if (v.relation !== 'none') rel++;
           _progress.relevant = rel;
+          // streaming: emite os hits novos do lote (não no fail-open) + progresso por artigo
+          if (onEvent && !batchFailed) {
+            for (const a of batch) {
+              const v = verdicts.get(a.id);
+              if (v && v.relation !== 'none') onEvent({ type: 'hit', hit: { id: a.id, relation: v.relation, kind: v.kind } });
+            }
+          }
+          emitProgress();
         }),
       ),
     );
@@ -306,6 +329,7 @@ export async function searchWeb(query, { deep = false, sources = null, from = nu
     scanned: _progress.scanned,
     total: rows.length,
     relevant: hits.length,
+    failed: _progress.failed,
     skipped,
     truncated,
     hits: hits.slice(0, SEARCH_WEB_MAX_ITEMS),

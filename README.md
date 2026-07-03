@@ -70,12 +70,14 @@ npm run unlink        # remove o link global quando quiser
 
 ## Configuração
 - **`.env`** — segredos e overrides (veja `.env.example`). Nunca é commitado. No uso global, prefira `ncrawl key set <chave>` (grava em `~/.newsletter-crawler/.env`).
-- **`config/sources.json`** — as newsletters a raspar:
+- **`config/sources.json`** — as newsletters a raspar. O conjunto de fábrica são **6 newsletters
+  Cooperpress** (mesma página `/issues`): Node Weekly, JavaScript Weekly, Frontend Focus, React
+  Status, Postgres Weekly e Golang Weekly:
   ```json
   {
     "sources": [
-      { "name": "The Batch — Research", "url": "https://www.deeplearning.ai/the-batch/tag/research" },
-      { "name": "AI Weekly", "url": "https://aiweekly.co/issues", "type": "index", "maxIndexPages": 1 }
+      { "name": "Node Weekly", "url": "https://nodeweekly.com/issues", "type": "index" },
+      { "name": "JavaScript Weekly", "url": "https://javascriptweekly.com/issues", "type": "index" }
     ]
   }
   ```
@@ -84,7 +86,7 @@ npm run unlink        # remove o link global quando quiser
   - Uma página apontada por um link que for, ela mesma, uma **coleção** de várias notícias (pouca prosa + muitos links externos) é **dividida em N** automaticamente (`MAX_CRAWL_DEPTH` limita a recursão).
 
 ## Menu guiado (TUI)
-Ao chamar a ferramenta **sem argumentos num terminal interativo**, abre um **menu guiado** (Ink/React) com todas as ações (coletar, **buscar**, status, exportar, classificar, **resumir**, adicionar fonte, limpar). Ele monta os parâmetros por opções, **mostra o comando equivalente** (assim você aprende as flags) e exibe um **painel de progresso ao vivo** no crawl/busca. **As flags continuam executando direto** — o menu é só um atalho.
+Ao chamar a ferramenta **sem argumentos num terminal interativo**, abre um **menu guiado** (Ink/React) com todas as ações (coletar, **buscar**, status, exportar, classificar, **resumir**, **finalizar pendentes**, adicionar fonte, limpar). Ele monta os parâmetros por opções, **mostra o comando equivalente** (assim você aprende as flags) e exibe, no crawl, um **dashboard ao vivo**: fases (Descoberta/Curadoria/Artigos/Pós) com barras + estado/cronômetro no topo, um **feed curado de eventos** embaixo e os avisos internos colapsados num contador (tecla `v` abre o log cru). Na tela **Coletar**, as fontes são escolhidas em **checkboxes** (espaço marca/desmarca, Enter confirma; todas vêm marcadas — um subconjunto vira `--sources "A,B"`). O visual é unificado por uma camada de **tokens semânticos** (`src/ui/theme.js`: cores por função, glifos, tema do @inkjs/ui) + widgets compartilhados (`Panel`, `FooterHints`, `Header`). **As flags continuam executando direto** — o menu é só um atalho.
 ```bash
 npm start            # ou `node src/index.js` — abre o menu (em TTY)
 npm run ui           # idem, explícito
@@ -93,14 +95,15 @@ NO_COLOR=1 npm run ui          # sem cores
 ```
 > Mudança: `node src/index.js` sem args agora abre o **menu** (TTY) ou imprime **ajuda** (não-TTY/`--no-input`), em vez de rodar o crawl. Use `npm run crawl` para coletar. Ctrl-C sai limpo (restaura o terminal; jobs `in_progress` são retomados no próximo run).
 
-**Adicionar newsletter pela interface:** menu → **Adicionar fonte** → assistente (URL → nome → tipo `listing`/`index` → maxIndexPages). A fonte é **persistida em `config/sources.json`** (upsert por URL) — fica permanente, passa a aparecer no seletor da tela **Coletar** e é re-semeada a cada crawl. Equivale a `npm run add -- <url> --name "..." --type index --max-index-pages 1`.
+**Adicionar newsletter pela interface:** menu → **Adicionar fonte** → assistente (URL → nome → tipo `listing`/`index` → maxIndexPages). A fonte é **persistida em `config/sources.json`** (upsert por URL) — fica permanente, passa a aparecer no **checkbox de fontes** da tela **Coletar** e é re-semeada a cada crawl. Equivale a `npm run add -- <url> --name "..." --type index --max-index-pages 1`.
 
 ## Uso
 ```bash
 npm run crawl                          # semeia do config e roda até esvaziar a fila (resumível)
 npm run crawl -- --max-pages 2 --max-articles 5   # limita custo/tempo (ótimo p/ 1º teste)
-npm run crawl -- --source "AI Weekly"  # semeia só essa fonte (nome exato; ou --only <substr>)
-npm run crawl -- --source "AI Weekly" --since 2026-06-25   # piso de data (veja abaixo)
+npm run crawl -- --sources "Node Weekly,React Status"   # várias fontes (é o que o checkbox da TUI emite)
+npm run crawl -- --source "Node Weekly"  # semeia só essa fonte (nome exato; ou --only <substr>)
+npm run crawl -- --source "Node Weekly" --since 2026-06-25   # piso de data (veja abaixo)
 npm run crawl -- --no-aggressive       # modo educado (agressivo é o default: robots ignorado + UA real)
 npm run crawl -- --no-refresh          # não re-visita as listagens; só drena a fila pendente
 npm run status                         # contagens de sources/pages/articles/selectors/frontier
@@ -111,6 +114,8 @@ npm run purge -- "Node Weekly" --yes   # apaga os DADOS da fonte (fica cadastrad
 npm run add -- https://exemplo.com/arquivo --name "Minha" --type index --max-index-pages 1
 npm run export -- --format md          # data/export/<fonte>/*.md — só a última run (--all = tudo; ou --format json)
 npm run summarize                      # resumo + título em PT-BR p/ cada artigo (Flash; idempotente)
+npm run classify                       # tags multi-faceta (core no Pro, resto Flash); idempotente
+npm run finish -- --budget 2           # termina os PENDENTES (verify+classify+summarize) sem novo crawl; teto US$2, retomável
 npm run search -- react server components --mode B   # por tags (5 Pro); só a última run (--all = acervo)
 npm run search -- "local llm" --mode A --limit 20 --yes --all   # exaustiva no acervo todo (Flash)
 npm run web                            # buscador no navegador (localhost:8477): busca IA soft/profunda + browse
@@ -128,14 +133,20 @@ npm test                               # node:test (datas, anti-bot, busca em lo
 - **Escopo padrão** do `search`: a última run **que trouxe artigos** (delta real); `--all` = acervo todo.
 
 ### Seleção de fonte e parada por data
+- **`--sources "<a,b>"`** semeia uma **lista** de fontes (vírgula; cada item por nome exato ou URL — é o que o checkbox da TUI emite; itens sem match geram aviso). Tem **precedência** sobre `--source`/`--only`.
 - **`--source "<nome|url>"`** semeia só uma fonte (nome exato ou URL); **`--only <substr>`** casa por substring.
 - **`--since <YYYY-MM-DD|ISO>`** é um **piso**: coleta do mais novo para o mais antigo e **para** ao passar da data. Aplica-se à data da **issue** (para a paginação do índice ao cruzar o piso) **e** à data de cada **artigo** (descarta os mais antigos; artigo sem data conhecida é mantido, pois sua issue já está no intervalo). Com `--since`, o índice pode paginar além de `maxIndexPages`, até `SINCE_MAX_INDEX_PAGES` (teto de segurança). Não é persistido — repita a flag ao retomar.
 - **Re-crawl incremental (padrão):** cada execução re-visita as listagens e enfileira **só URLs novas**; a paginação para na **1ª página sem itens novos** (arquivo é do mais novo p/ o mais antigo). `--no-refresh` desliga a re-visita (só drena a fila pendente). Cada crawl abre uma **execução (run)** com marca d'água (`runs` + `articles.run_id`) — `export` e `search` mostram por padrão **só o novo dessa última run** (`--all` = acervo inteiro).
 - **Dedup garantido:** o mesmo link nunca é cadastrado 2× — identidade pela **URL canônica pós-redirect** (`UNIQUE(url)`) + **`content_hash`** (índice UNIQUE). Links de paginação (instáveis) não servem de identidade; a checagem é pela notícia/conteúdo.
 
+### Retomar e terminar (parou no meio?)
+- **Retomar a fila:** re-rodar `npm run crawl` devolve os jobs `in_progress` à fila (`resetInProgress`), drena os pendentes e roda os sweeps ao fim. Artigos já salvos **não** são re-baixados (dedup).
+- **Terminar só o pós-processamento:** `npm run finish -- [--budget USD] [--parallel N] [--limit N] [--no-verify|--no-classify|--no-summarize]` roda verify+classify+summarize dos **pendentes**, sem novo crawl (também no menu da TUI → "Finalizar pendentes"). É **delta/idempotente** e o `--budget` **para no teto e devolve os pendentes** — dá p/ terminar um backlog grande em fatias, com custo controlado e retomável.
+
 ## Modelos (OpenRouter / DeepSeek V4)
 - **Pro** `deepseek/deepseek-v4-pro` com `reasoning.effort: "xhigh"` — deriva/repara seletores (1 chamada amortizada por template). Use `"xhigh"`, **nunca** `"max"`.
 - **Flash** `deepseek/deepseek-v4-flash` com `reasoning.effort: "high"` — fallback item-a-item, próxima página, extração de artigo, resumo PT-BR, busca modo A.
+- **Classificação (custo):** as 9 facetas de tag rodam **por faceta**; só as **core** (`domain`, `topic-technology`) no **Pro/high**, as outras 7 no **Flash/medium** sobre título+início do corpo (`CLASSIFY_MAX_CHARS`=2000; ajuste por faceta com `LLM_MODEL_CLASSIFY_<FACETA>`/`LLM_EFFORT_CLASSIFY_<FACETA>`). Classificar já foi ~92% do gasto de uma coleta longa; este perfil corta ~4× (o próximo salto seria classificar em **lote** de artigos por chamada).
 - Saídas estruturadas via `response_format: json_schema` (strict) + validação `zod`.
 - **JSON inválido é retomável:** o Flash às vezes trunca a resposta; `callJSON` re-amostra **2× no Flash** e, se ainda falhar, faz **uma última tentativa no Pro** (mais confiável no JSON). O `maxRetries` do SDK cobre 429/5xx à parte.
 

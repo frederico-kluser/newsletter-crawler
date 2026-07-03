@@ -1,0 +1,24 @@
+{
+  "name": "newsletter-webapp",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Buscador estático do acervo de newsletters — Vite + React + Motion, dados commitados (webapp/public/data), deploy Vercel sem backend.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "node --test",
+    "screenshots": "node scripts/screenshots.mjs"
+  },
+  "dependencies": {
+    "@fontsource-variable/bricolage-grotesque": "^5.2.10",
+    "motion": "^12.42.2",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^6.0.3",
+    "vite": "^8.1.3"
+  }
+}

@@ -1,0 +1,144 @@
+/* ============================================================================
+   Design tokens — identidade "editorial tech": papel quente + tinta grafite no
+   light; grafite-azulado + coral vibrante no dark. 3 camadas:
+     1. primitivos  (--raw-*)   — escalas cruas, independentes de tema
+     2. semânticos  (--bg, --fg, --accent, …) — o que os componentes consomem;
+        é a ÚNICA camada que o dark sobrescreve
+     3. componente  (--card-*, --chip-*, --seg-*, …) — derivados dos semânticos
+   Dark liga por [data-theme='dark'] (toggle) OU por prefers-color-scheme quando
+   o usuário nunca escolheu (sem data-theme) — casa com o pré-paint do index.html.
+   ========================================================================== */
+
+:root {
+  /* ---- 1. primitivos ---- */
+  --raw-paper-0: hsl(42 45% 99%);
+  --raw-paper-50: hsl(40 32% 96.5%);
+  --raw-paper-100: hsl(40 28% 93%);
+  --raw-paper-200: hsl(40 20% 87%);
+  --raw-ink-950: hsl(233 24% 12%);
+  --raw-ink-700: hsl(232 12% 34%);
+  --raw-ink-500: hsl(232 9% 48%);
+  --raw-graphite-975: hsl(232 16% 7%);
+  --raw-graphite-950: hsl(232 15% 9%);
+  --raw-graphite-900: hsl(232 14% 12%);
+  --raw-graphite-850: hsl(231 13% 15%);
+  --raw-graphite-700: hsl(231 10% 23%);
+  --raw-graphite-300: hsl(231 9% 64%);
+  --raw-milk-100: hsl(40 30% 93%);
+  --raw-coral-600: hsl(16 82% 47%);
+  --raw-coral-500: hsl(18 88% 54%);
+  --raw-coral-400: hsl(20 95% 64%);
+  --raw-coral-300: hsl(22 100% 74%);
+  --raw-green-500: hsl(152 42% 36%);
+  --raw-green-300: hsl(152 40% 58%);
+  --raw-amber-500: hsl(38 85% 40%);
+  --raw-amber-300: hsl(40 90% 62%);
+  --raw-red-500: hsl(4 66% 46%);
+  --raw-red-300: hsl(4 85% 68%);
+  --raw-violet-500: hsl(258 55% 52%);
+  --raw-violet-300: hsl(258 75% 76%);
+
+  /* ---- tipografia / forma (independentes de tema) ---- */
+  --font-display: 'Bricolage Grotesque Variable', system-ui, sans-serif;
+  --font-body: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: ui-monospace, 'Cascadia Code', Menlo, Consolas, monospace;
+  --radius-l: 16px;   /* cards, sheet, drawer */
+  --radius-m: 10px;   /* controles, inputs */
+  --radius-pill: 999px;
+  --topbar-h: 60px;
+  --sidebar-w: 280px;
+
+  /* ---- 2. semânticos (LIGHT default) ---- */
+  --bg: var(--raw-paper-50);
+  --bg-raised: var(--raw-paper-0);
+  --fg: var(--raw-ink-950);
+  --fg-muted: var(--raw-ink-500);
+  --fg-soft: var(--raw-ink-700);
+  --hairline: var(--raw-paper-200);
+  --accent: var(--raw-coral-500);
+  --accent-strong: var(--raw-coral-600);
+  --on-accent: hsl(40 45% 98%);
+  --accent-soft: color-mix(in oklab, var(--accent) 12%, var(--bg));
+  --focus-ring: color-mix(in oklab, var(--accent) 65%, transparent);
+  --ok: var(--raw-green-500);
+  --warn: var(--raw-amber-500);
+  --danger: var(--raw-red-500);
+  --ai: var(--raw-violet-500);
+  --overlay: hsl(233 24% 12% / 0.42);
+  --shadow-1: 0 1px 2px hsl(233 24% 12% / 0.06), 0 1px 1px hsl(233 24% 12% / 0.04);
+  --shadow-2: 0 10px 30px hsl(233 24% 12% / 0.12), 0 2px 8px hsl(233 24% 12% / 0.06);
+  --shadow-sheet: 0 24px 80px hsl(233 24% 12% / 0.28);
+
+  /* ---- 3. componente ---- */
+  --card-bg: var(--bg-raised);
+  --card-border: var(--hairline);
+  --card-shadow: var(--shadow-1);
+  --card-shadow-hover: var(--shadow-2);
+  --chip-bg: color-mix(in oklab, var(--fg) 5%, var(--bg-raised));
+  --chip-fg: var(--fg-soft);
+  --chip-on-bg: var(--fg);
+  --chip-on-fg: var(--bg-raised);
+  --seg-bg: color-mix(in oklab, var(--fg) 6%, var(--bg));
+  --seg-thumb: var(--bg-raised);
+  --input-bg: var(--bg-raised);
+  --sheet-bg: var(--bg-raised);
+  --topbar-bg: color-mix(in oklab, var(--bg) 82%, transparent);
+  --skeleton: color-mix(in oklab, var(--fg) 7%, var(--bg));
+  --scrollbar: color-mix(in oklab, var(--fg) 22%, transparent);
+}
+
+/* ---- dark por ESCOLHA (toggle grava data-theme) — sobrescreve só os semânticos ---- */
+:root[data-theme='dark'] {
+  --bg: var(--raw-graphite-950);
+  --bg-raised: var(--raw-graphite-900);
+  --fg: var(--raw-milk-100);
+  --fg-muted: var(--raw-graphite-300);
+  --fg-soft: hsl(231 12% 76%);
+  --hairline: var(--raw-graphite-700);
+  --accent: var(--raw-coral-400);
+  --accent-strong: var(--raw-coral-300);
+  --on-accent: var(--raw-graphite-975);
+  --ok: var(--raw-green-300);
+  --warn: var(--raw-amber-300);
+  --danger: var(--raw-red-300);
+  --ai: var(--raw-violet-300);
+  --overlay: hsl(232 16% 4% / 0.6);
+  /* sombra não lê em fundo escuro: cards usam hairline + fundo elevado */
+  --shadow-1: 0 0 0 1px var(--raw-graphite-700);
+  --shadow-2: 0 0 0 1px var(--raw-graphite-700), 0 12px 32px hsl(232 16% 3% / 0.5);
+  --shadow-sheet: 0 0 0 1px var(--raw-graphite-700), 0 24px 80px hsl(232 16% 3% / 0.7);
+  --card-bg: var(--raw-graphite-900);
+  --seg-thumb: var(--raw-graphite-850);
+  --input-bg: var(--raw-graphite-900);
+  --sheet-bg: var(--raw-graphite-900);
+  --topbar-bg: color-mix(in oklab, var(--raw-graphite-950) 84%, transparent);
+}
+
+/* ---- dark por PREFERÊNCIA do sistema (usuário nunca tocou o toggle) — bloco idêntico
+       ao de cima de propósito (CSS não reusa blocos; manter os dois em sincronia) ---- */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: var(--raw-graphite-950);
+    --bg-raised: var(--raw-graphite-900);
+    --fg: var(--raw-milk-100);
+    --fg-muted: var(--raw-graphite-300);
+    --fg-soft: hsl(231 12% 76%);
+    --hairline: var(--raw-graphite-700);
+    --accent: var(--raw-coral-400);
+    --accent-strong: var(--raw-coral-300);
+    --on-accent: var(--raw-graphite-975);
+    --ok: var(--raw-green-300);
+    --warn: var(--raw-amber-300);
+    --danger: var(--raw-red-300);
+    --ai: var(--raw-violet-300);
+    --overlay: hsl(232 16% 4% / 0.6);
+    --shadow-1: 0 0 0 1px var(--raw-graphite-700);
+    --shadow-2: 0 0 0 1px var(--raw-graphite-700), 0 12px 32px hsl(232 16% 3% / 0.5);
+    --shadow-sheet: 0 0 0 1px var(--raw-graphite-700), 0 24px 80px hsl(232 16% 3% / 0.7);
+    --card-bg: var(--raw-graphite-900);
+    --seg-thumb: var(--raw-graphite-850);
+    --input-bg: var(--raw-graphite-900);
+    --sheet-bg: var(--raw-graphite-900);
+    --topbar-bg: color-mix(in oklab, var(--raw-graphite-950) 84%, transparent);
+  }
+}

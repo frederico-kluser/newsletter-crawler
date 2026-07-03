@@ -5,7 +5,7 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { stmts, wipeAll } from './db.js';
 import {
-  EXPORT_DIR, DB_PATH, CONCURRENCY, MAX_RETRIES, HAS_LLM, CLASSIFY_AFTER_CRAWL, SUMMARIZE_AFTER_CRAWL,
+  ROOT, EXPORT_DIR, DB_PATH, CONCURRENCY, MAX_RETRIES, HAS_LLM, CLASSIFY_AFTER_CRAWL, SUMMARIZE_AFTER_CRAWL,
   SEARCH_MODE_A_CONFIRM, OPENROUTER_API_KEY, ENV_PATH, BUDGET_USD, MAX_PARALLEL, RAM_MAX_PCT,
   AGGRESSIVE_DEFAULT, VERIFY_AFTER_CRAWL, VERIFY_STREAMING, JOB_TIMEOUT_MS, JOB_HARD_TIMEOUT_MS,
   CLASSIFY_STREAMING, SUMMARIZE_STREAMING, CURATE_JOBS, ROUNDUP_TIMEOUT_MS, COST_LOG_INTERVAL_MS,
@@ -16,6 +16,7 @@ import {
 } from './governor.js';
 import { beginRun, endRun, shouldStop, getBudgetState } from './budget.js';
 import { processJob, enqueue, upsertSource } from './crawl.js';
+import { exportWebSnapshot } from './export-web.js';
 import { classifyPending, classifyArticleRow } from './classify.js';
 import { summarizePending, summarizeArticleRow } from './summarize.js';
 import { verifyPending, verifyArticleRow, recleanSuspects } from './verify.js';
@@ -27,6 +28,7 @@ import { createJobClock } from './deadline.js';
 import {
   progressReset, progressSnapshot, sourceSeen, sourceListingDone, bump, inStage,
 } from './progress.js';
+import { runEventsReset, emitRunEvent } from './run-events.js';
 import { startWebServer } from './web.js';
 import { probeOpenRouterKey, upsertEnvVar, maskKey } from './keys.js';
 import { slugify, normalizeUrl, parseDate, hostOf, log, warn, errorLog, debug } from './util.js';
@@ -190,6 +192,23 @@ export function printStatus() {
   );
 }
 
+// `--sources "A,B"`: lista por vírgula (o checkbox de fontes da TUI emite isto). Cada item casa
+// por nome exato (case-insensitive) OU URL normalizada — a mesma regra do --source. Puro p/
+// teste: devolve {selected, unmatched}; sem flag (ou vazia), selected = todas as fontes.
+export function filterSeedSources(sources, flags) {
+  const list = typeof flags.sources === 'string'
+    ? flags.sources.split(',').map((x) => x.trim()).filter(Boolean)
+    : null;
+  if (!list || !list.length) return { selected: sources, unmatched: [] };
+  const matches = (s, want) =>
+    (s.name || '').toLowerCase() === want.toLowerCase() ||
+    (normalizeUrl(want) != null && normalizeUrl(want) === normalizeUrl(s.url));
+  return {
+    selected: sources.filter((s) => list.some((w) => matches(s, w))),
+    unmatched: list.filter((w) => !sources.some((s) => matches(s, w))),
+  };
+}
+
 export async function cmdCrawl(flags) {
   return runWithLimits({ command: 'crawl', flags, profile: 'crawl' }, () => crawlRun(flags));
 }
@@ -227,23 +246,33 @@ async function crawlRun(flags) {
   }
   if (sinceDate) log(`--since ativo: piso ${sinceDate.toISOString()}`);
   progressReset({ sinceDate });
+  runEventsReset(); // zera o feed de MARCOS do painel (o ring é global ao processo, como o progresso)
 
   // Re-crawl incremental: por padrão re-visita as listagens das fontes a cada execução (só enfileira
   // o novo; a dedup de artigo impede re-baixar o existente). `--no-refresh` desliga a re-visita.
   const noRefresh = flags['no-refresh'] === true;
 
-  // Seleção de fonte ao executar: `--source "<nome exato>"` (ou a URL) seleciona UMA fonte;
-  // `--only <substr>` casa por substring no nome/url. Sem nenhum, semeia todas do config.
+  // Seleção de fonte ao executar: `--sources "A,B"` (lista por vírgula — o checkbox da TUI)
+  // tem PRECEDÊNCIA; `--source "<nome exato>"` (ou a URL) seleciona UMA fonte; `--only <substr>`
+  // casa por substring no nome/url. Sem nenhum, semeia todas do config.
   const only = typeof flags.only === 'string' ? flags.only.toLowerCase() : null;
   const sourceExact = typeof flags.source === 'string' ? flags.source.toLowerCase() : null;
-  for (const s of loadSources()) {
-    if (only && !`${s.name || ''} ${s.url}`.toLowerCase().includes(only)) continue;
-    if (
-      sourceExact &&
-      (s.name || '').toLowerCase() !== sourceExact &&
-      normalizeUrl(s.url) !== normalizeUrl(flags.source)
-    ) {
-      continue;
+  const hasSourcesList = typeof flags.sources === 'string' && flags.sources.trim() !== '';
+  if (hasSourcesList && (only || sourceExact)) {
+    warn('--sources tem precedência: ignorando --source/--only');
+  }
+  const { selected, unmatched } = filterSeedSources(loadSources(), flags);
+  for (const w of unmatched) warn(`--sources: nenhuma fonte casa com "${w}"`);
+  for (const s of selected) {
+    if (!hasSourcesList) {
+      if (only && !`${s.name || ''} ${s.url}`.toLowerCase().includes(only)) continue;
+      if (
+        sourceExact &&
+        (s.name || '').toLowerCase() !== sourceExact &&
+        normalizeUrl(s.url) !== normalizeUrl(flags.source)
+      ) {
+        continue;
+      }
     }
     const src = upsertSource(s);
     sourceSeen(src.id, src.name || s.name || hostOf(s.url)); // painel: fontes x/y + % por data
@@ -374,6 +403,7 @@ async function crawlRun(flags) {
         if (e?.code === 'JOB_TIMEOUT' || clock?.expired()) {
           timedOut++;
           bump('estouros');
+          emitRunEvent({ phase: 'articles', kind: 'timeout', level: 'warn', detail: job.url.slice(0, 70) });
           logEvent({
             runId, url: job.url, stage: 'job', status: 'timeout',
             detail: { ms: deadline, kind: job.kind, ...(clock ? clock.snapshot() : {}) },
@@ -420,6 +450,7 @@ async function crawlRun(flags) {
   }, COST_LOG_INTERVAL_MS);
   costTimer.unref?.();
 
+  emitRunEvent({ phase: 'discovery', kind: 'phase-start', detail: 'Descoberta' });
   for (;;) {
     // Artigos: limitados pela capacity de fetch+render (+ --max-articles).
     while (processedArticles < maxArticles && !shouldStop() && inflight.size < capacity()) {
@@ -444,12 +475,14 @@ async function crawlRun(flags) {
   if (budgetRequeued) log(`orçamento: ${budgetRequeued} jobs devolvidos à fila (retomáveis no próximo run)`);
   if (timedOut) log(`deadline: ${timedOut} job(s) cortado(s) em ${JOB_TIMEOUT_MS}ms de TRABALHO (fila/LLM não contam; ficha mantida com o blurb; detalhe por fase no ncrawl inspect)`);
   log('crawl concluído.');
+  emitRunEvent({ phase: 'articles', kind: 'phase-end', level: 'success', detail: `${processedArticles} artigos` });
 
   // Registra na run quantos artigos novos ela descobriu (o delta desta execução).
   if (runId != null) {
     const newCount = stmts.countArticlesByRun.get(runId).c;
     stmts.finishDeltaRun.run(newCount, runId);
     log(`run ${runId}: ${newCount} novo(s) artigo(s) desde a última execução.`);
+    emitRunEvent({ phase: 'post', kind: 'run-summary', level: 'success', detail: `${newCount} novos` });
   }
 
   // Hooks pós-crawl EM PARALELO (verify, classify e summarize são independentes — todos só
@@ -466,6 +499,7 @@ async function crawlRun(flags) {
   }
   if (post.length) {
     setProfile('llm-only');
+    emitRunEvent({ phase: 'post', kind: 'phase-start', detail: 'Pós-processamento' });
     await Promise.all(post);
   } else if (shouldStop()) {
     log('orçamento atingido: verify/classify/summarize pulados — retome com os comandos diretos');
@@ -549,6 +583,15 @@ function articleMarkdown(a, facets) {
 }
 
 export function cmdExport(flags) {
+  // Formato web: snapshot JSON estático do acervo COMPLETO p/ o webapp (webapp/public/data),
+  // COMMITADO no repo e servido pela Vercel — por isso o destino default é o REPO (ROOT), não
+  // o EXPORT_DIR de NC_HOME como nos formatos md/json. Snapshot é estado, não delta.
+  if (flags.format === 'web') {
+    if (flags.all === true) warn('--all é ignorado no formato web (o snapshot é sempre o acervo completo).');
+    const outDir = flags.out ? path.resolve(String(flags.out)) : path.join(ROOT, 'webapp', 'public', 'data');
+    exportWebSnapshot({ outDir });
+    return;
+  }
   const format = flags.format === 'json' ? 'json' : 'md';
   const outDir = EXPORT_DIR;
   mkdirSync(outDir, { recursive: true });
@@ -613,6 +656,34 @@ export async function cmdVerify(flags) {
   const force = flags.force === true;
   await runWithLimits({ command: 'verify', flags, profile: 'llm-only' }, () =>
     verifyPending({ limit, force }));
+  printStatus();
+}
+
+// Finaliza o PÓS-PROCESSAMENTO dos pendentes (verify + classify + summarize) num comando só, SEM
+// novo crawl — p/ terminar/retomar um backlog interrompido. Roda os 3 sweeps EM PARALELO (colunas
+// independentes) no perfil llm-only, honrando --limit/--force/--budget/--parallel e os --no-* p/
+// pular um sweep. O orçamento (shouldStop) para e devolve os pendentes, então dá p/ limitar o gasto
+// por execução e retomar depois. Espelha o bloco pós-crawl (crawlRun) num comando avulso.
+export async function cmdFinish(flags) {
+  if (!HAS_LLM) {
+    errorLog('OPENROUTER_API_KEY ausente — finalizar os pendentes requer o caminho LLM.');
+    process.exit(1);
+  }
+  const limit = flags.limit ? Number(flags.limit) : Infinity;
+  const force = flags.force === true;
+  await runWithLimits({ command: 'finish', flags, profile: 'llm-only' }, () => {
+    const tasks = [];
+    if (flags['no-verify'] !== true) {
+      tasks.push(verifyPending({ limit, force }).catch((e) => errorLog(`verify falhou: ${e.message}`)));
+    }
+    if (flags['no-summarize'] !== true) {
+      tasks.push(summarizePending({ limit, force }).catch((e) => errorLog(`summarize falhou: ${e.message}`)));
+    }
+    if (flags['no-classify'] !== true) {
+      tasks.push(classifyPending({ limit, force }).catch((e) => errorLog(`classify falhou: ${e.message}`)));
+    }
+    return Promise.all(tasks);
+  });
   printStatus();
 }
 

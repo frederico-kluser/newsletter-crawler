@@ -1,18 +1,20 @@
 // Raiz da UI: barra de status no topo + roteamento de telas. Monta o thunk do comando escolhido
 // (a partir de commands.js) e entrega à RunView. Sem hotkeys globais — navega por Select/onChange.
-import { useState } from 'react';
+import { useState, Fragment } from 'react';
 import { Box, Text, useApp } from 'ink';
-import { Badge } from '@inkjs/ui';
+import { Badge, ThemeProvider } from '@inkjs/ui';
 import { html } from './html.js';
 import { t } from './i18n.js';
+import { colors, space, uiTheme } from './theme.js';
+import { Header } from './widgets.js';
 import {
-  getStatus, cmdCrawl, cmdExport, cmdClassify, cmdAdd, cmdReset, cmdSummarize, cmdSearch,
+  getStatus, cmdCrawl, cmdExport, cmdClassify, cmdAdd, cmdReset, cmdSummarize, cmdFinish, cmdSearch,
   getArticle,
 } from '../commands.js';
 import { openBrowser } from '../web.js';
 import {
   Menu, StatusScreen, CrawlConfig, ExportConfig, ClassifyConfig, AddConfig, ResetConfirm,
-  SummarizeConfig, SearchConfig, WebConfig, LimitsConfig,
+  SummarizeConfig, FinishConfig, SearchConfig, WebConfig, LimitsConfig,
 } from './screens.js';
 import { RunView } from './RunView.js';
 import { ResultsView } from './ResultsView.js';
@@ -22,6 +24,7 @@ const THUNKS = {
   export: (flags) => cmdExport(flags),
   classify: (flags) => cmdClassify(flags),
   summarize: (flags) => cmdSummarize(flags),
+  finish: (flags) => cmdFinish(flags),
   search: (flags, rest) => cmdSearch(rest, flags), // retorna os resultados p/ a UI
   add: (flags, rest) => cmdAdd(rest, flags),
   reset: (flags) => cmdReset(flags),
@@ -31,16 +34,28 @@ function StatusBar() {
   const s = getStatus();
   const f = s.frontier;
   const gap = html`<${Text}> </${Text}>`;
+  // "Falta terminar", separando o que precisa de Coletar (na fila = ainda não baixado) do que
+  // precisa de Finalizar (já salvo, sem tags/resumo). Cada badge só aparece quando > 0.
+  const pend = [];
+  if (f.pending > 0) pend.push([`${f.pending} ${t('queued')}`, colors.warn]);
+  if (s.pendingClassif > 0) pend.push([`${s.pendingClassif} ${t('noTags')}`, colors.title]);
+  if (s.pendingSummary > 0) pend.push([`${s.pendingSummary} ${t('noSummary')}`, colors.title]);
   return html`<${Box} flexDirection="column" marginBottom=${1}>
     <${Box}>
-      <${Text} bold color="magenta">${t('title')} </${Text}>
+      <${Text} bold color=${colors.title}>${t('title')} </${Text}>
       <${Text} dimColor>${t('subtitle')}</${Text}>
     </${Box}>
     <${Box} marginTop=${1}>
-      <${Badge} color="green">${`${s.articles} ${t('articles')}`}</${Badge}>${gap}
-      <${Badge} color="blue">${`${s.sources} ${t('sources')}`}</${Badge}>${gap}
-      <${Badge} color="yellow">${`${f.pending} ${t('frontier')}`}</${Badge}>${gap}
-      <${Badge} color="cyan">${`${s.classified} ${t('classif')}`}</${Badge}>
+      <${Badge} color=${colors.ok}>${`${s.articles} ${t('articles')}`}</${Badge}>${gap}
+      <${Badge} color=${colors.link}>${`${s.sources} ${t('sources')}`}</${Badge}>${gap}
+      <${Badge} color=${colors.accent}>${`${s.classified} ${t('classif')}`}</${Badge}>
+    </${Box}>
+    <${Box} marginTop=${1}>
+      <${Text} bold>${t('pendingLabel')}: </${Text}>
+      ${pend.length
+        ? pend.map(([label, color], i) =>
+            html`<${Fragment} key=${i}><${Badge} color=${color}>${label}</${Badge}>${gap}</${Fragment}>`)
+        : html`<${Text} color=${colors.ok}>${t('allProcessed')}</${Text}>`}
     </${Box}>
   </${Box}>`;
 }
@@ -74,6 +89,8 @@ export default function App() {
     body = html`<${ClassifyConfig} onRun=${onRun} onBack=${toMenu} />`;
   } else if (screen === 'summarize') {
     body = html`<${SummarizeConfig} onRun=${onRun} onBack=${toMenu} />`;
+  } else if (screen === 'finish') {
+    body = html`<${FinishConfig} onRun=${onRun} onBack=${toMenu} />`;
   } else if (screen === 'search') {
     body = html`<${SearchConfig} onRun=${onRun} onBack=${toMenu} />`;
   } else if (screen === 'web') {
@@ -102,8 +119,11 @@ export default function App() {
     />`;
   }
 
-  return html`<${Box} flexDirection="column" padding=${1}>
-    <${StatusBar} />
-    ${body}
-  </${Box}>`;
+  return html`<${ThemeProvider} theme=${uiTheme}>
+    <${Box} flexDirection="column" padding=${space.pad}>
+      <${StatusBar} />
+      <${Header} screen=${screen} />
+      ${body}
+    </${Box}>
+  </${ThemeProvider}>`;
 }

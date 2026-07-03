@@ -623,6 +623,34 @@ export async function cmdVerify(flags) {
   printStatus();
 }
 
+// Finaliza o PÓS-PROCESSAMENTO dos pendentes (verify + classify + summarize) num comando só, SEM
+// novo crawl — p/ terminar/retomar um backlog interrompido. Roda os 3 sweeps EM PARALELO (colunas
+// independentes) no perfil llm-only, honrando --limit/--force/--budget/--parallel e os --no-* p/
+// pular um sweep. O orçamento (shouldStop) para e devolve os pendentes, então dá p/ limitar o gasto
+// por execução e retomar depois. Espelha o bloco pós-crawl (crawlRun) num comando avulso.
+export async function cmdFinish(flags) {
+  if (!HAS_LLM) {
+    errorLog('OPENROUTER_API_KEY ausente — finalizar os pendentes requer o caminho LLM.');
+    process.exit(1);
+  }
+  const limit = flags.limit ? Number(flags.limit) : Infinity;
+  const force = flags.force === true;
+  await runWithLimits({ command: 'finish', flags, profile: 'llm-only' }, () => {
+    const tasks = [];
+    if (flags['no-verify'] !== true) {
+      tasks.push(verifyPending({ limit, force }).catch((e) => errorLog(`verify falhou: ${e.message}`)));
+    }
+    if (flags['no-summarize'] !== true) {
+      tasks.push(summarizePending({ limit, force }).catch((e) => errorLog(`summarize falhou: ${e.message}`)));
+    }
+    if (flags['no-classify'] !== true) {
+      tasks.push(classifyPending({ limit, force }).catch((e) => errorLog(`classify falhou: ${e.message}`)));
+    }
+    return Promise.all(tasks);
+  });
+  printStatus();
+}
+
 // reclean: re-limpa os 'suspect' com o passe FORTE (Pro) e re-verifica (melhoria da seção 7).
 export async function cmdReclean(flags) {
   if (!HAS_LLM) {

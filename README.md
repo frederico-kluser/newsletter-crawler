@@ -84,7 +84,7 @@ npm run unlink        # remove o link global quando quiser
   - Uma página apontada por um link que for, ela mesma, uma **coleção** de várias notícias (pouca prosa + muitos links externos) é **dividida em N** automaticamente (`MAX_CRAWL_DEPTH` limita a recursão).
 
 ## Menu guiado (TUI)
-Ao chamar a ferramenta **sem argumentos num terminal interativo**, abre um **menu guiado** (Ink/React) com todas as ações (coletar, **buscar**, status, exportar, classificar, **resumir**, adicionar fonte, limpar). Ele monta os parâmetros por opções, **mostra o comando equivalente** (assim você aprende as flags) e exibe um **painel de progresso ao vivo** no crawl/busca. **As flags continuam executando direto** — o menu é só um atalho.
+Ao chamar a ferramenta **sem argumentos num terminal interativo**, abre um **menu guiado** (Ink/React) com todas as ações (coletar, **buscar**, status, exportar, classificar, **resumir**, **finalizar pendentes**, adicionar fonte, limpar). Ele monta os parâmetros por opções, **mostra o comando equivalente** (assim você aprende as flags) e exibe, no crawl, um **dashboard ao vivo**: fases (Descoberta/Curadoria/Artigos/Pós) com barras + estado/cronômetro no topo, um **feed curado de eventos** embaixo e os avisos internos colapsados num contador (tecla `v` abre o log cru). **As flags continuam executando direto** — o menu é só um atalho.
 ```bash
 npm start            # ou `node src/index.js` — abre o menu (em TTY)
 npm run ui           # idem, explícito
@@ -111,6 +111,8 @@ npm run purge -- "Node Weekly" --yes   # apaga os DADOS da fonte (fica cadastrad
 npm run add -- https://exemplo.com/arquivo --name "Minha" --type index --max-index-pages 1
 npm run export -- --format md          # data/export/<fonte>/*.md — só a última run (--all = tudo; ou --format json)
 npm run summarize                      # resumo + título em PT-BR p/ cada artigo (Flash; idempotente)
+npm run classify                       # tags multi-faceta (core no Pro, resto Flash); idempotente
+npm run finish -- --budget 2           # termina os PENDENTES (verify+classify+summarize) sem novo crawl; teto US$2, retomável
 npm run search -- react server components --mode B   # por tags (5 Pro); só a última run (--all = acervo)
 npm run search -- "local llm" --mode A --limit 20 --yes --all   # exaustiva no acervo todo (Flash)
 npm run web                            # buscador no navegador (localhost:8477): busca IA soft/profunda + browse
@@ -133,9 +135,14 @@ npm test                               # node:test (datas, anti-bot, busca em lo
 - **Re-crawl incremental (padrão):** cada execução re-visita as listagens e enfileira **só URLs novas**; a paginação para na **1ª página sem itens novos** (arquivo é do mais novo p/ o mais antigo). `--no-refresh` desliga a re-visita (só drena a fila pendente). Cada crawl abre uma **execução (run)** com marca d'água (`runs` + `articles.run_id`) — `export` e `search` mostram por padrão **só o novo dessa última run** (`--all` = acervo inteiro).
 - **Dedup garantido:** o mesmo link nunca é cadastrado 2× — identidade pela **URL canônica pós-redirect** (`UNIQUE(url)`) + **`content_hash`** (índice UNIQUE). Links de paginação (instáveis) não servem de identidade; a checagem é pela notícia/conteúdo.
 
+### Retomar e terminar (parou no meio?)
+- **Retomar a fila:** re-rodar `npm run crawl` devolve os jobs `in_progress` à fila (`resetInProgress`), drena os pendentes e roda os sweeps ao fim. Artigos já salvos **não** são re-baixados (dedup).
+- **Terminar só o pós-processamento:** `npm run finish -- [--budget USD] [--parallel N] [--limit N] [--no-verify|--no-classify|--no-summarize]` roda verify+classify+summarize dos **pendentes**, sem novo crawl (também no menu da TUI → "Finalizar pendentes"). É **delta/idempotente** e o `--budget` **para no teto e devolve os pendentes** — dá p/ terminar um backlog grande em fatias, com custo controlado e retomável.
+
 ## Modelos (OpenRouter / DeepSeek V4)
 - **Pro** `deepseek/deepseek-v4-pro` com `reasoning.effort: "xhigh"` — deriva/repara seletores (1 chamada amortizada por template). Use `"xhigh"`, **nunca** `"max"`.
 - **Flash** `deepseek/deepseek-v4-flash` com `reasoning.effort: "high"` — fallback item-a-item, próxima página, extração de artigo, resumo PT-BR, busca modo A.
+- **Classificação (custo):** as 9 facetas de tag rodam **por faceta**; só as **core** (`domain`, `topic-technology`) no **Pro/high**, as outras 7 no **Flash/medium** sobre título+início do corpo (`CLASSIFY_MAX_CHARS`=2000; ajuste por faceta com `LLM_MODEL_CLASSIFY_<FACETA>`/`LLM_EFFORT_CLASSIFY_<FACETA>`). Classificar já foi ~92% do gasto de uma coleta longa; este perfil corta ~4× (o próximo salto seria classificar em **lote** de artigos por chamada).
 - Saídas estruturadas via `response_format: json_schema` (strict) + validação `zod`.
 - **JSON inválido é retomável:** o Flash às vezes trunca a resposta; `callJSON` re-amostra **2× no Flash** e, se ainda falhar, faz **uma última tentativa no Pro** (mais confiável no JSON). O `maxRetries` do SDK cobre 429/5xx à parte.
 

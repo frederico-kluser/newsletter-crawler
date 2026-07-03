@@ -285,9 +285,9 @@ export function stageModel(stage) {
 
 /**
  * Modelo por FACETA da classificação (o estágio mais caro): models.json pode ter uma chave
- * "classify:<faceta>" (ou env LLM_MODEL_CLASSIFY_<FACETA>) p/ rebaixar facetas de baixo valor
- * (difficulty, content-type, trending-emerging) a Flash. SEM override, herda a etapa 'classify'
- * (Pro/xhigh) — então nada muda p/ as facetas caras de alto valor.
+ * "classify:<faceta>" (ou env LLM_MODEL_CLASSIFY_<FACETA>) p/ escolher o modelo por faceta. Só as
+ * facetas CORE (domain, topic-technology) herdam a etapa base 'classify' (Pro/high); as outras 7 têm
+ * override Flash/medium (classificação = tarefa de vocabulário fixo, small-output → Flash basta).
  */
 export function classifyFacetModel(facetName) {
   const fileStage = _modelsCfg.stages && _modelsCfg.stages[`classify:${facetName}`];
@@ -309,8 +309,9 @@ export const CLASSIFY_EFFORT = STAGE_MODELS.classify.effort;
 export const CLASSIFY_CONCURRENCY = envIntOr0('CLASSIFY_CONCURRENCY');
 // Janela de artigos processados ao mesmo tempo (cada um abre N facetas na lane llm).
 export const ARTICLE_CONCURRENCY = envIntOr0('ARTICLE_CONCURRENCY');
-// Recorte do corpo do artigo enviado a CADA agente (controle de custo de tokens).
-export const CLASSIFY_MAX_CHARS = Number(process.env.CLASSIFY_MAX_CHARS || 12000);
+// Recorte do corpo do artigo enviado a CADA agente (controle de custo de tokens). Título + início
+// do corpo já bastam p/ atribuir tags do vocabulário fixo; corpo inteiro só inflava o custo.
+export const CLASSIFY_MAX_CHARS = Number(process.env.CLASSIFY_MAX_CHARS || 2000);
 // Hook pós-crawl: classifica os novos artigos ao fim do `crawl` (desligue com =false ou --no-classify).
 export const CLASSIFY_AFTER_CRAWL = process.env.CLASSIFY_AFTER_CRAWL !== 'false';
 

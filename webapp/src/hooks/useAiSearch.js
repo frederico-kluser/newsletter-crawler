@@ -15,7 +15,10 @@ import { STR } from '../strings.js';
  * o modal com a busca pendente — salvar re-dispara sozinho.
  */
 export function useAiSearch({ articles, meta, filters }) {
-  const [state, setState] = useState({ phase: 'idle', query: '', deep: false, progress: null, result: null, error: null });
+  const [state, setState] = useState({
+    phase: 'idle', query: '', deep: false, progress: null, result: null, error: null,
+    partialHits: [], startedAt: null, // streaming: hits ao vivo + t0 p/ o ETA do loader
+  });
   const [confirmInfo, setConfirmInfo] = useState(null); // {query, deep, count, calls, usd, candidates}
   const [keyModal, setKeyModal] = useState(null); // {pending:{query,deep}|null, reason:'missing'|'invalid'|'manage'}
   const [sessionUsd, setSessionUsd] = useState(0); // gasto REAL acumulado da sessão (CostBadge)
@@ -38,7 +41,7 @@ export function useAiSearch({ articles, meta, filters }) {
       const controller = new AbortController();
       abortRef.current = controller;
       setConfirmInfo(null);
-      setState({ phase: 'running', query, deep, progress: null, result: null, error: null });
+      setState({ phase: 'running', query, deep, progress: null, result: null, error: null, partialHits: [], startedAt: Date.now() });
       let lastSpent = 0;
       try {
         const result = await runSearch({
@@ -56,22 +59,26 @@ export function useAiSearch({ articles, meta, filters }) {
               lastSpent = p.spentUsd;
             }
           },
+          onHit: (hit) => {
+            // streaming: cada hit relevante entra no grid AO VIVO (App lê partialHits na fase running)
+            setState((s) => (s.phase === 'running' ? { ...s, partialHits: [...s.partialHits, hit] } : s));
+          },
         });
         if (result.spentUsd > lastSpent) setSessionUsd((v) => v + (result.spentUsd - lastSpent));
-        setState({ phase: 'done', query, deep, progress: null, result, error: null });
+        setState({ phase: 'done', query, deep, progress: null, result, error: null, partialHits: [], startedAt: null });
       } catch (e) {
         if (controller.signal.aborted || e?.name === 'AbortError') {
-          setState({ phase: 'idle', query: '', deep, progress: null, result: null, error: null });
+          setState({ phase: 'idle', query: '', deep, progress: null, result: null, error: null, partialHits: [], startedAt: null });
           return;
         }
         if (e?.code === 'KEY_INVALID') {
           clearApiKey();
           setHasKey(false);
           setKeyModal({ pending: { query, deep }, reason: 'invalid' });
-          setState({ phase: 'idle', query: '', deep, progress: null, result: null, error: null });
+          setState({ phase: 'idle', query: '', deep, progress: null, result: null, error: null, partialHits: [], startedAt: null });
           return;
         }
-        setState({ phase: 'error', query, deep, progress: null, result: null, error: e.message || String(e) });
+        setState({ phase: 'error', query, deep, progress: null, result: null, error: e.message || String(e), partialHits: [], startedAt: null });
       } finally {
         abortRef.current = null;
       }
@@ -116,7 +123,7 @@ export function useAiSearch({ articles, meta, filters }) {
 
   const clear = useCallback(() => {
     abortRef.current?.abort();
-    setState({ phase: 'idle', query: '', deep: false, progress: null, result: null, error: null });
+    setState({ phase: 'idle', query: '', deep: false, progress: null, result: null, error: null, partialHits: [], startedAt: null });
   }, []);
 
   /** Valida via probe e salva; com busca pendente, re-dispara. LANÇA mensagem p/ o modal exibir. */

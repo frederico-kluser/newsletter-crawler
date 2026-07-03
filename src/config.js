@@ -345,6 +345,11 @@ export const SEARCH_BATCH_CONCURRENCY = envIntOr0('SEARCH_BATCH_CONCURRENCY');
 export const SEARCH_SOFT_CONFIRM = Number(process.env.SEARCH_SOFT_CONFIRM || 4000);
 // Teto de itens devolvidos ao navegador numa busca IA (os contadores seguem com o total real).
 export const SEARCH_WEB_MAX_ITEMS = Number(process.env.SEARCH_WEB_MAX_ITEMS || 500);
+// Concorrência INICIAL (teto) da lane AIMD do WEBAPP estático (browser BYOK): a lane começa aqui
+// e corta ½ no 429 / recupera +1/10s sozinha (lane.js). O CLI/servidor usam o governor; isto vai
+// no meta.search do snapshot só p/ o webapp (com defaults embutidos se o export for antigo).
+export const SEARCH_WEB_SOFT_CONCURRENCY = Number(process.env.SEARCH_WEB_SOFT_CONCURRENCY || 6);
+export const SEARCH_WEB_DEEP_CONCURRENCY = Number(process.env.SEARCH_WEB_DEEP_CONCURRENCY || 10);
 
 // sources.json do USUÁRIO mora em NC_HOME (o `ncrawl add`/assistente grava aqui). É semeado 1x a
 // partir do default versionado do repo, para não perder as fontes que já vêm no projeto.

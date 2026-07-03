@@ -6,10 +6,10 @@ import { closeBrowser } from './fetch.js';
 import { closeParsePool } from './parse-pool.js';
 import { errorLog } from './util.js';
 import {
-  printStatus, cmdCrawl, cmdAdd, cmdReset, cmdExport, cmdClassify, cmdSummarize, cmdSearch, cmdKey,
+  printStatus, cmdCrawl, cmdAdd, cmdReset, cmdExport, cmdSearch, cmdKey,
   cmdWeb,
   cmdLimits,
-  cmdVerify, cmdReclean, cmdInspect, cmdPurge, cmdFinish,
+  cmdReclean, cmdInspect, cmdPurge, cmdFinish,
 } from './commands.js';
 
 function parseFlags(argv) {
@@ -47,14 +47,11 @@ function printHelp() {
       '                          --no-aggressive volta ao modo educado. --no-refresh: só drena a fila.',
       '  node src/index.js status',
       '  node src/index.js inspect [--run N] [--url <substr>] [--verbose]   auditoria da run (itens, vereditos, motivos)',
-      '  node src/index.js verify [--limit N] [--force]   verificação pós-cadastro (ok|suspect|junk) sob demanda',
       '  node src/index.js reclean [--limit N]   re-limpa os "suspect" com passe forte (Pro) e re-verifica',
       '  node src/index.js purge <fonte> --yes [--selectors]   apaga os DADOS de uma fonte p/ refazer do zero',
       '  node src/index.js add <url> [--name "Nome"] [--type index|listing] [--max-index-pages N]',
       '  node src/index.js export [--format md|json|web] [--all] [--out DIR]',
       '                          (web: snapshot JSON p/ o webapp em webapp/public/data; --all: acervo todo)',
-      '  node src/index.js classify [--limit N] [--force] [--budget USD] [--parallel N]',
-      '  node src/index.js summarize [--limit N] [--force] [--budget USD] [--parallel N]   resumo/título PT-BR',
       '  node src/index.js finish [--budget USD] [--parallel N] [--limit N] [--no-verify|--no-classify|--no-summarize]',
       '                          termina os PENDENTES (verify+classify+summarize) SEM novo crawl; use --budget p/ limitar e retomar',
       '  node src/index.js search <consulta> [--mode A|B] [--limit N] [--yes] [--all] [--budget USD] [--parallel N]',
@@ -100,9 +97,6 @@ try {
     } else if (cmd === 'inspect') {
       cmdInspect(flags);
       db.close();
-    } else if (cmd === 'verify') {
-      await cmdVerify(flags);
-      db.close();
     } else if (cmd === 'reclean') {
       await cmdReclean(flags);
       db.close();
@@ -114,12 +108,6 @@ try {
       db.close();
     } else if (cmd === 'export') {
       cmdExport(flags);
-      db.close();
-    } else if (cmd === 'classify') {
-      await cmdClassify(flags);
-      db.close();
-    } else if (cmd === 'summarize') {
-      await cmdSummarize(flags);
       db.close();
     } else if (cmd === 'finish') {
       await cmdFinish(flags);
@@ -142,7 +130,7 @@ try {
     } else {
       errorLog(
         `comando desconhecido: ${cmd} ` +
-          '(use: crawl | status | inspect | verify | purge | add | export | classify | summarize | finish | search | web | key | limits | reset | ui)',
+          '(use: crawl | status | inspect | reclean | purge | add | export | finish | search | web | key | limits | reset | ui)',
       );
       process.exit(1);
     }

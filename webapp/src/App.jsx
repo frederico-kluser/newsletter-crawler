@@ -83,14 +83,17 @@ export default function App() {
     [articles, filters, toolTypes, textQuery],
   );
 
-  // modo IA: hits decorados com a ficha do snapshot; Segmented filtra pelo kind do JUIZ
+  // modo IA: hits decorados com a ficha do snapshot; Segmented filtra pelo kind do JUIZ.
+  // Durante `running` os hits vêm do streaming (partialHits, ao vivo); ao terminar, do result.
   const aiActive = ai.phase === 'done' && ai.result;
+  const aiRunning = ai.phase === 'running';
+  const aiHits = aiActive ? ai.result.hits : aiRunning ? ai.partialHits : null;
   const aiItems = useMemo(() => {
-    if (!aiActive) return null;
-    return ai.result.hits
+    if (!aiHits) return null;
+    return aiHits
       .map((h) => ({ article: byId.get(h.id), relation: h.relation, judgeKind: h.kind }))
       .filter((x) => x.article);
-  }, [aiActive, ai.result, byId]);
+  }, [aiHits, byId]);
   const aiShown = useMemo(() => {
     if (!aiItems) return null;
     return filters.kind === 'all' ? aiItems : aiItems.filter((x) => x.judgeKind === filters.kind);
@@ -112,7 +115,9 @@ export default function App() {
     () => JSON.stringify(filters) + `|q:${textQuery}` + (aiActive ? `|ai:${ai.result.query}:${ai.result.hits.length}` : ''),
     [filters, textQuery, aiActive, ai.result],
   );
-  const visible = useVisibleCount(displayItems.length, resetKey);
+  const pagedVisible = useVisibleCount(displayItems.length, resetKey);
+  // streaming (running): mostra TODOS os hits que já chegaram, sem paginação; no done volta a paginar
+  const visible = aiRunning ? displayItems.length : pagedVisible;
   const nActive = countActiveFilters(filters);
   const detail = detailId != null ? byId.get(detailId) : null;
 
@@ -165,7 +170,9 @@ export default function App() {
               )}
             </div>
 
-            {ai.phase === 'running' && <AiProgress progress={ai.progress} deep={ai.deep} onCancel={ai.cancel} />}
+            {ai.phase === 'running' && (
+              <AiProgress progress={ai.progress} deep={ai.deep} startedAt={ai.startedAt} onCancel={ai.cancel} />
+            )}
             {aiActive && <AiBanner result={ai.result} onClear={ai.clear} />}
             {ai.phase === 'error' && (
               <div className="ai-error" role="alert">
@@ -183,7 +190,7 @@ export default function App() {
               </div>
             )}
 
-            {!aiActive && meta && <ActivePills filters={filters} meta={meta} dispatch={dispatch} />}
+            {!aiActive && !aiRunning && meta && <ActivePills filters={filters} meta={meta} dispatch={dispatch} />}
 
             {loading ? (
               <div className="grid" aria-busy="true">
@@ -192,15 +199,17 @@ export default function App() {
                 ))}
               </div>
             ) : displayItems.length === 0 ? (
-              <EmptyState
-                title={
-                  aiActive
-                    ? STR.emptyFiltered
-                    : articles && articles.length === 0
-                      ? STR.emptyBase
-                      : STR.emptyFiltered
-                }
-              />
+              aiRunning ? null : (
+                <EmptyState
+                  title={
+                    aiActive
+                      ? STR.emptyFiltered
+                      : articles && articles.length === 0
+                        ? STR.emptyBase
+                        : STR.emptyFiltered
+                  }
+                />
+              )
             ) : (
               <ArticleGrid
                 items={displayItems}

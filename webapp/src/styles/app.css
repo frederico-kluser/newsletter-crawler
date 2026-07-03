@@ -878,12 +878,17 @@
 /* ---- progresso / banner / erro da busca IA ---- */
 .ai-progress {
   display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 14px;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
   border-radius: var(--radius-m);
   border: 1px solid color-mix(in oklab, var(--ai) 30%, var(--hairline));
   background: color-mix(in oklab, var(--ai) 7%, var(--bg-raised));
+}
+.ai-progress-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 .ai-progress-track {
   position: relative;
@@ -914,15 +919,39 @@
     transform: translateX(100%);
   }
 }
-.ai-progress-label {
+.ai-progress-pct {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 660;
+  color: var(--ai);
+  font-variant-numeric: tabular-nums;
+  min-width: 3.4ch;
+  text-align: right;
+}
+.ai-progress-cancel {
+  flex-shrink: 0;
+}
+.ai-progress-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
   font-size: 12.5px;
   color: var(--fg-soft);
   font-variant-numeric: tabular-nums;
-  white-space: nowrap;
 }
-.ai-progress-label em {
+.ai-progress-strong {
+  color: var(--fg);
+  font-weight: 600;
+}
+.ai-progress-dot {
   color: var(--fg-muted);
-  font-style: normal;
+}
+.ai-progress-warn {
+  color: var(--warn);
+}
+.ai-progress-hint {
+  color: var(--fg-muted);
 }
 .ai-banner {
   display: flex;

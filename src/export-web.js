@@ -10,6 +10,7 @@ import { stmts } from './db.js';
 import {
   MODELS, SEARCH_BATCH_SIZE, SEARCH_MAX_CHARS, SEARCH_WEB_MAX_ITEMS,
   SEARCH_MODE_A_CONFIRM, SEARCH_SOFT_CONFIRM, stageModel,
+  SEARCH_WEB_SOFT_CONCURRENCY, SEARCH_WEB_DEEP_CONCURRENCY,
 } from './config.js';
 import { getFacets, TOOL_CONTENT_TYPES } from './taxonomy.js';
 import { log } from './util.js';
@@ -75,6 +76,7 @@ export function buildWebSnapshot() {
         searchRelevance: stageModel('searchRelevance'),
         fallback: { model: MODELS.pro },
       },
+      concurrency: { soft: SEARCH_WEB_SOFT_CONCURRENCY, deep: SEARCH_WEB_DEEP_CONCURRENCY },
       costHints,
     },
   };

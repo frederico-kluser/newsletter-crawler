@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <meta
+      name="description"
+      content="Buscador do acervo de newsletters de tecnologia — filtros por fonte, período e tags, com busca por IA."
+    />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <title>Acervo — buscador de newsletters</title>
+    <script>
+      // Tema ANTES do 1º paint (zero FOUC): a escolha salva vence; sem escolha salva, o CSS
+      // segue prefers-color-scheme (o bloco @media dos tokens cobre). Mesmo mecanismo do
+      // web-ui do CLI. Inline de propósito — precisa rodar antes de qualquer CSS/JS do bundle.
+      try {
+        var t = localStorage.getItem('nc-theme');
+        if (t === 'dark' || t === 'light') document.documentElement.dataset.theme = t;
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

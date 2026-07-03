@@ -191,6 +191,23 @@ export function printStatus() {
   );
 }
 
+// `--sources "A,B"`: lista por vírgula (o checkbox de fontes da TUI emite isto). Cada item casa
+// por nome exato (case-insensitive) OU URL normalizada — a mesma regra do --source. Puro p/
+// teste: devolve {selected, unmatched}; sem flag (ou vazia), selected = todas as fontes.
+export function filterSeedSources(sources, flags) {
+  const list = typeof flags.sources === 'string'
+    ? flags.sources.split(',').map((x) => x.trim()).filter(Boolean)
+    : null;
+  if (!list || !list.length) return { selected: sources, unmatched: [] };
+  const matches = (s, want) =>
+    (s.name || '').toLowerCase() === want.toLowerCase() ||
+    (normalizeUrl(want) != null && normalizeUrl(want) === normalizeUrl(s.url));
+  return {
+    selected: sources.filter((s) => list.some((w) => matches(s, w))),
+    unmatched: list.filter((w) => !sources.some((s) => matches(s, w))),
+  };
+}
+
 export async function cmdCrawl(flags) {
   return runWithLimits({ command: 'crawl', flags, profile: 'crawl' }, () => crawlRun(flags));
 }
@@ -234,18 +251,27 @@ async function crawlRun(flags) {
   // o novo; a dedup de artigo impede re-baixar o existente). `--no-refresh` desliga a re-visita.
   const noRefresh = flags['no-refresh'] === true;
 
-  // Seleção de fonte ao executar: `--source "<nome exato>"` (ou a URL) seleciona UMA fonte;
-  // `--only <substr>` casa por substring no nome/url. Sem nenhum, semeia todas do config.
+  // Seleção de fonte ao executar: `--sources "A,B"` (lista por vírgula — o checkbox da TUI)
+  // tem PRECEDÊNCIA; `--source "<nome exato>"` (ou a URL) seleciona UMA fonte; `--only <substr>`
+  // casa por substring no nome/url. Sem nenhum, semeia todas do config.
   const only = typeof flags.only === 'string' ? flags.only.toLowerCase() : null;
   const sourceExact = typeof flags.source === 'string' ? flags.source.toLowerCase() : null;
-  for (const s of loadSources()) {
-    if (only && !`${s.name || ''} ${s.url}`.toLowerCase().includes(only)) continue;
-    if (
-      sourceExact &&
-      (s.name || '').toLowerCase() !== sourceExact &&
-      normalizeUrl(s.url) !== normalizeUrl(flags.source)
-    ) {
-      continue;
+  const hasSourcesList = typeof flags.sources === 'string' && flags.sources.trim() !== '';
+  if (hasSourcesList && (only || sourceExact)) {
+    warn('--sources tem precedência: ignorando --source/--only');
+  }
+  const { selected, unmatched } = filterSeedSources(loadSources(), flags);
+  for (const w of unmatched) warn(`--sources: nenhuma fonte casa com "${w}"`);
+  for (const s of selected) {
+    if (!hasSourcesList) {
+      if (only && !`${s.name || ''} ${s.url}`.toLowerCase().includes(only)) continue;
+      if (
+        sourceExact &&
+        (s.name || '').toLowerCase() !== sourceExact &&
+        normalizeUrl(s.url) !== normalizeUrl(flags.source)
+      ) {
+        continue;
+      }
     }
     const src = upsertSource(s);
     sourceSeen(src.id, src.name || s.name || hostOf(s.url)); // painel: fontes x/y + % por data

@@ -9,7 +9,7 @@ import os from 'node:os';
 process.env.NC_HOME = mkdtempSync(path.join(os.tmpdir(), 'nc-fts-'));
 
 const { db } = await import('../src/db.js');
-const { toFtsMatch, retrieveLexical, prefilterCandidates } = await import('../src/retrieval.js');
+const { toFtsMatch, retrieveLexical, prefilterCandidates, fuseRRF, hybridCandidates } = await import('../src/retrieval.js');
 
 after(() => rmSync(process.env.NC_HOME, { recursive: true, force: true }));
 
@@ -82,4 +82,24 @@ test('prefilterCandidates: corta p/ top-K por BM25 quando escopo > k; senão man
   assert.equal(pf2.rows.length, 6);
   // consulta vazia -> não filtra (fail-open)
   assert.equal(prefilterCandidates(rows, '  ', { k: 2 }).prefiltered, false);
+});
+
+test('fuseRRF: soma 1/(k+rank); item bem colocado nas duas listas vence; keep filtra escopo', () => {
+  const a = [{ id: 1 }, { id: 2 }, { id: 3 }];
+  const b = [{ id: 2 }, { id: 3 }, { id: 9 }];
+  const ids = fuseRRF([a, b], { k: 60 }).map((f) => f.id);
+  assert.equal(ids[0], 2, 'id 2 (topo em b, 2º em a) vence a fusão');
+  assert.ok(ids.includes(9), 'id presente em só uma lista ainda entra');
+  const kept = fuseRRF([a, b], { k: 60, keep: new Set([1, 2, 3]) }).map((f) => f.id);
+  assert.ok(!kept.includes(9), 'keep remove id fora do escopo');
+});
+
+test('hybridCandidates: base sem vetores cai p/ só-léxico (mode=lexical), SEM carregar o modelo', async () => {
+  const rows = [10, 11, 12, 13, 14, 15].map((id) => ({ id })); // kubernetes 10-12 (do teste acima)
+  const pf = await hybridCandidates(rows, 'kubernetes', { k: 2 });
+  assert.equal(pf.prefiltered, true);
+  assert.equal(pf.mode, 'lexical', 'sem embeddings na base, não baixa modelo — usa só o FTS');
+  assert.equal(pf.rows.length, 2);
+  assert.ok(pf.rows.every((r) => [10, 11, 12].includes(r.id)));
+  assert.equal((await hybridCandidates(rows, 'kubernetes', { k: 100 })).prefiltered, false, 'escopo <= k não filtra');
 });

@@ -368,6 +368,14 @@ export const SEARCH_WEB_MAX_ITEMS = Number(process.env.SEARCH_WEB_MAX_ITEMS || 5
 // (por BM25) em vez do acervo inteiro — corta o custo O(n) e afia a precisão. Escopo <= K = julga
 // tudo (recall pleno). Generoso de propósito: recall léxico até a metade densa (embeddings) entrar.
 export const SEARCH_CANDIDATES_K = Number(process.env.SEARCH_CANDIDATES_K || 200);
+
+// ---- embeddings locais + busca vetorial (metade DENSA do retrieval híbrido) ----
+// Modelo de embedding (transformers.js/onnxruntime, baixado 1x p/ NC_HOME/models). bge-small-en =
+// 384 dims, normalizado. RRF_K = constante da fusão Reciprocal Rank Fusion (léxico ⊕ denso).
+export const EMBED_MODEL = process.env.EMBED_MODEL || 'Xenova/bge-small-en-v1.5';
+export const EMBED_DIM = Number(process.env.EMBED_DIM || 384);
+export const EMBED_BATCH = Number(process.env.EMBED_BATCH || 64);
+export const RRF_K = Number(process.env.RRF_K || 60);
 // Concorrência INICIAL (teto) da lane AIMD do WEBAPP estático (browser BYOK): a lane começa aqui
 // e corta ½ no 429 / recupera +1/10s sozinha (lane.js). O CLI/servidor usam o governor; isto vai
 // no meta.search do snapshot só p/ o webapp (com defaults embutidos se o export for antigo).

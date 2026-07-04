@@ -16,7 +16,7 @@ import {
   SEARCH_FLASH_CONCURRENCY, SEARCH_BATCH_SIZE, SEARCH_BATCH_CONCURRENCY, SEARCH_WEB_MAX_ITEMS,
   SEARCH_CANDIDATES_K,
 } from './config.js';
-import { prefilterCandidates } from './retrieval.js';
+import { hybridCandidates } from './retrieval.js';
 import { stageWindow } from './governor.js';
 import { shouldStop, getBudgetState } from './budget.js';
 import { log, warn } from './util.js';
@@ -321,13 +321,13 @@ export async function searchWeb(query, { deep = false, sources = null, from = nu
   let rows = deep
     ? stmts.webSearchCandidates.all(params)
     : stmts.webSearchCandidatesLite.all(params);
-  // Pré-filtro LÉXICO (FTS5/BM25): o LLM (caro, O(n)) julga só o top-K candidato em vez do escopo
-  // inteiro. Recall léxico por ora — a metade densa (embeddings) amplia p/ paráfrase depois.
-  const pf = prefilterCandidates(rows, query, { k: SEARCH_CANDIDATES_K, sources, from, to });
+  // Pré-filtro HÍBRIDO (FTS5/BM25 ⊕ embeddings/sqlite-vec, fundidos por RRF): o LLM (caro, O(n))
+  // julga só o top-K candidato em vez do escopo inteiro. Cai p/ só-léxico se não houver vetores.
+  const pf = await hybridCandidates(rows, query, { k: SEARCH_CANDIDATES_K, sources, from, to });
   rows = pf.rows;
   if (pf.prefiltered) {
-    onEvent?.({ type: 'prefilter', scope: pf.scope, candidates: rows.length });
-    log(`busca: pré-filtro FTS ${pf.scope} -> ${rows.length} candidatos (top-K BM25)`);
+    onEvent?.({ type: 'prefilter', scope: pf.scope, candidates: rows.length, retrieval: pf.mode });
+    log(`busca: pré-filtro ${pf.mode} ${pf.scope} -> ${rows.length} candidatos`);
   }
   resetProgress(rows.length);
   const verdicts = new Map();

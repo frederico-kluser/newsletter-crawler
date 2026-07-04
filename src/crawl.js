@@ -119,10 +119,11 @@ async function processListing(job, source, opts) {
         : opts.maxPages ?? 1
     : opts.maxPages ?? Infinity;
 
-  // Atalho Substack: usa API JSON pública e pula HTML/LLM.
-  if (isSubstack(url)) {
+  // Atalho Substack: usa API JSON pública e pula HTML/LLM. Detecta domínio próprio (probe) e
+  // passa o piso p/ parar de paginar cedo no backfill incremental.
+  if (await isSubstack(url)) {
     try {
-      const posts = await substackArchive(url);
+      const posts = await substackArchive(url, { sinceDate: opts.sinceDate ?? null });
       if (posts.length) {
         let n = 0;
         let below = 0;

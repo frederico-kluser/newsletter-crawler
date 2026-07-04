@@ -216,6 +216,19 @@ export const SINCE_MAX_INDEX_PAGES = Number(process.env.SINCE_MAX_INDEX_PAGES ||
 // p/ declarar o feed estagnado e parar de rolar (a parada por data --since e o teto de rodadas
 // continuam valendo). Evita gastar sempre as 60 rodadas/90s num feed que não cresce mais.
 export const SCROLL_STALL_CHECKS = Number(process.env.SCROLL_STALL_CHECKS || 3);
+// Rolagem (perfil listing): passo em px por rodada e TETO da espera adaptativa por conteúdo novo.
+// O settle sai cedo assim que a página cresce (feed rápido) e é paciente até SCROLL_SETTLE_MAX_MS
+// (feed lento) — no lugar do antigo pause fixo de 800ms, que truncava feed lento e desperdiçava
+// tempo em feed rápido.
+export const SCROLL_STEP = Number(process.env.SCROLL_STEP || 1200);
+export const SCROLL_SETTLE_MAX_MS = Number(process.env.SCROLL_SETTLE_MAX_MS || 2500);
+// Perfis de render (antes hard-coded em RENDER_PROFILES/fetch.js): nº máx de rodadas de scroll e
+// deadline de parede (ms) por perfil, e máx de cliques em "carregar mais" por página (listing).
+export const SCROLL_ROUNDS = Number(process.env.SCROLL_ROUNDS || 60);
+export const SCROLL_ROUNDS_ARTICLE = Number(process.env.SCROLL_ROUNDS_ARTICLE || 8);
+export const RENDER_LISTING_DEADLINE_MS = Number(process.env.RENDER_LISTING_DEADLINE_MS || 90000);
+export const RENDER_ARTICLE_DEADLINE_MS = Number(process.env.RENDER_ARTICLE_DEADLINE_MS || 30000);
+export const MAX_LOAD_MORE = Number(process.env.MAX_LOAD_MORE || 50);
 
 // ---- modelos por etapa do pipeline (config/models.json + override por env) ----
 // Default de TODAS as etapas: deepseek/deepseek-v4-pro + xhigh ("ultrathink"). Para o

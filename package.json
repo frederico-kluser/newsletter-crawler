@@ -17,6 +17,7 @@
     "inspect": "node --env-file-if-exists=.env src/index.js inspect",
     "purge": "node --env-file-if-exists=.env src/index.js purge",
     "add": "node --env-file-if-exists=.env src/index.js add",
+    "remove": "node --env-file-if-exists=.env src/index.js remove",
     "export": "node --env-file-if-exists=.env src/index.js export",
     "finish": "node --env-file-if-exists=.env src/index.js finish",
     "search": "node --env-file-if-exists=.env src/index.js search",

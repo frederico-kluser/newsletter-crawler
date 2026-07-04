@@ -6,7 +6,7 @@ import { closeBrowser } from './fetch.js';
 import { closeParsePool } from './parse-pool.js';
 import { errorLog } from './util.js';
 import {
-  printStatus, cmdCrawl, cmdAdd, cmdReset, cmdExport, cmdSearch, cmdKey,
+  printStatus, cmdCrawl, cmdAdd, cmdRemove, cmdReset, cmdExport, cmdSearch, cmdKey,
   cmdWeb,
   cmdLimits,
   cmdReclean, cmdInspect, cmdPurge, cmdFinish,
@@ -50,6 +50,8 @@ function printHelp() {
       '  node src/index.js reclean [--limit N]   re-limpa os "suspect" com passe forte (Pro) e re-verifica',
       '  node src/index.js purge <fonte> --yes [--selectors]   apaga os DADOS de uma fonte p/ refazer do zero',
       '  node src/index.js add <url> [--name "Nome"] [--type index|listing] [--max-index-pages N]',
+      '                          (o TIPO é detectado por IA automaticamente; --type força manual)',
+      '  node src/index.js remove <fonte> --yes   DESCADASTRA a fonte e APAGA todo o conteúdo dela',
       '  node src/index.js export [--format md|json|web] [--all] [--out DIR]',
       '                          (web: snapshot JSON p/ o webapp em webapp/public/data; --all: acervo todo)',
       '  node src/index.js finish [--budget USD] [--parallel N] [--limit N] [--no-verify|--no-classify|--no-summarize]',
@@ -104,7 +106,10 @@ try {
       cmdPurge(rest, flags);
       db.close();
     } else if (cmd === 'add') {
-      cmdAdd(rest, flags);
+      await cmdAdd(rest, flags);
+      db.close();
+    } else if (cmd === 'remove') {
+      cmdRemove(rest, flags);
       db.close();
     } else if (cmd === 'export') {
       cmdExport(flags);
@@ -130,7 +135,7 @@ try {
     } else {
       errorLog(
         `comando desconhecido: ${cmd} ` +
-          '(use: crawl | status | inspect | reclean | purge | add | export | finish | search | web | key | limits | reset | ui)',
+          '(use: crawl | status | inspect | reclean | purge | add | remove | export | finish | search | web | key | limits | reset | ui)',
       );
       process.exit(1);
     }

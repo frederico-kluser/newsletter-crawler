@@ -24,6 +24,7 @@
     "articleClean":    { "model": "deepseek/deepseek-v4-flash", "effort": "medium" },
     "articleReclean":  { "model": "deepseek/deepseek-v4-pro", "effort": "high" },
     "verifyRecord":    { "model": "deepseek/deepseek-v4-flash", "effort": "high" },
-    "dateSelector":    { "model": "deepseek/deepseek-v4-flash", "effort": "high" }
+    "dateSelector":    { "model": "deepseek/deepseek-v4-flash", "effort": "high" },
+    "detectType":      { "model": "deepseek/deepseek-v4-flash", "effort": "high" }
   }
 }

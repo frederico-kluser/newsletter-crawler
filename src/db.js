@@ -4,7 +4,7 @@ import { load as loadVec } from 'sqlite-vec';
 import { mkdirSync } from 'node:fs';
 import path from 'node:path';
 import { DB_PATH, EMBED_DIM } from './config.js';
-import { parseDate, warn } from './util.js';
+import { parseDate, hostOf, warn } from './util.js';
 
 mkdirSync(path.dirname(DB_PATH), { recursive: true });
 
@@ -651,6 +651,11 @@ export const stmts = {
   deleteEventsBySource: db.prepare(`DELETE FROM events WHERE source_id = ?`),
   deleteSelectorsLike: db.prepare(`DELETE FROM selectors WHERE template_sig LIKE ?`),
 
+  // remoção COMPLETA de uma fonte (descadastra de vez, além do purge): ids dos artigos p/ decidir
+  // quais buscas ficaram órfãs; a linha `sources` em si (apagada por ÚLTIMO — FK dos articles).
+  listSourceArticleIds: db.prepare(`SELECT id FROM articles WHERE source_id = ?`),
+  deleteSourceById: db.prepare(`DELETE FROM sources WHERE id = ?`),
+
   // runs / marca d'água por execução (delta de "novo desde a última execução")
   startDeltaRun: db.prepare(`INSERT INTO runs (started_at) VALUES (datetime('now')) RETURNING id`),
   finishDeltaRun: db.prepare(`UPDATE runs SET finished_at = datetime('now'), new_count = ? WHERE id = ?`),
@@ -765,6 +770,8 @@ export const stmts = {
   ),
   deleteSearch: db.prepare(`DELETE FROM searches WHERE id = ?`),
   clearSearches: db.prepare(`DELETE FROM searches`),
+  // só id+hits p/ decidir, ao remover uma fonte, quais buscas ficaram 100% órfãs dela (best-effort)
+  listSearchHits: db.prepare(`SELECT id, hits_json FROM searches`),
   // Re-hidratação p/ a TUI/CLI: as MESMAS colunas do toItem da busca (search.js), por ids.
   searchArticlesByIds: db.prepare(
     `SELECT a.id, a.url, a.title, a.title_pt, a.summary_pt,
@@ -819,4 +826,55 @@ export function wipeAll() {
   });
   tx();
   db.exec('VACUUM');
+}
+
+/**
+ * Remoção COMPLETA de UMA fonte (descadastra de vez, o que o purge NÃO faz). Numa transação:
+ * apaga os DADOS (articles + cascatas de FK/trigger p/ classifications/article_tags/
+ * classification_uncovered/FTS/vec; pages, frontier, events), limpa o histórico de buscas
+ * "ligado" (best-effort: buscas cujos hits são TODOS artigos desta fonte — uma busca multi-fonte
+ * sobrevive e seus hits sumidos já são tratados como "missing"), derruba os selectors do host SÓ
+ * se nenhuma OUTRA fonte usa o host (podem ser compartilhados), e por fim a linha `sources`
+ * (por último — articles/pages têm FK p/ sources). NÃO mexe no sources.json (o chamador faz isso).
+ * Retorna { source, counts } ou null se a fonte não existe.
+ */
+export function removeSource(sourceId) {
+  const src = stmts.getSourceById.get(sourceId);
+  if (!src) return null;
+
+  // Buscas 100% desta fonte: decididas ANTES de apagar os artigos (depois os ids somem).
+  const articleIds = new Set(stmts.listSourceArticleIds.all(sourceId).map((r) => r.id));
+  const searchIdsToDelete = [];
+  if (articleIds.size) {
+    for (const row of stmts.listSearchHits.all()) {
+      let hits;
+      try {
+        hits = JSON.parse(row.hits_json || '[]');
+      } catch {
+        hits = [];
+      }
+      if (Array.isArray(hits) && hits.length && hits.every((h) => articleIds.has(h?.id))) {
+        searchIdsToDelete.push(row.id);
+      }
+    }
+  }
+
+  // selectors são por HOST (template_sig "host:…") e podem ser compartilhados por outra fonte.
+  const host = hostOf(src.base_url);
+  const shared =
+    host && stmts.listSources.all().some((s) => s.id !== sourceId && hostOf(s.base_url) === host);
+
+  const counts = {};
+  const tx = db.transaction(() => {
+    counts.articles = stmts.deleteArticlesBySource.run(sourceId).changes;
+    counts.pages = stmts.deletePagesBySource.run(sourceId).changes;
+    counts.frontier = stmts.deleteFrontierBySource.run(sourceId).changes;
+    counts.events = stmts.deleteEventsBySource.run(sourceId).changes;
+    counts.searches = 0;
+    for (const id of searchIdsToDelete) counts.searches += stmts.deleteSearch.run(id).changes;
+    counts.selectors = !shared && host ? stmts.deleteSelectorsLike.run(`${host}:%`).changes : 0;
+    counts.sources = stmts.deleteSourceById.run(sourceId).changes;
+  });
+  tx();
+  return { source: src, counts };
 }

@@ -255,6 +255,7 @@ export const STAGE_KEYS = [
   'articleClean', // limpeza pré-save do conteúdo extraído (Flash)
   'verifyRecord', // verificação pós-cadastro: veredito ok|suspect|junk (Flash)
   'dateSelector', // seletor de DATA da listagem (CSS + regex) lendo a página real (Flash)
+  'detectType', // detecção automática do tipo da fonte (index|listing) ao adicionar (Flash high, 1x/add)
 ];
 const DEFAULT_MODEL = MODELS.pro;
 const DEFAULT_EFFORT = 'xhigh';
@@ -434,6 +435,28 @@ export function addSourceToConfig({ url, name, type, maxIndexPages }, configPath
   else data.sources.push(entry);
   writeFileSync(configPath, JSON.stringify(data, null, 2) + '\n');
   return { added: i < 0, total: data.sources.length };
+}
+
+/**
+ * REMOVE (descadastra) uma fonte do sources.json do usuário, por URL normalizada. É o par do
+ * addSourceToConfig: sem isso, uma fonte apagada do banco voltaria no próximo crawl (o seed
+ * re-semeia do JSON). Idempotente e fail-open (arquivo ausente/ inválido = nada a remover).
+ * `configPath` é injetável p/ teste. Retorna { removed, total }.
+ */
+export function removeSourceFromConfig(url, configPath = SOURCES_PATH) {
+  let data = { sources: [] };
+  try {
+    const raw = JSON.parse(readFileSync(configPath, 'utf8'));
+    if (raw && Array.isArray(raw.sources)) data = raw;
+  } catch {
+    return { removed: false, total: 0 }; // sem arquivo/ inválido: nada a remover
+  }
+  const key = normalizeUrl(url);
+  const before = data.sources.length;
+  data.sources = data.sources.filter((s) => normalizeUrl(s.url) !== key);
+  const removed = data.sources.length < before;
+  if (removed) writeFileSync(configPath, JSON.stringify(data, null, 2) + '\n');
+  return { removed, total: data.sources.length };
 }
 
 // Vocabulário controlado da classificação. Lança se ausente/ inválido (a classificação

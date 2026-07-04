@@ -8,6 +8,10 @@ export function normalizeUrl(u, base) {
   try {
     const abs = base ? new URL(u, base).href : new URL(u).href;
     return normalizeUrlLib(abs, {
+      // NÃO remover "www.": www.host e host podem ser servidores DIFERENTES — vários Substack de
+      // domínio próprio (ex.: www.deeplearningweekly.com) NÃO têm DNS no ápice, então colapsar
+      // www->ápice gera URL morta (ENOTFOUND). hostOf/domainSig já preservam o www; isto alinha.
+      stripWWW: false,
       stripHash: true,
       removeQueryParameters: [/^utm_/i, 'ref', 'fbclid', 'gclid', 'mc_cid', 'mc_eid'],
       sortQueryParameters: true,

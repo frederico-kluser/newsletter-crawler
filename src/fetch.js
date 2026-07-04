@@ -6,7 +6,8 @@ import pLimit from 'p-limit';
 import * as cheerio from 'cheerio';
 import {
   USER_AGENT, REQUEST_DELAY_MS, PER_HOST_CONCURRENCY, MAX_RETRIES, RESPECT_ROBOTS,
-  SCROLL_STALL_CHECKS,
+  SCROLL_STALL_CHECKS, SCROLL_STEP, SCROLL_SETTLE_MAX_MS, SCROLL_ROUNDS, SCROLL_ROUNDS_ARTICLE,
+  RENDER_LISTING_DEADLINE_MS, RENDER_ARTICLE_DEADLINE_MS, MAX_LOAD_MORE,
 } from './config.js';
 import { getLane } from './governor.js';
 import { inStage } from './progress.js';
@@ -231,8 +232,8 @@ const CHROMIUM_ARGS = (process.env.CRAWLER_CHROMIUM_ARGS
 // renderizado crashava com "RENDER_PROFILES is not defined"): listagem rola até o fim e
 // clica "load more" (arquivo infinito); artigo é curto e sem cliques (só precisa do corpo).
 const RENDER_PROFILES = {
-  listing: { deadlineMs: 90_000, scrollRounds: 60, loadMore: true },
-  article: { deadlineMs: 30_000, scrollRounds: 8, loadMore: false },
+  listing: { deadlineMs: RENDER_LISTING_DEADLINE_MS, scrollRounds: SCROLL_ROUNDS, loadMore: true },
+  article: { deadlineMs: RENDER_ARTICLE_DEADLINE_MS, scrollRounds: SCROLL_ROUNDS_ARTICLE, loadMore: false },
 };
 
 let _browser = null;
@@ -297,8 +298,12 @@ export async function fetchRendered(url, {
           collect, sinceDate: collect ? sinceDate : null,
         });
         // Piso de data alcançado: clicar "older/load more" só traria itens ainda mais antigos.
-        if (prof.loadMore && scroll.reason !== 'piso') await clickLoadMore(page, undefined, 50, deadline, signal);
-        if (collect) scroll.harvest.push(...(await harvestNewLinks(page))); // o que o load-more trouxe
+        // Fora do piso: clica repetidamente e RE-COLHE entre cada clique (feed virtualizado
+        // descarta itens do DOM entre páginas) acumulando na mesma colheita do scroll.
+        if (prof.loadMore && scroll.reason !== 'piso') {
+          await clickLoadMore(page, { deadline, signal, harvest: collect ? scroll.harvest : null });
+        }
+        if (collect) scroll.harvest.push(...(await harvestNewLinks(page))); // rede de segurança final
         if (Date.now() >= deadline) log(`render truncado pelo deadline (${profile}): ${url.slice(0, 80)}`);
         if (collect && !['rodadas', 'plateau'].includes(scroll.reason)) {
           log(`scroll parado (${scroll.reason}) após ${scroll.rounds} rodadas, ${scroll.harvest.length} links vistos: ${url.slice(0, 80)}`);
@@ -369,14 +374,68 @@ function harvestNewLinks(page) {
     .catch(() => []);
 }
 
+// Rola o "scroller" CERTO por `step` px e devolve a altura de rolagem atual. Muitos feeds rolam
+// num CONTAINER interno (div com overflow), não na janela — aí window.scrollBy(0,step) não move
+// nada. Detecta e cacheia esse container no `window` (o maior elemento rolável); cai p/ a janela.
+function scrollOnce(page, step) {
+  return page
+    .evaluate((s) => {
+      let el = window.__ncScroller;
+      if (el === undefined || (el && !document.contains(el))) {
+        el = null;
+        let best = 0;
+        for (const n of document.querySelectorAll('body *')) {
+          if (n.scrollHeight - n.clientHeight <= 400) continue; // rejeição barata antes do estilo
+          if (!/(auto|scroll)/.test(getComputedStyle(n).overflowY)) continue;
+          const room = n.scrollHeight - n.clientHeight;
+          if (room > best) { best = room; el = n; }
+        }
+        window.__ncScroller = el; // elemento, ou null = rolar a janela
+      }
+      const target = el || document.scrollingElement || document.documentElement;
+      try { target.scrollTop += s; } catch { /* noop */ }
+      window.scrollBy(0, s); // e a janela também (feeds que escutam o scroll do window)
+      return Math.max(target.scrollHeight || 0, document.body.scrollHeight || 0);
+    }, step)
+    .catch(() => 0);
+}
+
+// Altura de rolagem atual pelo MESMO critério do scrollOnce (container cacheado ou janela).
+function probeHeight(page) {
+  return page
+    .evaluate(() => {
+      const el = window.__ncScroller;
+      const t = el || document.scrollingElement || document.documentElement;
+      return Math.max(t.scrollHeight || 0, document.body.scrollHeight || 0);
+    })
+    .catch(() => 0);
+}
+
+// Espera ADAPTATIVA pós-scroll: enquanto a altura cresce, continua esperando (feed lento carregando
+// aos poucos); assenta quando fica estável por ~400ms; teto duro em `maxMs`. Substitui o pause fixo
+// — feed rápido/estático sai em ~400ms; feed lento ganha até maxMs p/ trazer a próxima leva.
+async function settleAfterScroll(page, prevHeight, maxMs, signal) {
+  const t0 = Date.now();
+  let last = prevHeight;
+  let stableFor = 0;
+  while (Date.now() - t0 < maxMs) {
+    if (signal?.aborted) return;
+    await page.waitForTimeout(150).catch(() => {});
+    const h = await probeHeight(page);
+    if (h > last) { last = h; stableFor = 0; } // cresceu: mais conteúdo pode vir, segue esperando
+    else if ((stableFor += 150) >= 400) return; // estável por 400ms: assentou
+  }
+}
+
 /**
  * Rola a página até um motivo de parada. Retorna { rounds, reason, harvest }, onde harvest são
  * os links colhidos DURANTE o scroll (modo collect) — inclui itens que um feed virtualizado já
  * descartou do DOM final. reasons: plateau | piso | estagnado | deadline | abort | sem-altura | rodadas.
  */
 export async function autoScroll(page, {
-  step = 1200, pause = 800, maxRounds = 60, deadline = Infinity,
-  signal = null, collect = false, sinceDate = null, stallChecks = SCROLL_STALL_CHECKS,
+  step = SCROLL_STEP, settleMaxMs = SCROLL_SETTLE_MAX_MS, maxRounds = SCROLL_ROUNDS,
+  deadline = Infinity, signal = null, collect = false, sinceDate = null,
+  stallChecks = SCROLL_STALL_CHECKS,
 } = {}) {
   const sinceMs = sinceDate instanceof Date ? sinceDate.getTime() : null;
   const harvest = [];
@@ -393,7 +452,7 @@ export async function autoScroll(page, {
       reason = 'deadline';
       break;
     }
-    const h = await page.evaluate(() => document.body.scrollHeight).catch(() => 0);
+    const h = await probeHeight(page);
     let fresh = [];
     if (collect) {
       fresh = await harvestNewLinks(page);
@@ -422,28 +481,42 @@ export async function autoScroll(page, {
     }
     prev = h;
     rounds = i + 1;
-    await page.evaluate((s) => window.scrollBy(0, s), step).catch(() => {});
-    await page.waitForTimeout(pause);
+    await scrollOnce(page, step);
+    await settleAfterScroll(page, h, Math.min(settleMaxMs, Math.max(0, deadline - Date.now())), signal);
   }
   return { rounds, reason: reason || 'rodadas', harvest };
 }
 
-/** Clica repetidamente em botões "carregar mais / mais antigos / próximo" (até o deadline). */
-export async function clickLoadMore(
-  page,
+/**
+ * Clica repetidamente em "carregar mais / mais antigos / próximo" até o deadline. Entre cliques,
+ * espera a CONTAGEM de <a> crescer (teto curto) em vez de `networkidle` — que em página com
+ * websockets/analytics quase nunca dispara e queimava os 8s. Se `harvest` vier, RE-COLHE os links
+ * a cada clique (feed virtualizado descarta itens do DOM entre páginas) acumulando nele.
+ */
+export async function clickLoadMore(page, {
   label = /mais|more|older|antig|load|próxim|proxim|next/i,
-  maxClicks = 50,
+  maxClicks = MAX_LOAD_MORE,
   deadline = Infinity,
   signal = null,
-) {
+  harvest = null,
+} = {}) {
+  const linkCount = () =>
+    page.evaluate(() => document.querySelectorAll('a[href]').length).catch(() => 0);
   for (let i = 0; i < maxClicks && Date.now() < deadline; i++) {
     if (signal?.aborted) return;
-    const btn = page.locator('button, a').filter({ hasText: label }).first();
+    const btn = page.locator('button, a, [role="button"]').filter({ hasText: label }).first();
     if ((await btn.count().catch(() => 0)) === 0) break;
     if (!(await btn.isVisible().catch(() => false))) break;
+    const before = await linkCount();
     await btn.click({ timeout: 5000 }).catch(() => {});
-    await page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {});
-    await page.waitForTimeout(500);
+    // Espera conteúdo novo (cresce a contagem de <a>) até 4s, sem depender de networkidle.
+    const t0 = Date.now();
+    while (Date.now() - t0 < 4000 && Date.now() < deadline) {
+      if (signal?.aborted) return;
+      await page.waitForTimeout(200).catch(() => {});
+      if ((await linkCount()) > before) break;
+    }
+    if (harvest) harvest.push(...(await harvestNewLinks(page)));
   }
 }
 

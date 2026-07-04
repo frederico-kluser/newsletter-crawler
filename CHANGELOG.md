@@ -24,6 +24,29 @@ Webapp bilíngue (PT/EN) com detecção de idioma e tutorial de introdução no 
 - **Skill `building-the-webapp`:** nova skill em `.agents/skills/` documentando o frontend do webapp
   (stack Vite+React+Motion, tokens de tema, a camada i18n e o tutorial), separada do porte de busca
   (que segue em `searching-the-corpus`).
+- **Fontes Substack de domínio próprio (`src/substack.js`):** `isSubstack` agora detecta Substack
+  mesmo em domínio PRÓPRIO (ex.: `www.deeplearningweekly.com`) via header `x-served-by: Substack` +
+  probe cacheado de `/api/v1/archive` — antes só reconhecia `*.substack.com`. `substackArchive`
+  pagina o arquivo JSON com o page size REAL do Substack (**12**; `limit>12` devolve `[]`), filtra o
+  áudio `tts`, deduplica e **para cedo no piso `--since`**. Cobre o backfill COMPLETO do arquivo (o
+  `/archive` estático traz só ~24 posts, que a heurística `looksEmpty` dava por "cheios"). Testes em
+  `test/substack.archive.test.js`.
+- **Scroll infinito genérico mais robusto (`src/fetch.js`):** rola o CONTAINER interno correto (div
+  com `overflow`) além da janela — `window.scrollBy` não move feeds cujo scroll é num container;
+  espera ADAPTATIVA por conteúdo (assenta quando a altura estabiliza, teto `SCROLL_SETTLE_MAX_MS`) no
+  lugar do `pause` fixo de 800 ms (que truncava feed lento); `clickLoadMore` re-colhe links ENTRE
+  cada clique (feed virtualizado perdia itens) e espera a contagem de `<a>` crescer em vez de
+  `networkidle` (que em página com websockets/analytics quase nunca dispara e queimava 8 s).
+- **Knobs de scroll/render por env (`src/config.js`, `.env.example`):** `SCROLL_STEP`,
+  `SCROLL_SETTLE_MAX_MS`, `SCROLL_ROUNDS`, `SCROLL_ROUNDS_ARTICLE`, `RENDER_LISTING_DEADLINE_MS`,
+  `RENDER_ARTICLE_DEADLINE_MS`, `MAX_LOAD_MORE` — antes hard-coded em `RENDER_PROFILES`/`autoScroll`.
+
+### Corrigido
+- **`normalizeUrl` colapsava `www.` no ápice (`src/util.js`):** `www.host` e `host` podem ser
+  servidores DIFERENTES — vários Substack de domínio próprio (ex.: `deeplearningweekly.com`) NÃO têm
+  DNS no ápice, então a URL normalizada dava `ENOTFOUND` e a fonte inteira falhava (a detecção e
+  TODO `/p/` enfileirado). Agora `stripWWW: false`, alinhado a `hostOf`/`domainSig` (que já
+  preservavam o www). Regressão coberta por `test/util.normalizeUrl.test.js`.
 
 ## [1.9.0] - 2026-07-03
 

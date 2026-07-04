@@ -9,7 +9,7 @@ import { useStrings } from '../i18n.jsx';
  * abrir (resultado congelado, sem custo), re-rodar e apagar; "limpar tudo" pede 2º clique.
  * Overlay central com fade/scale (mesmo idioma de ConfirmDialog).
  */
-export default function HistoryPanel({ open, items, onClose, onOpen, onRerun, onDelete, onClear }) {
+export default function HistoryPanel({ open, items, onClose, onOpen, onRerun, onDelete, onClear, activeId }) {
   const STR = useStrings();
   const [armClear, setArmClear] = useState(false);
   useEffect(() => {
@@ -59,7 +59,7 @@ export default function HistoryPanel({ open, items, onClose, onOpen, onRerun, on
               <>
                 <ul className="history-list">
                   {items.map((h) => (
-                    <li key={h.id} className="history-row">
+                    <li key={h.id} className={`history-row${h.id === activeId ? ' is-active' : ''}`}>
                       <button
                         type="button"
                         className="history-main"

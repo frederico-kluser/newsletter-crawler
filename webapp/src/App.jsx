@@ -60,7 +60,7 @@ export default function App() {
   const { meta, articles, byId, error, loading, retry } = useSnapshot();
   const [filters, dispatch] = useReducer(filtersReducer, { ...EMPTY_FILTERS });
   const [detailId, setDetailId] = useState(null);
-  const [strict, setStrict] = useState(true); // busca precisão-primeiro: só 'direct' por default
+  const [strict, setStrict] = useState(false); // AMPLO por padrão: mostra 'direct' + 'similar' (Estrito é opt-in)
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [textInput, setTextInput] = useState('');
@@ -129,8 +129,8 @@ export default function App() {
       .map((h) => ({ article: byId.get(h.id), relation: h.relation, judgeKind: h.kind }))
       .filter((x) => x.article);
   }, [aiHits, byId]);
-  // ESTRITO (default): só 'direct' (resposta central); AMPLO: inclui 'similar'. Re-filtra o MESMO
-  // scan (zero LLM) — casa com o eval do repo (precisão estrita bem maior com o spec).
+  // AMPLO (default): 'direct' + 'similar'; ESTRITO (opt-in): só 'direct' (resposta central).
+  // Re-filtra o MESMO scan (zero LLM) — o Estrito é um toggle p/ apertar a precisão quando quiser.
   const aiShown = useMemo(() => {
     if (!aiItems) return null;
     return aiItems.filter(
@@ -161,8 +161,9 @@ export default function App() {
     [filters, textQuery, aiActive, ai.result],
   );
   const pagedVisible = useVisibleCount(displayItems.length, resetKey);
-  // streaming (running): mostra TODOS os hits que já chegaram, sem paginação; no done volta a paginar
-  const visible = aiRunning ? displayItems.length : pagedVisible;
+  // IA (running E done): mostra TODOS os hits sem paginar — assim o resultado NÃO encolhe/pula ao
+  // terminar (os cards que apareceram ao vivo permanecem). Só o browse (SQL) segue paginado.
+  const visible = aiRunning || aiActive ? displayItems.length : pagedVisible;
   const nActive = countActiveFilters(filters);
   const detail = detailId != null ? byId.get(detailId) : null;
 
@@ -217,6 +218,7 @@ export default function App() {
             hasKey={ai.hasKey}
             recents={ai.history}
             onPickRecent={openFromHistory}
+            activeId={ai.result?.id}
           />
         )}
       </TopBar>
@@ -243,10 +245,20 @@ export default function App() {
                 </span>
               )}
               {(aiActive || aiRunning) && (
-                <label className="strict-toggle" title={STR.strictHint}>
-                  <input type="checkbox" checked={strict} onChange={(e) => setStrict(e.target.checked)} />
-                  {STR.strictToggle}
-                </label>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={strict}
+                  className="strict-switch"
+                  data-on={strict || undefined}
+                  onClick={() => setStrict((v) => !v)}
+                  title={STR.strictHint}
+                >
+                  <span className="strict-switch-label">{STR.strictToggle}</span>
+                  <span className="strict-switch-track" aria-hidden="true">
+                    <span className="strict-switch-thumb" />
+                  </span>
+                </button>
               )}
             </div>
 
@@ -347,6 +359,7 @@ export default function App() {
       <HistoryPanel
         open={historyOpen}
         items={ai.history}
+        activeId={ai.result?.id}
         onClose={() => setHistoryOpen(false)}
         onOpen={openFromHistory}
         onRerun={rerunFromHistory}

@@ -8,7 +8,7 @@
 // A web UI tem motor próprio no fim do arquivo (searchWeb: soft em LOTE / hard por artigo).
 import pLimit from 'p-limit';
 import { stmts } from './db.js';
-import { judgeRelevance, judgeRelevanceBatch, mapQueryToFacetTags } from './llm.js';
+import { judgeRelevance, judgeRelevanceBatch, mapQueryToFacetTags, compileQuerySpec } from './llm.js';
 import {
   getFacets, RETRIEVAL_FACETS, buildFacetQueryPrompt, validateFacetTags, isToolByTags,
 } from './taxonomy.js';
@@ -78,9 +78,9 @@ const RANK = { direct: 0, similar: 1 };
  * Compartilhado pelo modo A do CLI e pela busca hard da web. Fail-open: erro vira 'none' com warn;
  * orçamento (shouldStop/BUDGET_EXCEEDED) NÃO vira 'none' silencioso — conta no retorno (skipped).
  */
-async function judgeRowsIndividually(query, rows, verdicts, label = 'A', onEvent = null) {
+async function judgeRowsIndividually(query, rows, verdicts, label = 'A', onEvent = null, spec = null, concurrency = null) {
   // Janela = min(override de env, capacidade atual da lane llm do governador).
-  const gate = pLimit(stageWindow(SEARCH_FLASH_CONCURRENCY));
+  const gate = pLimit(stageWindow(concurrency || SEARCH_FLASH_CONCURRENCY));
   let skipped = 0;
   await Promise.all(
     rows.map((a) =>
@@ -92,7 +92,7 @@ async function judgeRowsIndividually(query, rows, verdicts, label = 'A', onEvent
         let rel = { relation: 'none', kind: 'news' };
         let failedHere = false;
         try {
-          rel = await judgeRelevance({ query, title: a.title, content: a.content });
+          rel = await judgeRelevance({ query, title: a.title, content: a.content, spec });
         } catch (e) {
           if (e?.code === 'BUDGET_EXCEEDED') {
             skipped++;
@@ -245,6 +245,27 @@ const toBatchItem = (a) => ({
   summary: String(a.summary_pt || a.blurb || a.content_head || '').replace(/\s+/g, ' ').trim().slice(0, 400),
 });
 
+// Priorização barata (F4): ordena os PENDENTES por overlap dos termos EN do spec com título+resumo
+// — os prováveis-hits entram nos PRIMEIROS lotes (cards relevantes streamam antes; parar no meio
+// fica útil). Varre TUDO (não corta recall); só muda a ORDEM. Usa os termos EN do spec (a ponte
+// cross-lingual: docs em inglês, query PT já traduzida) — SEM nenhuma chamada LLM extra. No-op sem spec.
+const PRIO_STOP = new Set(['the', 'and', 'for', 'with', 'that', 'this', 'from', 'are', 'was', 'new', 'via', 'how', 'using', 'use', 'can', 'its', 'into', 'than', 'has', 'have', 'will', 'not', 'você', 'para', 'com', 'que', 'dos', 'das']);
+export function prioritizeBySpec(pend, spec) {
+  const src = [...(spec?.terms || []), spec?.query_en || ''].join(' ').toLowerCase();
+  const words = [...new Set(src.split(/[^a-z0-9]+/).filter((w) => w.length >= 3 && !PRIO_STOP.has(w)))];
+  if (words.length < 2) return pend; // sinal fraco: mantém a ordem original (mais novo 1º)
+  const score = (a) => {
+    const hay = `${a.title || ''} ${a.summary_pt || a.blurb || a.content_head || ''}`.toLowerCase();
+    let n = 0;
+    for (const w of words) if (hay.includes(w)) n++;
+    return n;
+  };
+  return pend
+    .map((a, i) => ({ a, i, s: score(a) }))
+    .sort((x, y) => y.s - x.s || x.i - y.i) // score DESC; empate mantém a ordem original (estável)
+    .map((o) => o.a);
+}
+
 /** Divide `rows` em lotes de `size` preservando a ordem (exportada p/ teste). */
 export function chunkBatches(rows, size) {
   const n = Math.max(1, Math.floor(size) || 1);
@@ -289,7 +310,7 @@ export function mergeBatchVerdicts(batch, results, verdicts) {
  * Retorna hits CRUS {id, relation, kind} ordenados (direct antes de similar) e capados em
  * SEARCH_WEB_MAX_ITEMS — o enriquecimento p/ os cards (fonte/data/tags) fica no web.js.
  */
-export async function searchWeb(query, { deep = false, sources = null, from = null, to = null, onEvent = null } = {}) {
+export async function searchWeb(query, { deep = false, sources = null, from = null, to = null, onEvent = null, concurrency = null } = {}) {
   const params = {
     sources: Array.isArray(sources) && sources.length ? JSON.stringify(sources) : null,
     from,
@@ -304,8 +325,21 @@ export async function searchWeb(query, { deep = false, sources = null, from = nu
   const emitProgress = () =>
     onEvent?.({ type: 'progress', scanned: _progress.scanned, total: rows.length, relevant: _progress.relevant, failed: _progress.failed });
 
+  // Entendimento da consulta (1 chamada Pro, amortizada sobre o scan): vira o SPEC (critérios
+  // OBRIGATÓRIOS/desejáveis + PT→EN) que TODO lote/artigo julga contra — busca precisão-primeiro.
+  // Fail-open: se falhar, segue com a query crua (spec=null → rubrica baseline). Emitido p/ a UI.
+  let spec = null;
+  if (rows.length) {
+    try {
+      spec = await compileQuerySpec(query);
+      onEvent?.({ type: 'spec', spec });
+    } catch (e) {
+      warn(`busca: compileQuerySpec falhou (${e.message}); seguindo com a query crua`);
+    }
+  }
+
   if (deep) {
-    skipped = await judgeRowsIndividually(query, rows, verdicts, 'profunda', onEvent);
+    skipped = await judgeRowsIndividually(query, rows, verdicts, 'profunda', onEvent, spec, concurrency);
   } else {
     // Item sem título E sem texto não gasta token: veredito local 'none'.
     const pend = [];
@@ -316,9 +350,9 @@ export async function searchWeb(query, { deep = false, sources = null, from = nu
     }
     _progress.scanned = rows.length - pend.length;
     emitProgress();
-    const gate = pLimit(stageWindow(SEARCH_BATCH_CONCURRENCY));
+    const gate = pLimit(stageWindow(concurrency || SEARCH_BATCH_CONCURRENCY));
     await Promise.all(
-      chunkBatches(pend, SEARCH_BATCH_SIZE).map((batch) =>
+      chunkBatches(prioritizeBySpec(pend, spec), SEARCH_BATCH_SIZE).map((batch) =>
         gate(async () => {
           if (shouldStop()) {
             skipped += batch.length; // orçamento: lote não avaliado (não vira 'none' silencioso)
@@ -326,7 +360,7 @@ export async function searchWeb(query, { deep = false, sources = null, from = nu
           }
           let batchFailed = false;
           try {
-            const results = await judgeRelevanceBatch({ query, items: batch.map(toBatchItem) });
+            const results = await judgeRelevanceBatch({ query, items: batch.map(toBatchItem), spec });
             const { missing, unknown } = mergeBatchVerdicts(batch, results, verdicts);
             if (missing || unknown) {
               warn(`busca[soft]: lote com ${missing} id(s) sem veredito / ${unknown} desconhecido(s)`);
@@ -380,6 +414,7 @@ export async function searchWeb(query, { deep = false, sources = null, from = nu
     stats: {
       scanned: _progress.scanned, total: rows.length, relevant: hits.length,
       failed: _progress.failed, skipped, truncated,
+      spec, // congela o "entendimento" p/ reabrir e mostrar o banner sem repagar LLM
     },
     hits: shown,
   });
@@ -393,6 +428,7 @@ export async function searchWeb(query, { deep = false, sources = null, from = nu
     skipped,
     truncated,
     historyId,
+    spec, // o "entendimento" da consulta (também vai por evento SSE 'spec' no streaming)
     hits: shown,
   };
 }

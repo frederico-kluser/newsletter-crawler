@@ -68,6 +68,13 @@ const STR = {
   aiFailed: (n) => `${n} não analisado${n === 1 ? '' : 's'}`,
   relationDirect: 'Direta',
   relationSimilar: 'Similar',
+  strictToggle: 'Estrito',
+  strictHint: 'Mostra só o que é resposta central; desligue para incluir os adjacentes (similares).',
+  concLabel: 'Paralelismo',
+  concHint: 'Buscas simultâneas contra a IA. Mais = mais rápido; o servidor reduz sozinho se a API limitar (429).',
+  specLabel: 'Entendi sua busca como',
+  specNiceLabel: 'desejável',
+  specHiddenHint: (n) => `+${n} adjacente${n === 1 ? '' : 's'} oculto${n === 1 ? '' : 's'} · desligue “Estrito”`,
   segReleases: 'Releases',
   confirmTitle: 'Confirmar busca com IA',
   confirmBody: (n, usd) => `O escopo atual tem ${n} artigo(s) — custo estimado ~US$ ${usd}. Rodar a busca?`,
@@ -143,13 +150,14 @@ async function postJSON(url, body) {
 // Consome a busca SSE (GET /api/search/stream) via fetch: dá p/ ler status de erro (428/409/NO_KEY)
 // E é abortável (Cancelar) — ao contrário do EventSource. Chama onHit/onProgress AO VIVO e resolve
 // com o payload do evento `done`. Parse manual dos frames "event:/data:" separados por linha vazia.
-async function streamSearch({ query, deep, sources, from, to, signal, onHit, onProgress }) {
+async function streamSearch({ query, deep, sources, from, to, concurrency, signal, onHit, onProgress, onSpec }) {
   const sp = new URLSearchParams();
   sp.set('q', query);
   if (deep) sp.set('deep', '1');
   if (sources && sources.length) sp.set('sources', JSON.stringify(sources));
   if (from) sp.set('from', from);
   if (to) sp.set('to', to);
+  if (concurrency) sp.set('concurrency', String(concurrency));
   sp.set('confirm', '1'); // o preflight/diálogo já confirmou antes de abrir o stream
   const r = await fetch(`/api/search/stream?${sp}`, { signal });
   if (!r.ok || !r.body) {
@@ -187,6 +195,7 @@ async function streamSearch({ query, deep, sources, from, to, signal, onHit, onP
       }
       if (event === 'hit') onHit?.(payload);
       else if (event === 'progress') onProgress?.(payload);
+      else if (event === 'spec') onSpec?.(payload);
       else if (event === 'done') done = payload;
       else if (event === 'error') throw new Error(payload.error || 'a busca falhou');
     }
@@ -605,6 +614,9 @@ function App() {
   const [aiProgress, setAiProgress] = useState(null); // {scanned,total,relevant,failed,spentUsd,mode}
   const [streamItems, setStreamItems] = useState([]); // hits que já chegaram (streaming ao vivo)
   const [confirmInfo, setConfirmInfo] = useState(null); // {count, usd, opts} vindos do preflight
+  const [aiSpec, setAiSpec] = useState(null); // "entendimento" da consulta (must_have + EN) p/ o banner
+  const [strict, setStrict] = useState(true); // ESTRITO (só 'direct') vs AMPLO (direct+similar) — re-filtra sem repagar
+  const [concurrency, setConcurrency] = useState(8); // paralelismo escolhido (slider); teto vem do meta; AIMD por baixo
   const [hasKey, setHasKey] = useState(null); // null = ainda não checado
   const [keyOpen, setKeyOpen] = useState(false);
 
@@ -649,6 +661,13 @@ function App() {
       .catch((e) => setMetaError(e.message));
   }, []);
   useEffect(loadMeta, [loadMeta]);
+  // Alinha o slider ao default do servidor quando o meta chega (uma vez; não pisa numa mudança do usuário).
+  const concInitRef = useRef(false);
+  useEffect(() => {
+    if (concInitRef.current || !meta?.search?.concurrency) return;
+    concInitRef.current = true;
+    setConcurrency(meta.search.concurrency.default || 8);
+  }, [meta]);
 
   // A key do LLM existe? (o modal só abre quando o usuário tenta BUSCAR sem key)
   useEffect(() => {
@@ -762,6 +781,7 @@ function App() {
       setConfirmInfo(null);
       setAi(null); // sai do modo resultados (inclusive congelado) — o grid mostra o streaming
       setStreamItems([]);
+      setAiSpec(null); // o "entendimento" chega pelo evento SSE 'spec' logo no início
       setAiProgress({ scanned: 0, total: 0, relevant: 0, failed: 0, spentUsd: 0, mode: isDeep ? 'deep' : 'soft' });
       aiStartRef.current = Date.now();
       setAiLoading(true);
@@ -774,12 +794,14 @@ function App() {
         sources: sources.length ? sources : null,
         from: fromV || null,
         to: toV || null,
+        concurrency,
         signal: ac.signal,
         onHit: (item) => {
           collected.push(item);
           setStreamItems((cur) => [...cur, item]); // card AO VIVO
         },
         onProgress: (p) => setAiProgress((cur) => ({ ...(cur || {}), ...p, mode: isDeep ? 'deep' : 'soft' })),
+        onSpec: (s) => setAiSpec(s),
       });
       collected.sort((a, b) => (a.relation === 'direct' ? 0 : 1) - (b.relation === 'direct' ? 0 : 1) || b.id - a.id); // direct 1º
       setAi({ ...done, items: collected });
@@ -918,10 +940,19 @@ function App() {
     clearAi();
   };
 
-  // Itens do modo IA filtrados pelo Segmented (paridade com os buckets do CLI: kind do JUIZ).
-  const aiItems = ai
-    ? ai.items.filter((it) => kind === 'all' || (it.judge_kind || it.kind) === kind)
-    : [];
+  // Itens do modo IA filtrados pelo Segmented (kind do JUIZ) E pelo modo ESTRITO (só 'direct').
+  // ESTRITO/AMPLO re-filtra o MESMO scan (zero LLM): estrito = resposta central; amplo inclui similares.
+  const passKind = (it) => kind === 'all' || (it.judge_kind || it.kind) === kind;
+  const passStrict = (it) => !strict || it.relation === 'direct';
+  const aiItems = ai ? ai.items.filter((it) => passKind(it) && passStrict(it)) : [];
+  const streamShown = aiLoading ? streamItems.filter((it) => passKind(it) && passStrict(it)) : [];
+  // adjacentes (similar) que o modo estrito está ocultando (p/ o hint do banner)
+  const hiddenSimilar = strict
+    ? (ai ? ai.items : streamItems).filter((it) => passKind(it) && it.relation !== 'direct').length
+    : 0;
+  // "entendimento" a exibir: nos resultados vem de ai.spec (inclui histórico congelado); no
+  // streaming vem do evento SSE 'spec' (aiSpec) que chega antes dos hits.
+  const shownSpec = (ai && ai.spec) || (aiLoading && aiSpec) || null;
   // loader: % e ETA nível-artigo (ETA = elapsed/scanned · restantes; recalcula a cada progress tick)
   const aiPct = aiProgress && aiProgress.total > 0 ? Math.round(Math.min(1, aiProgress.scanned / aiProgress.total) * 100) : 0;
   const aiEtaSecs =
@@ -1007,6 +1038,21 @@ function App() {
           <label className="deep-toggle">
             <input type="checkbox" checked=${deep} onChange=${(e) => setDeep(e.target.checked)} />
             ${STR.searchDeep}
+          </label>
+          <label className="deep-toggle" title=${STR.strictHint}>
+            <input type="checkbox" checked=${strict} onChange=${(e) => setStrict(e.target.checked)} />
+            ${STR.strictToggle}
+          </label>
+          <label className="conc-slider" title=${STR.concHint}>
+            <span className="muted">${STR.concLabel}: <strong>${concurrency}</strong></span>
+            <input
+              type="range"
+              min="1"
+              max=${meta?.search?.concurrency?.ceiling ?? 24}
+              value=${concurrency}
+              onChange=${(e) => setConcurrency(Number(e.target.value))}
+              disabled=${aiLoading}
+            />
           </label>
           <span className="muted">${deep ? STR.searchDeepHint : STR.searchHint}</span>
         </div>
@@ -1121,6 +1167,16 @@ function App() {
           : null}
       </section>
 
+      ${shownSpec && (shownSpec.must_have?.length || shownSpec.query_en) &&
+      html`<div className="spec-banner" aria-live="polite">
+        <span className="spec-label">${STR.specLabel}:</span>
+        ${(shownSpec.must_have || []).map(
+          (m, i) => html`<span key=${i} className="spec-chip">${m}</span>`,
+        )}
+        ${shownSpec.query_en ? html`<span className="spec-en muted">EN: ${shownSpec.query_en}</span>` : null}
+        ${hiddenSimilar > 0 ? html`<span className="spec-hidden muted"> · ${STR.specHiddenHint(hiddenSimilar)}</span>` : null}
+      </div>`}
+
       ${aiLoading &&
       html`<div className="ai-progress" role="status" aria-live="polite">
         <div className="ai-progress-bar-row">
@@ -1216,7 +1272,7 @@ function App() {
         : null}
 
       <div className="grid">
-        ${(ai ? aiItems : aiLoading ? streamItems : items).map(
+        ${(ai ? aiItems : aiLoading ? streamShown : items).map(
           (a) => html`<${ArticleCard} key=${a.id} a=${a} onOpen=${setDetailId} />`,
         )}
       </div>

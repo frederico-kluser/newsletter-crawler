@@ -1197,3 +1197,36 @@
   display: flex;
   justify-content: flex-end;
 }
+
+/* busca precisão-primeiro: banner do "entendimento" da consulta (spec) + toggle estrito */
+.spec-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0 4px;
+  padding: 10px 14px;
+  background: var(--card-bg);
+  border: 1px solid var(--border, var(--accent-soft));
+  border-radius: var(--radius-m);
+  font-size: 13px;
+}
+.spec-banner .spec-label { font-weight: 600; opacity: 0.72; }
+.spec-banner .spec-chip {
+  padding: 2px 10px;
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  color: var(--accent-strong, var(--accent));
+  background: var(--accent-soft);
+}
+.spec-banner .spec-en { font-style: italic; opacity: 0.72; }
+.spec-banner .spec-hidden { opacity: 0.72; }
+.strict-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.strict-toggle input { accent-color: var(--accent); }

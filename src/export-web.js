@@ -11,6 +11,7 @@ import {
   MODELS, SEARCH_BATCH_SIZE, SEARCH_MAX_CHARS, SEARCH_WEB_MAX_ITEMS,
   SEARCH_MODE_A_CONFIRM, SEARCH_SOFT_CONFIRM, stageModel,
   SEARCH_WEB_SOFT_CONCURRENCY, SEARCH_WEB_DEEP_CONCURRENCY,
+  SEARCH_UI_CONCURRENCY_DEFAULT, SEARCH_UI_CONCURRENCY_CEILING,
 } from './config.js';
 import { getFacets, TOOL_CONTENT_TYPES } from './taxonomy.js';
 import { log } from './util.js';
@@ -49,7 +50,7 @@ export function buildWebSnapshot() {
   }
   const dates = stmts.webMetaDates.get();
   const usage = stmts.sumUsageTotal.get();
-  const hints = { searchBatch: costHint('searchBatch'), searchRelevance: costHint('searchRelevance') };
+  const hints = { searchBatch: costHint('searchBatch'), searchRelevance: costHint('searchRelevance'), searchSpec: costHint('searchSpec') };
   const costHints = Object.fromEntries(Object.entries(hints).filter(([, v]) => v != null));
 
   const meta = {
@@ -74,9 +75,11 @@ export function buildWebSnapshot() {
       models: {
         searchBatch: stageModel('searchBatch'),
         searchRelevance: stageModel('searchRelevance'),
+        searchSpec: stageModel('searchSpec'), // entendimento da consulta (busca precisão-primeiro)
         fallback: { model: MODELS.pro },
       },
       concurrency: { soft: SEARCH_WEB_SOFT_CONCURRENCY, deep: SEARCH_WEB_DEEP_CONCURRENCY },
+      uiConcurrency: { default: SEARCH_UI_CONCURRENCY_DEFAULT, ceiling: SEARCH_UI_CONCURRENCY_CEILING },
       costHints,
     },
   };

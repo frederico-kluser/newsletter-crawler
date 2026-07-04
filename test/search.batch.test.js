@@ -10,7 +10,7 @@ const NC_HOME_TMP = mkdtempSync(path.join(tmpdir(), 'nc-batch-test-'));
 process.env.NC_HOME = NC_HOME_TMP; // search.js importa db.js — o schema nasce num tmp
 process.on('exit', () => rmSync(NC_HOME_TMP, { recursive: true, force: true }));
 
-const { chunkBatches, mergeBatchVerdicts } = await import('../src/search.js');
+const { chunkBatches, mergeBatchVerdicts, prioritizeBySpec } = await import('../src/search.js');
 const { relevanceBatchZ } = await import('../src/llm.js');
 
 test('chunkBatches: divide preservando a ordem, resto no último lote', () => {
@@ -60,4 +60,29 @@ test('relevanceBatchZ: clampa relation/kind desconhecidos e coage id string', ()
   });
   assert.deepEqual(parsed.results[0], { id: 12, relation: 'direct', kind: 'tool' });
   assert.deepEqual(parsed.results[1], { id: 13, relation: 'none', kind: 'news' });
+});
+
+// ---- prioritizeBySpec (F4): ordena prováveis-hits primeiro pelos termos EN do spec ----
+test('prioritizeBySpec: mais overlap de termos vem primeiro (varre tudo, só reordena)', () => {
+  const spec = { terms: ['postgres', 'partitioning', 'database'], query_en: 'postgres partitioning' };
+  const rows = [
+    { id: 1, title: 'A CSS grid trick', summary_pt: 'sobre layout css' },
+    { id: 2, title: 'pg_partman for Postgres partitioning', summary_pt: 'database partitioning extension' },
+    { id: 3, title: 'Postgres arrays', summary_pt: 'database cost' },
+  ];
+  assert.deepEqual(prioritizeBySpec(rows, spec).map((r) => r.id), [2, 3, 1]);
+  assert.equal(prioritizeBySpec(rows, spec).length, rows.length); // não descarta nada
+});
+
+test('prioritizeBySpec: sem spec/termos = no-op (ordem original preservada)', () => {
+  const rows = [{ id: 5, title: 'x' }, { id: 4, title: 'y' }];
+  assert.deepEqual(prioritizeBySpec(rows, null).map((r) => r.id), [5, 4]);
+  assert.deepEqual(prioritizeBySpec(rows, { terms: [] }).map((r) => r.id), [5, 4]);
+  assert.deepEqual(prioritizeBySpec(rows, { terms: ['react'] }).map((r) => r.id), [5, 4]); // 1 termo = sinal fraco
+});
+
+test('prioritizeBySpec: empate de score mantém a ordem original (estável)', () => {
+  const spec = { terms: ['react', 'component'] };
+  const rows = [{ id: 9, title: 'react component' }, { id: 8, title: 'react component' }];
+  assert.deepEqual(prioritizeBySpec(rows, spec).map((r) => r.id), [9, 8]);
 });

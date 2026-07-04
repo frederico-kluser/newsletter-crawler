@@ -59,6 +59,7 @@ export default function App() {
   const { meta, articles, byId, error, loading, retry } = useSnapshot();
   const [filters, dispatch] = useReducer(filtersReducer, { ...EMPTY_FILTERS });
   const [detailId, setDetailId] = useState(null);
+  const [strict, setStrict] = useState(true); // busca precisão-primeiro: só 'direct' por default
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [textInput, setTextInput] = useState('');
@@ -119,10 +120,18 @@ export default function App() {
       .map((h) => ({ article: byId.get(h.id), relation: h.relation, judgeKind: h.kind }))
       .filter((x) => x.article);
   }, [aiHits, byId]);
+  // ESTRITO (default): só 'direct' (resposta central); AMPLO: inclui 'similar'. Re-filtra o MESMO
+  // scan (zero LLM) — casa com o eval do repo (precisão estrita bem maior com o spec).
   const aiShown = useMemo(() => {
     if (!aiItems) return null;
-    return filters.kind === 'all' ? aiItems : aiItems.filter((x) => x.judgeKind === filters.kind);
-  }, [aiItems, filters.kind]);
+    return aiItems.filter(
+      (x) => (filters.kind === 'all' || x.judgeKind === filters.kind) && (!strict || x.relation === 'direct'),
+    );
+  }, [aiItems, filters.kind, strict]);
+  const hiddenSimilar = useMemo(() => {
+    if (!aiItems || !strict) return 0;
+    return aiItems.filter((x) => (filters.kind === 'all' || x.judgeKind === filters.kind) && x.relation !== 'direct').length;
+  }, [aiItems, filters.kind, strict]);
   const relationById = useMemo(() => {
     if (!aiShown) return null;
     return new Map(aiShown.map((x) => [x.article.id, x.relation]));
@@ -210,7 +219,28 @@ export default function App() {
                   {displayItems.length === 1 ? 'artigo' : 'artigos'}
                 </span>
               )}
+              {(aiActive || aiRunning) && (
+                <label className="strict-toggle" title="Mostra só o que é resposta central; desligue p/ incluir os adjacentes (similares).">
+                  <input type="checkbox" checked={strict} onChange={(e) => setStrict(e.target.checked)} />
+                  Estrito
+                </label>
+              )}
             </div>
+
+            {ai.spec && (ai.spec.must_have?.length || ai.spec.query_en) && (
+              <div className="spec-banner" aria-live="polite">
+                <span className="spec-label">Entendi sua busca como:</span>
+                {(ai.spec.must_have || []).map((m, i) => (
+                  <span key={i} className="spec-chip">{m}</span>
+                ))}
+                {ai.spec.query_en && <span className="spec-en">EN: {ai.spec.query_en}</span>}
+                {hiddenSimilar > 0 && (
+                  <span className="spec-hidden">
+                    +{hiddenSimilar} adjacente{hiddenSimilar === 1 ? '' : 's'} oculto{hiddenSimilar === 1 ? '' : 's'} · desligue “Estrito”
+                  </span>
+                )}
+              </div>
+            )}
 
             {ai.phase === 'running' && (
               <AiProgress progress={ai.progress} deep={ai.deep} startedAt={ai.startedAt} onCancel={ai.cancel} />

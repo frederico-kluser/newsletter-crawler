@@ -3,6 +3,7 @@
 // um campo de justificativa (evidence) via schema próprio (é descartado no pick).
 // v0 = baseline EXATO do src/llm.js (para medir ganho real das melhorias).
 import { SEARCH_MAX_CHARS } from '../src/config.js';
+import { buildBatchJudgePrompt, relevanceBatchSchema } from '../src/llm.js';
 
 const clampContent = (c) => String(c || '').slice(0, SEARCH_MAX_CHARS);
 
@@ -161,3 +162,29 @@ export const PROMPTS = [
 ];
 
 export const PROMPT_IDS = PROMPTS.map((p) => p.id);
+
+// ===================== variantes de LOTE (busca soft: N itens por chamada) =====================
+// O eval de lote mede o modo REAL da web (title≤200 + summary≤400 por item, N por chamada), que o
+// eval unitário (1 artigo, content≤8000) NUNCA cobriu. Os builders reusam a FONTE ÚNICA de prompt
+// de produção (`buildBatchJudgePrompt` de src/llm.js) — assim o eval mede EXATAMENTE o prompt que
+// roda em produção (sem drift/eval-lock quebrado). Cada builder recebe {query, spec, items}.
+export const BATCH_PROMPTS = [
+  // baseline: prompt de produção SEM spec (query crua, rubrica v2_fewshot eval-locked).
+  {
+    id: 'vb_current',
+    label: 'lote — produção atual (query crua)',
+    schema: relevanceBatchSchema,
+    needsSpec: false,
+    build: ({ query, items }) => buildBatchJudgePrompt({ query, items, spec: null }),
+  },
+  // spec-informado: MESMO builder de produção, com o spec (must-have + EN). "direct" exige TODOS os
+  // obrigatórios (default-reject). Isola o efeito do spec (tudo o mais idêntico ao baseline).
+  {
+    id: 'vb_spec',
+    label: 'lote — spec-informado (must-have + EN)',
+    schema: relevanceBatchSchema,
+    needsSpec: true,
+    build: ({ query, spec, items }) => buildBatchJudgePrompt({ query, items, spec }),
+  },
+];
+export const BATCH_PROMPT_IDS = BATCH_PROMPTS.map((p) => p.id);

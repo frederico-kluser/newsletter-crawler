@@ -81,7 +81,7 @@ test('scope: contagem respeita fontes (json array) e período', async () => {
   const deep = await getJSON('/api/search/scope?deep=1');
   assert.equal(deep.body.threshold, 1, 'threshold da profunda vem de SEARCH_MODE_A_CONFIRM');
   assert.equal(deep.body.needsConfirm, true, '3 artigos > 1 exige confirmação');
-  assert.equal(deep.body.calls, 3, 'profunda: 1 chamada por artigo');
+  assert.equal(deep.body.calls, 4, 'profunda: 1 chamada por artigo (3) + 1 de entendimento da consulta (spec)');
   assert.ok(deep.body.estimatedUsd > 0, 'estimativa em US$ presente');
 });
 

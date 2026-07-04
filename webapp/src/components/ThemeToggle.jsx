@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'motion/react';
-import { STR } from '../strings.js';
+import { useStrings } from '../i18n.jsx';
 import { springs } from '../motion/transitions.js';
 
 const Sun = () => (
@@ -16,6 +16,7 @@ const Moon = () => (
 
 /** Alterna claro/escuro com troca animada do ícone (rotate+fade). */
 export default function ThemeToggle({ theme, onToggle }) {
+  const STR = useStrings();
   const dark = theme === 'dark';
   return (
     <motion.button

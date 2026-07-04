@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { STR } from '../strings.js';
+import { useStrings } from '../i18n.jsx';
 
 const SearchIcon = () => (
   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
@@ -19,6 +19,7 @@ const SparkIcon = () => (
  * bloqueia o filtro por texto já aplicado. O cadeado no botão sinaliza "requer chave".
  */
 export default function SearchBar({ text, onTextChange, onAiSearch, aiBusy, hasKey }) {
+  const STR = useStrings();
   const [deep, setDeep] = useState(false);
   return (
     <form

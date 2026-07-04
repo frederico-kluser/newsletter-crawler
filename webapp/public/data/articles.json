@@ -84974,7 +84974,28 @@
   "section": "tools",
   "verify_status": "ok",
   "verify_notes": null,
-  "tags": {}
+  "tags": {
+   "concept-theme": [
+    "state-management",
+    "caching"
+   ],
+   "content-type": [
+    "library-release"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "frontend"
+   ],
+   "ecosystem-language": [
+    "javascript"
+   ],
+   "topic-technology": [
+    "state-management",
+    "web-apis"
+   ]
+  }
  },
  {
   "id": 2166,
@@ -84989,7 +85010,31 @@
   "section": "tools",
   "verify_status": "ok",
   "verify_notes": null,
-  "tags": {}
+  "tags": {
+   "concept-theme": [
+    "performance",
+    "optimization"
+   ],
+   "content-type": [
+    "library-release"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "frontend"
+   ],
+   "ecosystem-language": [
+    "wasm",
+    "javascript",
+    "typescript"
+   ],
+   "topic-technology": [
+    "image-optimization",
+    "webassembly",
+    "web-apis"
+   ]
+  }
  },
  {
   "id": 2167,
@@ -85004,7 +85049,27 @@
   "section": "IN BRIEF",
   "verify_status": "suspect",
   "verify_notes": "Título 'Svelte' é muito genérico e não reflete o conteúdo específico do post; Conteúdo parece ser apenas a blurb do agregador, não o texto completo da newsletter",
-  "tags": {}
+  "tags": {
+   "concept-theme": [
+    "ui"
+   ],
+   "content-type": [
+    "newsletter-roundup"
+   ],
+   "domain": [
+    "frontend"
+   ],
+   "ecosystem-language": [
+    "javascript"
+   ],
+   "framework-library-tool": [
+    "svelte"
+   ],
+   "topic-technology": [
+    "web-development",
+    "bundling"
+   ]
+  }
  },
  {
   "id": 2168,
@@ -85019,7 +85084,25 @@
   "section": "IN BRIEF",
   "verify_status": "suspect",
   "verify_notes": "Conteúdo é apenas o blurb, não o artigo completo.; Título muito genérico ('Astro') não condiz com o URL que indica um artigo específico.",
-  "tags": {}
+  "tags": {
+   "content-type": [
+    "newsletter-roundup"
+   ],
+   "difficulty": [
+    "all-levels"
+   ],
+   "domain": [
+    "frontend"
+   ],
+   "framework-library-tool": [
+    "astro"
+   ],
+   "topic-technology": [
+    "islands-architecture",
+    "ssg",
+    "ssr"
+   ]
+  }
  },
  {
   "id": 2169,
@@ -85034,7 +85117,25 @@
   "section": "IN BRIEF",
   "verify_status": "suspect",
   "verify_notes": "Conteúdo muito curto para uma notícia; Título parece fragmentado (começa com letra minúscula)",
-  "tags": {}
+  "tags": {
+   "concept-theme": [
+    "security"
+   ],
+   "content-type": [
+    "explainer",
+    "security-advisory"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "ecosystem-language": [
+    "typescript",
+    "javascript"
+   ],
+   "framework-library-tool": [
+    "angular"
+   ]
+  }
  },
  {
   "id": 2170,
@@ -85049,7 +85150,27 @@
   "section": "RELEASES",
   "verify_status": "suspect",
   "verify_notes": "Conteúdo muito raso; apenas o título foi capturado, sem detalhes do release.",
-  "tags": {}
+  "tags": {
+   "company-vendor-model": [
+    "google"
+   ],
+   "content-type": [
+    "version-release",
+    "news"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "frontend"
+   ],
+   "ecosystem-language": [
+    "typescript"
+   ],
+   "framework-library-tool": [
+    "angular"
+   ]
+  }
  },
  {
   "id": 2171,
@@ -85064,7 +85185,30 @@
   "section": "RELEASES",
   "verify_status": "ok",
   "verify_notes": null,
-  "tags": {}
+  "tags": {
+   "concept-theme": [
+    "ui",
+    "architecture",
+    "performance",
+    "dx"
+   ],
+   "content-type": [
+    "version-release"
+   ],
+   "domain": [
+    "frontend"
+   ],
+   "ecosystem-language": [
+    "javascript"
+   ],
+   "framework-library-tool": [
+    "react",
+    "nextjs"
+   ],
+   "topic-technology": [
+    "component-libraries"
+   ]
+  }
  },
  {
   "id": 2172,
@@ -85079,7 +85223,31 @@
   "section": "Articles and Videos",
   "verify_status": "ok",
   "verify_notes": null,
-  "tags": {}
+  "tags": {
+   "concept-theme": [
+    "encryption",
+    "security"
+   ],
+   "content-type": [
+    "explainer"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "frontend"
+   ],
+   "ecosystem-language": [
+    "javascript"
+   ],
+   "topic-technology": [
+    "web-standards",
+    "encryption"
+   ],
+   "trending-emerging": [
+    "ai-governance"
+   ]
+  }
  },
  {
   "id": 2173,
@@ -85094,7 +85262,35 @@
   "section": "Code & Tools",
   "verify_status": "suspect",
   "verify_notes": "Conteúdo muito raso para uma página de release; apenas uma linha descritiva",
-  "tags": {}
+  "tags": {
+   "concept-theme": [
+    "performance",
+    "open-source"
+   ],
+   "content-type": [
+    "tooling",
+    "library-release"
+   ],
+   "difficulty": [
+    "all-levels"
+   ],
+   "domain": [
+    "frontend",
+    "nodejs"
+   ],
+   "ecosystem-language": [
+    "javascript"
+   ],
+   "framework-library-tool": [
+    "nodejs"
+   ],
+   "topic-technology": [
+    "canvas",
+    "web-apis",
+    "web-development",
+    "browser-compatibility"
+   ]
+  }
  },
  {
   "id": 2174,
@@ -85109,7 +85305,26 @@
   "section": "Code & Tools",
   "verify_status": "suspect",
   "verify_notes": "Conteúdo muito raso para o título de release",
-  "tags": {}
+  "tags": {
+   "content-type": [
+    "version-release"
+   ],
+   "domain": [
+    "reactjs",
+    "frontend"
+   ],
+   "ecosystem-language": [
+    "markdown"
+   ],
+   "topic-technology": [
+    "react-hooks",
+    "usestate",
+    "useeffect",
+    "usecontext",
+    "custom-hooks",
+    "component-composition"
+   ]
+  }
  },
  {
   "id": 2175,
@@ -85124,7 +85339,20 @@
   "section": "Code & Tools",
   "verify_status": "suspect",
   "verify_notes": "Conteúdo muito raso: apenas repetição do título e blurb, sem detalhes da release; Possível captura incompleta do conteúdo real da página de release",
-  "tags": {}
+  "tags": {
+   "content-type": [
+    "version-release"
+   ],
+   "domain": [
+    "nodejs"
+   ],
+   "ecosystem-language": [
+    "javascript"
+   ],
+   "topic-technology": [
+    "cli-tools"
+   ]
+  }
  },
  {
   "id": 2176,
@@ -85139,7 +85367,35 @@
   "section": "Elsewhere in the ecosystem",
   "verify_status": "ok",
   "verify_notes": null,
-  "tags": {}
+  "tags": {
+   "concept-theme": [
+    "developer-productivity",
+    "performance",
+    "ui"
+   ],
+   "content-type": [
+    "release-announcement",
+    "news"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "nodejs",
+    "frontend",
+    "backend"
+   ],
+   "ecosystem-language": [
+    "javascript"
+   ],
+   "framework-library-tool": [
+    "npm"
+   ],
+   "topic-technology": [
+    "package-management",
+    "web-development"
+   ]
+  }
  },
  {
   "id": 2177,
@@ -85154,7 +85410,29 @@
   "section": "Elsewhere in the ecosystem",
   "verify_status": "ok",
   "verify_notes": null,
-  "tags": {}
+  "tags": {
+   "concept-theme": [
+    "open-source"
+   ],
+   "content-type": [
+    "tool-release"
+   ],
+   "difficulty": [
+    "for-students"
+   ],
+   "domain": [
+    "frontend",
+    "backend",
+    "python"
+   ],
+   "ecosystem-language": [
+    "typescript"
+   ],
+   "framework-library-tool": [
+    "nodejs",
+    "express"
+   ]
+  }
  },
  {
   "id": 2178,
@@ -85169,7 +85447,23 @@
   "section": "IN BRIEF",
   "verify_status": "suspect",
   "verify_notes": "título e blurb não correspondem ao conteúdo, que é uma agenda técnica do TC39, não uma notícia sobre o início da reunião; conteúdo capturado é apenas um rascunho de agenda (lista de tópicos), não um artigo jornalístico ou post; kind 'news' é inadequado para uma página de agenda de reunião",
-  "tags": {}
+  "tags": {
+   "content-type": [
+    "news"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "frontend"
+   ],
+   "ecosystem-language": [
+    "javascript"
+   ],
+   "topic-technology": [
+    "web-standards"
+   ]
+  }
  },
  {
   "id": 2179,
@@ -85184,7 +85478,19 @@
   "section": "IN BRIEF",
   "verify_status": "suspect",
   "verify_notes": "Conteúdo raso demais para o título",
-  "tags": {}
+  "tags": {
+   "content-type": [
+    "talk",
+    "conference-talk"
+   ],
+   "domain": [
+    "reactjs",
+    "frontend"
+   ],
+   "ecosystem-language": [
+    "javascript"
+   ]
+  }
  },
  {
   "id": 2180,
@@ -85199,7 +85505,21 @@
   "section": "RELEASES",
   "verify_status": "ok",
   "verify_notes": null,
-  "tags": {}
+  "tags": {
+   "content-type": [
+    "version-release",
+    "library-release"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "frontend"
+   ],
+   "ecosystem-language": [
+    "javascript"
+   ]
+  }
  },
  {
   "id": 2181,
@@ -85214,7 +85534,26 @@
   "section": "RELEASES",
   "verify_status": "suspect",
   "verify_notes": "Conteúdo muito raso, apenas o título capturado",
-  "tags": {}
+  "tags": {
+   "content-type": [
+    "version-release"
+   ],
+   "difficulty": [
+    "all-levels"
+   ],
+   "domain": [
+    "frontend"
+   ],
+   "ecosystem-language": [
+    "javascript"
+   ],
+   "framework-library-tool": [
+    "nodejs"
+   ],
+   "topic-technology": [
+    "react-native"
+   ]
+  }
  },
  {
   "id": 2182,
@@ -85229,7 +85568,36 @@
   "section": "RELEASES",
   "verify_status": "suspect",
   "verify_notes": "Conteúdo muito raso; apenas o título foi capturado, sem as notas de release.",
-  "tags": {}
+  "tags": {
+   "concept-theme": [
+    "performance",
+    "optimization",
+    "devops"
+   ],
+   "content-type": [
+    "version-release",
+    "release-announcement"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "nodejs",
+    "frontend",
+    "backend"
+   ],
+   "ecosystem-language": [
+    "javascript"
+   ],
+   "framework-library-tool": [
+    "pnpm"
+   ],
+   "topic-technology": [
+    "package-management",
+    "npm-scripts",
+    "monorepos"
+   ]
+  }
  },
  {
   "id": 2183,
@@ -85244,7 +85612,30 @@
   "section": "RELEASES",
   "verify_status": "suspect",
   "verify_notes": "Conteúdo muito raso: apenas o título repetido, sem detalhes da release",
-  "tags": {}
+  "tags": {
+   "concept-theme": [
+    "testing",
+    "unit-testing"
+   ],
+   "content-type": [
+    "tool-release",
+    "version-release"
+   ],
+   "domain": [
+    "frontend"
+   ],
+   "ecosystem-language": [
+    "javascript"
+   ],
+   "framework-library-tool": [
+    "jest"
+   ],
+   "topic-technology": [
+    "testing-react",
+    "testing-python",
+    "unit-testing"
+   ]
+  }
  },
  {
   "id": 2184,
@@ -85259,7 +85650,30 @@
   "section": "Articles and Videos",
   "verify_status": "ok",
   "verify_notes": null,
-  "tags": {}
+  "tags": {
+   "concept-theme": [
+    "security",
+    "data-privacy",
+    "authorization"
+   ],
+   "content-type": [
+    "incident-report"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "frontend",
+    "ai-general"
+   ],
+   "ecosystem-language": [
+    "javascript"
+   ],
+   "topic-technology": [
+    "npm-security",
+    "supply-chain-security"
+   ]
+  }
  },
  {
   "id": 2185,
@@ -85274,7 +85688,24 @@
   "section": "Code & Tools",
   "verify_status": "suspect",
   "verify_notes": "Conteúdo muito raso para o título; Kind parece incorreto (release, mas URL é página principal do repositório)",
-  "tags": {}
+  "tags": {
+   "concept-theme": [
+    "optimization"
+   ],
+   "content-type": [
+    "library-release"
+   ],
+   "domain": [
+    "frontend",
+    "nodejs"
+   ],
+   "ecosystem-language": [
+    "javascript"
+   ],
+   "framework-library-tool": [
+    "nodejs"
+   ]
+  }
  },
  {
   "id": 2186,
@@ -85289,7 +85720,29 @@
   "section": "Code & Tools",
   "verify_status": "ok",
   "verify_notes": null,
-  "tags": {}
+  "tags": {
+   "concept-theme": [
+    "a11y"
+   ],
+   "content-type": [
+    "library-release"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "frontend"
+   ],
+   "ecosystem-language": [
+    "javascript"
+   ],
+   "topic-technology": [
+    "web-development",
+    "html",
+    "web-performance",
+    "tree-shaking"
+   ]
+  }
  },
  {
   "id": 2187,
@@ -85304,7 +85757,30 @@
   "section": "Code & Tools",
   "verify_status": "suspect",
   "verify_notes": "kind parece errado (URL é da página do repositório, não de um release específico); conteúdo muito raso, apenas um blurb",
-  "tags": {}
+  "tags": {
+   "content-type": [
+    "release-announcement",
+    "library-release"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "nodejs",
+    "backend"
+   ],
+   "ecosystem-language": [
+    "javascript"
+   ],
+   "framework-library-tool": [
+    "nodejs",
+    "socket-io"
+   ],
+   "topic-technology": [
+    "event-driven-architecture",
+    "async-await"
+   ]
+  }
  },
  {
   "id": 2188,
@@ -85319,7 +85795,20 @@
   "section": "Code & Tools",
   "verify_status": "ok",
   "verify_notes": null,
-  "tags": {}
+  "tags": {
+   "content-type": [
+    "library-release"
+   ],
+   "domain": [
+    "frontend"
+   ],
+   "framework-library-tool": [
+    "svelte"
+   ],
+   "topic-technology": [
+    "component-libraries"
+   ]
+  }
  },
  {
   "id": 2189,
@@ -85334,7 +85823,28 @@
   "section": "Code & Tools",
   "verify_status": "suspect",
   "verify_notes": "Conteúdo muito raso, apenas repete título e blurb.",
-  "tags": {}
+  "tags": {
+   "concept-theme": [
+    "ui",
+    "ux",
+    "accessibility"
+   ],
+   "content-type": [
+    "library-release"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "frontend"
+   ],
+   "ecosystem-language": [
+    "javascript"
+   ],
+   "topic-technology": [
+    "web-components"
+   ]
+  }
  },
  {
   "id": 2190,
@@ -85349,7 +85859,27 @@
   "section": "Code & Tools",
   "verify_status": "ok",
   "verify_notes": null,
-  "tags": {}
+  "tags": {
+   "content-type": [
+    "version-release",
+    "library-release"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "frontend"
+   ],
+   "ecosystem-language": [
+    "javascript"
+   ],
+   "topic-technology": [
+    "webgl",
+    "canvas",
+    "html",
+    "web-apis"
+   ]
+  }
  },
  {
   "id": 2191,
@@ -85364,7 +85894,30 @@
   "section": "Code & Tools",
   "verify_status": "ok",
   "verify_notes": null,
-  "tags": {}
+  "tags": {
+   "content-type": [
+    "library-release"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "nodejs",
+    "frontend",
+    "backend"
+   ],
+   "ecosystem-language": [
+    "json",
+    "javascript"
+   ],
+   "framework-library-tool": [
+    "nodejs"
+   ],
+   "topic-technology": [
+    "serialization",
+    "npm-scripts"
+   ]
+  }
  },
  {
   "id": 2192,
@@ -85379,7 +85932,27 @@
   "section": "Elsewhere in the ecosystem",
   "verify_status": "ok",
   "verify_notes": "Possível erro de data: URL usa ano 2026, que ainda não ocorreu",
-  "tags": {}
+  "tags": {
+   "content-type": [
+    "tutorial",
+    "how-to"
+   ],
+   "difficulty": [
+    "beginner"
+   ],
+   "domain": [
+    "frontend"
+   ],
+   "ecosystem-language": [
+    "css",
+    "html"
+   ],
+   "topic-technology": [
+    "css",
+    "animations",
+    "html"
+   ]
+  }
  },
  {
   "id": 2193,
@@ -85394,7 +85967,27 @@
   "section": "Articles and Videos",
   "verify_status": "ok",
   "verify_notes": null,
-  "tags": {}
+  "tags": {
+   "content-type": [
+    "tutorial"
+   ],
+   "difficulty": [
+    "beginner"
+   ],
+   "domain": [
+    "frontend"
+   ],
+   "ecosystem-language": [
+    "javascript"
+   ],
+   "framework-library-tool": [
+    "vue"
+   ],
+   "topic-technology": [
+    "local-inference",
+    "distributed-systems"
+   ]
+  }
  },
  {
   "id": 2194,
@@ -85409,7 +86002,18 @@
   "section": "Articles and Videos",
   "verify_status": "ok",
   "verify_notes": null,
-  "tags": {}
+  "tags": {
+   "content-type": [
+    "how-to",
+    "tutorial"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "ecosystem-language": [
+    "javascript"
+   ]
+  }
  },
  {
   "id": 2195,
@@ -85424,7 +86028,33 @@
   "section": "Elsewhere in the ecosystem",
   "verify_status": "ok",
   "verify_notes": null,
-  "tags": {}
+  "tags": {
+   "concept-theme": [
+    "ui"
+   ],
+   "content-type": [
+    "how-to",
+    "tutorial"
+   ],
+   "difficulty": [
+    "all-levels"
+   ],
+   "domain": [
+    "frontend"
+   ],
+   "ecosystem-language": [
+    "css",
+    "html"
+   ],
+   "framework-library-tool": [
+    "css-modules"
+   ],
+   "topic-technology": [
+    "css",
+    "web-development",
+    "animations"
+   ]
+  }
  },
  {
   "id": 2196,
@@ -85439,7 +86069,38 @@
   "section": "IN BRIEF",
   "verify_status": "suspect",
   "verify_notes": "Conteúdo excessivamente curto para uma notícia, basicamente repete o título e o blurb.",
-  "tags": {}
+  "tags": {
+   "concept-theme": [
+    "state-management",
+    "ux",
+    "dev-experience",
+    "testing"
+   ],
+   "content-type": [
+    "survey-results"
+   ],
+   "difficulty": [
+    "all-levels"
+   ],
+   "domain": [
+    "reactjs",
+    "frontend"
+   ],
+   "ecosystem-language": [
+    "javascript"
+   ],
+   "framework-library-tool": [
+    "react"
+   ],
+   "topic-technology": [
+    "state-management",
+    "data-fetching",
+    "react-hooks",
+    "performance-optimization",
+    "react-18",
+    "react-19"
+   ]
+  }
  },
  {
   "id": 2197,
@@ -85454,7 +86115,36 @@
   "section": "RELEASES",
   "verify_status": "ok",
   "verify_notes": null,
-  "tags": {}
+  "tags": {
+   "content-type": [
+    "version-release",
+    "tool-release"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "frontend",
+    "reactjs",
+    "nodejs"
+   ],
+   "ecosystem-language": [
+    "javascript",
+    "css",
+    "graphql-lang"
+   ],
+   "framework-library-tool": [
+    "biome",
+    "eslint",
+    "prettier"
+   ],
+   "topic-technology": [
+    "html",
+    "css",
+    "graphql-api",
+    "accessibility"
+   ]
+  }
  },
  {
   "id": 2198,
@@ -85469,7 +86159,30 @@
   "section": "RELEASES",
   "verify_status": "suspect",
   "verify_notes": "O conteúdo é extremamente raso para o título 'sql.js v1.14.0', consistindo apenas da frase de descrição do projeto; espera-se uma nota de lançamento detalhada com changelog, features ou breaking changes.; O 'blurb do agregador' é idêntico ao conteúdo do recorte, indicando que o crawler capturou apenas o cabeçalho ou meta descrição, não o artigo real de release.",
-  "tags": {}
+  "tags": {
+   "content-type": [
+    "version-release"
+   ],
+   "difficulty": [
+    "for-students"
+   ],
+   "domain": [
+    "frontend",
+    "nodejs"
+   ],
+   "ecosystem-language": [
+    "javascript",
+    "sql"
+   ],
+   "framework-library-tool": [
+    "sqlite",
+    "nodejs"
+   ],
+   "topic-technology": [
+    "sql",
+    "webassembly"
+   ]
+  }
  },
  {
   "id": 2199,
@@ -85484,7 +86197,31 @@
   "section": "Articles and Videos",
   "verify_status": "ok",
   "verify_notes": null,
-  "tags": {}
+  "tags": {
+   "concept-theme": [
+    "ux",
+    "dev-experience",
+    "refactoring"
+   ],
+   "content-type": [
+    "walkthrough",
+    "tutorial"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "frontend"
+   ],
+   "ecosystem-language": [
+    "javascript"
+   ],
+   "topic-technology": [
+    "code-models",
+    "component-libraries",
+    "web-components"
+   ]
+  }
  },
  {
   "id": 2200,
@@ -85499,7 +86236,21 @@
   "section": "Code & Tools",
   "verify_status": "ok",
   "verify_notes": null,
-  "tags": {}
+  "tags": {
+   "concept-theme": [
+    "ux",
+    "architecture"
+   ],
+   "content-type": [
+    "library-release"
+   ],
+   "difficulty": [
+    "all-levels"
+   ],
+   "domain": [
+    "frontend"
+   ]
+  }
  },
  {
   "id": 2201,
@@ -85514,7 +86265,33 @@
   "section": "Code & Tools",
   "verify_status": "suspect",
   "verify_notes": "Conteúdo muito raso para o título (apenas a descrição do projeto); Kind parece incorreto: URL é a raiz do repositório, não uma release específica",
-  "tags": {}
+  "tags": {
+   "concept-theme": [
+    "performance",
+    "open-source"
+   ],
+   "content-type": [
+    "library-release",
+    "release-announcement"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "nodejs",
+    "ai-general"
+   ],
+   "ecosystem-language": [
+    "javascript",
+    "wasm"
+   ],
+   "framework-library-tool": [
+    "nodejs"
+   ],
+   "topic-technology": [
+    "webassembly"
+   ]
+  }
  },
  {
   "id": 2202,
@@ -85529,7 +86306,23 @@
   "section": "Code & Tools",
   "verify_status": "ok",
   "verify_notes": null,
-  "tags": {}
+  "tags": {
+   "content-type": [
+    "tool-release",
+    "release-announcement"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "frontend",
+    "nodejs",
+    "backend"
+   ],
+   "ecosystem-language": [
+    "javascript"
+   ]
+  }
  },
  {
   "id": 2203,
@@ -85544,7 +86337,34 @@
   "section": "Elsewhere in the ecosystem",
   "verify_status": "ok",
   "verify_notes": null,
-  "tags": {}
+  "tags": {
+   "content-type": [
+    "release-announcement",
+    "tool-release"
+   ],
+   "difficulty": [
+    "all-levels"
+   ],
+   "domain": [
+    "frontend"
+   ],
+   "ecosystem-language": [
+    "javascript"
+   ],
+   "framework-library-tool": [
+    "react",
+    "nextjs",
+    "three-js",
+    "shadcn-ui",
+    "tailwind",
+    "framer-motion"
+   ],
+   "topic-technology": [
+    "html",
+    "css",
+    "web-development"
+   ]
+  }
  },
  {
   "id": 2204,
@@ -85559,7 +86379,24 @@
   "section": "Elsewhere in the ecosystem",
   "verify_status": "junk",
   "verify_notes": "Conteúdo é uma repetição do título e blurb, sem texto real legível ou substancial; Página parece ser um stub de postagem sem conteúdo real",
-  "tags": {}
+  "tags": {
+   "difficulty": [
+    "expert"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "topic-technology": [
+    "ai-agents",
+    "multi-agent-systems",
+    "agent-orchestration"
+   ],
+   "trending-emerging": [
+    "multi-agent",
+    "agent-orchestration",
+    "ai-agents"
+   ]
+  }
  },
  {
   "id": 2205,
@@ -85574,7 +86411,26 @@
   "section": null,
   "verify_status": "suspect",
   "verify_notes": "Conteúdo recortado é apenas o título e o blurb, não o corpo do artigo; kind 'news' parece inadequado para um tutorial/blog",
-  "tags": {}
+  "tags": {
+   "concept-theme": [
+    "type-safety"
+   ],
+   "content-type": [
+    "deep-dive"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "frontend"
+   ],
+   "ecosystem-language": [
+    "typescript"
+   ],
+   "topic-technology": [
+    "typescript-node"
+   ]
+  }
  },
  {
   "id": 2206,
@@ -85589,7 +86445,37 @@
   "section": null,
   "verify_status": "suspect",
   "verify_notes": "Conteúdo muito raso para o título",
-  "tags": {}
+  "tags": {
+   "concept-theme": [
+    "performance",
+    "optimization",
+    "latency",
+    "throughput"
+   ],
+   "content-type": [
+    "announcement",
+    "tool-release"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "reactjs",
+    "backend"
+   ],
+   "ecosystem-language": [
+    "rust",
+    "javascript"
+   ],
+   "framework-library-tool": [
+    "react"
+   ],
+   "topic-technology": [
+    "server-components",
+    "streaming-ssr",
+    "performance-optimization"
+   ]
+  }
  },
  {
   "id": 2207,
@@ -85604,7 +86490,36 @@
   "section": "IN BRIEF",
   "verify_status": "ok",
   "verify_notes": null,
-  "tags": {}
+  "tags": {
+   "concept-theme": [
+    "testing",
+    "devops",
+    "open-source",
+    "dx"
+   ],
+   "content-type": [
+    "news"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "nodejs"
+   ],
+   "ecosystem-language": [
+    "typescript",
+    "javascript"
+   ],
+   "framework-library-tool": [
+    "oxlint",
+    "vitest"
+   ],
+   "topic-technology": [
+    "typescript-node",
+    "web-development",
+    "testing-react"
+   ]
+  }
  },
  {
   "id": 2208,
@@ -85619,7 +86534,22 @@
   "section": "RELEASES",
   "verify_status": "ok",
   "verify_notes": null,
-  "tags": {}
+  "tags": {
+   "concept-theme": [
+    "refactoring",
+    "technical-debt",
+    "clean-code"
+   ],
+   "content-type": [
+    "version-release"
+   ],
+   "domain": [
+    "frontend"
+   ],
+   "ecosystem-language": [
+    "javascript"
+   ]
+  }
  },
  {
   "id": 2209,
@@ -85634,7 +86564,23 @@
   "section": "Code & Tools",
   "verify_status": "ok",
   "verify_notes": null,
-  "tags": {}
+  "tags": {
+   "concept-theme": [
+    "validation",
+    "open-source",
+    "dx"
+   ],
+   "content-type": [
+    "tool-release",
+    "version-release"
+   ],
+   "domain": [
+    "nodejs"
+   ],
+   "ecosystem-language": [
+    "javascript"
+   ]
+  }
  },
  {
   "id": 2210,
@@ -85649,7 +86595,23 @@
   "section": "Code & Tools",
   "verify_status": "suspect",
   "verify_notes": "Conteúdo muito raso: apenas repete título e blurb, sem o corpo da página.",
-  "tags": {}
+  "tags": {
+   "content-type": [
+    "tool-release"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "frontend"
+   ],
+   "ecosystem-language": [
+    "javascript"
+   ],
+   "topic-technology": [
+    "esm"
+   ]
+  }
  },
  {
   "id": 2211,
@@ -85664,7 +86626,21 @@
   "section": "Code & Tools",
   "verify_status": "ok",
   "verify_notes": null,
-  "tags": {}
+  "tags": {
+   "content-type": [
+    "library-release",
+    "version-release"
+   ],
+   "domain": [
+    "frontend"
+   ],
+   "ecosystem-language": [
+    "javascript"
+   ],
+   "framework-library-tool": [
+    "vue"
+   ]
+  }
  },
  {
   "id": 2212,
@@ -85679,7 +86655,31 @@
   "section": "Code & Tools",
   "verify_status": "suspect",
   "verify_notes": "Conteúdo raso demais para o título: apenas repete o nome da versão e o blurb, sem detalhes técnicos ou descrição real",
-  "tags": {}
+  "tags": {
+   "concept-theme": [
+    "architecture"
+   ],
+   "content-type": [
+    "release-announcement",
+    "tool-release"
+   ],
+   "difficulty": [
+    "all-levels"
+   ],
+   "domain": [
+    "frontend"
+   ],
+   "ecosystem-language": [
+    "typescript"
+   ],
+   "framework-library-tool": [
+    "deno"
+   ],
+   "topic-technology": [
+    "ssg",
+    "web-development"
+   ]
+  }
  },
  {
   "id": 2213,
@@ -85694,7 +86694,29 @@
   "section": "Elsewhere in the ecosystem",
   "verify_status": "suspect",
   "verify_notes": "Título muito curto e genérico; não reflete o teor da notícia",
-  "tags": {}
+  "tags": {
+   "concept-theme": [
+    "cloud",
+    "platform-engineering",
+    "devops"
+   ],
+   "content-type": [
+    "analysis"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "backend"
+   ],
+   "topic-technology": [
+    "ai-infrastructure",
+    "ci-cd",
+    "deployment",
+    "containers",
+    "serverless"
+   ]
+  }
  },
  {
   "id": 2214,

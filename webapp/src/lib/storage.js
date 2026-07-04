@@ -47,3 +47,10 @@ export function trySetHistory(value) {
     return true;
   }
 }
+
+export const getLocale = () => get('nc-locale');
+export const setLocale = (l) => set('nc-locale', l);
+
+// Tutorial de introdução: mostra sozinho só na 1ª visita; o botão de ajuda reabre sempre.
+export const getTutorialSeen = () => get('nc-tutorial-seen') === '1';
+export const setTutorialSeen = () => set('nc-tutorial-seen', '1');

@@ -1,11 +1,12 @@
 import { useEffect, useRef } from 'react';
 import { animate, motion, useMotionValue, useTransform } from 'motion/react';
+import { fmtInt } from '../strings.js';
 
 /**
  * Número que "conta" até o valor novo (useMotionValue + animate — sem re-render por frame;
  * o motion.span renderiza o MotionValue direto). aria-live no wrapper anuncia o valor final.
  */
-export default function AnimatedCount({ value, format = (v) => Math.round(v).toLocaleString('pt-BR') }) {
+export default function AnimatedCount({ value, format = fmtInt }) {
   const mv = useMotionValue(value);
   // forma argless do useTransform (a forma com closure de argumento está deprecada)
   const text = useTransform(() => format(mv.get()));

@@ -1,7 +1,7 @@
 import { AnimatePresence } from 'motion/react';
 import { useEffect, useRef } from 'react';
 import ArticleCard from './ArticleCard.jsx';
-import { STR } from '../strings.js';
+import { useStrings } from '../i18n.jsx';
 
 /**
  * Grid com render incremental + as duas coreografias:
@@ -10,6 +10,7 @@ import { STR } from '../strings.js';
  *   (FLIP/transform), removidos saem em fade/scale, novos entram sem delay.
  */
 export default function ArticleGrid({ items, toolTypes, onOpen, visible, relationById = null }) {
+  const STR = useStrings();
   const { count, hasMore, sentinelRef, loadMore } = visible;
   const firstLoad = useRef(true);
   useEffect(() => {

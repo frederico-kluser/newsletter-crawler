@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { fades, springs } from '../motion/transitions.js';
-import { STR, fmtUsd, fmtDateTime } from '../strings.js';
+import { fmtUsd, fmtDateTime } from '../strings.js';
+import { useStrings } from '../i18n.jsx';
 
 /**
  * Painel do histórico de buscas (webapp estático → dados no localStorage). Lista completa com
@@ -9,6 +10,7 @@ import { STR, fmtUsd, fmtDateTime } from '../strings.js';
  * Overlay central com fade/scale (mesmo idioma de ConfirmDialog).
  */
 export default function HistoryPanel({ open, items, onClose, onOpen, onRerun, onDelete, onClear }) {
+  const STR = useStrings();
   const [armClear, setArmClear] = useState(false);
   useEffect(() => {
     if (!open) return undefined;

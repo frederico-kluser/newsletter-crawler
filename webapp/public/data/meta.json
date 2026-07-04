@@ -1,14 +1,14 @@
 {
  "schemaVersion": 1,
- "generatedAt": "2026-07-03T23:51:53.661Z",
+ "generatedAt": "2026-07-04T01:44:57.482Z",
  "totals": {
   "articles": 2370,
-  "summaries": 2277,
-  "classified": 2269
+  "summaries": 2370,
+  "classified": 2370
  },
  "cost": {
-  "totalUsd": 27.74498164354,
-  "totalCalls": 25912
+  "totalUsd": 30.95589142614,
+  "totalCalls": 29109
  },
  "sources": [
   {
@@ -48,35 +48,35 @@
    "tags": [
     {
      "tag": "frontend",
-     "count": 1106
+     "count": 1309
     },
     {
      "tag": "nodejs",
-     "count": 570
+     "count": 648
     },
     {
      "tag": "backend",
-     "count": 562
+     "count": 600
     },
     {
      "tag": "reactjs",
-     "count": 333
+     "count": 395
     },
     {
      "tag": "ai-general",
-     "count": 256
+     "count": 292
     },
     {
      "tag": "python",
-     "count": 51
-    },
-    {
-     "tag": "local-llm",
-     "count": 27
+     "count": 54
     },
     {
      "tag": "llm-models",
-     "count": 26
+     "count": 30
+    },
+    {
+     "tag": "local-llm",
+     "count": 28
     }
    ]
   },
@@ -85,70 +85,78 @@
    "tags": [
     {
      "tag": "version-release",
-     "count": 548
-    },
-    {
-     "tag": "tool-release",
-     "count": 313
+     "count": 650
     },
     {
      "tag": "library-release",
-     "count": 310
+     "count": 375
     },
     {
-     "tag": "deep-dive",
-     "count": 162
+     "tag": "tool-release",
+     "count": 359
     },
     {
      "tag": "release-announcement",
-     "count": 154
+     "count": 196
+    },
+    {
+     "tag": "deep-dive",
+     "count": 176
     },
     {
      "tag": "tutorial",
-     "count": 148
-    },
-    {
-     "tag": "announcement",
-     "count": 122
+     "count": 160
     },
     {
      "tag": "tooling",
-     "count": 121
+     "count": 141
+    },
+    {
+     "tag": "announcement",
+     "count": 127
     },
     {
      "tag": "opinion",
-     "count": 98
+     "count": 108
     },
     {
      "tag": "how-to",
-     "count": 95
+     "count": 101
     },
     {
      "tag": "explainer",
-     "count": 91
+     "count": 97
     },
     {
      "tag": "news",
-     "count": 73
+     "count": 91
     },
     {
      "tag": "analysis",
-     "count": 58
+     "count": 64
     },
     {
      "tag": "guide",
-     "count": 49
+     "count": 52
     },
     {
      "tag": "security-advisory",
-     "count": 38
-    },
-    {
-     "tag": "tips-and-tricks",
-     "count": 38
+     "count": 42
     },
     {
      "tag": "best-practices",
+     "count": 40
+    },
+    {
+     "tag": "tips-and-tricks",
+     "count": 39
+    },
+    {
+     "tag": "showcase",
+     "count": 37
+    },
+    {
+     "tag": "case-study",
      "count": 36
     },
     {
@@ -157,15 +165,7 @@
     },
     {
      "tag": "product-launch",
-     "count": 33
-    },
-    {
-     "tag": "showcase",
-     "count": 33
-    },
-    {
-     "tag": "case-study",
-     "count": 32
+     "count": 34
     },
     {
      "tag": "demo",
@@ -173,26 +173,34 @@
     },
     {
      "tag": "project-spotlight",
-     "count": 23
+     "count": 26
     },
     {
      "tag": "show-and-tell",
-     "count": 22
-    },
-    {
-     "tag": "migration-guide",
-     "count": 19
-    },
-    {
-     "tag": "comparison",
-     "count": 18
-    },
-    {
-     "tag": "incident-report",
-     "count": 17
+     "count": 23
     },
     {
      "tag": "interview",
+     "count": 20
+    },
+    {
+     "tag": "migration-guide",
+     "count": 20
+    },
+    {
+     "tag": "comparison",
+     "count": 19
+    },
+    {
+     "tag": "incident-report",
+     "count": 19
+    },
+    {
+     "tag": "conference-talk",
+     "count": 18
+    },
+    {
+     "tag": "getting-started",
      "count": 17
     },
     {
@@ -201,26 +209,30 @@
     },
     {
      "tag": "vs-comparison",
-     "count": 16
+     "count": 17
     },
     {
-     "tag": "conference-talk",
+     "tag": "newsletter-roundup",
      "count": 15
     },
     {
-     "tag": "getting-started",
-     "count": 14
+     "tag": "retrospective",
+     "count": 15
     },
     {
      "tag": "reference",
      "count": 12
     },
     {
-     "tag": "retrospective",
+     "tag": "walkthrough",
      "count": 12
     },
     {
-     "tag": "walkthrough",
+     "tag": "state-of-the-ecosystem",
+     "count": 11
+    },
+    {
+     "tag": "survey-results",
      "count": 11
     },
     {
@@ -228,19 +240,11 @@
      "count": 10
     },
     {
-     "tag": "newsletter-roundup",
-     "count": 9
-    },
-    {
-     "tag": "state-of-the-ecosystem",
-     "count": 9
-    },
-    {
-     "tag": "survey-results",
-     "count": 9
-    },
-    {
      "tag": "year-in-review",
+     "count": 9
+    },
+    {
+     "tag": "talk",
      "count": 8
     },
     {
@@ -260,8 +264,8 @@
      "count": 7
     },
     {
-     "tag": "talk",
-     "count": 7
+     "tag": "acquisition-news",
+     "count": 5
     },
     {
      "tag": "success-story",
@@ -269,6 +273,14 @@
     },
     {
      "tag": "commentary",
+     "count": 4
+    },
+    {
+     "tag": "editorial",
+     "count": 4
+    },
+    {
+     "tag": "hot-take",
      "count": 4
     },
     {
@@ -280,23 +292,19 @@
      "count": 4
     },
     {
+     "tag": "upgrade-guide",
+     "count": 4
+    },
+    {
      "tag": "video",
      "count": 4
     },
     {
-     "tag": "acquisition-news",
-     "count": 3
-    },
-    {
-     "tag": "editorial",
-     "count": 3
-    },
-    {
-     "tag": "upgrade-guide",
-     "count": 3
-    },
-    {
      "tag": "vulnerability-disclosure",
+     "count": 4
+    },
+    {
+     "tag": "api-reference",
      "count": 3
     },
     {
@@ -304,15 +312,7 @@
      "count": 2
     },
     {
-     "tag": "api-reference",
-     "count": 2
-    },
-    {
      "tag": "awesome-list",
-     "count": 2
-    },
-    {
-     "tag": "hot-take",
      "count": 2
     },
     {
@@ -353,251 +353,267 @@
    "name": "topic-technology",
    "tags": [
     {
+     "tag": "web-development",
+     "count": 277
+    },
+    {
      "tag": "css",
-     "count": 253
+     "count": 268
     },
     {
      "tag": "web-standards",
-     "count": 222
-    },
-    {
-     "tag": "web-development",
-     "count": 212
+     "count": 234
     },
     {
      "tag": "sql",
-     "count": 194
+     "count": 198
     },
     {
      "tag": "databases",
-     "count": 189
+     "count": 191
     },
     {
      "tag": "html",
-     "count": 155
+     "count": 168
     },
     {
      "tag": "relational-databases",
-     "count": 133
-    },
-    {
-     "tag": "accessibility",
-     "count": 108
+     "count": 135
     },
     {
      "tag": "web-apis",
-     "count": 104
+     "count": 115
+    },
+    {
+     "tag": "accessibility",
+     "count": 112
     },
     {
      "tag": "npm-scripts",
-     "count": 102
-    },
-    {
-     "tag": "database-access",
-     "count": 92
+     "count": 108
     },
     {
      "tag": "package-management",
-     "count": 87
-    },
-    {
-     "tag": "browser-compatibility",
-     "count": 84
-    },
-    {
-     "tag": "performance-optimization",
-     "count": 82
-    },
-    {
-     "tag": "ai-agents",
-     "count": 78
-    },
-    {
-     "tag": "performance-tuning",
-     "count": 76
+     "count": 96
     },
     {
      "tag": "component-libraries",
-     "count": 72
+     "count": 94
     },
     {
-     "tag": "security-node",
-     "count": 70
+     "tag": "performance-optimization",
+     "count": 94
+    },
+    {
+     "tag": "database-access",
+     "count": 93
+    },
+    {
+     "tag": "browser-compatibility",
+     "count": 90
+    },
+    {
+     "tag": "ai-agents",
+     "count": 89
+    },
+    {
+     "tag": "performance-tuning",
+     "count": 79
     },
     {
      "tag": "design-systems",
-     "count": 69
+     "count": 74
     },
     {
-     "tag": "node-versions",
-     "count": 67
+     "tag": "security-node",
+     "count": 73
     },
     {
      "tag": "web-performance",
-     "count": 67
+     "count": 70
     },
     {
-     "tag": "npm-security",
-     "count": 59
+     "tag": "node-versions",
+     "count": 68
     },
     {
      "tag": "react-native",
-     "count": 56
+     "count": 66
+    },
+    {
+     "tag": "npm-security",
+     "count": 63
     },
     {
      "tag": "supply-chain-security",
-     "count": 56
-    },
-    {
-     "tag": "animations",
-     "count": 53
+     "count": 61
     },
     {
      "tag": "typescript-node",
-     "count": 52
+     "count": 59
     },
     {
-     "tag": "query-optimization",
-     "count": 49
+     "tag": "animations",
+     "count": 58
     },
     {
      "tag": "webassembly",
-     "count": 47
+     "count": 58
+    },
+    {
+     "tag": "query-optimization",
+     "count": 50
     },
     {
      "tag": "cli-tools",
-     "count": 46
+     "count": 49
     },
     {
      "tag": "web-components",
-     "count": 42
-    },
-    {
-     "tag": "responsive-design",
-     "count": 39
-    },
-    {
-     "tag": "server-components",
-     "count": 39
+     "count": 46
     },
     {
      "tag": "esm",
-     "count": 38
+     "count": 44
+    },
+    {
+     "tag": "server-components",
+     "count": 42
+    },
+    {
+     "tag": "react-hooks",
+     "count": 41
+    },
+    {
+     "tag": "responsive-design",
+     "count": 41
     },
     {
      "tag": "react-19",
-     "count": 37
+     "count": 40
+    },
+    {
+     "tag": "testing-react",
+     "count": 40
+    },
+    {
+     "tag": "bundling",
+     "count": 38
+    },
+    {
+     "tag": "component-composition",
+     "count": 36
+    },
+    {
+     "tag": "ai-in-business",
+     "count": 35
+    },
+    {
+     "tag": "monorepos",
+     "count": 35
+    },
+    {
+     "tag": "ci-cd",
+     "count": 34
+    },
+    {
+     "tag": "ssr",
+     "count": 34
     },
     {
      "tag": "lts",
      "count": 33
     },
     {
-     "tag": "monorepos",
-     "count": 33
-    },
-    {
-     "tag": "testing-react",
-     "count": 33
-    },
-    {
-     "tag": "ai-in-business",
-     "count": 31
-    },
-    {
-     "tag": "component-composition",
-     "count": 31
-    },
-    {
      "tag": "database-migrations",
      "count": 31
     },
     {
-     "tag": "ci-cd",
+     "tag": "modules",
      "count": 30
     },
     {
-     "tag": "react-hooks",
-     "count": 30
-    },
-    {
-     "tag": "bundling",
+     "tag": "state-management",
      "count": 28
+    },
+    {
+     "tag": "rest-api",
+     "count": 27
+    },
+    {
+     "tag": "webgl",
+     "count": 27
+    },
+    {
+     "tag": "api-design",
+     "count": 26
+    },
+    {
+     "tag": "canvas",
+     "count": 26
     },
     {
      "tag": "indexing",
      "count": 26
     },
     {
-     "tag": "ssr",
+     "tag": "routing",
+     "count": 26
+    },
+    {
+     "tag": "serverless",
+     "count": 26
+    },
+    {
+     "tag": "tool-calling",
+     "count": 26
+    },
+    {
+     "tag": "data-fetching",
      "count": 25
     },
     {
-     "tag": "modules",
-     "count": 24
-    },
-    {
-     "tag": "api-design",
-     "count": 23
+     "tag": "data-visualization",
+     "count": 25
     },
     {
      "tag": "css-grid",
      "count": 23
     },
     {
-     "tag": "rest-api",
+     "tag": "css-variables",
      "count": 23
     },
     {
-     "tag": "canvas",
-     "count": 22
+     "tag": "edge-runtime",
+     "count": 23
     },
     {
-     "tag": "css-variables",
-     "count": 22
+     "tag": "utility-first-css",
+     "count": 23
     },
     {
-     "tag": "routing",
-     "count": 22
-    },
-    {
-     "tag": "serverless",
-     "count": 22
-    },
-    {
-     "tag": "tool-calling",
-     "count": 22
-    },
-    {
-     "tag": "webgl",
+     "tag": "ai-adoption",
      "count": 22
     },
     {
      "tag": "browser-devtools",
-     "count": 21
+     "count": 22
     },
     {
-     "tag": "state-management",
-     "count": 21
-    },
-    {
-     "tag": "utility-first-css",
-     "count": 21
-    },
-    {
-     "tag": "ai-adoption",
-     "count": 20
-    },
-    {
-     "tag": "edge-runtime",
-     "count": 20
+     "tag": "generative-ai",
+     "count": 22
     },
     {
      "tag": "workspaces",
-     "count": 20
+     "count": 21
     },
     {
-     "tag": "data-fetching",
+     "tag": "aria",
+     "count": 19
+    },
+    {
+     "tag": "custom-elements",
      "count": 19
     },
     {
@@ -605,7 +621,7 @@
      "count": 19
     },
     {
-     "tag": "data-visualization",
+     "tag": "jsx",
      "count": 19
     },
     {
@@ -613,39 +629,51 @@
      "count": 19
     },
     {
+     "tag": "orm",
+     "count": 19
+    },
+    {
+     "tag": "streaming-ssr",
+     "count": 19
+    },
+    {
      "tag": "background-jobs",
      "count": 18
     },
     {
-     "tag": "custom-elements",
-     "count": 18
-    },
-    {
-     "tag": "generative-ai",
-     "count": 18
-    },
-    {
-     "tag": "streaming-ssr",
-     "count": 18
-    },
-    {
-     "tag": "aria",
-     "count": 16
-    },
-    {
      "tag": "data-modeling",
-     "count": 16
+     "count": 17
     },
     {
      "tag": "distributed-systems",
+     "count": 17
+    },
+    {
+     "tag": "webgpu",
+     "count": 17
+    },
+    {
+     "tag": "ai-infrastructure",
      "count": 16
     },
     {
-     "tag": "jsx",
+     "tag": "authentication",
      "count": 16
     },
     {
-     "tag": "orm",
+     "tag": "code-models",
+     "count": 16
+    },
+    {
+     "tag": "design-tokens",
+     "count": 16
+    },
+    {
+     "tag": "observability",
+     "count": 16
+    },
+    {
+     "tag": "open-source-models",
      "count": 16
     },
     {
@@ -653,35 +681,43 @@
      "count": 16
     },
     {
+     "tag": "shadow-dom",
+     "count": 16
+    },
+    {
+     "tag": "theming",
+     "count": 16
+    },
+    {
+     "tag": "computer-vision",
+     "count": 15
+    },
+    {
      "tag": "connection-pooling",
      "count": 15
     },
     {
-     "tag": "design-tokens",
-     "count": 15
-    },
-    {
-     "tag": "observability",
-     "count": 15
-    },
-    {
-     "tag": "open-source-models",
-     "count": 15
-    },
-    {
-     "tag": "authentication",
-     "count": 14
-    },
-    {
-     "tag": "computer-vision",
-     "count": 14
-    },
-    {
      "tag": "core-web-vitals",
-     "count": 14
+     "count": 15
+    },
+    {
+     "tag": "custom-hooks",
+     "count": 15
     },
     {
      "tag": "image-optimization",
+     "count": 15
+    },
+    {
+     "tag": "keyboard-navigation",
+     "count": 15
+    },
+    {
+     "tag": "caching",
+     "count": 14
+    },
+    {
+     "tag": "local-inference",
      "count": 14
     },
     {
@@ -693,11 +729,7 @@
      "count": 14
     },
     {
-     "tag": "shadow-dom",
-     "count": 14
-    },
-    {
-     "tag": "theming",
+     "tag": "react-compiler",
      "count": 14
     },
     {
@@ -705,11 +737,15 @@
      "count": 14
     },
     {
-     "tag": "webgpu",
+     "tag": "web-scraping",
      "count": 14
     },
     {
-     "tag": "ai-infrastructure",
+     "tag": "code-splitting",
+     "count": 13
+    },
+    {
+     "tag": "event-driven-architecture",
      "count": 13
     },
     {
@@ -717,19 +753,35 @@
      "count": 13
     },
     {
-     "tag": "keyboard-navigation",
+     "tag": "transactions",
      "count": 13
     },
     {
-     "tag": "react-compiler",
+     "tag": "websockets",
      "count": 13
     },
     {
-     "tag": "rsc",
+     "tag": "async-await",
      "count": 12
     },
     {
-     "tag": "transactions",
+     "tag": "error-handling",
+     "count": 12
+    },
+    {
+     "tag": "message-queues",
+     "count": 12
+    },
+    {
+     "tag": "native-addons",
+     "count": 12
+    },
+    {
+     "tag": "react-18",
+     "count": 12
+    },
+    {
+     "tag": "rsc",
      "count": 12
     },
     {
@@ -737,19 +789,11 @@
      "count": 12
     },
     {
-     "tag": "web-scraping",
-     "count": 12
-    },
-    {
-     "tag": "websockets",
-     "count": 12
-    },
-    {
-     "tag": "ai-safety",
+     "tag": "ai-ethics",
      "count": 11
     },
     {
-     "tag": "code-models",
+     "tag": "ai-safety",
      "count": 11
     },
     {
@@ -757,15 +801,23 @@
      "count": 11
     },
     {
-     "tag": "custom-hooks",
+     "tag": "edge-ai",
      "count": 11
     },
     {
-     "tag": "local-inference",
+     "tag": "flexbox",
      "count": 11
     },
     {
-     "tag": "message-queues",
+     "tag": "graphql-api",
+     "count": 11
+    },
+    {
+     "tag": "machine-learning",
+     "count": 11
+    },
+    {
+     "tag": "middleware",
      "count": 11
     },
     {
@@ -777,31 +829,19 @@
      "count": 11
     },
     {
+     "tag": "accessibility-react",
+     "count": 10
+    },
+    {
      "tag": "ai-benchmarks",
      "count": 10
     },
     {
-     "tag": "ai-ethics",
+     "tag": "deployment",
      "count": 10
     },
     {
-     "tag": "async-await",
-     "count": 10
-    },
-    {
-     "tag": "caching",
-     "count": 10
-    },
-    {
-     "tag": "edge-ai",
-     "count": 10
-    },
-    {
-     "tag": "error-handling",
-     "count": 10
-    },
-    {
-     "tag": "event-driven-architecture",
+     "tag": "event-loop",
      "count": 10
     },
     {
@@ -809,23 +849,15 @@
      "count": 10
     },
     {
-     "tag": "flexbox",
-     "count": 10
-    },
-    {
-     "tag": "middleware",
-     "count": 10
-    },
-    {
-     "tag": "native-addons",
-     "count": 10
-    },
-    {
-     "tag": "react-18",
-     "count": 10
-    },
-    {
      "tag": "scalability",
+     "count": 10
+    },
+    {
+     "tag": "ssg",
+     "count": 10
+    },
+    {
+     "tag": "testing-python",
      "count": 10
     },
     {
@@ -837,6 +869,10 @@
      "count": 9
     },
     {
+     "tag": "automation",
+     "count": 9
+    },
+    {
      "tag": "data-science",
      "count": 9
     },
@@ -845,7 +881,7 @@
      "count": 9
     },
     {
-     "tag": "event-loop",
+     "tag": "gpu",
      "count": 9
     },
     {
@@ -857,7 +893,19 @@
      "count": 9
     },
     {
+     "tag": "prompt-engineering",
+     "count": 9
+    },
+    {
+     "tag": "query-builder",
+     "count": 9
+    },
+    {
      "tag": "rag",
+     "count": 9
+    },
+    {
+     "tag": "streams",
      "count": 9
     },
     {
@@ -869,11 +917,19 @@
      "count": 8
     },
     {
-     "tag": "automation",
+     "tag": "component-testing",
      "count": 8
     },
     {
-     "tag": "code-splitting",
+     "tag": "containers",
+     "count": 8
+    },
+    {
+     "tag": "dark-mode",
+     "count": 8
+    },
+    {
+     "tag": "dependency-management",
      "count": 8
     },
     {
@@ -881,19 +937,15 @@
      "count": 8
     },
     {
-     "tag": "gpu",
-     "count": 8
-    },
-    {
-     "tag": "graphql-api",
-     "count": 8
-    },
-    {
      "tag": "horizontal-scaling",
      "count": 8
     },
     {
-     "tag": "machine-learning",
+     "tag": "infrastructure-as-code",
+     "count": 8
+    },
+    {
+     "tag": "microservices",
      "count": 8
     },
     {
@@ -901,7 +953,11 @@
      "count": 8
     },
     {
-     "tag": "query-builder",
+     "tag": "model-evaluation",
+     "count": 8
+    },
+    {
+     "tag": "serialization",
      "count": 8
     },
     {
@@ -909,19 +965,31 @@
      "count": 8
     },
     {
-     "tag": "streams",
+     "tag": "transforms",
      "count": 8
     },
     {
-     "tag": "transforms",
+     "tag": "tree-shaking",
      "count": 8
+    },
+    {
+     "tag": "useeffect",
+     "count": 8
+    },
+    {
+     "tag": "agent-orchestration",
+     "count": 7
+    },
+    {
+     "tag": "ai-art",
+     "count": 7
     },
     {
      "tag": "api-gateway",
      "count": 7
     },
     {
-     "tag": "dark-mode",
+     "tag": "commonjs",
      "count": 7
     },
     {
@@ -929,23 +997,23 @@
      "count": 7
     },
     {
-     "tag": "dependency-management",
-     "count": 7
-    },
-    {
-     "tag": "deployment",
-     "count": 7
-    },
-    {
      "tag": "high-availability",
      "count": 7
     },
     {
-     "tag": "infrastructure-as-code",
+     "tag": "hydration",
      "count": 7
     },
     {
-     "tag": "microservices",
+     "tag": "internationalization",
+     "count": 7
+    },
+    {
+     "tag": "lazy-loading",
+     "count": 7
+    },
+    {
+     "tag": "model-comparison",
      "count": 7
     },
     {
@@ -953,7 +1021,7 @@
      "count": 7
     },
     {
-     "tag": "prompt-engineering",
+     "tag": "scripting",
      "count": 7
     },
     {
@@ -965,7 +1033,11 @@
      "count": 7
     },
     {
-     "tag": "testing-python",
+     "tag": "spa",
+     "count": 7
+    },
+    {
+     "tag": "streaming-responses",
      "count": 7
     },
     {
@@ -973,7 +1045,7 @@
      "count": 7
     },
     {
-     "tag": "ai-art",
+     "tag": "ai-policy",
      "count": 6
     },
     {
@@ -981,19 +1053,11 @@
      "count": 6
     },
     {
-     "tag": "commonjs",
-     "count": 6
-    },
-    {
-     "tag": "component-testing",
-     "count": 6
-    },
-    {
      "tag": "concurrency",
      "count": 6
     },
     {
-     "tag": "containers",
+     "tag": "encryption",
      "count": 6
     },
     {
@@ -1005,7 +1069,7 @@
      "count": 6
     },
     {
-     "tag": "internationalization",
+     "tag": "hmr",
      "count": 6
     },
     {
@@ -1013,15 +1077,15 @@
      "count": 6
     },
     {
-     "tag": "lazy-loading",
-     "count": 6
-    },
-    {
      "tag": "llmops",
      "count": 6
     },
     {
-     "tag": "model-evaluation",
+     "tag": "memoization",
+     "count": 6
+    },
+    {
+     "tag": "model-release",
      "count": 6
     },
     {
@@ -1033,31 +1097,7 @@
      "count": 6
     },
     {
-     "tag": "serialization",
-     "count": 6
-    },
-    {
-     "tag": "ssg",
-     "count": 6
-    },
-    {
-     "tag": "streaming-responses",
-     "count": 6
-    },
-    {
-     "tag": "useeffect",
-     "count": 6
-    },
-    {
-     "tag": "accessibility-react",
-     "count": 5
-    },
-    {
      "tag": "ai-hardware",
-     "count": 5
-    },
-    {
-     "tag": "ai-policy",
      "count": 5
     },
     {
@@ -1065,15 +1105,35 @@
      "count": 5
     },
     {
+     "tag": "client-components",
+     "count": 5
+    },
+    {
      "tag": "cron-jobs",
      "count": 5
     },
     {
-     "tag": "encryption",
+     "tag": "document-databases",
      "count": 5
     },
     {
-     "tag": "model-release",
+     "tag": "edge-deployment",
+     "count": 5
+    },
+    {
+     "tag": "foundation-models",
+     "count": 5
+    },
+    {
+     "tag": "logging",
+     "count": 5
+    },
+    {
+     "tag": "openapi",
+     "count": 5
+    },
+    {
+     "tag": "polyfills",
      "count": 5
     },
     {
@@ -1081,15 +1141,15 @@
      "count": 5
     },
     {
-     "tag": "tree-shaking",
+     "tag": "usestate",
      "count": 5
     },
     {
-     "tag": "agent-orchestration",
+     "tag": "ai-funding",
      "count": 4
     },
     {
-     "tag": "ai-funding",
+     "tag": "ai-research",
      "count": 4
     },
     {
@@ -1097,11 +1157,15 @@
      "count": 4
     },
     {
+     "tag": "ai-video",
+     "count": 4
+    },
+    {
      "tag": "authorization",
      "count": 4
     },
     {
-     "tag": "client-components",
+     "tag": "concurrent-rendering",
      "count": 4
     },
     {
@@ -1109,27 +1173,15 @@
      "count": 4
     },
     {
-     "tag": "edge-deployment",
-     "count": 4
-    },
-    {
      "tag": "embeddings",
      "count": 4
     },
     {
-     "tag": "hmr",
+     "tag": "islands-architecture",
      "count": 4
     },
     {
-     "tag": "logging",
-     "count": 4
-    },
-    {
-     "tag": "memoization",
-     "count": 4
-    },
-    {
-     "tag": "model-comparison",
+     "tag": "kubernetes",
      "count": 4
     },
     {
@@ -1141,19 +1193,15 @@
      "count": 4
     },
     {
-     "tag": "openapi",
-     "count": 4
-    },
-    {
-     "tag": "polyfills",
-     "count": 4
-    },
-    {
      "tag": "pwa",
      "count": 4
     },
     {
-     "tag": "scripting",
+     "tag": "reconciliation",
+     "count": 4
+    },
+    {
+     "tag": "screen-readers",
      "count": 4
     },
     {
@@ -1169,7 +1217,15 @@
      "count": 4
     },
     {
+     "tag": "unit-testing",
+     "count": 4
+    },
+    {
      "tag": "use-hook",
+     "count": 4
+    },
+    {
+     "tag": "validation",
      "count": 4
     },
     {
@@ -1177,8 +1233,8 @@
      "count": 4
     },
     {
-     "tag": "ai-research",
-     "count": 3
+     "tag": "worker-threads",
+     "count": 4
     },
     {
      "tag": "buffers",
@@ -1186,10 +1242,6 @@
     },
     {
      "tag": "c-extensions",
-     "count": 3
-    },
-    {
-     "tag": "concurrent-rendering",
      "count": 3
     },
     {
@@ -1201,10 +1253,6 @@
      "count": 3
     },
     {
-     "tag": "document-databases",
-     "count": 3
-    },
-    {
      "tag": "etl",
      "count": 3
     },
@@ -1213,7 +1261,7 @@
      "count": 3
     },
     {
-     "tag": "foundation-models",
+     "tag": "faas",
      "count": 3
     },
     {
@@ -1229,10 +1277,6 @@
      "count": 3
     },
     {
-     "tag": "kubernetes",
-     "count": 3
-    },
-    {
      "tag": "media-queries",
      "count": 3
     },
@@ -1245,11 +1289,11 @@
      "count": 3
     },
     {
-     "tag": "reconciliation",
+     "tag": "nosql",
      "count": 3
     },
     {
-     "tag": "screen-readers",
+     "tag": "on-device-inference",
      "count": 3
     },
     {
@@ -1261,11 +1305,11 @@
      "count": 3
     },
     {
-     "tag": "spa",
+     "tag": "sse",
      "count": 3
     },
     {
-     "tag": "sse",
+     "tag": "structured-output",
      "count": 3
     },
     {
@@ -1273,16 +1317,16 @@
      "count": 3
     },
     {
-     "tag": "validation",
+     "tag": "transformers",
      "count": 3
     },
     {
-     "tag": "worker-threads",
+     "tag": "usecontext",
      "count": 3
     },
     {
-     "tag": "ai-video",
-     "count": 2
+     "tag": "usetransition",
+     "count": 3
     },
     {
      "tag": "child-processes",
@@ -1309,10 +1353,6 @@
      "count": 2
     },
     {
-     "tag": "faas",
-     "count": 2
-    },
-    {
      "tag": "fault-tolerance",
      "count": 2
     },
@@ -1321,15 +1361,7 @@
      "count": 2
     },
     {
-     "tag": "hydration",
-     "count": 2
-    },
-    {
      "tag": "inference-optimization",
-     "count": 2
-    },
-    {
-     "tag": "islands-architecture",
      "count": 2
     },
     {
@@ -1345,11 +1377,19 @@
      "count": 2
     },
     {
-     "tag": "multiprocessing",
+     "tag": "model-training",
      "count": 2
     },
     {
-     "tag": "nosql",
+     "tag": "multi-agent-systems",
+     "count": 2
+    },
+    {
+     "tag": "multimodal-models",
+     "count": 2
+    },
+    {
+     "tag": "multiprocessing",
      "count": 2
     },
     {
@@ -1357,11 +1397,11 @@
      "count": 2
     },
     {
-     "tag": "on-device-inference",
+     "tag": "openai-compatible-api",
      "count": 2
     },
     {
-     "tag": "openai-compatible-api",
+     "tag": "packaging",
      "count": 2
     },
     {
@@ -1370,6 +1410,10 @@
     },
     {
      "tag": "props",
+     "count": 2
+    },
+    {
+     "tag": "pub-sub",
      "count": 2
     },
     {
@@ -1393,7 +1437,11 @@
      "count": 2
     },
     {
-     "tag": "structured-output",
+     "tag": "swagger",
+     "count": 2
+    },
+    {
+     "tag": "threading",
      "count": 2
     },
     {
@@ -1413,23 +1461,11 @@
      "count": 2
     },
     {
-     "tag": "transformers",
-     "count": 2
-    },
-    {
-     "tag": "unit-testing",
-     "count": 2
-    },
-    {
      "tag": "unsupervised-learning",
      "count": 2
     },
     {
-     "tag": "usecontext",
-     "count": 2
-    },
-    {
-     "tag": "usestate",
+     "tag": "useref",
      "count": 2
     },
     {
@@ -1469,7 +1505,19 @@
      "count": 1
     },
     {
+     "tag": "cache-invalidation",
+     "count": 1
+    },
+    {
      "tag": "cls",
+     "count": 1
+    },
+    {
+     "tag": "clustering",
+     "count": 1
+    },
+    {
+     "tag": "content-moderation",
      "count": 1
     },
     {
@@ -1501,6 +1549,10 @@
      "count": 1
     },
     {
+     "tag": "guardrails",
+     "count": 1
+    },
+    {
      "tag": "higher-order-components",
      "count": 1
     },
@@ -1525,6 +1577,10 @@
      "count": 1
     },
     {
+     "tag": "isr",
+     "count": 1
+    },
+    {
      "tag": "jwt",
      "count": 1
     },
@@ -1542,6 +1598,14 @@
     },
     {
      "tag": "local-rag",
+     "count": 1
+    },
+    {
+     "tag": "micro-frontends",
+     "count": 1
+    },
+    {
+     "tag": "model-architecture",
      "count": 1
     },
     {
@@ -1569,15 +1633,15 @@
      "count": 1
     },
     {
-     "tag": "model-training",
+     "tag": "modular-monolith",
+     "count": 1
+    },
+    {
+     "tag": "mpa",
      "count": 1
     },
     {
      "tag": "multilingual-models",
-     "count": 1
-    },
-    {
-     "tag": "multimodal-models",
      "count": 1
     },
     {
@@ -1593,15 +1657,15 @@
      "count": 1
     },
     {
+     "tag": "observability-llm",
+     "count": 1
+    },
+    {
      "tag": "outbox-pattern",
      "count": 1
     },
     {
-     "tag": "packaging",
-     "count": 1
-    },
-    {
-     "tag": "pub-sub",
+     "tag": "pip",
      "count": 1
     },
     {
@@ -1645,14 +1709,6 @@
      "count": 1
     },
     {
-     "tag": "swagger",
-     "count": 1
-    },
-    {
-     "tag": "threading",
-     "count": 1
-    },
-    {
      "tag": "tracing-llm",
      "count": 1
     },
@@ -1669,15 +1725,15 @@
      "count": 1
     },
     {
-     "tag": "useref",
-     "count": 1
-    },
-    {
-     "tag": "usetransition",
+     "tag": "usereducer",
      "count": 1
     },
     {
      "tag": "virtual-environments",
+     "count": 1
+    },
+    {
+     "tag": "vision-language-models",
      "count": 1
     }
    ]
@@ -1687,43 +1743,43 @@
    "tags": [
     {
      "tag": "intermediate",
-     "count": 583
+     "count": 661
     },
     {
      "tag": "for-practitioners",
-     "count": 548
+     "count": 611
     },
     {
      "tag": "all-levels",
-     "count": 335
+     "count": 380
     },
     {
      "tag": "advanced",
-     "count": 212
+     "count": 246
     },
     {
      "tag": "beginner",
-     "count": 79
+     "count": 89
     },
     {
      "tag": "for-beginners",
-     "count": 55
+     "count": 59
     },
     {
      "tag": "expert",
-     "count": 22
+     "count": 25
     },
     {
      "tag": "for-architects",
      "count": 14
     },
     {
-     "tag": "for-researchers",
-     "count": 2
+     "tag": "for-students",
+     "count": 3
     },
     {
-     "tag": "for-students",
-     "count": 1
+     "tag": "for-researchers",
+     "count": 2
     }
    ]
   },
@@ -1732,66 +1788,74 @@
    "tags": [
     {
      "tag": "javascript",
-     "count": 1112
+     "count": 1331
     },
     {
      "tag": "typescript",
-     "count": 357
+     "count": 442
     },
     {
      "tag": "sql",
-     "count": 356
+     "count": 359
     },
     {
      "tag": "css",
-     "count": 252
+     "count": 265
     },
     {
      "tag": "html",
-     "count": 172
+     "count": 184
     },
     {
      "tag": "rust",
-     "count": 59
+     "count": 66
     },
     {
      "tag": "go",
-     "count": 58
-    },
-    {
-     "tag": "python",
-     "count": 41
+     "count": 60
     },
     {
      "tag": "wasm",
-     "count": 41
+     "count": 50
+    },
+    {
+     "tag": "python",
+     "count": 42
     },
     {
      "tag": "markdown",
-     "count": 24
-    },
-    {
-     "tag": "c",
-     "count": 17
+     "count": 25
     },
     {
      "tag": "json",
-     "count": 14
+     "count": 19
+    },
+    {
+     "tag": "c",
+     "count": 18
     },
     {
      "tag": "cpp",
-     "count": 11
+     "count": 14
     },
     {
      "tag": "bash",
-     "count": 9
-    },
-    {
-     "tag": "yaml",
-     "count": 7
+     "count": 10
     },
     {
      "tag": "graphql-lang",
+     "count": 8
+    },
+    {
+     "tag": "yaml",
+     "count": 8
+    },
+    {
+     "tag": "zig",
+     "count": 8
+    },
+    {
+     "tag": "dotnet",
      "count": 6
     },
     {
@@ -1799,32 +1863,28 @@
      "count": 6
     },
     {
-     "tag": "zig",
-     "count": 6
-    },
-    {
-     "tag": "dotnet",
-     "count": 4
+     "tag": "csharp",
+     "count": 5
     },
     {
      "tag": "java",
-     "count": 3
+     "count": 5
+    },
+    {
+     "tag": "kotlin",
+     "count": 4
+    },
+    {
+     "tag": "ruby",
+     "count": 4
+    },
+    {
+     "tag": "swift",
+     "count": 4
     },
     {
      "tag": "php",
      "count": 3
-    },
-    {
-     "tag": "ruby",
-     "count": 3
-    },
-    {
-     "tag": "swift",
-     "count": 3
-    },
-    {
-     "tag": "csharp",
-     "count": 2
     },
     {
      "tag": "elixir",
@@ -1832,10 +1892,6 @@
     },
     {
      "tag": "erlang",
-     "count": 2
-    },
-    {
-     "tag": "kotlin",
      "count": 2
     },
     {
@@ -1865,43 +1921,43 @@
    "tags": [
     {
      "tag": "github",
-     "count": 77
+     "count": 88
     },
     {
      "tag": "google",
-     "count": 53
-    },
-    {
-     "tag": "vercel",
-     "count": 44
+     "count": 58
     },
     {
      "tag": "microsoft",
-     "count": 43
+     "count": 50
+    },
+    {
+     "tag": "vercel",
+     "count": 46
     },
     {
      "tag": "openai",
-     "count": 25
+     "count": 32
     },
     {
      "tag": "claude",
+     "count": 26
+    },
+    {
+     "tag": "aws",
      "count": 24
     },
     {
      "tag": "cloudflare",
-     "count": 21
-    },
-    {
-     "tag": "aws",
-     "count": 20
+     "count": 24
     },
     {
      "tag": "anthropic",
-     "count": 17
+     "count": 18
     },
     {
      "tag": "gpt",
-     "count": 16
+     "count": 18
     },
     {
      "tag": "apple",
@@ -1913,22 +1969,22 @@
     },
     {
      "tag": "amazon",
-     "count": 7
+     "count": 8
     },
     {
      "tag": "codex",
-     "count": 6
+     "count": 8
     },
     {
      "tag": "gemini",
+     "count": 7
+    },
+    {
+     "tag": "hugging-face",
      "count": 5
     },
     {
      "tag": "azure-ai",
-     "count": 4
-    },
-    {
-     "tag": "hugging-face",
      "count": 4
     },
     {
@@ -1986,62 +2042,74 @@
     },
     {
      "tag": "nodejs",
-     "count": 281
+     "count": 312
     },
     {
      "tag": "react",
-     "count": 244
+     "count": 289
     },
     {
      "tag": "npm",
-     "count": 69
+     "count": 73
     },
     {
      "tag": "react-native",
-     "count": 57
+     "count": 66
     },
     {
      "tag": "nextjs",
+     "count": 48
+    },
+    {
+     "tag": "vue",
+     "count": 47
+    },
+    {
+     "tag": "bun",
+     "count": 41
+    },
+    {
+     "tag": "vite",
      "count": 41
     },
     {
      "tag": "pnpm",
-     "count": 35
-    },
-    {
-     "tag": "bun",
-     "count": 33
-    },
-    {
-     "tag": "vite",
-     "count": 33
-    },
-    {
-     "tag": "vue",
-     "count": 32
+     "count": 38
     },
     {
      "tag": "tailwind",
-     "count": 31
+     "count": 37
     },
     {
      "tag": "deno",
-     "count": 28
-    },
-    {
-     "tag": "astro",
-     "count": 26
+     "count": 33
     },
     {
      "tag": "svelte",
-     "count": 21
+     "count": 33
+    },
+    {
+     "tag": "astro",
+     "count": 29
     },
     {
      "tag": "eslint",
-     "count": 19
+     "count": 28
+    },
+    {
+     "tag": "angular",
+     "count": 23
+    },
+    {
+     "tag": "shadcn-ui",
+     "count": 21
     },
     {
      "tag": "express",
+     "count": 20
+    },
+    {
+     "tag": "cloudflare-workers",
      "count": 18
     },
     {
@@ -2049,19 +2117,23 @@
      "count": 18
     },
     {
-     "tag": "cloudflare-workers",
-     "count": 16
-    },
-    {
-     "tag": "shadcn-ui",
-     "count": 16
-    },
-    {
      "tag": "three-js",
+     "count": 18
+    },
+    {
+     "tag": "aws",
+     "count": 17
+    },
+    {
+     "tag": "vitest",
+     "count": 17
+    },
+    {
+     "tag": "sqlite",
      "count": 16
     },
     {
-     "tag": "angular",
+     "tag": "claude",
      "count": 15
     },
     {
@@ -2069,11 +2141,11 @@
      "count": 15
     },
     {
-     "tag": "aws",
+     "tag": "react-query",
      "count": 14
     },
     {
-     "tag": "claude",
+     "tag": "react-router",
      "count": 14
     },
     {
@@ -2081,19 +2153,15 @@
      "count": 13
     },
     {
-     "tag": "sqlite",
+     "tag": "tanstack-query",
      "count": 13
     },
     {
-     "tag": "vitest",
-     "count": 13
-    },
-    {
-     "tag": "react-query",
+     "tag": "css-modules",
      "count": 12
     },
     {
-     "tag": "react-router",
+     "tag": "webpack",
      "count": 12
     },
     {
@@ -2101,55 +2169,67 @@
      "count": 11
     },
     {
-     "tag": "css-modules",
-     "count": 11
-    },
-    {
-     "tag": "tanstack-query",
-     "count": 11
-    },
-    {
      "tag": "expo",
-     "count": 10
-    },
-    {
-     "tag": "fastify",
-     "count": 9
-    },
-    {
-     "tag": "rolldown",
-     "count": 9
-    },
-    {
-     "tag": "jest",
-     "count": 8
-    },
-    {
-     "tag": "playwright",
-     "count": 8
+     "count": 11
     },
     {
      "tag": "prisma",
-     "count": 8
+     "count": 11
     },
     {
-     "tag": "webpack",
-     "count": 8
+     "tag": "rolldown",
+     "count": 11
     },
     {
-     "tag": "yarn",
-     "count": 8
+     "tag": "fastify",
+     "count": 10
+    },
+    {
+     "tag": "jest",
+     "count": 10
+    },
+    {
+     "tag": "zod",
+     "count": 10
     },
     {
      "tag": "d3",
-     "count": 7
+     "count": 9
+    },
+    {
+     "tag": "playwright",
+     "count": 9
+    },
+    {
+     "tag": "yarn",
+     "count": 9
+    },
+    {
+     "tag": "drizzle",
+     "count": 8
+    },
+    {
+     "tag": "framer-motion",
+     "count": 8
+    },
+    {
+     "tag": "nuxt",
+     "count": 8
     },
     {
      "tag": "docker",
      "count": 7
     },
     {
-     "tag": "drizzle",
+     "tag": "gpt",
+     "count": 7
+    },
+    {
+     "tag": "gsap",
+     "count": 7
+    },
+    {
+     "tag": "mysql",
      "count": 7
     },
     {
@@ -2173,19 +2253,11 @@
      "count": 7
     },
     {
-     "tag": "zod",
-     "count": 7
-    },
-    {
-     "tag": "framer-motion",
+     "tag": "babel",
      "count": 6
     },
     {
-     "tag": "gpt",
-     "count": 6
-    },
-    {
-     "tag": "gsap",
+     "tag": "cypress",
      "count": 6
     },
     {
@@ -2201,15 +2273,31 @@
      "count": 6
     },
     {
-     "tag": "mysql",
+     "tag": "preact",
      "count": 6
     },
     {
-     "tag": "nuxt",
+     "tag": "prettier",
+     "count": 6
+    },
+    {
+     "tag": "radix-ui",
+     "count": 6
+    },
+    {
+     "tag": "turbopack",
      "count": 6
     },
     {
      "tag": "azure",
+     "count": 5
+    },
+    {
+     "tag": "esbuild",
+     "count": 5
+    },
+    {
+     "tag": "gemini",
      "count": 5
     },
     {
@@ -2229,27 +2317,11 @@
      "count": 5
     },
     {
-     "tag": "preact",
-     "count": 5
-    },
-    {
      "tag": "redux",
      "count": 5
     },
     {
-     "tag": "babel",
-     "count": 4
-    },
-    {
-     "tag": "cypress",
-     "count": 4
-    },
-    {
-     "tag": "esbuild",
-     "count": 4
-    },
-    {
-     "tag": "gemini",
+     "tag": "biome",
      "count": 4
     },
     {
@@ -2265,7 +2337,15 @@
      "count": 4
     },
     {
+     "tag": "rails",
+     "count": 4
+    },
+    {
      "tag": "styled-components",
+     "count": 4
+    },
+    {
+     "tag": "sveltekit",
      "count": 4
     },
     {
@@ -2273,19 +2353,23 @@
      "count": 4
     },
     {
-     "tag": "turbopack",
-     "count": 4
-    },
-    {
      "tag": "adonisjs",
      "count": 3
     },
     {
-     "tag": "biome",
+     "tag": "ant-design",
      "count": 3
     },
     {
      "tag": "bullmq",
+     "count": 3
+    },
+    {
+     "tag": "headless-ui",
+     "count": 3
+    },
+    {
+     "tag": "hugging-face-transformers",
      "count": 3
     },
     {
@@ -2305,19 +2389,19 @@
      "count": 3
     },
     {
-     "tag": "prettier",
+     "tag": "oxlint",
      "count": 3
     },
     {
-     "tag": "radix-ui",
+     "tag": "rollup",
      "count": 3
     },
     {
-     "tag": "rails",
+     "tag": "sentry",
      "count": 3
     },
     {
-     "tag": "sveltekit",
+     "tag": "socket-io",
      "count": 3
     },
     {
@@ -2337,19 +2421,15 @@
      "count": 2
     },
     {
+     "tag": "gatsby",
+     "count": 2
+    },
+    {
      "tag": "hapi",
      "count": 2
     },
     {
-     "tag": "headless-ui",
-     "count": 2
-    },
-    {
      "tag": "htmx",
-     "count": 2
-    },
-    {
-     "tag": "hugging-face-transformers",
      "count": 2
     },
     {
@@ -2365,11 +2445,11 @@
      "count": 2
     },
     {
-     "tag": "nestjs",
+     "tag": "llama",
      "count": 2
     },
     {
-     "tag": "oxlint",
+     "tag": "nestjs",
      "count": 2
     },
     {
@@ -2381,6 +2461,10 @@
      "count": 2
     },
     {
+     "tag": "pm2",
+     "count": 2
+    },
+    {
      "tag": "protobuf",
      "count": 2
     },
@@ -2389,15 +2473,7 @@
      "count": 2
     },
     {
-     "tag": "rollup",
-     "count": 2
-    },
-    {
      "tag": "selenium",
-     "count": 2
-    },
-    {
-     "tag": "sentry",
      "count": 2
     },
     {
@@ -2405,19 +2481,23 @@
      "count": 2
     },
     {
-     "tag": "socket-io",
-     "count": 2
-    },
-    {
      "tag": "temporal",
      "count": 2
     },
     {
-     "tag": "alembic",
-     "count": 1
+     "tag": "trpc",
+     "count": 2
     },
     {
-     "tag": "ant-design",
+     "tag": "tsx",
+     "count": 2
+    },
+    {
+     "tag": "zustand",
+     "count": 2
+    },
+    {
+     "tag": "alembic",
      "count": 1
     },
     {
@@ -2430,10 +2510,6 @@
     },
     {
      "tag": "figma",
-     "count": 1
-    },
-    {
-     "tag": "gatsby",
      "count": 1
     },
     {
@@ -2457,11 +2533,23 @@
      "count": 1
     },
     {
+     "tag": "langchain",
+     "count": 1
+    },
+    {
+     "tag": "laravel",
+     "count": 1
+    },
+    {
      "tag": "lit",
      "count": 1
     },
     {
-     "tag": "llama",
+     "tag": "mistral",
+     "count": 1
+    },
+    {
+     "tag": "nats",
      "count": 1
     },
     {
@@ -2486,10 +2574,6 @@
     },
     {
      "tag": "phi",
-     "count": 1
-    },
-    {
-     "tag": "pm2",
      "count": 1
     },
     {
@@ -2521,19 +2605,19 @@
      "count": 1
     },
     {
+     "tag": "swr",
+     "count": 1
+    },
+    {
      "tag": "terraform",
      "count": 1
     },
     {
-     "tag": "trpc",
+     "tag": "transformers",
      "count": 1
     },
     {
      "tag": "ts-node",
-     "count": 1
-    },
-    {
-     "tag": "tsx",
      "count": 1
     },
     {
@@ -2559,10 +2643,6 @@
     {
      "tag": "yup",
      "count": 1
-    },
-    {
-     "tag": "zustand",
-     "count": 1
     }
    ]
   },
@@ -2571,174 +2651,182 @@
    "tags": [
     {
      "tag": "performance",
-     "count": 541
+     "count": 594
     },
     {
      "tag": "ux",
-     "count": 329
+     "count": 360
     },
     {
      "tag": "ui",
-     "count": 248
+     "count": 284
     },
     {
      "tag": "open-source",
-     "count": 231
+     "count": 266
     },
     {
      "tag": "dev-experience",
-     "count": 213
+     "count": 249
     },
     {
      "tag": "optimization",
-     "count": 184
-    },
-    {
-     "tag": "security",
-     "count": 173
-    },
-    {
-     "tag": "architecture",
-     "count": 164
+     "count": 205
     },
     {
      "tag": "developer-productivity",
-     "count": 160
+     "count": 183
+    },
+    {
+     "tag": "security",
+     "count": 183
+    },
+    {
+     "tag": "architecture",
+     "count": 181
     },
     {
      "tag": "dx",
-     "count": 143
+     "count": 168
     },
     {
      "tag": "accessibility",
-     "count": 134
+     "count": 140
     },
     {
      "tag": "api-design",
-     "count": 99
-    },
-    {
-     "tag": "data-engineering",
-     "count": 82
+     "count": 109
     },
     {
      "tag": "testing",
-     "count": 75
+     "count": 88
+    },
+    {
+     "tag": "data-engineering",
+     "count": 83
     },
     {
      "tag": "design-systems",
+     "count": 78
+    },
+    {
+     "tag": "type-safety",
      "count": 69
     },
     {
      "tag": "data-fetching",
-     "count": 59
-    },
-    {
-     "tag": "type-safety",
-     "count": 59
-    },
-    {
-     "tag": "reliability",
-     "count": 57
-    },
-    {
-     "tag": "community",
-     "count": 55
+     "count": 65
     },
     {
      "tag": "state-management",
-     "count": 49
+     "count": 62
     },
     {
-     "tag": "scalability",
-     "count": 44
+     "tag": "community",
+     "count": 61
     },
     {
-     "tag": "error-handling",
-     "count": 43
-    },
-    {
-     "tag": "debugging",
-     "count": 42
+     "tag": "reliability",
+     "count": 58
     },
     {
      "tag": "caching",
-     "count": 40
+     "count": 49
     },
     {
-     "tag": "design-patterns",
-     "count": 39
+     "tag": "error-handling",
+     "count": 49
+    },
+    {
+     "tag": "debugging",
+     "count": 46
+    },
+    {
+     "tag": "scalability",
+     "count": 45
     },
     {
      "tag": "async",
-     "count": 38
+     "count": 43
     },
     {
      "tag": "concurrency",
-     "count": 38
+     "count": 43
+    },
+    {
+     "tag": "design-patterns",
+     "count": 41
     },
     {
      "tag": "ci-cd",
-     "count": 35
+     "count": 39
     },
     {
      "tag": "observability",
-     "count": 31
-    },
-    {
-     "tag": "validation",
-     "count": 30
-    },
-    {
-     "tag": "devops",
-     "count": 28
-    },
-    {
-     "tag": "web-vitals",
-     "count": 28
+     "count": 35
     },
     {
      "tag": "cloud",
-     "count": 26
+     "count": 33
+    },
+    {
+     "tag": "devops",
+     "count": 33
     },
     {
      "tag": "refactoring",
-     "count": 26
+     "count": 32
+    },
+    {
+     "tag": "validation",
+     "count": 32
     },
     {
      "tag": "clean-code",
-     "count": 25
+     "count": 31
+    },
+    {
+     "tag": "web-vitals",
+     "count": 29
+    },
+    {
+     "tag": "governance",
+     "count": 26
     },
     {
      "tag": "data-pipelines",
      "count": 25
     },
     {
-     "tag": "governance",
-     "count": 22
-    },
-    {
      "tag": "monitoring",
-     "count": 22
+     "count": 24
     },
     {
      "tag": "privacy",
+     "count": 23
+    },
+    {
+     "tag": "technical-debt",
+     "count": 23
+    },
+    {
+     "tag": "authentication",
      "count": 22
     },
     {
      "tag": "latency",
-     "count": 21
-    },
-    {
-     "tag": "authentication",
-     "count": 20
+     "count": 22
     },
     {
      "tag": "data-privacy",
-     "count": 19
+     "count": 21
     },
     {
      "tag": "profiling",
+     "count": 19
+    },
+    {
+     "tag": "serverless",
      "count": 19
     },
     {
@@ -2746,27 +2834,23 @@
      "count": 18
     },
     {
-     "tag": "technical-debt",
-     "count": 18
-    },
-    {
-     "tag": "serverless",
-     "count": 17
-    },
-    {
      "tag": "a11y",
-     "count": 15
+     "count": 16
     },
     {
      "tag": "edge-computing",
-     "count": 12
+     "count": 13
     },
     {
      "tag": "internationalization",
-     "count": 12
+     "count": 13
     },
     {
      "tag": "authorization",
+     "count": 12
+    },
+    {
+     "tag": "ai-ethics",
      "count": 11
     },
     {
@@ -2774,43 +2858,51 @@
      "count": 11
     },
     {
-     "tag": "ai-ethics",
-     "count": 8
+     "tag": "parallelism",
+     "count": 10
     },
     {
      "tag": "compliance",
-     "count": 7
-    },
-    {
-     "tag": "encryption",
-     "count": 7
-    },
-    {
-     "tag": "infrastructure-as-code",
-     "count": 7
-    },
-    {
-     "tag": "llmops",
-     "count": 7
-    },
-    {
-     "tag": "parallelism",
-     "count": 7
-    },
-    {
-     "tag": "platform-engineering",
-     "count": 7
-    },
-    {
-     "tag": "productivity",
-     "count": 7
+     "count": 9
     },
     {
      "tag": "throughput",
-     "count": 7
+     "count": 9
+    },
+    {
+     "tag": "encryption",
+     "count": 8
+    },
+    {
+     "tag": "infrastructure-as-code",
+     "count": 8
+    },
+    {
+     "tag": "llmops",
+     "count": 8
+    },
+    {
+     "tag": "platform-engineering",
+     "count": 8
+    },
+    {
+     "tag": "productivity",
+     "count": 8
     },
     {
      "tag": "e2e-testing",
+     "count": 7
+    },
+    {
+     "tag": "cost-optimization",
+     "count": 6
+    },
+    {
+     "tag": "licensing",
+     "count": 6
+    },
+    {
+     "tag": "logging",
      "count": 6
     },
     {
@@ -2818,31 +2910,23 @@
      "count": 6
     },
     {
-     "tag": "licensing",
-     "count": 5
-    },
-    {
-     "tag": "logging",
-     "count": 5
-    },
-    {
      "tag": "agentops",
-     "count": 4
+     "count": 5
+    },
+    {
+     "tag": "localization",
+     "count": 5
+    },
+    {
+     "tag": "orchestration",
+     "count": 5
     },
     {
      "tag": "ai-safety",
      "count": 4
     },
     {
-     "tag": "cost-optimization",
-     "count": 4
-    },
-    {
      "tag": "metrics",
-     "count": 4
-    },
-    {
-     "tag": "orchestration",
      "count": 4
     },
     {
@@ -2851,6 +2935,14 @@
     },
     {
      "tag": "team-management",
+     "count": 4
+    },
+    {
+     "tag": "transparency",
+     "count": 4
+    },
+    {
+     "tag": "unit-testing",
      "count": 4
     },
     {
@@ -2870,16 +2962,16 @@
      "count": 3
     },
     {
-     "tag": "localization",
-     "count": 3
-    },
-    {
      "tag": "regulation",
      "count": 3
     },
     {
-     "tag": "unit-testing",
+     "tag": "responsible-ai",
      "count": 3
+    },
+    {
+     "tag": "bdd",
+     "count": 2
     },
     {
      "tag": "ethics",
@@ -2887,6 +2979,10 @@
     },
     {
      "tag": "evals",
+     "count": 2
+    },
+    {
+     "tag": "guardrails",
      "count": 2
     },
     {
@@ -2898,10 +2994,6 @@
      "count": 2
     },
     {
-     "tag": "responsible-ai",
-     "count": 2
-    },
-    {
      "tag": "sustainability",
      "count": 2
     },
@@ -2910,15 +3002,7 @@
      "count": 2
     },
     {
-     "tag": "transparency",
-     "count": 2
-    },
-    {
      "tag": "ai-regulation",
-     "count": 1
-    },
-    {
-     "tag": "bdd",
      "count": 1
     },
     {
@@ -2926,7 +3010,7 @@
      "count": 1
     },
     {
-     "tag": "guardrails",
+     "tag": "fmops",
      "count": 1
     },
     {
@@ -2948,47 +3032,51 @@
    "tags": [
     {
      "tag": "ai-coding-agents",
-     "count": 80
-    },
-    {
-     "tag": "on-device-ai",
-     "count": 46
+     "count": 93
     },
     {
      "tag": "ai-agents",
-     "count": 44
+     "count": 51
+    },
+    {
+     "tag": "on-device-ai",
+     "count": 51
     },
     {
      "tag": "agentic-ai",
-     "count": 39
-    },
-    {
-     "tag": "local-llm",
-     "count": 38
+     "count": 45
     },
     {
      "tag": "coding-agents",
-     "count": 36
+     "count": 41
+    },
+    {
+     "tag": "local-llm",
+     "count": 40
+    },
+    {
+     "tag": "vibe-coding",
+     "count": 29
     },
     {
      "tag": "edge-ai",
-     "count": 26
+     "count": 28
+    },
+    {
+     "tag": "copilots",
+     "count": 25
     },
     {
      "tag": "vector-search",
      "count": 24
     },
     {
-     "tag": "vibe-coding",
-     "count": 23
-    },
-    {
      "tag": "mcp",
-     "count": 20
+     "count": 21
     },
     {
-     "tag": "copilots",
-     "count": 19
+     "tag": "tool-calling",
+     "count": 18
     },
     {
      "tag": "embeddings",
@@ -2999,27 +3087,35 @@
      "count": 16
     },
     {
-     "tag": "tool-calling",
+     "tag": "small-language-models",
      "count": 16
     },
     {
-     "tag": "small-language-models",
+     "tag": "ai-governance",
      "count": 13
     },
     {
      "tag": "generative-ui",
-     "count": 11
+     "count": 13
     },
     {
-     "tag": "ai-governance",
+     "tag": "open-weights",
      "count": 10
+    },
+    {
+     "tag": "foundation-models",
+     "count": 9
     },
     {
      "tag": "model-context-protocol",
      "count": 9
     },
     {
-     "tag": "open-weights",
+     "tag": "agent-orchestration",
+     "count": 8
+    },
+    {
+     "tag": "structured-output",
      "count": 8
     },
     {
@@ -3027,31 +3123,23 @@
      "count": 7
     },
     {
-     "tag": "foundation-models",
-     "count": 7
-    },
-    {
      "tag": "semantic-search",
      "count": 7
     },
     {
-     "tag": "agent-orchestration",
-     "count": 6
-    },
-    {
-     "tag": "structured-output",
-     "count": 6
-    },
-    {
      "tag": "ai-search",
-     "count": 5
+     "count": 6
     },
     {
      "tag": "computer-use",
-     "count": 4
+     "count": 6
     },
     {
      "tag": "reasoning-models",
+     "count": 5
+    },
+    {
+     "tag": "multi-agent",
      "count": 4
     },
     {
@@ -3075,6 +3163,14 @@
      "count": 3
     },
     {
+     "tag": "prompt-injection",
+     "count": 3
+    },
+    {
+     "tag": "vision-language-models",
+     "count": 3
+    },
+    {
      "tag": "function-calling",
      "count": 2
     },
@@ -3083,11 +3179,7 @@
      "count": 2
     },
     {
-     "tag": "multi-agent",
-     "count": 2
-    },
-    {
-     "tag": "prompt-injection",
+     "tag": "jailbreaks",
      "count": 2
     },
     {
@@ -3095,11 +3187,7 @@
      "count": 2
     },
     {
-     "tag": "vision-language-models",
-     "count": 2
-    },
-    {
-     "tag": "jailbreaks",
+     "tag": "chain-of-thought",
      "count": 1
     },
     {
@@ -3136,10 +3224,14 @@
   "models": {
    "searchBatch": {
     "model": "deepseek/deepseek-v4-flash",
-    "effort": "xhigh"
+    "effort": "medium"
    },
    "searchRelevance": {
     "model": "deepseek/deepseek-v4-flash",
+    "effort": "high"
+   },
+   "searchSpec": {
+    "model": "deepseek/deepseek-v4-pro",
     "effort": "high"
    },
    "fallback": {
@@ -3150,8 +3242,13 @@
    "soft": 6,
    "deep": 10
   },
+  "uiConcurrency": {
+   "default": 8,
+   "ceiling": 24
+  },
   "costHints": {
-   "searchBatch": 0.0015565663903030302
+   "searchBatch": 0.001550630160597015,
+   "searchSpec": 0.004609193524390244
   }
  }
 }

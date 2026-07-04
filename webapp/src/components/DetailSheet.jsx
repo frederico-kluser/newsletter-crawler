@@ -2,7 +2,7 @@ import { motion, useDragControls } from 'motion/react';
 import { useEffect, useState } from 'react';
 import { getContent } from '../lib/data.js';
 import { fades, springs } from '../motion/transitions.js';
-import { FACET_LABEL, KIND_LABEL, STR, VERIFY_LABEL } from '../strings.js';
+import { useStrings } from '../i18n.jsx';
 import { fmtDate } from '../lib/format.js';
 import { effectiveKind } from '../lib/taxonomy.js';
 
@@ -13,6 +13,8 @@ import { effectiveKind } from '../lib/taxonomy.js';
  * O corpo (content) é LAZY: baixa contents.json na 1ª abertura.
  */
 export default function DetailSheet({ article: a, toolTypes, isMobile, onClose }) {
+  const STR = useStrings();
+  const { FACET_LABEL, KIND_LABEL, VERIFY_LABEL } = STR;
   const [content, setContent] = useState(null);
   const [failed, setFailed] = useState(false);
   const dragControls = useDragControls();
@@ -91,7 +93,7 @@ export default function DetailSheet({ article: a, toolTypes, isMobile, onClose }
           {isMobile && <div className="drawer-handle" aria-hidden="true" />}
           <div className="sheet-head-row">
             <span className="sheet-eyebrow">
-              {a.source_name || `fonte ${a.source_id}`}
+              {a.source_name || STR.sourceFallback(a.source_id)}
               {a.date_iso ? ` · ${fmtDate(a.date_iso)}` : ''}
             </span>
             <button type="button" className="icon-btn" onClick={onClose} aria-label={STR.close}>

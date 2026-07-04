@@ -1,6 +1,7 @@
 import { motion } from 'motion/react';
 import { springs } from '../motion/transitions.js';
-import { STR, fmtUsd, fmtDateTime } from '../strings.js';
+import { fmtUsd, fmtDateTime } from '../strings.js';
+import { useStrings } from '../i18n.jsx';
 
 /**
  * Cabeçalho dos resultados da busca IA: consulta, contadores, custo real e "limpar". Quando o
@@ -8,6 +9,7 @@ import { STR, fmtUsd, fmtDateTime } from '../strings.js';
  * oferece "rodar de novo" (re-paga).
  */
 export default function AiBanner({ result, missing = 0, onClear, onRerun }) {
+  const STR = useStrings();
   return (
     <motion.div
       className="ai-banner"

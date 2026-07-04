@@ -1,5 +1,5 @@
 import { motion } from 'motion/react';
-import { STR } from '../strings.js';
+import { useStrings } from '../i18n.jsx';
 import { springs } from '../motion/transitions.js';
 
 const KeyIcon = () => (
@@ -14,6 +14,7 @@ const KeyIcon = () => (
  * o modal p/ inserir/trocar/esquecer — proativamente, sem precisar tentar uma busca antes.
  */
 export default function KeyButton({ hasKey, onClick }) {
+  const STR = useStrings();
   return (
     <motion.button
       type="button"

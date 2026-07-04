@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { motion } from 'motion/react';
 import { springs } from '../motion/transitions.js';
-import { STR } from '../strings.js';
+import { useStrings } from '../i18n.jsx';
 
 const CAP = 14; // chips visíveis por faceta antes do "+N mais" (paridade com o web-ui do CLI)
 
 /** Grupo de chips de uma faceta, com contagem por tag e expansão além do cap. */
 export default function FacetGroup({ name, label, tags, selected = [], onToggle }) {
+  const STR = useStrings();
   const [expanded, setExpanded] = useState(false);
   // selecionadas sempre visíveis, mesmo além do cap (senão a pill ativa "some" do painel)
   const shown = expanded ? tags : tags.filter((t, i) => i < CAP || selected.includes(t.tag));

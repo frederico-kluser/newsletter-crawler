@@ -1,11 +1,14 @@
 import ThemeToggle from './ThemeToggle.jsx';
-import { STR } from '../strings.js';
+import LanguageToggle from './LanguageToggle.jsx';
+import HelpButton from './HelpButton.jsx';
+import { useStrings } from '../i18n.jsx';
 
 /**
- * Barra fixa do topo: brand à esquerda, busca (children) no centro, custo/tema à direita.
- * O fundo translúcido + borda ganham presença ao rolar (ver .topbar[data-scrolled]).
+ * Barra fixa do topo: brand à esquerda, busca (children) no centro, controles à direita
+ * (chave/custo + idioma + ajuda + tema). O fundo translúcido + borda ganham presença ao rolar.
  */
-export default function TopBar({ theme, onToggleTheme, children, right = null, scrolled = false }) {
+export default function TopBar({ theme, onToggleTheme, onHelp, children, right = null, scrolled = false }) {
+  const STR = useStrings();
   return (
     <header className="topbar" data-scrolled={scrolled || undefined}>
       <div className="topbar-inner">
@@ -19,6 +22,8 @@ export default function TopBar({ theme, onToggleTheme, children, right = null, s
         <div className="topbar-center">{children}</div>
         <div className="topbar-right">
           {right}
+          <LanguageToggle />
+          <HelpButton onClick={onHelp} />
           <ThemeToggle theme={theme} onToggle={onToggleTheme} />
         </div>
       </div>

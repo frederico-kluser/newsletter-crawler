@@ -1,5 +1,5 @@
 import FacetGroup from './FacetGroup.jsx';
-import { FACET_LABEL, STR, VERIFY_LABEL } from '../strings.js';
+import { useStrings } from '../i18n.jsx';
 
 function daysAgoIso(days) {
   const d = new Date();
@@ -12,6 +12,8 @@ function daysAgoIso(days) {
  * Fonte, período (com presets 7/30 dias), verificação e as 9 facetas.
  */
 export default function FilterPanel({ meta, filters, dispatch }) {
+  const STR = useStrings();
+  const { FACET_LABEL, VERIFY_LABEL } = STR;
   const set = (key, value) => dispatch({ type: 'set', key, value });
   const preset = (days) => {
     dispatch({ type: 'set', key: 'from', value: daysAgoIso(days) });

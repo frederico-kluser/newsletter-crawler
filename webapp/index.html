@@ -18,6 +18,16 @@
         var t = localStorage.getItem('nc-theme');
         if (t === 'dark' || t === 'light') document.documentElement.dataset.theme = t;
       } catch (e) {}
+      // Idioma ANTES do 1º paint: escolha salva vence; senão, só português vira pt-BR e
+      // QUALQUER outro idioma cai em inglês. Mesma regra do resolveLocale() em i18n.jsx.
+      try {
+        var l = localStorage.getItem('nc-locale');
+        if (l !== 'pt' && l !== 'en') {
+          var nav = (navigator.languages && navigator.languages[0]) || navigator.language || 'en';
+          l = String(nav).toLowerCase().split('-')[0] === 'pt' ? 'pt' : 'en';
+        }
+        document.documentElement.lang = l === 'pt' ? 'pt-BR' : 'en';
+      } catch (e) {}
     </script>
   </head>
   <body>

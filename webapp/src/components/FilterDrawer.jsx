@@ -2,13 +2,14 @@ import { AnimatePresence, motion } from 'motion/react';
 import { useEffect } from 'react';
 import FilterPanel from './FilterPanel.jsx';
 import { fades, springs } from '../motion/transitions.js';
-import { STR } from '../strings.js';
+import { useStrings } from '../i18n.jsx';
 
 /**
  * Drawer inferior de filtros (mobile <900px): entra por baixo com spring, fecha por backdrop,
  * Esc ou ARRASTO para baixo (offset > 120px ou flick > 800px/s — só transform, sem thrash).
  */
 export default function FilterDrawer({ open, onClose, meta, filters, dispatch }) {
+  const STR = useStrings();
   useEffect(() => {
     if (!open) return undefined;
     const onKey = (e) => e.key === 'Escape' && onClose();

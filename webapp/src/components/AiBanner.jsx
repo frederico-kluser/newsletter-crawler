@@ -1,9 +1,11 @@
 import { motion } from 'motion/react';
 import { springs } from '../motion/transitions.js';
-import { STR, fmtUsd } from '../strings.js';
+import { fmtUsd } from '../strings.js';
+import { useStrings } from '../i18n.jsx';
 
 /** Cabeçalho dos resultados da busca IA: consulta, contadores, custo real e "limpar". */
 export default function AiBanner({ result, onClear }) {
+  const STR = useStrings();
   return (
     <motion.div
       className="ai-banner"

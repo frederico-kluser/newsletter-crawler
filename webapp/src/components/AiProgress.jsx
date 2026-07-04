@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
 import { springs } from '../motion/transitions.js';
 import AnimatedCount from './AnimatedCount.jsx';
-import { STR, fmtUsd, fmtEta } from '../strings.js';
+import { fmtUsd, fmtEta } from '../strings.js';
+import { useStrings } from '../i18n.jsx';
 
 /**
  * Loader da busca IA: barra DETERMINÍSTICA (scaleX por ARTIGOS concluídos — transform, nunca
@@ -12,6 +13,7 @@ import { STR, fmtUsd, fmtEta } from '../strings.js';
  * é sempre honesto. ETA = elapsed/done · (total-done), recalculada a cada tick + 1 timer de 1s.
  */
 export default function AiProgress({ progress, deep, startedAt, onCancel }) {
+  const STR = useStrings();
   const reduced = useReducedMotion();
   const p = progress || { done: 0, total: 0, relevant: 0, failed: 0, spentUsd: 0, mode: deep ? 'deep' : 'soft' };
   const total = p.total > 0 ? p.total : 0;

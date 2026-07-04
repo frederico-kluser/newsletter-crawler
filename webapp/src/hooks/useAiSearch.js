@@ -5,7 +5,7 @@ import { runSearch } from '../lib/search.js';
 import { probeKey } from '../lib/openrouter.js';
 import { applyFilters, EMPTY_FILTERS } from '../lib/filters.js';
 import { clearApiKey, getApiKey, setApiKey } from '../lib/storage.js';
-import { STR } from '../strings.js';
+import { useStrings } from '../i18n.jsx';
 
 /**
  * Máquina de estados da busca IA (BYOK): idle → (keyModal) → confirm → running → done|error.
@@ -15,6 +15,7 @@ import { STR } from '../strings.js';
  * o modal com a busca pendente — salvar re-dispara sozinho.
  */
 export function useAiSearch({ articles, meta, filters }) {
+  const STR = useStrings();
   const [state, setState] = useState({
     phase: 'idle', query: '', deep: false, progress: null, result: null, error: null,
     partialHits: [], startedAt: null, // streaming: hits ao vivo + t0 p/ o ETA do loader
@@ -103,7 +104,7 @@ export function useAiSearch({ articles, meta, filters }) {
       if (needsConfirm) setConfirmInfo({ query: q, deep, count: candidates.length, calls, usd, candidates });
       else start({ query: q, deep, candidates });
     },
-    [articles, filters, meta, scopeCandidates, start, state.phase],
+    [articles, filters, meta, scopeCandidates, start, state.phase, STR],
   );
 
   const confirm = useCallback(() => {
@@ -139,7 +140,7 @@ export function useAiSearch({ articles, meta, filters }) {
       setKeyModal(null);
       if (pending) submit(pending.query, pending.deep);
     },
-    [keyModal, submit],
+    [keyModal, submit, STR],
   );
 
   const dismissKey = useCallback(() => setKeyModal(null), []);

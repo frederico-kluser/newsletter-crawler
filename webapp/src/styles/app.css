@@ -1080,3 +1080,156 @@
   font-size: 11.5px;
   font-variant-numeric: tabular-nums;
 }
+
+/* ---- seletor de idioma (topbar) — segmented compacto com pílula deslizante (layoutId) ---- */
+.lang-toggle {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: var(--radius-m);
+  background: var(--seg-bg);
+}
+.lang-opt {
+  position: relative;
+  padding: 5px 9px;
+  border-radius: 7px;
+  font-size: 11.5px;
+  font-weight: 650;
+  letter-spacing: 0.03em;
+  color: var(--fg-muted);
+}
+.lang-opt[data-active] {
+  color: var(--fg);
+}
+.lang-pill {
+  position: absolute;
+  inset: 0;
+  border-radius: 7px;
+  background: var(--seg-thumb);
+  box-shadow: var(--shadow-1);
+}
+.lang-opt-label {
+  position: relative;
+  z-index: 1;
+}
+
+/* ---- tutorial / onboarding (sheet central estilo "Welcome") ---- */
+.tutorial-card {
+  position: relative;
+  width: min(440px, 100%);
+  background: var(--sheet-bg);
+  border-radius: var(--radius-l);
+  box-shadow: var(--shadow-sheet);
+  padding: 16px 28px 22px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  overflow: hidden;
+}
+.tutorial-head {
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+.tutorial-close {
+  width: 32px;
+  height: 32px;
+  color: var(--fg-muted);
+  font-size: 15px;
+}
+.tutorial-stage {
+  display: grid;
+  align-items: center;
+  width: 100%;
+  min-height: 256px; /* altura estável entre passos — os botões/bolinhas não "pulam" */
+}
+.tutorial-step {
+  grid-area: 1 / 1; /* enter/exit no mesmo lugar durante o slide */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+.tutorial-icon {
+  display: grid;
+  place-items: center;
+  width: 78px;
+  height: 78px;
+  margin-top: 6px;
+  border-radius: 22px;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border: 1px solid color-mix(in oklab, var(--accent) 22%, transparent);
+}
+.tutorial-icon svg {
+  width: 38px;
+  height: 38px;
+}
+.tutorial-title {
+  font-family: var(--font-display);
+  font-size: 21px;
+  font-weight: 680;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+.tutorial-body {
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--fg-soft);
+  max-width: 34ch;
+}
+.tutorial-dots {
+  display: flex;
+  gap: 7px;
+  justify-content: center;
+  margin: 16px 0 20px;
+}
+.tutorial-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: var(--radius-pill);
+  background: color-mix(in oklab, var(--fg) 22%, transparent);
+  transition: background 0.2s ease, width 0.2s ease;
+}
+.tutorial-dot[data-active] {
+  width: 20px;
+  background: var(--accent);
+}
+.tutorial-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+}
+.tutorial-actions-right {
+  display: flex;
+  gap: 8px;
+}
+.tutorial-skip {
+  background: transparent;
+  border-color: transparent;
+  color: var(--fg-muted);
+}
+.tutorial-skip:hover {
+  border-color: transparent;
+  color: var(--fg-soft);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tutorial-dot {
+    transition: none;
+  }
+}
+
+/* Topbar apertado (telas estreitas): deixa o cluster de controles quebrar alinhado à direita. */
+@media (max-width: 480px) {
+  .topbar-right {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    row-gap: 6px;
+  }
+}

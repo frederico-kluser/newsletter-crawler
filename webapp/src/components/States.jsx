@@ -1,6 +1,6 @@
 import { motion } from 'motion/react';
 import { springs } from '../motion/transitions.js';
-import { STR } from '../strings.js';
+import { useStrings } from '../i18n.jsx';
 
 /** Vazio (base vazia ou filtros sem resultado) — entrada com spring sutil. */
 export function EmptyState({ title, hint = null }) {
@@ -22,6 +22,7 @@ export function EmptyState({ title, hint = null }) {
 
 /** Falha ao carregar o snapshot (ou o conteúdo) com retry. */
 export function ErrorState({ message, onRetry }) {
+  const STR = useStrings();
   return (
     <motion.div
       className="state"

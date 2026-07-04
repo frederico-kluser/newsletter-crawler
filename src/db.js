@@ -258,6 +258,42 @@ const SEARCH_SCOPE_WHERE = `
 
 // Índice do delta por execução (run_id vem via ensureColumn, então não existe no CREATE base).
 db.exec('CREATE INDEX IF NOT EXISTS idx_articles_run ON articles(run_id)');
+
+// ---- FTS5/BM25 sobre articles: metade LÉXICA da busca híbrida (gerador de candidatos) ----
+// Tabela external-content (content='articles'): guarda SÓ o índice invertido, lê o texto por
+// rowid=id. Triggers mantêm sincronizado em insert/update/delete (o comando 'delete' passa os
+// valores ANTIGOS p/ o FTS localizar e decrementar a entrada certa). Indexa title/title_pt/
+// content/summary_pt; porter+unicode61 (stemming EN + tokenização robusta sem diacríticos).
+// Backfill ÚNICO via 'rebuild' quando a tabela é criada numa base que já tem artigos (o reset/
+// purge fazem DELETE FROM articles, então as triggers de delete já mantêm o índice coerente).
+{
+  const ftsExisted =
+    db.prepare(`SELECT count(*) AS c FROM sqlite_master WHERE type = 'table' AND name = 'articles_fts'`).get()
+      .c > 0;
+  db.exec(`
+    CREATE VIRTUAL TABLE IF NOT EXISTS articles_fts USING fts5(
+      title, title_pt, content, summary_pt,
+      content = 'articles', content_rowid = 'id',
+      tokenize = 'porter unicode61 remove_diacritics 2'
+    );
+    CREATE TRIGGER IF NOT EXISTS articles_fts_ai AFTER INSERT ON articles BEGIN
+      INSERT INTO articles_fts(rowid, title, title_pt, content, summary_pt)
+        VALUES (new.id, new.title, new.title_pt, new.content, new.summary_pt);
+    END;
+    CREATE TRIGGER IF NOT EXISTS articles_fts_ad AFTER DELETE ON articles BEGIN
+      INSERT INTO articles_fts(articles_fts, rowid, title, title_pt, content, summary_pt)
+        VALUES ('delete', old.id, old.title, old.title_pt, old.content, old.summary_pt);
+    END;
+    CREATE TRIGGER IF NOT EXISTS articles_fts_au AFTER UPDATE ON articles BEGIN
+      INSERT INTO articles_fts(articles_fts, rowid, title, title_pt, content, summary_pt)
+        VALUES ('delete', old.id, old.title, old.title_pt, old.content, old.summary_pt);
+      INSERT INTO articles_fts(rowid, title, title_pt, content, summary_pt)
+        VALUES (new.id, new.title, new.title_pt, new.content, new.summary_pt);
+    END;
+  `);
+  if (!ftsExisted) db.exec(`INSERT INTO articles_fts(articles_fts) VALUES ('rebuild')`);
+}
+
 export const stmts = {
   // sources
   upsertSource: db.prepare(
@@ -377,6 +413,22 @@ export const stmts = {
         AND a.run_id = @runId
       GROUP BY a.id
       ORDER BY matches DESC
+      LIMIT @limit`,
+  ),
+
+  // recuperação LÉXICA (FTS5/BM25): top-N ids por relevância, escopo opcional (fontes/período).
+  // Metade léxica da busca híbrida — candidatos p/ o LLM/reranker julgar só o top-K, não o acervo
+  // inteiro. bm25() é NEGATIVO (mais relevante = mais negativo) -> ORDER BY ASC; os pesos por
+  // coluna priorizam título (title, title_pt, content, summary_pt).
+  searchFts: db.prepare(
+    `SELECT a.id, bm25(articles_fts, 10.0, 8.0, 1.0, 3.0) AS score
+       FROM articles_fts
+       JOIN articles a ON a.id = articles_fts.rowid
+      WHERE articles_fts MATCH @q
+        AND (@sources IS NULL OR a.source_id IN (SELECT value FROM json_each(@sources)))
+        AND (@from IS NULL OR coalesce(iso_date(a.published_at), date(a.extracted_at)) >= @from)
+        AND (@to IS NULL OR coalesce(iso_date(a.published_at), date(a.extracted_at)) <= @to)
+      ORDER BY score
       LIMIT @limit`,
   ),
 

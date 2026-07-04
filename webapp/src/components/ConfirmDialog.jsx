@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { fades, springs } from '../motion/transitions.js';
-import { fmtUsd } from '../strings.js';
 import { useStrings } from '../i18n.jsx';
 
 /** Guard de custo da busca IA: mostra escopo, nº de chamadas e ~US$ antes de gastar. */
@@ -37,7 +36,7 @@ export default function ConfirmDialog({ info, onConfirm, onCancel }) {
             transition={springs.snappy}
           >
             <h2 className="dialog-title">{STR.confirmTitle}</h2>
-            <p className="dialog-body">{STR.confirmBody(info.count, info.calls, fmtUsd(info.usd))}</p>
+            <p className="dialog-body">{STR.confirmBody(info.count, info.calls)}</p>
             <p className="dialog-query">“{info.query}”</p>
             {info.deep && <p className="dialog-warn">{STR.aiDeepWarning}</p>}
             <div className="dialog-actions">

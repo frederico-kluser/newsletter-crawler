@@ -1050,34 +1050,25 @@
   flex: 1;
 }
 
-/* botão flutuante de filtros (mobile) */
-.fab {
-  position: fixed;
-  left: 50%;
-  transform: translateX(-50%);
-  bottom: calc(16px + env(safe-area-inset-bottom));
-  z-index: 50;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 11px 20px;
-  border-radius: var(--radius-pill);
-  background: var(--fg);
-  color: var(--bg-raised);
-  font-weight: 650;
-  font-size: 14px;
-  box-shadow: var(--shadow-2);
+/* botão de filtros na topbar (mobile) — badge com o nº de filtros ativos */
+.filter-btn {
+  position: relative;
 }
-.fab-badge {
+.filter-btn-badge {
+  position: absolute;
+  top: -3px;
+  right: -3px;
   display: grid;
   place-items: center;
-  min-width: 20px;
-  height: 20px;
-  padding: 0 5px;
+  min-width: 15px;
+  height: 15px;
+  padding: 0 4px;
   border-radius: 999px;
   background: var(--accent);
   color: var(--on-accent);
-  font-size: 11.5px;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
   font-variant-numeric: tabular-nums;
 }
 

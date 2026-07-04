@@ -55,8 +55,8 @@ const pt = {
 
   // confirmação de custo
   confirmTitle: 'Confirmar busca com IA',
-  confirmBody: (count, calls, usd) =>
-    `O escopo tem ${count} artigo${count === 1 ? '' : 's'} — serão ~${calls} chamada${calls === 1 ? '' : 's'} de IA (≈ ${usd}).`,
+  confirmBody: (count, calls) =>
+    `O escopo tem ${count} artigo${count === 1 ? '' : 's'} — serão ~${calls} chamada${calls === 1 ? '' : 's'} de IA.`,
   confirmGo: 'Rodar busca',
   confirmCancel: 'Agora não',
 
@@ -209,8 +209,8 @@ const en = {
   historyStats: (rel, total) => `${rel}/${total}`,
 
   confirmTitle: 'Confirm AI search',
-  confirmBody: (count, calls, usd) =>
-    `The scope has ${count} article${count === 1 ? '' : 's'} — that's ~${calls} AI call${calls === 1 ? '' : 's'} (≈ ${usd}).`,
+  confirmBody: (count, calls) =>
+    `The scope has ${count} article${count === 1 ? '' : 's'} — that's ~${calls} AI call${calls === 1 ? '' : 's'}.`,
   confirmGo: 'Run search',
   confirmCancel: 'Not now',
 

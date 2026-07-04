@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import { AnimatePresence, useMotionValueEvent, useScroll } from 'motion/react';
 import TopBar from './components/TopBar.jsx';
-import CostBadge from './components/CostBadge.jsx';
 import KeyButton from './components/KeyButton.jsx';
 import SearchBar from './components/SearchBar.jsx';
 import Segmented from './components/Segmented.jsx';
@@ -177,6 +176,20 @@ export default function App() {
         right={
           meta ? (
             <>
+              {!isDesktop && !error && (
+                <button
+                  type="button"
+                  className="icon-btn filter-btn"
+                  onClick={() => setDrawerOpen(true)}
+                  title={STR.filters}
+                  aria-label={STR.filters}
+                >
+                  <svg width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true">
+                    <path d="M2.2 3h11.6l-4.4 5.2v4.1l-2.8 1.4V8.2L2.2 3Z" strokeLinejoin="round" strokeLinecap="round" />
+                  </svg>
+                  {nActive > 0 && <span className="filter-btn-badge">{nActive}</span>}
+                </button>
+              )}
               <button
                 type="button"
                 className="icon-btn"
@@ -191,7 +204,6 @@ export default function App() {
                 </svg>
               </button>
               <KeyButton hasKey={ai.hasKey} onClick={ai.openKeyModal} />
-              <CostBadge baseUsd={meta.cost.totalUsd} sessionUsd={ai.sessionUsd} />
             </>
           ) : null
         }
@@ -303,19 +315,13 @@ export default function App() {
       )}
 
       {!isDesktop && meta && !error && (
-        <>
-          <button type="button" className="fab" onClick={() => setDrawerOpen(true)}>
-            {STR.filters}
-            {nActive > 0 && <span className="fab-badge">{nActive}</span>}
-          </button>
-          <FilterDrawer
-            open={drawerOpen}
-            onClose={() => setDrawerOpen(false)}
-            meta={meta}
-            filters={filters}
-            dispatch={dispatch}
-          />
-        </>
+        <FilterDrawer
+          open={drawerOpen}
+          onClose={() => setDrawerOpen(false)}
+          meta={meta}
+          filters={filters}
+          dispatch={dispatch}
+        />
       )}
 
       <AnimatePresence>

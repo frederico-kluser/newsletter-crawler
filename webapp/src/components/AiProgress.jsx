@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
 import { springs } from '../motion/transitions.js';
 import AnimatedCount from './AnimatedCount.jsx';
-import { fmtUsd, fmtEta } from '../strings.js';
+import { fmtEta } from '../strings.js';
 import { useStrings } from '../i18n.jsx';
 
 /**
@@ -60,12 +60,6 @@ export default function AiProgress({ progress, deep, startedAt, onCancel }) {
         <span className="ai-progress-stat">
           <AnimatedCount value={p.relevant} /> {p.relevant === 1 ? STR.aiUnitRelevant : STR.aiUnitRelevants}
         </span>
-        {p.spentUsd > 0 && (
-          <>
-            <span className="ai-progress-dot" aria-hidden="true">·</span>
-            <span className="ai-progress-stat">{fmtUsd(p.spentUsd)}</span>
-          </>
-        )}
         {etaSecs != null && (
           <>
             <span className="ai-progress-dot" aria-hidden="true">·</span>

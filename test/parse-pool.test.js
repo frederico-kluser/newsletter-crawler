@@ -1,6 +1,6 @@
 // Pool de parsing: correção do caminho worker, resposta a op desconhecida, e — o ponto central
 // da melhoria — RESTART on crash e TIMEOUT resolvem com o default seguro E o pool segue vivo.
-// Usa o fixture crash-worker.js (via PARSE_WORKER_PATH) p/ forçar crash/hang deterministicamente.
+// Usa o fixture crash-worker.js (via PARSE_WORKER_PATH) p/ forçar crash/segfault/hang determinístico.
 // NC_HOME temporário + envs ANTES do import (config.js lê no load).
 import { test, after } from 'node:test';
 import assert from 'node:assert/strict';
@@ -43,6 +43,17 @@ test('CRASH do worker (process.exit) -> task resolve default E o pool respawna e
   // rajada pós-crash: várias em paralelo continuam corretas
   const burst = await Promise.all(Array.from({ length: 6 }, (_, i) => runParse('echo', [i], null)));
   assert.deepEqual(burst, [0, 1, 2, 3, 4, 5]);
+});
+
+test('CRASH NATIVO por SINAL (proxy do SIGSEGV do JSDOM) -> resolve default, respawna E o runner SOBREVIVE', async () => {
+  // A task mata o próprio filho com um sinal terminal (SIGKILL — uncatchable, fiel a um crash
+  // nativo de verdade). Com o antigo transporte worker_threads este sinal mataria o PROCESSO
+  // INTEIRO (o "core dumped"): este teste derrubaria o runner. Com child_process fica contido no
+  // filho -> o pool vê 'exit' com signal e resolve com o default seguro (onDeath, sem esperar timeout).
+  const crashed = await runParse('segfault', [], 'SAFE');
+  assert.equal(crashed, 'SAFE', 'a task que crashou o filho resolve com o default seguro');
+  const alive = await runParse('echo', ['vivo2'], null);
+  assert.equal(alive, 'vivo2', 'pool respawnou após o crash por sinal e voltou a atender');
 });
 
 test('TIMEOUT por task (worker que trava) -> default seguro, e o pool segue vivo', async () => {

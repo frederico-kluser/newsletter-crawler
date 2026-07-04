@@ -11,9 +11,36 @@ import { stageWindow } from './governor.js';
 import { shouldStop } from './budget.js';
 import { log, warn, errorLog } from './util.js';
 
+// Erro-sentinela: a classificação NÃO rodou de fato — uma faceta OBRIGATÓRIA caiu por rede/API
+// (ok:false, já depois dos retries do transporte em llm.js). Mesmo CONTRATO do BUDGET_EXCEEDED: o
+// chamador NÃO persiste; o artigo fica sem linha em `classifications` e re-entra no próximo run.
+// É o que evita o falso-positivo "classificado sem tags" quando a internet cai no meio (o bug do
+// `finish`): antes, o catch por faceta engolia o erro e o artigo era gravado como 'partial' zerado,
+// que `listArticlesNeedingClassification` (WHERE c.article_id IS NULL) nunca mais re-selecionava.
+export class ClassifyIncompleteError extends Error {
+  constructor(missing) {
+    super(`classificação incompleta: faceta(s) obrigatória(s) falharam por rede/API: ${missing.join(', ')}`);
+    this.name = 'ClassifyIncompleteError';
+    this.code = 'CLASSIFY_INCOMPLETE';
+    this.missing = missing;
+  }
+}
+
+// Puro/testável: dado o resultado por faceta e as facetas, devolve os nomes das facetas
+// OBRIGATÓRIAS que ERRARAM (ok:false). Vazio ⇒ o núcleo respondeu ⇒ pode persistir (mesmo que
+// 'partial' por faceta vazia). O ponto é distinguir "errou" (ok:false: rede/API) de "vazia DE
+// VERDADE" (ok:true, tags:[]: resposta real de baixa qualidade) — só o erro real mantém pendente,
+// senão um artigo genuinamente sem tags re-classificaria para sempre.
+export function failedMandatoryFacets(results, facets) {
+  const mandatory = new Set(facets.filter((f) => f.mandatory).map((f) => f.name));
+  return results.filter((r) => r.ok === false && mandatory.has(r.facet)).map((r) => r.facet);
+}
+
 // Classifica 1 artigo: dispara as 9 facetas pelo gate e monta o objeto de resultado.
-// Fail-open por faceta: uma faceta que falhar vira tags=[] e marca o artigo como 'partial',
-// para que um erro pontual não derrube o lote inteiro.
+// Fail-open por faceta NÃO-obrigatória: uma que falhar vira tags=[] e marca o artigo como
+// 'partial', para que um erro pontual não derrube o lote. MAS se uma faceta OBRIGATÓRIA cair
+// por rede/API, lança ClassifyIncompleteError (o chamador não persiste) — sem isso o artigo
+// virava 'classificado' sem tags e nunca mais era re-selecionado (bug do finish com a net fora).
 async function classifyOne(article, gate) {
   const facets = getFacets();
   const results = await Promise.all(
@@ -45,6 +72,12 @@ async function classifyOne(article, gate) {
       }),
     ),
   );
+
+  // Rede/API caiu numa faceta OBRIGATÓRIA ⇒ classificação não confiável: aborta ANTES de montar/
+  // persistir para o artigo não virar uma ficha 'classificada' sem tags. Fica sem linha em
+  // classifications e re-tenta no próximo run (fail-safe, igual ao BUDGET_EXCEEDED).
+  const failedMandatory = failedMandatoryFacets(results, facets);
+  if (failedMandatory.length) throw new ClassifyIncompleteError(failedMandatory);
 
   const facetsOut = {};
   const confidences = {};
@@ -96,7 +129,9 @@ const persist = db.transaction((article, result) => {
 /**
  * Classifica UMA ficha (fan-out por faceta na folga da lane llm) e persiste atomicamente.
  * Compartilhado pelo sweep (classifyPending) e pelo streaming pós-save (commands.js). classifyOne
- * re-lança BUDGET_EXCEEDED ANTES de persistir, então um estouro no meio não deixa parcial.
+ * re-lança BUDGET_EXCEEDED e ClassifyIncompleteError (faceta obrigatória caiu por rede/API) ANTES
+ * de persistir, então um estouro/queda no meio NÃO deixa uma ficha classificada sem tags — o
+ * chamador (que já dá catch) apenas não persiste e o artigo re-tenta no próximo run.
  */
 export async function classifyArticleRow(article) {
   const result = await classifyOne(article, (fn) => fn());
@@ -106,7 +141,8 @@ export async function classifyArticleRow(article) {
 
 /**
  * Classifica os artigos pendentes (ou todos, com force). Idempotente e retomável: sem force
- * só pega quem ainda não tem classificação. Retorna { classified, total }.
+ * só pega quem ainda não tem classificação. Retorna { classified, total, kept } — `kept` = artigos
+ * mantidos pendentes porque uma faceta obrigatória caiu por rede/API (nada persistido; re-tenta).
  */
 export async function classifyPending({ limit = Infinity, force = false } = {}) {
   const lim = Number.isFinite(limit) ? limit : -1; // SQLite: LIMIT -1 = sem limite
@@ -133,6 +169,7 @@ export async function classifyPending({ limit = Infinity, force = false } = {}) 
   let done = 0;
   let partial = 0;
   let skipped = 0;
+  let kept = 0; // facetas obrigatórias caíram por rede/API: nada persistido, segue pendente
 
   await Promise.all(
     rows.map((article) =>
@@ -153,6 +190,10 @@ export async function classifyPending({ limit = Infinity, force = false } = {}) 
             skipped++; // nada persistido: o artigo continua elegível
             return;
           }
+          if (e?.code === 'CLASSIFY_INCOMPLETE') {
+            kept++; // rede/API caiu numa faceta obrigatória: fica pendente, re-tenta com net
+            return;
+          }
           errorLog(`classify falhou (${article.url}): ${e.message}`);
         }
       }),
@@ -161,7 +202,8 @@ export async function classifyPending({ limit = Infinity, force = false } = {}) 
 
   log(
     `classify concluído: ${done}/${rows.length} (partial=${partial}` +
+      `${kept ? `, ${kept} mantidos pendentes por falha de rede/API — re-tente com internet` : ''}` +
       `${skipped ? `, ${skipped} pulados por orçamento — retome com \`ncrawl classify\`` : ''}).`,
   );
-  return { classified: done, total: rows.length };
+  return { classified: done, total: rows.length, kept };
 }

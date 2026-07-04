@@ -14,7 +14,9 @@ import {
 } from './taxonomy.js';
 import {
   SEARCH_FLASH_CONCURRENCY, SEARCH_BATCH_SIZE, SEARCH_BATCH_CONCURRENCY, SEARCH_WEB_MAX_ITEMS,
+  SEARCH_CANDIDATES_K,
 } from './config.js';
+import { hybridCandidates } from './retrieval.js';
 import { stageWindow } from './governor.js';
 import { shouldStop, getBudgetState } from './budget.js';
 import { log, warn } from './util.js';
@@ -316,9 +318,17 @@ export async function searchWeb(query, { deep = false, sources = null, from = nu
     from,
     to,
   };
-  const rows = deep
+  let rows = deep
     ? stmts.webSearchCandidates.all(params)
     : stmts.webSearchCandidatesLite.all(params);
+  // Pré-filtro HÍBRIDO (FTS5/BM25 ⊕ embeddings/sqlite-vec, fundidos por RRF): o LLM (caro, O(n))
+  // julga só o top-K candidato em vez do escopo inteiro. Cai p/ só-léxico se não houver vetores.
+  const pf = await hybridCandidates(rows, query, { k: SEARCH_CANDIDATES_K, sources, from, to });
+  rows = pf.rows;
+  if (pf.prefiltered) {
+    onEvent?.({ type: 'prefilter', scope: pf.scope, candidates: rows.length, retrieval: pf.mode, reranked: pf.reranked });
+    log(`busca: pré-filtro ${pf.mode}${pf.reranked ? '+rerank' : ''} ${pf.scope} -> ${rows.length} candidatos`);
+  }
   resetProgress(rows.length);
   const verdicts = new Map();
   let skipped = 0;
@@ -398,7 +408,9 @@ export async function searchWeb(query, { deep = false, sources = null, from = nu
     if (!rel || rel.relation === 'none') continue;
     hits.push({ id: a.id, relation: rel.relation, kind: rel.kind });
   }
-  hits.sort((x, y) => RANK[x.relation] - RANK[y.relation] || y.id - x.id); // direct 1º; empate: mais novo 1º
+  // direct 1º; dentro da mesma relação, mantém a ORDEM dos candidatos (reranqueada no hybridCandidates).
+  const candPos = new Map(rows.map((r, i) => [r.id, i]));
+  hits.sort((x, y) => RANK[x.relation] - RANK[y.relation] || (candPos.get(x.id) ?? 1e9) - (candPos.get(y.id) ?? 1e9));
   const truncated = hits.length > SEARCH_WEB_MAX_ITEMS;
   log(
     `busca web "${query}" (${deep ? 'profunda' : 'soft'}): ${hits.length} relevante(s) de ${rows.length}` +
@@ -413,7 +425,7 @@ export async function searchWeb(query, { deep = false, sources = null, from = nu
     scope: { sources: Array.isArray(sources) && sources.length ? sources : null, from, to },
     stats: {
       scanned: _progress.scanned, total: rows.length, relevant: hits.length,
-      failed: _progress.failed, skipped, truncated,
+      failed: _progress.failed, skipped, truncated, scope: pf.scope, prefiltered: pf.prefiltered,
       spec, // congela o "entendimento" p/ reabrir e mostrar o banner sem repagar LLM
     },
     hits: shown,
@@ -423,6 +435,8 @@ export async function searchWeb(query, { deep = false, sources = null, from = nu
     deep,
     scanned: _progress.scanned,
     total: rows.length,
+    scope: pf.scope,
+    prefiltered: pf.prefiltered,
     relevant: hits.length,
     failed: _progress.failed,
     skipped,

@@ -141,16 +141,21 @@ export const VERIFY_STREAMING = process.env.VERIFY_STREAMING !== 'false';
 export const CLASSIFY_STREAMING = process.env.CLASSIFY_STREAMING !== 'false';
 export const SUMMARIZE_STREAMING = process.env.SUMMARIZE_STREAMING !== 'false';
 
-// ---- worker pool de parsing (isola o JSDOM do processo principal) ----
+// ---- pool de PROCESSOS de parsing (isola o JSDOM do processo principal) ----
 // O parse JSDOM/Readability (causa de um SIGSEGV nativo raro do parser de CSS do JSDOM) sai do
-// processo principal p/ um pool de workers: um crash mata só o worker, o pool respawna e a task
-// resolve p/ um default seguro (o chamador degrada). Também libera paralelismo de CPU real.
+// processo principal p/ um pool de PROCESSOS-filho (child_process/fork): um crash — inclusive um
+// SIGSEGV nativo — mata só o filho, o pool respawna e a task resolve p/ um default seguro (o
+// chamador degrada). worker_threads NÃO serviam: threads compartilham o processo, um segfault
+// derrubava tudo. Também libera paralelismo de CPU real.
 export const PARSE_WORKERS =
   envIntOr0('PARSE_WORKERS') || Math.max(1, Math.min(4, os.availableParallelism() - 1));
 // Timeout por task de parse: um JSDOM travado não segura um worker p/ sempre (mata e respawna).
 export const PARSE_TIMEOUT_MS = Number(process.env.PARSE_TIMEOUT_MS || 30000);
+// Timeout de STARTUP do filho: se não mandar o handshake 'ready' nesse prazo (fork ok mas travou
+// ao carregar), é descartado e conta como falha de spawn (após MAX_SPAWN_FAILS o pool vai inline).
+export const PARSE_READY_TIMEOUT_MS = Number(process.env.PARSE_READY_TIMEOUT_MS || 10000);
 // =false força o caminho INLINE (parse no processo principal, comportamento antigo) — útil em
-// ambientes sem worker_threads ou p/ depurar. O pool também cai p/ inline sozinho se não subir.
+// ambientes sem child_process/IPC ou p/ depurar. O pool também cai p/ inline sozinho se não subir.
 export const PARSE_IN_WORKERS = process.env.PARSE_IN_WORKERS !== 'false';
 
 // ---- deadline por job (o retardatário não segura o fim da execução) ----
@@ -359,6 +364,24 @@ export const SEARCH_BATCH_CONCURRENCY = envIntOr0('SEARCH_BATCH_CONCURRENCY');
 export const SEARCH_SOFT_CONFIRM = Number(process.env.SEARCH_SOFT_CONFIRM || 4000);
 // Teto de itens devolvidos ao navegador numa busca IA (os contadores seguem com o total real).
 export const SEARCH_WEB_MAX_ITEMS = Number(process.env.SEARCH_WEB_MAX_ITEMS || 500);
+// Pré-filtro LÉXICO (FTS5/BM25): quando o escopo é MAIOR que isto, o LLM julga só o top-K candidato
+// (por BM25) em vez do acervo inteiro — corta o custo O(n) e afia a precisão. Escopo <= K = julga
+// tudo (recall pleno). Generoso de propósito: recall léxico até a metade densa (embeddings) entrar.
+export const SEARCH_CANDIDATES_K = Number(process.env.SEARCH_CANDIDATES_K || 200);
+
+// ---- embeddings locais + busca vetorial (metade DENSA do retrieval híbrido) ----
+// Modelo de embedding (transformers.js/onnxruntime, baixado 1x p/ NC_HOME/models). bge-small-en =
+// 384 dims, normalizado. RRF_K = constante da fusão Reciprocal Rank Fusion (léxico ⊕ denso).
+export const EMBED_MODEL = process.env.EMBED_MODEL || 'Xenova/bge-small-en-v1.5';
+export const EMBED_DIM = Number(process.env.EMBED_DIM || 384);
+export const EMBED_BATCH = Number(process.env.EMBED_BATCH || 64);
+export const RRF_K = Number(process.env.RRF_K || 60);
+// Rerank cross-encoder (precisão): reordena o TOPO dos candidatos RRF antes do LLM. Reranqueia só
+// o top RERANK_POOL (limita latência) e mantém RERANK_KEEP. Fail-open: modelo ausente => mantém RRF.
+export const RERANK_MODEL = process.env.RERANK_MODEL || 'Xenova/bge-reranker-base';
+export const RERANK_ENABLED = process.env.RERANK_ENABLED !== 'false';
+export const RERANK_POOL = Number(process.env.RERANK_POOL || 128);
+export const RERANK_KEEP = Number(process.env.RERANK_KEEP || RERANK_POOL);
 // Concorrência INICIAL (teto) da lane AIMD do WEBAPP estático (browser BYOK): a lane começa aqui
 // e corta ½ no 429 / recupera +1/10s sozinha (lane.js). O CLI/servidor usam o governor; isto vai
 // no meta.search do snapshot só p/ o webapp (com defaults embutidos se o export for antigo).

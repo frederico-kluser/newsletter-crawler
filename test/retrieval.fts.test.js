@@ -7,9 +7,11 @@ import path from 'node:path';
 import os from 'node:os';
 
 process.env.NC_HOME = mkdtempSync(path.join(os.tmpdir(), 'nc-fts-'));
+process.env.RERANK_ENABLED = 'false'; // não carregar o modelo de rerank nos testes
 
 const { db } = await import('../src/db.js');
-const { toFtsMatch, retrieveLexical, prefilterCandidates, fuseRRF, hybridCandidates } = await import('../src/retrieval.js');
+const { toFtsMatch, retrieveLexical, prefilterCandidates, fuseRRF, hybridCandidates, reorderByScores } =
+  await import('../src/retrieval.js');
 
 after(() => rmSync(process.env.NC_HOME, { recursive: true, force: true }));
 
@@ -92,6 +94,12 @@ test('fuseRRF: soma 1/(k+rank); item bem colocado nas duas listas vence; keep fi
   assert.ok(ids.includes(9), 'id presente em só uma lista ainda entra');
   const kept = fuseRRF([a, b], { k: 60, keep: new Set([1, 2, 3]) }).map((f) => f.id);
   assert.ok(!kept.includes(9), 'keep remove id fora do escopo');
+});
+
+test('reorderByScores: reordena por score desc e trunca em keep', () => {
+  const rows = [{ id: 1 }, { id: 2 }, { id: 3 }];
+  assert.deepEqual(reorderByScores(rows, [0.1, 0.9, 0.5], 2).map((r) => r.id), [2, 3], 'maior score 1º, top-2');
+  assert.deepEqual(reorderByScores(rows, [5, 1, 9]).map((r) => r.id), [3, 1, 2], 'sem keep = todos, ordenados');
 });
 
 test('hybridCandidates: base sem vetores cai p/ só-léxico (mode=lexical), SEM carregar o modelo', async () => {

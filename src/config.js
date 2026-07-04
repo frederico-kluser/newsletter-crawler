@@ -376,6 +376,12 @@ export const EMBED_MODEL = process.env.EMBED_MODEL || 'Xenova/bge-small-en-v1.5'
 export const EMBED_DIM = Number(process.env.EMBED_DIM || 384);
 export const EMBED_BATCH = Number(process.env.EMBED_BATCH || 64);
 export const RRF_K = Number(process.env.RRF_K || 60);
+// Rerank cross-encoder (precisão): reordena o TOPO dos candidatos RRF antes do LLM. Reranqueia só
+// o top RERANK_POOL (limita latência) e mantém RERANK_KEEP. Fail-open: modelo ausente => mantém RRF.
+export const RERANK_MODEL = process.env.RERANK_MODEL || 'Xenova/bge-reranker-base';
+export const RERANK_ENABLED = process.env.RERANK_ENABLED !== 'false';
+export const RERANK_POOL = Number(process.env.RERANK_POOL || 128);
+export const RERANK_KEEP = Number(process.env.RERANK_KEEP || RERANK_POOL);
 // Concorrência INICIAL (teto) da lane AIMD do WEBAPP estático (browser BYOK): a lane começa aqui
 // e corta ½ no 429 / recupera +1/10s sozinha (lane.js). O CLI/servidor usam o governor; isto vai
 // no meta.search do snapshot só p/ o webapp (com defaults embutidos se o export for antigo).

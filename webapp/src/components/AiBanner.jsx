@@ -1,6 +1,6 @@
 import { motion } from 'motion/react';
 import { springs } from '../motion/transitions.js';
-import { fmtUsd, fmtDateTime } from '../strings.js';
+import { fmtDateTime } from '../strings.js';
 import { useStrings } from '../i18n.jsx';
 
 /**
@@ -23,8 +23,6 @@ export default function AiBanner({ result, missing = 0, onClear, onRerun }) {
           {result.frozen ? `${STR.historyFrozen(fmtDateTime(result.createdAt))} · ` : ''}
           {STR.aiResults(result.relevant, result.scanned)}
           {result.truncated ? ` · ${STR.aiTruncated(result.hits?.length ?? 500)}` : ''}
-          {' · '}
-          {result.spentUsd > 0 ? STR.aiCost(fmtUsd(result.spentUsd)) : STR.aiCostUnknown}
           {missing > 0 ? ` · ${STR.historyMissing(missing)}` : ''}
         </span>
       </div>

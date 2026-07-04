@@ -4,7 +4,8 @@
 // por cross-encoder entram nos próximos incrementos e se combinam aqui.
 import { stmts, VEC_OK } from './db.js';
 import { embedQuery, toBlob } from './embed.js';
-import { RRF_K } from './config.js';
+import { RRF_K, RERANK_ENABLED, RERANK_POOL, RERANK_KEEP } from './config.js';
+import { rerankScores } from './rerank.js';
 import { debug } from './util.js';
 
 // Converte texto livre num MATCH SEGURO do FTS5. Tokeniza em \p{L}\p{N} (então nenhum caractere
@@ -89,6 +90,29 @@ export function fuseRRF(lists, { keep = null, k = RRF_K } = {}) {
   return [...score.entries()].sort((a, b) => b[1] - a[1]).map(([id, s]) => ({ id, score: s }));
 }
 
+// Texto do documento p/ o rerank: título + um trecho (resumo/blurb/cabeça do conteúdo).
+const rerankText = (r) =>
+  `${r.title || ''}. ${(r.summary_pt || r.blurb || r.content_head || r.content || '').slice(0, 500)}`.trim();
+
+/** Reordena `rows` por `scores` (alinhados) desc e trunca em `keep`. Puro/testável. */
+export function reorderByScores(rows, scores, keep = rows.length) {
+  return rows
+    .map((r, i) => ({ r, s: scores[i] ?? -Infinity }))
+    .sort((a, b) => b.s - a.s)
+    .slice(0, keep)
+    .map((x) => x.r);
+}
+
+// Rerank cross-encoder do TOPO da lista RRF (precisão). Fail-open: modelo ausente/erro => mantém a
+// ordem RRF (applied:false). Reranqueia só o top RERANK_POOL (latência) e mantém RERANK_KEEP.
+async function applyRerank(query, rows) {
+  if (rows.length <= 1) return { rows, applied: false };
+  const head = rows.slice(0, RERANK_POOL);
+  const scores = await rerankScores(query, head.map(rerankText));
+  if (!scores) return { rows, applied: false };
+  return { rows: reorderByScores(head, scores, RERANK_KEEP), applied: true };
+}
+
 /**
  * Candidatos HÍBRIDOS p/ a busca IA: escopo > k => funde léxico (FTS/BM25) ⊕ denso (embeddings)
  * por RRF e devolve o top-K (o LLM julga só esses). Fail-open: escopo <= k, consulta vazia, ou
@@ -107,5 +131,6 @@ export async function hybridCandidates(rows, query, { k = 200, sources = null, f
   const order = new Map(fused.slice(0, k).map((f, i) => [f.id, i]));
   const filtered = rows.filter((r) => order.has(r.id)).sort((a, b) => order.get(a.id) - order.get(b.id));
   const mode = lex.length && dense.length ? 'hybrid' : dense.length ? 'dense' : 'lexical';
-  return { rows: filtered, scope, prefiltered: true, mode };
+  const rr = RERANK_ENABLED ? await applyRerank(query, filtered) : { rows: filtered, applied: false };
+  return { rows: rr.rows, scope, prefiltered: true, mode, reranked: rr.applied };
 }

@@ -326,8 +326,8 @@ export async function searchWeb(query, { deep = false, sources = null, from = nu
   const pf = await hybridCandidates(rows, query, { k: SEARCH_CANDIDATES_K, sources, from, to });
   rows = pf.rows;
   if (pf.prefiltered) {
-    onEvent?.({ type: 'prefilter', scope: pf.scope, candidates: rows.length, retrieval: pf.mode });
-    log(`busca: pré-filtro ${pf.mode} ${pf.scope} -> ${rows.length} candidatos`);
+    onEvent?.({ type: 'prefilter', scope: pf.scope, candidates: rows.length, retrieval: pf.mode, reranked: pf.reranked });
+    log(`busca: pré-filtro ${pf.mode}${pf.reranked ? '+rerank' : ''} ${pf.scope} -> ${rows.length} candidatos`);
   }
   resetProgress(rows.length);
   const verdicts = new Map();
@@ -408,7 +408,9 @@ export async function searchWeb(query, { deep = false, sources = null, from = nu
     if (!rel || rel.relation === 'none') continue;
     hits.push({ id: a.id, relation: rel.relation, kind: rel.kind });
   }
-  hits.sort((x, y) => RANK[x.relation] - RANK[y.relation] || y.id - x.id); // direct 1º; empate: mais novo 1º
+  // direct 1º; dentro da mesma relação, mantém a ORDEM dos candidatos (reranqueada no hybridCandidates).
+  const candPos = new Map(rows.map((r, i) => [r.id, i]));
+  hits.sort((x, y) => RANK[x.relation] - RANK[y.relation] || (candPos.get(x.id) ?? 1e9) - (candPos.get(y.id) ?? 1e9));
   const truncated = hits.length > SEARCH_WEB_MAX_ITEMS;
   log(
     `busca web "${query}" (${deep ? 'profunda' : 'soft'}): ${hits.length} relevante(s) de ${rows.length}` +

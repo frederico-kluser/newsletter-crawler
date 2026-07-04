@@ -46,9 +46,10 @@ function Review({ sub, flags, rest = [], onRun, onBack }) {
   </${Box}>`;
 }
 
-function Field({ label, error, children }) {
+function Field({ label, error, hint, children }) {
   return html`<${Box} flexDirection="column">
     <${Text} bold>${label}</${Text}>
+    ${hint ? html`<${Text} dimColor>${hint}</${Text}>` : null}
     ${error ? html`<${Alert} variant="error">${error}</${Alert}>` : null}
     ${children}
   </${Box}>`;
@@ -72,6 +73,7 @@ export function Menu({ onSelect }) {
     { label: t('menuExport'), value: 'export' },
     { label: t('menuFinish') + finishSuffix, value: 'finish' },
     { label: t('menuAdd'), value: 'add' },
+    { label: t('menuSources'), value: 'sources' },
     { label: t('menuLimits'), value: 'limits' },
     { label: t('menuReset'), value: 'reset' },
     { label: t('menuQuit'), value: 'quit' },
@@ -434,36 +436,16 @@ export function AddConfig({ onRun, onBack }) {
     </${Field}>`;
   }
   if (step === 'name') {
-    return html`<${Field} label=${t('addName')}>
+    return html`<${Field} label=${t('addName')} hint=${t('addTypeAuto')}>
       <${TextInput} key=${step} placeholder="" onSubmit=${(val) => {
         const v = val.trim();
         if (v) setFlags((f) => ({ ...f, name: v }));
-        setStep('type');
-      }} />
-    </${Field}>`;
-  }
-  if (step === 'type') {
-    return html`<${Field} label=${t('addType')}>
-      <${Select} options=${[
-        { label: t('typeListing'), value: 'listing' },
-        { label: t('typeIndex'), value: 'index' },
-      ]} onChange=${(v) => {
-        setFlags((f) => ({ ...f, type: v }));
-        setStep('maxidx');
-      }} />
-    </${Field}>`;
-  }
-  if (step === 'maxidx') {
-    return html`<${Field} label=${t('addMaxIdx')} error=${err}>
-      <${TextInput} key=${step} placeholder="" onSubmit=${(val) => {
-        const r = parseIntFlag(val);
-        if (!r.ok) return setErr(t('numInvalid'));
-        setErr(null);
-        if (r.value) setFlags((f) => ({ ...f, 'max-index-pages': r.value }));
         setStep('review');
       }} />
     </${Field}>`;
   }
+  // O TIPO (index|listing) é detectado por IA ao rodar o `add` — sem passo manual (o usuário não
+  // precisa saber a diferença). O painel do run mostra "tipo detectado: …" ao vivo.
   return html`<${Review} sub="add" flags=${flags} rest=${[url]} onRun=${onRun} onBack=${onBack} />`;
 }
 

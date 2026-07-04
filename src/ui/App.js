@@ -10,6 +10,7 @@ import { Header } from './widgets.js';
 import {
   getStatus, cmdCrawl, cmdExport, cmdAdd, cmdReset, cmdFinish, cmdSearch,
   getArticle, listSearchHistory, getSearchHistoryEntry, deleteSearchHistory,
+  listSourcesForUI, setSourceType, redetectSourceType, removeSourceById,
 } from '../commands.js';
 import { openBrowser } from '../web.js';
 import {
@@ -19,6 +20,7 @@ import {
 import { RunView } from './RunView.js';
 import { ResultsView } from './ResultsView.js';
 import { HistoryView } from './HistoryView.js';
+import { SourcesView } from './SourcesView.js';
 
 const THUNKS = {
   crawl: (flags) => cmdCrawl(flags),
@@ -120,6 +122,15 @@ export default function App() {
     body = html`<${LimitsConfig} onBack=${toMenu} />`;
   } else if (screen === 'add') {
     body = html`<${AddConfig} onRun=${onRun} onBack=${toMenu} />`;
+  } else if (screen === 'sources') {
+    // Gerenciar fontes: trocar o tipo (síncrono), re-detectar por IA (assíncrono) e remover de vez.
+    body = html`<${SourcesView}
+      sources=${listSourcesForUI()}
+      onToggleType=${(s, type) => setSourceType(s.id, type)}
+      onRedetect=${(s) => redetectSourceType(s.id)}
+      onRemove=${(s) => removeSourceById(s.id)}
+      onDone=${(v) => (v === 'quit' ? exit() : toMenu())}
+    />`;
   } else if (screen === 'reset') {
     body = html`<${ResetConfirm} onRun=${onRun} onBack=${toMenu} />`;
   } else if (screen === 'run') {

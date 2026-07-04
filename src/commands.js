@@ -3,19 +3,20 @@
 // captura tudo via setLogSink. As contagens vêm de getStatus() (dado), reusado pela UI.
 import { mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { stmts, wipeAll } from './db.js';
+import { stmts, wipeAll, removeSource } from './db.js';
 import {
   ROOT, EXPORT_DIR, DB_PATH, CONCURRENCY, MAX_RETRIES, HAS_LLM, CLASSIFY_AFTER_CRAWL, SUMMARIZE_AFTER_CRAWL,
   SEARCH_MODE_A_CONFIRM, OPENROUTER_API_KEY, ENV_PATH, BUDGET_USD, MAX_PARALLEL, RAM_MAX_PCT,
   AGGRESSIVE_DEFAULT, VERIFY_AFTER_CRAWL, VERIFY_STREAMING, JOB_TIMEOUT_MS, JOB_HARD_TIMEOUT_MS,
   CLASSIFY_STREAMING, SUMMARIZE_STREAMING, CURATE_JOBS, ROUNDUP_TIMEOUT_MS, COST_LOG_INTERVAL_MS,
-  defaultParallel, loadSources, addSourceToConfig, setRuntimeKey,
+  defaultParallel, loadSources, addSourceToConfig, removeSourceFromConfig, setRuntimeKey,
 } from './config.js';
 import {
   initGovernor, stopGovernor, setProfile, jobsCapacity, getTelemetry,
 } from './governor.js';
 import { beginRun, endRun, shouldStop, getBudgetState } from './budget.js';
 import { processJob, enqueue, upsertSource } from './crawl.js';
+import { detectSourceType } from './detect-type.js';
 import { exportWebSnapshot } from './export-web.js';
 import { classifyPending, classifyArticleRow } from './classify.js';
 import { summarizePending, summarizeArticleRow } from './summarize.js';
@@ -508,16 +509,32 @@ async function crawlRun(flags) {
   printStatus();
 }
 
-export function cmdAdd(rest, flags) {
+// Adiciona uma fonte. O TIPO (index|listing) é DETECTADO automaticamente (o usuário não precisa
+// saber a diferença): sem --type, roda a detecção por IA (sob governador/orçamento/ledger, p/ o
+// custo aparecer e as lanes existirem) e persiste o resultado; --type continua forçando manual.
+export async function cmdAdd(rest, flags) {
   const url = rest[0];
   if (!url) {
     errorLog('uso: add <url> [--name "Nome"] [--type index|listing] [--max-index-pages N]');
     process.exit(1);
   }
+  const explicitType = typeof flags.type === 'string' ? flags.type : undefined;
+  let type = explicitType;
+  let detection = null;
+  if (!explicitType) {
+    detection = await runWithLimits({ command: 'add', flags, profile: 'llm-only' }, () =>
+      detectSourceType(url, { aggressive: AGGRESSIVE_DEFAULT }));
+    type = detection.type;
+    log(
+      `tipo detectado: ${type} ` +
+        `(${detection.source === 'llm' ? 'IA' : 'heurística'}, ${Math.round(detection.confidence * 100)}%) ` +
+        `— ${detection.reason}`,
+    );
+  }
   const src = upsertSource({
     url,
     name: typeof flags.name === 'string' ? flags.name : undefined,
-    type: typeof flags.type === 'string' ? flags.type : undefined,
+    type,
     maxIndexPages: flags['max-index-pages'] ? Number(flags['max-index-pages']) : undefined,
   });
   enqueue(url, 'listing', null, src.id, 0);
@@ -532,6 +549,98 @@ export function cmdAdd(rest, flags) {
     `fonte ${added ? 'adicionada' : 'atualizada'}: ${src.base_url} (id ${src.id}, type=${src.type}) ` +
       '— salva em sources.json (permanente)',
   );
+  return { source: src, added, detection };
+}
+
+// ---- gestão de fontes (tela "Gerenciar fontes" da TUI + CLI) ----
+
+/** Fontes + contagem de artigos (DADO p/ a TUI). */
+export function listSourcesForUI() {
+  return stmts.listSources.all().map((s) => ({
+    id: s.id,
+    name: s.name,
+    base_url: s.base_url,
+    type: s.type,
+    articles: stmts.countArticlesBySource.get(s.id).c,
+  }));
+}
+
+/** Troca o tipo de uma fonte (index<->listing) e persiste no DB + sources.json. Síncrono. */
+export function setSourceType(sourceId, type) {
+  const s = stmts.getSourceById.get(sourceId);
+  if (!s) return { error: `fonte ${sourceId} não encontrada` };
+  const next = type === 'index' ? 'index' : 'listing';
+  const updated = upsertSource({
+    url: s.base_url, name: s.name, type: next, maxIndexPages: s.max_index_pages,
+  });
+  addSourceToConfig({
+    url: updated.base_url, name: updated.name, type: updated.type, maxIndexPages: updated.max_index_pages,
+  });
+  log(`tipo da fonte "${updated.name || updated.base_url}" -> ${updated.type}`);
+  return { source: updated };
+}
+
+/** Re-detecta o tipo via IA (sob governador/orçamento) e persiste. Async. */
+export async function redetectSourceType(sourceId) {
+  const s = stmts.getSourceById.get(sourceId);
+  if (!s) return { error: `fonte ${sourceId} não encontrada` };
+  const detection = await runWithLimits({ command: 'add', flags: {}, profile: 'llm-only' }, () =>
+    detectSourceType(s.base_url, { aggressive: AGGRESSIVE_DEFAULT }));
+  const updated = upsertSource({
+    url: s.base_url, name: s.name, type: detection.type, maxIndexPages: s.max_index_pages,
+  });
+  addSourceToConfig({
+    url: updated.base_url, name: updated.name, type: updated.type, maxIndexPages: updated.max_index_pages,
+  });
+  log(
+    `re-detecção "${updated.name || updated.base_url}" -> ${updated.type} ` +
+      `(${detection.source === 'llm' ? 'IA' : 'heurística'}) — ${detection.reason}`,
+  );
+  return { source: updated, detection };
+}
+
+/**
+ * Remoção COMPLETA por id (dados + descadastro do sources.json). Usado pela CLI (cmdRemove) e pela
+ * TUI (tela Gerenciar fontes). Retorna { source, counts } ou { error }.
+ */
+export function removeSourceById(sourceId) {
+  const out = removeSource(sourceId); // transação no db.js (dados + linha sources)
+  if (!out) return { error: `fonte ${sourceId} não encontrada` };
+  // Descadastra do sources.json (NC_HOME) p/ não voltar no próximo crawl (o seed re-semeia do JSON).
+  try {
+    removeSourceFromConfig(out.source.base_url);
+  } catch (e) {
+    warn(`sources.json: falha ao remover a fonte (${e.message})`);
+  }
+  return out;
+}
+
+// Remove uma fonte DE VEZ: descadastra (sources.json + linha `sources`) e apaga TODO o conteúdo
+// coletado (artigos+tags/classificações, pages, frontier, events, buscas 100% dela; selectors do
+// host se não compartilhados). Diferente do `purge` (que mantém a fonte cadastrada). Exige --yes.
+export function cmdRemove(rest, flags) {
+  const { source, error } = findOneSource(rest[0]);
+  if (error) {
+    errorLog(`remove: ${error}`);
+    process.exit(1);
+  }
+  const nArticles = stmts.countArticlesBySource.get(source.id).c;
+  if (flags.yes !== true) {
+    errorLog(
+      `remove DESCADASTRA "${source.name || source.base_url}" (id ${source.id}) e APAGA ${nArticles} ` +
+        'artigo(s) + tags/classificações, pages, frontier, events e as buscas 100% dela. A fonte ' +
+        'também sai do sources.json (NÃO volta no próximo crawl).',
+    );
+    errorLog(`Confirme com:  ncrawl remove ${JSON.stringify(rest[0])} --yes`);
+    process.exit(1);
+  }
+  const { counts } = removeSourceById(source.id);
+  log(
+    `fonte "${source.name || source.base_url}" removida: ` +
+      Object.entries(counts).map(([k, n]) => `${k}=${n}`).join(' ') +
+      ' — descadastrada do sources.json.',
+  );
+  printStatus();
 }
 
 // Limpa TODOS os dados (slate limpo). Destrutivo: exige --yes.

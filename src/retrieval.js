@@ -2,7 +2,10 @@
 // gerador de candidatos que troca a varredura O(n_artigos) por LLM em tempo de busca por uma
 // consulta de índice + top-K. A metade DENSA (embeddings + sqlite-vec), a fusão RRF e o rerank
 // por cross-encoder entram nos próximos incrementos e se combinam aqui.
-import { stmts } from './db.js';
+import { stmts, VEC_OK } from './db.js';
+import { embedQuery, toBlob } from './embed.js';
+import { RRF_K } from './config.js';
+import { debug } from './util.js';
 
 // Converte texto livre num MATCH SEGURO do FTS5. Tokeniza em \p{L}\p{N} (então nenhum caractere
 // especial do FTS — aspas, -, *, (), : — sobrevive), descarta tokens < 2 chars, e cita cada termo
@@ -53,4 +56,56 @@ export function prefilterCandidates(rows, query, { k = 200, sources = null, from
   if (!filtered.length) return { rows, scope, prefiltered: false };
   filtered.sort((a, b) => rank.get(a.id) - rank.get(b.id)); // BM25: mais relevante primeiro
   return { rows: filtered, scope, prefiltered: true };
+}
+
+/**
+ * Recuperação DENSA (embeddings + sqlite-vec KNN): top-N ids por similaridade de cosseno. Nunca
+ * lança; sem sqlite-vec / consulta vazia / falha do modelo => []. @returns {{id:number,distance:number}[]}
+ */
+export async function retrieveDense(query, { limit = 200 } = {}) {
+  if (!VEC_OK || !query) return [];
+  try {
+    const v = await embedQuery(query);
+    if (!v) return [];
+    return stmts.knnVec.all(toBlob(v), limit);
+  } catch (e) {
+    debug(`retrieveDense falhou (${e.message}); seguindo só com o léxico`);
+    return [];
+  }
+}
+
+/**
+ * Reciprocal Rank Fusion: combina listas ranqueadas (cada uma best-first) num score
+ * Σ 1/(k + rank). `keep` (Set) restringe ao escopo. Puro/testável. @returns {{id,score}[]}
+ */
+export function fuseRRF(lists, { keep = null, k = RRF_K } = {}) {
+  const score = new Map();
+  for (const list of lists) {
+    list.forEach((it, rank) => {
+      if (keep && !keep.has(it.id)) return;
+      score.set(it.id, (score.get(it.id) || 0) + 1 / (k + rank));
+    });
+  }
+  return [...score.entries()].sort((a, b) => b[1] - a[1]).map(([id, s]) => ({ id, score: s }));
+}
+
+/**
+ * Candidatos HÍBRIDOS p/ a busca IA: escopo > k => funde léxico (FTS/BM25) ⊕ denso (embeddings)
+ * por RRF e devolve o top-K (o LLM julga só esses). Fail-open: escopo <= k, consulta vazia, ou
+ * fusão vazia => `rows` INTACTO. Sem embeddings (sqlite-vec off / base não-vetorizada) => cai p/
+ * só-léxico SEM carregar o modelo. @returns {{rows:any[],scope:number,prefiltered:boolean,mode:string}}
+ */
+export async function hybridCandidates(rows, query, { k = 200, sources = null, from = null, to = null } = {}) {
+  const scope = rows.length;
+  if (!query || scope <= k) return { rows, scope, prefiltered: false, mode: 'none' };
+  const keep = new Set(rows.map((r) => r.id));
+  const lex = retrieveLexical(query, { limit: k, sources, from, to });
+  const hasVectors = VEC_OK && stmts.countVec && stmts.countVec.get().c > 0;
+  const dense = hasVectors ? await retrieveDense(query, { limit: k }) : [];
+  const fused = fuseRRF([lex, dense], { keep });
+  if (!fused.length) return { rows, scope, prefiltered: false, mode: 'none' };
+  const order = new Map(fused.slice(0, k).map((f, i) => [f.id, i]));
+  const filtered = rows.filter((r) => order.has(r.id)).sort((a, b) => order.get(a.id) - order.get(b.id));
+  const mode = lex.length && dense.length ? 'hybrid' : dense.length ? 'dense' : 'lexical';
+  return { rows: filtered, scope, prefiltered: true, mode };
 }

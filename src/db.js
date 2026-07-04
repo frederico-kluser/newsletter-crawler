@@ -1,9 +1,10 @@
 // Persistência SQLite (better-sqlite3): schema + prepared statements.
 import Database from 'better-sqlite3';
+import { load as loadVec } from 'sqlite-vec';
 import { mkdirSync } from 'node:fs';
 import path from 'node:path';
-import { DB_PATH } from './config.js';
-import { parseDate } from './util.js';
+import { DB_PATH, EMBED_DIM } from './config.js';
+import { parseDate, warn } from './util.js';
 
 mkdirSync(path.dirname(DB_PATH), { recursive: true });
 
@@ -13,6 +14,16 @@ db.pragma('foreign_keys = ON');
 // Dois processos `ncrawl` podem compartilhar este DB (ex.: crawl + search em terminais
 // diferentes). Sem busy_timeout, o segundo escritor falharia na hora com SQLITE_BUSY.
 db.pragma('busy_timeout = 5000');
+
+// sqlite-vec (metade DENSA da busca híbrida): carrega a extensão vetorial nesta conexão. Fail-open
+// — se não carregar (plataforma sem binário), VEC_OK=false e a busca cai p/ só-léxica (FTS).
+export let VEC_OK = false;
+try {
+  loadVec(db);
+  VEC_OK = true;
+} catch (e) {
+  warn(`sqlite-vec indisponível (${e.message}); busca densa desligada — segue só a léxica (FTS).`);
+}
 
 // published_at é string CRUA do scrape (nem sempre ISO — ex.: "June 18, 2026"), e o date() do
 // SQLite só entende ISO (senão NULL). iso_date normaliza via o MESMO parseDate do crawler p/
@@ -292,6 +303,19 @@ db.exec('CREATE INDEX IF NOT EXISTS idx_articles_run ON articles(run_id)');
     END;
   `);
   if (!ftsExisted) db.exec(`INSERT INTO articles_fts(articles_fts) VALUES ('rebuild')`);
+}
+
+// ---- busca vetorial DENSA (sqlite-vec): tabela de embeddings + limpeza no delete ----
+// rowid = articles.id; o embedding é preenchido em JS (o modelo não roda em trigger SQL) — ver
+// src/embed.js (backfill/sweep). O trigger só LIMPA no delete (barato e seguro; insert/update do
+// vetor ficam no fluxo JS). distance_metric=cosine (o bge é normalizado).
+if (VEC_OK) {
+  db.exec(`
+    CREATE VIRTUAL TABLE IF NOT EXISTS articles_vec USING vec0(embedding float[${EMBED_DIM}] distance_metric=cosine);
+    CREATE TRIGGER IF NOT EXISTS articles_vec_ad AFTER DELETE ON articles BEGIN
+      DELETE FROM articles_vec WHERE rowid = old.id;
+    END;
+  `);
 }
 
 export const stmts = {
@@ -752,6 +776,26 @@ export const stmts = {
       WHERE a.id IN (SELECT value FROM json_each(@ids))`,
   ),
 };
+
+// Statements da busca vetorial: só quando o sqlite-vec carregou (senão referenciariam uma tabela
+// inexistente). rowid = articles.id (BigInt no bind — o vec0 exige inteiro); embedding = BLOB float32.
+if (VEC_OK) {
+  Object.assign(stmts, {
+    insertVec: db.prepare(`INSERT INTO articles_vec(rowid, embedding) VALUES (?, ?)`),
+    deleteVec: db.prepare(`DELETE FROM articles_vec WHERE rowid = ?`),
+    knnVec: db.prepare(
+      `SELECT rowid AS id, distance FROM articles_vec WHERE embedding MATCH ? ORDER BY distance LIMIT ?`,
+    ),
+    countVec: db.prepare(`SELECT COUNT(*) AS c FROM articles_vec`),
+    articlesMissingVec: db.prepare(
+      `SELECT a.id, a.title, a.title_pt, a.summary_pt,
+              substr(coalesce(a.content, ''), 1, 2000) AS content_head
+         FROM articles a
+        WHERE a.id NOT IN (SELECT rowid FROM articles_vec)
+        ORDER BY a.id LIMIT ?`,
+    ),
+  });
+}
 
 // Limpeza total (slate limpo). Ordem filho->pai porque foreign_keys=ON. VACUUM fora da
 // transação p/ recuperar espaço do arquivo/WAL. Opera no DB de DB_PATH (respeita o override).

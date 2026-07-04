@@ -73,8 +73,17 @@ export function useAiSearch({ articles, meta, filters }) {
           },
         });
         if (result.spentUsd > lastSpent) setSessionUsd((v) => v + (result.spentUsd - lastSpent));
-        setState({ phase: 'done', query, deep, progress: null, result, error: null, partialHits: [], spec: capturedSpec, startedAt: null });
-        setHistory(addToHistory({ ...result, spec: capturedSpec }, scope)); // auto-salva (com o spec) — fail-open
+        // auto-salva (com o spec) e apresenta a busca concluída COMO a entrada recém-salva do
+        // histórico (frozen): os cards permanecem na tela e o banner mostra que já está salvo —
+        // idêntico a reabrir do histórico (pedido do usuário). fail-open se o save falhar.
+        const saved = addToHistory({ ...result, spec: capturedSpec }, scope);
+        setHistory(saved);
+        const entry = saved[0];
+        setState({
+          phase: 'done', query, deep, progress: null,
+          result: entry ? { ...result, frozen: true, id: entry.id, createdAt: entry.createdAt } : result,
+          error: null, partialHits: [], spec: capturedSpec, startedAt: null,
+        });
       } catch (e) {
         if (controller.signal.aborted || e?.name === 'AbortError') {
           setState({ phase: 'idle', query: '', deep, progress: null, result: null, error: null, partialHits: [], startedAt: null });
@@ -134,7 +143,7 @@ export function useAiSearch({ articles, meta, filters }) {
       query: entry.query,
       deep: entry.deep,
       progress: null,
-      result: { ...entry.stats, query: entry.query, deep: entry.deep, hits: entry.hits, frozen: true, createdAt: entry.createdAt },
+      result: { ...entry.stats, query: entry.query, deep: entry.deep, hits: entry.hits, frozen: true, createdAt: entry.createdAt, id: entry.id },
       error: null,
       partialHits: [],
       spec: entry.spec || null, // reabre com o "entendimento" salvo (banner sem repagar)

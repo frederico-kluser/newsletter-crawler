@@ -19,7 +19,7 @@ const SparkIcon = () => (
  * o botão "IA" (ou Enter) dispara a busca semântica — que pede a chave se faltar, mas NÃO
  * bloqueia o filtro por texto já aplicado. O cadeado no botão sinaliza "requer chave".
  */
-export default function SearchBar({ text, onTextChange, onAiSearch, aiBusy, hasKey, recents = [], onPickRecent }) {
+export default function SearchBar({ text, onTextChange, onAiSearch, aiBusy, hasKey, recents = [], onPickRecent, activeId }) {
   const STR = useStrings();
   const [deep, setDeep] = useState(false);
   const [focused, setFocused] = useState(false);
@@ -54,7 +54,7 @@ export default function SearchBar({ text, onTextChange, onAiSearch, aiBusy, hasK
             <button
               key={h.id}
               type="button"
-              className="searchbar-recent"
+              className={`searchbar-recent${h.id === activeId ? ' is-active' : ''}`}
               onClick={() => onPickRecent?.(h.id)}
             >
               <span className="searchbar-recent-q">{h.query}</span>

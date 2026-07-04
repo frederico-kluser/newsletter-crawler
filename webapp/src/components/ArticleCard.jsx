@@ -1,6 +1,6 @@
 import { motion } from 'motion/react';
 import { springs } from '../motion/transitions.js';
-import { KIND_LABEL, STR, VERIFY_LABEL } from '../strings.js';
+import { useStrings } from '../i18n.jsx';
 import { fmtDate } from '../lib/format.js';
 import { effectiveKind } from '../lib/taxonomy.js';
 
@@ -10,6 +10,8 @@ import { effectiveKind } from '../lib/taxonomy.js';
  * AnimatePresence popLayout (o exit precisa medir/posicionar o elemento).
  */
 export default function ArticleCard({ ref, article: a, toolTypes, onOpen, entryDelay = 0, relation = null }) {
+  const STR = useStrings();
+  const { KIND_LABEL, VERIFY_LABEL } = STR;
   const kind = effectiveKind(a, toolTypes);
   const title = a.title_pt || a.title || a.url;
   const excerpt = a.summary_pt || a.snippet || '';
@@ -26,7 +28,7 @@ export default function ArticleCard({ ref, article: a, toolTypes, onOpen, entryD
     >
       <button type="button" className="card-hit" onClick={() => onOpen(a.id)} aria-label={`${STR.openArticle}: ${title}`}>
         <div className="card-eyebrow">
-          <span className="card-source">{a.source_name || `fonte ${a.source_id}`}</span>
+          <span className="card-source">{a.source_name || STR.sourceFallback(a.source_id)}</span>
           {a.date_iso && <time dateTime={a.date_iso}>{fmtDate(a.date_iso)}</time>}
         </div>
         <h3 className="card-title">{title}</h3>

@@ -1,0 +1,15 @@
+{
+  "routing": {
+    "must_trigger": [
+      "add or change a webapp UI string and its portuguese english translation",
+      "the webapp bilingual i18n language toggle with browser locale detection",
+      "the webapp onboarding tutorial modal shown on the first visit",
+      "change a webapp theme token or motion animation in a react component"
+    ],
+    "must_not_trigger": [
+      "which reasoning effort for deepseek",
+      "how does the crawler pagination stop"
+    ]
+  },
+  "content_must_include": ["useStrings", "DICTS", "resolveLocale", "Tutorial.jsx", "layoutId"]
+}

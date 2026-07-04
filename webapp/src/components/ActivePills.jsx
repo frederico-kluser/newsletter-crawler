@@ -1,33 +1,33 @@
 import { AnimatePresence, motion } from 'motion/react';
 import { springs } from '../motion/transitions.js';
-import { FACET_LABEL, STR, VERIFY_LABEL } from '../strings.js';
+import { useStrings } from '../i18n.jsx';
 import { fmtDate } from '../lib/format.js';
 
 /** Deriva as pills removíveis do estado de filtros (kind fica no Segmented). */
-function pillsOf(filters, meta) {
+function pillsOf(filters, meta, STR) {
   const pills = [];
   if (filters.sourceId != null) {
     const s = meta.sources.find((x) => x.id === filters.sourceId);
-    pills.push({ key: 'source', label: s ? s.name : `fonte ${filters.sourceId}`, clear: { type: 'set', key: 'sourceId', value: null } });
+    pills.push({ key: 'source', label: s ? s.name : STR.sourceFallback(filters.sourceId), clear: { type: 'set', key: 'sourceId', value: null } });
   }
   if (filters.from || filters.to) {
     const label =
       filters.from && filters.to
         ? `${fmtDate(filters.from)} – ${fmtDate(filters.to)}`
         : filters.from
-          ? `desde ${fmtDate(filters.from)}`
-          : `até ${fmtDate(filters.to)}`;
+          ? STR.pillSince(fmtDate(filters.from))
+          : STR.pillUntil(fmtDate(filters.to));
     pills.push({ key: 'period', label, clear: { type: 'setPeriod', from: '', to: '' } });
   }
   if (filters.verify) {
-    pills.push({ key: 'verify', label: VERIFY_LABEL[filters.verify] || filters.verify, clear: { type: 'set', key: 'verify', value: '' } });
+    pills.push({ key: 'verify', label: STR.VERIFY_LABEL[filters.verify] || filters.verify, clear: { type: 'set', key: 'verify', value: '' } });
   }
   for (const [facet, tags] of Object.entries(filters.facets || {})) {
     for (const tag of tags) {
       pills.push({
         key: `f:${facet}:${tag}`,
         label: tag,
-        title: FACET_LABEL[facet] || facet,
+        title: STR.FACET_LABEL[facet] || facet,
         clear: { type: 'toggleTag', facet, tag },
       });
     }
@@ -37,7 +37,8 @@ function pillsOf(filters, meta) {
 
 /** Pills dos filtros ativos + "Limpar filtros"; entram/saem com popLayout (troca rápida). */
 export default function ActivePills({ filters, meta, dispatch }) {
-  const pills = pillsOf(filters, meta);
+  const STR = useStrings();
+  const pills = pillsOf(filters, meta, STR);
   if (!pills.length) return null;
   return (
     <div className="pills" aria-label={STR.activeFilters}>

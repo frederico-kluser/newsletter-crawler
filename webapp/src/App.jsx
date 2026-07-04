@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useReducer, useState } from 'react';
+import { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import { AnimatePresence, useMotionValueEvent, useScroll } from 'motion/react';
 import TopBar from './components/TopBar.jsx';
 import CostBadge from './components/CostBadge.jsx';
@@ -26,7 +26,9 @@ import { useMediaQuery } from './hooks/useMediaQuery.js';
 import { useDebouncedValue } from './hooks/useDebouncedValue.js';
 import { EMPTY_FILTERS, applyFilters, countActiveFilters, sortForDisplay } from './lib/filters.js';
 import { searchText } from './lib/textSearch.js';
-import { KIND_LABEL, STR } from './strings.js';
+import { useStrings } from './i18n.jsx';
+import Tutorial from './components/Tutorial.jsx';
+import { getTutorialSeen, setTutorialSeen } from './lib/storage.js';
 import './styles/app.css';
 
 function filtersReducer(state, action) {
@@ -50,11 +52,11 @@ function filtersReducer(state, action) {
   }
 }
 
-const KIND_OPTIONS = ['all', 'news', 'tool', 'release'].map((v) => ({ value: v, label: KIND_LABEL[v] }));
-// o juiz da busca IA só devolve news|tool — a opção Releases some no modo IA (paridade)
-const KIND_OPTIONS_AI = KIND_OPTIONS.filter((o) => o.value !== 'release');
-
 export default function App() {
+  const STR = useStrings();
+  const KIND_OPTIONS = ['all', 'news', 'tool', 'release'].map((v) => ({ value: v, label: STR.KIND_LABEL[v] }));
+  // o juiz da busca IA só devolve news|tool — a opção Releases some no modo IA (paridade)
+  const KIND_OPTIONS_AI = KIND_OPTIONS.filter((o) => o.value !== 'release');
   const { theme, toggle } = useTheme();
   const { meta, articles, byId, error, loading, retry } = useSnapshot();
   const [filters, dispatch] = useReducer(filtersReducer, { ...EMPTY_FILTERS });
@@ -65,6 +67,14 @@ export default function App() {
   const textQuery = useDebouncedValue(textInput, 180);
   const isDesktop = useMediaQuery('(min-width: 900px)');
   const ai = useAiSearch({ articles, meta, filters });
+
+  // Tutorial de introdução: abre sozinho na 1ª visita (flag no localStorage); o botão de ajuda
+  // (topbar) reabre sempre. closeTutorial marca como visto e desmonta.
+  const [tutorialOpen, setTutorialOpen] = useState(() => !getTutorialSeen());
+  const closeTutorial = useCallback(() => {
+    setTutorialSeen();
+    setTutorialOpen(false);
+  }, []);
 
   // Digitar filtra LOCALMENTE (sem chave). Se havia um resultado de IA na tela, editar o texto
   // volta ao modo local (a IA é re-disparada só pelo botão) — evita confusão de dois modos.
@@ -153,6 +163,7 @@ export default function App() {
       <TopBar
         theme={theme}
         onToggleTheme={toggle}
+        onHelp={() => setTutorialOpen(true)}
         scrolled={scrolled}
         right={
           meta ? (
@@ -202,12 +213,12 @@ export default function App() {
                 value={filters.kind}
                 options={aiActive || ai.phase === 'running' ? KIND_OPTIONS_AI : KIND_OPTIONS}
                 onChange={(v) => dispatch({ type: 'set', key: 'kind', value: v })}
-                label="Tipo de item"
+                label={STR.kindLabel}
               />
               {articles && (
                 <span className="result-count">
                   <AnimatedCount value={displayItems.length} />{' '}
-                  {displayItems.length === 1 ? 'artigo' : 'artigos'}
+                  {STR.articleWord(displayItems.length)}
                 </span>
               )}
             </div>
@@ -310,6 +321,8 @@ export default function App() {
         onDelete={ai.removeEntry}
         onClear={ai.clearAll}
       />
+
+      <AnimatePresence>{tutorialOpen && <Tutorial onClose={closeTutorial} />}</AnimatePresence>
     </div>
   );
 }

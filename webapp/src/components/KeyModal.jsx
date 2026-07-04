@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { fades, springs } from '../motion/transitions.js';
-import { STR } from '../strings.js';
+import { useStrings } from '../i18n.jsx';
 
 /**
  * Chave OpenRouter (BYOK): valida via probe e salva SÓ no navegador (localStorage). Abre
  * quando o usuário tenta buscar sem chave, ou quando a salva é recusada (401 → reason invalid).
  */
 export default function KeyModal({ modal, hasStoredKey, onSave, onDismiss, onForget }) {
+  const STR = useStrings();
   const [value, setValue] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);

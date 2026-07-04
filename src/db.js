@@ -1,9 +1,10 @@
 // Persistência SQLite (better-sqlite3): schema + prepared statements.
 import Database from 'better-sqlite3';
+import { load as loadVec } from 'sqlite-vec';
 import { mkdirSync } from 'node:fs';
 import path from 'node:path';
-import { DB_PATH } from './config.js';
-import { parseDate } from './util.js';
+import { DB_PATH, EMBED_DIM } from './config.js';
+import { parseDate, warn } from './util.js';
 
 mkdirSync(path.dirname(DB_PATH), { recursive: true });
 
@@ -13,6 +14,16 @@ db.pragma('foreign_keys = ON');
 // Dois processos `ncrawl` podem compartilhar este DB (ex.: crawl + search em terminais
 // diferentes). Sem busy_timeout, o segundo escritor falharia na hora com SQLITE_BUSY.
 db.pragma('busy_timeout = 5000');
+
+// sqlite-vec (metade DENSA da busca híbrida): carrega a extensão vetorial nesta conexão. Fail-open
+// — se não carregar (plataforma sem binário), VEC_OK=false e a busca cai p/ só-léxica (FTS).
+export let VEC_OK = false;
+try {
+  loadVec(db);
+  VEC_OK = true;
+} catch (e) {
+  warn(`sqlite-vec indisponível (${e.message}); busca densa desligada — segue só a léxica (FTS).`);
+}
 
 // published_at é string CRUA do scrape (nem sempre ISO — ex.: "June 18, 2026"), e o date() do
 // SQLite só entende ISO (senão NULL). iso_date normaliza via o MESMO parseDate do crawler p/
@@ -258,6 +269,55 @@ const SEARCH_SCOPE_WHERE = `
 
 // Índice do delta por execução (run_id vem via ensureColumn, então não existe no CREATE base).
 db.exec('CREATE INDEX IF NOT EXISTS idx_articles_run ON articles(run_id)');
+
+// ---- FTS5/BM25 sobre articles: metade LÉXICA da busca híbrida (gerador de candidatos) ----
+// Tabela external-content (content='articles'): guarda SÓ o índice invertido, lê o texto por
+// rowid=id. Triggers mantêm sincronizado em insert/update/delete (o comando 'delete' passa os
+// valores ANTIGOS p/ o FTS localizar e decrementar a entrada certa). Indexa title/title_pt/
+// content/summary_pt; porter+unicode61 (stemming EN + tokenização robusta sem diacríticos).
+// Backfill ÚNICO via 'rebuild' quando a tabela é criada numa base que já tem artigos (o reset/
+// purge fazem DELETE FROM articles, então as triggers de delete já mantêm o índice coerente).
+{
+  const ftsExisted =
+    db.prepare(`SELECT count(*) AS c FROM sqlite_master WHERE type = 'table' AND name = 'articles_fts'`).get()
+      .c > 0;
+  db.exec(`
+    CREATE VIRTUAL TABLE IF NOT EXISTS articles_fts USING fts5(
+      title, title_pt, content, summary_pt,
+      content = 'articles', content_rowid = 'id',
+      tokenize = 'porter unicode61 remove_diacritics 2'
+    );
+    CREATE TRIGGER IF NOT EXISTS articles_fts_ai AFTER INSERT ON articles BEGIN
+      INSERT INTO articles_fts(rowid, title, title_pt, content, summary_pt)
+        VALUES (new.id, new.title, new.title_pt, new.content, new.summary_pt);
+    END;
+    CREATE TRIGGER IF NOT EXISTS articles_fts_ad AFTER DELETE ON articles BEGIN
+      INSERT INTO articles_fts(articles_fts, rowid, title, title_pt, content, summary_pt)
+        VALUES ('delete', old.id, old.title, old.title_pt, old.content, old.summary_pt);
+    END;
+    CREATE TRIGGER IF NOT EXISTS articles_fts_au AFTER UPDATE ON articles BEGIN
+      INSERT INTO articles_fts(articles_fts, rowid, title, title_pt, content, summary_pt)
+        VALUES ('delete', old.id, old.title, old.title_pt, old.content, old.summary_pt);
+      INSERT INTO articles_fts(rowid, title, title_pt, content, summary_pt)
+        VALUES (new.id, new.title, new.title_pt, new.content, new.summary_pt);
+    END;
+  `);
+  if (!ftsExisted) db.exec(`INSERT INTO articles_fts(articles_fts) VALUES ('rebuild')`);
+}
+
+// ---- busca vetorial DENSA (sqlite-vec): tabela de embeddings + limpeza no delete ----
+// rowid = articles.id; o embedding é preenchido em JS (o modelo não roda em trigger SQL) — ver
+// src/embed.js (backfill/sweep). O trigger só LIMPA no delete (barato e seguro; insert/update do
+// vetor ficam no fluxo JS). distance_metric=cosine (o bge é normalizado).
+if (VEC_OK) {
+  db.exec(`
+    CREATE VIRTUAL TABLE IF NOT EXISTS articles_vec USING vec0(embedding float[${EMBED_DIM}] distance_metric=cosine);
+    CREATE TRIGGER IF NOT EXISTS articles_vec_ad AFTER DELETE ON articles BEGIN
+      DELETE FROM articles_vec WHERE rowid = old.id;
+    END;
+  `);
+}
+
 export const stmts = {
   // sources
   upsertSource: db.prepare(
@@ -377,6 +437,22 @@ export const stmts = {
         AND a.run_id = @runId
       GROUP BY a.id
       ORDER BY matches DESC
+      LIMIT @limit`,
+  ),
+
+  // recuperação LÉXICA (FTS5/BM25): top-N ids por relevância, escopo opcional (fontes/período).
+  // Metade léxica da busca híbrida — candidatos p/ o LLM/reranker julgar só o top-K, não o acervo
+  // inteiro. bm25() é NEGATIVO (mais relevante = mais negativo) -> ORDER BY ASC; os pesos por
+  // coluna priorizam título (title, title_pt, content, summary_pt).
+  searchFts: db.prepare(
+    `SELECT a.id, bm25(articles_fts, 10.0, 8.0, 1.0, 3.0) AS score
+       FROM articles_fts
+       JOIN articles a ON a.id = articles_fts.rowid
+      WHERE articles_fts MATCH @q
+        AND (@sources IS NULL OR a.source_id IN (SELECT value FROM json_each(@sources)))
+        AND (@from IS NULL OR coalesce(iso_date(a.published_at), date(a.extracted_at)) >= @from)
+        AND (@to IS NULL OR coalesce(iso_date(a.published_at), date(a.extracted_at)) <= @to)
+      ORDER BY score
       LIMIT @limit`,
   ),
 
@@ -700,6 +776,26 @@ export const stmts = {
       WHERE a.id IN (SELECT value FROM json_each(@ids))`,
   ),
 };
+
+// Statements da busca vetorial: só quando o sqlite-vec carregou (senão referenciariam uma tabela
+// inexistente). rowid = articles.id (BigInt no bind — o vec0 exige inteiro); embedding = BLOB float32.
+if (VEC_OK) {
+  Object.assign(stmts, {
+    insertVec: db.prepare(`INSERT INTO articles_vec(rowid, embedding) VALUES (?, ?)`),
+    deleteVec: db.prepare(`DELETE FROM articles_vec WHERE rowid = ?`),
+    knnVec: db.prepare(
+      `SELECT rowid AS id, distance FROM articles_vec WHERE embedding MATCH ? ORDER BY distance LIMIT ?`,
+    ),
+    countVec: db.prepare(`SELECT COUNT(*) AS c FROM articles_vec`),
+    articlesMissingVec: db.prepare(
+      `SELECT a.id, a.title, a.title_pt, a.summary_pt,
+              substr(coalesce(a.content, ''), 1, 2000) AS content_head
+         FROM articles a
+        WHERE a.id NOT IN (SELECT rowid FROM articles_vec)
+        ORDER BY a.id LIMIT ?`,
+    ),
+  });
+}
 
 // Limpeza total (slate limpo). Ordem filho->pai porque foreign_keys=ON. VACUUM fora da
 // transação p/ recuperar espaço do arquivo/WAL. Opera no DB de DB_PATH (respeita o override).

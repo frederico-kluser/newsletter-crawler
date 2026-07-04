@@ -57,6 +57,7 @@ export function addToHistory(result, scope = {}) {
     query: result.query,
     deep: Boolean(result.deep),
     scope: { sourceId: scope.sourceId ?? null, from: scope.from || '', to: scope.to || '' },
+    spec: result.spec || null, // o "entendimento" da consulta — banner ao reabrir (paridade com o fim da busca)
     stats: {
       scanned: result.scanned ?? 0,
       total: result.total ?? 0,

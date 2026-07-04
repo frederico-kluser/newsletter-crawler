@@ -14,7 +14,9 @@ import {
 } from './taxonomy.js';
 import {
   SEARCH_FLASH_CONCURRENCY, SEARCH_BATCH_SIZE, SEARCH_BATCH_CONCURRENCY, SEARCH_WEB_MAX_ITEMS,
+  SEARCH_CANDIDATES_K,
 } from './config.js';
+import { prefilterCandidates } from './retrieval.js';
 import { stageWindow } from './governor.js';
 import { shouldStop, getBudgetState } from './budget.js';
 import { log, warn } from './util.js';
@@ -316,9 +318,17 @@ export async function searchWeb(query, { deep = false, sources = null, from = nu
     from,
     to,
   };
-  const rows = deep
+  let rows = deep
     ? stmts.webSearchCandidates.all(params)
     : stmts.webSearchCandidatesLite.all(params);
+  // Pré-filtro LÉXICO (FTS5/BM25): o LLM (caro, O(n)) julga só o top-K candidato em vez do escopo
+  // inteiro. Recall léxico por ora — a metade densa (embeddings) amplia p/ paráfrase depois.
+  const pf = prefilterCandidates(rows, query, { k: SEARCH_CANDIDATES_K, sources, from, to });
+  rows = pf.rows;
+  if (pf.prefiltered) {
+    onEvent?.({ type: 'prefilter', scope: pf.scope, candidates: rows.length });
+    log(`busca: pré-filtro FTS ${pf.scope} -> ${rows.length} candidatos (top-K BM25)`);
+  }
   resetProgress(rows.length);
   const verdicts = new Map();
   let skipped = 0;
@@ -413,7 +423,7 @@ export async function searchWeb(query, { deep = false, sources = null, from = nu
     scope: { sources: Array.isArray(sources) && sources.length ? sources : null, from, to },
     stats: {
       scanned: _progress.scanned, total: rows.length, relevant: hits.length,
-      failed: _progress.failed, skipped, truncated,
+      failed: _progress.failed, skipped, truncated, scope: pf.scope, prefiltered: pf.prefiltered,
       spec, // congela o "entendimento" p/ reabrir e mostrar o banner sem repagar LLM
     },
     hits: shown,
@@ -423,6 +433,8 @@ export async function searchWeb(query, { deep = false, sources = null, from = nu
     deep,
     scanned: _progress.scanned,
     total: rows.length,
+    scope: pf.scope,
+    prefiltered: pf.prefiltered,
     relevant: hits.length,
     failed: _progress.failed,
     skipped,

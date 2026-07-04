@@ -18,7 +18,7 @@ import { STR } from '../strings.js';
 export function useAiSearch({ articles, meta, filters }) {
   const [state, setState] = useState({
     phase: 'idle', query: '', deep: false, progress: null, result: null, error: null,
-    partialHits: [], startedAt: null, // streaming: hits ao vivo + t0 p/ o ETA do loader
+    partialHits: [], spec: null, startedAt: null, // streaming: hits ao vivo + spec + t0 p/ o ETA do loader
   });
   const [confirmInfo, setConfirmInfo] = useState(null); // {query, deep, count, calls, usd, candidates, scope}
   const [keyModal, setKeyModal] = useState(null); // {pending:{query,deep,scope}|null, reason:'missing'|'invalid'|'manage'}
@@ -43,8 +43,9 @@ export function useAiSearch({ articles, meta, filters }) {
       const controller = new AbortController();
       abortRef.current = controller;
       setConfirmInfo(null);
-      setState({ phase: 'running', query, deep, progress: null, result: null, error: null, partialHits: [], startedAt: Date.now() });
+      setState({ phase: 'running', query, deep, progress: null, result: null, error: null, partialHits: [], spec: null, startedAt: Date.now() });
       let lastSpent = 0;
+      let capturedSpec = null;
       try {
         const result = await runSearch({
           query,
@@ -54,6 +55,10 @@ export function useAiSearch({ articles, meta, filters }) {
           apiKey,
           signal: controller.signal,
           getContent,
+          onSpec: (spec) => {
+            capturedSpec = spec; // o "entendimento" chega antes dos hits (banner ao vivo)
+            setState((s) => (s.phase === 'running' ? { ...s, spec } : s));
+          },
           onProgress: (p) => {
             setState((s) => (s.phase === 'running' ? { ...s, progress: p } : s));
             if (p.spentUsd > lastSpent) {
@@ -67,8 +72,8 @@ export function useAiSearch({ articles, meta, filters }) {
           },
         });
         if (result.spentUsd > lastSpent) setSessionUsd((v) => v + (result.spentUsd - lastSpent));
-        setState({ phase: 'done', query, deep, progress: null, result, error: null, partialHits: [], startedAt: null });
-        setHistory(addToHistory(result, scope)); // auto-salva a busca concluída (fail-open)
+        setState({ phase: 'done', query, deep, progress: null, result, error: null, partialHits: [], spec: capturedSpec, startedAt: null });
+        setHistory(addToHistory({ ...result, spec: capturedSpec }, scope)); // auto-salva (com o spec) — fail-open
       } catch (e) {
         if (controller.signal.aborted || e?.name === 'AbortError') {
           setState({ phase: 'idle', query: '', deep, progress: null, result: null, error: null, partialHits: [], startedAt: null });
@@ -131,6 +136,7 @@ export function useAiSearch({ articles, meta, filters }) {
       result: { ...entry.stats, query: entry.query, deep: entry.deep, hits: entry.hits, frozen: true, createdAt: entry.createdAt },
       error: null,
       partialHits: [],
+      spec: entry.spec || null, // reabre com o "entendimento" salvo (banner sem repagar)
       startedAt: null,
     });
     return entry;

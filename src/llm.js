@@ -737,19 +737,22 @@ export const relevanceZ = z.object({
   relation: z.string().transform(clampRelation),
   kind: z.string().transform(clampKind),
 });
-export async function judgeRelevance({ query, title, content }) {
+export async function judgeRelevance({ query, title, content, spec = null, signal = null }) {
   const { model, effort } = stageModel('searchRelevance');
+  const sb = specBlock(spec);
   const out = await callJSON({
     model,
     reasoning: { effort },
     stage: 'searchRelevance',
     schemaName: 'relevance',
     schema: relevanceSchema,
+    signal,
     system:
-      'Você é um avaliador de relevância de busca, rigoroso e consistente. Siga a rubrica e os EXEMPLOS. ' +
+      'Você é um avaliador de relevância de busca, rigoroso e consistente. ' +
+      (sb ? 'Julgue o ARTIGO CONTRA O SPEC. ' : 'Siga a rubrica e os EXEMPLOS. ') +
       'Responda APENAS com JSON válido.',
     user:
-      RELEVANCE_RUBRIC + '\n\n' +
+      RELEVANCE_RUBRIC + '\n\n' + sb +
       `CONSULTA: ${query}\n\n` +
       `ARTIGO\nTítulo: ${title || ''}\n\nConteúdo:\n${String(content || '').slice(0, SEARCH_MAX_CHARS)}\n\n` +
       'Devolva JSON {"relation","kind"}.',
@@ -788,13 +791,53 @@ export const relevanceBatchZ = z.object({
     }),
   ),
 });
+// Bloco do SPEC (busca precisão-primeiro): injeta OBRIGATÓRIOS/desejáveis + a consulta EN e
+// redefine "direct" = satisfaz TODOS os obrigatórios (default-reject). Vazio se não houver spec
+// (mantém a rubrica/comportamento atuais — o baseline eval-locked). Ver compileQuerySpec.
+function specBlock(spec) {
+  if (!spec || (!spec.must_have?.length && !spec.query_en)) return '';
+  const mh = (spec.must_have || []).map((s) => `  - ${s}`).join('\n') || '  - (nenhum explícito; use a intenção geral da consulta)';
+  const nh = (spec.nice_to_have || []).map((s) => `  - ${s}`).join('\n') || '  - (nenhum)';
+  return (
+    'SPEC DA BUSCA (derivado da consulta do usuário):\n' +
+    `OBRIGATÓRIOS (TODOS precisam bater p/ "direct"):\n${mh}\n` +
+    `DESEJÁVEIS (adjacentes → no máximo "similar"):\n${nh}\n` +
+    `CONSULTA (EN): ${spec.query_en || ''}\n\n` +
+    'Aplicando o SPEC: "direct" = satisfaz TODOS os OBRIGATÓRIOS (resposta central); ' +
+    '"similar" = só desejáveis/adjacente; "none" = não satisfaz. Compartilhar o tema amplo NÃO basta.\n\n'
+  );
+}
+
+/**
+ * Constrói o prompt {system,user} do juiz de LOTE. FONTE ÚNICA compartilhada com o eval
+ * (eval/prompts.mjs importa esta função — nunca duplique a rubrica). `spec` opcional ativa a
+ * busca precisão-primeiro (julga contra os OBRIGATÓRIOS); ausente = baseline eval-locked v2_fewshot.
+ */
+export function buildBatchJudgePrompt({ query, items, spec = null }) {
+  const sb = specBlock(spec);
+  return {
+    system:
+      'Você é um avaliador de relevância de busca, rigoroso e consistente. Avalie CADA item da ' +
+      'lista de forma INDEPENDENTE' + (sb ? ' CONTRA O SPEC' : ', seguindo a rubrica e os EXEMPLOS') +
+      '. Responda APENAS com JSON válido.',
+    user:
+      RELEVANCE_RUBRIC + '\n\n' + sb +
+      `CONSULTA: ${query}\n\n` +
+      'ITENS (um JSON por linha; "summary" pode estar em PT-BR):\n' +
+      items.map((it) => JSON.stringify(it)).join('\n') + '\n\n' +
+      'Devolva JSON {"results":[{"id","relation","kind"}]} com EXATAMENTE UMA entrada por item, ' +
+      'na MESMA ordem da lista, ecoando o id EXATO de cada um. Não invente ids; não omita nenhum.',
+  };
+}
+
 /**
  * Julga um LOTE de itens {id, title, summary} contra a consulta em UMA chamada (busca soft da
- * web: 1 Flash xhigh por ~SEARCH_BATCH_SIZE artigos; saída PEQUENA por item). A fusão tolerante
- * a ids faltando/sobrando/duplicados fica no chamador (mergeBatchVerdicts, search.js).
+ * web: 1 Flash por ~SEARCH_BATCH_SIZE artigos; saída PEQUENA por item). `spec` opcional = busca
+ * precisão-primeiro. A fusão tolerante a ids fica no chamador (mergeBatchVerdicts, search.js).
  */
-export async function judgeRelevanceBatch({ query, items, signal = null }) {
+export async function judgeRelevanceBatch({ query, items, spec = null, signal = null }) {
   const { model, effort } = stageModel('searchBatch');
+  const { system, user } = buildBatchJudgePrompt({ query, items, spec });
   const out = await callJSON({
     model,
     reasoning: { effort },
@@ -802,18 +845,64 @@ export async function judgeRelevanceBatch({ query, items, signal = null }) {
     schemaName: 'relevance_batch',
     schema: relevanceBatchSchema,
     signal,
-    system:
-      'Você é um avaliador de relevância de busca, rigoroso e consistente. Avalie CADA item da ' +
-      'lista de forma INDEPENDENTE, seguindo a rubrica e os EXEMPLOS. Responda APENAS com JSON válido.',
-    user:
-      RELEVANCE_RUBRIC + '\n\n' +
-      `CONSULTA: ${query}\n\n` +
-      'ITENS (um JSON por linha; "summary" pode estar em PT-BR):\n' +
-      items.map((it) => JSON.stringify(it)).join('\n') + '\n\n' +
-      'Devolva JSON {"results":[{"id","relation","kind"}]} com EXATAMENTE UMA entrada por item, ' +
-      'na MESMA ordem da lista, ecoando o id EXATO de cada um. Não invente ids; não omita nenhum.',
+    system,
+    user,
   });
   return relevanceBatchZ.parse(out).results;
+}
+
+// ---------- etapa searchSpec: "entende" a consulta ANTES de julgar (1 chamada, amortizada) ----------
+// Transforma a consulta (PT-BR, possivelmente longa/detalhada) num SPEC compacto usado por TODO
+// lote: critérios OBRIGATÓRIOS (must-have) vs desejáveis + a consulta traduzida/normalizada em
+// inglês + termos-chave EN (p/ recuperação por tag, cross-lingual). Small-output: só listas curtas.
+// Motivação (pesquisa/CLIR): docs são majoritariamente EN e o juiz super-avalia por overlap de
+// tema; dar critérios explícitos + tradução ataca FP (tema amplo ≠ foco) e FN (match sem termo comum).
+export const querySpecSchema = {
+  type: 'object',
+  properties: {
+    must_have: { type: 'array', items: { type: 'string' }, description: 'critérios OBRIGATÓRIOS (todos precisam bater p/ ser resposta central); 1-6 itens curtos' },
+    nice_to_have: { type: 'array', items: { type: 'string' }, description: 'critérios desejáveis/adjacentes; 0-6 itens curtos' },
+    query_en: { type: 'string', description: 'a consulta reescrita/traduzida em inglês, concisa' },
+    terms: { type: 'array', items: { type: 'string' }, description: 'termos-chave em inglês p/ recuperação (0-12)' },
+  },
+  required: ['must_have', 'nice_to_have', 'query_en', 'terms'],
+  additionalProperties: false,
+};
+export const querySpecZ = z.object({
+  must_have: z.array(z.string()).default([]),
+  nice_to_have: z.array(z.string()).default([]),
+  query_en: z.string().default(''),
+  terms: z.array(z.string()).default([]),
+});
+/**
+ * Compila a consulta num spec {must_have, nice_to_have, query_en, terms}. 1 chamada (stage
+ * `searchSpec`, Pro/high) amortizada sobre o scan inteiro — o custo/latência dela pesa pouco.
+ * Fail-open no chamador: se falhar, cai-se p/ o judge com a query crua (sem spec).
+ */
+export async function compileQuerySpec(query, { signal = null } = {}) {
+  const { model, effort } = stageModel('searchSpec');
+  const out = await callJSON({
+    model,
+    reasoning: { effort },
+    stage: 'searchSpec',
+    schemaName: 'query_spec',
+    schema: querySpecSchema,
+    signal,
+    system:
+      'Você interpreta uma CONSULTA de busca (pode estar em PT-BR e ser longa/detalhada) e devolve um ' +
+      'SPEC para avaliar artigos técnicos (majoritariamente em inglês). Extraia a INTENÇÃO real: o que é ' +
+      'OBRIGATÓRIO para um artigo ser resposta CENTRAL vs o que é apenas desejável/adjacente. Traduza a ' +
+      'consulta e os termos-chave para inglês. NÃO invente restrições que a consulta não pede. Responda APENAS com JSON.',
+    user:
+      `CONSULTA: ${String(query || '').slice(0, 2000)}\n\n` +
+      'Devolva JSON {"must_have":[...],"nice_to_have":[...],"query_en":"...","terms":[...]}:\n' +
+      '- must_have: as condições que um artigo PRECISA satisfazer p/ ser resposta central (o foco pedido). ' +
+      'Curtas e verificáveis; 1 a 6. Se a consulta for genérica, 1-2 bastam.\n' +
+      '- nice_to_have: aspectos adjacentes/parciais que tornam um artigo "similar" mas não central; 0 a 6.\n' +
+      '- query_en: a consulta reescrita em inglês, concisa.\n' +
+      '- terms: termos-chave em inglês (sinônimos/variações) úteis p/ achar os artigos; 0 a 12.',
+  });
+  return querySpecZ.parse(out);
 }
 
 // ---------- etapa searchTags: mapeia consulta -> tags de UMA faceta (modo B, Pro) ----------

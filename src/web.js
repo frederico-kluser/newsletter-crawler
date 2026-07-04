@@ -11,6 +11,7 @@ import { stmts } from './db.js';
 import {
   WEB_PORT, WEB_HOST, HAS_LLM, setRuntimeKey, BUDGET_USD,
   SEARCH_MODE_A_CONFIRM, SEARCH_SOFT_CONFIRM, SEARCH_BATCH_SIZE, stageModel,
+  SEARCH_UI_CONCURRENCY_DEFAULT, SEARCH_UI_CONCURRENCY_CEILING,
 } from './config.js';
 import { TOOL_CONTENT_TYPES, isToolByTags, getFacets } from './taxonomy.js';
 import { parseDate, log, warn, errorLog } from './util.js';
@@ -182,6 +183,8 @@ function apiMeta() {
       sources: stmts.webMetaSources.all().map((s) => ({ id: s.id, name: s.name || s.base_url, count: s.c })),
       facets: order.map((name) => ({ name, tags: grouped.get(name) })),
       dates: { min: dates.min_d, max: dates.max_d },
+      // limites do slider de paralelismo da busca (o servidor CLAMPA o valor recebido a [1, ceiling])
+      search: { concurrency: { default: SEARCH_UI_CONCURRENCY_DEFAULT, ceiling: SEARCH_UI_CONCURRENCY_CEILING } },
     },
   };
 }
@@ -190,6 +193,13 @@ function apiMeta() {
 
 const MAX_SCOPE_SOURCES = 50;
 const MAX_BODY_BYTES = 64 * 1024;
+
+/** Paralelismo pedido pela UI → inteiro em [1, ceiling]; fora disso/ausente → default. */
+function clampConcurrency(v) {
+  const n = Math.floor(Number(v));
+  if (!Number.isFinite(n) || n < 1) return SEARCH_UI_CONCURRENCY_DEFAULT;
+  return Math.min(n, SEARCH_UI_CONCURRENCY_CEILING);
+}
 
 /**
  * Valida o ESCOPO da busca IA {sources, from, to} (querystring do preflight OU body do POST).
@@ -291,8 +301,11 @@ function apiSearchScope(sp) {
   const deep = sp.get('deep') === '1' || sp.get('deep') === 'true';
   const count = stmts.webSearchScopeCount.get(scope.params).c;
   const stage = deep ? 'searchRelevance' : 'searchBatch';
-  const calls = deep ? count : Math.ceil(count / SEARCH_BATCH_SIZE);
-  const estimatedUsd = calls * estimateStageCallUsd(stage, stageModel(stage).model);
+  const judgeCalls = deep ? count : Math.ceil(count / SEARCH_BATCH_SIZE);
+  // +1 chamada de "entendimento da consulta" (searchSpec, Pro) por busca — amortizada, mas conta no custo.
+  const specUsd = count > 0 ? estimateStageCallUsd('searchSpec', stageModel('searchSpec').model) : 0;
+  const calls = judgeCalls + (count > 0 ? 1 : 0);
+  const estimatedUsd = judgeCalls * estimateStageCallUsd(stage, stageModel(stage).model) + specUsd;
   const threshold = deep ? SEARCH_MODE_A_CONFIRM : SEARCH_SOFT_CONFIRM;
   return {
     status: 200,
@@ -330,10 +343,11 @@ async function apiSearch(req, res, deps) {
   if (_searchBusy) {
     return sendJSON(res, 409, { error: 'Já existe uma busca em andamento — aguarde terminar.' });
   }
+  const concurrency = clampConcurrency(body.concurrency);
   _searchBusy = true;
   try {
     const r = await withSearchRun({ query, deep, ...scope.params }, () =>
-      deps.search(query, { deep, sources: scope.sources, from: scope.params.from, to: scope.params.to }),
+      deps.search(query, { deep, sources: scope.sources, from: scope.params.from, to: scope.params.to, concurrency }),
     );
     // Enriquecimento p/ os cards: re-select por ids + a MESMA decoração de tags/kind do browse.
     const rows = r.hits.length
@@ -457,6 +471,7 @@ async function apiSearchStream(req, res, deps, u) {
     return sendJSON(res, 400, { error: 'OPENROUTER_API_KEY ausente — configure a chave para buscar com IA.', code: 'NO_KEY' });
   }
   const deep = sp.get('deep') === '1' || sp.get('deep') === 'true';
+  const concurrency = clampConcurrency(sp.get('concurrency'));
   const scope = buildScopeParams({ sources: sp.get('sources'), from: sp.get('from'), to: sp.get('to') });
   if (scope.error) return sendJSON(res, 400, { error: scope.error });
   const count = stmts.webSearchScopeCount.get(scope.params).c;
@@ -501,6 +516,7 @@ async function apiSearchStream(req, res, deps, u) {
         sources: scope.sources,
         from: scope.params.from,
         to: scope.params.to,
+        concurrency,
         onEvent: (ev) => {
           if (!open) return;
           if (ev.type === 'hit') {
@@ -509,6 +525,8 @@ async function apiSearchStream(req, res, deps, u) {
           } else if (ev.type === 'progress') {
             lastSpent = getBudgetState().spentUsd;
             send('progress', { ...ev, spentUsd: lastSpent });
+          } else if (ev.type === 'spec') {
+            send('spec', ev.spec); // o "entendimento" da consulta chega antes dos hits (banner)
           }
         },
       }),

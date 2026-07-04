@@ -1,37 +1,37 @@
 {
-  "_note": "Gabarito curado por Opus 4.8 (Claude Code) a partir de título+conteúdo do corpus. relevant = direct∪similar; qualquer id do pool fora de direct/similar é 'none'. kindTool = ids que são SOBRE uma ferramenta/lib/framework/CLI (resto = news). Ground-truth é o juízo do Opus por design; serve de bar fixo para comparar Flash vs Pro e as variantes de prompt.",
-  "pool": [25,26,95,27,101,60,3,5,16,17,197,56,21,44,58,144,155,156,28,87,128,157,161,23,46,54,73,78,136,187,14,30,32,51,142,204],
-  "kindTool": [25,26,95,60],
+  "_note": "Gabarito RE-CURADO por Claude Fable 5 (juiz independente do DeepSeek sob teste) contra o DB ATUAL (2370 artigos, corpus JS/web-dev da Cooperpress: Node/Frontend/React/JS Weekly + Postgres Weekly). O golden anterior (temas de IA/LLM) ficou obsoleto: o DB foi reconstruído e os ids auto-increment reatribuídos — os ids do pool antigo passaram a apontar p/ outros artigos. relevant = direct∪similar; qualquer id do pool fora de direct/similar é 'none'. kindTool = ids que são SOBRE uma ferramenta/lib/framework/CLI/produto (resto = news, ensaio, case, entrevista). Cross-overs propositais (Bun runtime vs gerenciador; Postgres+agentes de IA) exercitam a distinção ESTRITO(direct) vs AMPLO(direct∪similar).",
+  "pool": [2249,2138,2078,2162,2369,2012,2008,2007,1985,1983,2002,2003,2324,2323,2264,2270,1897,2327,2307,2290,2279,2232,2059,2057,2356,2218,2340,2329,2219,2163,2148,2098,2341,1905,1784,2013,1982,1998,2217,2107,2143,2016],
+  "kindTool": [2249,2138,2078,2012,2008,2007,1985,1983,2013,2270,1897,2324,2323,2143,2327,2307,2290,2279,2232,2059,2057,2217,2107,2356,2218,2329,2219],
   "scenarios": [
     {
       "id": "S1",
-      "query": "ferramentas e bibliotecas open-source para acelerar a inferência de LLMs (serving, speculative decoding, paralelismo em GPU)",
-      "direct": [25,26,95],
-      "similar": [27,101,60]
+      "query": "gerenciadores de pacotes do JavaScript (npm, pnpm, yarn, bun) e melhorias na instalação e na segurança de dependências",
+      "direct": [2249,2138,2078,2162,2369],
+      "similar": [2148,2098,2341]
     },
     {
       "id": "S2",
-      "query": "modelos de linguagem de pesos abertos (open-weights) lançados recentemente",
-      "direct": [3,5,16,17,197],
-      "similar": [56]
+      "query": "novidades, extensões e otimização de performance no PostgreSQL",
+      "direct": [2012,2008,2007,1985,1983,2002,2003],
+      "similar": [2013,1982,1905,1784]
     },
     {
       "id": "S3",
-      "query": "ataques de supply-chain e vulnerabilidades de seguranca envolvendo IA, pacotes e agentes de codigo",
-      "direct": [21,44,58,144,155],
-      "similar": [156]
+      "query": "agentes de IA e ferramentas de LLM para desenvolvimento de software (assistentes e agentes de codificação)",
+      "direct": [2324,2323,2264,2270,1897,1905],
+      "similar": [1998,2016,1784,2143]
     },
     {
       "id": "S4",
-      "query": "rodadas de investimento e captacao de recursos (funding) por startups de IA",
-      "direct": [28,87,128,157,161],
-      "similar": [23]
+      "query": "novidades e bibliotecas do React e do seu ecossistema (Next.js, React Native)",
+      "direct": [2327,2307,2290,2279,2232,2059,2057,2107],
+      "similar": [2217]
     },
     {
       "id": "S5",
-      "query": "regulacao, controles de exportacao e politicas governamentais de IA",
-      "direct": [46,54,73,78,136,187],
-      "similar": []
+      "query": "runtimes de JavaScript (Node.js, Deno, Bun): novas versões, performance e recursos internos",
+      "direct": [2356,2218,2340,2329,2219,2163,2148,2098],
+      "similar": [2341]
     }
   ]
 }

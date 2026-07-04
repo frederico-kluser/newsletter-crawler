@@ -528,6 +528,15 @@ select.control:disabled { opacity: 0.5; cursor: default; }
   cursor: pointer;
 }
 .deep-toggle input { accent-color: var(--accent); width: 15px; height: 15px; }
+.conc-slider {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+.conc-slider input[type="range"] { width: 92px; accent-color: var(--accent); }
+.conc-slider input[type="range"]:disabled { opacity: 0.5; cursor: not-allowed; }
+.conc-slider strong { color: var(--text); }
 .deep-row .muted { color: var(--text-2); }
 .source-chips {
   max-width: 780px;
@@ -557,6 +566,30 @@ select.control:disabled { opacity: 0.5; cursor: default; }
   border-color: rgba(239, 68, 68, 0.4);
   color: #dc2626;
 }
+/* banner do "entendimento" da consulta (spec): critérios OBRIGATÓRIOS + tradução EN */
+.spec-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  max-width: 980px;
+  margin: 20px auto 0;
+  padding: 10px 16px;
+  background: var(--card);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-m);
+  font-size: 13px;
+  text-align: left;
+}
+.spec-banner .spec-label { font-weight: 600; color: var(--text-2); }
+.spec-banner .spec-chip {
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+.spec-banner .spec-en { font-style: italic; }
 /* loader da busca IA (streaming): barra + %, X/Y artigos, relevantes, custo, ETA, "não analisados" */
 .ai-progress {
   display: flex;

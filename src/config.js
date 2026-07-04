@@ -230,8 +230,9 @@ export const STAGE_KEYS = [
   'classify', // classificação multi-faceta de tags
   'summarize', // resumo + título em PT-BR (Flash high)
   'searchRelevance', // busca modo A: julga artigo vs consulta (Flash high, 50x)
-  'searchBatch', // busca soft da web: julga um LOTE de ~40 artigos vs consulta (Flash xhigh)
+  'searchBatch', // busca soft da web: julga um LOTE de ~40 artigos vs consulta (Flash)
   'searchTags', // busca modo B: mapeia consulta -> tags por faceta (Pro)
+  'searchSpec', // busca precisão-primeiro: "entende" a consulta -> spec (Pro high, 1x por busca)
   'curate', // curadoria da issue: itens estruturados news/tool/release (Flash, chunks paralelos)
   'articleClean', // limpeza pré-save do conteúdo extraído (Flash)
   'verifyRecord', // verificação pós-cadastro: veredito ok|suspect|junk (Flash)
@@ -350,6 +351,12 @@ export const SEARCH_WEB_MAX_ITEMS = Number(process.env.SEARCH_WEB_MAX_ITEMS || 5
 // no meta.search do snapshot só p/ o webapp (com defaults embutidos se o export for antigo).
 export const SEARCH_WEB_SOFT_CONCURRENCY = Number(process.env.SEARCH_WEB_SOFT_CONCURRENCY || 6);
 export const SEARCH_WEB_DEEP_CONCURRENCY = Number(process.env.SEARCH_WEB_DEEP_CONCURRENCY || 10);
+// Paralelismo ESCOLHIDO pelo usuário na UI da busca (slider): teto do pool por busca. O governor
+// (lane llm) segue por baixo com AIMD (429 → ½), então este é só o TETO. default = ponto de partida
+// do slider; ceiling = máximo que o slider oferece (OpenRouter não tem cap de plataforma em modelo
+// pago — o teto só evita thrash de 429). O servidor CLAMPA a [1, ceiling] o valor recebido.
+export const SEARCH_UI_CONCURRENCY_DEFAULT = Number(process.env.SEARCH_UI_CONCURRENCY_DEFAULT || 8);
+export const SEARCH_UI_CONCURRENCY_CEILING = Number(process.env.SEARCH_UI_CONCURRENCY_CEILING || 24);
 
 // sources.json do USUÁRIO mora em NC_HOME (o `ncrawl add`/assistente grava aqui). É semeado 1x a
 // partir do default versionado do repo, para não perder as fontes que já vêm no projeto.

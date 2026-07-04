@@ -61,6 +61,84 @@ const relevanceBatchSchema = {
   additionalProperties: false,
 };
 
+// ---- entendimento da consulta (spec) — porta de compileQuerySpec/specBlock de llm.js ----
+const querySpecSchema = {
+  type: 'object',
+  properties: {
+    must_have: { type: 'array', items: { type: 'string' } },
+    nice_to_have: { type: 'array', items: { type: 'string' } },
+    query_en: { type: 'string' },
+    terms: { type: 'array', items: { type: 'string' } },
+  },
+  required: ['must_have', 'nice_to_have', 'query_en', 'terms'],
+  additionalProperties: false,
+};
+// Bloco do SPEC no prompt do juiz (idêntico a specBlock de src/llm.js). Vazio sem spec = baseline.
+function specBlock(spec) {
+  if (!spec || (!(spec.must_have && spec.must_have.length) && !spec.query_en)) return '';
+  const mh = (spec.must_have || []).map((s) => `  - ${s}`).join('\n') || '  - (nenhum explícito; use a intenção geral da consulta)';
+  const nh = (spec.nice_to_have || []).map((s) => `  - ${s}`).join('\n') || '  - (nenhum)';
+  return (
+    'SPEC DA BUSCA (derivado da consulta do usuário):\n' +
+    `OBRIGATÓRIOS (TODOS precisam bater p/ "direct"):\n${mh}\n` +
+    `DESEJÁVEIS (adjacentes → no máximo "similar"):\n${nh}\n` +
+    `CONSULTA (EN): ${spec.query_en || ''}\n\n` +
+    'Aplicando o SPEC: "direct" = satisfaz TODOS os OBRIGATÓRIOS (resposta central); ' +
+    '"similar" = só desejáveis/adjacente; "none" = não satisfaz. Compartilhar o tema amplo NÃO basta.\n\n'
+  );
+}
+/** 1 chamada (searchSpec, Pro) que "entende" a consulta → {must_have, nice_to_have, query_en, terms}. */
+export async function compileSpec({ query, search, apiKey, signal, onCost }) {
+  const cfg = search.models?.searchSpec;
+  if (!cfg) return null; // snapshot antigo sem searchSpec: segue com a query crua
+  const out = await callJSON({
+    apiKey,
+    model: cfg.model,
+    effort: cfg.effort,
+    fallbackModel: search.models.fallback?.model || null,
+    schemaName: 'query_spec',
+    schema: querySpecSchema,
+    signal,
+    onCost,
+    system:
+      'Você interpreta uma CONSULTA de busca (pode estar em PT-BR e ser longa/detalhada) e devolve um ' +
+      'SPEC para avaliar artigos técnicos (majoritariamente em inglês). Extraia a INTENÇÃO real: o que é ' +
+      'OBRIGATÓRIO para um artigo ser resposta CENTRAL vs o que é apenas desejável/adjacente. Traduza a ' +
+      'consulta e os termos-chave para inglês. NÃO invente restrições que a consulta não pede. Responda APENAS com JSON.',
+    user:
+      `CONSULTA: ${String(query || '').slice(0, 2000)}\n\n` +
+      'Devolva JSON {"must_have":[...],"nice_to_have":[...],"query_en":"...","terms":[...]}:\n' +
+      '- must_have: as condições que um artigo PRECISA satisfazer p/ ser resposta central (o foco pedido). ' +
+      'Curtas e verificáveis; 1 a 6. Se a consulta for genérica, 1-2 bastam.\n' +
+      '- nice_to_have: aspectos adjacentes/parciais que tornam um artigo "similar" mas não central; 0 a 6.\n' +
+      '- query_en: a consulta reescrita em inglês, concisa.\n' +
+      '- terms: termos-chave em inglês (sinônimos/variações) úteis p/ achar os artigos; 0 a 12.',
+  });
+  if (!out || typeof out !== 'object') return null;
+  return {
+    must_have: Array.isArray(out.must_have) ? out.must_have.map(String) : [],
+    nice_to_have: Array.isArray(out.nice_to_have) ? out.nice_to_have.map(String) : [],
+    query_en: String(out.query_en || ''),
+    terms: Array.isArray(out.terms) ? out.terms.map(String) : [],
+  };
+}
+
+// Priorização barata (F4): ordena os pendentes por overlap dos termos EN do spec com título+resumo
+// — prováveis-hits nos primeiros lotes (cards relevantes streamam antes). Varre TUDO; só reordena.
+const PRIO_STOP = new Set(['the', 'and', 'for', 'with', 'that', 'this', 'from', 'are', 'was', 'new', 'via', 'how', 'using', 'use', 'can', 'its', 'into', 'than', 'has', 'have', 'will', 'not', 'você', 'para', 'com', 'que', 'dos', 'das']);
+export function prioritizeBySpec(pend, spec) {
+  const src = [...(spec?.terms || []), spec?.query_en || ''].join(' ').toLowerCase();
+  const words = [...new Set(src.split(/[^a-z0-9]+/).filter((w) => w.length >= 3 && !PRIO_STOP.has(w)))];
+  if (words.length < 2) return pend;
+  const score = (a) => {
+    const hay = `${a.title || a.title_pt || ''} ${a.summary_pt || a.snippet || ''}`.toLowerCase();
+    let n = 0;
+    for (const w of words) if (hay.includes(w)) n++;
+    return n;
+  };
+  return pend.map((a, i) => ({ a, i, s: score(a) })).sort((x, y) => y.s - x.s || x.i - y.i).map((o) => o.a);
+}
+
 // ---- helpers de lote (porta de search.js:186-227) ----
 
 /** Entrada mínima por artigo no juiz em lote — no snapshot, o "melhor texto curto" é o snippet. */
@@ -109,8 +187,9 @@ export function mergeBatchVerdicts(batch, results, verdicts) {
 
 // ---- juízes (prompts verbatim de judgeRelevance/judgeRelevanceBatch, llm.js:740-817) ----
 
-async function judgeBatch({ query, items, search, apiKey, signal, onCost }) {
+async function judgeBatch({ query, items, spec, search, apiKey, signal, onCost }) {
   const cfg = search.models.searchBatch;
+  const sb = specBlock(spec);
   const out = await callJSON({
     apiKey,
     model: cfg.model,
@@ -122,9 +201,10 @@ async function judgeBatch({ query, items, search, apiKey, signal, onCost }) {
     onCost,
     system:
       'Você é um avaliador de relevância de busca, rigoroso e consistente. Avalie CADA item da ' +
-      'lista de forma INDEPENDENTE, seguindo a rubrica e os EXEMPLOS. Responda APENAS com JSON válido.',
+      'lista de forma INDEPENDENTE' + (sb ? ' CONTRA O SPEC' : ', seguindo a rubrica e os EXEMPLOS') +
+      '. Responda APENAS com JSON válido.',
     user:
-      RELEVANCE_RUBRIC + '\n\n' +
+      RELEVANCE_RUBRIC + '\n\n' + sb +
       `CONSULTA: ${query}\n\n` +
       'ITENS (um JSON por linha; "summary" pode estar em PT-BR):\n' +
       items.map((it) => JSON.stringify(it)).join('\n') + '\n\n' +
@@ -134,8 +214,9 @@ async function judgeBatch({ query, items, search, apiKey, signal, onCost }) {
   return Array.isArray(out?.results) ? out.results : [];
 }
 
-async function judgeOne({ query, title, content, search, apiKey, signal, onCost }) {
+async function judgeOne({ query, title, content, spec, search, apiKey, signal, onCost }) {
   const cfg = search.models.searchRelevance;
+  const sb = specBlock(spec);
   const out = await callJSON({
     apiKey,
     model: cfg.model,
@@ -146,10 +227,11 @@ async function judgeOne({ query, title, content, search, apiKey, signal, onCost 
     signal,
     onCost,
     system:
-      'Você é um avaliador de relevância de busca, rigoroso e consistente. Siga a rubrica e os EXEMPLOS. ' +
+      'Você é um avaliador de relevância de busca, rigoroso e consistente. ' +
+      (sb ? 'Julgue o ARTIGO CONTRA O SPEC. ' : 'Siga a rubrica e os EXEMPLOS. ') +
       'Responda APENAS com JSON válido.',
     user:
-      RELEVANCE_RUBRIC + '\n\n' +
+      RELEVANCE_RUBRIC + '\n\n' + sb +
       `CONSULTA: ${query}\n\n` +
       `ARTIGO\nTítulo: ${title || ''}\n\nConteúdo:\n${String(content || '').slice(0, search.maxChars)}\n\n` +
       'Devolva JSON {"relation","kind"}.',
@@ -166,7 +248,7 @@ const RANK = { direct: 0, similar: 1 };
  * KEY_INVALID propaga (o hook reabre o KeyModal). Retorna hits {id, relation, kind} direct-first
  * capados em search.maxItems + contadores + custo real acumulado.
  */
-export async function runSearch({ query, deep, candidates, search, apiKey, signal, onProgress, onHit, getContent }) {
+export async function runSearch({ query, deep, candidates, search, apiKey, signal, onProgress, onHit, onSpec, getContent }) {
   const verdicts = new Map();
   const hits = []; // acumulado AO VIVO (streaming) — o veredito de cada item empurra 1× aqui
   let spentUsd = 0;
@@ -192,6 +274,18 @@ export async function runSearch({ query, deep, candidates, search, apiKey, signa
     onHit?.(hit);
   };
 
+  // Entendimento da consulta (1 chamada Pro, amortizada): spec (must-have + PT→EN) que o juiz usa —
+  // busca precisão-primeiro. Fail-open: erro → query crua (spec=null). Abort/KEY_INVALID propagam.
+  let spec = null;
+  if (candidates.length) {
+    try {
+      spec = await compileSpec({ query, search, apiKey, signal, onCost });
+      if (spec) onSpec?.(spec);
+    } catch (e) {
+      if (isAbort(e, signal) || e?.code === 'KEY_INVALID') throw e;
+    }
+  }
+
   if (deep) {
     emitProgress('deep');
     await adaptivePool(
@@ -200,7 +294,7 @@ export async function runSearch({ query, deep, candidates, search, apiKey, signa
         if (signal?.aborted) throw signal.reason || new DOMException('abortado', 'AbortError');
         try {
           const content = await getContent(a.id);
-          verdicts.set(a.id, await judgeOne({ query, title: a.title, content, search, apiKey, signal, onCost }));
+          verdicts.set(a.id, await judgeOne({ query, title: a.title, content, spec, search, apiKey, signal, onCost }));
         } catch (e) {
           if (isAbort(e, signal) || e?.code === 'KEY_INVALID') throw e;
           verdicts.set(a.id, { relation: 'none', kind: 'news' }); // fail-open
@@ -221,7 +315,7 @@ export async function runSearch({ query, deep, candidates, search, apiKey, signa
       else pend.push(a);
     }
     scanned = candidates.length - pend.length;
-    const batches = chunkBatches(pend, search.batchSize);
+    const batches = chunkBatches(prioritizeBySpec(pend, spec), search.batchSize);
     emitProgress('soft');
     await adaptivePool(
       batches,
@@ -229,7 +323,7 @@ export async function runSearch({ query, deep, candidates, search, apiKey, signa
         if (signal?.aborted) throw signal.reason || new DOMException('abortado', 'AbortError');
         let batchFailed = false;
         try {
-          const results = await judgeBatch({ query, items: batch.map(toBatchItem), search, apiKey, signal, onCost });
+          const results = await judgeBatch({ query, items: batch.map(toBatchItem), spec, search, apiKey, signal, onCost });
           mergeBatchVerdicts(batch, results, verdicts);
         } catch (e) {
           if (isAbort(e, signal) || e?.code === 'KEY_INVALID') throw e;

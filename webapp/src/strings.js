@@ -35,6 +35,20 @@ const pt = {
   aiRelationDirect: 'direto',
   aiRelationSimilar: 'relacionado',
 
+  // histórico de buscas (localStorage; toda busca concluída entra sozinha)
+  historyTitle: 'Histórico de buscas',
+  historyOpen: 'Histórico de buscas',
+  historyEmpty: 'Nenhuma busca salva ainda — toda busca com IA aparece aqui.',
+  historyRecent: 'Buscas recentes',
+  historyReopen: 'Abrir o resultado salvo (sem custo)',
+  historyRerun: 'Rodar de novo',
+  historyDelete: 'Apagar',
+  historyClear: 'Limpar histórico',
+  historyClearConfirm: 'Apagar tudo? Clique de novo.',
+  historyFrozen: (when) => `salva em ${when}`,
+  historyMissing: (n) => `${n} item${n === 1 ? '' : 's'} fora do acervo`,
+  historyStats: (rel, total) => `${rel}/${total}`,
+
   // confirmação de custo
   confirmTitle: 'Confirmar busca com IA',
   confirmBody: (count, calls, usd) =>
@@ -171,6 +185,20 @@ const en = {
   aiRetry: 'Try again',
   aiRelationDirect: 'direct',
   aiRelationSimilar: 'related',
+
+  // search history (localStorage; every completed search is saved automatically)
+  historyTitle: 'Search history',
+  historyOpen: 'Search history',
+  historyEmpty: 'No saved searches yet — every AI search shows up here.',
+  historyRecent: 'Recent searches',
+  historyReopen: 'Open the saved result (no cost)',
+  historyRerun: 'Run again',
+  historyDelete: 'Delete',
+  historyClear: 'Clear history',
+  historyClearConfirm: 'Delete all? Click again.',
+  historyFrozen: (when) => `saved on ${when}`,
+  historyMissing: (n) => `${n} item${n === 1 ? '' : 's'} outside the archive`,
+  historyStats: (rel, total) => `${rel}/${total}`,
 
   confirmTitle: 'Confirm AI search',
   confirmBody: (count, calls, usd) =>
@@ -336,6 +364,14 @@ export function fmtUsd(v) {
 /** Inteiro com o separador de milhar do locale ativo (2.370 em pt vs 2,370 em en). */
 export function fmtInt(v) {
   return Math.round(Number(v) || 0).toLocaleString(BCP47[_fmtLocale]);
+}
+
+/** Data+hora curtas de um ISO (createdAt do histórico), no locale ativo; vazio p/ valor inválido. */
+export function fmtDateTime(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '';
+  return d.toLocaleString(BCP47[_fmtLocale], { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
 }
 
 /** ETA legível a partir de segundos: "45s", "2min", "2min 30s" (unidades neutras). */

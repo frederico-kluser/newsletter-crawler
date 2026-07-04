@@ -1,14 +1,14 @@
 {
  "schemaVersion": 1,
- "generatedAt": "2026-07-04T01:27:56.285Z",
+ "generatedAt": "2026-07-04T01:31:11.751Z",
  "totals": {
   "articles": 2370,
   "summaries": 2370,
   "classified": 2370
  },
  "cost": {
-  "totalUsd": 30.95559182614,
-  "totalCalls": 29108
+  "totalUsd": 30.95589142614,
+  "totalCalls": 29109
  },
  "sources": [
   {

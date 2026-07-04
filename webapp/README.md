@@ -21,6 +21,17 @@ re-executa com o mesmo escopo (passando pela confirmação de custo); dá p/ **a
 > Faz parte do repositório `newsletter-crawler`. O CLI continua sendo a fonte da verdade: ele
 > coleta/classifica os artigos e **gera o snapshot** que este site serve.
 
+## Idiomas (PT/EN) e tutorial
+
+A interface é **bilíngue**: detecta o idioma do navegador (português → **PT**; **qualquer outro
+idioma → EN**) e deixa trocar a qualquer hora pelo seletor **PT | EN** na barra do topo (a escolha
+fica salva no navegador). O **conteúdo do acervo** (títulos originais + resumos/tags em PT-BR)
+**não** é traduzido — só a casca da interface.
+
+Na **1ª visita** abre um **tutorial** em etapas (estilo "Welcome" do iOS) explicando o app; o botão
+de ajuda (**?**) na barra do topo reabre quando quiser. Toda string da UI vive em `src/strings.js`
+(`DICTS` com os dois idiomas) e o `npm test` garante que PT e EN tenham exatamente as mesmas chaves.
+
 ## Pré-requisito: gerar os dados
 
 O site lê `webapp/public/data/{meta,articles,contents}.json`. Gere/atualize com o CLI (na raiz
@@ -42,7 +53,7 @@ npm install
 npm run dev        # http://localhost:5173
 npm run build      # gera dist/ (produção)
 npm run preview    # serve o dist/ localmente
-npm test           # testes das libs puras (filtros, busca, custo, pool)
+npm test           # testes das libs puras (filtros, busca, custo, pool, i18n)
 npm run screenshots # (opcional) fotos desktop/mobile via Playwright do repo raiz
 ```
 
@@ -108,5 +119,9 @@ No caminho **2** (GitHub), o push já redeploya. Nos caminhos 1/3, rode o deploy
   `format`, `pool`, `storage`.
 - `src/components/` + `src/hooks/` — a UI (sidebar/drawer de filtros, grid animado, sheet de
   preview, busca IA) e o estado (`useReducer` de filtros + `useAiSearch`).
+- `src/i18n.jsx` + `src/strings.js` — i18n bilíngue PT/EN (Context próprio `useStrings`, sem lib;
+  toda string nos dois idiomas, paridade coberta por `test/i18n.test.js`); detecção do idioma do
+  navegador em `src/lib/locale.js` (espelhada no pré-paint do `index.html`).
+  `src/components/Tutorial.jsx` — tutorial de introdução (auto na 1ª visita + botão de ajuda `?`).
 - `src/motion/` — vocabulário único de springs do Motion.
 - Animações respeitam `prefers-reduced-motion`; só `transform`/`opacity`/`filter` são animados.

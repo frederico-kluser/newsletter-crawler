@@ -3,6 +3,28 @@
 Todas as mudanças relevantes deste projeto. Formato baseado em
 [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/); versionamento [SemVer](https://semver.org/lang/pt-BR/).
 
+## [Unreleased]
+
+Webapp bilíngue (PT/EN) com detecção de idioma e tutorial de introdução no site público.
+
+### Adicionado
+- **Idiomas PT/EN no webapp (`webapp/`):** interface bilíngue com **detecção pelo navegador**
+  (português → PT; **qualquer outro idioma → EN**) e **seletor manual PT | EN** na barra do topo,
+  com a escolha salva no `localStorage`. Camada i18n própria (Context `useStrings` + `DICTS` em
+  `webapp/src/strings.js`, **sem `react-i18next`**); regra de detecção pura e testável em
+  `webapp/src/lib/locale.js` (subtag primária `pt` → pt, resto → en), espelhada no pré-paint do
+  `webapp/index.html`; formatadores de número/moeda/data por locale. `webapp/test/i18n.test.js`
+  garante **paridade de chaves** entre os dois idiomas. O conteúdo do acervo (resumos/tags PT-BR)
+  **não** é traduzido — só a casca da UI.
+- **Tutorial de introdução (onboarding estilo Apple "Welcome"):** modal em etapas
+  (`webapp/src/components/Tutorial.jsx`) explicando o que é o app e como funciona; **abre sozinho na
+  1ª visita** (`localStorage nc-tutorial-seen`) e **reabre pelo botão de ajuda (?)** na barra do topo.
+  Acessível (focus trap, navegação por ←/→/Esc, foco de volta ao gatilho), respeita
+  `prefers-reduced-motion` e traz um seletor de idioma dentro do próprio card.
+- **Skill `building-the-webapp`:** nova skill em `.agents/skills/` documentando o frontend do webapp
+  (stack Vite+React+Motion, tokens de tema, a camada i18n e o tutorial), separada do porte de busca
+  (que segue em `searching-the-corpus`).
+
 ## [1.9.0] - 2026-07-03
 
 Histórico de buscas IA com resultados persistidos — a busca deixou de ser efêmera nas três frentes.

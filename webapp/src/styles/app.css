@@ -284,6 +284,14 @@
   color: var(--chip-on-fg);
   border-color: var(--chip-on-bg);
 }
+/* tag sem itens no contexto atual dos filtros: visível, mas apagada e sem clique */
+.chip:disabled {
+  opacity: 0.34;
+  cursor: not-allowed;
+}
+.chip:disabled:hover {
+  border-color: var(--hairline);
+}
 .chip-count {
   font-size: 10.5px;
   opacity: 0.65;

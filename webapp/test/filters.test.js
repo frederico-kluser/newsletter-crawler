@@ -3,7 +3,7 @@
 // tags; NULL cai no fallback por tags), período sobre date_iso e verify. Sem React/DOM.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { applyFilters, countActiveFilters, sortForDisplay, EMPTY_FILTERS } from '../src/lib/filters.js';
+import { applyFilters, computeFacetCounts, countActiveFilters, sortForDisplay, EMPTY_FILTERS } from '../src/lib/filters.js';
 import { effectiveKind, isToolByTags } from '../src/lib/taxonomy.js';
 
 const TOOL_TYPES = ['tool-release', 'tooling', 'library-release', 'product-launch'];
@@ -29,14 +29,18 @@ const art = (over = {}) => ({
 const f = (over = {}) => ({ ...EMPTY_FILTERS, facets: {}, ...over });
 const ids = (list) => list.map((a) => a.id);
 
-test('facetas: OR dentro da faceta, AND entre facetas', () => {
+test('facetas: INTERSEÇÃO (AND) dentro da faceta E entre facetas', () => {
   const rsc = art({ tags: { domain: ['reactjs'], 'content-type': ['deep-dive'] } });
   const llm = art({ tags: { domain: ['local-llm'] } });
+  const both = art({ tags: { domain: ['reactjs', 'local-llm'] } });
   const semTags = art();
-  const all = [rsc, llm, semTags];
+  const all = [rsc, llm, both, semTags];
 
-  assert.deepEqual(ids(applyFilters(all, f({ facets: { domain: ['reactjs'] } }), TOOL_TYPES)), [rsc.id]);
-  assert.equal(applyFilters(all, f({ facets: { domain: ['reactjs', 'local-llm'] } }), TOOL_TYPES).length, 2);
+  // uma tag: todos que a possuem (rsc e both têm reactjs)
+  assert.deepEqual(ids(applyFilters(all, f({ facets: { domain: ['reactjs'] } }), TOOL_TYPES)), [rsc.id, both.id]);
+  // DUAS tags na MESMA faceta = AND: só quem tem AS DUAS (antes, com OR, retornava 3)
+  assert.deepEqual(ids(applyFilters(all, f({ facets: { domain: ['reactjs', 'local-llm'] } }), TOOL_TYPES)), [both.id]);
+  // AND entre facetas continua igual
   assert.deepEqual(
     ids(applyFilters(all, f({ facets: { domain: ['reactjs'], 'content-type': ['deep-dive'] } }), TOOL_TYPES)),
     [rsc.id],
@@ -46,7 +50,22 @@ test('facetas: OR dentro da faceta, AND entre facetas', () => {
     0,
   );
   // artigo sem tags nunca passa num filtro de faceta (mesma semântica do NOT EXISTS do SQL)
-  assert.ok(!ids(applyFilters(all, f({ facets: { domain: ['reactjs', 'local-llm'] } }), TOOL_TYPES)).includes(semTags.id));
+  assert.ok(!ids(applyFilters(all, f({ facets: { domain: ['reactjs'] } }), TOOL_TYPES)).includes(semTags.id));
+});
+
+test('computeFacetCounts: co-ocorrência sobre o conjunto filtrado (selecionada=|R|, ausente=0)', () => {
+  const a1 = art({ tags: { domain: ['reactjs', 'nodejs'], 'content-type': ['deep-dive'] } });
+  const a2 = art({ tags: { domain: ['reactjs'], 'content-type': ['tutorial'] } });
+  const a3 = art({ tags: { domain: ['local-llm'] } });
+  // R = itens filtrados por domain=reactjs (interseção) → [a1, a2]
+  const R = applyFilters([a1, a2, a3], f({ facets: { domain: ['reactjs'] } }), TOOL_TYPES);
+  const counts = computeFacetCounts(R);
+  assert.equal(counts.domain.reactjs, 2); // tag selecionada: todo item de R a tem → |R|
+  assert.equal(counts.domain.nodejs, 1); // co-ocorre só em a1
+  assert.equal(counts['content-type']['deep-dive'], 1);
+  assert.equal(counts['content-type'].tutorial, 1);
+  assert.equal(counts.domain['local-llm'], undefined); // fora de R → ausente (a UI trata como 0/desabilita)
+  assert.deepEqual(computeFacetCounts([]), {}); // conjunto vazio → sem contagens
 });
 
 test('kind: release é match exato da coluna; segue contando como tool no bucket amplo', () => {

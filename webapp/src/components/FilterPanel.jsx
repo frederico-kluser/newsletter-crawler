@@ -11,7 +11,7 @@ function daysAgoIso(days) {
  * Conteúdo dos filtros — COMPARTILHADO entre a Sidebar (desktop) e o FilterDrawer (mobile).
  * Fonte, período (com presets 7/30 dias), verificação e as 9 facetas.
  */
-export default function FilterPanel({ meta, filters, dispatch }) {
+export default function FilterPanel({ meta, filters, dispatch, facetCounts }) {
   const STR = useStrings();
   const { FACET_LABEL, VERIFY_LABEL } = STR;
   const set = (key, value) => dispatch({ type: 'set', key, value });
@@ -95,6 +95,7 @@ export default function FilterPanel({ meta, filters, dispatch }) {
             label={FACET_LABEL[f.name] || f.name}
             tags={f.tags}
             selected={filters.facets[f.name] || []}
+            counts={facetCounts?.[f.name]}
             onToggle={(facet, tag) => dispatch({ type: 'toggleTag', facet, tag })}
           />
         ))}

@@ -23,7 +23,7 @@ import { useAiSearch } from './hooks/useAiSearch.js';
 import { useVisibleCount } from './hooks/useVisibleCount.js';
 import { useMediaQuery } from './hooks/useMediaQuery.js';
 import { useDebouncedValue } from './hooks/useDebouncedValue.js';
-import { EMPTY_FILTERS, applyFilters, countActiveFilters, sortForDisplay } from './lib/filters.js';
+import { EMPTY_FILTERS, applyFilters, computeFacetCounts, countActiveFilters, sortForDisplay } from './lib/filters.js';
 import { searchText } from './lib/textSearch.js';
 import { useStrings } from './i18n.jsx';
 import Tutorial from './components/Tutorial.jsx';
@@ -117,6 +117,10 @@ export default function App() {
     () => (articles ? sortForDisplay(searchText(applyFilters(articles, filters, toolTypes), textQuery)) : []),
     [articles, filters, toolTypes, textQuery],
   );
+  // Contagens de co-ocorrência das tags sobre o conjunto JÁ filtrado: cada chip mostra quantos
+  // itens do resultado atual também têm aquela tag, e a UI desabilita as zeradas. null enquanto o
+  // acervo não chega (o painel cai no total estático, sem desabilitar nada).
+  const facetCounts = useMemo(() => (articles ? computeFacetCounts(filtered) : null), [articles, filtered]);
 
   // modo IA: hits decorados com a ficha do snapshot; Segmented filtra pelo kind do JUIZ.
   // Durante `running` os hits vêm do streaming (partialHits, ao vivo); ao terminar, do result.
@@ -229,7 +233,7 @@ export default function App() {
         </main>
       ) : (
         <main className="layout" data-desktop={isDesktop || undefined}>
-          {isDesktop && meta && <Sidebar meta={meta} filters={filters} dispatch={dispatch} />}
+          {isDesktop && meta && <Sidebar meta={meta} filters={filters} dispatch={dispatch} facetCounts={facetCounts} />}
           <section className="content">
             <div className="content-head">
               <Segmented
@@ -333,6 +337,7 @@ export default function App() {
           meta={meta}
           filters={filters}
           dispatch={dispatch}
+          facetCounts={facetCounts}
         />
       )}
 

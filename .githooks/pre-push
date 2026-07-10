@@ -10,12 +10,18 @@
 #     banco real exporta um acervo vazio — jamais auto-publicar isso; pós-purge intencional,
 #     exporte e commite manualmente);
 #   • só a linha volátil `generatedAt` do meta.json mudou → restaura e o push segue;
-#   • dado novo de verdade → commita SÓ webapp/public/data e ABORTA o push (um commit criado
-#     durante o push não entra nele): repita o `git push`.
+#   • dado novo de verdade → commita webapp/public/data + webapp/public/api/v1 e ABORTA o push
+#     (um commit criado durante o push não entra nele): repita o `git push`.
+#
+# O mesmo `export --format web` regenera a API pública em webapp/public/api/v1/corpus.json — ela
+# viaja junto do snapshot em todos os ramos abaixo (encolheu → restaura; só generatedAt → restaura;
+# dado novo → commita), pelos MESMOS guards.
 set -u
 
 DATA_DIR="webapp/public/data"
+API_DIR="webapp/public/api/v1"
 META="$DATA_DIR/meta.json"
+CORPUS="$API_DIR/corpus.json"
 ZERO="0000000000000000000000000000000000000000"
 
 # stdin do pre-push: "<local ref> <local sha> <remote ref> <remote sha>" por ref pushado.
@@ -42,7 +48,7 @@ case "$total_novo" in '' | *[!0-9]*) total_novo="" ;; esac
 case "$total_head" in '' | *[!0-9]*) total_head="" ;; esac
 
 if [ -n "$total_novo" ] && [ -n "$total_head" ] && [ "$total_novo" -lt "$total_head" ]; then
-  git restore -- "$DATA_DIR" 2>/dev/null || git checkout -- "$DATA_DIR"
+  git restore -- "$DATA_DIR" "$API_DIR" 2>/dev/null || git checkout -- "$DATA_DIR" "$API_DIR"
   echo "[pre-push] aviso: snapshot novo tem MENOS artigos ($total_novo < $total_head) — máquina sem o banco real?" >&2
   echo "[pre-push] nada foi commitado; se a redução é intencional (purge), rode e commite manualmente: ncrawl export --format web" >&2
   exit 0
@@ -56,16 +62,19 @@ if ! git diff --quiet HEAD -- "$DATA_DIR/articles.json" "$DATA_DIR/contents.json
 elif ! diff -q <(git show "HEAD:$META" 2>/dev/null | grep -v '"generatedAt"') \
   <(grep -v '"generatedAt"' "$META") >/dev/null 2>&1; then
   real_change=1
+elif ! diff -q <(git show "HEAD:$CORPUS" 2>/dev/null | grep -v '"generatedAt"') \
+  <(grep -v '"generatedAt"' "$CORPUS") >/dev/null 2>&1; then
+  real_change=1
 fi
 
 if [ "$real_change" = "0" ]; then
-  git restore -- "$META" 2>/dev/null || git checkout -- "$META"
+  git restore -- "$META" "$CORPUS" 2>/dev/null || git checkout -- "$META" "$CORPUS"
   echo "[pre-push] snapshot já em dia (${total_head:-?} artigos) — push segue."
   exit 0
 fi
 
-git add -- "$DATA_DIR"
-if ! git commit --no-verify -m "chore(data): atualiza snapshot do webapp (pre-push, ${total_novo:-?} artigos)" -- "$DATA_DIR"; then
+git add -- "$DATA_DIR" "$API_DIR"
+if ! git commit --no-verify -m "chore(data): atualiza snapshot do webapp + API pública (pre-push, ${total_novo:-?} artigos)" -- "$DATA_DIR" "$API_DIR"; then
   echo "[pre-push] aviso: commit do snapshot falhou — push segue sem ele." >&2
   exit 0
 fi

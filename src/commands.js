@@ -18,6 +18,7 @@ import { beginRun, endRun, shouldStop, getBudgetState } from './budget.js';
 import { processJob, enqueue, upsertSource } from './crawl.js';
 import { detectSourceType } from './detect-type.js';
 import { exportWebSnapshot } from './export-web.js';
+import { exportPublicApi } from './export-api.js';
 import { classifyPending, classifyArticleRow } from './classify.js';
 import { summarizePending, summarizeArticleRow } from './summarize.js';
 import { verifyPending, verifyArticleRow, recleanSuspects } from './verify.js';
@@ -699,6 +700,10 @@ export function cmdExport(flags) {
     if (flags.all === true) warn('--all é ignorado no formato web (o snapshot é sempre o acervo completo).');
     const outDir = flags.out ? path.resolve(String(flags.out)) : path.join(ROOT, 'webapp', 'public', 'data');
     exportWebSnapshot({ outDir });
+    // API pública dedicada e versionada (webapp/public/api/v1/corpus.json) — regenerada no MESMO
+    // export que o pre-push roda. Só no destino default: um --out pontual não deve cuspir a API
+    // pública noutro lugar (o snapshot web ainda respeita o --out p/ exports de inspeção).
+    if (!flags.out) exportPublicApi({ outDir: path.join(ROOT, 'webapp', 'public', 'api', 'v1') });
     return;
   }
   const format = flags.format === 'json' ? 'json' : 'md';

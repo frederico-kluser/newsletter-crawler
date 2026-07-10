@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://newsletter-crawler.vercel.app/api/v1/schema.json",
+  "title": "Newsletter crawler — public corpus (v1)",
+  "description": "Acervo público de notícias, ferramentas e releases: metadados + resumos PT-BR + tags. Sem corpo completo. Contrato v1 aditivo — campos extras podem surgir; ignore os desconhecidos.",
+  "type": "object",
+  "required": ["schemaVersion", "generatedAt", "totals", "dates", "sources", "facets", "articles"],
+  "properties": {
+    "schemaVersion": { "type": "integer", "const": 1 },
+    "generatedAt": { "type": "string", "format": "date-time", "description": "ISO-8601. Único campo volátil entre exports sem mudança na base." },
+    "documentation": { "type": "string", "description": "Caminho relativo do README." },
+    "schema": { "type": "string", "description": "Caminho relativo deste schema." },
+    "totals": {
+      "type": "object",
+      "required": ["articles", "summaries", "classified", "byKind"],
+      "properties": {
+        "articles": { "type": "integer", "description": "== articles.length" },
+        "summaries": { "type": "integer", "description": "Artigos com resumo PT-BR." },
+        "classified": { "type": "integer", "description": "Artigos com tags." },
+        "byKind": {
+          "type": "object",
+          "required": ["news", "tool", "release", "unknown"],
+          "properties": {
+            "news": { "type": "integer" },
+            "tool": { "type": "integer" },
+            "release": { "type": "integer" },
+            "unknown": { "type": "integer" }
+          }
+        }
+      }
+    },
+    "dates": {
+      "type": "object",
+      "required": ["min", "max"],
+      "properties": {
+        "min": { "type": ["string", "null"], "description": "Menor data do acervo, YYYY-MM-DD." },
+        "max": { "type": ["string", "null"], "description": "Maior data do acervo, YYYY-MM-DD." }
+      }
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "count"],
+        "properties": {
+          "id": { "type": "integer" },
+          "name": { "type": ["string", "null"] },
+          "count": { "type": "integer" }
+        }
+      }
+    },
+    "facets": {
+      "type": "array",
+      "description": "Catálogo global de tags, agrupadas por faceta, em ordem canônica da taxonomia.",
+      "items": {
+        "type": "object",
+        "required": ["name", "tags"],
+        "properties": {
+          "name": { "type": "string" },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["tag", "count"],
+              "properties": {
+                "tag": { "type": "string" },
+                "count": { "type": "integer" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "articles": {
+      "type": "array",
+      "description": "Acervo COMPLETO, ordenado por id ASC.",
+      "items": {
+        "type": "object",
+        "required": ["id", "url", "sourceId", "sourceName", "title", "titlePt", "summaryPt", "snippet", "kind", "section", "date", "verifyStatus", "tags"],
+        "properties": {
+          "id": { "type": "integer" },
+          "url": { "type": "string" },
+          "sourceId": { "type": "integer" },
+          "sourceName": { "type": ["string", "null"] },
+          "title": { "type": ["string", "null"] },
+          "titlePt": { "type": ["string", "null"], "description": "Título PT-BR; null se ainda não resumido." },
+          "summaryPt": { "type": ["string", "null"], "description": "Resumo PT-BR; null se ainda não resumido." },
+          "snippet": { "type": "string", "description": "Preview ~400 chars, sem HTML." },
+          "kind": { "type": ["string", "null"], "enum": ["news", "tool", "release", null] },
+          "section": { "type": ["string", "null"] },
+          "date": { "type": "string", "description": "YYYY-MM-DD (publicação, ou coleta se a fonte não datar)." },
+          "verifyStatus": { "type": ["string", "null"], "enum": ["ok", "suspect", "junk", null] },
+          "tags": {
+            "type": "object",
+            "description": "Mapa faceta -> [tags]. {} se não classificado.",
+            "additionalProperties": { "type": "array", "items": { "type": "string" } }
+          }
+        }
+      }
+    }
+  }
+}

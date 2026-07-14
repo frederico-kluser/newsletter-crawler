@@ -1,22 +1,22 @@
 {
  "schemaVersion": 1,
- "generatedAt": "2026-07-10T15:33:25.202Z",
+ "generatedAt": "2026-07-14T16:01:17.172Z",
  "documentation": "/api/v1/README.md",
  "schema": "/api/v1/schema.json",
  "totals": {
-  "articles": 3061,
-  "summaries": 3061,
-  "classified": 3061,
+  "articles": 3088,
+  "summaries": 3088,
+  "classified": 3088,
   "byKind": {
    "news": 1200,
    "tool": 521,
    "release": 700,
-   "unknown": 640
+   "unknown": 667
   }
  },
  "dates": {
   "min": "2015-01-02",
-  "max": "2026-07-10"
+  "max": "2026-07-14"
  },
  "sources": [
   {
@@ -30,14 +30,14 @@
    "count": 540
   },
   {
+   "id": 8,
+   "name": "llmnews.ai",
+   "count": 493
+  },
+  {
    "id": 5,
    "name": "React Status",
    "count": 471
-  },
-  {
-   "id": 8,
-   "name": "llmnews.ai",
-   "count": 467
   },
   {
    "id": 6,
@@ -52,7 +52,7 @@
   {
    "id": 7,
    "name": "AI Weekly",
-   "count": 159
+   "count": 160
   }
  ],
  "facets": [
@@ -61,11 +61,11 @@
    "tags": [
     {
      "tag": "frontend",
-     "count": 1395
+     "count": 1396
     },
     {
      "tag": "ai-general",
-     "count": 766
+     "count": 787
     },
     {
      "tag": "nodejs",
@@ -73,23 +73,23 @@
     },
     {
      "tag": "backend",
-     "count": 650
+     "count": 651
     },
     {
      "tag": "reactjs",
-     "count": 420
+     "count": 421
     },
     {
      "tag": "llm-models",
-     "count": 319
+     "count": 334
     },
     {
      "tag": "local-llm",
-     "count": 117
+     "count": 120
     },
     {
      "tag": "python",
-     "count": 84
+     "count": 85
     }
    ]
   },
@@ -102,7 +102,7 @@
     },
     {
      "tag": "tool-release",
-     "count": 435
+     "count": 442
     },
     {
      "tag": "library-release",
@@ -110,63 +110,63 @@
     },
     {
      "tag": "deep-dive",
-     "count": 261
+     "count": 265
     },
     {
      "tag": "news",
-     "count": 260
+     "count": 261
     },
     {
      "tag": "release-announcement",
-     "count": 239
+     "count": 242
     },
     {
      "tag": "analysis",
-     "count": 232
+     "count": 238
     },
     {
      "tag": "tutorial",
-     "count": 190
+     "count": 192
     },
     {
      "tag": "opinion",
-     "count": 184
+     "count": 188
     },
     {
      "tag": "tooling",
-     "count": 183
+     "count": 185
     },
     {
      "tag": "announcement",
-     "count": 180
+     "count": 181
     },
     {
      "tag": "how-to",
-     "count": 120
+     "count": 122
     },
     {
      "tag": "explainer",
-     "count": 112
+     "count": 113
     },
     {
      "tag": "product-launch",
-     "count": 90
+     "count": 93
     },
     {
      "tag": "guide",
-     "count": 64
+     "count": 66
     },
     {
      "tag": "security-advisory",
-     "count": 62
+     "count": 63
     },
     {
      "tag": "benchmark",
-     "count": 54
+     "count": 56
     },
     {
      "tag": "showcase",
-     "count": 49
+     "count": 51
     },
     {
      "tag": "case-study",
@@ -174,23 +174,23 @@
     },
     {
      "tag": "research-paper",
-     "count": 44
+     "count": 45
     },
     {
      "tag": "best-practices",
      "count": 41
     },
     {
+     "tag": "demo",
+     "count": 39
+    },
+    {
      "tag": "tips-and-tricks",
      "count": 39
     },
     {
-     "tag": "demo",
-     "count": 38
-    },
-    {
      "tag": "project-spotlight",
-     "count": 34
+     "count": 35
     },
     {
      "tag": "incident-report",
@@ -198,6 +198,10 @@
     },
     {
      "tag": "funding-news",
+     "count": 30
+    },
+    {
+     "tag": "paper-summary",
      "count": 30
     },
     {
@@ -209,16 +213,12 @@
      "count": 29
     },
     {
-     "tag": "paper-summary",
-     "count": 28
-    },
-    {
      "tag": "comparison",
      "count": 27
     },
     {
      "tag": "migration-guide",
-     "count": 22
+     "count": 23
     },
     {
      "tag": "interview",
@@ -261,16 +261,16 @@
      "count": 12
     },
     {
+     "tag": "commentary",
+     "count": 11
+    },
+    {
      "tag": "curated-list",
      "count": 11
     },
     {
      "tag": "state-of-the-ecosystem",
      "count": 11
-    },
-    {
-     "tag": "commentary",
-     "count": 10
     },
     {
      "tag": "performance-report",
@@ -382,12 +382,12 @@
    "name": "topic-technology",
    "tags": [
     {
-     "tag": "web-development",
-     "count": 297
+     "tag": "ai-agents",
+     "count": 302
     },
     {
-     "tag": "ai-agents",
-     "count": 285
+     "tag": "web-development",
+     "count": 297
     },
     {
      "tag": "css",
@@ -419,7 +419,7 @@
     },
     {
      "tag": "ai-adoption",
-     "count": 126
+     "count": 127
     },
     {
      "tag": "accessibility",
@@ -435,11 +435,15 @@
     },
     {
      "tag": "generative-ai",
-     "count": 101
+     "count": 107
+    },
+    {
+     "tag": "tool-calling",
+     "count": 102
     },
     {
      "tag": "component-libraries",
-     "count": 100
+     "count": 101
     },
     {
      "tag": "package-management",
@@ -450,20 +454,16 @@
      "count": 100
     },
     {
-     "tag": "database-access",
-     "count": 97
-    },
-    {
      "tag": "ai-ethics",
-     "count": 94
+     "count": 98
     },
     {
      "tag": "ai-safety",
-     "count": 94
+     "count": 97
     },
     {
-     "tag": "tool-calling",
-     "count": 94
+     "tag": "database-access",
+     "count": 97
     },
     {
      "tag": "browser-compatibility",
@@ -471,11 +471,11 @@
     },
     {
      "tag": "ai-regulation",
-     "count": 89
+     "count": 91
     },
     {
      "tag": "ai-policy",
-     "count": 85
+     "count": 88
     },
     {
      "tag": "performance-tuning",
@@ -515,7 +515,7 @@
     },
     {
      "tag": "cli-tools",
-     "count": 64
+     "count": 66
     },
     {
      "tag": "typescript-node",
@@ -530,27 +530,31 @@
      "count": 59
     },
     {
+     "tag": "mcp",
+     "count": 57
+    },
+    {
+     "tag": "code-models",
+     "count": 56
+    },
+    {
+     "tag": "frontier-models",
+     "count": 56
+    },
+    {
      "tag": "query-optimization",
      "count": 55
     },
     {
-     "tag": "mcp",
-     "count": 54
-    },
-    {
-     "tag": "frontier-models",
-     "count": 53
-    },
-    {
-     "tag": "code-models",
-     "count": 52
+     "tag": "model-comparison",
+     "count": 49
     },
     {
      "tag": "esm",
      "count": 47
     },
     {
-     "tag": "model-comparison",
+     "tag": "local-inference",
      "count": 47
     },
     {
@@ -562,7 +566,7 @@
      "count": 46
     },
     {
-     "tag": "local-inference",
+     "tag": "model-evaluation",
      "count": 45
     },
     {
@@ -578,7 +582,7 @@
      "count": 45
     },
     {
-     "tag": "model-evaluation",
+     "tag": "model-training",
      "count": 44
     },
     {
@@ -590,11 +594,11 @@
      "count": 42
     },
     {
-     "tag": "model-training",
-     "count": 42
+     "tag": "component-composition",
+     "count": 41
     },
     {
-     "tag": "component-composition",
+     "tag": "foundation-models",
      "count": 41
     },
     {
@@ -606,11 +610,19 @@
      "count": 40
     },
     {
+     "tag": "open-source-models",
+     "count": 39
+    },
+    {
+     "tag": "agent-orchestration",
+     "count": 38
+    },
+    {
      "tag": "ai-funding",
      "count": 38
     },
     {
-     "tag": "foundation-models",
+     "tag": "prompt-engineering",
      "count": 38
     },
     {
@@ -618,7 +630,7 @@
      "count": 37
     },
     {
-     "tag": "agent-orchestration",
+     "tag": "ai-benchmarks",
      "count": 36
     },
     {
@@ -626,15 +638,11 @@
      "count": 36
     },
     {
-     "tag": "open-source-models",
-     "count": 36
-    },
-    {
-     "tag": "ai-benchmarks",
+     "tag": "computer-vision",
      "count": 35
     },
     {
-     "tag": "computer-vision",
+     "tag": "ai-research",
      "count": 34
     },
     {
@@ -642,19 +650,23 @@
      "count": 34
     },
     {
+     "tag": "model-safety",
+     "count": 34
+    },
+    {
      "tag": "rest-api",
      "count": 34
+    },
+    {
+     "tag": "edge-ai",
+     "count": 33
     },
     {
      "tag": "lts",
      "count": 33
     },
     {
-     "tag": "model-safety",
-     "count": 33
-    },
-    {
-     "tag": "prompt-engineering",
+     "tag": "multi-agent-systems",
      "count": 33
     },
     {
@@ -662,19 +674,11 @@
      "count": 32
     },
     {
-     "tag": "edge-ai",
-     "count": 32
-    },
-    {
-     "tag": "multi-agent-systems",
-     "count": 32
-    },
-    {
      "tag": "ai-hardware",
      "count": 31
     },
     {
-     "tag": "ai-research",
+     "tag": "gpu",
      "count": 31
     },
     {
@@ -682,7 +686,7 @@
      "count": 31
     },
     {
-     "tag": "gpu",
+     "tag": "image-generation",
      "count": 30
     },
     {
@@ -702,11 +706,11 @@
      "count": 30
     },
     {
-     "tag": "canvas",
+     "tag": "agentic-rag",
      "count": 29
     },
     {
-     "tag": "image-generation",
+     "tag": "canvas",
      "count": 29
     },
     {
@@ -718,7 +722,11 @@
      "count": 29
     },
     {
-     "tag": "agentic-rag",
+     "tag": "data-visualization",
+     "count": 28
+    },
+    {
+     "tag": "inference-optimization",
      "count": 28
     },
     {
@@ -738,20 +746,16 @@
      "count": 27
     },
     {
-     "tag": "data-visualization",
-     "count": 27
-    },
-    {
-     "tag": "inference-optimization",
-     "count": 27
-    },
-    {
      "tag": "edge-runtime",
      "count": 26
     },
     {
      "tag": "rag",
      "count": 26
+    },
+    {
+     "tag": "distributed-systems",
+     "count": 25
     },
     {
      "tag": "authentication",
@@ -766,7 +770,7 @@
      "count": 24
     },
     {
-     "tag": "distributed-systems",
+     "tag": "model-capabilities",
      "count": 24
     },
     {
@@ -782,7 +786,11 @@
      "count": 23
     },
     {
-     "tag": "model-capabilities",
+     "tag": "open-weights",
+     "count": 23
+    },
+    {
+     "tag": "privacy-first-ai",
      "count": 23
     },
     {
@@ -798,15 +806,11 @@
      "count": 22
     },
     {
-     "tag": "open-weights",
-     "count": 22
-    },
-    {
-     "tag": "privacy-first-ai",
-     "count": 22
-    },
-    {
      "tag": "proprietary-models",
+     "count": 22
+    },
+    {
+     "tag": "robotics",
      "count": 22
     },
     {
@@ -819,10 +823,6 @@
     },
     {
      "tag": "orm",
-     "count": 21
-    },
-    {
-     "tag": "robotics",
      "count": 21
     },
     {
@@ -854,6 +854,10 @@
      "count": 19
     },
     {
+     "tag": "deep-learning",
+     "count": 19
+    },
+    {
      "tag": "docker",
      "count": 19
     },
@@ -866,6 +870,14 @@
      "count": 18
     },
     {
+     "tag": "deepfakes",
+     "count": 18
+    },
+    {
+     "tag": "model-serving",
+     "count": 18
+    },
+    {
      "tag": "web-scraping",
      "count": 18
     },
@@ -874,15 +886,15 @@
      "count": 18
     },
     {
+     "tag": "attention-mechanism",
+     "count": 17
+    },
+    {
      "tag": "caching",
      "count": 17
     },
     {
-     "tag": "deep-learning",
-     "count": 17
-    },
-    {
-     "tag": "deepfakes",
+     "tag": "context-engineering",
      "count": 17
     },
     {
@@ -890,11 +902,11 @@
      "count": 17
     },
     {
-     "tag": "model-serving",
+     "tag": "on-device-inference",
      "count": 17
     },
     {
-     "tag": "on-device-inference",
+     "tag": "self-hosting",
      "count": 17
     },
     {
@@ -902,11 +914,11 @@
      "count": 16
     },
     {
-     "tag": "attention-mechanism",
+     "tag": "automation",
      "count": 16
     },
     {
-     "tag": "automation",
+     "tag": "cost-optimization-llm",
      "count": 16
     },
     {
@@ -914,11 +926,11 @@
      "count": 16
     },
     {
-     "tag": "reasoning-models",
+     "tag": "guardrails",
      "count": 16
     },
     {
-     "tag": "self-hosting",
+     "tag": "reasoning-models",
      "count": 16
     },
     {
@@ -938,19 +950,11 @@
      "count": 15
     },
     {
-     "tag": "context-engineering",
-     "count": 15
-    },
-    {
      "tag": "core-web-vitals",
      "count": 15
     },
     {
      "tag": "data-science",
-     "count": 15
-    },
-    {
-     "tag": "guardrails",
      "count": 15
     },
     {
@@ -963,6 +967,10 @@
     },
     {
      "tag": "llmops",
+     "count": 15
+    },
+    {
+     "tag": "reinforcement-learning",
      "count": 15
     },
     {
@@ -990,10 +998,6 @@
      "count": 14
     },
     {
-     "tag": "cost-optimization-llm",
-     "count": 14
-    },
-    {
      "tag": "function-calling",
      "count": 14
     },
@@ -1002,11 +1006,11 @@
      "count": 14
     },
     {
-     "tag": "react-compiler",
+     "tag": "moe",
      "count": 14
     },
     {
-     "tag": "reinforcement-learning",
+     "tag": "react-compiler",
      "count": 14
     },
     {
@@ -1026,11 +1030,11 @@
      "count": 13
     },
     {
-     "tag": "event-driven-architecture",
+     "tag": "error-handling",
      "count": 13
     },
     {
-     "tag": "moe",
+     "tag": "event-driven-architecture",
      "count": 13
     },
     {
@@ -1058,11 +1062,19 @@
      "count": 12
     },
     {
-     "tag": "error-handling",
+     "tag": "fine-tuning",
+     "count": 12
+    },
+    {
+     "tag": "jailbreaks",
      "count": 12
     },
     {
      "tag": "message-queues",
+     "count": 12
+    },
+    {
+     "tag": "quantization",
      "count": 12
     },
     {
@@ -1072,6 +1084,10 @@
     {
      "tag": "streaming-responses",
      "count": 12
+    },
+    {
+     "tag": "agentops",
+     "count": 11
     },
     {
      "tag": "agi",
@@ -1090,10 +1106,6 @@
      "count": 11
     },
     {
-     "tag": "fine-tuning",
-     "count": 11
-    },
-    {
      "tag": "flexbox",
      "count": 11
     },
@@ -1102,15 +1114,7 @@
      "count": 11
     },
     {
-     "tag": "jailbreaks",
-     "count": 11
-    },
-    {
      "tag": "multimodal-ai",
-     "count": 11
-    },
-    {
-     "tag": "quantization",
      "count": 11
     },
     {
@@ -1126,7 +1130,7 @@
      "count": 10
     },
     {
-     "tag": "agentops",
+     "tag": "containers",
      "count": 10
     },
     {
@@ -1158,6 +1162,10 @@
      "count": 10
     },
     {
+     "tag": "token-counting",
+     "count": 10
+    },
+    {
      "tag": "vector-search",
      "count": 10
     },
@@ -1178,10 +1186,6 @@
      "count": 9
     },
     {
-     "tag": "containers",
-     "count": 9
-    },
-    {
      "tag": "data-analysis",
      "count": 9
     },
@@ -1195,6 +1199,10 @@
     },
     {
      "tag": "encryption",
+     "count": 9
+    },
+    {
+     "tag": "explainable-ai",
      "count": 9
     },
     {
@@ -1214,6 +1222,10 @@
      "count": 9
     },
     {
+     "tag": "openai-compatible-api",
+     "count": 9
+    },
+    {
      "tag": "performance-python",
      "count": 9
     },
@@ -1223,10 +1235,6 @@
     },
     {
      "tag": "spa",
-     "count": 9
-    },
-    {
-     "tag": "token-counting",
      "count": 9
     },
     {
@@ -1262,10 +1270,6 @@
      "count": 8
     },
     {
-     "tag": "explainable-ai",
-     "count": 8
-    },
-    {
      "tag": "hmr",
      "count": 8
     },
@@ -1287,10 +1291,6 @@
     },
     {
      "tag": "mobile-first",
-     "count": 8
-    },
-    {
-     "tag": "openai-compatible-api",
      "count": 8
     },
     {
@@ -1374,6 +1374,10 @@
      "count": 7
     },
     {
+     "tag": "model-licensing",
+     "count": 7
+    },
+    {
      "tag": "post-training",
      "count": 7
     },
@@ -1403,6 +1407,10 @@
     },
     {
      "tag": "synthetic-data",
+     "count": 7
+    },
+    {
+     "tag": "text-to-speech",
      "count": 7
     },
     {
@@ -1438,11 +1446,11 @@
      "count": 6
     },
     {
-     "tag": "model-licensing",
+     "tag": "neural-networks",
      "count": 6
     },
     {
-     "tag": "neural-networks",
+     "tag": "observability-llm",
      "count": 6
     },
     {
@@ -1459,10 +1467,6 @@
     },
     {
      "tag": "superintelligence",
-     "count": 6
-    },
-    {
-     "tag": "text-to-speech",
      "count": 6
     },
     {
@@ -1506,6 +1510,10 @@
      "count": 5
     },
     {
+     "tag": "cuda",
+     "count": 5
+    },
+    {
      "tag": "etl",
      "count": 5
     },
@@ -1514,11 +1522,11 @@
      "count": 5
     },
     {
-     "tag": "numerical-computing",
+     "tag": "multilingual-models",
      "count": 5
     },
     {
-     "tag": "observability-llm",
+     "tag": "numerical-computing",
      "count": 5
     },
     {
@@ -1562,10 +1570,6 @@
      "count": 4
     },
     {
-     "tag": "cuda",
-     "count": 4
-    },
-    {
      "tag": "hardware-requirements",
      "count": 4
     },
@@ -1583,10 +1587,6 @@
     },
     {
      "tag": "model-leaderboards",
-     "count": 4
-    },
-    {
-     "tag": "multilingual-models",
      "count": 4
     },
     {
@@ -1622,6 +1622,10 @@
      "count": 4
     },
     {
+     "tag": "speech-to-text",
+     "count": 4
+    },
+    {
      "tag": "use-hook",
      "count": 4
     },
@@ -1643,6 +1647,10 @@
     },
     {
      "tag": "c-extensions",
+     "count": 3
+    },
+    {
+     "tag": "caching-llm",
      "count": 3
     },
     {
@@ -1710,11 +1718,11 @@
      "count": 3
     },
     {
-     "tag": "server-sent-events",
+     "tag": "rlhf",
      "count": 3
     },
     {
-     "tag": "speech-to-text",
+     "tag": "server-sent-events",
      "count": 3
     },
     {
@@ -1742,6 +1750,10 @@
      "count": 3
     },
     {
+     "tag": "tracing-llm",
+     "count": 3
+    },
+    {
      "tag": "usecontext",
      "count": 3
     },
@@ -1755,10 +1767,6 @@
     },
     {
      "tag": "api-versioning",
-     "count": 2
-    },
-    {
-     "tag": "caching-llm",
      "count": 2
     },
     {
@@ -1826,6 +1834,10 @@
      "count": 2
     },
     {
+     "tag": "lora",
+     "count": 2
+    },
+    {
      "tag": "mlops",
      "count": 2
     },
@@ -1866,10 +1878,6 @@
      "count": 2
     },
     {
-     "tag": "rlhf",
-     "count": 2
-    },
-    {
      "tag": "selective-hydration",
      "count": 2
     },
@@ -1883,10 +1891,6 @@
     },
     {
      "tag": "swe-bench",
-     "count": 2
-    },
-    {
-     "tag": "tracing-llm",
      "count": 2
     },
     {
@@ -2018,10 +2022,6 @@
      "count": 1
     },
     {
-     "tag": "lora",
-     "count": 1
-    },
-    {
      "tag": "memory-bandwidth",
      "count": 1
     },
@@ -2128,19 +2128,19 @@
    "tags": [
     {
      "tag": "for-practitioners",
-     "count": 763
+     "count": 773
     },
     {
      "tag": "intermediate",
-     "count": 760
+     "count": 765
     },
     {
      "tag": "all-levels",
-     "count": 489
+     "count": 490
     },
     {
      "tag": "advanced",
-     "count": 362
+     "count": 364
     },
     {
      "tag": "beginner",
@@ -2152,15 +2152,15 @@
     },
     {
      "tag": "for-beginners",
-     "count": 70
+     "count": 72
     },
     {
      "tag": "for-researchers",
-     "count": 46
+     "count": 48
     },
     {
      "tag": "for-leaders",
-     "count": 32
+     "count": 34
     },
     {
      "tag": "for-architects",
@@ -2177,11 +2177,11 @@
    "tags": [
     {
      "tag": "javascript",
-     "count": 1424
+     "count": 1428
     },
     {
      "tag": "typescript",
-     "count": 489
+     "count": 491
     },
     {
      "tag": "sql",
@@ -2197,7 +2197,7 @@
     },
     {
      "tag": "python",
-     "count": 136
+     "count": 138
     },
     {
      "tag": "rust",
@@ -2209,7 +2209,7 @@
     },
     {
      "tag": "go",
-     "count": 43
+     "count": 44
     },
     {
      "tag": "json",
@@ -2232,23 +2232,23 @@
      "count": 14
     },
     {
-     "tag": "shell",
+     "tag": "java",
      "count": 11
     },
     {
-     "tag": "java",
-     "count": 10
+     "tag": "shell",
+     "count": 11
     },
     {
      "tag": "zig",
      "count": 10
     },
     {
-     "tag": "graphql-lang",
-     "count": 8
+     "tag": "ruby",
+     "count": 9
     },
     {
-     "tag": "ruby",
+     "tag": "graphql-lang",
      "count": 8
     },
     {
@@ -2284,7 +2284,15 @@
      "count": 2
     },
     {
+     "tag": "r",
+     "count": 2
+    },
+    {
      "tag": "dart",
+     "count": 1
+    },
+    {
+     "tag": "julia",
      "count": 1
     },
     {
@@ -2297,10 +2305,6 @@
     },
     {
      "tag": "protobuf",
-     "count": 1
-    },
-    {
-     "tag": "r",
      "count": 1
     },
     {
@@ -2317,36 +2321,36 @@
    "name": "company-vendor-model",
    "tags": [
     {
-     "tag": "anthropic",
-     "count": 174
+     "tag": "openai",
+     "count": 179
     },
     {
-     "tag": "openai",
-     "count": 174
+     "tag": "anthropic",
+     "count": 178
     },
     {
      "tag": "google",
-     "count": 128
-    },
-    {
-     "tag": "github",
-     "count": 114
+     "count": 130
     },
     {
      "tag": "claude",
-     "count": 112
+     "count": 118
+    },
+    {
+     "tag": "github",
+     "count": 115
     },
     {
      "tag": "microsoft",
-     "count": 91
+     "count": 92
     },
     {
      "tag": "gpt",
-     "count": 62
+     "count": 64
     },
     {
      "tag": "nvidia",
-     "count": 54
+     "count": 55
     },
     {
      "tag": "vercel",
@@ -2354,7 +2358,7 @@
     },
     {
      "tag": "meta-ai",
-     "count": 51
+     "count": 52
     },
     {
      "tag": "aws",
@@ -2362,7 +2366,7 @@
     },
     {
      "tag": "deepseek",
-     "count": 38
+     "count": 39
     },
     {
      "tag": "gemini",
@@ -2370,38 +2374,42 @@
     },
     {
      "tag": "cloudflare",
-     "count": 33
+     "count": 34
     },
     {
      "tag": "codex",
-     "count": 29
+     "count": 32
     },
     {
      "tag": "google-deepmind",
-     "count": 26
+     "count": 27
     },
     {
      "tag": "apple",
      "count": 23
     },
     {
+     "tag": "amazon",
+     "count": 22
+    },
+    {
      "tag": "qwen",
      "count": 22
     },
     {
-     "tag": "amazon",
-     "count": 20
+     "tag": "claude-opus",
+     "count": 19
     },
     {
      "tag": "hugging-face",
      "count": 19
     },
     {
-     "tag": "claude-opus",
-     "count": 17
+     "tag": "alibaba",
+     "count": 15
     },
     {
-     "tag": "alibaba",
+     "tag": "glm",
      "count": 15
     },
     {
@@ -2417,10 +2425,6 @@
      "count": 14
     },
     {
-     "tag": "glm",
-     "count": 14
-    },
-    {
      "tag": "zhipu-ai",
      "count": 14
     },
@@ -2429,11 +2433,11 @@
      "count": 11
     },
     {
-     "tag": "azure-ai",
-     "count": 8
+     "tag": "mistral",
+     "count": 9
     },
     {
-     "tag": "mistral",
+     "tag": "azure-ai",
      "count": 8
     },
     {
@@ -2449,20 +2453,20 @@
      "count": 6
     },
     {
+     "tag": "minimax",
+     "count": 6
+    },
+    {
      "tag": "deepseek-v",
      "count": 5
     },
     {
-     "tag": "minimax",
-     "count": 5
+     "tag": "aws-bedrock",
+     "count": 4
     },
     {
      "tag": "databricks",
      "count": 4
-    },
-    {
-     "tag": "aws-bedrock",
-     "count": 3
     },
     {
      "tag": "baseten",
@@ -2561,6 +2565,10 @@
      "count": 1
     },
     {
+     "tag": "nova",
+     "count": 1
+    },
+    {
      "tag": "perplexity",
      "count": 1
     },
@@ -2595,11 +2603,11 @@
     },
     {
      "tag": "react",
-     "count": 303
+     "count": 304
     },
     {
      "tag": "claude",
-     "count": 82
+     "count": 86
     },
     {
      "tag": "npm",
@@ -2626,12 +2634,12 @@
      "count": 45
     },
     {
-     "tag": "tailwind",
-     "count": 41
+     "tag": "gpt",
+     "count": 43
     },
     {
-     "tag": "gpt",
-     "count": 40
+     "tag": "tailwind",
+     "count": 41
     },
     {
      "tag": "pnpm",
@@ -2659,14 +2667,14 @@
     },
     {
      "tag": "gemini",
-     "count": 27
-    },
-    {
-     "tag": "angular",
-     "count": 25
+     "count": 28
     },
     {
      "tag": "aws",
+     "count": 26
+    },
+    {
+     "tag": "angular",
      "count": 25
     },
     {
@@ -2690,16 +2698,16 @@
      "count": 21
     },
     {
+     "tag": "langchain",
+     "count": 20
+    },
+    {
      "tag": "sqlite",
      "count": 20
     },
     {
      "tag": "three-js",
      "count": 19
-    },
-    {
-     "tag": "langchain",
-     "count": 18
     },
     {
      "tag": "tanstack-router",
@@ -2722,6 +2730,14 @@
      "count": 16
     },
     {
+     "tag": "hugging-face-transformers",
+     "count": 15
+    },
+    {
+     "tag": "llama-cpp",
+     "count": 15
+    },
+    {
      "tag": "react-router",
      "count": 15
     },
@@ -2734,11 +2750,7 @@
      "count": 14
     },
     {
-     "tag": "hugging-face-transformers",
-     "count": 14
-    },
-    {
-     "tag": "llama-cpp",
+     "tag": "ollama",
      "count": 14
     },
     {
@@ -2758,6 +2770,10 @@
      "count": 13
     },
     {
+     "tag": "claude-opus",
+     "count": 12
+    },
+    {
      "tag": "css-modules",
      "count": 12
     },
@@ -2770,16 +2786,8 @@
      "count": 12
     },
     {
-     "tag": "ollama",
-     "count": 12
-    },
-    {
      "tag": "rolldown",
      "count": 12
-    },
-    {
-     "tag": "claude-opus",
-     "count": 11
     },
     {
      "tag": "clickhouse",
@@ -2866,6 +2874,10 @@
      "count": 7
     },
     {
+     "tag": "llama-index",
+     "count": 7
+    },
+    {
      "tag": "mysql",
      "count": 7
     },
@@ -2898,7 +2910,7 @@
      "count": 6
     },
     {
-     "tag": "llama-index",
+     "tag": "litellm",
      "count": 6
     },
     {
@@ -2938,11 +2950,11 @@
      "count": 5
     },
     {
-     "tag": "litellm",
+     "tag": "mantine",
      "count": 5
     },
     {
-     "tag": "mantine",
+     "tag": "mixtral",
      "count": 5
     },
     {
@@ -2974,7 +2986,7 @@
      "count": 4
     },
     {
-     "tag": "mixtral",
+     "tag": "langgraph",
      "count": 4
     },
     {
@@ -3034,6 +3046,10 @@
      "count": 3
     },
     {
+     "tag": "crewai",
+     "count": 3
+    },
+    {
      "tag": "elasticsearch",
      "count": 3
     },
@@ -3067,10 +3083,6 @@
     },
     {
      "tag": "kafka",
-     "count": 3
-    },
-    {
-     "tag": "langgraph",
      "count": 3
     },
     {
@@ -3142,11 +3154,11 @@
      "count": 2
     },
     {
-     "tag": "axolotl",
+     "tag": "autogen",
      "count": 2
     },
     {
-     "tag": "crewai",
+     "tag": "axolotl",
      "count": 2
     },
     {
@@ -3238,15 +3250,15 @@
      "count": 1
     },
     {
-     "tag": "autogen",
-     "count": 1
-    },
-    {
      "tag": "claude-haiku",
      "count": 1
     },
     {
      "tag": "dask",
+     "count": 1
+    },
+    {
+     "tag": "dspy",
      "count": 1
     },
     {
@@ -3351,6 +3363,10 @@
     },
     {
      "tag": "nodemon",
+     "count": 1
+    },
+    {
+     "tag": "nova",
      "count": 1
     },
     {
@@ -3476,7 +3492,7 @@
    "tags": [
     {
      "tag": "performance",
-     "count": 713
+     "count": 718
     },
     {
      "tag": "ux",
@@ -3484,7 +3500,7 @@
     },
     {
      "tag": "open-source",
-     "count": 373
+     "count": 376
     },
     {
      "tag": "ui",
@@ -3492,23 +3508,23 @@
     },
     {
      "tag": "dev-experience",
-     "count": 283
+     "count": 285
     },
     {
      "tag": "security",
-     "count": 280
+     "count": 283
     },
     {
      "tag": "architecture",
-     "count": 264
+     "count": 266
     },
     {
      "tag": "optimization",
-     "count": 253
+     "count": 256
     },
     {
      "tag": "developer-productivity",
-     "count": 217
+     "count": 219
     },
     {
      "tag": "dx",
@@ -3524,23 +3540,23 @@
     },
     {
      "tag": "testing",
-     "count": 119
+     "count": 120
+    },
+    {
+     "tag": "ai-ethics",
+     "count": 103
     },
     {
      "tag": "data-engineering",
      "count": 103
     },
     {
-     "tag": "ai-ethics",
-     "count": 101
-    },
-    {
      "tag": "governance",
-     "count": 91
+     "count": 94
     },
     {
      "tag": "cost-optimization",
-     "count": 90
+     "count": 93
     },
     {
      "tag": "design-systems",
@@ -3548,11 +3564,11 @@
     },
     {
      "tag": "reliability",
-     "count": 80
+     "count": 81
     },
     {
      "tag": "community",
-     "count": 74
+     "count": 75
     },
     {
      "tag": "data-fetching",
@@ -3568,18 +3584,22 @@
     },
     {
      "tag": "ai-safety",
-     "count": 60
+     "count": 61
     },
     {
      "tag": "scalability",
-     "count": 59
+     "count": 61
     },
     {
      "tag": "caching",
-     "count": 55
+     "count": 58
     },
     {
      "tag": "debugging",
+     "count": 57
+    },
+    {
+     "tag": "cloud",
      "count": 55
     },
     {
@@ -3587,40 +3607,40 @@
      "count": 55
     },
     {
-     "tag": "cloud",
-     "count": 54
+     "tag": "privacy",
+     "count": 51
     },
     {
      "tag": "ci-cd",
      "count": 50
     },
     {
-     "tag": "privacy",
+     "tag": "devops",
      "count": 50
     },
     {
-     "tag": "devops",
-     "count": 49
+     "tag": "observability",
+     "count": 50
     },
     {
-     "tag": "observability",
-     "count": 49
+     "tag": "evaluation",
+     "count": 47
+    },
+    {
+     "tag": "async",
+     "count": 46
     },
     {
      "tag": "design-patterns",
      "count": 46
     },
     {
-     "tag": "async",
+     "tag": "latency",
      "count": 45
     },
     {
-     "tag": "evaluation",
-     "count": 44
-    },
-    {
-     "tag": "latency",
-     "count": 44
+     "tag": "ai-regulation",
+     "count": 42
     },
     {
      "tag": "concurrency",
@@ -3628,11 +3648,7 @@
     },
     {
      "tag": "data-privacy",
-     "count": 41
-    },
-    {
-     "tag": "ai-regulation",
-     "count": 40
+     "count": 42
     },
     {
      "tag": "regulation",
@@ -3640,27 +3656,35 @@
     },
     {
      "tag": "refactoring",
-     "count": 36
+     "count": 37
     },
     {
      "tag": "validation",
      "count": 36
     },
     {
+     "tag": "compliance",
+     "count": 35
+    },
+    {
      "tag": "data-pipelines",
      "count": 35
     },
     {
-     "tag": "compliance",
-     "count": 34
-    },
-    {
      "tag": "ethics",
-     "count": 34
+     "count": 35
     },
     {
      "tag": "llmops",
      "count": 33
+    },
+    {
+     "tag": "responsible-ai",
+     "count": 32
+    },
+    {
+     "tag": "agentops",
+     "count": 31
     },
     {
      "tag": "authentication",
@@ -3671,28 +3695,20 @@
      "count": 31
     },
     {
-     "tag": "web-vitals",
+     "tag": "transparency",
      "count": 30
     },
     {
-     "tag": "responsible-ai",
-     "count": 29
+     "tag": "web-vitals",
+     "count": 30
     },
     {
      "tag": "monitoring",
      "count": 28
     },
     {
-     "tag": "transparency",
-     "count": 28
-    },
-    {
-     "tag": "agentops",
-     "count": 27
-    },
-    {
      "tag": "productivity",
-     "count": 26
+     "count": 27
     },
     {
      "tag": "technical-debt",
@@ -3700,7 +3716,7 @@
     },
     {
      "tag": "edge-computing",
-     "count": 22
+     "count": 23
     },
     {
      "tag": "authorization",
@@ -3720,11 +3736,19 @@
     },
     {
      "tag": "cost",
-     "count": 19
+     "count": 20
     },
     {
      "tag": "containers",
-     "count": 18
+     "count": 19
+    },
+    {
+     "tag": "infrastructure-as-code",
+     "count": 17
+    },
+    {
+     "tag": "prompt-engineering",
+     "count": 17
     },
     {
      "tag": "a11y",
@@ -3739,12 +3763,8 @@
      "count": 16
     },
     {
-     "tag": "infrastructure-as-code",
-     "count": 16
-    },
-    {
      "tag": "guardrails",
-     "count": 15
+     "count": 16
     },
     {
      "tag": "parallelism",
@@ -3752,10 +3772,6 @@
     },
     {
      "tag": "pricing",
-     "count": 15
-    },
-    {
-     "tag": "prompt-engineering",
      "count": 15
     },
     {
@@ -3771,6 +3787,10 @@
      "count": 13
     },
     {
+     "tag": "interpretability",
+     "count": 12
+    },
+    {
      "tag": "leadership",
      "count": 12
     },
@@ -3780,10 +3800,6 @@
     },
     {
      "tag": "bias",
-     "count": 11
-    },
-    {
-     "tag": "interpretability",
      "count": 11
     },
     {
@@ -3799,6 +3815,14 @@
      "count": 10
     },
     {
+     "tag": "orchestration",
+     "count": 10
+    },
+    {
+     "tag": "token-economics",
+     "count": 10
+    },
+    {
      "tag": "alignment",
      "count": 9
     },
@@ -3811,15 +3835,7 @@
      "count": 9
     },
     {
-     "tag": "orchestration",
-     "count": 9
-    },
-    {
      "tag": "sustainability",
-     "count": 9
-    },
-    {
-     "tag": "token-economics",
      "count": 9
     },
     {
@@ -3840,7 +3856,11 @@
     },
     {
      "tag": "tracing",
-     "count": 6
+     "count": 7
+    },
+    {
+     "tag": "explainability",
+     "count": 5
     },
     {
      "tag": "fairness",
@@ -3849,10 +3869,6 @@
     {
      "tag": "localization",
      "count": 5
-    },
-    {
-     "tag": "explainability",
-     "count": 4
     },
     {
      "tag": "metrics",
@@ -3897,67 +3913,67 @@
    "tags": [
     {
      "tag": "ai-agents",
-     "count": 229
+     "count": 240
     },
     {
      "tag": "ai-coding-agents",
-     "count": 218
+     "count": 230
     },
     {
      "tag": "agentic-ai",
-     "count": 166
+     "count": 173
     },
     {
      "tag": "ai-governance",
-     "count": 126
-    },
-    {
-     "tag": "on-device-ai",
-     "count": 102
+     "count": 132
     },
     {
      "tag": "coding-agents",
-     "count": 100
+     "count": 106
+    },
+    {
+     "tag": "on-device-ai",
+     "count": 104
     },
     {
      "tag": "reasoning-models",
-     "count": 98
+     "count": 103
     },
     {
      "tag": "local-llm",
-     "count": 92
+     "count": 96
     },
     {
      "tag": "frontier-models",
-     "count": 85
+     "count": 88
     },
     {
      "tag": "tool-calling",
-     "count": 59
+     "count": 62
     },
     {
      "tag": "open-weights",
-     "count": 58
+     "count": 61
     },
     {
      "tag": "foundation-models",
-     "count": 57
+     "count": 58
     },
     {
      "tag": "mcp",
-     "count": 55
+     "count": 56
     },
     {
      "tag": "ai-data-centers",
-     "count": 54
+     "count": 55
     },
     {
      "tag": "edge-ai",
-     "count": 52
+     "count": 53
     },
     {
      "tag": "agent-orchestration",
-     "count": 48
+     "count": 50
     },
     {
      "tag": "small-language-models",
@@ -3973,11 +3989,11 @@
     },
     {
      "tag": "copilots",
-     "count": 35
+     "count": 36
     },
     {
      "tag": "multi-agent",
-     "count": 33
+     "count": 34
     },
     {
      "tag": "prompt-injection",
@@ -3992,16 +4008,16 @@
      "count": 27
     },
     {
+     "tag": "computer-use",
+     "count": 26
+    },
+    {
      "tag": "multimodal",
      "count": 26
     },
     {
      "tag": "model-context-protocol",
      "count": 24
-    },
-    {
-     "tag": "computer-use",
-     "count": 23
     },
     {
      "tag": "embeddings",
@@ -4012,12 +4028,12 @@
      "count": 21
     },
     {
-     "tag": "world-models",
+     "tag": "quantization",
      "count": 21
     },
     {
-     "tag": "quantization",
-     "count": 20
+     "tag": "world-models",
+     "count": 21
     },
     {
      "tag": "browser-agents",
@@ -4028,7 +4044,15 @@
      "count": 19
     },
     {
+     "tag": "fine-tuning",
+     "count": 19
+    },
+    {
      "tag": "structured-output",
+     "count": 19
+    },
+    {
+     "tag": "synthetic-data",
      "count": 19
     },
     {
@@ -4040,31 +4064,23 @@
      "count": 18
     },
     {
-     "tag": "fine-tuning",
-     "count": 18
-    },
-    {
-     "tag": "synthetic-data",
-     "count": 18
-    },
-    {
      "tag": "generative-ui",
      "count": 14
+    },
+    {
+     "tag": "distillation",
+     "count": 12
+    },
+    {
+     "tag": "moe",
+     "count": 12
     },
     {
      "tag": "voice-ai",
      "count": 12
     },
     {
-     "tag": "distillation",
-     "count": 11
-    },
-    {
      "tag": "jailbreaks",
-     "count": 10
-    },
-    {
-     "tag": "moe",
      "count": 10
     },
     {
@@ -4081,7 +4097,7 @@
     },
     {
      "tag": "voice-agents",
-     "count": 8
+     "count": 9
     },
     {
      "tag": "context-windows",
@@ -4110,6 +4126,10 @@
     {
      "tag": "slm",
      "count": 2
+    },
+    {
+     "tag": "lora",
+     "count": 1
     }
    ]
   }
@@ -128363,6 +128383,1293 @@
      "database-migrations",
      "authentication",
      "webassembly"
+    ]
+   }
+  },
+  {
+   "id": 3102,
+   "url": "https://terrytao.wordpress.com/2026/07/11/old-and-new-apps-via-modern-coding-agents",
+   "sourceId": 8,
+   "sourceName": "llmnews.ai",
+   "title": "Old and new apps, via modern coding agents",
+   "titlePt": "Aplicativos antigos e novos, via agentes de codificação modernos",
+   "summaryPt": "O autor, desde 1999, criava applets em Java para visualização matemática (como favos de mel e conjuntos de Besicovitch), mas eles se tornaram obsoletos com o fim do suporte a Java nos navegadores. Recentemente, usou agentes de codificação baseados em IA para portar cerca de duas dúzias desses applets para JavaScript em poucas horas, inclusive com melhorias gráficas — como a colorização do applet de Besicovitch. A IA também corrigiu dois bugs no código original, e apenas um pequeno problema foi identificado no port, tornando a migração bem-sucedida e de baixo risco, já que os applets são auxiliares visuais não críticos.\n\nAlém de portar os antigos, o autor criou novos aplicativos: um visualizador de relatividade especial (conceito de “Inkscape no espaço de Minkowski”, que havia abandonado em 1999) e um visualizador para a Conjectura de Gilbreath, ambos gerados em algumas horas de “vibe coding” com o agente de IA. O processo foi simples e o autor planeja usar visualizações interativas como suplementos em futuros artigos, aceitando os possíveis bugs residuais por não serem essenciais ao conteúdo principal.",
+   "snippet": "I have been interested in machine-assisted ways to do and teach mathematics from as far back as 1999, when I started coding several applets in Java 1.0, both for my complex analysis and linear algebra courses, as well as to visualize various mathematical objects I was interested in (such as honeycombs or Besicovitch sets). This was moderately successful; but the applets were time-consuming to prog",
+   "kind": null,
+   "section": null,
+   "date": "2026-07-11",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "refactoring",
+     "dev-experience",
+     "developer-productivity",
+     "debugging"
+    ],
+    "content-type": [
+     "how-to",
+     "tutorial"
+    ],
+    "difficulty": [
+     "for-practitioners"
+    ],
+    "domain": [
+     "llm-models",
+     "ai-general"
+    ],
+    "ecosystem-language": [
+     "javascript",
+     "java"
+    ],
+    "topic-technology": [
+     "ai-agents",
+     "generative-ai"
+    ],
+    "trending-emerging": [
+     "ai-coding-agents"
+    ]
+   }
+  },
+  {
+   "id": 3103,
+   "url": "https://insideai.news/news/ai-safety/mits-new-method-flags-ai-models-trained-on-child-abuse-imagery-without-generating-it/3869",
+   "sourceId": 8,
+   "sourceName": "llmnews.ai",
+   "title": "MIT’s New Method Flags AI Models Trained on Child Abuse Imagery Without Generating It",
+   "titlePt": "Novo método do MIT identifica modelos de IA treinados para abuso infantil sem gerar conteúdo",
+   "summaryPt": "Pesquisadores do MIT, em parceria com a organização sem fins lucrativos Thorn, desenvolveram um método de auditoria chamado Gaussian probing que é capaz de identificar se um modelo de IA foi ajustado para gerar material de abuso sexual infantil (CSAM) sem precisar gerar imagens. Essa abordagem inovadora contorna as barreiras legais e éticas que inviabilizavam os métodos tradicionais de verificação, já que gerar esse tipo de conteúdo para testes é criminoso. Ao analisar as adaptações internas do modelo a partir de dados aleatórios — e não suas saídas —, a técnica obteve 100% de precisão na detecção de modelos especializados em gerar CSAM. A descoberta surge em meio a um aumento expressivo de denúncias de imagens abusivas geradas por IA, que chegaram a mais de 1,5 milhão em 2025. O método, que pode ser integrado a plataformas de hospedagem de modelos abertos como Hugging Face, é escalável e resistente a tentativas de evasão, representando uma ferramenta legal e técnica para conter a proliferação desse tipo de conteúdo. Os pesquisadores planejam expandir os testes para mais modelos e investigar a detecção precoce de capacidades nocivas mesmo antes do ajuste fino, mas alertam que a técnica ainda não cobre todas as formas de geração de CSAM por IA.",
+   "snippet": "July 13, 2026, (Inside AI) — A new auditing method developed by MIT researchers can determine whether an AI model has been fine-tuned to generate child sexual abuse material (CSAM) without ever producing an image, sidestepping the legal and ethical barriers that have stymied safety checks. Led by graduate student Vinith Suriyakumar and associate professors Ashia Wilson and Marzyeh Ghassemi, the te",
+   "kind": null,
+   "section": null,
+   "date": "2026-07-13",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "ai-safety",
+     "responsible-ai",
+     "ai-ethics",
+     "evaluation"
+    ],
+    "content-type": [
+     "research-paper"
+    ],
+    "domain": [
+     "ai-general",
+     "llm-models"
+    ],
+    "topic-technology": [
+     "fine-tuning",
+     "model-safety",
+     "ai-ethics",
+     "image-generation",
+     "jailbreaks",
+     "lora"
+    ],
+    "trending-emerging": [
+     "fine-tuning",
+     "lora",
+     "ai-governance"
+    ]
+   }
+  },
+  {
+   "id": 3104,
+   "url": "https://github.com/luuuc/sense/blob/main/bench/verticals/ruby-rails/report-for-humans.md",
+   "sourceId": 8,
+   "sourceName": "llmnews.ai",
+   "title": "Can an AI agent navigate Ruby? The results, in plain language",
+   "titlePt": "Agente de IA navega em Ruby? Resultados práticos",
+   "summaryPt": "Um benchmark testou se agentes de IA conseguem navegar por bases de código Ruby reais para identificar dependências de um modelo central antes de uma refatoração arriscada. Em 13 repositórios e 5 modelos, o agente sem ajuda encontrou poucas dependências em aplicações grandes, declarando a auditoria completa mesmo tendo perdido a maioria. Com um mapa estrutural da base (chamado Sense), o melhor modelo (Claude Opus 4.8) teve um ganho médio de +0,26 na taxa de acertos, concentrado em dependências não óbvias (+0,48). O ganho foi maior em repositórios com mais de 2.500 arquivos; em gems pequenas, o mapa não fez diferença. O artigo descreve a metodologia detalhada, incluindo verificação manual das respostas, transcrições públicas e variação publicada, e convida o leitor a testar no próprio repositório com o Sense, que é gratuito e de código aberto.",
+   "snippet": "Can an AI agent navigate Ruby? The results, in plain language AI agents write Ruby well. This benchmark asks a different question: can they navigate it? Given a real codebase and a change that touches a central model, can an agent find every place that depends on it, before the change silently breaks one? Across 13 real codebases and 5 models, the answer splits cleanly in two. On small, readable g",
+   "kind": null,
+   "section": null,
+   "date": "2026-07-14",
+   "verifyStatus": "suspect",
+   "tags": {
+    "concept-theme": [
+     "evaluation"
+    ],
+    "content-type": [
+     "benchmark",
+     "analysis"
+    ],
+    "difficulty": [
+     "for-practitioners"
+    ],
+    "domain": [
+     "ai-general",
+     "llm-models"
+    ],
+    "ecosystem-language": [
+     "ruby"
+    ],
+    "topic-technology": [
+     "ai-agents",
+     "ai-benchmarks",
+     "code-models",
+     "tool-calling",
+     "model-comparison"
+    ],
+    "trending-emerging": [
+     "ai-coding-agents"
+    ]
+   }
+  },
+  {
+   "id": 3105,
+   "url": "https://nobie.com",
+   "sourceId": 8,
+   "sourceName": "llmnews.ai",
+   "title": "Nobie — The best way to xlsx on Mac",
+   "titlePt": "Nobie — A melhor forma de usar xlsx no Mac",
+   "summaryPt": "Nobie é um aplicativo gratuito e local para Mac que permite abrir e editar arquivos xlsx sem necessidade de conta, instalação complexa ou envio de dados para a nuvem. Ele suporta todas as fórmulas do Excel, estilos, tabelas, gráficos e tabelas dinâmicas, com desempenho superior. A edição completa está prevista para breve. O diferencial é o foco em privacidade: seus dados nunca saem do Mac. O app também é compatível com agentes de IA como Claude, Codex e Gemini, permitindo que você use seu próprio modelo de IA para interagir diretamente com a planilha, sem intermediários. Funcionalidades como macros VBA e multiplayer estão programadas para o futuro. Nobie promete ser uma alternativa leve, segura e poderosa para quem precisa trabalhar com planilhas no ecossistema Apple.",
+   "snippet": "The easiest way to open xlsx on Mac.No account.Download and start working. That's it.Free foreverFor everything you can do in Excel or Google Sheets.Local-onlyYour data never leaves your Mac.You shouldn't need to compromiseAll your features, shortcuts and speed. All Excel formulas All Excel styling Unmatched performance TablesCharts & PivotsEDITING COMING SOON AI-first: use Claude, Codex, etc",
+   "kind": null,
+   "section": null,
+   "date": "2026-07-14",
+   "verifyStatus": "suspect",
+   "tags": {
+    "company-vendor-model": [
+     "anthropic",
+     "openai",
+     "google"
+    ],
+    "concept-theme": [
+     "data-privacy",
+     "performance"
+    ],
+    "content-type": [
+     "product-launch",
+     "tool-release"
+    ],
+    "difficulty": [
+     "for-beginners"
+    ],
+    "domain": [
+     "llm-models",
+     "ai-general"
+    ],
+    "topic-technology": [
+     "ai-agents",
+     "mcp",
+     "tool-calling",
+     "privacy-first-ai",
+     "data-visualization"
+    ],
+    "trending-emerging": [
+     "on-device-ai",
+     "local-llm",
+     "ai-agents",
+     "computer-use"
+    ]
+   }
+  },
+  {
+   "id": 3106,
+   "url": "https://addyosmani.com/blog/agent-harness-engineering",
+   "sourceId": 8,
+   "sourceName": "llmnews.ai",
+   "title": "Agent Harness Engineering",
+   "titlePt": "Engenharia de Harness para Agentes de Código",
+   "summaryPt": "O artigo apresenta o conceito de 'engenharia de harness' (harness engineering), que trata todos os componentes que cercam um modelo de IA — como prompts, ferramentas, regras de contexto e loops de feedback — como artefatos de engenharia reais e iterativos. A ideia central é que um agente de código não é apenas o modelo, mas sim o modelo mais toda essa infraestrutura (o harness). Um modelo mediano com um harness excelente supera um modelo ótimo com um harness ruim. A disciplina consiste em tratar cada erro do agente como um sinal permanente para adicionar uma regra ou restrição no harness, impedindo que o mesmo erro se repita. Isso inclui desde adicionar instruções em arquivos como AGENTS.md até criar hooks que bloqueiam comandos destrutivos ou dividir tarefas longas entre planejador e executor. O artigo mostra que a maior alavancagem para melhorar agentes de código hoje está no design do harness, não na escolha do modelo.",
+   "snippet": "A coding agent is the model plus everything you build around it. Harness engineering treats that scaffolding as a real artifact, and it tightens every time the agent slips. Roughly: anytime you find an agent makes a mistake, you take the time to engineer a solution such that the agent never makes that mistake again. We’ve spent the last two years arguing about models. Which one is smartest, wh",
+   "kind": null,
+   "section": null,
+   "date": "2026-07-14",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "architecture",
+     "dev-experience",
+     "prompt-engineering"
+    ],
+    "content-type": [
+     "deep-dive",
+     "explainer"
+    ],
+    "difficulty": [
+     "advanced"
+    ],
+    "domain": [
+     "llm-models"
+    ],
+    "framework-library-tool": [
+     "langgraph",
+     "crewai",
+     "autogen",
+     "ollama",
+     "litellm",
+     "dspy"
+    ],
+    "topic-technology": [
+     "ai-agents",
+     "multi-agent-systems",
+     "agent-orchestration",
+     "prompt-engineering",
+     "tool-calling",
+     "error-handling"
+    ],
+    "trending-emerging": [
+     "coding-agents",
+     "tool-calling",
+     "agent-orchestration"
+    ]
+   }
+  },
+  {
+   "id": 3107,
+   "url": "https://github.com/jbwinters/jacquard-lang",
+   "sourceId": 8,
+   "sourceName": "llmnews.ai",
+   "title": "Jacquard is a small programming language designed for a regime in which most code is written by machine-learning models and reviewed by people.",
+   "titlePt": "Jacquard: uma linguagem de programação para código gerado por IA e revisado por humanos",
+   "summaryPt": "Jacquard é uma linguagem de programação de pesquisa projetada para um cenário onde a maior parte do código é gerada por modelos de aprendizado de máquina e revisada por humanos. Ela se destaca por expor não apenas o que um programa computa, mas também quais efeitos ele pode realizar, incertezas discretas finitas e sua identidade canônica — tudo isso integrado à própria linguagem, não apenas em comentários ou logs. Isso permite que revisores vejam rapidamente, por exemplo, se uma função pode acessar a rede (efeito `net`) e que o runtime rejeita efeitos não autorizados sem uma permissão explícita (`--allow`). Além disso, a linguagem suporta execução em múltiplos \"mundos\" (real, simulado, gravado), permitindo substituir o manipulador de efeitos sem alterar o código, o que substitui muita mocks convencionais.\n\nJacquard também oferece enumeração de probabilidades exatas para modelos discretos, identidade estrutural baseada em hash (que ignora formatação e renomeações locais), e um conjunto de ferramentas como formatador, diff ciente de estrutura, testes Warp com cache, e um compilador nativo AOT que emite C. A versão 0.1 é um protótipo funcional, mas não é produção. Inclui uma biblioteca padrão, um interpretador CPS em OCaml e um backend nativo. A instalação pode ser feita via script para Linux e macOS, sem necessidade de OCaml ou opam. O desenvolvimento local requer OCaml 5.1.1 e opam. O projeto é open source sob Apache 2.0 e visa dar aos revisores humanos as respostas \"o que isso pode tocar?\" e \"quão certo estamos?\" sem precisar ler cada linha.",
+   "snippet": "Jacquard is a FriendMachine research project for running, reviewing, simulating, and trusting programs written by models and reviewed by people. Start with the human-friendly introduction to Jacquard. Concretely, it is a small programming language with a compact .jac surface syntax, an OCaml checker and CPS interpreter, a C-emitting native AOT backend that currently compiles the kernel .jqd carrie",
+   "kind": null,
+   "section": null,
+   "date": "2026-07-14",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "testing"
+    ],
+    "content-type": [
+     "release-announcement",
+     "showcase"
+    ],
+    "difficulty": [
+     "for-researchers"
+    ],
+    "domain": [
+     "ai-general",
+     "llm-models"
+    ],
+    "trending-emerging": [
+     "ai-coding-agents"
+    ]
+   }
+  },
+  {
+   "id": 3108,
+   "url": "https://github.com/morganwilliscloud/billai-bass",
+   "sourceId": 8,
+   "sourceName": "llmnews.ai",
+   "title": "morganwilliscloud/billai-bass: Turn a Big Mouth Billy Bass into a real-time voice assistant powered by Strands BidiAgent + Amazon Nova 2 Sonic on a Raspberry Pi 5",
+   "titlePt": "Transforme um Billy Bass em assistente de voz com Raspberry Pi 5 e Amazon Nova Sonic",
+   "summaryPt": "Este guia ensina como transformar um boneco Big Mouth Billy Bass em um assistente de voz em tempo real, usando um Raspberry Pi 5, o sistema de streaming bidirecional Strands BidiAgent e o modelo Amazon Nova 2 Sonic no Amazon Bedrock. O peixe responde à fala, movendo a cabeça, sincronizando os lábios e balançando o rabo. Não é necessário conhecimento prévio de robótica ou solda — o guia foi criado para iniciantes e inclui lista de materiais, configuração de conta AWS com permissões mínimas e instruções passo a passo detalhadas. O projeto é baseado no billy-b-assistant, mas reconstruído sobre a plataforma Strands, e pode ser executado com ajuda de um assistente de IA para depuração.",
+   "snippet": "🐟 BillAI Bass Builder Guide Powered by Strands Agents Bidirectional Streaming + Amazon Nova 2 Sonic billai-bass-demo-strands.mp4 Turn a Big Mouth Billy Bass into a real-time voice assistant: you talk, the fish talks back — head swiveling, mouth lip-syncing to its own voice, tail flapping for emphasis. The fish runs a Strands Agents bidirectional streaming agent (Bidi",
+   "kind": null,
+   "section": null,
+   "date": "2026-07-14",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "amazon",
+     "nova",
+     "aws-bedrock"
+    ],
+    "concept-theme": [
+     "agentops",
+     "latency",
+     "edge-computing",
+     "cloud"
+    ],
+    "content-type": [
+     "how-to",
+     "guide"
+    ],
+    "difficulty": [
+     "for-beginners"
+    ],
+    "domain": [
+     "ai-general",
+     "python"
+    ],
+    "framework-library-tool": [
+     "nova",
+     "aws"
+    ],
+    "topic-technology": [
+     "ai-agents",
+     "speech-to-text",
+     "text-to-speech",
+     "generative-ai",
+     "edge-ai",
+     "robotics"
+    ],
+    "trending-emerging": [
+     "voice-agents",
+     "ai-agents",
+     "edge-ai"
+    ]
+   }
+  },
+  {
+   "id": 3109,
+   "url": "https://www.elliotcsmith.com/autoresearch-claude-and-constrained-optimization",
+   "sourceId": 8,
+   "sourceName": "llmnews.ai",
+   "title": "Autoresearch, Claude and Constrained Optimization",
+   "titlePt": "Autopesquisa, Claude e Otimização com Restrições",
+   "summaryPt": "O autor, cético quanto a alegações de que IA substitui dezenas de pessoas, criou um experimento inspirado no conceito de 'Autopesquisa' de Kaparthay. Usando o Claude Code (modelo Sonnet 4.6, modo padrão), ele programou um agente para otimizar um algoritmo de compressão de arquivos em Rust, com dois objetivos claros: o arquivo descomprimido deve ser idêntico ao original e a compressão/descompressão não pode ultrapassar 300 segundos. A métrica principal era a redução total de bytes. O agente foi executado em 10 iterações, cada uma custando cerca de US$ 4, partindo de uma implementação LZSS e adicionando melhorias como checagem de entropia e novas técnicas de codificação. Os resultados finais foram comparados com ferramentas de compressão comuns: o algoritmo caseiro se saiu bem, especialmente em compressão de áudio e vídeo, mas perdeu ou empatou em outras categorias. As principais lições incluem: modelos tendem a 'terminar' rápido demais, então é importante ter um mecanismo de looping explícito; a escolha da função objetivo é crucial — no experimento, o agente ignorou tempo e uso de memória; métricas para problemas reais (ex.: taxa de conversão) são mais ruidosas e exigem proxies cuidadosos. O autor sugere que a abordagem é viável desde que se tenha métricas robustas, mensuráveis e bem restritas.",
+   "snippet": "IntroductionYou don't need to look far to find claims that folks have been using AI to do the work of dozens of people. I tend to be skeptical of any claim that discusses improvements without evidence. I decided to take that skepticism and put it to work. This had a minor overlap with the whole 'loops' discussion on X but that's coincidental.Over the last few weeks I have put together a project in",
+   "kind": null,
+   "section": null,
+   "date": "2026-06-30",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "claude",
+     "anthropic"
+    ],
+    "concept-theme": [
+     "optimization",
+     "performance"
+    ],
+    "content-type": [
+     "project-spotlight",
+     "deep-dive"
+    ],
+    "difficulty": [
+     "for-practitioners"
+    ],
+    "domain": [
+     "ai-general",
+     "backend"
+    ],
+    "framework-library-tool": [
+     "claude"
+    ],
+    "topic-technology": [
+     "ai-agents",
+     "tool-calling",
+     "prompt-engineering",
+     "ai-research",
+     "foundation-models",
+     "context-engineering"
+    ],
+    "trending-emerging": [
+     "ai-coding-agents",
+     "agentic-ai",
+     "ai-agents"
+    ]
+   }
+  },
+  {
+   "id": 3110,
+   "url": "https://humansand.ai/blog/nvfp4-rl",
+   "sourceId": 8,
+   "sourceName": "llmnews.ai",
+   "title": "The 4-bitter Lesson: Balancing Stability and Performance in NVFP4 RL",
+   "titlePt": "Lições do NVFP4: Equilibrando Estabilidade e Desempenho em RL de 4 Bits",
+   "summaryPt": "O uso de formatos de baixa precisão, como o NVFP4, aumenta drasticamente a taxa de transferência (throughput) no treinamento por reforço (RL) de modelos de linguagem, mas introduz instabilidades que não são resolvidas apenas com as receitas de pré-treinamento convencionais. Enquanto o pré-treinamento lida bem com o viés de quantização através de arredondamento estocástico, o RL é mais sensível ao ruído, pois o gradiente da política já é inerentemente ruidoso devido à amostragem de rolagens, estimativa de vantagens e defasagem de política.\n\nPara enfrentar esse desafio, os autores desenvolveram uma receita que usa quantização NVFP4 apenas na passagem direta (forward) das camadas MoE, mantendo a passagem reversa (backward) em BF16 para estabilidade. Eles identificaram que, mesmo assim, ocorriam picos de gradiente devido à inconsistência da regra da cadeia: o backward 'enxergava' uma função diferente da forward quantizada. A solução foi aplicar o 'dequantized backward', onde o backward utiliza versões BF16 dos tensores exatos que foram quantizados na forward, alinhando as duas passagens.\n\nOs experimentos mostram que essa abordagem resulta em gradientes mais limpos e menos picos, embora o NVFP4 ainda introduza maior variância que o MXFP8. Com o otimizador Adam, a técnica reduziu significativamente os picos de gradiente, mantendo a maior eficiência computacional. O código foi aberto nas bibliotecas TransformerEngine, cuDNN, FlashInfer e SGLang, permitindo que a comunidade utilize receitas de 4 bits estáveis para RL.",
+   "snippet": "Introduction RL Training Simulator. The simulator models an asynchronous RL system where samplers continuously generate rollouts while the trainer updates the policy. Policy mismatch arises from both off-policyness (stale rollouts) and quantization error, accumulating into policy drift that eventually degrades reward if it exceeds the optimizer's correction capacity. RL & Efficiency",
+   "kind": null,
+   "section": null,
+   "date": "2026-07-10",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "nvidia"
+    ],
+    "concept-theme": [
+     "performance",
+     "optimization",
+     "reliability",
+     "async"
+    ],
+    "content-type": [
+     "deep-dive",
+     "analysis"
+    ],
+    "domain": [
+     "llm-models"
+    ],
+    "topic-technology": [
+     "reinforcement-learning",
+     "quantization",
+     "model-training",
+     "rlhf"
+    ],
+    "trending-emerging": [
+     "reasoning-models"
+    ]
+   }
+  },
+  {
+   "id": 3111,
+   "url": "https://github.com/cyrusNuevoDia/capn-hook",
+   "sourceId": 8,
+   "sourceName": "llmnews.ai",
+   "title": "capn-hook",
+   "titlePt": "capn-hook",
+   "summaryPt": "O capn-hook é uma ferramenta de memória persistente para agentes de codificação, como Claude Code e Codex. Ela resolve o problema de agentes que esquecem descobertas entre sessões, economizando tempo e tokens. O agente pode consultar respostas salvas antes de explorar o código e, após uma descoberta custosa, guardá-la com os arquivos relevantes. Cada entrada é vinculada a hashes dos arquivos; se algum arquivo mudar, a resposta é automaticamente removida, garantindo que nunca retorne informações desatualizadas. Em testes com 60 perguntas em 5 bases de código reais, o uso com capn-hook consumiu 77% menos tokens do que a exploração do zero, mantendo 100% de acerto. A instalação é simples via npm ou bun, e a integração com os agentes se dá por hooks de início de sessão. O armazenamento é local, baseado em arquivos Markdown e um índice SQLite, sem depender de servidores externos.",
+   "snippet": "🧢🪝 cap'n hook Don't grep the same mystery twice. Persistent memory for coding agents. When your agent spends ten minutes figuring out where something lives in your codebase, capn saves the files that answer the question. The next session gets them back in one command instead of re-exploring — and the moment the underlying files change, the saved answer deletes itself. Across 60 real developer qu",
+   "kind": null,
+   "section": null,
+   "date": "2026-07-03",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "claude",
+     "codex"
+    ],
+    "concept-theme": [
+     "caching",
+     "developer-productivity",
+     "agentops"
+    ],
+    "content-type": [
+     "tooling",
+     "tool-release"
+    ],
+    "difficulty": [
+     "intermediate"
+    ],
+    "domain": [
+     "ai-general"
+    ],
+    "ecosystem-language": [
+     "javascript",
+     "typescript"
+    ],
+    "topic-technology": [
+     "ai-agents",
+     "agentic-rag",
+     "tool-calling",
+     "context-engineering",
+     "cost-optimization-llm"
+    ],
+    "trending-emerging": [
+     "coding-agents",
+     "ai-coding-agents",
+     "agentic-ai"
+    ]
+   }
+  },
+  {
+   "id": 3112,
+   "url": "https://thebeach.dev/posts/lisp-agent",
+   "sourceId": 8,
+   "sourceName": "llmnews.ai",
+   "title": "An Agent in 100 Lines of Lisp, or How my Prof was Right - Just 25 Years Early",
+   "titlePt": "Um Agente em 100 Linhas de Lisp, ou Como Meu Professor Estava Certo – Só 25 Anos Adiantado",
+   "summaryPt": "O autor relembra seu curso de IA na Universidade de Guelph, por volta do ano 2000, onde aprendeu Lisp como a “linguagem para IA” — foco em sistemas simbólicos, não em redes neurais ou deep learning. Décadas depois, ao construir uma plataforma de agentes de IA, ele decide testar se Lisp ainda é útil para o loop principal de um agente.\n\nEle implementa um agente completo em cerca de 100 linhas de Common Lisp, usando apenas as bibliotecas Dexador (HTTP) e Shasht (JSON). O loop do agente é uma função recursiva de 8 linhas: envia mensagens para um modelo, executa ferramentas se solicitado e chama a si mesmo com o histórico atualizado. A ferramenta única do agente é `eval` — ele pode executar qualquer código Lisp recebido como string, o que permite que o modelo crie novas funções dinamicamente, como um buscador web, sem que o desenvolvedor as pré-defina.\n\nO autor reflete que, ao contrário das plataformas tradicionais (como Agent Foundry ou Claude Code), onde o catálogo de ferramentas é fixo, aqui a capacidade é decidida em tempo de execução pelo modelo. A memória do agente é armazenada como JSON em disco, e ao reiniciar ele relembra suas habilidades como se fossem histórias contadas a si mesmo. O artigo sugere que Lisp, com sua homoiconicidade (código como dados), é natural para agentes de IA, e conclui que a visão do professor sobre Lisp como linguagem para IA estava correta, apenas adiantada para a era simbólica.",
+   "snippet": "Around 2000 I took an AI course at the University of Guelph. I don’t think I learned too much. We didn’t talk about neural networks, as far as I can remember. My end of term project was, I think, a pathfinding algorithm wearing an AI costume. There were certainly no discussions of transformers. No CUDA. No PyTorch. None of that existed. But what I remember doing a lot of was coding in Lisp - a lot",
+   "kind": null,
+   "section": null,
+   "date": "2026-07-07",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "claude"
+    ],
+    "content-type": [
+     "opinion",
+     "tutorial"
+    ],
+    "difficulty": [
+     "intermediate"
+    ],
+    "domain": [
+     "ai-general"
+    ],
+    "topic-technology": [
+     "ai-agents"
+    ],
+    "trending-emerging": [
+     "ai-coding-agents",
+     "agentic-ai",
+     "ai-agents",
+     "reasoning-models"
+    ]
+   }
+  },
+  {
+   "id": 3113,
+   "url": "https://github.com/sshwarts/skillscript",
+   "sourceId": 8,
+   "sourceName": "llmnews.ai",
+   "title": "Skillscript — a small declarative language for authoring agent workflows. Runtime, compiler, and CLI.",
+   "titlePt": "Skillscript — linguagem declarativa para workflows de agentes com runtime, compilador e CLI",
+   "summaryPt": "Skillscript é uma linguagem declarativa inspirada no Makefile, criada para que agentes de IA possam escrever workflows reutilizáveis de forma segura. O agente elabora uma skill (habilidade), que passa por revisão e aprovação humana antes de ser executada pelo runtime. A execução é feita através de conectores configurados, com listas de permissão e políticas de segurança — sem acesso irrestrito ao shell, instalação de pacotes ou credenciais embutidas.\n\nA principal vantagem é que tarefas rotineiras deixam de ser replanejadas do zero a cada execução, reduzindo custo, latência e deriva comportamental. Cada skill é um artefato versionado, inspecionável e composto por outras skills. O uso de modelos de fronteira é otimizado: o custo de raciocínio é pago uma vez na criação, e as execuções subsequentes são determinísticas, podendo delegar sub-tarefas a modelos locais mais baratos.\n\nPara começar, basta instalar via npm (`npm install -g skillscript-runtime`), iniciar o dashboard e conectar seu agente ao servidor MCP. O projeto está em versão pré-1.0, com licença MIT, e aceita contribuições via Issues. A documentação completa inclui referência da linguagem, guia de configuração e exemplos.",
+   "snippet": "Safe, reusable automation authored by agents. skillscript.ai • docs TL;DR — npm install -g skillscript-runtime && skillfile init && skillfile dashboard. See Quickstart. What is Skillscript? Skillscript came from asking: what would a Makefile look like if it built skills instead of binaries? The answer is a constrained language, inspired by Make, and a runtime that turns an agent'",
+   "kind": null,
+   "section": null,
+   "date": "2026-07-14",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "agentops",
+     "orchestration",
+     "governance",
+     "security"
+    ],
+    "content-type": [
+     "product-launch",
+     "tool-release"
+    ],
+    "difficulty": [
+     "intermediate"
+    ],
+    "domain": [
+     "ai-general"
+    ],
+    "ecosystem-language": [
+     "javascript"
+    ],
+    "topic-technology": [
+     "ai-agents",
+     "mcp",
+     "agent-orchestration",
+     "tool-calling",
+     "guardrails"
+    ],
+    "trending-emerging": [
+     "ai-agents",
+     "agent-orchestration",
+     "mcp",
+     "ai-governance"
+    ]
+   }
+  },
+  {
+   "id": 3114,
+   "url": "https://arxiv.org/abs/2607.06377",
+   "sourceId": 8,
+   "sourceName": "llmnews.ai",
+   "title": "Automation Without Understanding",
+   "titlePt": "Automação sem Compreensão",
+   "summaryPt": "O artigo \"Automação sem Compreensão\" argumenta que dois desenvolvimentos simultâneos constituem um erro estratégico: sistemas de IA começaram a produzir matemática genuína de nível de pesquisa, enquanto os Estados Unidos enfraquecem o pipeline que forma humanos capazes de entender tais sistemas. A capacidade matemática — a habilidade treinada de verificar, interpretar e desafiar raciocínios matemáticos — não é subproduto da produção de teoremas, mas sim uma infraestrutura construída ao longo de gerações por instituições que não podem ser reconstituídas sob demanda. O autor cita o caso de maio de 2026 em que uma IA refutou uma conjectura de Erdős sobre o problema da distância unitária planar, bem como as recentes interrupções no apoio federal às ciências matemáticas. Para mitigar o problema, propõe, entre outras medidas, que sistemas de IA que realizam raciocínios consequenciais sejam obrigados a expor suas afirmações críticas em forma formal e verificável por máquina, convertendo parte do raciocínio de IA de persuasão opaca em estrutura auditável.",
+   "snippet": "Two developments are unfolding at once: artificial intelligence systems have begun to produce genuine research-level mathematics, and the United States is weakening the pipeline that produces humans capable of understanding what such systems are doing. This essay argues that, taken together, these developments amount to a strategic error. Mathematical capacity, which is the trained ability to veri",
+   "kind": null,
+   "section": null,
+   "date": "2026-07-07",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "interpretability",
+     "transparency",
+     "explainability"
+    ],
+    "content-type": [
+     "opinion",
+     "paper-summary"
+    ],
+    "domain": [
+     "ai-general"
+    ],
+    "topic-technology": [
+     "explainable-ai",
+     "ai-safety",
+     "ai-policy",
+     "ai-research",
+     "ai-ethics"
+    ],
+    "trending-emerging": [
+     "reasoning-models",
+     "ai-governance"
+    ]
+   }
+  },
+  {
+   "id": 3115,
+   "url": "https://www.iroh.computer/blog/mesh-llm",
+   "sourceId": 8,
+   "sourceName": "llmnews.ai",
+   "title": "Mesh LLM: distributed AI computing on iroh",
+   "titlePt": "Mesh LLM: computação de IA distribuída com iroh",
+   "summaryPt": "Mesh LLM é uma plataforma de computação distribuída que permite executar modelos de linguagem de grande porte (LLMs) em um 'mesh' (malha) de máquinas interconectadas pela biblioteca iroh, eliminando a dependência de datacenters centralizados. Em vez de alugar GPUs caras de provedores de nuvem, você pode usar GPUs já disponíveis em escritórios ou servidores locais, combinando-as para rodar modelos maiores ou distribuir o processamento. O sistema expõe uma API compatível com OpenAI, ou seja, qualquer cliente que use o padrão 'localhost:9337/v1' pode enviar requisições, e o mesh decide se o modelo será executado localmente, encaminhado a um par ou dividido entre várias máquinas (modo 'Skippy').\n\nTecnicamente, cada nó do mesh é identificado por uma chave pública e se comunica via QUIC, com suporte a NAT traversal e relays para ambientes de rede restritivos. O protocolo define canais específicos para gossip, tunelamento HTTP, roteamento e transporte de ativações de modelos particionados. A arquitetura é plugável, com mais de 40 modelos pré-integrados, e o software é leve (cerca de 18 MB). O projeto é open source e visa criar uma alternativa peer-to-peer, privada e sem lock-in para inferência de IA.",
+   "snippet": "When people picture running a large language model, they picture a data center. Racks of GPUs that belong to someone else, a metered API, and a bill that grows every month you succeed. You send your prompts off to a black box and hope the price, the model, and the privacy policy all stay the way they were when you signed up. For a lot of teams that is a bad trade. You give up control over when mod",
+   "kind": null,
+   "section": null,
+   "date": "2026-07-14",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "architecture",
+     "cost-optimization",
+     "scalability",
+     "privacy"
+    ],
+    "content-type": [
+     "release-announcement",
+     "product-launch"
+    ],
+    "difficulty": [
+     "for-practitioners"
+    ],
+    "domain": [
+     "local-llm",
+     "llm-models",
+     "ai-general"
+    ],
+    "topic-technology": [
+     "local-inference",
+     "self-hosting",
+     "model-serving",
+     "openai-compatible-api",
+     "distributed-systems"
+    ],
+    "trending-emerging": [
+     "distillation",
+     "quantization",
+     "local-llm",
+     "moe"
+    ]
+   }
+  },
+  {
+   "id": 3116,
+   "url": "https://aiweekly.co/issues/treasury-analysts-called-ai-a-systemic-risk-treasury",
+   "sourceId": 7,
+   "sourceName": "AI Weekly",
+   "title": "Treasury analysts called AI a systemic risk. Treasury disowned it.",
+   "titlePt": "Analistas do Tesouro chamaram IA de risco sistêmico; Tesouro se desvinculou",
+   "summaryPt": "Em uma semana de forte atividade regulatória, analistas de carreira do Tesouro dos EUA prepararam um rascunho de relatório classificando o mercado de IA como um risco sistêmico para o sistema financeiro, alertando que uma recessão se espalharia por ações, crédito privado, data centers e serviços públicos. No entanto, o Tesouro rejeitou o relatório como não verificado e reafirmou que a IA impulsionará uma 'nova era de ouro'. Paralelamente, o ESRB emitiu um raro alerta formal sobre modelos de fronteira de IA e cibersegurança, o BCE exigiu que todos os grandes bancos europeus apresentem planos de ação contra ameaças de IA até 31 de outubro de 2026, e o Reino Unido colocou AWS, Google Cloud, Microsoft e Oracle sob supervisão como terceiros críticos para o sistema financeiro.\n\nNa camada de dispositivos, a Meta foi flagrada com código de reconhecimento facial inativo (internamente chamado NameTag) em seu app de IA para óculos inteligentes, removendo-o após reportagem do Wired. Também testa protótipos que gravam áudio e fotos continuamente para um recurso de memória de IA. Na esfera trabalhista, grandes empresas de tecnologia mudaram o discurso sobre demissões em massa por IA, com pesquisas mostrando queda na expectativa de CEOs de cortar empregos, enquanto a TCS planeja contratar milhares de engenheiros de IA.\n\nA dependência cognitiva da IA também foi auditada: na Brown University, a média de uma prova presencial caiu de 96% para 48,6% após um trabalho suspeito feito em casa; estudos na Nature mostram degradação mensurável de habilidades em médicos e engenheiros de software que usam IA; e a África do Sul retirou sua minuta de política nacional de IA após descobrir que pelo menos 6 das 67 citações eram fabricações geradas por IA. O padrão é claro: instituições estão deixando de debater a IA para gerenciá-la como risco sistêmico, com prazos, auditorias e supervisão direta.",
+   "snippet": "Regulators picked a word for AI this week, and the word is systemic. Career Treasury analysts concluded the boom is now too entrenched to unwind quietly: a downturn would ripple through stocks, private credit, data-center debt and utilities. The ECB gave every significant European bank until October 31 to prove it can take an AI-powered punch, and the UK put AWS, Google Cloud, Microsoft and Oracle",
+   "kind": null,
+   "section": null,
+   "date": "2026-07-13",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "openai",
+     "microsoft",
+     "google",
+     "amazon",
+     "meta-ai"
+    ],
+    "concept-theme": [
+     "ai-regulation",
+     "governance",
+     "compliance",
+     "responsible-ai"
+    ],
+    "content-type": [
+     "news",
+     "analysis"
+    ],
+    "difficulty": [
+     "for-leaders"
+    ],
+    "domain": [
+     "ai-general"
+    ],
+    "topic-technology": [
+     "ai-regulation",
+     "ai-policy",
+     "deepfakes",
+     "computer-vision",
+     "ai-agents",
+     "frontier-models"
+    ],
+    "trending-emerging": [
+     "ai-governance",
+     "frontier-models",
+     "ai-data-centers",
+     "computer-use"
+    ]
+   }
+  },
+  {
+   "id": 3117,
+   "url": "https://1shotchallenge.ai",
+   "sourceId": 8,
+   "sourceName": "llmnews.ai",
+   "title": "One Shot Challenge — One Prompt, One AI Model, One Shot",
+   "titlePt": "One Shot Challenge — Um Prompt, Um Modelo, Uma Chance",
+   "summaryPt": "O One Shot Challenge é uma competição de programação com IA que testa o limite de criatividade em uma única tentativa. Os participantes escrevem um prompt único e poderoso, enviam para um modelo de IA (como Fable 5, Opus 4.8, GPT-4.6 Sol, Gemini 3.1 Pro e outros) e recebem um jogo, mundo 3D ou simulação completo — sem edições, sem retoques. A competição ocorre de 13 a 18 de julho de 2026, com seis vencedores: o primeiro lugar leva um PlayStation 5 e todos ganham uma cópia de GTA VI, além de destaque no SIGGRAPH. O processo é simples: escreva um prompt, use seu próprio modelo (ou obtenha créditos gratuitos de serviços como Muse Spark, Gemini, Groq ou NVIDIA), confirme o e-mail, e a IA executa uma única vez. O resultado é publicado em um ambiente isolado e verificável por hash. Cinco vencedores são escolhidos por um júri (Lionsgate AI, Sony, NBA, World Labs) e o sexto pelo voto da comunidade. As regras permitem bibliotecas de CDNs aprovadas (como three.js), mas proíbem código externo mutável. A competição é gratuita; o único custo é a execução do modelo em sua chave API (que é criptografada e descartada após o uso). Perguntas frequentes explicam segurança, critérios de julgamento e limitações. É uma chance de provar o que você e a IA podem fazer em um único shot.",
+   "snippet": "Boil down your creativity and vision into your best shot.Round 01Jul 13 – Jul 18, 2026 · winners Jul 196 days. 6 winners. 6 GTA VI copies, plus a PlayStation 5 for first place.One prompt in, something spectacular out. Build a whole game, a living world, a toy that feels impossible. The more complex, rich and deep, the better.A year ago this was impossible.The newest models, like Fable 5, Opus 4.8,",
+   "kind": null,
+   "section": null,
+   "date": "2026-07-14",
+   "verifyStatus": "suspect",
+   "tags": {
+    "concept-theme": [
+     "prompt-engineering"
+    ],
+    "content-type": [
+     "announcement"
+    ],
+    "difficulty": [
+     "intermediate"
+    ],
+    "domain": [
+     "llm-models",
+     "ai-general"
+    ],
+    "topic-technology": [
+     "generative-ai",
+     "prompt-engineering",
+     "frontier-models",
+     "model-capabilities",
+     "code-models"
+    ],
+    "trending-emerging": [
+     "ai-coding-agents",
+     "agentic-ai",
+     "ai-agents"
+    ]
+   }
+  },
+  {
+   "id": 3118,
+   "url": "https://github.com/cosmtrek/mindwalk",
+   "sourceId": 8,
+   "sourceName": "llmnews.ai",
+   "title": "cosmtrek/mindwalk: A visualization tool that replays coding-agent sessions on a 3D map of your codebase.",
+   "titlePt": "mindwalk: visualização de sessões de agentes de codificação em mapa 3D da base de código",
+   "summaryPt": "O **mindwalk** é uma ferramenta de visualização que reproduz sessões de agentes de codificação em um mapa 3D da base de código. Ela resolve o problema de que registros de sessão mostram *o que* o agente fez, mas não *como* ele entendeu a tarefa: quais partes do repositório foram consideradas relevantes, onde ele explorou antes de agir, e se seu escopo correspondeu ao esperado.\n\nA ferramenta desenha o repositório como um mapa noturno e reproduz a sessão como luz se movendo por ele: onde o agente pesquisou, leu e editou, o mapa brilha — todo o resto fica escuro. Isso transforma o entendimento do agente sobre a tarefa em uma forma visual que pode ser compreendida rapidamente. O binário Go lê logs de sessão do Claude Code e Codex, tudo localmente, sem que os dados saiam da máquina do usuário.\n\nO mindwalk oferece visões em árvore radial ou treemap, estados de toque (visto, lido, editado, não visitado) com cores distintas, um deck de reprodução com histograma, marcas temporais, e um inspetor para ver o histórico de visitas de arquivos. A arquitetura mantém separados o traço (eventos de toque normalizados) e o citymap (layout determinístico do repositório), permitindo comparações entre sessões diferentes.",
+   "snippet": "A visualization tool that replays coding-agent sessions on a 3D map of your codebase. mindwalk-demo.mp4 The 30-second demo — sound on. The problem A session log records what an agent did, but not how it understood the task: which parts of the repo it treated as relevant, where it explored before it acted, whether its footprint matched the scope you had in mind. Readi",
+   "kind": null,
+   "section": null,
+   "date": "2026-07-14",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "claude",
+     "codex",
+     "anthropic",
+     "openai"
+    ],
+    "concept-theme": [
+     "agentops",
+     "observability",
+     "tracing",
+     "debugging"
+    ],
+    "content-type": [
+     "tooling",
+     "showcase"
+    ],
+    "difficulty": [
+     "for-practitioners"
+    ],
+    "domain": [
+     "ai-general"
+    ],
+    "ecosystem-language": [
+     "go"
+    ],
+    "topic-technology": [
+     "agentops",
+     "ai-agents",
+     "observability-llm",
+     "tracing-llm"
+    ],
+    "trending-emerging": [
+     "ai-coding-agents",
+     "copilots"
+    ]
+   }
+  },
+  {
+   "id": 3119,
+   "url": "https://geohot.github.io/blog/jekyll/update/2026/07/12/i-love-llms.html",
+   "sourceId": 8,
+   "sourceName": "llmnews.ai",
+   "title": "I love LLMs, I hate hype",
+   "titlePt": "Amo LLMs, mas odeio o hype",
+   "summaryPt": "O autor declara seu entusiasmo genuíno por IA, mas critica dois tipos de hype prejudiciais: o hype negativo, que espalha medo de ficar para trás e incentiva a migração para São Francisco, e o hype exagerado, que pinta um cenário apocalíptico de dominação da IA. Ele argumenta que a IA é fruto do progresso geral da computação, e não de grupos específicos, e que as empresas de fronteira temem a commoditização. Apesar das ressalvas sobre o 'vibe coding' e o cansaço cognitivo, o autor reconhece que modelos de linguagem trazem ganhos reais de produtividade e que programação está mudando—assim como compiladores ou regex, são ferramentas úteis, não uma revolução mágica.",
+   "snippet": "I think from this blog you may misunderestimate how absolutely giddy I am about AI. I did hacking from 2007-2014, after that my whole career has been devoted to AI. I love the progress. I’m so excited for the new LLMs, self driving cars, video generation models, and coding agents. I set up a Linux box with opencode on my local GLM-5.2 last week and wow like just saying install tmux with the geohot",
+   "kind": null,
+   "section": null,
+   "date": "2026-07-12",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "mistral"
+    ],
+    "concept-theme": [
+     "community",
+     "ethics",
+     "ai-ethics",
+     "open-source"
+    ],
+    "content-type": [
+     "opinion",
+     "commentary"
+    ],
+    "difficulty": [
+     "all-levels"
+    ],
+    "domain": [
+     "llm-models",
+     "local-llm"
+    ],
+    "framework-library-tool": [
+     "langchain",
+     "llama-index",
+     "gpt",
+     "claude",
+     "gemini",
+     "ollama"
+    ],
+    "topic-technology": [
+     "generative-ai",
+     "ai-ethics",
+     "local-inference",
+     "foundation-models",
+     "ai-safety",
+     "open-source-models"
+    ],
+    "trending-emerging": [
+     "coding-agents",
+     "local-llm",
+     "open-weights",
+     "ai-agents"
+    ]
+   }
+  },
+  {
+   "id": 3120,
+   "url": "https://systima.ai/blog/claude-code-vs-opencode-token-overhead",
+   "sourceId": 8,
+   "sourceName": "llmnews.ai",
+   "title": "Claude Code Is Way More Token-Hungry Than OpenCode. We Measured Exactly How Much",
+   "titlePt": "Claude Code Consome Muito Mais Tokens que OpenCode — Medimos Exatamente Quanto",
+   "summaryPt": "Uma análise comparativa quantitativa entre Claude Code e OpenCode revela que o Claude Code consome significativamente mais tokens por requisição. Enquanto o OpenCode usa cerca de 7.000 tokens iniciais, o Claude Code chega a aproximadamente 33.000 tokens no primeiro turno, principalmente devido a um conjunto maior de ferramentas (27 contra 10) e instruções de sistema mais extensas.\n\nO estudo mostra que, embora o Claude Code tenha um custo inicial muito maior, ele pode compensar em tarefas com múltiplas etapas ao fazer chamadas em lote paralelo, reduzindo o número de requisições. Em um teste de loop de escrever-executar-testar-corrigir, ambos os sistemas gastaram cerca de 121.000–132.000 tokens totais. No entanto, essa vantagem de batching varia conforme o modelo — com um modelo mais novo, o Claude Code gastou 298.000 tokens contra 133.000 do OpenCode.\n\nO cache de prompts é outro diferencial: o OpenCode mantém um prefixo de requisição byte-idêntico, permitindo cache eficiente, enquanto o Claude Code frequentemente reescreve milhares de tokens de cache durante a sessão, gerando custos extras. Arquivos de instrução como AGENTS.md/CLAUDE.md adicionam cerca de 20.000 tokens por requisição em ambos, e servidores MCP podem contribuir com mais 5.000–7.000 tokens cada.",
+   "snippet": "We put Claude Code and OpenCode on the same model, the same machine, and the same tasks, then examined everything sent and received. Claude Code is far hungrier:When we asked both harnesses for a one-line reply, Claude Code used roughly 33,000 tokens of system prompt, tool schemas, and injected scaffolding before the prompt even arrived. OpenCode used about 7,000.Claude Code is far more cache inef",
+   "kind": null,
+   "section": null,
+   "date": "2026-07-12",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "claude",
+     "anthropic"
+    ],
+    "concept-theme": [
+     "token-economics",
+     "caching",
+     "cost-optimization",
+     "cost"
+    ],
+    "content-type": [
+     "benchmark",
+     "analysis"
+    ],
+    "difficulty": [
+     "intermediate"
+    ],
+    "domain": [
+     "llm-models",
+     "local-llm"
+    ],
+    "framework-library-tool": [
+     "claude"
+    ],
+    "topic-technology": [
+     "token-counting",
+     "caching-llm",
+     "cost-optimization-llm",
+     "ai-agents",
+     "prompt-engineering",
+     "mcp"
+    ],
+    "trending-emerging": [
+     "ai-coding-agents",
+     "coding-agents",
+     "local-llm",
+     "synthetic-data"
+    ]
+   }
+  },
+  {
+   "id": 3121,
+   "url": "https://spectrum.ieee.org/ai-science-research-flattens-discovery",
+   "sourceId": 8,
+   "sourceName": "llmnews.ai",
+   "title": "AI in Science Research Boosts Speed, Limits Scope",
+   "titlePt": "IA acelera pesquisas, mas limita a criatividade científica",
+   "summaryPt": "Um estudo publicado na Nature analisou mais de 40 milhões de artigos acadêmicos e descobriu que cientistas que usam ferramentas de IA produzem mais papers, acumulam mais citações e atingem cargos de liderança mais cedo. Porém, essa produtividade individual tem um custo coletivo: a pesquisa científica está se tornando mais restrita e menos diversa. Os artigos com IA se concentram em problemas com muitos dados disponíveis, geram menos conexões entre estudos e encolhem o 'espaço de conhecimento' explorado pela ciência.\n\nO sociólogo James Evans, líder do estudo, aponta um conflito entre o avanço individual e o progresso científico como um todo, já que ferramentas como ChatGPT e AlphaFold recompensam velocidade e escala, mas não a originalidade. Outros especialistas alertam para um ciclo vicioso de conformidade e queda na inovação, com pesquisadores migrando para os mesmos tópicos 'fáceis de automatizar', em vez de explorar áreas menos conhecidas.\n\nApesar do cenário preocupante, Evans acredita que o problema não está na arquitetura da IA, mas nos incentivos acadêmicos atuais. Ele defende uma mudança nos sistemas de recompensa para direcionar o uso da IA a questões verdadeiramente novas, em vez de apenas acelerar a pesquisa nos mesmos temas de sempre. Para ele, o grande desafio é usar a IA para expandir, e não comprimir, as fronteiras do conhecimento científico.",
+   "snippet": "AI is turning scientists into publishing machines—and quietly funneling them into the same crowded corners of research.That’s the conclusion of an analysis of more than 40 million academic papers, which found that scientists who use AI tools in their research publish more papers, accumulate more citations, and reach leadership roles sooner than peers who don’t.But there’s a catch. As individual sc",
+   "kind": null,
+   "section": null,
+   "date": "2026-01-19",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "openai",
+     "google-deepmind"
+    ],
+    "concept-theme": [
+     "productivity"
+    ],
+    "content-type": [
+     "paper-summary",
+     "analysis"
+    ],
+    "difficulty": [
+     "for-researchers"
+    ],
+    "domain": [
+     "ai-general"
+    ],
+    "ecosystem-language": [
+     "python",
+     "r",
+     "julia"
+    ],
+    "framework-library-tool": [
+     "gpt"
+    ],
+    "topic-technology": [
+     "ai-research",
+     "generative-ai",
+     "deep-learning",
+     "ai-adoption",
+     "ai-ethics"
+    ],
+    "trending-emerging": [
+     "ai-agents",
+     "agentic-ai",
+     "ai-governance"
+    ]
+   }
+  },
+  {
+   "id": 3122,
+   "url": "https://nanduruganesh.github.io/flash-msa",
+   "sourceId": 8,
+   "sourceName": "llmnews.ai",
+   "title": "Flash-MSA: Accelerating Million-Token Training With Sparse Attention Kernels",
+   "titlePt": "Flash-MSA: Acelerando o Treinamento com Milhões de Tokens Usando Kernels de Atenção Esparsa",
+   "summaryPt": "Este artigo apresenta o Flash-MSA, os primeiros kernels de treinamento open-source eficientes para a Atenção Esparsa Minimax (MSA) em GPUs Hopper e Blackwell, implementados em CuTeDSL. O MSA usa esparsidade por blocos (selecionando blocos de 128 KVs via max-pooling) e substitui MLA por GQA na atenção principal, com especialização de cabeças proxy por grupo, permitindo maior expressividade. O design do kernel otimiza o forward com atenção proxy (top-k em registradores) e atenção principal esparsa por blocos (reparametrizada como varlen flash). O backward funde as atenções proxy e principal para calcular gradientes, usando um truque que evita materializar a divergência KL ao derivar que o gradiente do proxy é igual a (probabilidade proxy - probabilidade principal). O kernel também inclui um modo de aquecimento com atenção densa. Testes de similaridade cosseno entre implementações eager e kernel mostram precisão dentro da tolerância BF16. O artigo discute melhorias futuras: aumentar a paralelização do backward (atualmente com ocupação limitada), otimizações arquiteturais como compartilhamento de cabeças proxy entre camadas (IndexShare) e treinamento em baixa precisão, e paralelismo de contexto (CP) via headwise all-gather ou ring (este último mais complexo, mas ideal para alta escalabilidade).",
+   "snippet": "Flash-MSA vs Flash-Attention isolated train step.1 Several frontier models [1, 2, 3, 4, 5] use sparse attention to greatly speedup their inference, though no one has posted code to train it efficiently. Today I introduce the world's first performant open-source training kernels for Minimax Sparse Attention in CuTeDSL for Hopper and Blackwell GPUs. I did all of the dev work on Spheron H100 and B",
+   "kind": null,
+   "section": null,
+   "date": "2026-07-14",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "minimax"
+    ],
+    "concept-theme": [
+     "performance",
+     "optimization",
+     "scalability"
+    ],
+    "content-type": [
+     "tool-release",
+     "deep-dive"
+    ],
+    "difficulty": [
+     "advanced"
+    ],
+    "domain": [
+     "ai-general",
+     "llm-models"
+    ],
+    "topic-technology": [
+     "attention-mechanism",
+     "model-training",
+     "cuda",
+     "gpu",
+     "deep-learning"
+    ],
+    "trending-emerging": [
+     "agentic-ai",
+     "ai-agents",
+     "multi-agent",
+     "reasoning-models"
+    ]
+   }
+  },
+  {
+   "id": 3123,
+   "url": "https://www.interconnects.ai/p/6-months-to-live-for-open-models",
+   "sourceId": 8,
+   "sourceName": "llmnews.ai",
+   "title": "6 months to live for open models",
+   "titlePt": "开源模型的最后6个月",
+   "summaryPt": "开源AI模型的生存正面临最严峻的考验。美国白宫正在讨论通过新的行政令来管理开源模型，可能针对中国来源的模型和政府用途，但这可能成为一系列限制措施的起点。随着开源模型的能力接近闭源前沿模型（如GPT-5.5、Claude Opus 4.8级别），预计未来6个月内可能出台禁令或无限期推迟此类模型的发布。\n\nAnthropic正领导一场反对中国模型的政治运动，声称存在蒸馏风险，但被批评为监管捕获——即利用政策限制竞争对手以巩固自身市场地位。文章指出，蒸馏问题被夸大，真正的风险在于开源模型达到前沿能力后的安全问题。完全禁止开源模型并非有效解决方案，因为如果中国不采取同样禁令，恶意行为者仍能获取模型。\n\n短期解决方案包括：美国公司（如微软、Meta）尽快发布能力相当的开源模型，以转移“只有中国通过蒸馏构建开源模型”的焦点，并建立开源联盟进行游说。文章强调，开源生态不应被限制，全球合作才是管理AI风险的正确途径。",
+   "snippet": "The most serious test to date of open source AI’s viability is happening right now. I’ve seen many waves of anti open-source AI rhetoric come and go since ChatGPT was launched, but none of them had obvious analogues in their potential enforcement to real action already in place targeting the peer, closed models of the day. It is more real because new forms of regulation are being tested and implem",
+   "kind": null,
+   "section": null,
+   "date": "2026-07-12",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "deepseek",
+     "gpt",
+     "claude-opus",
+     "glm"
+    ],
+    "concept-theme": [
+     "open-source",
+     "ai-regulation"
+    ],
+    "content-type": [
+     "opinion",
+     "analysis"
+    ],
+    "difficulty": [
+     "for-leaders"
+    ],
+    "domain": [
+     "llm-models"
+    ],
+    "topic-technology": [
+     "ai-policy",
+     "ai-regulation",
+     "open-source-models",
+     "open-weights",
+     "frontier-models",
+     "model-licensing"
+    ],
+    "trending-emerging": [
+     "open-weights",
+     "frontier-models",
+     "ai-governance"
+    ]
+   }
+  },
+  {
+   "id": 3124,
+   "url": "https://github.com/sin-ack/agent-run",
+   "sourceId": 8,
+   "sourceName": "llmnews.ai",
+   "title": "Run a coding agent in a sandboxed environment",
+   "titlePt": "Execute um agente de código em ambiente isolado",
+   "summaryPt": "O agent-run é uma ferramenta leve (menos de 1 MB) que executa agentes de codificação como pi, opencode, codex e claude em um ambiente isolado (sandbox) usando bwrap. Funciona apenas em Linux com namespaces de usuário não privilegiados. A configuração é feita em TOML, com suporte a schema JSON. É possível controlar acesso à rede, variáveis de ambiente e quais diretórios ficam graváveis, tudo por ferramenta. A instalação pode ser via Nix, Mise ou download manual do binário. O foco é evitar erros acidentais dos agentes, não oferecer segurança contra código malicioso — para isso, recomenda-se microVMs. O projeto é desenvolvido com Bazel e licenciado sob GPLv3.",
+   "snippet": "Run a coding agent in a sandboxed environment. Features Tiny standalone binary (<1MB). Runs on any recent GNU/Linux system1. Simple TOML-based configuration. JSON schema for config assistance. Usage Use one of the installation methods below. Write your configuration. Run your agent: agent-run <pi|opencode|codex|claude>. That's it! Noteagent-run uses bwrap so it only works on a Linux system.",
+   "kind": null,
+   "section": null,
+   "date": "2026-07-14",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "claude",
+     "codex"
+    ],
+    "concept-theme": [
+     "security",
+     "containers"
+    ],
+    "content-type": [
+     "tool-release",
+     "guide"
+    ],
+    "difficulty": [
+     "for-practitioners"
+    ],
+    "domain": [
+     "ai-general"
+    ],
+    "topic-technology": [
+     "ai-agents",
+     "code-models",
+     "cli-tools"
+    ],
+    "trending-emerging": [
+     "ai-coding-agents",
+     "coding-agents"
+    ]
+   }
+  },
+  {
+   "id": 3125,
+   "url": "https://ploy.ai/blog/migrating-a-production-ai-agent-to-gpt-5-6",
+   "sourceId": 8,
+   "sourceName": "llmnews.ai",
+   "title": "Migrating a production AI agent to GPT-5.6",
+   "titlePt": "Migrando um agente de IA em produção para GPT-5.6",
+   "summaryPt": "A Ploy, plataforma que constrói e otimiza sites de marketing usando IA, migrou seu agente de produção do Claude Opus para o GPT-5.6 Sol. Após avaliações comparativas, o novo modelo se mostrou 2,2 vezes mais rápido, 27% mais barato e com pontuação visual superior. O artigo detalha os desafios e soluções encontrados durante a migração.\n\nPrimeiro, foi necessário corrigir a suíte de avaliação (eval harness) que estava ajustada para o estilo sequencial do Claude e não suportava chamadas paralelas nem leituras em lote do GPT-5.6. Em seguida, o esquema de ferramentas (tool schemas) precisou ser adaptado: o GPT-5.6 enviava todos os 25 parâmetros opcionais com valores inventados, causando leituras vazias em 52% dos casos. A solução foi tornar parâmetros opcionais como anuláveis (anyOf: [T, null]) e depois remover os nulos antes da validação, eliminando completamente as leituras vazias.\n\nOutro ponto crítico foi o cache de prompts. Enquanto o Claude compartilha cache a nível de organização, o GPT-5.6 usa chaves de cache por workspace para evitar sobrecarga em nós com limite de 15 requisições/minuto. A implementação correta elevou a taxa de acerto de cache de 0% para 83,7%, reduzindo os custos. Por fim, o replay de raciocínio (reasoning replay) foi corrigido usando `store: false` para evitar referências a estado no servidor que causavam falhas intermitentes. O resultado final é um agente mais rápido, barato e consistente, já disponível na plataforma Ploy.",
+   "snippet": "As of today, Ploy’s agent runs on GPT-5.6 Sol, the flagship tier of the model family OpenAI released this morning. For months, no model met our bar for replacing Claude Opus. GPT-5.6 Sol did. After a head-to-head evaluation, we made it the default model for every Ploy workspace. Ploy’s agent builds and edits production marketing websites. It plans a page, reads the codebase, writes components, gen",
+   "kind": null,
+   "section": null,
+   "date": "2026-07-09",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "openai",
+     "gpt"
+    ],
+    "concept-theme": [
+     "evaluation",
+     "cost-optimization",
+     "performance",
+     "caching"
+    ],
+    "content-type": [
+     "migration-guide"
+    ],
+    "difficulty": [
+     "for-practitioners"
+    ],
+    "domain": [
+     "llm-models",
+     "ai-general"
+    ],
+    "framework-library-tool": [
+     "gpt",
+     "claude"
+    ],
+    "topic-technology": [
+     "ai-agents",
+     "model-comparison",
+     "model-evaluation",
+     "tool-calling",
+     "prompt-engineering",
+     "inference-optimization"
+    ],
+    "trending-emerging": [
+     "frontier-models",
+     "reasoning-models",
+     "ai-coding-agents",
+     "tool-calling"
+    ]
+   }
+  },
+  {
+   "id": 3126,
+   "url": "https://www.soofi.info",
+   "sourceId": 8,
+   "sourceName": "llmnews.ai",
+   "title": "Sovereign Open Source Foundation Models",
+   "titlePt": "Modelos Fundacionais de Código Aberto Soberanos",
+   "summaryPt": "O consórcio Soofi, formado por instituições de pesquisa e startups alemãs, lançou o Soofi S, o primeiro modelo de uma família de modelos fundacionais de código aberto e soberanos para a Europa. Com 30 bilhões de parâmetros e arquitetura Mixture-of-Experts, treinado em 27 trilhões de tokens (com foco em inglês e alemão), o modelo é voltado para aplicações industriais que exigem controle, transparência e eficiência, como análise de documentos técnicos e regulatórios, geração de código, sistemas de IA agentiva e aplicações corporativas. O modelo ainda não está disponível publicamente; está em fase de testes com parceiros industriais. O consórcio também promove a série de workshops 'Open Source Sovereign Foundation Models' (OSFM) para discutir IA soberana e aberta na Europa, além de participar de eventos e conferências do setor.",
+   "snippet": "Soofi SUnser erstes Modell für industrielle KI in EuropaMit Soofi S stellt das Soofi-Konsortium den ersten Baustein einer offenen europäischen KI-Modellfamilie vor. Das Modell wurde entwickelt, um leistungsfähige KI-Anwendungen nachvollziehbar, anpassbar und auf souveräner Infrastruktur nutzbar zu machen.Im Fokus stehen industrielle Einsatzbereiche, in denen Kontrolle, Transparenz und Effizienz en",
+   "kind": null,
+   "section": null,
+   "date": "2026-07-14",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "open-source",
+     "transparency",
+     "governance",
+     "responsible-ai"
+    ],
+    "content-type": [
+     "release-announcement"
+    ],
+    "difficulty": [
+     "for-practitioners"
+    ],
+    "domain": [
+     "llm-models"
+    ],
+    "framework-library-tool": [
+     "mixtral",
+     "hugging-face-transformers",
+     "langchain",
+     "llama-cpp"
+    ],
+    "topic-technology": [
+     "foundation-models",
+     "moe",
+     "open-source-models",
+     "ai-agents",
+     "multilingual-models",
+     "code-models"
+    ],
+    "trending-emerging": [
+     "foundation-models",
+     "open-weights",
+     "moe"
+    ]
+   }
+  },
+  {
+   "id": 3127,
+   "url": "https://github.com/clawkwork/clawk",
+   "sourceId": 8,
+   "sourceName": "llmnews.ai",
+   "title": "GitHub - clawkwork/clawk: Disposable, network-restricted Linux VMs for AI coding agents",
+   "titlePt": "Clawk: VMs Linux descartáveis e com rede restrita para agentes de IA",
+   "summaryPt": "Clawk é uma ferramenta de código aberto que oferece um ambiente isolado e seguro para agentes de codificação de IA executarem tarefas complexas. Em vez de permitir que o agente opere diretamente na sua máquina — com riscos de danos ou vazamento de dados —, o Clawk cria uma máquina virtual (VM) Linux descartável e com rede restrita para cada projeto. Basta executar `clawk` em um repositório para que o agente (como Claude Code ou Codex) tenha sua própria máquina, com acesso total ao código montado, mas sem permissão para acessar seus arquivos pessoais, credenciais ou a rede externa não autorizada.\n\nA separação é baseada em uma VM real com kernel próprio, e não em regras de sandboxing em nível de processo, que podem ser contornadas. O agente tem acesso root na VM, podendo instalar pacotes e modificar configurações, enquanto o tráfego de saída é controlado por uma lista de permissões (allow-list). Comandos como `git push` funcionam graças ao encaminhamento do ssh-agent do host, sem que as chaves privadas entrem na VM. Se a VM for corrompida, basta executar `clawk destroy && clawk` para obter uma nova máquina rapidamente.\n\nO projeto é voltado para macOS (Apple Silicon), com suporte experimental para Linux. Ele não requer Docker, qemu ou sudo. A instalação é feita via Homebrew ou compilação a partir do código-fonte. A configuração é opcional e pode ser feita com um arquivo `clawk.mod` para definir CPU, memória, imagem, regras de rede e outras opções. O Clawk suporta múltiplas VMs simultâneas e oferece comandos para pausar, retomar e criar snapshots, garantindo que o estado do agente seja preservado no host mesmo após a destruição da VM.",
+   "snippet": "Give a coding agent its own disposable Linux machine, not yours. Install · Quickstart · Why a VM? · How it works · Compared to · FAQ · Docs A coding agent is only useful when you let it actually do things: install packages, run the code it writes, start servers, use the network. On your own machine that leaves two bad options. You approve every command (and babysit a prompt every few seconds)",
+   "kind": null,
+   "section": null,
+   "date": "2026-07-14",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "github"
+    ],
+    "concept-theme": [
+     "security",
+     "guardrails",
+     "devops",
+     "infrastructure-as-code"
+    ],
+    "content-type": [
+     "tool-release",
+     "security-advisory"
+    ],
+    "difficulty": [
+     "for-practitioners"
+    ],
+    "domain": [
+     "ai-general"
+    ],
+    "topic-technology": [
+     "ai-agents",
+     "containers",
+     "cli-tools",
+     "ai-safety"
+    ],
+    "trending-emerging": [
+     "ai-coding-agents",
+     "coding-agents",
+     "on-device-ai",
+     "ai-agents"
+    ]
+   }
+  },
+  {
+   "id": 3128,
+   "url": "https://techstackups.com/articles/tldraw-agent-draw",
+   "sourceId": 8,
+   "sourceName": "llmnews.ai",
+   "title": "Agent Draw: An agent draws while you talk, built on TLDraw",
+   "titlePt": "Agent Draw: um agente desenha enquanto você fala",
+   "summaryPt": "Agent Draw é uma ferramenta construída sobre o SDK tldraw que permite que um agente de IA desenhe em uma tela infinita enquanto você apresenta ou fala. O funcionamento é simples: o usuário arrasta um retângulo na tela, dita o que deseja ver desenhado ali, e o agente cria a ilustração em segundos, usando formas primitivas (retângulos, losangos, setas) ou a ferramenta de caneta para esboços mais complexos. O sistema suporta múltiplas capturas simultâneas por meio de uma fila FIFO, garantindo que os desenhos sejam processados um após o outro sem conflitos.\n\nA implementação utiliza o kit inicial de agente oficial do tldraw, com adaptações para captura de áudio via MediaRecorder do navegador e transcrição pelo modelo Voxtral da Mistral. Para otimizar o desempenho, os desenvolvedores removeram ações desnecessárias (como reajuste de câmera e revisão de lint) que dobravam o número de chamadas ao modelo. Além disso, o prompt foi ajustado para evitar que o agente simplesmente transcreva a fala como texto na tela, incentivando a escolha da forma visual mais adequada (diagramas, ilustrações, gráficos).\n\nTestes com diferentes modelos mostram variações na qualidade: modelos mais capazes (como Claude Opus 4.8) produzem composições detalhadas e bem posicionadas, enquanto modelos menores (Claude Haiku 4.5) tendem a simplificar, e modelos ainda mais leves (Gemini 2.5 Flash Lite) podem desistir da tarefa ou gerar resultados insatisfatórios. O código-fonte completo está disponível no GitHub, e uma demonstração ao vivo pode ser testada online.",
+   "snippet": "We recently built 2draw, a Drawful-style game where players draw on a shared canvas and race to guess each other's drawings, on tldraw, an infinite-canvas SDK for React. We started wondering what it would take to put an agent in that loop, as an opponent or a rival guesser, and dug into how an agent could read and draw on a tldraw canvas. That research turned into: Agent draw, a tool that lets an",
+   "kind": null,
+   "section": null,
+   "date": "2026-06-24",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "claude-opus",
+     "cloudflare"
+    ],
+    "content-type": [
+     "demo",
+     "tool-release"
+    ],
+    "difficulty": [
+     "for-practitioners"
+    ],
+    "domain": [
+     "reactjs",
+     "ai-general",
+     "frontend"
+    ],
+    "ecosystem-language": [
+     "javascript",
+     "typescript",
+     "python"
+    ],
+    "framework-library-tool": [
+     "react",
+     "claude-opus"
+    ],
+    "topic-technology": [
+     "ai-agents",
+     "tool-calling",
+     "component-libraries",
+     "generative-ai"
+    ],
+    "trending-emerging": [
+     "agentic-ai",
+     "ai-agents",
+     "computer-use",
+     "tool-calling"
     ]
    }
   }

@@ -124249,5 +124249,1292 @@
     "webassembly"
    ]
   }
+ },
+ {
+  "id": 3102,
+  "source_id": 8,
+  "url": "https://terrytao.wordpress.com/2026/07/11/old-and-new-apps-via-modern-coding-agents",
+  "title": "Old and new apps, via modern coding agents",
+  "title_pt": "Aplicativos antigos e novos, via agentes de codificação modernos",
+  "summary_pt": "O autor, desde 1999, criava applets em Java para visualização matemática (como favos de mel e conjuntos de Besicovitch), mas eles se tornaram obsoletos com o fim do suporte a Java nos navegadores. Recentemente, usou agentes de codificação baseados em IA para portar cerca de duas dúzias desses applets para JavaScript em poucas horas, inclusive com melhorias gráficas — como a colorização do applet de Besicovitch. A IA também corrigiu dois bugs no código original, e apenas um pequeno problema foi identificado no port, tornando a migração bem-sucedida e de baixo risco, já que os applets são auxiliares visuais não críticos.\n\nAlém de portar os antigos, o autor criou novos aplicativos: um visualizador de relatividade especial (conceito de “Inkscape no espaço de Minkowski”, que havia abandonado em 1999) e um visualizador para a Conjectura de Gilbreath, ambos gerados em algumas horas de “vibe coding” com o agente de IA. O processo foi simples e o autor planeja usar visualizações interativas como suplementos em futuros artigos, aceitando os possíveis bugs residuais por não serem essenciais ao conteúdo principal.",
+  "snippet": "I have been interested in machine-assisted ways to do and teach mathematics from as far back as 1999, when I started coding several applets in Java 1.0, both for my complex analysis and linear algebra courses, as well as to visualize various mathematical objects I was interested in (such as honeycombs or Besicovitch sets). This was moderately successful; but the applets were time-consuming to prog",
+  "date_iso": "2026-07-11",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "refactoring",
+    "dev-experience",
+    "developer-productivity",
+    "debugging"
+   ],
+   "content-type": [
+    "how-to",
+    "tutorial"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "llm-models",
+    "ai-general"
+   ],
+   "ecosystem-language": [
+    "javascript",
+    "java"
+   ],
+   "topic-technology": [
+    "ai-agents",
+    "generative-ai"
+   ],
+   "trending-emerging": [
+    "ai-coding-agents"
+   ]
+  }
+ },
+ {
+  "id": 3103,
+  "source_id": 8,
+  "url": "https://insideai.news/news/ai-safety/mits-new-method-flags-ai-models-trained-on-child-abuse-imagery-without-generating-it/3869",
+  "title": "MIT’s New Method Flags AI Models Trained on Child Abuse Imagery Without Generating It",
+  "title_pt": "Novo método do MIT identifica modelos de IA treinados para abuso infantil sem gerar conteúdo",
+  "summary_pt": "Pesquisadores do MIT, em parceria com a organização sem fins lucrativos Thorn, desenvolveram um método de auditoria chamado Gaussian probing que é capaz de identificar se um modelo de IA foi ajustado para gerar material de abuso sexual infantil (CSAM) sem precisar gerar imagens. Essa abordagem inovadora contorna as barreiras legais e éticas que inviabilizavam os métodos tradicionais de verificação, já que gerar esse tipo de conteúdo para testes é criminoso. Ao analisar as adaptações internas do modelo a partir de dados aleatórios — e não suas saídas —, a técnica obteve 100% de precisão na detecção de modelos especializados em gerar CSAM. A descoberta surge em meio a um aumento expressivo de denúncias de imagens abusivas geradas por IA, que chegaram a mais de 1,5 milhão em 2025. O método, que pode ser integrado a plataformas de hospedagem de modelos abertos como Hugging Face, é escalável e resistente a tentativas de evasão, representando uma ferramenta legal e técnica para conter a proliferação desse tipo de conteúdo. Os pesquisadores planejam expandir os testes para mais modelos e investigar a detecção precoce de capacidades nocivas mesmo antes do ajuste fino, mas alertam que a técnica ainda não cobre todas as formas de geração de CSAM por IA.",
+  "snippet": "July 13, 2026, (Inside AI) — A new auditing method developed by MIT researchers can determine whether an AI model has been fine-tuned to generate child sexual abuse material (CSAM) without ever producing an image, sidestepping the legal and ethical barriers that have stymied safety checks. Led by graduate student Vinith Suriyakumar and associate professors Ashia Wilson and Marzyeh Ghassemi, the te",
+  "date_iso": "2026-07-13",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "ai-safety",
+    "responsible-ai",
+    "ai-ethics",
+    "evaluation"
+   ],
+   "content-type": [
+    "research-paper"
+   ],
+   "domain": [
+    "ai-general",
+    "llm-models"
+   ],
+   "topic-technology": [
+    "fine-tuning",
+    "model-safety",
+    "ai-ethics",
+    "image-generation",
+    "jailbreaks",
+    "lora"
+   ],
+   "trending-emerging": [
+    "fine-tuning",
+    "lora",
+    "ai-governance"
+   ]
+  }
+ },
+ {
+  "id": 3104,
+  "source_id": 8,
+  "url": "https://github.com/luuuc/sense/blob/main/bench/verticals/ruby-rails/report-for-humans.md",
+  "title": "Can an AI agent navigate Ruby? The results, in plain language",
+  "title_pt": "Agente de IA navega em Ruby? Resultados práticos",
+  "summary_pt": "Um benchmark testou se agentes de IA conseguem navegar por bases de código Ruby reais para identificar dependências de um modelo central antes de uma refatoração arriscada. Em 13 repositórios e 5 modelos, o agente sem ajuda encontrou poucas dependências em aplicações grandes, declarando a auditoria completa mesmo tendo perdido a maioria. Com um mapa estrutural da base (chamado Sense), o melhor modelo (Claude Opus 4.8) teve um ganho médio de +0,26 na taxa de acertos, concentrado em dependências não óbvias (+0,48). O ganho foi maior em repositórios com mais de 2.500 arquivos; em gems pequenas, o mapa não fez diferença. O artigo descreve a metodologia detalhada, incluindo verificação manual das respostas, transcrições públicas e variação publicada, e convida o leitor a testar no próprio repositório com o Sense, que é gratuito e de código aberto.",
+  "snippet": "Can an AI agent navigate Ruby? The results, in plain language AI agents write Ruby well. This benchmark asks a different question: can they navigate it? Given a real codebase and a change that touches a central model, can an agent find every place that depends on it, before the change silently breaks one? Across 13 real codebases and 5 models, the answer splits cleanly in two. On small, readable g",
+  "date_iso": "2026-07-14",
+  "kind": null,
+  "section": null,
+  "verify_status": "suspect",
+  "verify_notes": "Conteúdo contém tabela não renderizada (formatação raw), ",
+  "tags": {
+   "concept-theme": [
+    "evaluation"
+   ],
+   "content-type": [
+    "benchmark",
+    "analysis"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "ai-general",
+    "llm-models"
+   ],
+   "ecosystem-language": [
+    "ruby"
+   ],
+   "topic-technology": [
+    "ai-agents",
+    "ai-benchmarks",
+    "code-models",
+    "tool-calling",
+    "model-comparison"
+   ],
+   "trending-emerging": [
+    "ai-coding-agents"
+   ]
+  }
+ },
+ {
+  "id": 3105,
+  "source_id": 8,
+  "url": "https://nobie.com",
+  "title": "Nobie — The best way to xlsx on Mac",
+  "title_pt": "Nobie — A melhor forma de usar xlsx no Mac",
+  "summary_pt": "Nobie é um aplicativo gratuito e local para Mac que permite abrir e editar arquivos xlsx sem necessidade de conta, instalação complexa ou envio de dados para a nuvem. Ele suporta todas as fórmulas do Excel, estilos, tabelas, gráficos e tabelas dinâmicas, com desempenho superior. A edição completa está prevista para breve. O diferencial é o foco em privacidade: seus dados nunca saem do Mac. O app também é compatível com agentes de IA como Claude, Codex e Gemini, permitindo que você use seu próprio modelo de IA para interagir diretamente com a planilha, sem intermediários. Funcionalidades como macros VBA e multiplayer estão programadas para o futuro. Nobie promete ser uma alternativa leve, segura e poderosa para quem precisa trabalhar com planilhas no ecossistema Apple.",
+  "snippet": "The easiest way to open xlsx on Mac.No account.Download and start working. That's it.Free foreverFor everything you can do in Excel or Google Sheets.Local-onlyYour data never leaves your Mac.You shouldn't need to compromiseAll your features, shortcuts and speed. All Excel formulas All Excel styling Unmatched performance TablesCharts & PivotsEDITING COMING SOON AI-first: use Claude, Codex, etc",
+  "date_iso": "2026-07-14",
+  "kind": null,
+  "section": null,
+  "verify_status": "suspect",
+  "verify_notes": "Conteúdo muito superficial para o título prometido, sendo essencialmente uma página de marketing com promessas de funcionalidades futuras.",
+  "tags": {
+   "company-vendor-model": [
+    "anthropic",
+    "openai",
+    "google"
+   ],
+   "concept-theme": [
+    "data-privacy",
+    "performance"
+   ],
+   "content-type": [
+    "product-launch",
+    "tool-release"
+   ],
+   "difficulty": [
+    "for-beginners"
+   ],
+   "domain": [
+    "llm-models",
+    "ai-general"
+   ],
+   "topic-technology": [
+    "ai-agents",
+    "mcp",
+    "tool-calling",
+    "privacy-first-ai",
+    "data-visualization"
+   ],
+   "trending-emerging": [
+    "on-device-ai",
+    "local-llm",
+    "ai-agents",
+    "computer-use"
+   ]
+  }
+ },
+ {
+  "id": 3106,
+  "source_id": 8,
+  "url": "https://addyosmani.com/blog/agent-harness-engineering",
+  "title": "Agent Harness Engineering",
+  "title_pt": "Engenharia de Harness para Agentes de Código",
+  "summary_pt": "O artigo apresenta o conceito de 'engenharia de harness' (harness engineering), que trata todos os componentes que cercam um modelo de IA — como prompts, ferramentas, regras de contexto e loops de feedback — como artefatos de engenharia reais e iterativos. A ideia central é que um agente de código não é apenas o modelo, mas sim o modelo mais toda essa infraestrutura (o harness). Um modelo mediano com um harness excelente supera um modelo ótimo com um harness ruim. A disciplina consiste em tratar cada erro do agente como um sinal permanente para adicionar uma regra ou restrição no harness, impedindo que o mesmo erro se repita. Isso inclui desde adicionar instruções em arquivos como AGENTS.md até criar hooks que bloqueiam comandos destrutivos ou dividir tarefas longas entre planejador e executor. O artigo mostra que a maior alavancagem para melhorar agentes de código hoje está no design do harness, não na escolha do modelo.",
+  "snippet": "A coding agent is the model plus everything you build around it. Harness engineering treats that scaffolding as a real artifact, and it tightens every time the agent slips. Roughly: anytime you find an agent makes a mistake, you take the time to engineer a solution such that the agent never makes that mistake again. We’ve spent the last two years arguing about models. Which one is smartest, wh",
+  "date_iso": "2026-07-14",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "architecture",
+    "dev-experience",
+    "prompt-engineering"
+   ],
+   "content-type": [
+    "deep-dive",
+    "explainer"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "llm-models"
+   ],
+   "framework-library-tool": [
+    "langgraph",
+    "crewai",
+    "autogen",
+    "ollama",
+    "litellm",
+    "dspy"
+   ],
+   "topic-technology": [
+    "ai-agents",
+    "multi-agent-systems",
+    "agent-orchestration",
+    "prompt-engineering",
+    "tool-calling",
+    "error-handling"
+   ],
+   "trending-emerging": [
+    "coding-agents",
+    "tool-calling",
+    "agent-orchestration"
+   ]
+  }
+ },
+ {
+  "id": 3107,
+  "source_id": 8,
+  "url": "https://github.com/jbwinters/jacquard-lang",
+  "title": "Jacquard is a small programming language designed for a regime in which most code is written by machine-learning models and reviewed by people.",
+  "title_pt": "Jacquard: uma linguagem de programação para código gerado por IA e revisado por humanos",
+  "summary_pt": "Jacquard é uma linguagem de programação de pesquisa projetada para um cenário onde a maior parte do código é gerada por modelos de aprendizado de máquina e revisada por humanos. Ela se destaca por expor não apenas o que um programa computa, mas também quais efeitos ele pode realizar, incertezas discretas finitas e sua identidade canônica — tudo isso integrado à própria linguagem, não apenas em comentários ou logs. Isso permite que revisores vejam rapidamente, por exemplo, se uma função pode acessar a rede (efeito `net`) e que o runtime rejeita efeitos não autorizados sem uma permissão explícita (`--allow`). Além disso, a linguagem suporta execução em múltiplos \"mundos\" (real, simulado, gravado), permitindo substituir o manipulador de efeitos sem alterar o código, o que substitui muita mocks convencionais.\n\nJacquard também oferece enumeração de probabilidades exatas para modelos discretos, identidade estrutural baseada em hash (que ignora formatação e renomeações locais), e um conjunto de ferramentas como formatador, diff ciente de estrutura, testes Warp com cache, e um compilador nativo AOT que emite C. A versão 0.1 é um protótipo funcional, mas não é produção. Inclui uma biblioteca padrão, um interpretador CPS em OCaml e um backend nativo. A instalação pode ser feita via script para Linux e macOS, sem necessidade de OCaml ou opam. O desenvolvimento local requer OCaml 5.1.1 e opam. O projeto é open source sob Apache 2.0 e visa dar aos revisores humanos as respostas \"o que isso pode tocar?\" e \"quão certo estamos?\" sem precisar ler cada linha.",
+  "snippet": "Jacquard is a FriendMachine research project for running, reviewing, simulating, and trusting programs written by models and reviewed by people. Start with the human-friendly introduction to Jacquard. Concretely, it is a small programming language with a compact .jac surface syntax, an OCaml checker and CPS interpreter, a C-emitting native AOT backend that currently compiles the kernel .jqd carrie",
+  "date_iso": "2026-07-14",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "testing"
+   ],
+   "content-type": [
+    "release-announcement",
+    "showcase"
+   ],
+   "difficulty": [
+    "for-researchers"
+   ],
+   "domain": [
+    "ai-general",
+    "llm-models"
+   ],
+   "trending-emerging": [
+    "ai-coding-agents"
+   ]
+  }
+ },
+ {
+  "id": 3108,
+  "source_id": 8,
+  "url": "https://github.com/morganwilliscloud/billai-bass",
+  "title": "morganwilliscloud/billai-bass: Turn a Big Mouth Billy Bass into a real-time voice assistant powered by Strands BidiAgent + Amazon Nova 2 Sonic on a Raspberry Pi 5",
+  "title_pt": "Transforme um Billy Bass em assistente de voz com Raspberry Pi 5 e Amazon Nova Sonic",
+  "summary_pt": "Este guia ensina como transformar um boneco Big Mouth Billy Bass em um assistente de voz em tempo real, usando um Raspberry Pi 5, o sistema de streaming bidirecional Strands BidiAgent e o modelo Amazon Nova 2 Sonic no Amazon Bedrock. O peixe responde à fala, movendo a cabeça, sincronizando os lábios e balançando o rabo. Não é necessário conhecimento prévio de robótica ou solda — o guia foi criado para iniciantes e inclui lista de materiais, configuração de conta AWS com permissões mínimas e instruções passo a passo detalhadas. O projeto é baseado no billy-b-assistant, mas reconstruído sobre a plataforma Strands, e pode ser executado com ajuda de um assistente de IA para depuração.",
+  "snippet": "🐟 BillAI Bass Builder Guide Powered by Strands Agents Bidirectional Streaming + Amazon Nova 2 Sonic billai-bass-demo-strands.mp4 Turn a Big Mouth Billy Bass into a real-time voice assistant: you talk, the fish talks back — head swiveling, mouth lip-syncing to its own voice, tail flapping for emphasis. The fish runs a Strands Agents bidirectional streaming agent (Bidi",
+  "date_iso": "2026-07-14",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "amazon",
+    "nova",
+    "aws-bedrock"
+   ],
+   "concept-theme": [
+    "agentops",
+    "latency",
+    "edge-computing",
+    "cloud"
+   ],
+   "content-type": [
+    "how-to",
+    "guide"
+   ],
+   "difficulty": [
+    "for-beginners"
+   ],
+   "domain": [
+    "ai-general",
+    "python"
+   ],
+   "framework-library-tool": [
+    "nova",
+    "aws"
+   ],
+   "topic-technology": [
+    "ai-agents",
+    "speech-to-text",
+    "text-to-speech",
+    "generative-ai",
+    "edge-ai",
+    "robotics"
+   ],
+   "trending-emerging": [
+    "voice-agents",
+    "ai-agents",
+    "edge-ai"
+   ]
+  }
+ },
+ {
+  "id": 3109,
+  "source_id": 8,
+  "url": "https://www.elliotcsmith.com/autoresearch-claude-and-constrained-optimization",
+  "title": "Autoresearch, Claude and Constrained Optimization",
+  "title_pt": "Autopesquisa, Claude e Otimização com Restrições",
+  "summary_pt": "O autor, cético quanto a alegações de que IA substitui dezenas de pessoas, criou um experimento inspirado no conceito de 'Autopesquisa' de Kaparthay. Usando o Claude Code (modelo Sonnet 4.6, modo padrão), ele programou um agente para otimizar um algoritmo de compressão de arquivos em Rust, com dois objetivos claros: o arquivo descomprimido deve ser idêntico ao original e a compressão/descompressão não pode ultrapassar 300 segundos. A métrica principal era a redução total de bytes. O agente foi executado em 10 iterações, cada uma custando cerca de US$ 4, partindo de uma implementação LZSS e adicionando melhorias como checagem de entropia e novas técnicas de codificação. Os resultados finais foram comparados com ferramentas de compressão comuns: o algoritmo caseiro se saiu bem, especialmente em compressão de áudio e vídeo, mas perdeu ou empatou em outras categorias. As principais lições incluem: modelos tendem a 'terminar' rápido demais, então é importante ter um mecanismo de looping explícito; a escolha da função objetivo é crucial — no experimento, o agente ignorou tempo e uso de memória; métricas para problemas reais (ex.: taxa de conversão) são mais ruidosas e exigem proxies cuidadosos. O autor sugere que a abordagem é viável desde que se tenha métricas robustas, mensuráveis e bem restritas.",
+  "snippet": "IntroductionYou don't need to look far to find claims that folks have been using AI to do the work of dozens of people. I tend to be skeptical of any claim that discusses improvements without evidence. I decided to take that skepticism and put it to work. This had a minor overlap with the whole 'loops' discussion on X but that's coincidental.Over the last few weeks I have put together a project in",
+  "date_iso": "2026-06-30",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "claude",
+    "anthropic"
+   ],
+   "concept-theme": [
+    "optimization",
+    "performance"
+   ],
+   "content-type": [
+    "project-spotlight",
+    "deep-dive"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "ai-general",
+    "backend"
+   ],
+   "framework-library-tool": [
+    "claude"
+   ],
+   "topic-technology": [
+    "ai-agents",
+    "tool-calling",
+    "prompt-engineering",
+    "ai-research",
+    "foundation-models",
+    "context-engineering"
+   ],
+   "trending-emerging": [
+    "ai-coding-agents",
+    "agentic-ai",
+    "ai-agents"
+   ]
+  }
+ },
+ {
+  "id": 3110,
+  "source_id": 8,
+  "url": "https://humansand.ai/blog/nvfp4-rl",
+  "title": "The 4-bitter Lesson: Balancing Stability and Performance in NVFP4 RL",
+  "title_pt": "Lições do NVFP4: Equilibrando Estabilidade e Desempenho em RL de 4 Bits",
+  "summary_pt": "O uso de formatos de baixa precisão, como o NVFP4, aumenta drasticamente a taxa de transferência (throughput) no treinamento por reforço (RL) de modelos de linguagem, mas introduz instabilidades que não são resolvidas apenas com as receitas de pré-treinamento convencionais. Enquanto o pré-treinamento lida bem com o viés de quantização através de arredondamento estocástico, o RL é mais sensível ao ruído, pois o gradiente da política já é inerentemente ruidoso devido à amostragem de rolagens, estimativa de vantagens e defasagem de política.\n\nPara enfrentar esse desafio, os autores desenvolveram uma receita que usa quantização NVFP4 apenas na passagem direta (forward) das camadas MoE, mantendo a passagem reversa (backward) em BF16 para estabilidade. Eles identificaram que, mesmo assim, ocorriam picos de gradiente devido à inconsistência da regra da cadeia: o backward 'enxergava' uma função diferente da forward quantizada. A solução foi aplicar o 'dequantized backward', onde o backward utiliza versões BF16 dos tensores exatos que foram quantizados na forward, alinhando as duas passagens.\n\nOs experimentos mostram que essa abordagem resulta em gradientes mais limpos e menos picos, embora o NVFP4 ainda introduza maior variância que o MXFP8. Com o otimizador Adam, a técnica reduziu significativamente os picos de gradiente, mantendo a maior eficiência computacional. O código foi aberto nas bibliotecas TransformerEngine, cuDNN, FlashInfer e SGLang, permitindo que a comunidade utilize receitas de 4 bits estáveis para RL.",
+  "snippet": "Introduction RL Training Simulator. The simulator models an asynchronous RL system where samplers continuously generate rollouts while the trainer updates the policy. Policy mismatch arises from both off-policyness (stale rollouts) and quantization error, accumulating into policy drift that eventually degrades reward if it exceeds the optimizer's correction capacity. RL & Efficiency",
+  "date_iso": "2026-07-10",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "nvidia"
+   ],
+   "concept-theme": [
+    "performance",
+    "optimization",
+    "reliability",
+    "async"
+   ],
+   "content-type": [
+    "deep-dive",
+    "analysis"
+   ],
+   "domain": [
+    "llm-models"
+   ],
+   "topic-technology": [
+    "reinforcement-learning",
+    "quantization",
+    "model-training",
+    "rlhf"
+   ],
+   "trending-emerging": [
+    "reasoning-models"
+   ]
+  }
+ },
+ {
+  "id": 3111,
+  "source_id": 8,
+  "url": "https://github.com/cyrusNuevoDia/capn-hook",
+  "title": "capn-hook",
+  "title_pt": "capn-hook",
+  "summary_pt": "O capn-hook é uma ferramenta de memória persistente para agentes de codificação, como Claude Code e Codex. Ela resolve o problema de agentes que esquecem descobertas entre sessões, economizando tempo e tokens. O agente pode consultar respostas salvas antes de explorar o código e, após uma descoberta custosa, guardá-la com os arquivos relevantes. Cada entrada é vinculada a hashes dos arquivos; se algum arquivo mudar, a resposta é automaticamente removida, garantindo que nunca retorne informações desatualizadas. Em testes com 60 perguntas em 5 bases de código reais, o uso com capn-hook consumiu 77% menos tokens do que a exploração do zero, mantendo 100% de acerto. A instalação é simples via npm ou bun, e a integração com os agentes se dá por hooks de início de sessão. O armazenamento é local, baseado em arquivos Markdown e um índice SQLite, sem depender de servidores externos.",
+  "snippet": "🧢🪝 cap'n hook Don't grep the same mystery twice. Persistent memory for coding agents. When your agent spends ten minutes figuring out where something lives in your codebase, capn saves the files that answer the question. The next session gets them back in one command instead of re-exploring — and the moment the underlying files change, the saved answer deletes itself. Across 60 real developer qu",
+  "date_iso": "2026-07-03",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "claude",
+    "codex"
+   ],
+   "concept-theme": [
+    "caching",
+    "developer-productivity",
+    "agentops"
+   ],
+   "content-type": [
+    "tooling",
+    "tool-release"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "ecosystem-language": [
+    "javascript",
+    "typescript"
+   ],
+   "topic-technology": [
+    "ai-agents",
+    "agentic-rag",
+    "tool-calling",
+    "context-engineering",
+    "cost-optimization-llm"
+   ],
+   "trending-emerging": [
+    "coding-agents",
+    "ai-coding-agents",
+    "agentic-ai"
+   ]
+  }
+ },
+ {
+  "id": 3112,
+  "source_id": 8,
+  "url": "https://thebeach.dev/posts/lisp-agent",
+  "title": "An Agent in 100 Lines of Lisp, or How my Prof was Right - Just 25 Years Early",
+  "title_pt": "Um Agente em 100 Linhas de Lisp, ou Como Meu Professor Estava Certo – Só 25 Anos Adiantado",
+  "summary_pt": "O autor relembra seu curso de IA na Universidade de Guelph, por volta do ano 2000, onde aprendeu Lisp como a “linguagem para IA” — foco em sistemas simbólicos, não em redes neurais ou deep learning. Décadas depois, ao construir uma plataforma de agentes de IA, ele decide testar se Lisp ainda é útil para o loop principal de um agente.\n\nEle implementa um agente completo em cerca de 100 linhas de Common Lisp, usando apenas as bibliotecas Dexador (HTTP) e Shasht (JSON). O loop do agente é uma função recursiva de 8 linhas: envia mensagens para um modelo, executa ferramentas se solicitado e chama a si mesmo com o histórico atualizado. A ferramenta única do agente é `eval` — ele pode executar qualquer código Lisp recebido como string, o que permite que o modelo crie novas funções dinamicamente, como um buscador web, sem que o desenvolvedor as pré-defina.\n\nO autor reflete que, ao contrário das plataformas tradicionais (como Agent Foundry ou Claude Code), onde o catálogo de ferramentas é fixo, aqui a capacidade é decidida em tempo de execução pelo modelo. A memória do agente é armazenada como JSON em disco, e ao reiniciar ele relembra suas habilidades como se fossem histórias contadas a si mesmo. O artigo sugere que Lisp, com sua homoiconicidade (código como dados), é natural para agentes de IA, e conclui que a visão do professor sobre Lisp como linguagem para IA estava correta, apenas adiantada para a era simbólica.",
+  "snippet": "Around 2000 I took an AI course at the University of Guelph. I don’t think I learned too much. We didn’t talk about neural networks, as far as I can remember. My end of term project was, I think, a pathfinding algorithm wearing an AI costume. There were certainly no discussions of transformers. No CUDA. No PyTorch. None of that existed. But what I remember doing a lot of was coding in Lisp - a lot",
+  "date_iso": "2026-07-07",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "claude"
+   ],
+   "content-type": [
+    "opinion",
+    "tutorial"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "topic-technology": [
+    "ai-agents"
+   ],
+   "trending-emerging": [
+    "ai-coding-agents",
+    "agentic-ai",
+    "ai-agents",
+    "reasoning-models"
+   ]
+  }
+ },
+ {
+  "id": 3113,
+  "source_id": 8,
+  "url": "https://github.com/sshwarts/skillscript",
+  "title": "Skillscript — a small declarative language for authoring agent workflows. Runtime, compiler, and CLI.",
+  "title_pt": "Skillscript — linguagem declarativa para workflows de agentes com runtime, compilador e CLI",
+  "summary_pt": "Skillscript é uma linguagem declarativa inspirada no Makefile, criada para que agentes de IA possam escrever workflows reutilizáveis de forma segura. O agente elabora uma skill (habilidade), que passa por revisão e aprovação humana antes de ser executada pelo runtime. A execução é feita através de conectores configurados, com listas de permissão e políticas de segurança — sem acesso irrestrito ao shell, instalação de pacotes ou credenciais embutidas.\n\nA principal vantagem é que tarefas rotineiras deixam de ser replanejadas do zero a cada execução, reduzindo custo, latência e deriva comportamental. Cada skill é um artefato versionado, inspecionável e composto por outras skills. O uso de modelos de fronteira é otimizado: o custo de raciocínio é pago uma vez na criação, e as execuções subsequentes são determinísticas, podendo delegar sub-tarefas a modelos locais mais baratos.\n\nPara começar, basta instalar via npm (`npm install -g skillscript-runtime`), iniciar o dashboard e conectar seu agente ao servidor MCP. O projeto está em versão pré-1.0, com licença MIT, e aceita contribuições via Issues. A documentação completa inclui referência da linguagem, guia de configuração e exemplos.",
+  "snippet": "Safe, reusable automation authored by agents. skillscript.ai • docs TL;DR — npm install -g skillscript-runtime && skillfile init && skillfile dashboard. See Quickstart. What is Skillscript? Skillscript came from asking: what would a Makefile look like if it built skills instead of binaries? The answer is a constrained language, inspired by Make, and a runtime that turns an agent'",
+  "date_iso": "2026-07-14",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "agentops",
+    "orchestration",
+    "governance",
+    "security"
+   ],
+   "content-type": [
+    "product-launch",
+    "tool-release"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "ecosystem-language": [
+    "javascript"
+   ],
+   "topic-technology": [
+    "ai-agents",
+    "mcp",
+    "agent-orchestration",
+    "tool-calling",
+    "guardrails"
+   ],
+   "trending-emerging": [
+    "ai-agents",
+    "agent-orchestration",
+    "mcp",
+    "ai-governance"
+   ]
+  }
+ },
+ {
+  "id": 3114,
+  "source_id": 8,
+  "url": "https://arxiv.org/abs/2607.06377",
+  "title": "Automation Without Understanding",
+  "title_pt": "Automação sem Compreensão",
+  "summary_pt": "O artigo \"Automação sem Compreensão\" argumenta que dois desenvolvimentos simultâneos constituem um erro estratégico: sistemas de IA começaram a produzir matemática genuína de nível de pesquisa, enquanto os Estados Unidos enfraquecem o pipeline que forma humanos capazes de entender tais sistemas. A capacidade matemática — a habilidade treinada de verificar, interpretar e desafiar raciocínios matemáticos — não é subproduto da produção de teoremas, mas sim uma infraestrutura construída ao longo de gerações por instituições que não podem ser reconstituídas sob demanda. O autor cita o caso de maio de 2026 em que uma IA refutou uma conjectura de Erdős sobre o problema da distância unitária planar, bem como as recentes interrupções no apoio federal às ciências matemáticas. Para mitigar o problema, propõe, entre outras medidas, que sistemas de IA que realizam raciocínios consequenciais sejam obrigados a expor suas afirmações críticas em forma formal e verificável por máquina, convertendo parte do raciocínio de IA de persuasão opaca em estrutura auditável.",
+  "snippet": "Two developments are unfolding at once: artificial intelligence systems have begun to produce genuine research-level mathematics, and the United States is weakening the pipeline that produces humans capable of understanding what such systems are doing. This essay argues that, taken together, these developments amount to a strategic error. Mathematical capacity, which is the trained ability to veri",
+  "date_iso": "2026-07-07",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "interpretability",
+    "transparency",
+    "explainability"
+   ],
+   "content-type": [
+    "opinion",
+    "paper-summary"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "topic-technology": [
+    "explainable-ai",
+    "ai-safety",
+    "ai-policy",
+    "ai-research",
+    "ai-ethics"
+   ],
+   "trending-emerging": [
+    "reasoning-models",
+    "ai-governance"
+   ]
+  }
+ },
+ {
+  "id": 3115,
+  "source_id": 8,
+  "url": "https://www.iroh.computer/blog/mesh-llm",
+  "title": "Mesh LLM: distributed AI computing on iroh",
+  "title_pt": "Mesh LLM: computação de IA distribuída com iroh",
+  "summary_pt": "Mesh LLM é uma plataforma de computação distribuída que permite executar modelos de linguagem de grande porte (LLMs) em um 'mesh' (malha) de máquinas interconectadas pela biblioteca iroh, eliminando a dependência de datacenters centralizados. Em vez de alugar GPUs caras de provedores de nuvem, você pode usar GPUs já disponíveis em escritórios ou servidores locais, combinando-as para rodar modelos maiores ou distribuir o processamento. O sistema expõe uma API compatível com OpenAI, ou seja, qualquer cliente que use o padrão 'localhost:9337/v1' pode enviar requisições, e o mesh decide se o modelo será executado localmente, encaminhado a um par ou dividido entre várias máquinas (modo 'Skippy').\n\nTecnicamente, cada nó do mesh é identificado por uma chave pública e se comunica via QUIC, com suporte a NAT traversal e relays para ambientes de rede restritivos. O protocolo define canais específicos para gossip, tunelamento HTTP, roteamento e transporte de ativações de modelos particionados. A arquitetura é plugável, com mais de 40 modelos pré-integrados, e o software é leve (cerca de 18 MB). O projeto é open source e visa criar uma alternativa peer-to-peer, privada e sem lock-in para inferência de IA.",
+  "snippet": "When people picture running a large language model, they picture a data center. Racks of GPUs that belong to someone else, a metered API, and a bill that grows every month you succeed. You send your prompts off to a black box and hope the price, the model, and the privacy policy all stay the way they were when you signed up. For a lot of teams that is a bad trade. You give up control over when mod",
+  "date_iso": "2026-07-14",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "architecture",
+    "cost-optimization",
+    "scalability",
+    "privacy"
+   ],
+   "content-type": [
+    "release-announcement",
+    "product-launch"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "local-llm",
+    "llm-models",
+    "ai-general"
+   ],
+   "topic-technology": [
+    "local-inference",
+    "self-hosting",
+    "model-serving",
+    "openai-compatible-api",
+    "distributed-systems"
+   ],
+   "trending-emerging": [
+    "distillation",
+    "quantization",
+    "local-llm",
+    "moe"
+   ]
+  }
+ },
+ {
+  "id": 3116,
+  "source_id": 7,
+  "url": "https://aiweekly.co/issues/treasury-analysts-called-ai-a-systemic-risk-treasury",
+  "title": "Treasury analysts called AI a systemic risk. Treasury disowned it.",
+  "title_pt": "Analistas do Tesouro chamaram IA de risco sistêmico; Tesouro se desvinculou",
+  "summary_pt": "Em uma semana de forte atividade regulatória, analistas de carreira do Tesouro dos EUA prepararam um rascunho de relatório classificando o mercado de IA como um risco sistêmico para o sistema financeiro, alertando que uma recessão se espalharia por ações, crédito privado, data centers e serviços públicos. No entanto, o Tesouro rejeitou o relatório como não verificado e reafirmou que a IA impulsionará uma 'nova era de ouro'. Paralelamente, o ESRB emitiu um raro alerta formal sobre modelos de fronteira de IA e cibersegurança, o BCE exigiu que todos os grandes bancos europeus apresentem planos de ação contra ameaças de IA até 31 de outubro de 2026, e o Reino Unido colocou AWS, Google Cloud, Microsoft e Oracle sob supervisão como terceiros críticos para o sistema financeiro.\n\nNa camada de dispositivos, a Meta foi flagrada com código de reconhecimento facial inativo (internamente chamado NameTag) em seu app de IA para óculos inteligentes, removendo-o após reportagem do Wired. Também testa protótipos que gravam áudio e fotos continuamente para um recurso de memória de IA. Na esfera trabalhista, grandes empresas de tecnologia mudaram o discurso sobre demissões em massa por IA, com pesquisas mostrando queda na expectativa de CEOs de cortar empregos, enquanto a TCS planeja contratar milhares de engenheiros de IA.\n\nA dependência cognitiva da IA também foi auditada: na Brown University, a média de uma prova presencial caiu de 96% para 48,6% após um trabalho suspeito feito em casa; estudos na Nature mostram degradação mensurável de habilidades em médicos e engenheiros de software que usam IA; e a África do Sul retirou sua minuta de política nacional de IA após descobrir que pelo menos 6 das 67 citações eram fabricações geradas por IA. O padrão é claro: instituições estão deixando de debater a IA para gerenciá-la como risco sistêmico, com prazos, auditorias e supervisão direta.",
+  "snippet": "Regulators picked a word for AI this week, and the word is systemic. Career Treasury analysts concluded the boom is now too entrenched to unwind quietly: a downturn would ripple through stocks, private credit, data-center debt and utilities. The ECB gave every significant European bank until October 31 to prove it can take an AI-powered punch, and the UK put AWS, Google Cloud, Microsoft and Oracle",
+  "date_iso": "2026-07-13",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "openai",
+    "microsoft",
+    "google",
+    "amazon",
+    "meta-ai"
+   ],
+   "concept-theme": [
+    "ai-regulation",
+    "governance",
+    "compliance",
+    "responsible-ai"
+   ],
+   "content-type": [
+    "news",
+    "analysis"
+   ],
+   "difficulty": [
+    "for-leaders"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "topic-technology": [
+    "ai-regulation",
+    "ai-policy",
+    "deepfakes",
+    "computer-vision",
+    "ai-agents",
+    "frontier-models"
+   ],
+   "trending-emerging": [
+    "ai-governance",
+    "frontier-models",
+    "ai-data-centers",
+    "computer-use"
+   ]
+  }
+ },
+ {
+  "id": 3117,
+  "source_id": 8,
+  "url": "https://1shotchallenge.ai",
+  "title": "One Shot Challenge — One Prompt, One AI Model, One Shot",
+  "title_pt": "One Shot Challenge — Um Prompt, Um Modelo, Uma Chance",
+  "summary_pt": "O One Shot Challenge é uma competição de programação com IA que testa o limite de criatividade em uma única tentativa. Os participantes escrevem um prompt único e poderoso, enviam para um modelo de IA (como Fable 5, Opus 4.8, GPT-4.6 Sol, Gemini 3.1 Pro e outros) e recebem um jogo, mundo 3D ou simulação completo — sem edições, sem retoques. A competição ocorre de 13 a 18 de julho de 2026, com seis vencedores: o primeiro lugar leva um PlayStation 5 e todos ganham uma cópia de GTA VI, além de destaque no SIGGRAPH. O processo é simples: escreva um prompt, use seu próprio modelo (ou obtenha créditos gratuitos de serviços como Muse Spark, Gemini, Groq ou NVIDIA), confirme o e-mail, e a IA executa uma única vez. O resultado é publicado em um ambiente isolado e verificável por hash. Cinco vencedores são escolhidos por um júri (Lionsgate AI, Sony, NBA, World Labs) e o sexto pelo voto da comunidade. As regras permitem bibliotecas de CDNs aprovadas (como three.js), mas proíbem código externo mutável. A competição é gratuita; o único custo é a execução do modelo em sua chave API (que é criptografada e descartada após o uso). Perguntas frequentes explicam segurança, critérios de julgamento e limitações. É uma chance de provar o que você e a IA podem fazer em um único shot.",
+  "snippet": "Boil down your creativity and vision into your best shot.Round 01Jul 13 – Jul 18, 2026 · winners Jul 196 days. 6 winners. 6 GTA VI copies, plus a PlayStation 5 for first place.One prompt in, something spectacular out. Build a whole game, a living world, a toy that feels impossible. The more complex, rich and deep, the better.A year ago this was impossible.The newest models, like Fable 5, Opus 4.8,",
+  "date_iso": "2026-07-14",
+  "kind": null,
+  "section": null,
+  "verify_status": "suspect",
+  "verify_notes": "Conteúdo parece ser página promocional de concurso de IA, não texto jornalístico ou informativo típico de newsletter; Título é nome do evento, mas conteúdo é essencialmente propaganda do desafio com regras e prêmios; Contém elementos de interface como cabeçalhos de seção ('01', '02', etc) e listas numeradas; Presença de data futura (Jul 2026) indica que não é notícia atual, mas sim chamada para evento",
+  "tags": {
+   "concept-theme": [
+    "prompt-engineering"
+   ],
+   "content-type": [
+    "announcement"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "llm-models",
+    "ai-general"
+   ],
+   "topic-technology": [
+    "generative-ai",
+    "prompt-engineering",
+    "frontier-models",
+    "model-capabilities",
+    "code-models"
+   ],
+   "trending-emerging": [
+    "ai-coding-agents",
+    "agentic-ai",
+    "ai-agents"
+   ]
+  }
+ },
+ {
+  "id": 3118,
+  "source_id": 8,
+  "url": "https://github.com/cosmtrek/mindwalk",
+  "title": "cosmtrek/mindwalk: A visualization tool that replays coding-agent sessions on a 3D map of your codebase.",
+  "title_pt": "mindwalk: visualização de sessões de agentes de codificação em mapa 3D da base de código",
+  "summary_pt": "O **mindwalk** é uma ferramenta de visualização que reproduz sessões de agentes de codificação em um mapa 3D da base de código. Ela resolve o problema de que registros de sessão mostram *o que* o agente fez, mas não *como* ele entendeu a tarefa: quais partes do repositório foram consideradas relevantes, onde ele explorou antes de agir, e se seu escopo correspondeu ao esperado.\n\nA ferramenta desenha o repositório como um mapa noturno e reproduz a sessão como luz se movendo por ele: onde o agente pesquisou, leu e editou, o mapa brilha — todo o resto fica escuro. Isso transforma o entendimento do agente sobre a tarefa em uma forma visual que pode ser compreendida rapidamente. O binário Go lê logs de sessão do Claude Code e Codex, tudo localmente, sem que os dados saiam da máquina do usuário.\n\nO mindwalk oferece visões em árvore radial ou treemap, estados de toque (visto, lido, editado, não visitado) com cores distintas, um deck de reprodução com histograma, marcas temporais, e um inspetor para ver o histórico de visitas de arquivos. A arquitetura mantém separados o traço (eventos de toque normalizados) e o citymap (layout determinístico do repositório), permitindo comparações entre sessões diferentes.",
+  "snippet": "A visualization tool that replays coding-agent sessions on a 3D map of your codebase. mindwalk-demo.mp4 The 30-second demo — sound on. The problem A session log records what an agent did, but not how it understood the task: which parts of the repo it treated as relevant, where it explored before it acted, whether its footprint matched the scope you had in mind. Readi",
+  "date_iso": "2026-07-14",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "claude",
+    "codex",
+    "anthropic",
+    "openai"
+   ],
+   "concept-theme": [
+    "agentops",
+    "observability",
+    "tracing",
+    "debugging"
+   ],
+   "content-type": [
+    "tooling",
+    "showcase"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "ecosystem-language": [
+    "go"
+   ],
+   "topic-technology": [
+    "agentops",
+    "ai-agents",
+    "observability-llm",
+    "tracing-llm"
+   ],
+   "trending-emerging": [
+    "ai-coding-agents",
+    "copilots"
+   ]
+  }
+ },
+ {
+  "id": 3119,
+  "source_id": 8,
+  "url": "https://geohot.github.io/blog/jekyll/update/2026/07/12/i-love-llms.html",
+  "title": "I love LLMs, I hate hype",
+  "title_pt": "Amo LLMs, mas odeio o hype",
+  "summary_pt": "O autor declara seu entusiasmo genuíno por IA, mas critica dois tipos de hype prejudiciais: o hype negativo, que espalha medo de ficar para trás e incentiva a migração para São Francisco, e o hype exagerado, que pinta um cenário apocalíptico de dominação da IA. Ele argumenta que a IA é fruto do progresso geral da computação, e não de grupos específicos, e que as empresas de fronteira temem a commoditização. Apesar das ressalvas sobre o 'vibe coding' e o cansaço cognitivo, o autor reconhece que modelos de linguagem trazem ganhos reais de produtividade e que programação está mudando—assim como compiladores ou regex, são ferramentas úteis, não uma revolução mágica.",
+  "snippet": "I think from this blog you may misunderestimate how absolutely giddy I am about AI. I did hacking from 2007-2014, after that my whole career has been devoted to AI. I love the progress. I’m so excited for the new LLMs, self driving cars, video generation models, and coding agents. I set up a Linux box with opencode on my local GLM-5.2 last week and wow like just saying install tmux with the geohot",
+  "date_iso": "2026-07-12",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "mistral"
+   ],
+   "concept-theme": [
+    "community",
+    "ethics",
+    "ai-ethics",
+    "open-source"
+   ],
+   "content-type": [
+    "opinion",
+    "commentary"
+   ],
+   "difficulty": [
+    "all-levels"
+   ],
+   "domain": [
+    "llm-models",
+    "local-llm"
+   ],
+   "framework-library-tool": [
+    "langchain",
+    "llama-index",
+    "gpt",
+    "claude",
+    "gemini",
+    "ollama"
+   ],
+   "topic-technology": [
+    "generative-ai",
+    "ai-ethics",
+    "local-inference",
+    "foundation-models",
+    "ai-safety",
+    "open-source-models"
+   ],
+   "trending-emerging": [
+    "coding-agents",
+    "local-llm",
+    "open-weights",
+    "ai-agents"
+   ]
+  }
+ },
+ {
+  "id": 3120,
+  "source_id": 8,
+  "url": "https://systima.ai/blog/claude-code-vs-opencode-token-overhead",
+  "title": "Claude Code Is Way More Token-Hungry Than OpenCode. We Measured Exactly How Much",
+  "title_pt": "Claude Code Consome Muito Mais Tokens que OpenCode — Medimos Exatamente Quanto",
+  "summary_pt": "Uma análise comparativa quantitativa entre Claude Code e OpenCode revela que o Claude Code consome significativamente mais tokens por requisição. Enquanto o OpenCode usa cerca de 7.000 tokens iniciais, o Claude Code chega a aproximadamente 33.000 tokens no primeiro turno, principalmente devido a um conjunto maior de ferramentas (27 contra 10) e instruções de sistema mais extensas.\n\nO estudo mostra que, embora o Claude Code tenha um custo inicial muito maior, ele pode compensar em tarefas com múltiplas etapas ao fazer chamadas em lote paralelo, reduzindo o número de requisições. Em um teste de loop de escrever-executar-testar-corrigir, ambos os sistemas gastaram cerca de 121.000–132.000 tokens totais. No entanto, essa vantagem de batching varia conforme o modelo — com um modelo mais novo, o Claude Code gastou 298.000 tokens contra 133.000 do OpenCode.\n\nO cache de prompts é outro diferencial: o OpenCode mantém um prefixo de requisição byte-idêntico, permitindo cache eficiente, enquanto o Claude Code frequentemente reescreve milhares de tokens de cache durante a sessão, gerando custos extras. Arquivos de instrução como AGENTS.md/CLAUDE.md adicionam cerca de 20.000 tokens por requisição em ambos, e servidores MCP podem contribuir com mais 5.000–7.000 tokens cada.",
+  "snippet": "We put Claude Code and OpenCode on the same model, the same machine, and the same tasks, then examined everything sent and received. Claude Code is far hungrier:When we asked both harnesses for a one-line reply, Claude Code used roughly 33,000 tokens of system prompt, tool schemas, and injected scaffolding before the prompt even arrived. OpenCode used about 7,000.Claude Code is far more cache inef",
+  "date_iso": "2026-07-12",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "claude",
+    "anthropic"
+   ],
+   "concept-theme": [
+    "token-economics",
+    "caching",
+    "cost-optimization",
+    "cost"
+   ],
+   "content-type": [
+    "benchmark",
+    "analysis"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "llm-models",
+    "local-llm"
+   ],
+   "framework-library-tool": [
+    "claude"
+   ],
+   "topic-technology": [
+    "token-counting",
+    "caching-llm",
+    "cost-optimization-llm",
+    "ai-agents",
+    "prompt-engineering",
+    "mcp"
+   ],
+   "trending-emerging": [
+    "ai-coding-agents",
+    "coding-agents",
+    "local-llm",
+    "synthetic-data"
+   ]
+  }
+ },
+ {
+  "id": 3121,
+  "source_id": 8,
+  "url": "https://spectrum.ieee.org/ai-science-research-flattens-discovery",
+  "title": "AI in Science Research Boosts Speed, Limits Scope",
+  "title_pt": "IA acelera pesquisas, mas limita a criatividade científica",
+  "summary_pt": "Um estudo publicado na Nature analisou mais de 40 milhões de artigos acadêmicos e descobriu que cientistas que usam ferramentas de IA produzem mais papers, acumulam mais citações e atingem cargos de liderança mais cedo. Porém, essa produtividade individual tem um custo coletivo: a pesquisa científica está se tornando mais restrita e menos diversa. Os artigos com IA se concentram em problemas com muitos dados disponíveis, geram menos conexões entre estudos e encolhem o 'espaço de conhecimento' explorado pela ciência.\n\nO sociólogo James Evans, líder do estudo, aponta um conflito entre o avanço individual e o progresso científico como um todo, já que ferramentas como ChatGPT e AlphaFold recompensam velocidade e escala, mas não a originalidade. Outros especialistas alertam para um ciclo vicioso de conformidade e queda na inovação, com pesquisadores migrando para os mesmos tópicos 'fáceis de automatizar', em vez de explorar áreas menos conhecidas.\n\nApesar do cenário preocupante, Evans acredita que o problema não está na arquitetura da IA, mas nos incentivos acadêmicos atuais. Ele defende uma mudança nos sistemas de recompensa para direcionar o uso da IA a questões verdadeiramente novas, em vez de apenas acelerar a pesquisa nos mesmos temas de sempre. Para ele, o grande desafio é usar a IA para expandir, e não comprimir, as fronteiras do conhecimento científico.",
+  "snippet": "AI is turning scientists into publishing machines—and quietly funneling them into the same crowded corners of research.That’s the conclusion of an analysis of more than 40 million academic papers, which found that scientists who use AI tools in their research publish more papers, accumulate more citations, and reach leadership roles sooner than peers who don’t.But there’s a catch. As individual sc",
+  "date_iso": "2026-01-19",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "openai",
+    "google-deepmind"
+   ],
+   "concept-theme": [
+    "productivity"
+   ],
+   "content-type": [
+    "paper-summary",
+    "analysis"
+   ],
+   "difficulty": [
+    "for-researchers"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "ecosystem-language": [
+    "python",
+    "r",
+    "julia"
+   ],
+   "framework-library-tool": [
+    "gpt"
+   ],
+   "topic-technology": [
+    "ai-research",
+    "generative-ai",
+    "deep-learning",
+    "ai-adoption",
+    "ai-ethics"
+   ],
+   "trending-emerging": [
+    "ai-agents",
+    "agentic-ai",
+    "ai-governance"
+   ]
+  }
+ },
+ {
+  "id": 3122,
+  "source_id": 8,
+  "url": "https://nanduruganesh.github.io/flash-msa",
+  "title": "Flash-MSA: Accelerating Million-Token Training With Sparse Attention Kernels",
+  "title_pt": "Flash-MSA: Acelerando o Treinamento com Milhões de Tokens Usando Kernels de Atenção Esparsa",
+  "summary_pt": "Este artigo apresenta o Flash-MSA, os primeiros kernels de treinamento open-source eficientes para a Atenção Esparsa Minimax (MSA) em GPUs Hopper e Blackwell, implementados em CuTeDSL. O MSA usa esparsidade por blocos (selecionando blocos de 128 KVs via max-pooling) e substitui MLA por GQA na atenção principal, com especialização de cabeças proxy por grupo, permitindo maior expressividade. O design do kernel otimiza o forward com atenção proxy (top-k em registradores) e atenção principal esparsa por blocos (reparametrizada como varlen flash). O backward funde as atenções proxy e principal para calcular gradientes, usando um truque que evita materializar a divergência KL ao derivar que o gradiente do proxy é igual a (probabilidade proxy - probabilidade principal). O kernel também inclui um modo de aquecimento com atenção densa. Testes de similaridade cosseno entre implementações eager e kernel mostram precisão dentro da tolerância BF16. O artigo discute melhorias futuras: aumentar a paralelização do backward (atualmente com ocupação limitada), otimizações arquiteturais como compartilhamento de cabeças proxy entre camadas (IndexShare) e treinamento em baixa precisão, e paralelismo de contexto (CP) via headwise all-gather ou ring (este último mais complexo, mas ideal para alta escalabilidade).",
+  "snippet": "Flash-MSA vs Flash-Attention isolated train step.1 Several frontier models [1, 2, 3, 4, 5] use sparse attention to greatly speedup their inference, though no one has posted code to train it efficiently. Today I introduce the world's first performant open-source training kernels for Minimax Sparse Attention in CuTeDSL for Hopper and Blackwell GPUs. I did all of the dev work on Spheron H100 and B",
+  "date_iso": "2026-07-14",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "minimax"
+   ],
+   "concept-theme": [
+    "performance",
+    "optimization",
+    "scalability"
+   ],
+   "content-type": [
+    "tool-release",
+    "deep-dive"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "ai-general",
+    "llm-models"
+   ],
+   "topic-technology": [
+    "attention-mechanism",
+    "model-training",
+    "cuda",
+    "gpu",
+    "deep-learning"
+   ],
+   "trending-emerging": [
+    "agentic-ai",
+    "ai-agents",
+    "multi-agent",
+    "reasoning-models"
+   ]
+  }
+ },
+ {
+  "id": 3123,
+  "source_id": 8,
+  "url": "https://www.interconnects.ai/p/6-months-to-live-for-open-models",
+  "title": "6 months to live for open models",
+  "title_pt": "开源模型的最后6个月",
+  "summary_pt": "开源AI模型的生存正面临最严峻的考验。美国白宫正在讨论通过新的行政令来管理开源模型，可能针对中国来源的模型和政府用途，但这可能成为一系列限制措施的起点。随着开源模型的能力接近闭源前沿模型（如GPT-5.5、Claude Opus 4.8级别），预计未来6个月内可能出台禁令或无限期推迟此类模型的发布。\n\nAnthropic正领导一场反对中国模型的政治运动，声称存在蒸馏风险，但被批评为监管捕获——即利用政策限制竞争对手以巩固自身市场地位。文章指出，蒸馏问题被夸大，真正的风险在于开源模型达到前沿能力后的安全问题。完全禁止开源模型并非有效解决方案，因为如果中国不采取同样禁令，恶意行为者仍能获取模型。\n\n短期解决方案包括：美国公司（如微软、Meta）尽快发布能力相当的开源模型，以转移“只有中国通过蒸馏构建开源模型”的焦点，并建立开源联盟进行游说。文章强调，开源生态不应被限制，全球合作才是管理AI风险的正确途径。",
+  "snippet": "The most serious test to date of open source AI’s viability is happening right now. I’ve seen many waves of anti open-source AI rhetoric come and go since ChatGPT was launched, but none of them had obvious analogues in their potential enforcement to real action already in place targeting the peer, closed models of the day. It is more real because new forms of regulation are being tested and implem",
+  "date_iso": "2026-07-12",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "deepseek",
+    "gpt",
+    "claude-opus",
+    "glm"
+   ],
+   "concept-theme": [
+    "open-source",
+    "ai-regulation"
+   ],
+   "content-type": [
+    "opinion",
+    "analysis"
+   ],
+   "difficulty": [
+    "for-leaders"
+   ],
+   "domain": [
+    "llm-models"
+   ],
+   "topic-technology": [
+    "ai-policy",
+    "ai-regulation",
+    "open-source-models",
+    "open-weights",
+    "frontier-models",
+    "model-licensing"
+   ],
+   "trending-emerging": [
+    "open-weights",
+    "frontier-models",
+    "ai-governance"
+   ]
+  }
+ },
+ {
+  "id": 3124,
+  "source_id": 8,
+  "url": "https://github.com/sin-ack/agent-run",
+  "title": "Run a coding agent in a sandboxed environment",
+  "title_pt": "Execute um agente de código em ambiente isolado",
+  "summary_pt": "O agent-run é uma ferramenta leve (menos de 1 MB) que executa agentes de codificação como pi, opencode, codex e claude em um ambiente isolado (sandbox) usando bwrap. Funciona apenas em Linux com namespaces de usuário não privilegiados. A configuração é feita em TOML, com suporte a schema JSON. É possível controlar acesso à rede, variáveis de ambiente e quais diretórios ficam graváveis, tudo por ferramenta. A instalação pode ser via Nix, Mise ou download manual do binário. O foco é evitar erros acidentais dos agentes, não oferecer segurança contra código malicioso — para isso, recomenda-se microVMs. O projeto é desenvolvido com Bazel e licenciado sob GPLv3.",
+  "snippet": "Run a coding agent in a sandboxed environment. Features Tiny standalone binary (<1MB). Runs on any recent GNU/Linux system1. Simple TOML-based configuration. JSON schema for config assistance. Usage Use one of the installation methods below. Write your configuration. Run your agent: agent-run <pi|opencode|codex|claude>. That's it! Noteagent-run uses bwrap so it only works on a Linux system.",
+  "date_iso": "2026-07-14",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "claude",
+    "codex"
+   ],
+   "concept-theme": [
+    "security",
+    "containers"
+   ],
+   "content-type": [
+    "tool-release",
+    "guide"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "topic-technology": [
+    "ai-agents",
+    "code-models",
+    "cli-tools"
+   ],
+   "trending-emerging": [
+    "ai-coding-agents",
+    "coding-agents"
+   ]
+  }
+ },
+ {
+  "id": 3125,
+  "source_id": 8,
+  "url": "https://ploy.ai/blog/migrating-a-production-ai-agent-to-gpt-5-6",
+  "title": "Migrating a production AI agent to GPT-5.6",
+  "title_pt": "Migrando um agente de IA em produção para GPT-5.6",
+  "summary_pt": "A Ploy, plataforma que constrói e otimiza sites de marketing usando IA, migrou seu agente de produção do Claude Opus para o GPT-5.6 Sol. Após avaliações comparativas, o novo modelo se mostrou 2,2 vezes mais rápido, 27% mais barato e com pontuação visual superior. O artigo detalha os desafios e soluções encontrados durante a migração.\n\nPrimeiro, foi necessário corrigir a suíte de avaliação (eval harness) que estava ajustada para o estilo sequencial do Claude e não suportava chamadas paralelas nem leituras em lote do GPT-5.6. Em seguida, o esquema de ferramentas (tool schemas) precisou ser adaptado: o GPT-5.6 enviava todos os 25 parâmetros opcionais com valores inventados, causando leituras vazias em 52% dos casos. A solução foi tornar parâmetros opcionais como anuláveis (anyOf: [T, null]) e depois remover os nulos antes da validação, eliminando completamente as leituras vazias.\n\nOutro ponto crítico foi o cache de prompts. Enquanto o Claude compartilha cache a nível de organização, o GPT-5.6 usa chaves de cache por workspace para evitar sobrecarga em nós com limite de 15 requisições/minuto. A implementação correta elevou a taxa de acerto de cache de 0% para 83,7%, reduzindo os custos. Por fim, o replay de raciocínio (reasoning replay) foi corrigido usando `store: false` para evitar referências a estado no servidor que causavam falhas intermitentes. O resultado final é um agente mais rápido, barato e consistente, já disponível na plataforma Ploy.",
+  "snippet": "As of today, Ploy’s agent runs on GPT-5.6 Sol, the flagship tier of the model family OpenAI released this morning. For months, no model met our bar for replacing Claude Opus. GPT-5.6 Sol did. After a head-to-head evaluation, we made it the default model for every Ploy workspace. Ploy’s agent builds and edits production marketing websites. It plans a page, reads the codebase, writes components, gen",
+  "date_iso": "2026-07-09",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "openai",
+    "gpt"
+   ],
+   "concept-theme": [
+    "evaluation",
+    "cost-optimization",
+    "performance",
+    "caching"
+   ],
+   "content-type": [
+    "migration-guide"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "llm-models",
+    "ai-general"
+   ],
+   "framework-library-tool": [
+    "gpt",
+    "claude"
+   ],
+   "topic-technology": [
+    "ai-agents",
+    "model-comparison",
+    "model-evaluation",
+    "tool-calling",
+    "prompt-engineering",
+    "inference-optimization"
+   ],
+   "trending-emerging": [
+    "frontier-models",
+    "reasoning-models",
+    "ai-coding-agents",
+    "tool-calling"
+   ]
+  }
+ },
+ {
+  "id": 3126,
+  "source_id": 8,
+  "url": "https://www.soofi.info",
+  "title": "Sovereign Open Source Foundation Models",
+  "title_pt": "Modelos Fundacionais de Código Aberto Soberanos",
+  "summary_pt": "O consórcio Soofi, formado por instituições de pesquisa e startups alemãs, lançou o Soofi S, o primeiro modelo de uma família de modelos fundacionais de código aberto e soberanos para a Europa. Com 30 bilhões de parâmetros e arquitetura Mixture-of-Experts, treinado em 27 trilhões de tokens (com foco em inglês e alemão), o modelo é voltado para aplicações industriais que exigem controle, transparência e eficiência, como análise de documentos técnicos e regulatórios, geração de código, sistemas de IA agentiva e aplicações corporativas. O modelo ainda não está disponível publicamente; está em fase de testes com parceiros industriais. O consórcio também promove a série de workshops 'Open Source Sovereign Foundation Models' (OSFM) para discutir IA soberana e aberta na Europa, além de participar de eventos e conferências do setor.",
+  "snippet": "Soofi SUnser erstes Modell für industrielle KI in EuropaMit Soofi S stellt das Soofi-Konsortium den ersten Baustein einer offenen europäischen KI-Modellfamilie vor. Das Modell wurde entwickelt, um leistungsfähige KI-Anwendungen nachvollziehbar, anpassbar und auf souveräner Infrastruktur nutzbar zu machen.Im Fokus stehen industrielle Einsatzbereiche, in denen Kontrolle, Transparenz und Effizienz en",
+  "date_iso": "2026-07-14",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "open-source",
+    "transparency",
+    "governance",
+    "responsible-ai"
+   ],
+   "content-type": [
+    "release-announcement"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "llm-models"
+   ],
+   "framework-library-tool": [
+    "mixtral",
+    "hugging-face-transformers",
+    "langchain",
+    "llama-cpp"
+   ],
+   "topic-technology": [
+    "foundation-models",
+    "moe",
+    "open-source-models",
+    "ai-agents",
+    "multilingual-models",
+    "code-models"
+   ],
+   "trending-emerging": [
+    "foundation-models",
+    "open-weights",
+    "moe"
+   ]
+  }
+ },
+ {
+  "id": 3127,
+  "source_id": 8,
+  "url": "https://github.com/clawkwork/clawk",
+  "title": "GitHub - clawkwork/clawk: Disposable, network-restricted Linux VMs for AI coding agents",
+  "title_pt": "Clawk: VMs Linux descartáveis e com rede restrita para agentes de IA",
+  "summary_pt": "Clawk é uma ferramenta de código aberto que oferece um ambiente isolado e seguro para agentes de codificação de IA executarem tarefas complexas. Em vez de permitir que o agente opere diretamente na sua máquina — com riscos de danos ou vazamento de dados —, o Clawk cria uma máquina virtual (VM) Linux descartável e com rede restrita para cada projeto. Basta executar `clawk` em um repositório para que o agente (como Claude Code ou Codex) tenha sua própria máquina, com acesso total ao código montado, mas sem permissão para acessar seus arquivos pessoais, credenciais ou a rede externa não autorizada.\n\nA separação é baseada em uma VM real com kernel próprio, e não em regras de sandboxing em nível de processo, que podem ser contornadas. O agente tem acesso root na VM, podendo instalar pacotes e modificar configurações, enquanto o tráfego de saída é controlado por uma lista de permissões (allow-list). Comandos como `git push` funcionam graças ao encaminhamento do ssh-agent do host, sem que as chaves privadas entrem na VM. Se a VM for corrompida, basta executar `clawk destroy && clawk` para obter uma nova máquina rapidamente.\n\nO projeto é voltado para macOS (Apple Silicon), com suporte experimental para Linux. Ele não requer Docker, qemu ou sudo. A instalação é feita via Homebrew ou compilação a partir do código-fonte. A configuração é opcional e pode ser feita com um arquivo `clawk.mod` para definir CPU, memória, imagem, regras de rede e outras opções. O Clawk suporta múltiplas VMs simultâneas e oferece comandos para pausar, retomar e criar snapshots, garantindo que o estado do agente seja preservado no host mesmo após a destruição da VM.",
+  "snippet": "Give a coding agent its own disposable Linux machine, not yours. Install · Quickstart · Why a VM? · How it works · Compared to · FAQ · Docs A coding agent is only useful when you let it actually do things: install packages, run the code it writes, start servers, use the network. On your own machine that leaves two bad options. You approve every command (and babysit a prompt every few seconds)",
+  "date_iso": "2026-07-14",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "github"
+   ],
+   "concept-theme": [
+    "security",
+    "guardrails",
+    "devops",
+    "infrastructure-as-code"
+   ],
+   "content-type": [
+    "tool-release",
+    "security-advisory"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "topic-technology": [
+    "ai-agents",
+    "containers",
+    "cli-tools",
+    "ai-safety"
+   ],
+   "trending-emerging": [
+    "ai-coding-agents",
+    "coding-agents",
+    "on-device-ai",
+    "ai-agents"
+   ]
+  }
+ },
+ {
+  "id": 3128,
+  "source_id": 8,
+  "url": "https://techstackups.com/articles/tldraw-agent-draw",
+  "title": "Agent Draw: An agent draws while you talk, built on TLDraw",
+  "title_pt": "Agent Draw: um agente desenha enquanto você fala",
+  "summary_pt": "Agent Draw é uma ferramenta construída sobre o SDK tldraw que permite que um agente de IA desenhe em uma tela infinita enquanto você apresenta ou fala. O funcionamento é simples: o usuário arrasta um retângulo na tela, dita o que deseja ver desenhado ali, e o agente cria a ilustração em segundos, usando formas primitivas (retângulos, losangos, setas) ou a ferramenta de caneta para esboços mais complexos. O sistema suporta múltiplas capturas simultâneas por meio de uma fila FIFO, garantindo que os desenhos sejam processados um após o outro sem conflitos.\n\nA implementação utiliza o kit inicial de agente oficial do tldraw, com adaptações para captura de áudio via MediaRecorder do navegador e transcrição pelo modelo Voxtral da Mistral. Para otimizar o desempenho, os desenvolvedores removeram ações desnecessárias (como reajuste de câmera e revisão de lint) que dobravam o número de chamadas ao modelo. Além disso, o prompt foi ajustado para evitar que o agente simplesmente transcreva a fala como texto na tela, incentivando a escolha da forma visual mais adequada (diagramas, ilustrações, gráficos).\n\nTestes com diferentes modelos mostram variações na qualidade: modelos mais capazes (como Claude Opus 4.8) produzem composições detalhadas e bem posicionadas, enquanto modelos menores (Claude Haiku 4.5) tendem a simplificar, e modelos ainda mais leves (Gemini 2.5 Flash Lite) podem desistir da tarefa ou gerar resultados insatisfatórios. O código-fonte completo está disponível no GitHub, e uma demonstração ao vivo pode ser testada online.",
+  "snippet": "We recently built 2draw, a Drawful-style game where players draw on a shared canvas and race to guess each other's drawings, on tldraw, an infinite-canvas SDK for React. We started wondering what it would take to put an agent in that loop, as an opponent or a rival guesser, and dug into how an agent could read and draw on a tldraw canvas. That research turned into: Agent draw, a tool that lets an",
+  "date_iso": "2026-06-24",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "claude-opus",
+    "cloudflare"
+   ],
+   "content-type": [
+    "demo",
+    "tool-release"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "reactjs",
+    "ai-general",
+    "frontend"
+   ],
+   "ecosystem-language": [
+    "javascript",
+    "typescript",
+    "python"
+   ],
+   "framework-library-tool": [
+    "react",
+    "claude-opus"
+   ],
+   "topic-technology": [
+    "ai-agents",
+    "tool-calling",
+    "component-libraries",
+    "generative-ai"
+   ],
+   "trending-emerging": [
+    "agentic-ai",
+    "ai-agents",
+    "computer-use",
+    "tool-calling"
+   ]
+  }
  }
 ]

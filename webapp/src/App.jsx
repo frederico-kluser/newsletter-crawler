@@ -80,7 +80,7 @@ export default function App() {
   // volta ao modo local (a IA é re-disparada só pelo botão) — evita confusão de dois modos.
   const onTextChange = (v) => {
     setTextInput(v);
-    if (ai.phase === 'done' || ai.phase === 'error') ai.clear();
+    if (ai.phase === 'done' || ai.phase === 'error' || ai.phase === 'paused') ai.clear();
   };
 
   // Restaura o ESCOPO salvo (fonte/período) nos filtros — pills/sidebar refletem a busca reaberta.
@@ -89,6 +89,14 @@ export default function App() {
     dispatch({ type: 'set', key: 'sourceId', value: scope.sourceId ?? null });
     dispatch({ type: 'setPeriod', from: scope.from || '', to: scope.to || '' });
   };
+
+  // Retomada de busca (reload/reabrir a aba): o hook decidiu retomar e expôs {query, scope} —
+  // sincroniza o campo de texto e os pills com o escopo DO CHECKPOINT (não os filtros da tela).
+  useEffect(() => {
+    if (!ai.resumeInfo) return;
+    setTextInput(ai.resumeInfo.query);
+    restoreScope(ai.resumeInfo.scope);
+  }, [ai.resumeInfo]); // eslint-disable-line react-hooks/exhaustive-deps
   const openFromHistory = (id) => {
     setHistoryOpen(false);
     const entry = ai.restore(id);
@@ -126,7 +134,9 @@ export default function App() {
   // Durante `running` os hits vêm do streaming (partialHits, ao vivo); ao terminar, do result.
   const aiActive = ai.phase === 'done' && ai.result;
   const aiRunning = ai.phase === 'running';
-  const aiHits = aiActive ? ai.result.hits : aiRunning ? ai.partialHits : null;
+  const aiPaused = ai.phase === 'paused'; // retomada manual: mostra os parciais + banner Retomar/Descartar
+  const aiLive = aiRunning || aiPaused; // fases que exibem hits parciais e travam a paginação
+  const aiHits = aiActive ? ai.result.hits : aiLive ? ai.partialHits : null;
   const aiItems = useMemo(() => {
     if (!aiHits) return null;
     return aiHits
@@ -154,7 +164,7 @@ export default function App() {
 
   // resultados IA não têm bucket release: se estava selecionado, volta pro Tudo
   useEffect(() => {
-    if ((ai.phase === 'running' || aiActive) && filters.kind === 'release') {
+    if ((aiLive || aiActive) && filters.kind === 'release') {
       dispatch({ type: 'set', key: 'kind', value: 'all' });
     }
   }, [ai.phase, aiActive, filters.kind]);
@@ -167,7 +177,7 @@ export default function App() {
   const pagedVisible = useVisibleCount(displayItems.length, resetKey);
   // IA (running E done): mostra TODOS os hits sem paginar — assim o resultado NÃO encolhe/pula ao
   // terminar (os cards que apareceram ao vivo permanecem). Só o browse (SQL) segue paginado.
-  const visible = aiRunning || aiActive ? displayItems.length : pagedVisible;
+  const visible = aiLive || aiActive ? displayItems.length : pagedVisible;
   const nActive = countActiveFilters(filters);
   const detail = detailId != null ? byId.get(detailId) : null;
 
@@ -238,7 +248,7 @@ export default function App() {
             <div className="content-head">
               <Segmented
                 value={filters.kind}
-                options={aiActive || ai.phase === 'running' ? KIND_OPTIONS_AI : KIND_OPTIONS}
+                options={aiActive || aiLive ? KIND_OPTIONS_AI : KIND_OPTIONS}
                 onChange={(v) => dispatch({ type: 'set', key: 'kind', value: v })}
                 label={STR.kindLabel}
               />
@@ -248,7 +258,7 @@ export default function App() {
                   {STR.articleWord(displayItems.length)}
                 </span>
               )}
-              {(aiActive || aiRunning) && (
+              {(aiActive || aiLive) && (
                 <button
                   type="button"
                   role="switch"
@@ -278,7 +288,20 @@ export default function App() {
             )}
 
             {ai.phase === 'running' && (
-              <AiProgress progress={ai.progress} deep={ai.deep} startedAt={ai.startedAt} onCancel={ai.cancel} />
+              <AiProgress progress={ai.progress} deep={ai.deep} startedAt={ai.startedAt} resuming={ai.resuming} baseDone={ai.baseDone} onCancel={ai.cancel} />
+            )}
+            {aiPaused && (
+              <div className="ai-error" role="status">
+                <span>{STR.aiPaused}</span>
+                <span className="ai-error-actions">
+                  <button type="button" className="btn" onClick={ai.resumeManual}>
+                    {STR.aiResumeAction}
+                  </button>
+                  <button type="button" className="btn" onClick={ai.discardResume}>
+                    {STR.aiResumeDiscard}
+                  </button>
+                </span>
+              </div>
             )}
             {aiActive && <AiBanner result={ai.result} missing={aiMissing} onClear={ai.clear} onRerun={() => ai.submit(ai.result.query, ai.result.deep)} />}
             {ai.phase === 'error' && (
@@ -297,7 +320,7 @@ export default function App() {
               </div>
             )}
 
-            {!aiActive && !aiRunning && meta && <ActivePills filters={filters} meta={meta} dispatch={dispatch} />}
+            {!aiActive && !aiLive && meta && <ActivePills filters={filters} meta={meta} dispatch={dispatch} />}
 
             {loading ? (
               <div className="grid" aria-busy="true">
@@ -306,7 +329,7 @@ export default function App() {
                 ))}
               </div>
             ) : displayItems.length === 0 ? (
-              aiRunning ? null : (
+              aiLive ? null : (
                 <EmptyState
                   title={
                     aiActive

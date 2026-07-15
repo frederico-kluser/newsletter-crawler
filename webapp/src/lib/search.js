@@ -185,6 +185,47 @@ export function mergeBatchVerdicts(batch, results, verdicts) {
   return { missing, unknown };
 }
 
+// ---- retomada (checkpoint p/ reload; ver lib/activeSearch.js) ----
+
+/** Candidatos ainda NÃO julgados — a retomada pula os que já têm veredito (não repaga). */
+export function filterUnjudged(candidates, judgedSet) {
+  return candidates.filter((a) => !judgedSet.has(a.id));
+}
+
+/**
+ * Semeia os acumuladores a partir de um checkpoint salvo: marca os ids já julgados em `verdicts`
+ * (placeholder 'none' — só importa que estão julgados; os hits reais vêm em `hits`) e devolve os
+ * contadores/hits/spec de onde continuar. Uma chamada em voo no reload NÃO virou veredito → seu id
+ * fica de fora de judgedIds → é re-julgada ("as requests sem finalizar recomeçam").
+ */
+export function seedResume(resume) {
+  const verdicts = new Map();
+  for (const id of resume?.judgedIds || []) verdicts.set(id, { relation: 'none', kind: 'news' });
+  const hits = (resume?.hits || []).map((h) => ({ id: h.id, relation: clampRelation(h.relation), kind: clampKind(h.kind) }));
+  return {
+    verdicts,
+    hits,
+    scanned: Number(resume?.scanned) || 0,
+    failed: Number(resume?.failed) || 0,
+    spentUsd: Number(resume?.spentUsd) || 0,
+    spec: resume?.spec || null,
+  };
+}
+
+/** Estado MÍNIMO p/ o checkpoint: ids julgados (pular) + hits (re-hidratar) + contadores + custo. */
+export function buildCheckpoint(verdicts, hits, counters) {
+  return {
+    judgedIds: [...verdicts.keys()],
+    hits: hits.map((h) => ({ id: h.id, relation: h.relation, kind: h.kind })),
+    scanned: counters.scanned,
+    relevant: hits.length,
+    failed: counters.failed,
+    total: counters.total,
+    spentUsd: counters.spentUsd,
+    spec: counters.spec || null,
+  };
+}
+
 // ---- juízes (prompts verbatim de judgeRelevance/judgeRelevanceBatch, llm.js:740-817) ----
 
 async function judgeBatch({ query, items, spec, search, apiKey, signal, onCost }) {
@@ -248,13 +289,16 @@ const RANK = { direct: 0, similar: 1 };
  * KEY_INVALID propaga (o hook reabre o KeyModal). Retorna hits {id, relation, kind} direct-first
  * capados em search.maxItems + contadores + custo real acumulado.
  */
-export async function runSearch({ query, deep, candidates, search, apiKey, signal, onProgress, onHit, onSpec, getContent }) {
-  const verdicts = new Map();
-  const hits = []; // acumulado AO VIVO (streaming) — o veredito de cada item empurra 1× aqui
-  let spentUsd = 0;
-  let scanned = 0;
-  let failed = 0; // itens que ESGOTARAM 429/erro (≠ 'none' legítimo) — vira "não analisados"
-  const total = candidates.length;
+export async function runSearch({ query, deep, candidates, search, apiKey, signal, onProgress, onHit, onSpec, getContent, resume = null, onCheckpoint }) {
+  // Retomada: semeia ids já julgados + hits + contadores/custo de um checkpoint (lib/activeSearch.js).
+  const seeded = resume ? seedResume(resume) : null;
+  const verdicts = seeded ? seeded.verdicts : new Map();
+  const hits = seeded ? seeded.hits : []; // acumulado AO VIVO (streaming) — o veredito empurra 1× aqui
+  let spec = seeded?.spec || null;
+  let spentUsd = seeded ? seeded.spentUsd : 0;
+  let scanned = seeded ? seeded.scanned : 0;
+  let failed = seeded ? seeded.failed : 0; // ESGOTARAM 429/erro (≠ 'none' legítimo) — "não analisados"
+  const total = candidates.length; // escopo ORIGINAL completo (barra/stats corretas mesmo retomando)
   const onCost = (c) => {
     spentUsd += c;
   };
@@ -265,6 +309,8 @@ export async function runSearch({ query, deep, candidates, search, apiKey, signa
   configureLane({ ceil, floor: Math.min(CONCURRENCY_FLOOR, ceil) });
   const getLimit = () => currentLimit();
   const emitProgress = (mode) => onProgress?.({ mode, done: scanned, total, relevant: hits.length, failed, spentUsd });
+  // Checkpoint (o CHAMADOR faz o throttle): thunk materializado só quando de fato grava.
+  const checkpoint = () => onCheckpoint?.(() => buildCheckpoint(verdicts, hits, { scanned, failed, total, spentUsd, spec }));
   // Empurra o item p/ os resultados AO VIVO se o veredito for relevante (streaming via onHit).
   const pushIfRelevant = (a) => {
     const v = verdicts.get(a.id);
@@ -276,20 +322,25 @@ export async function runSearch({ query, deep, candidates, search, apiKey, signa
 
   // Entendimento da consulta (1 chamada Pro, amortizada): spec (must-have + PT→EN) que o juiz usa —
   // busca precisão-primeiro. Fail-open: erro → query crua (spec=null). Abort/KEY_INVALID propagam.
-  let spec = null;
-  if (candidates.length) {
+  // Na RETOMADA o spec vem do checkpoint (não repaga a chamada Pro).
+  if (!spec && candidates.length) {
     try {
       spec = await compileSpec({ query, search, apiKey, signal, onCost });
-      if (spec) onSpec?.(spec);
     } catch (e) {
       if (isAbort(e, signal) || e?.code === 'KEY_INVALID') throw e;
     }
   }
+  if (spec) onSpec?.(spec);
+  checkpoint(); // 1º checkpoint logo após o spec — um reload precoce não reperde a chamada Pro
+
+  // Só o que FALTA julgar (busca nova = tudo; retomada = candidates − já julgados).
+  const work = filterUnjudged(candidates, new Set(verdicts.keys()));
 
   if (deep) {
     emitProgress('deep');
+    checkpoint();
     await adaptivePool(
-      candidates,
+      work,
       async (a) => {
         if (signal?.aborted) throw signal.reason || new DOMException('abortado', 'AbortError');
         try {
@@ -303,20 +354,22 @@ export async function runSearch({ query, deep, candidates, search, apiKey, signa
         pushIfRelevant(a);
         scanned++;
         emitProgress('deep');
+        checkpoint();
       },
       { getLimit, signal },
     );
   } else {
     // item sem título E sem texto não gasta token: veredito local 'none' (search.js:252-258)
     const pend = [];
-    for (const a of candidates) {
+    for (const a of work) {
       const it = toBatchItem(a);
       if (!it.title && !it.summary) verdicts.set(a.id, { relation: 'none', kind: 'news' });
       else pend.push(a);
     }
-    scanned = candidates.length - pend.length;
+    scanned += work.length - pend.length; // INCREMENTA (soma ao scanned semeado na retomada)
     const batches = chunkBatches(prioritizeBySpec(pend, spec), search.batchSize);
     emitProgress('soft');
+    checkpoint();
     await adaptivePool(
       batches,
       async (batch) => {
@@ -335,6 +388,7 @@ export async function runSearch({ query, deep, candidates, search, apiKey, signa
         else for (const a of batch) pushIfRelevant(a);
         scanned += batch.length;
         emitProgress('soft');
+        checkpoint();
       },
       { getLimit, signal },
     );

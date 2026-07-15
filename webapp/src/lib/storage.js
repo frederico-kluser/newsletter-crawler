@@ -48,6 +48,22 @@ export function trySetHistory(value) {
   }
 }
 
+// Busca EM ANDAMENTO (checkpoint de "troca rápida", lido/escrito por lib/activeSearch.js). Slot
+// ÚNICO, sobrescrito com throttle e LIMPO a cada nova busca — serve p/ RETOMAR após reload/fechar
+// a aba. Mesma distinção de quota do history (false → sem retomada, melhor que derrubar a busca).
+export const getActiveRaw = () => get('nc-search-active');
+export function trySetActive(value) {
+  try {
+    localStorage.setItem('nc-search-active', value);
+    return true;
+  } catch (e) {
+    if (isQuotaError(e)) return false; // slot muito grande: abre mão da retomada, não da busca
+    mem.set('nc-search-active', value); // localStorage indisponível: mantém na sessão
+    return true;
+  }
+}
+export const clearActive = () => del('nc-search-active');
+
 export const getLocale = () => get('nc-locale');
 export const setLocale = (l) => set('nc-locale', l);
 

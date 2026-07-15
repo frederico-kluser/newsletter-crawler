@@ -38,6 +38,11 @@ const pt = {
   aiRetry: 'Tentar de novo',
   aiRelationDirect: 'direto',
   aiRelationSimilar: 'relacionado',
+  // retomada da busca (checkpoint no localStorage): reload/fechar-e-reabrir a aba continua de onde parou
+  aiResuming: 'retomando busca…',
+  aiPaused: 'Busca interrompida — dá pra retomar de onde parou.',
+  aiResumeAction: 'Retomar',
+  aiResumeDiscard: 'Descartar',
 
   // histórico de buscas (localStorage; toda busca concluída entra sozinha)
   historyTitle: 'Histórico de buscas',
@@ -194,6 +199,11 @@ const en = {
   aiRetry: 'Try again',
   aiRelationDirect: 'direct',
   aiRelationSimilar: 'related',
+  // search resume (localStorage checkpoint): reload / close-and-reopen the tab continues where it left off
+  aiResuming: 'resuming search…',
+  aiPaused: 'Search interrupted — you can resume where it left off.',
+  aiResumeAction: 'Resume',
+  aiResumeDiscard: 'Discard',
 
   // search history (localStorage; every completed search is saved automatically)
   historyTitle: 'Search history',

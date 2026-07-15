@@ -12,7 +12,7 @@ import { useStrings } from '../i18n.jsx';
  * O progresso é nível-artigo nos DOIS modos (soft e profunda), então "quanto já foi processado"
  * é sempre honesto. ETA = elapsed/done · (total-done), recalculada a cada tick + 1 timer de 1s.
  */
-export default function AiProgress({ progress, deep, startedAt, onCancel }) {
+export default function AiProgress({ progress, deep, startedAt, onCancel, resuming = false, baseDone = 0 }) {
   const STR = useStrings();
   const reduced = useReducedMotion();
   const p = progress || { done: 0, total: 0, relevant: 0, failed: 0, spentUsd: 0, mode: deep ? 'deep' : 'soft' };
@@ -27,9 +27,13 @@ export default function AiProgress({ progress, deep, startedAt, onCancel }) {
     return () => clearInterval(id);
   }, []);
   const elapsed = startedAt ? Math.max(0, now - startedAt) : 0;
+  // ETA mede só o trabalho DESTA sessão: na retomada, `done` já vem semeado (baseDone), então o
+  // ritmo real = itens processados desde o start atual / elapsed atual.
+  const sessionDone = Math.max(0, p.done - baseDone);
+  const sessionTotal = Math.max(0, total - baseDone);
   const etaSecs =
-    p.done > 0 && total > 0 && p.done < total && elapsed > 0
-      ? (elapsed / p.done) * (total - p.done) / 1000
+    sessionDone > 0 && sessionTotal > 0 && sessionDone < sessionTotal && elapsed > 0
+      ? (elapsed / sessionDone) * (sessionTotal - sessionDone) / 1000
       : null;
 
   return (
@@ -72,6 +76,7 @@ export default function AiProgress({ progress, deep, startedAt, onCancel }) {
             <span className="ai-progress-stat ai-progress-warn">{STR.aiFailed(p.failed)}</span>
           </>
         )}
+        {resuming && <span className="ai-progress-hint">· {STR.aiResuming}</span>}
         {deep && <span className="ai-progress-hint">· {STR.aiDeepWarning}</span>}
       </div>
     </div>

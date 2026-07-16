@@ -1,6 +1,6 @@
 {
  "schemaVersion": 1,
- "generatedAt": "2026-07-14T16:01:16.708Z",
+ "generatedAt": "2026-07-16T15:23:52.782Z",
  "totals": {
   "articles": 3088,
   "summaries": 3088,
@@ -4171,5 +4171,10 @@
    "searchBatch": 0.001550630160597015,
    "searchSpec": 0.004609193524390244
   }
+ },
+ "audio": {
+  "model": "hexgrad/kokoro-82m",
+  "voice": "pf_dora",
+  "format": "mp3"
  }
 }

@@ -89,6 +89,16 @@ export const USER_AGENT =
 export const HTTP_REFERER = process.env.OPENROUTER_REFERER || 'https://example.com';
 export const X_TITLE = 'NewsletterArchiver';
 
+// ---- TTS (síntese de fala via OpenRouter Audio API, /api/v1/audio/speech) ----
+// Kokoro 82M é o gerador barato com português (US$0,62/M caracteres, saída grátis). A voz PT-BR
+// exata é resolvida no teste local (scripts/tts-smoke.mjs); o Kokoro usa vozes com prefixo p*
+// para português (ex.: pf_dora). Model/voz/formato são override-áveis por env; o webapp lê os
+// mesmos valores via meta.json (export-web) com fallback próprio.
+export const TTS_MODEL = process.env.TTS_MODEL || 'hexgrad/kokoro-82m';
+export const TTS_VOICE = process.env.TTS_VOICE || 'pf_dora';
+export const TTS_FORMAT = process.env.TTS_FORMAT || 'mp3';
+export const TTS_TIMEOUT_MS = Number(process.env.TTS_TIMEOUT_MS || 60000);
+
 // Banco em NC_HOME (previsível/global). `DB_PATH` relativo resolve contra NC_HOME; absoluto vale como é.
 export const DB_PATH = process.env.DB_PATH
   ? path.resolve(NC_HOME, process.env.DB_PATH)

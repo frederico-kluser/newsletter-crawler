@@ -27,6 +27,7 @@ import { EMPTY_FILTERS, applyFilters, computeFacetCounts, countActiveFilters, so
 import { searchText } from './lib/textSearch.js';
 import { useStrings } from './i18n.jsx';
 import Tutorial from './components/Tutorial.jsx';
+import { PlayerProvider } from './player.jsx';
 import { getTutorialSeen, setTutorialSeen } from './lib/storage.js';
 import './styles/app.css';
 
@@ -170,6 +171,12 @@ export default function App() {
   }, [ai.phase, aiActive, filters.kind]);
 
   const displayItems = aiShown ? aiShown.map((x) => x.article) : filtered;
+  // Itens do player de áudio: a lista EXIBIDA (na ordem da tela) reduzida ao que o TTS narra
+  // (id + título p/ rótulo + summary_pt como conteúdo). Itens sem resumo são pulados no player.
+  const playerItems = useMemo(
+    () => displayItems.map((a) => ({ id: a.id, title: a.title_pt || a.title || a.url, text: a.summary_pt || a.snippet || '' })),
+    [displayItems],
+  );
   const resetKey = useMemo(
     () => JSON.stringify(filters) + `|q:${textQuery}` + (aiActive ? `|ai:${ai.result.query}:${ai.result.hits.length}` : ''),
     [filters, textQuery, aiActive, ai.result],
@@ -182,6 +189,7 @@ export default function App() {
   const detail = detailId != null ? byId.get(detailId) : null;
 
   return (
+    <PlayerProvider items={playerItems} audio={meta?.audio} onNeedKey={ai.openKeyModal}>
     <div className="app">
       <TopBar
         theme={theme}
@@ -397,5 +405,6 @@ export default function App() {
 
       <AnimatePresence>{tutorialOpen && <Tutorial onClose={closeTutorial} />}</AnimatePresence>
     </div>
+    </PlayerProvider>
   );
 }

@@ -12,6 +12,7 @@ import {
   SEARCH_MODE_A_CONFIRM, SEARCH_SOFT_CONFIRM, stageModel,
   SEARCH_WEB_SOFT_CONCURRENCY, SEARCH_WEB_DEEP_CONCURRENCY,
   SEARCH_UI_CONCURRENCY_DEFAULT, SEARCH_UI_CONCURRENCY_CEILING,
+  TTS_MODEL, TTS_VOICE, TTS_FORMAT,
 } from './config.js';
 import { getFacets, TOOL_CONTENT_TYPES } from './taxonomy.js';
 import { log } from './util.js';
@@ -82,6 +83,9 @@ export function buildWebSnapshot() {
       uiConcurrency: { default: SEARCH_UI_CONCURRENCY_DEFAULT, ceiling: SEARCH_UI_CONCURRENCY_CEILING },
       costHints,
     },
+    // Play de áudio (TTS): modelo/voz que o webapp usa ao narrar summary_pt direto do browser
+    // (BYOK). Re-export troca a voz sem deploy de código; o webapp tem fallback próprio.
+    audio: { model: TTS_MODEL, voice: TTS_VOICE, format: TTS_FORMAT },
   };
 
   // Tags de todos os artigos numa query só, agrupadas no shape {faceta:[tags]} (= tagsOf do web.js).

@@ -16,6 +16,7 @@ import {
 import { TOOL_CONTENT_TYPES, isToolByTags, getFacets } from './taxonomy.js';
 import { parseDate, log, warn, errorLog } from './util.js';
 import { searchWeb } from './search.js';
+import { synthesizeSpeech, TtsError } from './tts.js';
 import { probeOpenRouterKey, upsertEnvVar } from './keys.js';
 import { initGovernor, stopGovernor } from './governor.js';
 import { beginRun, endRun, estimateStageCallUsd, getBudgetState } from './budget.js';
@@ -142,6 +143,30 @@ function apiArticle(id) {
   if (!a) return { status: 404, body: { error: 'artigo não encontrado' } };
   const { rows, byFacet } = tagsOf(a.id);
   return { status: 200, body: { ...a, tags: byFacet, kind: a.kind || (isToolByTags(rows) ? 'tool' : 'news') } };
+}
+
+// TTS: narra o resumo PT-BR (summary_pt) de um artigo. Diferente das outras rotas, responde com
+// BYTES de áudio (audio/mpeg) — o <audio> da UI aponta direto p/ cá. Fail-open: erro vira JSON.
+async function apiTts(res, id) {
+  if (!HAS_LLM) return sendJSON(res, 400, { error: 'sem chave OpenRouter', code: 'NO_KEY' });
+  if (!Number.isInteger(id)) return sendJSON(res, 400, { error: 'id inválido' });
+  const a = stmts.webGetArticle.get(id);
+  if (!a) return sendJSON(res, 404, { error: 'artigo não encontrado' });
+  const text = String(a.summary_pt || a.snippet || '').trim();
+  if (!text) return sendJSON(res, 422, { error: 'artigo sem resumo para narrar', code: 'NO_TEXT' });
+  try {
+    const { buffer, contentType } = await synthesizeSpeech({ text });
+    res.writeHead(200, {
+      'Content-Type': contentType,
+      'Content-Length': buffer.length,
+      'Cache-Control': 'no-store',
+    });
+    res.end(buffer);
+  } catch (e) {
+    const status = e instanceof TtsError && e.status >= 400 && e.status < 600 ? e.status : 502;
+    errorLog(`web /api/tts id=${id}: ${e.message}`);
+    if (!res.headersSent) sendJSON(res, status, { error: 'falha ao gerar áudio', code: 'TTS_FAILED' });
+  }
 }
 
 function apiMeta() {
@@ -635,6 +660,7 @@ async function handleRequest(req, res, deps) {
     if (p === '/api/key/status') {
       return sendJSON(res, 200, { hasKey: HAS_LLM });
     }
+    if (p === '/api/tts') return await apiTts(res, Number(u.searchParams.get('id')));
     const m = p.match(/^\/api\/article\/(\d+)$/);
     if (m) {
       const r = apiArticle(Number(m[1]));

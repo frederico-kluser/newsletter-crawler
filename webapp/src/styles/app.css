@@ -860,6 +860,69 @@
   font-size: 11px;
   line-height: 1;
 }
+
+/* ---- player de áudio (TTS): botão na busca + botão por card ---- */
+.play-btn {
+  flex-shrink: 0;
+}
+.play-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.play-btn.is-active {
+  color: var(--on-accent);
+  background: var(--accent);
+  border-color: transparent;
+}
+.play-btn.is-active:hover {
+  background: var(--accent-strong);
+  border-color: transparent;
+}
+.searchbar-play {
+  margin-left: 2px;
+  color: var(--accent-strong);
+}
+/* botão flutuante no canto do card — irmão do .card-hit (HTML proíbe <button> dentro de <button>) */
+.card-play {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  z-index: 2;
+  width: 32px;
+  height: 32px;
+  color: var(--accent-strong);
+  background: var(--card-bg);
+  border: 1px solid var(--hairline);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+.card-play:hover {
+  background: var(--chip-bg);
+  border-color: color-mix(in oklab, var(--accent) 40%, var(--hairline));
+}
+.card-play.is-active {
+  color: var(--on-accent);
+  background: var(--accent);
+  border-color: transparent;
+}
+/* card em reprodução: anel de destaque (box-shadow próprio não é cortado pelo overflow:hidden) */
+.card[data-playing] {
+  box-shadow: var(--card-shadow), 0 0 0 2px var(--accent);
+}
+/* spinner de "gerando áudio" — anima só transform (compositor-friendly) */
+.play-spinner {
+  transform-origin: center;
+  animation: play-spin 0.8s linear infinite;
+}
+@keyframes play-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .play-spinner {
+    animation-duration: 1.6s;
+  }
+}
 .key-btn {
   position: relative;
 }

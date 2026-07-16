@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { fmtDateTime } from '../strings.js';
 import { useStrings } from '../i18n.jsx';
+import { usePlayer } from '../player.jsx';
+import PlayButton from './PlayButton.jsx';
 
 const SearchIcon = () => (
   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
@@ -21,6 +23,7 @@ const SparkIcon = () => (
  */
 export default function SearchBar({ text, onTextChange, onAiSearch, aiBusy, hasKey, recents = [], onPickRecent, activeId }) {
   const STR = useStrings();
+  const player = usePlayer();
   const [deep, setDeep] = useState(false);
   const [focused, setFocused] = useState(false);
   const showRecents = focused && !text.trim() && recents.length > 0;
@@ -88,6 +91,17 @@ export default function SearchBar({ text, onTextChange, onAiSearch, aiBusy, hasK
           </span>
         )}
       </button>
+      {player && (
+        <PlayButton
+          className="searchbar-play"
+          active={player.playing}
+          loading={player.loadingId != null}
+          disabled={!player.hasItems}
+          onClick={player.toggleAll}
+          playLabel={STR.playAll}
+          stopLabel={STR.stopPlayback}
+        />
+      )}
     </form>
   );
 }

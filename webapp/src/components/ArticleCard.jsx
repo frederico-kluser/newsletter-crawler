@@ -3,6 +3,8 @@ import { springs } from '../motion/transitions.js';
 import { useStrings } from '../i18n.jsx';
 import { fmtDate } from '../lib/format.js';
 import { effectiveKind } from '../lib/taxonomy.js';
+import { usePlayer } from '../player.jsx';
+import PlayButton from './PlayButton.jsx';
 
 /**
  * Card do grid: eyebrow (fonte · data), título PT (fallback original), resumo, badges.
@@ -15,17 +17,34 @@ export default function ArticleCard({ ref, article: a, toolTypes, onOpen, entryD
   const kind = effectiveKind(a, toolTypes);
   const title = a.title_pt || a.title || a.url;
   const excerpt = a.summary_pt || a.snippet || '';
+  const player = usePlayer();
+  const isCurrent = player?.currentId === a.id;
   return (
     <motion.article
       ref={ref}
       layout
       className="card"
+      data-playing={isCurrent || undefined}
       initial={{ opacity: 0, y: 14, scale: 0.98 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, scale: 0.96 }}
       transition={{ ...springs.gentle, delay: entryDelay }}
       whileHover={{ y: -3 }}
     >
+      {player && excerpt && (
+        <PlayButton
+          className="card-play"
+          active={isCurrent && player.playing}
+          loading={player.loadingId === a.id}
+          onClick={() =>
+            isCurrent && player.playing
+              ? player.stop()
+              : player.playOne({ id: a.id, text: excerpt, title })
+          }
+          playLabel={STR.playSummary}
+          stopLabel={STR.stopPlayback}
+        />
+      )}
       <button type="button" className="card-hit" onClick={() => onOpen(a.id)} aria-label={`${STR.openArticle}: ${title}`}>
         <div className="card-eyebrow">
           <span className="card-source">{a.source_name || STR.sourceFallback(a.source_id)}</span>

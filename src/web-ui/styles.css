@@ -425,6 +425,33 @@ input.control[type='date']::-webkit-calendar-picker-indicator { opacity: 0.55; }
   overflow: hidden;
 }
 .card .card-foot { display: flex; flex-wrap: wrap; gap: 6px; margin-top: auto; padding-top: 6px; }
+
+/* ---- player de áudio (TTS): botão na busca + botão flutuante no card ---- */
+/* o card é um <button>; o play vira IRMÃO dentro do wrap (HTML proíbe button dentro de button) */
+.card-wrap { position: relative; display: flex; min-width: 0; }
+.card-wrap > .card { flex: 1; }
+.card-wrap.is-playing > .card { box-shadow: var(--shadow-card), 0 0 0 2px var(--accent); }
+.card-play {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  width: 32px;
+  height: 32px;
+  z-index: 2;
+  color: var(--accent);
+  background: var(--card);
+  border: 1px solid var(--hairline);
+  box-shadow: var(--shadow-card);
+}
+.card-play:hover { background: var(--chip); color: var(--accent-hover); }
+.card-play.is-active { background: var(--accent); color: var(--on-accent); border-color: transparent; }
+.searchbar-play { flex: none; color: var(--accent); }
+.searchbar-play:hover:not(:disabled) { background: var(--chip); }
+.searchbar-play.is-active { background: var(--accent); color: var(--on-accent); }
+.searchbar-play:disabled { opacity: 0.4; cursor: default; }
+.play-spinner { transform-origin: center; animation: play-spin 0.8s linear infinite; }
+@keyframes play-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .play-spinner { animation-duration: 1.6s; } }
 .tag {
   height: 24px;
   padding: 0 10px;

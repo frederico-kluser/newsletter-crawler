@@ -49,6 +49,10 @@ const STR = {
   showMore: (n) => `+ ${n} mais`,
   showLess: 'mostrar menos',
   noDate: 'sem data',
+  // player de áudio (TTS)
+  playAll: 'Ouvir resultados',
+  stopPlayback: 'Parar áudio',
+  playSummary: 'Ouvir resumo',
   // busca IA (soft em lote / profunda por artigo)
   searchBtn: 'Buscar',
   searchHint: 'Enter busca com IA · fonte e período limitam o escopo',
@@ -272,7 +276,114 @@ const Icon = {
     <path d="M3.2 1.8v3.4h3.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
     <path d="M8 5.4V8l2 1.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
   </svg>`,
+  play: () => html`<svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+    <path d="M5 3.4v9.2a.6.6 0 0 0 .92.5l7.2-4.6a.6.6 0 0 0 0-1L5.92 2.9A.6.6 0 0 0 5 3.4Z" />
+  </svg>`,
+  stop: () => html`<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+    <rect x="3.5" y="3.5" width="9" height="9" rx="1.8" />
+  </svg>`,
+  spinner: () => html`<svg className="play-spinner" width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+    <path d="M8 2a6 6 0 1 0 6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+  </svg>`,
 };
+
+// ---- player de áudio (TTS) ----
+// UM <audio>, UMA reprodução por vez. Toca direto da rota /api/tts?id= (o backend gera o áudio e
+// cuida da chave); no 'ended' avança na fila 'all', no 'error' pula o item. A App gasta gate por
+// hasKey antes de tocar (abre o modal de chave), como na busca.
+function useAudioPlayer() {
+  const audioRef = useRef(null);
+  const queueRef = useRef([]);
+  const idxRef = useRef(-1);
+  const modeRef = useRef(null); // 'all' | 'one' | null
+  const advanceRef = useRef(() => {});
+  const [playing, setPlaying] = useState(false);
+  const [currentId, setCurrentId] = useState(null);
+  const [loadingId, setLoadingId] = useState(null);
+
+  if (!audioRef.current && typeof Audio !== 'undefined') audioRef.current = new Audio();
+
+  const stop = useCallback(() => {
+    modeRef.current = null;
+    idxRef.current = -1;
+    const el = audioRef.current;
+    if (el) {
+      el.pause();
+      el.removeAttribute('src');
+      el.load();
+    }
+    setPlaying(false);
+    setCurrentId(null);
+    setLoadingId(null);
+  }, []);
+
+  const playId = useCallback((id) => {
+    const el = audioRef.current;
+    if (!el) return;
+    setCurrentId(id);
+    setLoadingId(id);
+    setPlaying(true);
+    el.src = `/api/tts?id=${id}`;
+    el.play().catch(() => {}); // erro real cai no listener 'error' → advance
+  }, []);
+
+  const advance = useCallback(() => {
+    if (modeRef.current !== 'all') {
+      stop();
+      return;
+    }
+    const q = queueRef.current;
+    let next = idxRef.current + 1;
+    while (next < q.length && !(q[next].summary_pt || q[next].snippet)) next += 1;
+    if (next >= q.length) {
+      stop();
+      return;
+    }
+    idxRef.current = next;
+    playId(q[next].id);
+  }, [playId, stop]);
+  advanceRef.current = advance;
+
+  const playAll = useCallback(
+    (items) => {
+      queueRef.current = items || [];
+      const first = queueRef.current.findIndex((x) => x.summary_pt || x.snippet);
+      if (first === -1) return;
+      modeRef.current = 'all';
+      idxRef.current = first;
+      playId(queueRef.current[first].id);
+    },
+    [playId],
+  );
+
+  const playOne = useCallback(
+    (id) => {
+      modeRef.current = 'one';
+      idxRef.current = -1;
+      playId(id);
+    },
+    [playId],
+  );
+
+  useEffect(() => {
+    const el = audioRef.current;
+    if (!el) return;
+    const onEnded = () => advanceRef.current();
+    const onErr = () => advanceRef.current();
+    const onPlaying = () => setLoadingId(null);
+    el.addEventListener('ended', onEnded);
+    el.addEventListener('error', onErr);
+    el.addEventListener('playing', onPlaying);
+    return () => {
+      el.pause();
+      el.removeEventListener('ended', onEnded);
+      el.removeEventListener('error', onErr);
+      el.removeEventListener('playing', onPlaying);
+    };
+  }, []);
+
+  return { playing, currentId, loadingId, playAll, playOne, stop };
+}
 
 // ---- tema ----
 function currentTheme() {
@@ -356,26 +467,41 @@ function verifyBadge(a) {
   >${VERIFY_LABEL[v] || v}</span>`;
 }
 
-function ArticleCard({ a, onOpen }) {
+function ArticleCard({ a, onOpen, player }) {
   const title = a.title_pt || a.title || a.url;
   const summary = a.summary_pt || a.snippet || '';
   const chipTags = [...(a.tags['domain'] || []), ...(a.tags['framework-library-tool'] || [])].slice(0, 2);
-  return html`<button className="card" onClick=${() => onOpen(a.id)}>
-    <span className="eyebrow">
-      ${a.source_name || '—'} <span className="dot">·</span> ${bestDate(a)}
-    </span>
-    <h3>${title}</h3>
-    ${summary && html`<p className="summary">${summary}</p>`}
-    <span className="card-foot">
-      ${a.relation &&
-      html`<span className=${`tag relation-${a.relation}`}>
-        ${a.relation === 'direct' ? STR.relationDirect : STR.relationSimilar}
-      </span>`}
-      ${kindBadge(a.kind)}
-      ${verifyBadge(a)}
-      ${chipTags.map((t) => html`<span key=${t} className="tag">${t}</span>`)}
-    </span>
-  </button>`;
+  const isCurrent = player && player.currentId === a.id;
+  const active = isCurrent && player.playing;
+  const loading = player && player.loadingId === a.id;
+  return html`<div className=${`card-wrap${isCurrent ? ' is-playing' : ''}`}>
+    <button className="card" onClick=${() => onOpen(a.id)}>
+      <span className="eyebrow">
+        ${a.source_name || '—'} <span className="dot">·</span> ${bestDate(a)}
+      </span>
+      <h3>${title}</h3>
+      ${summary && html`<p className="summary">${summary}</p>`}
+      <span className="card-foot">
+        ${a.relation &&
+        html`<span className=${`tag relation-${a.relation}`}>
+          ${a.relation === 'direct' ? STR.relationDirect : STR.relationSimilar}
+        </span>`}
+        ${kindBadge(a.kind)}
+        ${verifyBadge(a)}
+        ${chipTags.map((t) => html`<span key=${t} className="tag">${t}</span>`)}
+      </span>
+    </button>
+    ${player &&
+    summary &&
+    html`<button
+      className=${`icon-btn card-play${active ? ' is-active' : ''}`}
+      onClick=${() => (active ? player.stop() : player.playOne(a.id))}
+      title=${active ? STR.stopPlayback : STR.playSummary}
+      aria-label=${active ? STR.stopPlayback : STR.playSummary}
+    >
+      ${loading ? html`<${Icon.spinner} />` : active ? html`<${Icon.stop} />` : html`<${Icon.play} />`}
+    </button>`}
+  </div>`;
 }
 
 function DetailSheet({ id, onClose }) {
@@ -631,6 +757,7 @@ function App() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState(null);
   const [detailId, setDetailId] = useState(null);
+  const player = useAudioPlayer();
 
   const facetKey = JSON.stringify(facetSel);
   const sentinel = useRef(null);
@@ -961,6 +1088,9 @@ function App() {
       : null;
 
   const dbEmpty = meta && meta.totals.articles === 0;
+  // Lista EXIBIDA (na ordem da tela) — a mesma que o grid mapeia e que o play-all narra em sequência.
+  const shown = ai ? aiItems : aiLoading ? streamShown : items;
+  const canPlayAll = shown.some((a) => a.summary_pt || a.snippet);
 
   return html`<${Fragment}>
     <header className="topbar">
@@ -1033,6 +1163,24 @@ function App() {
           >
             ${STR.searchBtn}
           </button>
+          ${player &&
+          html`<button
+            className=${`icon-btn searchbar-play${player.playing ? ' is-active' : ''}`}
+            onClick=${() => {
+              if (player.playing) return player.stop();
+              if (!hasKey) return setKeyOpen(true);
+              player.playAll(shown);
+            }}
+            disabled=${!canPlayAll}
+            title=${player.playing ? STR.stopPlayback : STR.playAll}
+            aria-label=${player.playing ? STR.stopPlayback : STR.playAll}
+          >
+            ${player.loadingId != null
+              ? html`<${Icon.spinner} />`
+              : player.playing
+                ? html`<${Icon.stop} />`
+                : html`<${Icon.play} />`}
+          </button>`}
         </div>
         <div className="deep-row">
           <label className="deep-toggle">
@@ -1272,8 +1420,8 @@ function App() {
         : null}
 
       <div className="grid">
-        ${(ai ? aiItems : aiLoading ? streamShown : items).map(
-          (a) => html`<${ArticleCard} key=${a.id} a=${a} onOpen=${setDetailId} />`,
+        ${shown.map(
+          (a) => html`<${ArticleCard} key=${a.id} a=${a} onOpen=${setDetailId} player=${player} />`,
         )}
       </div>
 

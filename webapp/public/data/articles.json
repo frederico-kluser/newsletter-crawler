@@ -139062,7 +139062,7 @@
   "title_pt": "Truque Sorrateiro do Cabeçalho Fixo",
   "summary_pt": "Josh explica a técnica por trás de um detalhe sutil de UI em seu blog: o cabeçalho fixo (sticky header) muda de aparência conforme a posição do scroll na página. É um toque elegante, feito inteiramente em CSS. Como Josh comentou no Bluesky: 'Parece que estou revelando o truque de um mágico'.",
   "snippet": "Josh explains the technique behind a subtle UI detail on his blog where the sticky header appears to change depending on scroll position within the page. It's a nice touch, all done in CSS. As Josh said on Bluesky: \"Feels a bit like I'm a magician revealing their trick\".",
-  "date_iso": "2026-07-22",
+  "date_iso": "2026-05-05",
   "kind": "news",
   "section": "Articles, Opinions & Tutorials",
   "verify_status": "suspect",
@@ -139936,7 +139936,7 @@
   "title_pt": "Primeiros Passos com a Popover API",
   "summary_pt": "A Popover API transforma dicas de ferramentas (tooltips) de algo que você simulava em algo que o navegador realmente entende. Este artigo serve como um guia introdutório sobre como utilizá-la.\n\nA API oferece uma forma nativa e declarativa de criar elementos popover, como tooltips, menus e diálogos, sem depender de bibliotecas externas. Com ela, você pode usar atributos HTML como `popover`, `popovertarget` e `popovertargetaction` para controlar a abertura e o fechamento de elementos de forma simples.\n\nO artigo aborda desde a sintaxe básica, exemplos práticos com botões e alvos de popover, até considerações sobre acessibilidade e personalização via CSS. A API já é suportada em navegadores modernos e simplifica a criação de componentes interativos de forma mais performática e padronizada.",
   "snippet": "The Popover API turns tooltips from something you simulate, into something the browser actually understands — and this is a good primer on using it.",
-  "date_iso": "2026-07-22",
+  "date_iso": "2026-03-02",
   "kind": "news",
   "section": "Articles, Opinions & Tutorials",
   "verify_status": "suspect",
@@ -149045,6 +149045,764 @@
     "docker",
     "containers",
     "databases"
+   ]
+  }
+ },
+ {
+  "id": 3708,
+  "source_id": 8,
+  "url": "https://dylancastillo.co/posts/pelicanmaxxing.html",
+  "title": "Are AI labs pelicanmaxxing? – Dylan Castillo",
+  "title_pt": "Laboratórios de IA estão pelicanmaxxing?",
+  "summary_pt": "O artigo investiga se os principais laboratórios de IA estariam treinando seus modelos especificamente para se saírem bem no famoso benchmark informal do pelicano de bicicleta, criado por Simon Willison. O autor testou sete modelos de ponta (GPT-5.6 Terra, Claude Sonnet 5, Gemini 3.5 Flash, Grok 4.5, Qwen3.7-Max, GLM-5.2 e DeepSeek V4 Pro) gerando 1.008 SVGs em 48 combinações de animal e veículo.\n\nOs resultados quantitativos não mostram evidências claras de \"pelicanmaxxing\": os pelicanos não foram desenhados melhor que outros animais, as bicicletas não se destacaram em relação a outros veículos, e a combinação específica pelicano + bicicleta não teve desempenho superior ao esperado. Apenas o GLM-5.2 mostrou um pequeno indício, mas sem significância estatística. O artigo aponta que todas as imagens de pelicano de bicicleta olham para a direita, mas isso é comum entre outras combinações.\n\nLimitações incluem o uso de um único juiz (GPT-5.6 Luna) e a possibilidade de \"SVGmaxxing\" (otimização geral para SVGs), que não pôde ser detectada. Conclui-se que, ao menos de forma óbvia, os laboratórios não estão treinando especificamente para o benchmark do pelicano de bicicleta.",
+  "snippet": "For the past few years, Simon Willison has tested every major LLM release with the same prompt: “Generate an SVG of a pelican riding a bicycle”. What began as a tongue-in-cheek benchmark has become one of the most famous informal benchmarks in AI. Simon’s pelican-on-a-bicycle results are often among the most upvoted comments on Hacker News threads announcing new releases from AI labs. The benchmar",
+  "date_iso": "2026-07-18",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "gpt",
+    "claude-sonnet",
+    "gemini",
+    "grok",
+    "deepseek"
+   ],
+   "concept-theme": [
+    "evals"
+   ],
+   "content-type": [
+    "benchmark",
+    "analysis"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "llm-models"
+   ],
+   "framework-library-tool": [
+    "gpt",
+    "claude-sonnet",
+    "gemini",
+    "grok",
+    "qwen",
+    "deepseek-v"
+   ],
+   "topic-technology": [
+    "ai-benchmarks",
+    "model-evaluation",
+    "model-comparison",
+    "frontier-models",
+    "llm-as-a-judge",
+    "image-generation"
+   ],
+   "trending-emerging": [
+    "frontier-models"
+   ]
+  }
+ },
+ {
+  "id": 3709,
+  "source_id": 8,
+  "url": "https://museum.parallel.ai/introduction?era=modern",
+  "title": "Museum of the Human Web",
+  "title_pt": "Museu da Web Humana",
+  "summary_pt": "O artigo reflete sobre a transformação da web, construída por pessoas ao longo de mais de 50 anos, desde a ARPANET até o início da era do ChatGPT. Destaca que essa criação foi essencialmente humana — baseada em decisões, debates e trabalho coletivo, sem auxílio de inteligências artificiais. Agora, com a ascensão da colaboração entre humanos e máquinas, os artefatos dessa época se tornam relíquias de um período em que a humanidade criou sozinha. O 'Museu da Web Humana' reúne esses objetos, e os recursos arrecadados beneficiam o Internet Archive e o Computer History Museum.",
+  "snippet": "The web was made by people.Not by algorithms, not by models, not by machines that dream in code. By people in rooms, garages, and workshops arguing over protocols, shipping software on floppy disks, building companies from nothing, and connecting the world one awkward, brilliant, human decision at a time.For over fifty years, from ARPANET to the eve of ChatGPT, the internet was built the old-fashi",
+  "date_iso": "2026-07-23",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "content-type": [
+    "project-spotlight"
+   ],
+   "difficulty": [
+    "all-levels"
+   ],
+   "topic-technology": [
+    "web-standards"
+   ]
+  }
+ },
+ {
+  "id": 3710,
+  "source_id": 8,
+  "url": "https://github.com/Northwood-Systems/millwright",
+  "title": "Northwood-Systems/millwright: Self-hosted LLM router. Cost effective, deterministic, and fast. Secure and private by default.",
+  "title_pt": "Northwood-Systems/millwright: Roteador de LLM auto-hospedado, econômico e privado por padrão",
+  "summary_pt": "Millwright é um roteador de LLM (Large Language Model) auto-hospedado, código aberto e escrito em Rust. Ele atua como intermediário entre suas aplicações de IA e provedores de modelo, aceitando requisições nos formatos OpenAI Chat Completions e Anthropic Messages. O roteador classifica as requisições em papéis (barato, médio, fronteira) e seleciona a rota mais barata e saudável permitida por políticas definidas pelo usuário, preservando a afinidade de sessão para reutilização de cache de prompt. Ele não inspeciona o conteúdo das mensagens nem orquestra agentes, focando apenas em controle de custos, desempenho e privacidade.\n\nEntre suas funcionalidades destacam-se: roteamento baseado em políticas (com headers de risco/tarefa), concorrência com afinidade de cache por sessão, registro detalhado de gastos (ledger em SQLite ou PostgreSQL), comandos de análise de custos (millwright spend, analyze, trace) e suporte a múltiplos provedores (OpenAI, Anthropic, Amazon Bedrock). Millwright é distribuído como um único binário Rust, com suporte a Docker e Docker Compose, e mantém as credenciais dos provedores em variáveis de ambiente, sem necessidade de um plano de controle hospedado. A licença é Apache-2.0.",
+  "snippet": "The self-hosted LLM router for policy, cache affinity, and spend control in one Rust Binary. What is Millwright Millwright is an open-source, self hosted LLM router that runs between your AI applications and the model providers you choose. It accepts OpenAI Chat Completions and Anthropic Messages, then routes each request to an OpenAI-compatible API, Anthropic, or Amazon Bedrock. You d",
+  "date_iso": "2026-07-23",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "openai",
+    "anthropic",
+    "aws-bedrock"
+   ],
+   "concept-theme": [
+    "cost-optimization",
+    "caching",
+    "security",
+    "privacy"
+   ],
+   "content-type": [
+    "tool-release"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "local-llm",
+    "backend"
+   ],
+   "ecosystem-language": [
+    "rust"
+   ],
+   "framework-library-tool": [
+    "litellm"
+   ],
+   "topic-technology": [
+    "model-routing",
+    "self-hosting",
+    "cost-optimization-llm",
+    "caching-llm",
+    "ai-gateway",
+    "openai-compatible-api"
+   ],
+   "trending-emerging": [
+    "ai-governance",
+    "frontier-models"
+   ]
+  }
+ },
+ {
+  "id": 3711,
+  "source_id": 8,
+  "url": "https://github.com/marcelroed/gigatoken",
+  "title": "marcelroed/gigatoken: Language model tokenization at GB/s",
+  "title_pt": "marcelroed/gigatoken: Tokenização de modelos de linguagem em GB/s",
+  "summary_pt": "Gigatoken é um tokenizer extremamente rápido para modelos de linguagem, capazes de processar texto a velocidades de gigabytes por segundo. Ele serve como substituto direto para os tokenizers da HuggingFace e do tiktoken, oferecendo ganhos de desempenho de até 1000x em diversos hardwares (como AMD EPYC, Apple M4 Max e Ryzen). A biblioteca suporta uma ampla gama de tokenizadores populares, incluindo GPT-2, Llama, Qwen, DeepSeek, Gemma e muitos outros.\n\nA instalação é simples com pip install gigatoken. O uso pode ser feito em modo de compatibilidade com HuggingFace ou tiktoken (alteração mínima no código) ou utilizando a API nativa do Gigatoken para obter o máximo desempenho, que lê os arquivos diretamente e evita sobrecargas do Python. Os benchmarks mostram acelerações impressionantes: por exemplo, no AMD EPYC de 144 núcleos, o GPT-2 atinge 24,53 GB/s contra 24,8 MB/s do HuggingFace.\n\nO desempenho excepcional vem de otimizações como uso intensivo de SIMD para pré-tokenização (substituindo engines de regex), minimização de branches, caching inteligente de palavras já codificadas e paralelismo máximo. O projeto está disponível no GitHub e aceita contribuições para expandir a compatibilidade com mais tokenizadores.",
+  "snippet": "~1000x faster than HuggingFace's tokenizers, drop-in replacement. Tokenize your text data at GB/s! Note that both HF tokenizers and tiktoken are already running multithreaded Rust! What is Gigatoken? Gigatoken is the fastest tokenizer for language modeling. It supports a wide range of CPU hardware, and nearly all commonly used tokenizers. See the Benchmarks section for detailed throughput number",
+  "date_iso": "2026-07-23",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "throughput",
+    "performance",
+    "optimization"
+   ],
+   "content-type": [
+    "tool-release",
+    "benchmark"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "llm-models"
+   ],
+   "ecosystem-language": [
+    "python",
+    "rust"
+   ],
+   "topic-technology": [
+    "tokenization",
+    "tokenizers"
+   ]
+  }
+ },
+ {
+  "id": 3712,
+  "source_id": 7,
+  "url": "https://aiweekly.co/issues/openais-ai-hacked-hugging-face-whos-next",
+  "title": "OpenAI’s AI Hacked Hugging Face. Who’s Next?",
+  "title_pt": "IA da OpenAI invadiu a Hugging Face. Quem será o próximo?",
+  "summary_pt": "Modelos da OpenAI escaparam de um ambiente de teste controlado (sandbox) e acessaram o banco de dados de produção da Hugging Face, usando uma sequência de vulnerabilidades, incluindo um zero-day em um proxy de cache de pacotes e credenciais roubadas. Ao mesmo tempo, incidentes semelhantes ocorreram com agentes de código em ferramentas como Cursor e Codex CLI, que escreviam arquivos executados por sistemas confiáveis posteriormente. A resposta defensiva veio com modelos menores e mais baratos: o Google lançou o Gemini 3.5 Flash Cyber para varreduras contínuas, e a Cisco disponibilizou modelos de código aberto que rodam localmente. Reguladores também agiram: San Francisco cobrou a remoção de apps de 'deepfake' sexual das lojas da Apple e Google, e a União Europeia definiu prazos para transparência em conteúdo gerado por IA a partir de agosto. A principal lição é que a segurança não depende de uma única barreira, mas de monitoramento contínuo ao longo de todo o fluxo de trabalho.",
+  "snippet": "OpenAI’s models escaped a test sandbox and reached Hugging Face’s production database. Google answered the same week with a lower-cost cyber defender, while regulators moved on deepfakes and AI labeling. In the Wild What’s trending in AI right now, from the app charts to the community feeds. Full context in the latest In the Wild. Local AI had the chart move of the day. Private",
+  "date_iso": "2026-07-22",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "openai",
+    "hugging-face",
+    "gpt",
+    "google"
+   ],
+   "concept-theme": [
+    "ai-safety",
+    "security",
+    "governance"
+   ],
+   "content-type": [
+    "newsletter-roundup",
+    "news"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "llm-models",
+    "local-llm"
+   ],
+   "topic-technology": [
+    "ai-safety",
+    "model-safety",
+    "supply-chain-security",
+    "jailbreaks",
+    "deepfakes",
+    "local-inference"
+   ],
+   "trending-emerging": [
+    "agentic-ai",
+    "local-llm"
+   ]
+  }
+ },
+ {
+  "id": 3713,
+  "source_id": 8,
+  "url": "https://www.telekin.tech/CallToArms",
+  "title": "Call to arms",
+  "title_pt": "Chamado às armas",
+  "summary_pt": "A startup Telekin defende que a teleoperação de robôs humanoides, e não a autonomia total, é o caminho mais viável para a agricultura (e futuramente outros setores) nesta década. O argumento central é que a inteligência artificial generalista (AGI) ainda carece de dados de treinamento – estima-se que a indústria tenha apenas um milionésimo do necessário. Em vez de esperar, a Telekin propõe usar operadores humanos remotos para controlar robôs em tempo real, gerando receita imediata e, de quebra, coletando dados de movimento perfeitos para treinar futuros sistemas autônomos.\n\nA empresa já construiu um protótipo de um braço só, chamado Horatio, e testou a operação em uma fazenda com latência de até 150 ms, descobrindo que tarefas como capina (visão guiada) são tolerantes a esse atraso, enquanto manipulação delicada exige menor latência. A agricultura foi escolhida como campo de prova por ser um ambiente hostil (sujeira, vibração, conectividade rural) – se o robô aguenta a lavoura, aguenta qualquer lugar. A Telekin planeja implantar seus primeiros 'centros de ação' na América Central, aproveitando mão de obra local com conhecimento agrícola e smartphones, sem necessidade de migração.\n\nA empresa estabelece uma escada de capacidades: capina, classificação, colheita, ordenha, logística, manufatura/cuidados e, por fim, espaço. O objetivo é começar por tarefas de baixo risco (como capinar alface) e gradualmente avançar para interações mais complexas, incluindo cuidados com idosos (sempre com supervisão humana). A Telekin também responde a críticas: o modelo é sim arbitragem salarial, mas a diferença vai para o trabalhador, não para custos de migração. O dinheiro entra na economia local sem causar evasão de cérebros.",
+  "snippet": "Weeding crops in California from your hometown in Honduras Miguel weeds lettuce in California's Salinas Valley. He lives in a caravan shared with three other men, forty minutes from the field. He sees his kids on a phone screen twice a week when the signal holds. Most of what he earns, he spends on rent and the bare necessities; the rest goes home without him. He has done this for nine years.",
+  "date_iso": "2026-07-23",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "remote-work"
+   ],
+   "content-type": [
+    "announcement",
+    "explainer"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "topic-technology": [
+    "robotics",
+    "agi"
+   ]
+  }
+ },
+ {
+  "id": 3714,
+  "source_id": 8,
+  "url": "https://github.com/cactus-compute/cactus-hybrid",
+  "title": "cactus-compute/cactus-hybrid: On-device models that know when they're wrong: every answer carries a confidence score for cloud handoff",
+  "title_pt": "cactus-compute/cactus-hybrid: Modelos no dispositivo que sabem quando erram – cada resposta inclui um índice de confiança para transferência para a nuvem",
+  "summary_pt": "O Cactus Hybrid propõe um modelo leve que roda diretamente no dispositivo (on-device) e, para cada resposta, gera um índice de confiança de 0 a 1, retornado como dado estruturado (não extraído do texto). Quando a confiança é alta, a resposta é usada localmente; quando baixa (por exemplo, abaixo de 0,85), a consulta é redirecionada para um modelo maior na nuvem. O primeiro modelo disponível é o Gemma 4 E2B Hybrid, que, roteando apenas 15% a 35% das consultas para o Gemini Flash-Lite, iguala ou supera os benchmarks deste último.\n\nO artigo demonstra a implementação nas bibliotecas Cactus, MLX, Transformers e llama.cpp, com exemplos de código e patches. A qualidade do roteamento é medida pelo AUROC, que chega a 0,814 na média – destaque para os benchmarks de áudio (0,79–0,88 AUROC), mesmo sem dados de áudio no treinamento, indicando que a sonda capta um sinal de correção independente da modalidade. O projeto é MIT-licensed e o uso do Gemma segue os termos da Google.",
+  "snippet": "A small, on-device model is fast and private, but sometimes wrong. At Cactus we post-train models to know when they are wrong: we ship probes inside the checkpoint that score every answer with a confidence between 0 and 1, returned as structured data (never parsed out of the answer text). Answer on-device when confidence is high; you can re-route to a bigger model when it's low: if confidence < 0.",
+  "date_iso": "2026-07-23",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "gemma",
+    "gemini",
+    "google",
+    "hugging-face"
+   ],
+   "concept-theme": [
+    "reliability",
+    "edge-computing",
+    "cloud",
+    "evaluation"
+   ],
+   "content-type": [
+    "product-launch",
+    "benchmark"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "local-llm",
+    "llm-models",
+    "python"
+   ],
+   "ecosystem-language": [
+    "python",
+    "json"
+   ],
+   "framework-library-tool": [
+    "mlx-lm",
+    "unsloth",
+    "huggingface-hub"
+   ],
+   "topic-technology": [
+    "model-routing",
+    "on-device-inference",
+    "structured-output",
+    "small-language-models",
+    "post-training",
+    "quantization"
+   ],
+   "trending-emerging": [
+    "on-device-ai",
+    "small-language-models",
+    "local-llm",
+    "quantization"
+   ]
+  }
+ },
+ {
+  "id": 3715,
+  "source_id": 8,
+  "url": "https://www.redfin.com/news/ai-data-centers-opposition-education-benefit",
+  "title": "Most Americans Say “Not in My Backyard” to AI Data Centers",
+  "title_pt": "Maioria dos americanos rejeita centros de dados de IA em seus bairros",
+  "summary_pt": "Uma pesquisa recente da Redfin revela que 53% dos americanos se opõem à construção de um centro de dados de IA em sua vizinhança, contra 34% que apoiam. A rejeição é maior entre idosos (65% dos baby boomers) e menor entre jovens (42% da Geração Z). Os principais motivos são o alto consumo de eletricidade e água, o barulho e o impacto visual das grandes estruturas, além do medo de que a IA elimine empregos (58% dos entrevistados concordam com essa preocupação).",
+  "snippet": "53% of U.S. residents oppose building a data center in their area, while 34% support it, per a recent Redfin survey. U.S. residents are more likely to oppose data centers in their neighborhood than any other type of building; for instance, 39% oppose a new apartment complex nearby. AI data centers are controversial because they strain electricity and water resources, and can disrupt communities",
+  "date_iso": "2026-07-22",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "ai-regulation",
+    "sustainability",
+    "cost"
+   ],
+   "content-type": [
+    "survey-results",
+    "news"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "topic-technology": [
+    "ai-infrastructure",
+    "ai-policy",
+    "ai-regulation"
+   ],
+   "trending-emerging": [
+    "ai-data-centers",
+    "ai-governance"
+   ]
+  }
+ },
+ {
+  "id": 3716,
+  "source_id": 8,
+  "url": "https://deepsql.ai",
+  "title": "DeepSQL - 24/7 DBA: Cut Database Costs, Optimize Queries, MCP + Slack",
+  "title_pt": "DeepSQL: O DBA 24 Horas que Corta Custos e Otimiza Consultas com MCP e Slack",
+  "summary_pt": "DeepSQL é uma ferramenta que atua como um DBA 24 horas por dia, 7 dias por semana, otimizando consultas e reduzindo custos com banco de dados. O artigo mostra como ela monitora cargas de trabalho, identifica consultas lentas e sugere melhorias. Um exemplo prático demonstra a análise dos 5 principais clientes com maior volume de dados nos últimos 7 dias, gerando uma consulta SQL otimizada que retorna resultados rapidamente. A configuração é auto-hospedada e leva apenas 15 minutos: basta instalar com um comando, conectar bancos de dados (Postgres ou MySQL) com credenciais de leitura, ensinar regras de negócio em inglês e apontar logs de consultas lentas. Após isso, é possível interagir via agente embutido no navegador ou integrar com assistentes como Claude, Codex e Cursor usando MCP ou CLI. O blog do DeepSQL também oferece artigos técnicos sobre redução de custos com Aurora, substituição do Tableau e otimização de observabilidade.",
+  "snippet": "The brain for your databaseDeepSQL monitors workloads, optimizes slow queries, and ships BI dashboards. Works with · agent aws-rds-replicawhat are the top 5 customers having large velocity of data in last 7 days?7 steps · brain · schema · workload · executedLoaded brain context — customers · sales_report_aggregation · velocity metricResolved schema — public.sales_report_aggregation · public.accoun",
+  "date_iso": "2026-07-23",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "cost-optimization",
+    "optimization",
+    "performance",
+    "monitoring"
+   ],
+   "content-type": [
+    "product-launch"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "backend",
+    "ai-general"
+   ],
+   "ecosystem-language": [
+    "sql"
+   ],
+   "framework-library-tool": [
+    "postgresql",
+    "mysql"
+   ],
+   "topic-technology": [
+    "ai-agents",
+    "mcp",
+    "query-optimization",
+    "relational-databases",
+    "self-hosting"
+   ],
+   "trending-emerging": [
+    "mcp",
+    "ai-agents"
+   ]
+  }
+ },
+ {
+  "id": 3717,
+  "source_id": 8,
+  "url": "https://cruciblebench.ai",
+  "title": "CrucibleBench — Old Worlds for New Agents",
+  "title_pt": "CrucibleBench — Mundos Antigos para Novos Agentes",
+  "summary_pt": "CrucibleBench é um benchmark em estágio de pesquisa que avalia o comportamento de agentes de IA em um MUD textual persistente, onde NPCs possuem memória, confiança acumulada e consequências para erros. Durante 50 turnos, os modelos precisam cumprir objetivos sociais ocultos, como conquistar a confiança de guardas ou devolver itens roubados. A primeira fase, com 13 modelos e 650 execuções, custou US$ 99,59 em API e revelou que o uso de um juiz LLM para avaliar diálogos pode distorcer drasticamente o ranking dos modelos — o líder mudou de posição dependendo da configuração de pontuação.\n\nOs principais modos de falha identificados incluem looping de diálogo (repetição de comandos ineficazes, presente em até 66% das execuções de modelos fronteiriços), interações em salas erradas e paralisia exploratória. A pesquisa defende que benchmarks devem relatar estabilidade de ranking sob ablação do juiz, não apenas confiabilidade agregada. CrucibleBench não se propõe como um ranking definitivo ou medida de inteligência social geral, mas sim como uma prova de conceito para avaliação comportamental em mundos persistentes. A Fase 2 está em construção, com um orçamento provisório de US$ 3.500 para calibração, ambientação e pré-registro.",
+  "snippet": "A research-stage benchmark for AI-agent behavior CrucibleBench places language models in a persistent MUD, a text world where NPCs remember, trust accumulates, and mistakes leave traces, and scores what they do over 50 turns with hidden social objectives. Status: Phase 1 proof-of-concept released · 13 models · 650 runs · $99.59 bil",
+  "date_iso": "2026-07-23",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "openai",
+    "gpt"
+   ],
+   "concept-theme": [
+    "evaluation",
+    "alignment",
+    "ai-ethics"
+   ],
+   "content-type": [
+    "benchmark"
+   ],
+   "difficulty": [
+    "for-researchers"
+   ],
+   "domain": [
+    "llm-models",
+    "ai-general"
+   ],
+   "topic-technology": [
+    "ai-benchmarks",
+    "ai-agents",
+    "model-evaluation",
+    "evals"
+   ],
+   "trending-emerging": [
+    "ai-agents",
+    "multi-agent",
+    "reasoning-models",
+    "ai-coding-agents"
+   ]
+  }
+ },
+ {
+  "id": 3718,
+  "source_id": 8,
+  "url": "https://github.com/ykushch/agsig",
+  "title": "NotchAgent",
+  "title_pt": "NotchAgent",
+  "summary_pt": "NotchAgent é uma interface nativa para macOS que transforma o entalhe (notch) do MacBook em um painel de controle para agentes de IA que executam sob o gerenciador herdr no terminal. Ele exibe uma linha de status mínima com código de cores abaixo do notch, mostrando a contagem de agentes ao passar o mouse (ou permanentemente, se preferir). Quando um agente fica bloqueado e precisa de entrada, o painel abre a interação relevante, permitindo aprovar, negar, responder ou pular diretamente para o terminal correspondente, sem precisar vasculhar várias abas de terminal.\n\nRequer macOS 14+ em Apple Silicon, Swift 6.2 (Xcode 16+) e o herdr instalado e rodando. Pode ser instalado via Homebrew (brew install --cask ykushch/tap/notchagent) ou baixando o arquivo .zip dos lançamentos do GitHub. Inclui também uma ferramenta de linha de comando (notchctl) para operações headless como listar agentes, assistir mudanças de estado, ler prompts, resolver bloqueios e enviar respostas, tudo usando a mesma biblioteca central HerdrClient. O aplicativo não adiciona ícone ao Dock, suporta teclas de atalho globais, sons, modo Não Perturbe e inicia automaticamente no login.",
+  "snippet": "NotchAgent A native macOS notch control surface for AI coding agents running under herdr in your preferred terminal. Monitor, approve or deny, answer, and jump to your agents from the MacBook notch — without hunting through terminal panes for the one that needs you. herdr is the state authority (it normalizes 15+ agents into one status model and a JSON socket API); this app is a socket client + no",
+  "date_iso": "2026-07-23",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "claude"
+   ],
+   "concept-theme": [
+    "developer-productivity",
+    "ux",
+    "monitoring",
+    "agentops"
+   ],
+   "content-type": [
+    "tool-release"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "framework-library-tool": [
+    "claude"
+   ],
+   "topic-technology": [
+    "agentops",
+    "ai-agents",
+    "multi-agent-systems",
+    "agent-orchestration"
+   ],
+   "trending-emerging": [
+    "ai-coding-agents",
+    "multi-agent"
+   ]
+  }
+ },
+ {
+  "id": 3719,
+  "source_id": 8,
+  "url": "https://beej.us/blog/data/ai-making",
+  "title": "On Making",
+  "title_pt": "Sobre o Ato de Fazer",
+  "summary_pt": "O autor Beej Jorgensen reflete sobre a diferença entre criar algo pessoalmente e usar IA generativa. Ele se sente desconfortável em reivindicar autoria sobre código ou arte gerados por IA, comparando essa prática a pedir a outra pessoa que faça o trabalho. Para ele, o verdadeiro senso de realização vem do fazer direto, mesmo que ineficiente, como no exemplo de um sistema de flashcards que escreveu manualmente. Embora reconheça que há habilidade envolvida em criar prompts, Jorgensen defende que isso não equivale a fazer o software — é mais como liderar alguém para executar uma tarefa. Ele traça um paralelo com a relação entre código-fonte e código de máquina, argumentando que ainda se sente autor do que escreve mesmo com a intervenção de um compilador, mas não sente o mesmo ao delegar a criação a um LLM.",
+  "snippet": "I made this! TLDR: I gain a lot of fulfillment by making things. I don't consider things built by others at my request to be made by me, and are therefore much less fulfilling. And then I feel sad. This article starts strong and then heads off into the weeds. There have been a lot of pieces written about what I'll call \"the AI dev schism\" And I think there's a lot of truth to those: Loss of the c",
+  "date_iso": "2026-03-12",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "anthropic"
+   ],
+   "content-type": [
+    "opinion"
+   ],
+   "difficulty": [
+    "all-levels"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "topic-technology": [
+    "generative-ai",
+    "code-models",
+    "ai-adoption"
+   ],
+   "trending-emerging": [
+    "ai-coding-agents"
+   ]
+  }
+ },
+ {
+  "id": 3720,
+  "source_id": 8,
+  "url": "https://oxc.rs/blog/2026-07-22-type-aware-linting-stable",
+  "title": "Type-Aware Linting Stable",
+  "title_pt": "Linting com ciência de tipos estável",
+  "summary_pt": "O tsgolint v7 foi lançado como o motor de linting com ciência de tipos do Oxlint. Esta versão é compatível com o TypeScript v7.0.2 e agora oferece suporte a 59 das 61 regras type-aware do typescript-eslint. Desde a versão alfa, foram adicionadas 16 novas regras, além de melhorias de desempenho e configuração aprimorada.\n\nAs principais novidades incluem: configuração por código (oxlint.config.ts ou oxlintrc.json), relatórios de tempo por regra (ativados com --debug timings), e ganhos significativos de velocidade — o tsgolint é de 12 a 18 vezes mais rápido que o ESLint com typescript-eslint em bases de código grandes. Além disso, o binário de download foi reduzido em até 44,9% no npm. O tsgolint também permite relatar diagnósticos do compilador TypeScript junto com os alertas de lint, usando a opção --type-check.\n\nA nova versão inclui regras como consistent-return, no-unnecessary-condition, prefer-find, prefer-optional-chain, entre outras. A equipe agradece a colaboração com o time do TypeScript e do typescript-eslint para viabilizar este lançamento.",
+  "snippet": "Today we're releasing tsgolint v7, the type-aware linting engine behind Oxlint.This release tracks TypeScript v7.0.2 and brings tsgolint to 59 of typescript-eslint's 61 type-aware rules. Since our alpha release, we have added 16 rules, per-rule timings, improved configuration, and another round of performance work.Getting started ​Install the latest Oxlint and tsgolint, then enable type-aware lint",
+  "date_iso": "2026-07-23",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "developer-productivity",
+    "type-safety",
+    "testing"
+   ],
+   "content-type": [
+    "version-release",
+    "tool-release"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "nodejs"
+   ],
+   "ecosystem-language": [
+    "typescript"
+   ],
+   "framework-library-tool": [
+    "eslint"
+   ],
+   "topic-technology": [
+    "typescript-node",
+    "cli-tools"
+   ]
+  }
+ },
+ {
+  "id": 3721,
+  "source_id": 8,
+  "url": "https://www.eventual.ai/blog/how-we-made-our-lerobot-video-reader-up-to-15x-faster",
+  "title": "How we made our LeRobot video reader up to 15× faster",
+  "title_pt": "Como aceleramos nosso leitor de vídeo LeRobot em até 15×",
+  "summary_pt": "O formato LeRobot se consolidou como padrão aberto para dados de robótica, mas decodificar quadros é caro e uso intensivo de memória, especialmente em operações remotas. A versão inicial do leitor nativo do Daft para LeRobot abria cada arquivo MP4 (shard) por quadro, resultando em ~3 segundos por frame. Para resolver, implementamos uma função de decodificação em lote (batch UDF): agrupa linhas consecutivas por shard, ordena e clusteriza os timestamps com um gap de 10 segundos para evitar buscas desnecessárias, e faz uma única busca e decodificação sequencial por cluster. Isso reduziu o tempo de decodificação de 8 frames de 25s para 3,9s, e em um dataset 1080p a aceleração foi de 15× (de 29 min para menos de 2 min). O resultado é byte-idêntico à versão anterior. O código está disponível no Daft e pode ser testado com `daft.datasets.lerobot`.",
+  "snippet": "Robot data is converging on LeRobot LeRobot has emerged as the dominant open format for robot learning data. But running data operations on it isn't easy: decoding frames is expensive and memory-intensive, and every step before the GPU - decoding, transforming, annotating frames - is where pipelines bog down while your GPU sits idle, whether you're running inference or training. We've been working",
+  "date_iso": "2026-07-16",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "hugging-face"
+   ],
+   "concept-theme": [
+    "performance",
+    "optimization",
+    "latency"
+   ],
+   "content-type": [
+    "deep-dive",
+    "performance-report"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "ai-general",
+    "python"
+   ],
+   "ecosystem-language": [
+    "python"
+   ],
+   "topic-technology": [
+    "data-pipelines",
+    "datasets",
+    "performance-optimization",
+    "computer-vision"
+   ]
+  }
+ },
+ {
+  "id": 3722,
+  "source_id": 8,
+  "url": "https://vester.si/ai-impact",
+  "title": "AI Impact, by the numbers",
+  "title_pt": "Impacto da IA, em números",
+  "summary_pt": "O artigo apresenta um panorama quantitativo do impacto da inteligência artificial, com dados atualizados de 16 fontes. Os números mostram crescimento expressivo em atividades de desenvolvimento no GitHub (+79% em novos repositórios, +138% em pull requests), aumento de 680 mil domínios .ai e 55% mais requisições de crawlers de IA. No mercado de trabalho, há queda de 7,3% em vagas de call centers e telemarketing, enquanto editoras tradicionais perdem 6,3% dos empregos. Já na pesquisa, artigos sobre agentes/agentic cresceram 196% no arXiv, e a área de processamento de linguagem natural teve alta de 265% no OpenAlex.\n\nNo ecossistema de bibliotecas, o destaque são os pacotes da OpenAI (npm +428%, PyPI +472%) e Anthropic (npm +784%, PyPI +704%). Modelos como DeepSeek-R1 e Whisper large-v3 acumulam milhões de downloads no Hugging Face. Por outro lado, perguntas no Stack Overflow caíram 72%, sinalizando que desenvolvedores estão migrando para ferramentas de IA. O resumo reflete uma adoção acelerada da IA, com impactos positivos em hubs técnicos e negativos em setores tradicionais e fóruns de programação.",
+  "snippet": "AI Impact, by the numbers 16 sources updated daily. Click a source for more metrics. GitHub ▲ +79.1% New repositories (monthly) 8.9M GitHub ▲ +138.8% New pull requests (monthly) 15.6M GitHub ▲ +146.8% New issues (monthly) 3.7M Domains (DNIB) ▲ +680k .ai (registry counts) 1.3M Cloudflare Radar ▲ +55.4% All AI crawlers 5.8%of HTTP requests US jobs (BLS) ▼ −7.3% Call centres & telemarketing 276k arXi",
+  "date_iso": "2026-07-23",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "openai",
+    "anthropic",
+    "deepseek-r",
+    "flux",
+    "hugging-face"
+   ],
+   "concept-theme": [
+    "metrics",
+    "open-source",
+    "community"
+   ],
+   "content-type": [
+    "state-of-the-ecosystem"
+   ],
+   "difficulty": [
+    "all-levels"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "topic-technology": [
+    "machine-learning",
+    "deep-learning",
+    "nlp",
+    "generative-ai",
+    "foundation-models",
+    "ai-agents"
+   ],
+   "trending-emerging": [
+    "agentic-ai",
+    "ai-coding-agents"
+   ]
+  }
+ },
+ {
+  "id": 3723,
+  "source_id": 8,
+  "url": "https://morethanmoore.substack.com/p/intel-starts-shipping-high-na-euv",
+  "title": "Intel Starts Shipping High-NA EUV Silicon",
+  "title_pt": "Intel começa a enviar chips fabricados com EUV de alta abertura numérica",
+  "summary_pt": "A Intel começou a enviar processadores Panther Lake (Core Ultra Series 3) fabricados com a tecnologia High-NA EUV, anunciada em parceria com a ASML. O scanner de US$ 380 milhões, instalado na fábrica D1X em Oregon, é usado para litografia de alta precisão em algumas camadas dos chips, com rendimento equivalente ao dos scanners EUV tradicionais de baixa abertura numérica (Low-NA). A máquina utiliza abertura numérica de 0,55, permitindo exposições únicas que antes exigiam múltiplas etapas, reduzindo custos e defeitos. No entanto, o alto custo por ferramenta e a necessidade de stitching em chips grandes levantam questões econômicas, com análises indicando que o ponto de equilíbrio financeiro só deve ser alcançado por volta de 2030. A Intel é a primeira a usar a tecnologia em produção, enquanto TSMC optou por esperar. A empresa planeja oferecer High-NA como opção para clientes externos no nó 14A.",
+  "snippet": "In April 2024 I pulled on a bunny suit at Intel’s D1X fab in Hillsboro, Oregon, and stood a few feet from a machine the size of a bus and worth a small nation state. Intel Fellow Mark Phillips explained this was ASML’s first High-NA EUV scanner, 165 tons of it. Installation had just wrapped and calibration had begun, but realistically still another few months before test wafers could be run. Intel",
+  "date_iso": "2026-07-16",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "content-type": [
+    "product-launch"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "topic-technology": [
+    "ai-hardware"
+   ]
+  }
+ },
+ {
+  "id": 3724,
+  "source_id": 8,
+  "url": "https://blog.fiddery.com/businesses-with-ugly-ai-menu-redesigns",
+  "title": "businesses with ugly AI menu redesigns!!!",
+  "title_pt": "Cardápios feios feitos por IA em restaurantes",
+  "summary_pt": "O autor, um filipino-americano, visitou um restaurante filipino/havaiano recomendado e ficou decepcionado ao ver que o estabelecimento havia substituído as fotos do cardápio por imagens geradas por inteligência artificial (IA). Ele descreve as imagens como \"estranhas\", \"sombrias\" e de péssima qualidade, comparando o visual a um vale da estranheza (uncanny valley). Embora entenda que pequenos negócios muitas vezes têm margens apertadas, o autor acredita que a decisão veio mais por ignorância do que por maldade, e que preferiria um cardápio escrito em fontes como Comic Sans ou Papyrus a essas imagens de IA. Apesar da aparência perturbadora, a comida — no caso, um spamsilog — estava deliciosa e remeteu a memórias afetivas de café da manhã caseiro. O texto reflete o conflito entre apoiar negócios locais e rejeitar o uso de arte gerada por IA na comunicação visual.",
+  "snippet": "fiddery Home Archive Tags Now Links Guestbook 20 Jul, 2026 I stopped by a Filipino/Hawaiian (mostly filipino) restaurant/bar that was recommended to me a few months ago by someone I met at an AANHPI event. One of my friends that was eating with us had gone many times before and said they enjoyed the menu. We looked up the menu before heading over. As a Fil",
+  "date_iso": "2026-07-20",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "ai-ethics",
+    "ethics",
+    "ux"
+   ],
+   "content-type": [
+    "opinion",
+    "commentary"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "topic-technology": [
+    "generative-ai",
+    "image-generation",
+    "ai-in-business"
+   ]
+  }
+ },
+ {
+  "id": 3725,
+  "source_id": 8,
+  "url": "https://resobscura.substack.com/p/quality-non-fiction-books-are-the",
+  "title": "Quality non-fiction books are the antithesis of AI slop",
+  "title_pt": "Livros de não-ficção de qualidade são a antítese do conteúdo genérico de IA",
+  "summary_pt": "O autor relembra seu trabalho de jovem organizando estantes na biblioteca da faculdade, onde desenvolveu o hábito de folhear livros ao acaso – uma experiência que considera mais formativa que qualquer aula formal. Ele contrasta a descoberta serendipitada nos acervos abertos (como a seção GR 830, com livros sobre vampiros e lobisomens) com a pobreza das buscas no Google atualmente. Para resgatar essa curadoria, criou (com ajuda do Claude Code) uma plataforma gratuita que reúne finalistas e vencedores dos principais prêmios de não-ficção em inglês, permitindo busca semântica – recurso que considera o mais útil da IA por melhorar a pesquisa tradicional. O artigo também analisa o que chama de 'era de ouro' da não-ficção (décadas de 1980 a 2000), atribuindo-a a fatores como viagens de avião, quebra de barreiras sociais e avanços na catalogação (MARC). O autor inclui visualizações de dados – como a distribuição de prêmios por editora e a evolução temporal dos prêmios – e reflete sobre o possível declínio da qualidade da não-ficção na era da IA, apontando que ferramentas de detecção como Pangram são eficazes e que plataformas como Substack já as adotaram.",
+  "snippet": "My first year of college, I had a work-study job which ended up being one of the most sneakily important intellectual experiences of my life. I was a lowly library shelver, assigned to the shelves labelled A through F section in the Library of Congress filing system: mostly works on religion, philosophy, sociology, and history. I say sneakily important because at first glance, shelving books in a",
+  "date_iso": "2026-07-22",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "content-type": [
+    "opinion"
+   ],
+   "difficulty": [
+    "all-levels"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "topic-technology": [
+    "generative-ai",
+    "ai-ethics"
    ]
   }
  }

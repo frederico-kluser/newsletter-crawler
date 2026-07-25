@@ -137737,7 +137737,7 @@
   "title_pt": "React 19.0.5",
   "summary_pt": "A versão 19.0.5 do React foi lançada com uma correção para uma vulnerabilidade nos React Server Components. Essa atualização é importante para evitar possíveis riscos de segurança em aplicações que utilizam o servidor para renderizar componentes. Recomenda-se que todos os usuários façam a atualização o mais rápido possível.",
   "snippet": "have been released to deploy a fix for a React Server Components vulnerability.",
-  "date_iso": "2026-07-22",
+  "date_iso": "2026-04-08",
   "kind": "release",
   "section": "RELEASES",
   "verify_status": "ok",
@@ -149803,6 +149803,1982 @@
    "topic-technology": [
     "generative-ai",
     "ai-ethics"
+   ]
+  }
+ },
+ {
+  "id": 3726,
+  "source_id": 5,
+  "url": "https://infrequently.org/2026/07/state-management",
+  "title": "The Absolute State of Management",
+  "title_pt": "O Estado Absoluto da Gestão",
+  "summary_pt": "O artigo critica o uso generalizado do termo \"gerenciamento de estado\" (state management) no ecossistema React. O autor argumenta que bibliotecas como Redux, MobX, Zustand, Recoil e outras não gerenciam estado de fato — elas apenas propagam notificações de mudanças, funcionando como barramentos de eventos. O verdadeiro gerenciamento de estado exige uma noção de tempo e ordenação (como vetores de clock) para resolver conflitos e garantir consistência, algo que falta nessas ferramentas. O autor sugere alternativas como Y.js, Zero e Fluid, que tratam o tempo e a ordem das mutações, permitindo colaboração em tempo real e desenvolvimento offline-first. A conclusão é que o termo \"gerenciamento de estado\" é enganoso e que a comunidade deveria adotar sistemas mais adequados.",
+  "snippet": "Alex Russell argues Redux, MobX, Zustand, and React itself don't 'manage state', they just propagate it whereas 'real' state management means handling time and conflicts, the way CRDTs and sync engines do. Deliberately provocative (Redux maintainer Mark Erikson has already pushed back) but with substance underneath.",
+  "date_iso": "2026-07-23",
+  "kind": "news",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "state-management",
+    "architecture",
+    "dx",
+    "ux"
+   ],
+   "content-type": [
+    "opinion",
+    "analysis"
+   ],
+   "difficulty": [
+    "all-levels"
+   ],
+   "domain": [
+    "reactjs"
+   ],
+   "ecosystem-language": [
+    "javascript",
+    "typescript",
+    "graphql-lang"
+   ],
+   "framework-library-tool": [
+    "react",
+    "redux",
+    "mobx",
+    "zustand",
+    "recoil",
+    "jotai"
+   ],
+   "topic-technology": [
+    "state-management"
+   ]
+  }
+ },
+ {
+  "id": 3727,
+  "source_id": 5,
+  "url": "https://nextjs.org/blog/july-2026-security-release",
+  "title": "July 2026 Security Release",
+  "title_pt": "Atualização de Segurança de Julho de 2026",
+  "summary_pt": "A Next.js lançou patches de segurança para as versões v16.2.11 (Active LTS) e v15.5.21 (Maintenance LTS), corrigindo diversas vulnerabilidades. As atualizações também estão disponíveis nas versões canary e preview da v16.3.0.\n\nAs falhas corrigidas incluem: negação de serviço (DoS) no App Router via Server Actions (CVE-2026-64641), bypass de middleware/proxy em aplicações com Turbopack e único locale (CVE-2026-64642), Server-Side Request Forgery (SSRF) em regras de rewrite com hostname controlado pelo atacante (CVE-2026-64645) e em Server Actions em servidores customizados (CVE-2026-64649). Também foram resolvidos problemas de DoS na API de otimização de imagens com SVGs (CVE-2026-64644), payload ilimitado em Server Actions no Edge runtime (CVE-2026-64646), exposição não autenticada de endpoints internos de funções Server (CVE-2026-64643), e confusão de cache em respostas para requisições com corpo, incluindo com sequências inválidas de UTF-8 (CVE-2026-64648 e CVE-2026-64647).\n\nA Vercel mantém um programa de bug bounty para segurança de frameworks open source. Dúvidas podem ser enviadas para security@vercel.com.",
+  "snippet": "The first of Next.js's promised regular security releases is here, addressing several vulnerabilities.",
+  "date_iso": "2026-07-20",
+  "kind": "release",
+  "section": "IN BRIEF",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "vercel"
+   ],
+   "concept-theme": [
+    "security"
+   ],
+   "content-type": [
+    "security-advisory",
+    "cve"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "reactjs"
+   ],
+   "ecosystem-language": [
+    "javascript"
+   ],
+   "framework-library-tool": [
+    "nextjs",
+    "turbopack"
+   ],
+   "topic-technology": [
+    "server-actions",
+    "middleware",
+    "security-node"
+   ]
+  }
+ },
+ {
+  "id": 3728,
+  "source_id": 5,
+  "url": "https://gtkx.dev/blog/gtkx-1-0-rc-1",
+  "title": "GTKX 1.0 Release Candidate",
+  "title_pt": "GTKX 1.0 Release Candidate",
+  "summary_pt": "O GTKX 1.0 Release Candidate (rc.1) representa uma reformulação completa do framework desde a versão 0.21.0. A principal mudança é que as ligações (bindings) agora são geradas localmente, a partir dos arquivos .gir das bibliotecas GObject instaladas no sistema, e não mais pré-empacotadas. O desenvolvedor declara as bibliotecas desejadas no arquivo gtkx.config.ts, e o CLI do GTKX gera pacotes TypeScript completos com tipagem estática, incluindo classes, sinais e mixins. O modelo de programação agora segue o React DOM: usa-se createRoot().render() com um componente <GtkApplication> como raiz, e todos os widgets GTK4 são componentes React com props tipadas, incluindo suporte a sinais e propriedades notificáveis. O reconciliador foi reescrito para ser genérico, e elementos podem ser passados como props, como um buffer para um GtkTextView. Também há novos hooks como useSignal e useSetting.",
+  "snippet": "Lets you build native Linux desktop apps with React and GTK4, and v1.0 has reached release candidate status.",
+  "date_iso": "2026-07-14",
+  "kind": "release",
+  "section": "IN BRIEF",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "ui",
+    "type-safety",
+    "api-design",
+    "developer-productivity"
+   ],
+   "content-type": [
+    "version-release"
+   ],
+   "difficulty": [
+    "expert"
+   ],
+   "domain": [
+    "reactjs",
+    "frontend"
+   ],
+   "ecosystem-language": [
+    "typescript"
+   ],
+   "framework-library-tool": [
+    "react",
+    "nodejs"
+   ],
+   "topic-technology": [
+    "reconciliation",
+    "jsx",
+    "props",
+    "typescript-node"
+   ]
+  }
+ },
+ {
+  "id": 3729,
+  "source_id": 5,
+  "url": "https://x.com/ReactRouter/status/2079966504162856965",
+  "title": "Upgrade React Router due to CVEs",
+  "title_pt": "Atualize o React Router devido a CVEs",
+  "summary_pt": "Foram publicados novos CVEs para o React Router (5 moderados, 1 alto), que tratam principalmente de casos marginais de relatórios anteriores. Para obter as correções mais atualizadas, atualize para as versões v7.18.0 ou v8.3.0. Mais detalhes nos avisos de segurança no GitHub (link no artigo).",
+  "snippet": "The React Router team advises upgrading to v7.18.0 or v8.3.0 due to several newly published CVEs.",
+  "date_iso": "2026-07-22",
+  "kind": "news",
+  "section": "IN BRIEF",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "security"
+   ],
+   "content-type": [
+    "cve"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "reactjs",
+    "frontend"
+   ],
+   "ecosystem-language": [
+    "javascript"
+   ],
+   "framework-library-tool": [
+    "react-router"
+   ],
+   "topic-technology": [
+    "routing",
+    "npm-security",
+    "supply-chain-security"
+   ]
+  }
+ },
+ {
+  "id": 3730,
+  "source_id": 5,
+  "url": "https://ui.shadcn.com/docs/changelog/2026-07-toast",
+  "title": "shadcn/ui new Toast component",
+  "title_pt": "Novo componente Toast do shadcn/ui",
+  "summary_pt": "O shadcn/ui lançou um novo componente Toast, construído sobre os primitivos do Base UI. Ele oferece suporte a ações, tipos de status, promessas, empilhamento e dispensa por deslize (swipe).\n\nPara adicioná-lo ao seu projeto, basta executar o comando `pnpm dlx shadcn@latest add toast` no terminal. O componente também inclui um exemplo de código com `\"use client\"` e importação do botão.",
+  "snippet": "It has a new Toast component.",
+  "date_iso": "2026-07-25",
+  "kind": "tool",
+  "section": "IN BRIEF",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "ui"
+   ],
+   "content-type": [
+    "library-release"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "reactjs",
+    "frontend"
+   ],
+   "ecosystem-language": [
+    "typescript",
+    "javascript"
+   ],
+   "framework-library-tool": [
+    "shadcn-ui"
+   ],
+   "topic-technology": [
+    "component-libraries"
+   ]
+  }
+ },
+ {
+  "id": 3731,
+  "source_id": 5,
+  "url": "https://backstage.orus.eu/react-composition-patterns-at-orus",
+  "title": "Props, Composers, and Providers: The Composition Pattern We're Converging On",
+  "title_pt": "Props, Compositores e Providers: O Padrão de Composição que Estamos Convergindo",
+  "summary_pt": "O artigo descreve uma abordagem em escada para compor componentes React, partindo de props simples até um padrão mais robusto com providers e contratos. A escada tem quatro degraus: props simples (rung 1), componentes compostos (rung 2) que expõem subcomponentes em vez de props infinitas, um compositor com providers (rung 3) para lidar com múltiplas fontes de dados sem drilling, e estado elevado por trás de um contrato (rung 4) para ações que cruzam limites de componentes. A recomendação é começar sempre no degrau mais baixo e só subir quando surge uma dor concreta. Exemplos práticos mostram como cada degrau resolve problemas específicos (como a lista de cotações com fontes diferentes ou o bloco de notas com callbacks profundos).",
+  "snippet": "One team's decision ladder for component composition, from plain props up to context contracts.",
+  "date_iso": "2026-07-15",
+  "kind": "news",
+  "section": "IN BRIEF",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "design-patterns",
+    "architecture",
+    "ui"
+   ],
+   "content-type": [
+    "guide",
+    "best-practices"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "reactjs"
+   ],
+   "ecosystem-language": [
+    "javascript"
+   ],
+   "framework-library-tool": [
+    "react"
+   ],
+   "topic-technology": [
+    "component-composition",
+    "props"
+   ]
+  }
+ },
+ {
+  "id": 3732,
+  "source_id": 5,
+  "url": "https://xabierlameiro.com/blog/nextjs/nextjs-memory-leak-in-production",
+  "title": "How to Find a Next.js Memory Leak in Production",
+  "title_pt": "Como Encontrar um Vazamento de Memória do Next.js em Produção",
+  "summary_pt": "Se seu servidor Next.js autogerenciado cresce até morrer com erro de heap ou OOMKilled, não comece auditando seu próprio código — há três vazamentos de memória documentados no framework (versões 15.5 a 16.3). O primeiro é o cache LRU do roteador que não conta as chaves (issue #94890), causando um crescimento lento e monotônico conforme o número de URLs únicas. O segundo é a retenção da árvore de renderização RSC por requisição (#94919), pior no Node 22/24 e quando clientes abortam a conexão. O terceiro são os IDs de setTimeout do middleware que nunca são liberados (#95094), gerando crescimento gradual. Para diagnosticar, monitore o uso de heap (process.memoryUsage()) e compare com URLs únicas, tráfego ou rotas específicas. Use snapshots de heap no DevTools para identificar os retentores (LRUNode, reactServerStream ou TimeoutsManager). Em serverless (Vercel), o OOM raramente aparece, mas o mesmo problema se manifesta como 504 FUNCTION_INVOCATION_TIMEOUT — um exemplo real do autor foi causado por ineficiência algorítmica (O(N²)) e resolvido com cache no nível de módulo. A ferramenta next-leak automatiza a detecção desses vazamentos, fornecendo diagnósticos claros. Verifique sempre os retentores em vez de palpites, correlacione o formato do crescimento com as causas e, em serverless, foque no tempo de resposta em vez da memória.",
+  "snippet": "How to see if three unfixed memory leaks in Next.js affect you.",
+  "date_iso": "2026-07-18",
+  "kind": "news",
+  "section": "IN BRIEF",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "vercel"
+   ],
+   "concept-theme": [
+    "debugging",
+    "performance",
+    "profiling",
+    "observability"
+   ],
+   "content-type": [
+    "how-to"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "nodejs",
+    "reactjs"
+   ],
+   "ecosystem-language": [
+    "javascript"
+   ],
+   "framework-library-tool": [
+    "nextjs"
+   ],
+   "topic-technology": [
+    "memory-leaks",
+    "profiling",
+    "rsc",
+    "middleware",
+    "routing",
+    "observability"
+   ]
+  }
+ },
+ {
+  "id": 3733,
+  "source_id": 5,
+  "url": "https://andrei-calazans.com/posts/2026-07-15-which-react-native-animation-library",
+  "title": "Which React Native Animation Library Should You Use for Performance?",
+  "title_pt": "Qual biblioteca de animação React Native escolher para performance?",
+  "summary_pt": "O artigo compara três bibliotecas de animação para React Native — Animated, Reanimated e react-native-ease — com foco em desempenho. Usando um setup com 60 caixas animadas em um dispositivo Android de 90 Hz, foram testados quatro tipos de animação: toque, atualização de estado, arrasto contínuo (scrub) e loop. Os resultados mostram que a melhor escolha depende do caso de uso:",
+  "snippet": "React Native’s animation story is fragmented. You can reach for the built-in Animated API, Reanimated, or newer entrants like react-native-ease. They all animate a box. The interesting question is: if performance is your primary concern, which one should you pick? So I built a harness and measured it. Everything here is reproducible — AndreiCalazans/react-native-animation-performance. The setup Th",
+  "date_iso": "2026-07-15",
+  "kind": "news",
+  "section": "IN BRIEF",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "performance",
+    "profiling",
+    "optimization"
+   ],
+   "content-type": [
+    "benchmark"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "reactjs",
+    "frontend"
+   ],
+   "ecosystem-language": [
+    "javascript"
+   ],
+   "framework-library-tool": [
+    "react"
+   ],
+   "topic-technology": [
+    "react-native",
+    "animations",
+    "performance-optimization",
+    "profiling"
+   ]
+  }
+ },
+ {
+  "id": 3734,
+  "source_id": 5,
+  "url": "https://www.shadscan.com",
+  "title": "Shadscan: Deterministic UI Audits for `shadcn` Apps",
+  "title_pt": "Shadscan: Auditorias Determinísticas de UI para Apps shadcn",
+  "summary_pt": "O shadscan realiza análises estáticas em componentes React da biblioteca shadcn para detectar regressões de acessibilidade, estado e composição. A ferramenta garante resultados determinísticos (os mesmos em cada execução) e foi projetada para ser usada tanto no terminal quanto em pipelines de integração contínua (CI). É voltada para desenvolvedores que desejam automatizar auditorias de UI de forma confiável.",
+  "snippet": "A tool that statically analyzes your shadcn components using almost 60 deterministic checks (no AI or API keys needed) around fundamental accessibility, state, and composition best practices.",
+  "date_iso": "2026-07-25",
+  "kind": "tool",
+  "section": "Code, Tools & Libraries",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "accessibility",
+    "testing",
+    "ci-cd",
+    "dx"
+   ],
+   "content-type": [
+    "tool-release"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "reactjs",
+    "frontend"
+   ],
+   "ecosystem-language": [
+    "typescript",
+    "javascript"
+   ],
+   "framework-library-tool": [
+    "shadcn-ui"
+   ],
+   "topic-technology": [
+    "component-libraries",
+    "accessibility",
+    "design-systems",
+    "testing-react"
+   ]
+  }
+ },
+ {
+  "id": 3735,
+  "source_id": 5,
+  "url": "https://github.com/shakacode/react_on_rails/releases/tag/v17.0.0",
+  "title": "React on Rails 17.0",
+  "title_pt": "React on Rails 17.0",
+  "summary_pt": "A versão 17.0 do React on Rails traz suporte explícito ao React 18 para SSR streaming não RSC, além de novos contratos TypeScript para respostas JSON do Rails e callers tipados para mutações com TanStack Query. Inclui também funcionalidades Pro como pré-carregamento de RSC via cache do provider, renderização RSC bufferizada para páginas estáticas, métricas de desempenho no navegador e atribuição Server-Timing para respostas RSC streamed, além de diagnósticos de artefatos RSC e streaming bidirecional de props assíncronas (modo pull).\n\nPara desenvolvedores, a versão adiciona owner stacks em relatórios de erro (React 19.1+), agendamento de hidratação com `hydrate_on`, revalidação de cache baseada em tags (similar ao Next.js), e um novo hook `useRailsForm` que integra formulários React a controladores Rails sem API dedicada. O comando `bin/dev clean` agora limpa bundles e caches gerados, e o renderizador Node ganha endpoints `/health` e `/ready` para verificação de disponibilidade.",
+  "snippet": "A complete way to integrate React into Ruby on Rails apps. Now with full support for React 19.",
+  "date_iso": "2026-07-25",
+  "kind": "release",
+  "section": "Code, Tools & Libraries",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "data-fetching",
+    "type-safety",
+    "caching",
+    "api-design"
+   ],
+   "content-type": [
+    "version-release"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "reactjs",
+    "frontend",
+    "backend"
+   ],
+   "ecosystem-language": [
+    "typescript",
+    "javascript",
+    "ruby"
+   ],
+   "framework-library-tool": [
+    "react",
+    "rails",
+    "react-query",
+    "webpack"
+   ],
+   "topic-technology": [
+    "streaming-ssr",
+    "server-components",
+    "suspense",
+    "data-fetching"
+   ]
+  }
+ },
+ {
+  "id": 3736,
+  "source_id": 5,
+  "url": "https://github.com/margelo/react-native-nitro-sqlite/releases/tag/v9.7.0",
+  "title": "react-native-nitro-sqlite 9.7",
+  "title_pt": "react-native-nitro-sqlite 9.7",
+  "summary_pt": "A versão 9.7.0 do react-native-nitro-sqlite foi lançada, trazendo suporte para busca vetorial (vector search) através do novo pacote react-native-nitro-sqlite-vec. Além disso, inclui uma tela SQL Console para testar consultas, testes de harness e diversas correções de bugs, como melhoria na gestão de memória e ativação do modo de desempenho SQLite no iOS. O projeto foi reestruturado em um monorepo e a documentação foi atualizada para refletir a API atual.",
+  "snippet": "Fast SQLite library for React Native built using Nitro Modules.",
+  "date_iso": "2026-07-23",
+  "kind": "release",
+  "section": "Code, Tools & Libraries",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "performance",
+    "optimization"
+   ],
+   "content-type": [
+    "version-release"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "frontend"
+   ],
+   "ecosystem-language": [
+    "javascript",
+    "typescript",
+    "sql"
+   ],
+   "framework-library-tool": [
+    "react"
+   ],
+   "topic-technology": [
+    "react-native",
+    "vector-search",
+    "sql",
+    "relational-databases",
+    "monorepos"
+   ],
+   "trending-emerging": [
+    "vector-search"
+   ]
+  }
+ },
+ {
+  "id": 3737,
+  "source_id": 5,
+  "url": "https://rjsf-team.github.io/react-jsonschema-form",
+  "title": "react-jsonschema-form 6.7",
+  "title_pt": "react-jsonschema-form 6.7",
+  "summary_pt": "O artigo apresenta a versão 6.7 do react-jsonschema-form, uma biblioteca que permite gerar formulários dinâmicos a partir de esquemas JSON. É mostrado um exemplo de formulário de registro com campos obrigatórios como nome e sobrenome, além de idade, biografia, senha e telefone. A interface do usuário pode ser personalizada com foco automático, placeholders, descrições em Markdown, widgets específicos (como updown para idade) e validação de campos obrigatórios. O JSON de dados de exemplo preenche o formulário com valores típicos. A versão 6.7 mantém a compatibilidade com React e oferece maior flexibilidade na criação de formulários complexos a partir de definições declarativas.",
+  "snippet": "Component for building forms from JSON Schema.",
+  "date_iso": "2026-07-25",
+  "kind": "release",
+  "section": "Code, Tools & Libraries",
+  "verify_status": "junk",
+  "verify_notes": "Conteúdo não é um release real, apenas bloco de código JSON Schema.",
+  "tags": {
+   "concept-theme": [
+    "ui",
+    "validation"
+   ],
+   "content-type": [
+    "version-release"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "reactjs"
+   ],
+   "ecosystem-language": [
+    "javascript",
+    "json"
+   ],
+   "framework-library-tool": [
+    "react"
+   ],
+   "topic-technology": [
+    "forms",
+    "component-libraries"
+   ]
+  }
+ },
+ {
+  "id": 3738,
+  "source_id": 5,
+  "url": "https://github.com/thebuilder/react-intersection-observer",
+  "title": "react-intersection-observer 10.1",
+  "title_pt": "react-intersection-observer 10.1",
+  "summary_pt": "react-intersection-observer é uma biblioteca React que implementa a API Intersection Observer, permitindo detectar quando um elemento entra ou sai da viewport. Ela oferece hooks, render props e suporte a children simples para monitorar a visibilidade de elementos de forma eficiente. O pacote facilita o rastreamento de impressões, animações baseadas em scroll e lazy loading de imagens.\n\nPrincipais funcionalidades incluem o hook `useInView`, que retorna uma ref, o estado `inView` e o `entry` do IntersectionObserver, e o hook `useOnInView`, que aceita um callback sem causar re-renderizações, ideal para cenários críticos de performance. O componente `<InView>` suporta tanto render props quanto children simples, permitindo controle total sobre o comportamento. A biblioteca também oferece suporte experimental à versão 2 do IntersectionObserver, que rastreia se um elemento está oculto por outro ou possui filtros aplicados.\n\nPara testes, a biblioteca inclui utilitários em `react-intersection-observer/test-utils` que simulam o IntersectionObserver, facilitando a validação do comportamento de visibilidade em componentes.",
+  "snippet": "Hooks for the Intersection Observer API.",
+  "date_iso": "2026-07-25",
+  "kind": "release",
+  "section": "Code, Tools & Libraries",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "performance",
+    "ux"
+   ],
+   "content-type": [
+    "version-release",
+    "library-release"
+   ],
+   "difficulty": [
+    "beginner"
+   ],
+   "domain": [
+    "reactjs",
+    "frontend"
+   ],
+   "ecosystem-language": [
+    "javascript"
+   ],
+   "framework-library-tool": [
+    "react"
+   ],
+   "topic-technology": [
+    "react-hooks",
+    "web-apis"
+   ]
+  }
+ },
+ {
+  "id": 3739,
+  "source_id": 5,
+  "url": "https://github.com/mdx-editor/editor/releases/tag/v4.1.0",
+  "title": "MDXEditor 4.1",
+  "title_pt": "MDXEditor 4.1",
+  "summary_pt": "O artigo intitulado \"MDXEditor 4.1\" provavelmente aborda o lançamento dessa versão do editor de markdown com suporte a JSX. No entanto, o conteúdo fornecido consiste apenas em elementos de navegação e interface do GitHub, sem informações detalhadas sobre as novidades, correções ou melhorias trazidas pela atualização. Para uma análise completa, seria necessário acessar o texto original do anúncio.",
+  "snippet": "Popular rich Markdown text editor component.",
+  "date_iso": "2026-07-25",
+  "kind": "release",
+  "section": "Code, Tools & Libraries",
+  "verify_status": "junk",
+  "verify_notes": "Conteúdo capturado consiste apenas em menus de navegação e elementos de interface do GitHub; não inclui o texto da release.",
+  "tags": {
+   "content-type": [
+    "version-release"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "reactjs",
+    "frontend"
+   ],
+   "ecosystem-language": [
+    "markdown",
+    "javascript"
+   ],
+   "topic-technology": [
+    "jsx",
+    "component-libraries"
+   ]
+  }
+ },
+ {
+  "id": 3740,
+  "source_id": 5,
+  "url": "https://github.com/pmndrs/jotai/releases/tag/v3.0.0-alpha.0",
+  "title": "Jotai 3.0 Alpha",
+  "title_pt": "Jotai 3.0 Alpha",
+  "summary_pt": "A versão 3.0 alpha do Jotai traz diversas mudanças que quebram compatibilidade com versões anteriores. Principais alterações incluem a remoção de suporte para TypeScript antigo, builds UMD e SystemJS, Node.js antigo, CommonJS, bundler Rollup e React antigo. O alvo de compilação foi atualizado para ES2020, e funcionalidades como atomFamily, loadable, integração Babel e o método setSelf foram removidas.",
+  "snippet": "What's Changed [v3] drop old TS by @dai-shi in #3336 [v3] drop UMD and SystemJS builds by @dai-shi in #3338 [v3] drop old node by @dai-shi in #3339 [v3] module-first package by @dai-shi in #3340 [v3] drop CJS by @dai-shi in #3341 [v3] use NODE_ENV directly by @dai-shi in #3342 [v3] drop rollup by @dai-shi in #3344 [v3] drop old React by @dai-shi in #3345 [v3] es2020 target by @dai-shi in #3346 [v",
+  "date_iso": "2026-07-25",
+  "kind": "release",
+  "section": "Code, Tools & Libraries",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "state-management",
+    "refactoring",
+    "dev-experience"
+   ],
+   "content-type": [
+    "version-release"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "reactjs",
+    "frontend"
+   ],
+   "ecosystem-language": [
+    "typescript",
+    "javascript"
+   ],
+   "framework-library-tool": [
+    "jotai"
+   ],
+   "topic-technology": [
+    "state-management",
+    "react-hooks",
+    "esm"
+   ]
+  }
+ },
+ {
+  "id": 3741,
+  "source_id": 5,
+  "url": "https://github.com/react/react/releases/tag/v19.2.8",
+  "title": "React 19.2.8, 19.1.9 and 19.0.8 Released",
+  "title_pt": "React 19.2.8, 19.1.9 e 19.0.8 Lançados",
+  "summary_pt": "A equipe do React anunciou o lançamento das versões 19.2.8, 19.1.9 e 19.0.8. Trata-se de atualizações de patch que corrigem bugs e melhoram a estabilidade da biblioteca. A recomendação é que todos os usuários atualizem para a versão mais recente para garantir as correções e aprimoramentos incluídos.",
+  "snippet": "Small bumps for the React 19 release lines to fix a DoS vulnerability that could be triggered by sending specially crafted requests to server function endpoints.",
+  "date_iso": "2026-07-21",
+  "kind": "release",
+  "section": null,
+  "verify_status": "junk",
+  "verify_notes": "Conteúdo capturado é apenas elementos de interface, não o texto do release.",
+  "tags": {
+   "concept-theme": [
+    "dev-experience",
+    "open-source"
+   ],
+   "content-type": [
+    "version-release"
+   ],
+   "domain": [
+    "reactjs",
+    "frontend"
+   ],
+   "ecosystem-language": [
+    "javascript"
+   ],
+   "framework-library-tool": [
+    "react"
+   ],
+   "topic-technology": [
+    "react-19"
+   ]
+  }
+ },
+ {
+  "id": 3742,
+  "source_id": 5,
+  "url": "https://ui.shadcn.com/docs/changelog/2026-07-react-aria",
+  "title": "shadcn/ui Adds React Aria as a Component Base",
+  "title_pt": "shadcn/ui adiciona React Aria como base de componentes",
+  "summary_pt": "O shadcn/ui agora oferece suporte ao React Aria como uma base de componentes, facilitando o uso da suíte de componentes da Adobe para quem já utiliza o shadcn/ui. Os usuários podem selecionar o React Aria em qualquer lugar onde antes era possível escolher Base UI ou Radix, incluindo a interface de linha de comando (CLI), predefinições (presets) e outros contextos. Essa integração amplia as opções de personalização e compatibilidade dentro do ecossistema shadcn/ui.",
+  "snippet": "Now it's even easier to use Adobe's React Aria component suite if you're a shadcn/ui user. You can now choose React Aria anywhere you can choose Base UI or Radix, including the CLI, presets, and shadcn/create.",
+  "date_iso": "2026-07-25",
+  "kind": "news",
+  "section": null,
+  "verify_status": "suspect",
+  "verify_notes": "Conteúdo muito raso, apenas repete o título e o blurb, sem desenvolvimento adicional",
+  "tags": {
+   "concept-theme": [
+    "design-systems",
+    "accessibility",
+    "ui"
+   ],
+   "content-type": [
+    "release-announcement"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "reactjs",
+    "frontend"
+   ],
+   "ecosystem-language": [
+    "javascript"
+   ],
+   "framework-library-tool": [
+    "shadcn-ui",
+    "radix-ui",
+    "react"
+   ],
+   "topic-technology": [
+    "component-libraries",
+    "accessibility"
+   ]
+  }
+ },
+ {
+  "id": 3743,
+  "source_id": 5,
+  "url": "https://shopify.engineering/upgrading-checkout-blocks-app-to-polaris-web-components",
+  "title": "Shopify's React to Preact + Web Components Migration",
+  "title_pt": "Migração do Shopify: de React para Preact e Web Components",
+  "summary_pt": "A Checkout Blocks, que atende um terço dos checkouts personalizados da Shopify, migrou suas extensões de UI da pilha legada (React, Remote UI, API 2025-07) para uma nova arquitetura baseada em remote-dom, Preact e Web Components Polaris, além de reescrever tudo em TypeScript. O principal motor foi a necessidade de performance: bundles menores e carregamento mais rápido no momento da compra.\n\nO resultado foi uma redução de 40% a 85% no tamanho dos bundles transferidos e uma melhora consistente no tempo de carregamento (ELT P50 caiu 8%, P90 caiu 7%). Para caber no limite de 64KB gzip imposto pela nova API, a equipe substituiu bibliotecas pesadas como liquidjs (por um parser próprio de 13KB) e dayjs (por utilitário customizado), manteve markdown-to-jsx via alias para Preact, e eliminou o react-reconciler (~89KB) ao trocar React por Preact.\n\nA migração foi incremental, começando pela extensão mais simples (Static Content), com forte uso de IA para conversões mecânicas. Durante o processo, bugs como colisão de IDs (resolvido com hook useStableId) e ausência de textAlign nos componentes Polaris foram corrigidos e enviados upstream. A abordagem pragmática (testes com dados reais de produção, pacote de testes de 42.000 linhas para o parser Liquid) garantiu confiabilidade. O artigo serve como guia prático para quem precisa fazer upgrade semelhante no ecossistema Shopify.",
+  "snippet": "How Shopify squeezed five React-based checkout widgets under a hard 64KB budget by switching to Preact and web components.",
+  "date_iso": "2026-07-25",
+  "kind": "news",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "performance",
+    "optimization",
+    "latency"
+   ],
+   "content-type": [
+    "migration-guide",
+    "case-study"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "reactjs",
+    "frontend"
+   ],
+   "ecosystem-language": [
+    "typescript",
+    "javascript"
+   ],
+   "framework-library-tool": [
+    "preact",
+    "react"
+   ],
+   "topic-technology": [
+    "web-components",
+    "web-performance",
+    "component-libraries",
+    "design-systems",
+    "bundling"
+   ]
+  }
+ },
+ {
+  "id": 3744,
+  "source_id": 5,
+  "url": "https://omgovich.github.io/react-colorful",
+  "title": "React Colorful 5.8: A Simple Color Picker Component",
+  "title_pt": "React Colorful 5.8: Um Componente Simples de Seletor de Cores",
+  "summary_pt": "React Colorful 5.8 é um componente de seletor de cores (color picker) leve e simples para aplicações React e Preact. O componente é pequeno e fácil de integrar, oferecendo uma interface básica para seleção de cores.",
+  "snippet": "A six-year-old color picker component that's simple, straightforward, and now has Shadow DOM support. The homepage includes a live demo.",
+  "date_iso": "2026-07-25",
+  "kind": "release",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "ui"
+   ],
+   "content-type": [
+    "library-release"
+   ],
+   "difficulty": [
+    "for-beginners"
+   ],
+   "domain": [
+    "reactjs"
+   ],
+   "ecosystem-language": [
+    "javascript"
+   ],
+   "framework-library-tool": [
+    "react",
+    "preact"
+   ],
+   "topic-technology": [
+    "component-libraries"
+   ]
+  }
+ },
+ {
+  "id": 3745,
+  "source_id": 8,
+  "url": "https://andonlabs.com/evals/drone-bench",
+  "title": "Drone-Bench",
+  "title_pt": "Drone-Bench: Avaliação de IA para vigilância com drones",
+  "summary_pt": "A Anthropic lançou o Drone-Bench, um benchmark que avalia a capacidade de modelos de IA em escrever código para vigiar ambientes reais usando drones de baixo custo. O benchmark é composto por cinco tarefas sequenciais: reconstrução 3D do ambiente a partir de vídeos, localização do drone no mapa reconstruído, navegação entre salas sem colidir com obstáculos, detecção de uma pessoa específica no feed de vídeo e seguimento dessa pessoa mantendo-a enquadrada. Cada tarefa é testada isoladamente com entradas limpas para evitar propagação de erros, mas uma execução completa exigiria que o modelo superasse o baseline humano em todas as cinco em sequência. Os resultados mostram que os modelos mais avançados, como o opus-4-8 e o fable-5, conseguem superar o baseline nas tarefas de Detecção e Seguimento, mas nenhum ainda superou a tarefa de Reconstrução. A média das execuções fica cerca de seis meses atrás da melhor execução de cada modelo. O relatório destaca que, embora os modelos estejam evoluindo rapidamente para controle físico autônomo, o sucesso completo de ponta a ponta ainda é zero por enquanto. A Anthropic ressalta que a autonomia física crescente dos modelos levanta questões de segurança e uso indevido que devem ser discutidas publicamente.",
+  "snippet": "We’re releasing Drone-Bench, a benchmark measuring how well AI models can write code to surveil real-world environments on low-cost drone hardware. Full report coming soon Progress towards baseline0%20%40%60%80%100%Jul '24Oct '24Jan '25Apr '25Jul '25Oct '25Jan '26Apr '26Jul '26Release dateAverage run matches the baseline on every taskgpt-4o-maygpt-4o-novo1o3opus-4-5gemini-3.1opus-4-8fable-584% pro",
+  "date_iso": "2026-07-25",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "gpt",
+    "o-series",
+    "claude",
+    "gemini"
+   ],
+   "concept-theme": [
+    "evals",
+    "ai-safety",
+    "responsible-ai"
+   ],
+   "content-type": [
+    "benchmark",
+    "release-announcement"
+   ],
+   "difficulty": [
+    "for-researchers"
+   ],
+   "domain": [
+    "llm-models"
+   ],
+   "ecosystem-language": [
+    "python"
+   ],
+   "topic-technology": [
+    "ai-benchmarks",
+    "code-models",
+    "robotics",
+    "autonomous-vehicles",
+    "computer-vision",
+    "model-evaluation"
+   ],
+   "trending-emerging": [
+    "ai-coding-agents",
+    "vision-language-models"
+   ]
+  }
+ },
+ {
+  "id": 3746,
+  "source_id": 8,
+  "url": "https://www.cerebras.ai/press-release/amd-and-cerebras-announce-industry-leading-ultra-low-latency-and-high-throughput-ai-inference",
+  "title": "AMD and Cerebras Launch AI Inference Solution",
+  "title_pt": "AMD e Cerebras Lançam Solução de Inferência de IA",
+  "summary_pt": "A AMD e a Cerebras Systems anunciaram uma parceria técnica para criar uma nova solução de inferência de IA com arquitetura desagregada. A solução combina o AMD Helios, uma solução de rackscale de alto desempenho para processamento de prompts e contextos longos, com o Cerebras Wafer-Scale Engine, projetado para geração de tokens com latência ultrabaixa. O objetivo é atender às demandas variadas de cargas de trabalho de inferência, desde aplicações de alto volume que priorizam a geração de tokens até cenários de agentes de IA e copilotos em tempo real que exigem respostas rápidas.\n\nA integração permite otimizar cada etapa do fluxo de inferência de forma independente, prometendo até 5 vezes mais tokens por segundo por watt (T/s/W) em comparação com soluções tradicionais. A Cerebras planeja implantar sistemas AMD Helios em seus datacenters, e a solução conjunta estará disponível inicialmente via Cerebras Cloud no segundo semestre de 2026. A parceria busca oferecer uma plataforma diferenciada para inferência de latência ultrabaixa sem sacrificar throughput ou escala.",
+  "snippet": "AMD and Cerebras are collaborating to advance a workload-optimized approach to ultra-low-latency AI inference infrastructure.AMD Helios™ and the Cerebras Wafer-Scale Engine will operate as a single disaggregated inference workflow, combining ultra-high-throughput from AMD Instinct™ GPUs, with ultra-fast token generation of Cerebras Wafer-Scale Engine.Cerebras plans to deploy AMD Helios in its data",
+  "date_iso": "2026-07-23",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "cerebras"
+   ],
+   "concept-theme": [
+    "latency",
+    "throughput",
+    "performance"
+   ],
+   "content-type": [
+    "product-launch"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "topic-technology": [
+    "ai-hardware",
+    "gpu",
+    "ai-accelerators",
+    "ai-infrastructure",
+    "inference-optimization"
+   ],
+   "trending-emerging": [
+    "agentic-ai",
+    "copilots",
+    "ai-data-centers"
+   ]
+  }
+ },
+ {
+  "id": 3747,
+  "source_id": 8,
+  "url": "https://bfl.ai/blog/flux-3-mimic",
+  "title": "FLUX 3 x mimic: The Next Generation of Video-Action Models",
+  "title_pt": "FLUX 3 x mimic: A Nova Geração de Modelos de Vídeo-Ação",
+  "summary_pt": "A Black Forest Labs (BFL) lançou o FLUX 3, um modelo de fundação multimodal que vai além da geração de conteúdo audiovisual. Diferente de seus antecessores (FLUX 1 e 2), o FLUX 3 é treinado conjuntamente em imagens, vídeo e áudio, e sua parte mais desafiadora — a predição de vídeo — exige que o modelo aprenda física do mundo real, como contato, movimento e causa e efeito. Ações robóticas são tratadas como mais uma modalidade de baixa dimensão, fortemente acoplada às observações visuais. Após um breve período de adaptação, o modelo integra a predição de ações sem perder qualidade na geração de vídeo, demonstrando que um único backbone pode sustentar tanto criação de conteúdo quanto IA física.\n\nEm parceria com a mimic robotics, a BFL desenvolveu o FLUX-mimic, um modelo de vídeo-ação que decodifica ações a partir das representações internas do FLUX 3. Usando a técnica Self-Flow, que unifica aprendizado de geração e representação, o modelo alcança representações mais desacopladas e de alta qualidade. Isso permite que o FLUX-mimic seja extremamente eficiente em termos de dados: atinge boas taxas de sucesso com muito menos demonstrações que modelos anteriores, e se recupera naturalmente de falhas, já que compreende o comportamento do mundo. O backbone pode ser otimizado para rodar em menos de 80 ms em uma GPU NVIDIA RTX 5090, e o sistema completo atinge tempos de reação de 101 ms, viabilizando a implantação em linhas de produção reais.\n\nA Audi, parceira industrial, já testa o FLUX-mimic em tarefas complexas como montagem de componentes e manipulação de materiais flexíveis, áreas onde a automação convencional falha. O modelo supera modelos anteriores de visão-linguagem-ação, mesmo com o backbone congelado, e ao ajustá-lo junto com o decodificador de ações atinge o estado da arte em taxas de sucesso. A conclusão é que o FLUX 3 não é apenas um modelo de geração de conteúdo, mas um modelo de mundo que possibilita agir — e a colaboração com a mimic prova que essa abordagem funciona no chão de fábrica.",
+  "snippet": "An early version of FLUX 3, our new multimodal foundation model, is now running on robots. We gave mimic robotics early access to FLUX.3. Their strength in robot learning and deployment, combined with the model's world knowledge and BFL's foundation model expertise, produced FLUX-mimic: the next generation of video-action models.FLUXFLUX 1 and FLUX 2 generate images. FLUX 3 expands into multimodal",
+  "date_iso": "2026-07-23",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "content-type": [
+    "version-release",
+    "deep-dive"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "topic-technology": [
+    "robotics",
+    "ai-video",
+    "multimodal-ai",
+    "foundation-models"
+   ],
+   "trending-emerging": [
+    "world-models",
+    "multimodal",
+    "foundation-models"
+   ]
+  }
+ },
+ {
+  "id": 3748,
+  "source_id": 8,
+  "url": "https://www.cnbc.com/2026/07/23/amazon-makes-sellers-label-ai-generated-people-in-images-after-ny-law.html",
+  "title": "Amazon cracks down on use of AI images by sellers after New York law",
+  "title_pt": "Amazon exige que vendedores identifiquem imagens geradas por IA após lei de Nova York",
+  "summary_pt": "A Amazon está exigindo que vendedores terceiros rotulem imagens e vídeos de produtos que contenham \"pessoas geradas por IA\", após uma nova lei do estado de Nova York que obriga maior transparência sobre \"performers sintéticos\" em anúncios. A política, comunicada aos vendedores na quarta-feira, determina que eles adicionem palavras-chave de metadados específicos antes do upload, tanto para imagens quanto para o \"conteúdo A+\" (vídeos e gráficos nas páginas de listagem). A lei, em vigor desde o mês passado, exige que empresas informem o uso de performers sintéticos em substituição a atores reais, sendo descrita pela governadora Kathy Hochul como \"pioneira no país\".\n\nA Amazon esclareceu que a exigência não se aplica a conteúdos de personagens de TV, videogames ou filmes, nem a pessoas reais mesmo que alteradas por IA. A empresa afirmou que adicionará um indicador nas listagens para informar consumidores sobre o uso de imagens com pessoas geradas por IA, mas não especificou os critérios para exibir esse selo. A medida ocorre em meio ao uso crescente de IA pela própria Amazon em suas operações — como otimização de listagens, assistente Alexa e busca com produtos gerados por IA — e pelo aumento do uso de ferramentas de IA por vendedores terceiros, que representam mais de 60% das vendas na plataforma.\n\nAinda não há lei federal obrigando a divulgação de conteúdo publicitário criado por IA nos EUA, mas estados como Nova York e Califórnia estão tomando medidas para exigir mais transparência. Plataformas como Meta, TikTok, Pinterest e YouTube já implementaram rótulos de conteúdo gerado por IA, mas têm sido criticadas por não rotularem adequadamente anúncios com influenciadores artificiais que promovem produtos duvidosos.",
+  "snippet": "Amazon is requiring that third-party sellers label any product images or videos that contain \"AI-generated people\" after New York recently passed a law mandating greater transparency around \"synthetic performers\" in ads. The company informed sellers Wednesday of the policy change, according to a copy of the announcement viewed by CNBC. The policy directs sellers to tag images and any \"A+ content,\"",
+  "date_iso": "2026-07-24",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "amazon"
+   ],
+   "concept-theme": [
+    "ai-regulation",
+    "transparency",
+    "compliance",
+    "ai-ethics"
+   ],
+   "content-type": [
+    "news"
+   ],
+   "difficulty": [
+    "all-levels"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "topic-technology": [
+    "ai-regulation",
+    "generative-ai",
+    "image-generation",
+    "ai-policy",
+    "deepfakes"
+   ],
+   "trending-emerging": [
+    "ai-governance"
+   ]
+  }
+ },
+ {
+  "id": 3749,
+  "source_id": 8,
+  "url": "https://github.com/palmier-io/palmier-pro",
+  "title": "macOS video editor built for AI",
+  "title_pt": "Editor de vídeo para macOS criado para IA",
+  "summary_pt": "O Palmier Pro é um editor de vídeo de código aberto para macOS, desenvolvido do zero em Swift. Ele se inspira no Adobe Premiere Pro, mas integra recursos de IA generativa diretamente na linha do tempo. Os usuários podem gerar vídeos e imagens usando modelos como Seedance, Kling e Nano Banana Pro, além de conectar agentes como Claude, Codex ou Cursor via protocolo MCP. O editor básico é gratuito e não requer login; já as funcionalidades de IA generativa exigem assinatura. O aplicativo expõe um servidor MCP em http://127.0.0.1:19789/mcp, permitindo controle remoto por agentes. Atualmente, só funciona no macOS 26 (Tahoe) em Apple Silicon.",
+  "snippet": "Palmier Pro is an open source video editor for Mac. You and your agent can generate and edit videos together inside the timeline. Swift-native video editor We built Palmier Pro from scratch with Swift. The north star is Premiere Pro, with our take on integrating AI into the workflow. Built-in Generative AI Generate videos and images with SOTA models like Seedance, Kling, Nano Banana Pro inside the",
+  "date_iso": "2026-07-25",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "codex",
+    "claude"
+   ],
+   "concept-theme": [
+    "open-source",
+    "dx",
+    "agentops"
+   ],
+   "content-type": [
+    "product-launch",
+    "tool-release"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "ecosystem-language": [
+    "swift"
+   ],
+   "framework-library-tool": [
+    "claude"
+   ],
+   "topic-technology": [
+    "ai-video",
+    "model-context-protocol",
+    "tool-calling",
+    "generative-ai"
+   ],
+   "trending-emerging": [
+    "mcp",
+    "ai-agents",
+    "agentic-ai"
+   ]
+  }
+ },
+ {
+  "id": 3750,
+  "source_id": 8,
+  "url": "https://bfl.ai/blog/flux-3",
+  "title": "FLUX 3 - Real World Models: Towards Multimodal Flow Models as the Backbone of Visual Intelligence.",
+  "title_pt": "FLUX 3 – Rumo a Modelos Multimodais como Base da Inteligência Visual",
+  "summary_pt": "O FLUX 3 é um novo modelo de fundação multimodal que aprende simultaneamente de imagens, vídeos, áudio e ações. Em vez de tratar cada modalidade isoladamente, o modelo busca capturar uma representação unificada do mundo real: como objetos se comportam, como se movem e como eventos soam. Essa abordagem permite que as diferentes modalidades se complementem, revelando relações causais e físicas que uma única fonte não conseguiria fornecer.\n\nConstruído sobre a técnica Self-Flow, o FLUX 3 escalou significativamente os recursos computacionais e de dados para treinar em vídeo, imagens e áudio ao mesmo tempo. Entre suas capacidades, destacam-se a geração de vídeos com áudio de até 20 segundos, edição e síntese de imagens em diversos estilos, e a predição de ações físicas — seja integrada nativamente ou a partir do backbone de vídeo como base para modelos especializados, como o FLUX-mimic para robótica. Avaliações iniciais mostram preferência superior em comparações com modelos concorrentes.\n\nO plano de lançamento inclui acesso antecipado para geração e edição de vídeo/áudio (FLUX 3 Video), imagem (FLUX 3 Image), predição de ações (FLUX 3 Action, em parcerias de pesquisa) e, futuramente, acesso de pesos abertos para um backbone multimodal (FLUX 3 Dev). Resultados preliminares indicam que o modelo já se destaca em expressões faciais, associação de sons a eventos e suporte multilíngue, com expectativa de melhorias contínuas durante a fase de acesso antecipado.",
+  "snippet": "FLUX 3 is our new multimodal foundation model. It jointly learns from images, videos, and audio within a unified architecture, because what it needs to learn is not any one of these elements in isolation. Instead, a model must learn a representation of the world: how objects hold together, how things move, and how events sound.No single modality provides a complete description. Each is a projectio",
+  "date_iso": "2026-07-23",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "flux"
+   ],
+   "concept-theme": [
+    "architecture"
+   ],
+   "content-type": [
+    "release-announcement"
+   ],
+   "difficulty": [
+    "expert"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "topic-technology": [
+    "multimodal-models",
+    "foundation-models",
+    "generative-ai",
+    "model-release",
+    "model-architecture"
+   ],
+   "trending-emerging": [
+    "multimodal",
+    "world-models",
+    "foundation-models"
+   ]
+  }
+ },
+ {
+  "id": 3751,
+  "source_id": 8,
+  "url": "https://www.alexhyett.com/videos/tried-building-app-with-ai-it-took-a-year",
+  "title": "I Tried Building a Real App With AI. It Took a Year.",
+  "title_pt": "Tentei Criar um App com IA. Levou um Ano.",
+  "summary_pt": "O autor queria um app para rastrear hábitos e tarefas com sua esposa, mas nenhum dos existentes atendia todos os requisitos. Decidiu criar o próprio usando IA, mesmo sem experiência em Swift. Com a ajuda do Cursor, conseguiu um protótipo funcional em 6 horas, mas o código era bagunçado, o iCloud não sincronizava e o app ficou lento com muitos dados. Teve que refatorar manualmente, corrigir bugs e lidar com problemas do iOS 26. Após um ano de desenvolvimento e testes, o app está na App Store (gratuito para até 6 hábitos). O autor reflete que, embora a IA tenha permitido começar, ela gerou código de baixa qualidade e ele não aprendeu a programar de fato. Alerta sobre a dependência excessiva de IA e o risco de uma geração de desenvolvedores sem habilidades reais.",
+  "snippet": "17 Jul 2026 My wife and I have been looking for an app to track things like habits, hobbies, and when we last did certain chores.To be honest there are probably hundreds of different habit trackers on the App Store. Next to todo list apps they are supposed to be the easiest apps to create so it is not really that surprising there are so many options. But we must have tried dozens of different apps",
+  "date_iso": "2026-07-17",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "developer-productivity",
+    "dev-experience",
+    "ux",
+    "data-privacy"
+   ],
+   "content-type": [
+    "retrospective",
+    "analysis"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "topic-technology": [
+    "code-models",
+    "generative-ai",
+    "prompt-engineering",
+    "context-window"
+   ],
+   "trending-emerging": [
+    "ai-coding-agents",
+    "vibe-coding"
+   ]
+  }
+ },
+ {
+  "id": 3752,
+  "source_id": 1,
+  "url": "https://adventures.nodeland.dev/archive/no-we-cant-harden-nodejs-against-prototype",
+  "title": "No, We Can't Harden Node.js Against Prototype Pollution",
+  "title_pt": "Não, não podemos blindar o Node.js contra poluição de protótipo",
+  "summary_pt": "O artigo argumenta que tentar 'blindar' o Node.js contra gadgets de poluição de protótipo (como execSync ou fetch) é uma luta perdida. A razão é estrutural: qualquer gadget explorado assume que um atacante já conseguiu escrever em Object.prototype (passo zero). Nesse ponto, o jogo já acabou – o gadget é apenas um sintoma, e existem infinitos outros em todo o ecossistema (core, bibliotecas, frameworks). O JavaScript lê pela cadeia de protótipos em construções sintáticas (destructuring, spread, await, etc.), tornando inviável proteger cada ponto individualmente. Mesmo o esforço dos 'primordials' no Node.js (para integridade, não segurança) não resolve o problema, pois não impede a leitura de opções com protótipo poluído.\n\nA verdadeira correção está na origem: impedir a poluição no momento em que dados não confiáveis se tornam objetos. Ferramentas como `secure-json-parse` bloqueiam `__proto__` e `constructor.prototype` na desserialização. O foco deve estar em guardar essas fronteiras – com objetos de protótipo nulo, `Map` no lugar de dicionários e validação rigorosa – pois o runtime não pode compensar uma vulnerabilidade que a própria linguagem torna acessível.",
+  "snippet": "An explanation of why the Node team rejects prototype pollution reports against core: each assumes the attacker can already write to `Object.prototype`, by which point the game is over. The true fix lives at the boundary where untrusted JSON becomes objects.",
+  "date_iso": "2026-07-19",
+  "kind": "news",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "security"
+   ],
+   "content-type": [
+    "opinion",
+    "editorial"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "nodejs",
+    "backend"
+   ],
+   "ecosystem-language": [
+    "javascript"
+   ],
+   "framework-library-tool": [
+    "nodejs"
+   ],
+   "topic-technology": [
+    "security-node",
+    "npm-security"
+   ]
+  }
+ },
+ {
+  "id": 3753,
+  "source_id": 1,
+  "url": "https://nodejs.org/en/blog/vulnerability/july-2026-security-releases",
+  "title": "A round of July 27 Node.js security releases",
+  "title_pt": "Lançamentos de segurança do Node.js em 27 de julho",
+  "summary_pt": "O Node.js lançará novas versões das linhas 26.x, 24.x e 22.x em ou logo após 27 de julho de 2026 para corrigir vulnerabilidades de segurança, sendo a mais grave classificada como HIGH. É importante destacar que versões com fim de vida útil também são afetadas. Recomenda-se usar versões atualizadas. Mais informações podem ser encontradas na política de segurança oficial e no processo de reporte de vulnerabilidades no GitHub. Para se manter informado, inscreva-se na lista de e-mails nodejs-sec.",
+  "snippet": "has been announced, with Node 26.x, 24.x, 22.x being updated to resolve a HIGH severity issue.",
+  "date_iso": "2026-07-27",
+  "kind": "news",
+  "section": "IN BRIEF",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "security"
+   ],
+   "content-type": [
+    "security-advisory",
+    "release-announcement"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "nodejs"
+   ],
+   "ecosystem-language": [
+    "javascript"
+   ],
+   "framework-library-tool": [
+    "nodejs"
+   ],
+   "topic-technology": [
+    "security-node",
+    "node-versions",
+    "lts"
+   ]
+  }
+ },
+ {
+  "id": 3754,
+  "source_id": 1,
+  "url": "https://insights.linuxfoundation.org/collection/details/ojsf/contributors?end=2026-07-23&start=2025-07-23&timeRange=past365days",
+  "title": "a ranking of the top contributors to its projects",
+  "title_pt": "Um ranking dos principais contribuidores de seus projetos",
+  "summary_pt": "A OpenJS Foundation, mantida pela Linux Foundation, publicou um ranking dos principais contribuidores de seus projetos. A fundação hospeda 43 projetos que dão suporte ao ecossistema JavaScript, com mais de 115 mil contribuidores cadastrados. A análise inclui métricas como contribuidores ativos, retenção trimestral, distribuição geográfica e um indicador de saúde geral dos projetos, que atualmente está em nível 'preocupante' (31). O ranking também destaca as organizações mais ativas e a dependência entre contribuidores e organizações.",
+  "snippet": "in the past year. Matteo Collina leads the way…just! (which include Node, Express, and Electron)",
+  "date_iso": "2026-06-12",
+  "kind": "news",
+  "section": "IN BRIEF",
+  "verify_status": "junk",
+  "verify_notes": "Conteúdo não possui texto real, apenas elementos de interface e carregamento; Título promete ranking mas não há dados; Tipo 'news' inadequado: página é dashboard de analytics",
+  "tags": {
+   "concept-theme": [
+    "open-source",
+    "community"
+   ],
+   "content-type": [
+    "state-of-the-ecosystem"
+   ],
+   "difficulty": [
+    "all-levels"
+   ],
+   "domain": [
+    "nodejs"
+   ],
+   "ecosystem-language": [
+    "javascript"
+   ]
+  }
+ },
+ {
+  "id": 3755,
+  "source_id": 1,
+  "url": "https://x.com/bunjavascript/status/2079863261630267773",
+  "title": "the Bun team is teasing",
+  "title_pt": "Bun v1.4 será o maior salto em compatibilidade com Node.js desde o Bun v1.0",
+  "summary_pt": "A equipe do Bun anunciou que a versão 1.4 trará o maior avanço em compatibilidade com Node.js desde o lançamento do Bun v1.0. Mais de 505 testes e correções estão aguardando para serem incorporados. Além de fazer os testes passarem, eles estão realizando differential fuzzing contra o Node.js, fuzzing de APIs de runtime, chamadas de sistema e varredura de vulnerabilidades de segurança. Também foram feitas melhorias significativas no uso de memória e correções para casos extremos que não estavam cobertos pelos testes.",
+  "snippet": "the imminent release of Bun 1.4, which will have the \"biggest jump in Node.js compatibility since Bun v1.0\".",
+  "date_iso": "2026-08-22",
+  "kind": "news",
+  "section": "IN BRIEF",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "testing",
+    "security",
+    "performance",
+    "optimization"
+   ],
+   "content-type": [
+    "version-release"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "nodejs"
+   ],
+   "ecosystem-language": [
+    "javascript"
+   ],
+   "framework-library-tool": [
+    "bun"
+   ]
+  }
+ },
+ {
+  "id": 3756,
+  "source_id": 1,
+  "url": "https://pnpm.io/blog/releases/11.11-11.14",
+  "title": "pnpm has had a flurry of releases",
+  "title_pt": "pnpm tem uma enxurrada de lançamentos",
+  "summary_pt": "As versões 11.11 a 11.14 do pnpm trazem uma série de novidades. O destaque é o gerenciamento nativo de lançamentos em workspaces, com os comandos `pnpm change` (para registrar intenções de mudança), `pnpm lane` (para canais de lançamento por pacote) e `pnpm version -r` (para aplicar as versões). Também foi adicionado o comando `pnpm doctor`, que diagnostica a instalação e o ambiente de ponta a ponta, e os comandos `pnpm access` e `pnpm team` para gerenciar pacotes e organizações no registro.\n\nOutras melhorias incluem: overrides de convergência (com o formato `\"pkg@\": \"<versão>\"` para unificar dependências compatíveis), suporte a especificadores de peerDependencies com esquemas (como `npm:` ou `file:`), e a restauração de seletores de script por expressão regular com execução sequencial. Na parte de segurança, foi corrigida uma vulnerabilidade de path traversal que podia escrever arquivos fora do `node_modules` e impedido que lockfiles maliciosos extraíssem conteúdo para locais arbitrários.\n\nO consumo de memória durante a resolução de dependências com cache frio foi reduzido em aproximadamente 30%, corrigindo uma regressão em relação ao pnpm 10. Um deadlock na resolução de peer dependencies (que travava o `pnpm install` em cenários como `electron-builder@26.15.3`) foi resolvido, e diversas correções pontuais foram aplicadas, como o tratamento correto de lockfiles simbólicos e a não reescrita desnecessária do lockfile.",
+  "snippet": "introducing native workspace release management, a doctor command to diagnose installation issues, and more.",
+  "date_iso": "2026-07-18",
+  "kind": "release",
+  "section": "IN BRIEF",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "developer-productivity",
+    "performance",
+    "security"
+   ],
+   "content-type": [
+    "version-release"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "nodejs"
+   ],
+   "ecosystem-language": [
+    "javascript"
+   ],
+   "framework-library-tool": [
+    "pnpm"
+   ],
+   "topic-technology": [
+    "package-management",
+    "workspaces",
+    "monorepos",
+    "npm-security",
+    "cli-tools"
+   ]
+  }
+ },
+ {
+  "id": 3757,
+  "source_id": 1,
+  "url": "https://www.microsoft.com/en-us/security/blog/2026/07/15/unpacking-asyncapi-npm-supply-chain-compromise-import-time-payload-delivery",
+  "title": "Unpacking the AsyncAPI npm Supply Chain Compromise",
+  "title_pt": "Desvendando o comprometimento da cadeia de suprimentos npm do AsyncAPI",
+  "summary_pt": "Em 14 de julho de 2026, a Microsoft Threat Intelligence detectou um ataque coordenado à cadeia de suprimentos npm da organização @asyncapi. Cinco versões de quatro pacotes (@asyncapi/specs, @asyncapi/generator, @asyncapi/generator-components e @asyncapi/generator-helpers) foram republicadas com um loader malicioso que executa no momento da importação (require/import), ignorando a mitigação comum de `--ignore-scripts`. O ataque começou com um pull request malicioso que explorou uma vulnerabilidade no workflow `pull_request_target` do GitHub Actions, roubando um token de automação. Usando esse token, o atacante fez push de commits para branches de publicação, acionando workflows legítimos de trusted publishing (OIDC) que publicaram as versões comprometidas. O payload de múltiplos estágios baixa um segundo estágio do IPFS (sync.js), que decifra e executa o runtime modular Miasma, com capacidades de C2, persistência (registry no Windows, systemd no Linux, shell RC no macOS) e canais de fallback descentralizados (Nostr, Ethereum, BitTorrent DHT). Embora os módulos de coleta de credenciais e propagação estivessem desabilitados nesta campanha, eles poderiam ser ativados. A Microsoft recomenda remover imediatamente as versões afetadas, limpar caches do npm/Yarn, bloquear conexões de saída para 85.137.53[.]71 nas portas 8080, 8081 e 8091, e rotacionar credenciais expostas. Os artefatos são detectados como Trojan:JS/MiasmStealer.SC e Trojan:Script/Supychain.A.",
+  "snippet": "It seems attackers have already adapted to a world where post-install scripts are no longer run. Microsoft Security Research",
+  "date_iso": "2026-07-16",
+  "kind": "news",
+  "section": "IN BRIEF",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "security",
+    "ci-cd",
+    "open-source"
+   ],
+   "content-type": [
+    "incident-report",
+    "security-advisory"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "nodejs"
+   ],
+   "ecosystem-language": [
+    "javascript"
+   ],
+   "framework-library-tool": [
+    "nodejs"
+   ],
+   "topic-technology": [
+    "supply-chain-security",
+    "npm-security"
+   ]
+  }
+ },
+ {
+  "id": 3758,
+  "source_id": 1,
+  "url": "https://socket.dev/blog/slopsquatting-targets-across-frontier-llms",
+  "title": "New Study Identifies 53 Slopsquatting Targets Across 5 Popular LLMs",
+  "title_pt": "Novo Estudo Identifica 53 Alvos de Slopsquatting em 5 LLMs Populares",
+  "summary_pt": "Um novo estudo revelou que modelos de linguagem de grande porte (LLMs) estão gerando nomes de pacotes npm que podem ser explorados por ataques de slopsquatting — uma variação do typosquatting voltada para código gerado por IA. Os pesquisadores identificaram 53 alvos potenciais em cinco LLMs populares, incluindo nomes de pacotes inventados que poderiam ser registrados por atacantes para distribuir código malicioso. O fenômeno ocorre quando os LLMs sugerem nomes de pacotes que não existem, abrindo brecha para que agentes mal-intencionados os registrem e comprometam quem confiar cegamente nas sugestões da IA.",
+  "snippet": "LLMs continue to make up npm package names. Sarah Gooding",
+  "date_iso": "2026-07-25",
+  "kind": "news",
+  "section": "IN BRIEF",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "security",
+    "open-source"
+   ],
+   "content-type": [
+    "paper-summary"
+   ],
+   "difficulty": [
+    "for-researchers"
+   ],
+   "domain": [
+    "llm-models",
+    "nodejs"
+   ],
+   "ecosystem-language": [
+    "javascript"
+   ],
+   "framework-library-tool": [
+    "npm",
+    "nodejs",
+    "llama",
+    "gpt",
+    "claude",
+    "gemini"
+   ],
+   "topic-technology": [
+    "npm-security",
+    "supply-chain-security",
+    "hallucination-detection",
+    "ai-safety",
+    "security-node"
+   ],
+   "trending-emerging": [
+    "foundation-models"
+   ]
+  }
+ },
+ {
+  "id": 3759,
+  "source_id": 1,
+  "url": "https://flaviocopes.com/nodejs-background-jobs-bullmq",
+  "title": "Running Background Jobs in Node.js with BullMQ",
+  "title_pt": "Executando Tarefas em Segundo Plano no Node.js com BullMQ",
+  "summary_pt": "O artigo ensina como construir uma fila de tarefas em segundo plano confiável no Node.js usando BullMQ e Redis. Ele cobre a criação de um produtor que adiciona jobs a uma fila 'emails' e um worker que processa esses jobs, incluindo retentativas com backoff exponencial, atualização de progresso, concorrência e, crucialmente, a idempotência para garantir que jobs possam ser executados mais de uma vez sem efeitos colaterais. Também são abordados eventos, prioridades, atrasos e a separação dos processos de API e worker para escalabilidade.\n\nAlém disso, o tutorial destaca práticas de produção como validação de dados, classificação de erros, uso de chaves de idempotência no banco de dados, monitoramento de filas, e a importância de uma política de limpeza de jobs antigos para evitar crescimento infinito do Redis. O objetivo é transformar o Redis em um sistema prático de processamento em segundo plano, mantendo o trabalho lento e propenso a falhas longe da requisição HTTP original.",
+  "snippet": "Flavio Copes",
+  "date_iso": "2026-07-23",
+  "kind": "news",
+  "section": "IN BRIEF",
+  "verify_status": "suspect",
+  "verify_notes": "kind 'news' não corresponde ao conteúdo (é um tutorial técnico)",
+  "tags": {
+   "concept-theme": [
+    "reliability",
+    "concurrency",
+    "error-handling",
+    "async"
+   ],
+   "content-type": [
+    "tutorial"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "nodejs",
+    "backend"
+   ],
+   "ecosystem-language": [
+    "javascript"
+   ],
+   "framework-library-tool": [
+    "bullmq",
+    "redis",
+    "nodejs"
+   ],
+   "topic-technology": [
+    "background-jobs",
+    "task-queues",
+    "idempotency"
+   ]
+  }
+ },
+ {
+  "id": 3760,
+  "source_id": 1,
+  "url": "https://github.com/sindresorhus/execa",
+  "title": "Execa 10.0: Better Process Execution from Node",
+  "title_pt": "Execa 10.0: Melhor Execução de Processos no Node",
+  "summary_pt": "Execa 10.0 é uma biblioteca Node.js para execução de processos de forma programática, mais segura e flexível que shells tradicionais. Ela oferece sintaxe simples com Promises e template strings (similar ao zx), sem necessidade de escaping ou citação, eliminando riscos de injeção. Suporta execução de binários locais sem npx, tem suporte aprimorado ao Windows, e permite pipe de múltiplos subprocessos, recuperação de resultados intermediários e transformação de entrada/saída. A instalação é feita via `npm install execa`. A documentação cobre execução básica, scripts, entrada/saída (incluindo arquivos e streams), IPC (comunicação entre processos), terminação graciosa e depuração com erros detalhados e modo verboso. Exemplos mostram desde comandos simples até pipelines complexos e uso com Web Streams.",
+  "snippet": "A powerful way to run processes that makes passing in input, processing output, handling errors, piping things around, and handling streams easy. v10 trims the API and adds new stream conversion powers and a `killDescendants` option to terminate a subprocess's descendant processes.",
+  "date_iso": "2026-07-25",
+  "kind": "release",
+  "section": "Code & Tools",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "devops",
+    "developer-productivity",
+    "dev-experience"
+   ],
+   "content-type": [
+    "version-release"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "nodejs"
+   ],
+   "ecosystem-language": [
+    "javascript",
+    "typescript"
+   ],
+   "framework-library-tool": [
+    "nodejs",
+    "npm"
+   ],
+   "topic-technology": [
+    "scripting",
+    "automation",
+    "cli-tools"
+   ]
+  }
+ },
+ {
+  "id": 3761,
+  "source_id": 1,
+  "url": "https://github.com/nubjs/nub/releases/tag/v0.5.0",
+  "title": "Nub 0.5",
+  "title_pt": "Nub 0.5.0: Nova ferramenta de scaffolding e melhorias no gerenciador de pacotes",
+  "summary_pt": "Nub 0.5.0 chega com o comando `nub init`, um scaffold de projeto focado em TypeScript que cria uma estrutura mínima (cinco arquivos, git e instalação) a partir de um único comando. O projeto gerado já vem configurado com TypeScript 7, tipos para Node sem poluição do DOM, imports reais com extensão .ts e configuração estrita. Também foram adicionadas perguntas interativas e suporte a modo não-interativo.\n\nAlém disso, o `nub create <template>` integra-se com a convenção `create-*` do ecossistema, permitindo criar projetos a partir de templates como Vue, Vite, Nuxt e outros. Vários projetos já detectam o Nub como gerenciador. A versão também traz correções no gerenciador de pacotes, incluindo suporte a `packageExtensions` no manifesto raiz, melhorias no `dlx`, `update`, `linker hoisted` e `approve-builds`. O comando `nubx` foi ajustado para seguir o comportamento do npx, e o gerenciamento de processos ganhou melhorias no controle de processos filhos e no suporte a `--env-file` no `watch`. Instalações do Node agora fazem streaming da extração durante o download, e há suporte a builds no Android/Termux sem JVM.",
+  "snippet": "The all-in-one toolkit that augments Node's feature set. v0.5 adds `nub init` as a way to quickly scaffold new projects.",
+  "date_iso": "2026-07-25",
+  "kind": "release",
+  "section": "Code & Tools",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "type-safety",
+    "dx",
+    "developer-productivity"
+   ],
+   "content-type": [
+    "version-release"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "nodejs"
+   ],
+   "ecosystem-language": [
+    "typescript"
+   ],
+   "topic-technology": [
+    "typescript-node",
+    "package-management",
+    "cli-tools"
+   ]
+  }
+ },
+ {
+  "id": 3762,
+  "source_id": 1,
+  "url": "https://github.com/dmtrKovalenko/odiff",
+  "title": "odiff 4.5",
+  "title_pt": "odiff 4.5",
+  "summary_pt": "Odiff é uma ferramenta de comparação de imagens pixel a pixel extremamente rápida, escrita em Zig com otimizações SIMD (SSE2, AVX2, AVX512 e NEON). Ela suporta comparação entre diferentes formatos (PNG, JPEG, WebP, TIFF), detecção de anti-aliasing, ignora regiões específicas e usa o algoritmo de transmissão YIQ NTSC para determinar diferenças visuais. Além do uso via linha de comando, oferece bindings para Node.js com suporte a modo servidor para evitar overhead de inicialização. Integra-se com frameworks como Playwright e Cypress através de plugins.\n\nEm benchmarks, o odiff mostrou ser cerca de 6 vezes mais rápido que o pixelmatch e o ImageMagick em imagens grandes (ex.: screenshots de sites e imagens 8K). A instalação pode ser feita via npm (pacote odiff-bin) ou download direto dos binários pré-compilados para diversas plataformas. O projeto é open source sob licença MIT.",
+  "snippet": "Fast SIMD-powered image comparison library. Written in Zig with Node bindings.",
+  "date_iso": "2026-07-25",
+  "kind": "release",
+  "section": "Code & Tools",
+  "verify_status": "suspect",
+  "verify_notes": "Título indica versão 4.5, mas conteúdo é descrição geral do projeto, não notas de versão; kind 'release' pode ser inadequado.",
+  "tags": {
+   "concept-theme": [
+    "performance",
+    "testing",
+    "optimization"
+   ],
+   "content-type": [
+    "tool-release"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "nodejs"
+   ],
+   "ecosystem-language": [
+    "zig",
+    "javascript"
+   ],
+   "topic-technology": [
+    "computer-vision",
+    "performance-optimization",
+    "native-addons",
+    "cli-tools"
+   ]
+  }
+ },
+ {
+  "id": 3763,
+  "source_id": 1,
+  "url": "https://github.com/frinyvonnick/node-html-to-image",
+  "title": "node-html-to-image 6.2",
+  "title_pt": "node-html-to-image 6.2",
+  "summary_pt": "A biblioteca node-html-to-image permite gerar imagens (PNG, JPEG) a partir de HTML usando Puppeteer em modo headless e Handlebars para incluir lógica nos templates. A instalação é feita via npm ou yarn. O uso básico consiste em chamar a função com um HTML e o caminho de saída. A biblioteca oferece diversas opções: tipo e qualidade da imagem, conteúdo para templates Handlebars, aguardar carregamento (waitUntil), configuração do Puppeteer (como puppeteer-core ou puppeteer-extra), funções assíncronas antes da renderização e do screenshot, fundo transparente, codificação base64, seletor CSS para captura de elemento específico, helpers Handlebars, timeout e concorrência máxima. É possível definir a resolução via CSS no HTML, trabalhar com imagens locais convertendo para base64 e usar fontes também em base64. O buffer da imagem pode ser obtido em vez de salvar em disco, permitindo envio direto em APIs como Express. Para gerar múltiplas imagens, basta passar um array no campo 'content', com opção de salvar cada uma em disco ou obter um array de buffers. A biblioteca é compatível com TypeScript e possui testes com yarn test.",
+  "snippet": "A function to generate images from HTML.",
+  "date_iso": "2026-07-25",
+  "kind": "release",
+  "section": "Code & Tools",
+  "verify_status": "suspect",
+  "verify_notes": "kind 'release' parece inadequado para conteúdo de documentação geral",
+  "tags": {
+   "concept-theme": [
+    "developer-productivity",
+    "dev-experience"
+   ],
+   "content-type": [
+    "library-release"
+   ],
+   "difficulty": [
+    "beginner"
+   ],
+   "domain": [
+    "nodejs"
+   ],
+   "ecosystem-language": [
+    "typescript",
+    "javascript"
+   ],
+   "framework-library-tool": [
+    "nodejs",
+    "npm"
+   ],
+   "topic-technology": [
+    "web-development"
+   ]
+  }
+ },
+ {
+  "id": 3764,
+  "source_id": 1,
+  "url": "https://github.com/gitify-app/gitify",
+  "title": "Gitify 7.0",
+  "title_pt": "Gitify 7.0",
+  "summary_pt": "O Gitify 7.0 é um aplicativo gratuito e de código aberto que consolida notificações de várias plataformas Git na barra de menus ou bandeja do sistema. Compatível com macOS, Windows e Linux, ele oferece suporte a GitHub Cloud, GitHub Enterprise, Gitea, Forgejo, Codeberg e Bitbucket Cloud, proporcionando uma experiência rápida e nativa.\n\nPrincipais recursos incluem notificações unificadas, suporte a múltiplos forges, personalização de temas e filtros, e integração com a bandeja do sistema. O aplicativo permite marcar notificações como lidas, concluídas ou se desinscrever, com detalhes enriquecidos para a maioria dos forges compatíveis.\n\nPara começar, basta baixar o Gitify em gitify.io, instalar e autenticar com as contas desejadas. Usuários de macOS também podem instalá-lo via Homebrew com o comando `brew install gitify`. O projeto é licenciado sob a MIT License e aceita contribuições da comunidade.",
+  "snippet": "Electron-powered Git notifications menu bar app.",
+  "date_iso": "2026-07-25",
+  "kind": "release",
+  "section": "Code & Tools",
+  "verify_status": "suspect",
+  "verify_notes": "kind aparentemente errado: conteúdo é README do projeto, não notas de release",
+  "tags": {
+   "company-vendor-model": [
+    "github"
+   ],
+   "concept-theme": [
+    "dev-experience",
+    "developer-productivity",
+    "ux",
+    "open-source"
+   ],
+   "content-type": [
+    "version-release"
+   ],
+   "difficulty": [
+    "all-levels"
+   ],
+   "domain": [
+    "nodejs"
+   ],
+   "ecosystem-language": [
+    "javascript"
+   ]
+  }
+ },
+ {
+  "id": 3765,
+  "source_id": 1,
+  "url": "https://github.com/verdaccio/verdaccio/releases/tag/v6.8.0",
+  "title": "Verdaccio 6.8",
+  "title_pt": "Verdaccio 6.8",
+  "summary_pt": "O Verdaccio 6.8 traz melhorias significativas em notificações, correções de segurança e otimizações. Agora, os webhooks de notificação disparam também ao remover pacotes ou versões, com novos templates para diferenciar eventos de publicação/remoção. A correção de propagação de erro 403 do uplink para o cliente evita respostas genéricas 500 em bloqueios de segurança.\n\nO endpoint de busca /-/v1/search ganhou limites de taxa e paginação (máximo 250 resultados, 10000 iterações), evitando varreduras completas do catálogo com requisições anônimas. A seleção de uplink para downloads de tarballs foi corrigida para escolher o registro correto baseado na URL, e registros de distfile ausentes são restaurados a partir dos metadados. Dependências foram atualizadas, incluindo @verdaccio/ui-theme para a versão 9.0.0-next-9.21.",
+  "snippet": "Self-hostable Node.js private proxy registry.",
+  "date_iso": "2026-07-25",
+  "kind": "release",
+  "section": "Code & Tools",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "vercel",
+    "cloudflare",
+    "github"
+   ],
+   "concept-theme": [
+    "security",
+    "authorization",
+    "error-handling",
+    "api-design"
+   ],
+   "content-type": [
+    "version-release"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "nodejs",
+    "backend"
+   ],
+   "ecosystem-language": [
+    "javascript"
+   ],
+   "topic-technology": [
+    "package-management",
+    "rate-limiting",
+    "npm-security",
+    "webhooks"
+   ]
+  }
+ },
+ {
+  "id": 3766,
+  "source_id": 1,
+  "url": "https://github.com/piscinajs/piscina",
+  "title": "Piscina 5.3",
+  "title_pt": "Piscina 5.3",
+  "summary_pt": "Piscina é um pool de workers para Node.js que gerencia threads de trabalho (Worker Threads) para executar tarefas de forma paralela. Cada worker executa uma função exportada de um arquivo separado, e o pool coordena a distribuição das tarefas, retornando os resultados de forma assíncrona. A biblioteca suporta cancelamento de tarefas via AbortController ou EventEmitter, e permite o uso de módulos ES e funções assíncronas.\n\nAs principais opções de configuração incluem os números mínimo e máximo de threads (minThreads e maxThreads), tempo limite de inatividade (idleTimeout), tamanho máximo da fila (maxQueue) e a possibilidade de usar a API Atomics para comunicação mais rápida entre threads. Também é possível definir limites de recursos, como tamanho da pilha e memória, além de suporte a BroadcastChannel para comunicação entre workers a partir do Node.js 18.\n\nO Piscina é útil para tarefas que exigem processamento paralelo intensivo, oferecendo controle fino sobre o ciclo de vida dos workers e a fila de tarefas. Exemplos de uso incluem integração com streams do Node.js para processar dados sob demanda, evitando sobrecarga na fila.",
+  "snippet": "Popular worker thread pool implementation.",
+  "date_iso": "2026-07-25",
+  "kind": "release",
+  "section": "Code & Tools",
+  "verify_status": "suspect",
+  "verify_notes": "Conteúdo contém elementos de interface e navegação (Website, Queue Size, The Team, Sponsors, Resources); Muitos espaços em branco e placeholders no conteúdo",
+  "tags": {
+   "concept-theme": [
+    "concurrency",
+    "parallelism",
+    "async"
+   ],
+   "content-type": [
+    "library-release",
+    "version-release"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "nodejs"
+   ],
+   "ecosystem-language": [
+    "javascript"
+   ],
+   "framework-library-tool": [
+    "nodejs"
+   ],
+   "topic-technology": [
+    "worker-threads",
+    "esm",
+    "commonjs",
+    "task-queues"
+   ]
+  }
+ },
+ {
+  "id": 3767,
+  "source_id": 1,
+  "url": "https://github.com/prisma/prisma/releases/tag/7.9.0",
+  "title": "Prisma 7.9",
+  "title_pt": "Prisma 7.9",
+  "summary_pt": "O Prisma ORM chega à versão 7.9.0 com diversas novidades. O CLI agora conta com autocomplete para bash, zsh, fish e PowerShell, facilitando a descoberta de comandos e opções. A instalação via @bomb.sh/tab integra-se com gerenciadores de pacotes como npm, pnpm e yarn. Para uso global, basta adicionar o comando ao shell.\n\nOutra grande novidade é o suporte preparado para agentes de IA. O comando prisma init agora instala automaticamente um catálogo de skills para ferramentas como Claude Code, Cursor e Codex, garantindo que agentes de codificação tenham conhecimento atualizado do Prisma. Além disso, comandos destrutivos (como db push --accept-data-loss) agora são bloqueados quando um agente de IA é detectado, a menos que haja consentimento explícito. O comando migrate-reset foi removido do servidor MCP para evitar operações perigosas.\n\nA versão também corrige diversos bugs: uma regressão de performance no TypeScript foi resolvida, melhorando a verificação de tipos de minutos para segundos em schemas grandes; validações mais rigorosas para datas inválidas em $queryRaw e $executeRaw; correção de vazamento de conexões em transações interativas; e tratamento adequado de comentários com */ na geração de código. O cache de binários no Windows agora usa %APPDATA%\\Prisma, eliminando duplicatas em bundles Serverless/Docker.\n\nO Prisma Studio foi atualizado para a versão 0.33.0, trazendo uma nova visualização de histórico de migrações (apenas para bancos gerenciados pelo Prisma Next), suporte a Prisma Streams, melhorias na execução de SQL com reconhecimento de schema e correções na edição de arrays textuais no PostgreSQL.\n\nPor fim, o Prisma Compute entra em beta público: uma hospedagem gerenciada para apps TypeScript que rodam próximos ao banco de dados, sem cold starts, com deploy via CLI ou GitHub, ambientes por branch, domínios customizados e certificados TLS automáticos. O serviço é gratuito durante o beta.",
+  "snippet": "Today, we are excited to share the 7.9.0 stable release 🎉 Highlights ORM Tab completions for the Prisma CLI Typing out CLI commands from memory is now optional. Prisma ships shell tab completions for bash, zsh, fish, and PowerShell, covering commands, subcommands, options, flags, and even option values. Setting it up. Most projects run Prisma through a package manager, so completions are enabled",
+  "date_iso": "2026-07-25",
+  "kind": "release",
+  "section": "Code & Tools",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "dev-experience",
+    "developer-productivity"
+   ],
+   "content-type": [
+    "version-release",
+    "announcement"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "nodejs",
+    "backend"
+   ],
+   "ecosystem-language": [
+    "typescript",
+    "bash",
+    "powershell"
+   ],
+   "framework-library-tool": [
+    "prisma"
+   ],
+   "topic-technology": [
+    "query-builder",
+    "database-access",
+    "typescript-node",
+    "relational-databases",
+    "databases"
+   ],
+   "trending-emerging": [
+    "coding-agents"
+   ]
+  }
+ },
+ {
+  "id": 3768,
+  "source_id": 1,
+  "url": "https://domenic.me/agentic-coding-setup",
+  "title": "Domenic Denicola's Agentic Coding Setup",
+  "title_pt": "A Configuração de Codificação com Agentes de Domenic Denicola",
+  "summary_pt": "Domenic Denicola compartilha sua configuração pessoal para desenvolvimento de software assistido por inteligência artificial, após experimentar diversas abordagens. Ele destaca a necessidade de rodar os agentes em uma máquina Linux, devido à dependência de Bash e ferramentas Unix, e descreve como usa uma VM Ubuntu Server com Tailscale para conectar seus dispositivos (desktop, laptop e a VM) em uma rede privada, permitindo acesso remoto de qualquer lugar. O Tailscale também viabiliza SSH, HTTPS para servidores de desenvolvimento seguros e transferência de arquivos.\n\nPara os agentes, Denicola utiliza Claude Code e Codex CLI na VM, e recomenda os aplicativos de desktop do ChatGPT e Claude como clientes finos para interagir remotamente. O ChatGPT é elogiado pela integração SSH suave e suporte a worktrees do Git, enquanto o Claude app ainda apresenta limitações de sincronização e gerenciamento de sessões. Ele adota configurações permissivas (modo 'dangerously skip permissions') para máxima autonomia dos agentes, mas reconhece os riscos de segurança, recomendando commits frequentes no GitHub como rede de segurança. Por fim, o uso de Git worktrees é destacado como essencial para executar múltiplos fluxos de trabalho paralelos sem conflitos, sendo suportado nativamente pelo ChatGPT e por algumas integrações no Claude.",
+  "snippet": "It's fascinating when a prolific developer (Domenic was a key figure in the adoption of promises in JavaScript, creating jsdom, and much more) shares their workflow. This is no exception, covering areas like disposable VMs, Tailscale, and worktrees.",
+  "date_iso": "2026-07-23",
+  "kind": "news",
+  "section": "top",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "claude",
+    "anthropic"
+   ],
+   "concept-theme": [
+    "dev-experience",
+    "developer-productivity"
+   ],
+   "content-type": [
+    "show-and-tell"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "ecosystem-language": [
+    "bash"
+   ],
+   "framework-library-tool": [
+    "claude"
+   ],
+   "topic-technology": [
+    "ai-agents",
+    "frontier-models"
+   ],
+   "trending-emerging": [
+    "ai-coding-agents",
+    "coding-agents",
+    "agentic-ai",
+    "ai-agents"
+   ]
+  }
+ },
+ {
+  "id": 3769,
+  "source_id": 1,
+  "url": "https://github.com/WiseLibs/better-sqlite3/releases/tag/v13.0.0",
+  "title": "better-sqlite3 13.0: The Popular SQLite Library Moves to N-API",
+  "title_pt": "better-sqlite3 13.0: A Popular Biblioteca SQLite Adota N-API",
+  "summary_pt": "A versão 13.0.0 do better-sqlite3 é um marco importante, sendo a primeira a rodar sobre a N-API. Isso permite que binários pré-compilados funcionem teoricamente em diferentes versões do Node.js e Electron, podendo até mesmo serem usados com runtimes como Bun. Com isso, a dependência obsoleta prebuild-install foi removida, e agora os binários são publicados diretamente junto com o código. Se a plataforma/arquitetura não tiver um binário pré-compilado, a compilação ocorrerá durante a instalação, como antes.\n\nAs principais mudanças incluem: reformulação da base de código para usar o node-addon-api, novo método db.explain() para executar consultas EXPLAIN sem a necessidade de fornecer parâmetros vinculados, novo método preparedStatement.toString() para obter o SQL expandido de uma declaração preparada e correção de compatibilidade do SqliteError entre realms e com Error.isError. Também há um novo contribuidor.",
+  "snippet": "The good news is prebuilt binaries should now work across different versions of Node and Electron. There's also a new db.explain() method and a preparedStatement.toString() method to get the expanded SQL of a prepared statement.",
+  "date_iso": "2026-07-25",
+  "kind": "release",
+  "section": "releases",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "architecture",
+    "dx",
+    "api-design",
+    "error-handling"
+   ],
+   "content-type": [
+    "version-release",
+    "library-release"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "nodejs"
+   ],
+   "ecosystem-language": [
+    "javascript",
+    "sql"
+   ],
+   "framework-library-tool": [
+    "sqlite",
+    "nodejs"
+   ],
+   "topic-technology": [
+    "native-addons",
+    "database-access",
+    "sql",
+    "node-versions"
+   ]
+  }
+ },
+ {
+  "id": 3770,
+  "source_id": 1,
+  "url": "https://github.com/sindresorhus/eslint-package-json",
+  "title": "eslint-package-json: Powerful ESLint Rules for package.json",
+  "title_pt": "eslint-package-json: Regras poderosas do ESLint para package.json",
+  "summary_pt": "O `eslint-package-json` é um plugin poderoso para o ESLint que permite lintar e corrigir automaticamente arquivos `package.json`. Ele detecta diversos erros reais (como nomes inválidos, intervalos de versão ruins, exports quebrados, `@types/*` mal colocados, entradas de `files` redundantes e muito mais) e corrige muitos deles automaticamente. O plugin requer ESLint >=10.4, configuração flat e ESM. Para usar, basta instalar o pacote e adicionar a configuração recomendada ao `eslint.config.js`. O artigo lista dezenas de regras, com descrições, quais estão habilitadas na configuração recomendada e se são corrigíveis automaticamente (🔧) ou manualmente (💡). Também diferencia o projeto de alternativas como `eslint-plugin-package-json` e `npm-package-json-lint`, destacando um design com menos regras, mas mais poderosas, e integração nativa com o ESLint e autofix.",
+  "snippet": "An ESLint plugin that catches package.json mistakes like invalid names, bad version ranges, broken exports, redundant files entries, and more, and fixes many of them automatically.",
+  "date_iso": "2026-07-25",
+  "kind": "tool",
+  "section": "tools",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "validation",
+    "dev-experience"
+   ],
+   "content-type": [
+    "tool-release"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "nodejs"
+   ],
+   "ecosystem-language": [
+    "json"
+   ],
+   "framework-library-tool": [
+    "eslint"
+   ],
+   "topic-technology": [
+    "package-management",
+    "esm"
+   ]
+  }
+ },
+ {
+  "id": 3771,
+  "source_id": 8,
+  "url": "https://www.cnbc.com/2026/07/24/nvidia-microsoft-meta-open-weight-ai-models.html",
+  "title": "Nvidia, Microsoft, Meta warn against 'premature restrictions' of open-weight models",
+  "title_pt": "Nvidia, Microsoft e Meta alertam contra 'restrições prematuras' a modelos de peso aberto",
+  "summary_pt": "Nvidia, Microsoft, Meta, Palantir e mais de 20 outras empresas divulgaram uma carta na sexta-feira pedindo que formuladores de políticas evitem 'restrições prematuras' a modelos de inteligência artificial de peso aberto (open-weight), que poderiam 'sufocar a competição ou levar a inovação para o exterior'. Os modelos de peso aberto permitem que usuários os baixem, modifiquem e executem em sua própria infraestrutura, e têm sido alvo de intenso debate no setor de tecnologia. A carta destaca que esses modelos fortalecem a concorrência e garantem que os benefícios da tecnologia sejam amplamente compartilhados, em vez de concentrados em poucas mãos. Além disso, alertam que confiar apenas em modelos fechados não é intrinsecamente seguro, pois podem ser violados, mal utilizados ou falhar de maneiras que pessoas de fora não conseguem detectar. CEOs como Jensen Huang (Nvidia) e Satya Nadella (Microsoft) endossaram a carta publicamente, assim como Elon Musk. OpenAI e Anthropic, que têm modelos fechados, não assinaram. A carta surge em meio a preocupações sobre modelos chineses de peso aberto, como o Kimi K3 da Moonshot AI, que superou ofertas americanas em alguns benchmarks. O governo dos EUA investiga possível roubo de propriedade intelectual, mas as empresas defendem abordagens legais específicas em vez de restrições amplas.",
+  "snippet": "Nvidia, Microsoft, Meta, Palantir and more than 20 other companies released a letter Friday urging policymakers to avoid \"premature restrictions\" on open-weight artificial intelligence models that would \"stifle competition or drive innovation overseas.\"Open-weight AI models are available for users to download, modify and run on their own infrastructure, and they have been the subject of fierce deb",
+  "date_iso": "2026-07-24",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "nvidia",
+    "microsoft",
+    "meta-ai",
+    "moonshot-ai"
+   ],
+   "concept-theme": [
+    "open-source",
+    "ai-regulation",
+    "governance"
+   ],
+   "content-type": [
+    "news"
+   ],
+   "difficulty": [
+    "all-levels"
+   ],
+   "domain": [
+    "llm-models",
+    "ai-general"
+   ],
+   "topic-technology": [
+    "ai-regulation",
+    "open-weights",
+    "ai-policy",
+    "proprietary-models",
+    "ai-benchmarks",
+    "model-comparison"
+   ],
+   "trending-emerging": [
+    "open-weights",
+    "ai-governance"
    ]
   }
  }

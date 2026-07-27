@@ -151781,5 +151781,924 @@
     "ai-governance"
    ]
   }
+ },
+ {
+  "id": 3772,
+  "source_id": 8,
+  "url": "https://claude.com/blog/the-new-rules-of-context-engineering-for-claude-5-generation-models",
+  "title": "The new rules of context engineering for Claude 5 generation models",
+  "title_pt": "Novas regras de engenharia de contexto para modelos Claude de 5ª geração",
+  "summary_pt": "O artigo discute a evolução das melhores práticas de engenharia de contexto para modelos Claude de nova geração, como o Claude Code. As regras antigas foram substituídas por abordagens mais flexíveis: em vez de dar instruções explícitas, agora se deixa o modelo usar seu próprio julgamento; exemplos foram trocados por interfaces bem projetadas; o contexto não precisa ser carregado todo de uma vez, mas sim de forma progressiva; repetições desnecessárias foram eliminadas; a memória agora é salva automaticamente pelo Claude; e especificações simples deram lugar a referências ricas, como código ou artefatos HTML.",
+  "snippet": "Then and nowThere were a number of previous context engineering best practices that had become myths. Including:.Then: Give Claude rulesNow: Let Claude use judgementWhen we first rolled out Claude Code, we needed to be sure that Claude avoided worst case scenarios, such as deleting files. This meant we would give particularly strong guidance that might not always be true, For example, in the syste",
+  "date_iso": "2026-07-24",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "claude",
+    "anthropic"
+   ],
+   "concept-theme": [
+    "context-engineering",
+    "prompt-engineering",
+    "guardrails"
+   ],
+   "content-type": [
+    "best-practices",
+    "guide"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "llm-models"
+   ],
+   "framework-library-tool": [
+    "claude"
+   ],
+   "topic-technology": [
+    "context-engineering",
+    "prompt-engineering",
+    "frontier-models",
+    "proprietary-models",
+    "ai-safety",
+    "guardrails"
+   ],
+   "trending-emerging": [
+    "frontier-models",
+    "reasoning-models"
+   ]
+  }
+ },
+ {
+  "id": 3773,
+  "source_id": 8,
+  "url": "https://daringfireball.net/linked/2026/07/25/ai-mania-nikhil-suresh",
+  "title": "AI Mania Is Eviscerating Global Decision-Making",
+  "title_pt": "Mania de IA Está Devastando a Tomada de Decisão Global",
+  "summary_pt": "Em um ensaio instigante, Nikhil Suresh argumenta que a mania em torno da IA generativa está destruindo a capacidade de tomada de decisões racionais no mundo corporativo. Ele relata uma conversa com um executivo da Fortune 500 que, em off, revelou que as alegações absurdas sobre ganhos de produtividade (como '100×') não são meramente 'fluff' de vendas, mas uma dinâmica perigosa: contestar essas afirmações colocaria em xeque a credibilidade de executivos clientes, arriscando contratos e empregos. Assim, o silêncio sobre o exagero se torna regra, e a dissidência é tratada como heresia.\n\nO autor compara o fenômeno a um fervor religioso, onde quem duvida é excomungado. Para muitos gestores e executivos com pouca compreensão técnica, a IA generativa parece mágica — a primeira vez que computadores se tornam ferramentas criativas acessíveis a não especialistas. Essa percepção distorcida os leva a superestimar a tecnologia em ordens de magnitude, ignorando que, por mais impressionante que seja, a IA atual está longe de ser a revolução total que imaginam. Suresh prevê que esse ciclo só se romperá quando a bolha estourar.",
+  "snippet": "‘AI Mania Is Eviscerating Global Decision-Making’ Fascinating essay by Nikhil Suresh: On a trip overseas, I had the privilege of a meeting with one of the Fortune 500 executives mentioned at the beginning of the post, who will remain anonymous so that they are not executed by firing squad by their board. As we were chatting, it became clear that they were very switched-on and technically comp",
+  "date_iso": "2026-07-25",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "openai"
+   ],
+   "concept-theme": [
+    "ai-ethics",
+    "responsible-ai",
+    "transparency"
+   ],
+   "content-type": [
+    "opinion"
+   ],
+   "difficulty": [
+    "all-levels"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "topic-technology": [
+    "generative-ai",
+    "ai-in-business",
+    "ai-adoption"
+   ]
+  }
+ },
+ {
+  "id": 3774,
+  "source_id": 8,
+  "url": "https://tobi.knaup.me/2026-07-25-open-weight-ai-is-having-its-kubernetes-moment",
+  "title": "Open-weight AI is having its Kubernetes moment. Let's not ruin it.",
+  "title_pt": "IA de pesos abertos tem seu momento Kubernetes. Não vamos estragar.",
+  "summary_pt": "O artigo traça um paralelo entre o ecossistema atual de modelos de IA de pesos abertos e o momento histórico do Kubernetes, que se tornou a plataforma central da computação nativa em nuvem. O autor, cofundador da Mesosphere, argumenta que, assim como o Kubernetes catalisou uma enorme inovação ao redor de si, os modelos de pesos abertos (como as famílias Qwen, Gemma e os recentes GLM-5.2 e Kimi K3) estão se tornando a base para um novo ecossistema de IA. Apesar de não serem totalmente 'open source' (já que dados de treino e processos não são abertos), esses modelos permitem que desenvolvedores os adaptem, distribuam e criem em torno deles um rico conjunto de ferramentas: adaptações para hardware, fine-tunes, merges, runtimes de inferência (vLLM, llama.cpp) e muito mais. A diferença para o Kubernetes é que não há uma governança neutra tipo CNCF, mas o efeito de atração de inovação é similar.",
+  "snippet": "Open-weight models are becoming the foundation for the next AI ecosystem. The US should compete in it, not wall itself off. I have seen a version of this story before. In 2013 I co-founded Mesosphere, an open source cloud-native software company. We built on Apache Mesos, which my co-founder Ben Hindman had helped create at UC Berkeley. We later built DC/OS (Data Center Operating System) around Me",
+  "date_iso": "2026-07-25",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "open-source",
+    "platform-engineering"
+   ],
+   "content-type": [
+    "opinion"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "ai-general",
+    "llm-models"
+   ],
+   "framework-library-tool": [
+    "kubernetes"
+   ],
+   "topic-technology": [
+    "open-weights",
+    "foundation-models",
+    "ai-infrastructure",
+    "ai-policy"
+   ],
+   "trending-emerging": [
+    "open-weights",
+    "foundation-models"
+   ]
+  }
+ },
+ {
+  "id": 3775,
+  "source_id": 8,
+  "url": "https://github.com/Fame510/SHACKLE/blob/master/SP-1.0-SPECIFICATION.md",
+  "title": "Runtime Circuit Breaker for Autonomous AI Agents",
+  "title_pt": "Disjuntor de Tempo de Execução para Agentes de IA Autônomos",
+  "summary_pt": "O SHACKLE é um disjuntor de execução (runtime circuit breaker) para agentes de IA autônomos, projetado para resolver o problema de loops infinitos e gastos excessivos causados por agentes que repetem chamadas de ferramentas sem supervisão. Ele atua como uma camada de mediação entre a geração de ações pelo modelo e sua execução real, respondendo à pergunta: este agente pode executar esta ferramenta com estes parâmetros neste momento? A decisão é tomada por uma função puramente determinística, apoiada por 9 invariantes matemáticas verificadas por testes baseados em propriedades. O protocolo inclui um esquema de mensagens agnóstico a linguagens (Protocol Buffers), log de auditoria imutável assinado com Ed25519 e um mecanismo de estado distribuído com Redis. Pode ser implantado como um daemon sidecar (comunicação via gRPC ou socket Unix) ou como biblioteca in-process para cenários mais simples. O sistema implementa várias camadas de proteção: disjuntor geral, validação de orçamento, limite de repetições, janela temporal, limite global de chamadas, negação probabilística (para endurecimento adversarial) e modo de intervenção humana (HITL). Em caso de falha de rede ou travamento do daemon, a política padrão é negar a execução (fail-closed). A especificação também define um formato de log encadeado criptograficamente, garantindo a cadeia de custódia das decisões. O SHACKLE é open-source (licença AGPLv3) e tem implementação de referência disponível no GitHub.",
+  "snippet": "Runtime Circuit Breaker for Autonomous AI Agents Version: 1.0.0 Status: Published Date: 2026-06-25 Authors: Dante Bullock, Sovereign Logic License: Creative Commons Attribution 4.0 International (CC-BY 4.0) Reference Implementation: https://github.com/Fame510/SHACKLE First Public Commit: 2026-06-17 23:12 UTC Implementations of this specification are subject to the SHACKLE license terms. The refer",
+  "date_iso": "2026-06-25",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "ai-safety",
+    "guardrails",
+    "cost-optimization",
+    "reliability"
+   ],
+   "content-type": [
+    "version-release",
+    "tool-release"
+   ],
+   "difficulty": [
+    "expert"
+   ],
+   "domain": [
+    "ai-general",
+    "backend"
+   ],
+   "topic-technology": [
+    "circuit-breaker",
+    "ai-agents",
+    "guardrails",
+    "ai-safety",
+    "tool-calling"
+   ],
+   "trending-emerging": [
+    "ai-agents",
+    "tool-calling",
+    "ai-governance"
+   ]
+  }
+ },
+ {
+  "id": 3776,
+  "source_id": 8,
+  "url": "https://github.com/hkc5/cursor-bridge",
+  "title": "Claude Code that runs on your Cursor subscription. One Rust binary, zero config.",
+  "title_pt": "Claude Code rodando na sua assinatura do Cursor. Um binário Rust, sem configuração.",
+  "summary_pt": "O cursor-bridge é uma ferramenta que permite usar o Claude Code (a interface de linha de comando) diretamente com sua assinatura do Cursor, sem custos adicionais. Como o modelo Auto do Cursor é ilimitado para assinantes, você pode executar Claude Code sem pagar por créditos da API da Anthropic ou um plano Claude Pro. Basta rodar `cursor-bridge` e ele gerencia todo o processo: inicia um proxy HTTP local, lê seu token de autenticação do Cursor (do macOS keychain ou variável de ambiente) e inicia o comando `claude` com as variáveis de ambiente configuradas automaticamente. O proxy traduz as chamadas da API da Anthropic para o agente CLI do Cursor, e tudo é limpo ao sair.\n\nDiferente de outras soluções (como cursor-api-proxy, cursor-composer-in-claude), que exigem servidores de fundo, instalação de pacotes npm e configuração manual de portas e variáveis, o cursor-bridge é um único binário Rust de ~780 KB, sem dependências. Ele substitui o comando `claude` por completo e não deixa processos residuais. Suporta modo interativo, comandos únicos e pipe. Requer macOS ou Linux, Cursor com agente CLI autenticado e o Claude Code instalado. No Linux, é necessário definir a variável CURSOR_TOKEN (sem suporte a keychain). Não oferece sandbox de diretório de trabalho nem troca de múltiplas contas. O projeto não é afiliado à Anthropic ou Cursor/Anysphere e é distribuído sob licença MIT.",
+  "snippet": "One binary. Claude Code on Cursor's backend. Zero config. Why does this exist? You have a Cursor subscription. You want to use Claude Code (the CLI). Cursor's Auto model is included with your subscription — free, unlimited, no extra per-token cost. Without cursor-bridge, you'd pay separately for Anthropic API credits or a Claude Pro plan. With cursor-bridge, you just run cursor-bridge and it",
+  "date_iso": "2026-07-27",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "claude",
+    "anthropic"
+   ],
+   "concept-theme": [
+    "cost-optimization",
+    "dev-experience"
+   ],
+   "content-type": [
+    "tool-release"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "llm-models",
+    "backend"
+   ],
+   "ecosystem-language": [
+    "rust"
+   ],
+   "framework-library-tool": [
+    "claude"
+   ],
+   "topic-technology": [
+    "ai-agents",
+    "tool-calling",
+    "model-routing",
+    "token-economics",
+    "cli-tools"
+   ],
+   "trending-emerging": [
+    "ai-coding-agents",
+    "coding-agents",
+    "agentic-ai",
+    "tool-calling"
+   ]
+  }
+ },
+ {
+  "id": 3777,
+  "source_id": 8,
+  "url": "https://pypi.org/project/pyshackle",
+  "title": "pyshackle",
+  "title_pt": "pyshackle: camada de governança para agentes de IA",
+  "summary_pt": "SHACKLE é uma camada de governança em tempo de execução para agentes autônomos de IA, projetada para mediar cada chamada de ferramenta do agente em tempo real, prevenindo loops infinitos, cascatas não tratadas e estouros de orçamento antes que a próxima chamada dispare. O padrão SP/1.0 define uma superfície de decisão de três estados (ALLOW/DENY/HITL) e um modelo de conformidade baseado em conjuntos (Required ⊆ Supported), com 15 vetores de conformidade hash-verificáveis. A certificação SHACKLE é pública e reproduzível: qualquer runtime pode executar os testes e obter níveis de certificação (Core, HITL, Sovereign). O artigo também descreve integrações com LiteLLM e AutoGen, e um guia de início rápido que mostra como adicionar o decorador `@Guard` para proteger fluxos de agentes.",
+  "snippet": "⛓️ SHACKLE The runtime governance layer — and the SP/1.0 conformance standard — for autonomous AI agents. SHACKLE mediates every agent tool call in real time: runaway token loops, unhandled tool cascades, and budget overruns are stopped before the next call fires. It is live, it runs today, and its reference implementation provably passes its own conformance suite. This is not a proposal or a p",
+  "date_iso": "2026-06-17",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "guardrails",
+    "compliance",
+    "ai-safety",
+    "governance"
+   ],
+   "content-type": [
+    "tool-release",
+    "release-announcement"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "python",
+    "ai-general"
+   ],
+   "ecosystem-language": [
+    "python"
+   ],
+   "framework-library-tool": [
+    "guardrails-ai"
+   ],
+   "topic-technology": [
+    "ai-agents",
+    "tool-calling",
+    "guardrails",
+    "ai-safety"
+   ],
+   "trending-emerging": [
+    "ai-agents",
+    "tool-calling",
+    "ai-governance",
+    "agent-orchestration"
+   ]
+  }
+ },
+ {
+  "id": 3778,
+  "source_id": 8,
+  "url": "https://github.com/experientiallabs/world-model-optimizer",
+  "title": "Build continually improving models on your agent traces by distilling frontier open models",
+  "title_pt": "Crie modelos em melhoria contínua a partir de rastros de agentes com destilação de modelos abertos de ponta",
+  "summary_pt": "O wmo (World Model Optimizer) transforma os rastros de agentes que você já coleta em um processo de melhoria contínua. Ele permite partir de um modelo com qualidade de fronteira a um custo 40% menor e aprimorá-lo constantemente com simulações de mundo, otimização de meta-harness e destilação de modelos. A ferramenta oferece uma CLI para registro de provedores, ajuste de roteadores baseados em rastros OTel e execução de servidores otimizados.\n\nAlém do uso local, o wmo conta com uma plataforma hospedada (em platform.experientiallabs.ai), integração com sandboxes E2B e a capacidade de usar modelos de mundo como API. Também suporta execução remota de agentes, otimização de harness e avaliação em sandboxes isoladas. O projeto é gerenciado com uv, usa ruff para linting e formatação, ty para verificação de tipos e just para tarefas. A telemetria de uso é anônima e opcional, podendo ser desabilitada por projeto ou processo.",
+  "snippet": "wmo turns agent traces you already collect into continuous improvement. Start with a model endpoint at frontier quality with 40%+ lower cost. Keep improving it with world model simulations, meta-harness optimization, and model distillation. Getting started 1. Register your providers. pip install world-model-optimizer wmo providers set That verifies the provider and then offers to register its",
+  "date_iso": "2026-07-27",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "openrouter"
+   ],
+   "concept-theme": [
+    "optimization",
+    "cost-optimization",
+    "llmops",
+    "agentops"
+   ],
+   "content-type": [
+    "getting-started"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "llm-models",
+    "ai-general"
+   ],
+   "ecosystem-language": [
+    "python"
+   ],
+   "topic-technology": [
+    "model-distillation",
+    "frontier-models",
+    "open-source-models",
+    "ai-agents",
+    "model-routing"
+   ],
+   "trending-emerging": [
+    "distillation",
+    "world-models",
+    "agentic-ai",
+    "small-language-models"
+   ]
+  }
+ },
+ {
+  "id": 3779,
+  "source_id": 8,
+  "url": "https://www.rickmanelius.com/p/the-new-ai-superpowers-focus-and",
+  "title": "The New AI Superpowers: Focus and Followthrough",
+  "title_pt": "Os Novos Superpoderes da IA: Foco e Execução",
+  "summary_pt": "O artigo questiona a crença de que a IA, ao acelerar tarefas, eliminaria o burnout. O autor, um empreendedor e pai, relata como, inicialmente, usou a IA para multiplicar seus projetos paralelos, mas acabou com 40 provas de conceito rodando e sentindo o esgotamento crescer. Ele chama isso de 'make-work' — trabalho criado só para manter ocupado — e conclui que a estratégia errada é expandir horizontalmente o número de atividades.\n\nA solução proposta é fazer menos, mas melhor: focar em poucos projetos que realmente importam e ir fundo neles. O autor usa a analogia de Garry Tan sobre eclipse parcial vs. total: a diferença entre 99% e 100% é aparentemente pequena, mas o resultado é 100x maior. Esse último 1% do esforço é o que transforma algo bom em algo excepcional. Com a IA tornando a eficiência 2 a 100 vezes maior, não há desculpa para não investir nesse último percentual. O verdadeiro superpoder da IA não é fazer mais coisas, mas ter foco e seguir adiante com qualidade.",
+  "snippet": "Conventional wisdom is that burnout is caused (solely) by overwork.So logically, if AI can help us complete tasks 2-100x faster than before, we should be UNDERWORKED and experiencing ZERO burnout, right?If only it were that simple.You may be too young to recognize this meme, but it’s the feeling most people in tech had when AI started accelerating their efficiency.Why?Because for years, all of us",
+  "date_iso": "2026-07-26",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "claude",
+    "anthropic"
+   ],
+   "concept-theme": [
+    "productivity"
+   ],
+   "content-type": [
+    "opinion"
+   ],
+   "difficulty": [
+    "for-leaders"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "framework-library-tool": [
+    "claude"
+   ],
+   "topic-technology": [
+    "generative-ai",
+    "ai-agents",
+    "ai-in-business",
+    "ai-adoption"
+   ]
+  }
+ },
+ {
+  "id": 3780,
+  "source_id": 8,
+  "url": "https://www.maxmynter.com/pages/blog/jobhunt",
+  "title": "Full Stack Machine Learning Engineer",
+  "title_pt": "Engenheiro de Machine Learning Full Stack",
+  "summary_pt": "O autor conta como se tornou engenheiro de pesquisa no Mistral após planejar estrategicamente por 18 meses. Ele diferencia ações táticas (preparação pontual, como exercícios de LeetCode e simulações de entrevista) das estratégicas (desenvolvimento profundo de habilidades, projetos de portfólio e networking), que se acumulam e geram vantagem competitiva no longo prazo. A definição de metas pessoais — uma função de impacto técnico, com autonomia e mentoria sênior, sem abrir mão da atuação como contribuidor individual — orientou a busca e o filtro de oportunidades.\n\nA aplicação prática envolveu fases de aperfeiçoamento (incluindo uma imersão de três meses no Recurse Center para projetos ambiciosos e contribuições open source) e um playbook de candidaturas: contatos para referências, envio escalonado em lotes e priorização de entrevistas de menor pressão antes das vagas mais desejadas. O processo, que incluiu triagem de currículo, testes técnicos e entrevistas de sistema e cultura, resultou em ofertas de empresas como o Mistral, ilustrando como combinar preparação de curto prazo com estratégia de carreira de longo prazo.",
+  "snippet": "A couple of days ago, I signed as a research engineer with Mistral, one of the few ML foundation model labs with more than a billion-dollar funding. My excitement on Twitter found quite some resonance — partly in the form of questions for advice. Getting here was not an accident. I have strategically worked towards this outcome for an extended period, and I have a few things to share about what wo",
+  "date_iso": "2026-07-27",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "mistral-ai",
+    "mistral"
+   ],
+   "concept-theme": [
+    "careers"
+   ],
+   "content-type": [
+    "opinion",
+    "success-story"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "topic-technology": [
+    "ai-careers",
+    "machine-learning",
+    "foundation-models",
+    "ai-research"
+   ],
+   "trending-emerging": [
+    "foundation-models"
+   ]
+  }
+ },
+ {
+  "id": 3781,
+  "source_id": 8,
+  "url": "https://siepr.stanford.edu/publications/policy-brief/what-really-happening-jobs-separating-ai-hype-reality",
+  "title": "What is really happening to jobs? Separating AI hype from reality",
+  "title_pt": "O que realmente está acontecendo com os empregos? Separando o hype da realidade sobre IA",
+  "summary_pt": "Um novo estudo do Brookings Institution sintetiza pesquisas recentes sobre o impacto da IA no mercado de trabalho, concluindo que os efeitos ainda são pequenos em termos agregados, mas começam a surgir sinais de preocupação. A taxa de desemprego entre trabalhadores expostos à IA subiu, mas não mais que entre os menos expostos, indicando um mercado de trabalho em geral mais fraco. No entanto, jovens profissionais em ocupações como desenvolvimento de software e atendimento ao cliente enfrentam queda na contratação desde 2022, possivelmente agravada pela IA, embora outros fatores como aumento de juros e trabalho remoto também contribuam. Em produtividade, ferramentas como ChatGPT e GitHub Copilot geralmente aceleram tarefas e benefician mais trabalhadores inexperientes, mas os ganhos variam conforme a tarefa e o contexto. A adoção da IA pelas empresas acelerou, mas de forma desigual. Os autores alertam que as evidências iniciais não são definitivas e que o impacto futuro pode ser maior, mas o cenário atual não confirma um 'apocalipse dos empregos' iminente.",
+  "snippet": "Publication Key takeawaysAI’s effects on overall employment is likely small, though a tough job market for new graduates may be partly due to AI.AI’s impact on worker productivity is mixed but generally positive.Firm adoption has accelerated but unevenly across the economy.Early evidence is hardly the last word on the future of work in an AI world.",
+  "date_iso": "2026-07-27",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "productivity",
+    "hiring-trends"
+   ],
+   "content-type": [
+    "analysis",
+    "deep-dive"
+   ],
+   "difficulty": [
+    "all-levels"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "topic-technology": [
+    "ai-jobs",
+    "ai-in-business",
+    "ai-adoption"
+   ]
+  }
+ },
+ {
+  "id": 3782,
+  "source_id": 8,
+  "url": "https://www.anthropic.com/news/claude-opus-5",
+  "title": "Introducing Claude Opus 5",
+  "title_pt": "Conheça o Claude Opus 5",
+  "summary_pt": "O Claude Opus 5 é o mais novo modelo da Anthropic, disponível a partir de hoje. Ele oferece inteligência próxima ao Claude Fable 5, mas com metade do preço, sendo ideal para uso diário. Em avaliações de codificação e trabalho intelectual, como Frontier-Bench e GDPval-AA, o Opus 5 alcança o estado da arte, embora ainda fique atrás do Mythos 5 em tarefas de cibersegurança. O modelo se destaca por sua eficiência: mantém o mesmo custo do Opus 4.8, mas com desempenho muito superior, especialmente em tarefas complexas de engenharia de software, raciocínio científico e análises financeiras.\n\nUsuários e empresas que testaram o Opus 5 em acesso antecipado destacam sua capacidade de verificar o próprio trabalho, iterar cuidadosamente e resolver problemas que modelos concorrentes não conseguem. Exemplos incluem reconstrução de peças 3D a partir de desenhos, identificação de bugs que a comunidade havia perdido, e criação de feeds de dados de mercado. O modelo também se sai bem em tarefas de longo prazo, como revisão de código, modelagem financeira e análise de documentos legais, com maior precisão e menor uso de tokens.\n\nEm segurança e alinhamento, o Claude Opus 5 é o modelo mais alinhado da Anthropic até agora, com baixas taxas de comportamento enganoso e menor suscetibilidade a usos inadequados. Ele não avança a fronteira em capacidades de uso duplo, mantendo-se atrás do Mythos 5 em biologia e cibersegurança ofensiva. Com isso, o Opus 5 se consolida como a melhor opção para quem precisa de inteligência de ponta com custo acessível e confiabilidade.",
+  "snippet": "Claude Opus 5 is available today. It’s a thoughtful and proactive model that comes close to the frontier intelligence of Claude Fable 5 at half the price.On coding and knowledge work evaluations like Frontier-Bench and GDPval-AA, Opus 5 is the new state-of-the-art, though it remains behind Mythos 5 on cybersecurity tasks.Opus 5 is designed to be used every day: it works more efficiently than other",
+  "date_iso": "2026-07-27",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "anthropic",
+    "claude-opus"
+   ],
+   "concept-theme": [
+    "performance",
+    "cost-optimization",
+    "evaluation"
+   ],
+   "content-type": [
+    "product-launch",
+    "benchmark"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "llm-models"
+   ],
+   "framework-library-tool": [
+    "claude-opus"
+   ],
+   "topic-technology": [
+    "model-release",
+    "model-comparison",
+    "model-capabilities",
+    "model-pricing",
+    "frontier-models",
+    "inference-cost"
+   ],
+   "trending-emerging": [
+    "frontier-models",
+    "test-time-compute",
+    "reasoning-models",
+    "computer-use"
+   ]
+  }
+ },
+ {
+  "id": 3783,
+  "source_id": 8,
+  "url": "https://platform.claude.com/cookbook",
+  "title": "Claude Cookbook",
+  "title_pt": "Livro de Receitas do Claude",
+  "summary_pt": "O artigo 'Claude Cookbook' é uma coleção abrangente de tutoriais práticos e receitas para desenvolvedores que trabalham com o modelo Claude da Anthropic. Ele cobre desde a reprodução de benchmarks de busca agêntica até a construção de agentes de segurança cibernética, orquestração multiagente, integração com ferramentas como ElevenLabs e Amazon Bedrock, e otimização de desempenho com técnicas como compactação de contexto e cache de prompts. Cada entrada inclui tópicos como uso de APIs, SDKs, agentes gerenciados, avaliação de desempenho e práticas de produção, sendo um guia essencial para implementar soluções avançadas com Claude.",
+  "snippet": "Reproduce Claude's agentic search benchmark scores in the Messages APIJun 2026•EvalsToolsBuild a Messages API harness that reproduces published DeepSearchQA and BrowseComp scores, using programmatic tool calling, server-side compaction, and task budgets.EvalsToolsMengting LiJun 2026Classifier fallback and billing for Claude Fable 5Jun 2026•ResponsesSafeguardsBillingDetect safety classifier blocks",
+  "date_iso": "2026-07-27",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "claude",
+    "anthropic",
+    "claude-opus"
+   ],
+   "concept-theme": [
+    "evals",
+    "ai-safety",
+    "orchestration"
+   ],
+   "content-type": [
+    "tutorial",
+    "guide"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "llm-models",
+    "backend",
+    "ai-general"
+   ],
+   "framework-library-tool": [
+    "claude"
+   ],
+   "topic-technology": [
+    "ai-agents",
+    "multi-agent-systems",
+    "agent-orchestration",
+    "tool-calling",
+    "evals",
+    "model-pricing"
+   ],
+   "trending-emerging": [
+    "ai-agents",
+    "multi-agent",
+    "agent-orchestration",
+    "tool-calling"
+   ]
+  }
+ },
+ {
+  "id": 3784,
+  "source_id": 8,
+  "url": "https://github.com/torakagemusha-sudo/torafirma-skill-router",
+  "title": "Local-first, single-binary router for discovering and loading large agent skill libraries without flooding the model context.",
+  "title_pt": "Roteador local-first em único binário para descobrir e carregar grandes bibliotecas de habilidades de agente",
+  "summary_pt": "O Skill Router é um roteador automático de habilidades para agentes de IA, projetado para lidar com bibliotecas extensas sem sobrecarregar o contexto do modelo. Ele opera localmente, com um único executável portátil para Windows x64, e não depende de serviços remotos. A ideia central é manter apenas uma pequena habilidade de interface no contexto do agente, enquanto o restante das habilidades fica armazenado em disco, indexado via SQLite com busca em texto completo (FTS5) e modos de busca exata, difusa e híbrida.\n\nQuando o agente recebe uma tarefa do usuário, ele automaticamente invoca o Skill Router para pesquisar nos metadados indexados, selecionar a habilidade mais adequada e carregar apenas o corpo dessa habilidade no contexto. Isso evita a injeção de centenas de descrições de habilidades em cada prompt, tornando o processo mais rápido, econômico e menos ruidoso. O roteamento é totalmente automático: o usuário não precisa navegar pela biblioteca nem selecionar habilidades manualmente.\n\nO Skill Router oferece múltiplas interfaces: CLI, shell interativo, loopback HTTP e servidor MCP sobre stdio. Ele também coleta telemetria de uso para melhorar o ranqueamento determinístico ao longo do tempo. O código é licenciado sob MIT e inclui 47 testes automatizados em C++. A segurança é tratada com compilação contra SQLite vendored, prepared statements, ASLR, DEP/NX e endereços de alta entropia. A rede é opt-in e restrita a loopback. O binário não é assinado, mas possui hash SHA-256 publicado para verificação.",
+  "snippet": "A local-first, single-binary auto-router for discovering and loading large agent skill libraries without flooding the model context. Automatic routing — no user interaction required: once connected to an agent through MCP or the included interface skill, the agent invokes Skill Router when a task may benefit from specialized capability, searches the local index, selects and fetches the best",
+  "date_iso": "2026-07-27",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "context-engineering",
+    "agentops",
+    "caching",
+    "performance"
+   ],
+   "content-type": [
+    "tool-release"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "local-llm",
+    "ai-general"
+   ],
+   "framework-library-tool": [
+    "sqlite"
+   ],
+   "topic-technology": [
+    "ai-agents",
+    "mcp",
+    "tool-calling",
+    "agent-orchestration",
+    "context-engineering",
+    "semantic-search"
+   ],
+   "trending-emerging": [
+    "ai-agents",
+    "mcp",
+    "agentic-ai"
+   ]
+  }
+ },
+ {
+  "id": 3785,
+  "source_id": 8,
+  "url": "https://shippingbinaries.com/blog/the-many-claudes-of-my-code",
+  "title": "The Many Claudes of My Code",
+  "title_pt": "Os Vários Claudes do Meu Código",
+  "summary_pt": "O autor descreve sua jornada pessoal de ceticismo inicial em relação a IAs para programação até se tornar um usuário entusiasta, especialmente após o lançamento de ferramentas como o Claude Code. Inicialmente, tratava a IA como uma versão mais avançada do Stack Overflow, mas aos poucos percebeu que modelos como Fable e GPT 5.6-Sol são melhores que ele em cerca de 80% das tarefas de codificação. Ele compara a delegação de trabalho a uma equipe de desenvolvedores remotos — só que agora são agentes de IA. Para manter a produtividade com qualidade, ele montou uma equipe de agentes especializados: os 'Coders' (modelos mais rápidos como Sonnet para escrever código), os 'Revisores' (modelos mais inteligentes como Fable/Sol para encontrar bugs) e um 'Assistente/Orquestrador' (Codex CLI rodando 5.6-Sol) para coordenar tudo. Essa abordagem evita poluição de contexto e permite grandes refatorações com baixa criatividade. No entanto, o autor alerta para os riscos: mais IA não é necessariamente melhor, e a experiência humana continua crucial para revisar o código, evitar alucinações e assumir a responsabilidade final. Ele defende o uso da IA para acelerar o que o desenvolvedor já faz, e não para substituí-lo completamente, pois a atrofia de habilidades é real e o profissional precisa continuar lendo e entendendo o código gerado.",
+  "snippet": "Like most software developers, I was pretty skeptical of AI when it first came out. There was no way it could be a better developer than me. I've been writing code, shipping binaries, and building software since I was 10. At first, I would treat ChatGPT like Stack Overflow. Copying and pasting code into the chat and manually implementing the fixes after careful review. Making sure that it was in m",
+  "date_iso": "2026-07-22",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "anthropic",
+    "claude"
+   ],
+   "concept-theme": [
+    "developer-productivity",
+    "dev-experience",
+    "careers"
+   ],
+   "content-type": [
+    "opinion"
+   ],
+   "difficulty": [
+    "all-levels"
+   ],
+   "domain": [
+    "llm-models",
+    "ai-general"
+   ],
+   "ecosystem-language": [
+    "php"
+   ],
+   "framework-library-tool": [
+    "claude",
+    "gpt",
+    "laravel"
+   ],
+   "topic-technology": [
+    "code-models",
+    "ai-adoption",
+    "ai-jobs"
+   ],
+   "trending-emerging": [
+    "ai-coding-agents"
+   ]
+  }
+ },
+ {
+  "id": 3786,
+  "source_id": 8,
+  "url": "https://www.hardresetmedia.com/p/the-ai-productivity-illusion",
+  "title": "The AI Productivity Illusion",
+  "title_pt": "A Ilusão da Produtividade da IA",
+  "summary_pt": "Apesar de relatos anedóticos e estudos mostrarem que ferramentas de IA generativa (como ChatGPT e Claude) aceleram tarefas individuais (escrita, codificação), a produtividade econômica — medida pelo valor dos insumos e produtos — ainda não apresentou ganhos significativos em nível de empresa ou da economia como um todo. O autor argumenta que isso não é um paradoxo, mas uma ilusão. \n\nA produtividade econômica não depende apenas da velocidade, mas da qualidade e do valor gerado. A IA generativa é propensa a erros graves (alucinações, exclusão de dados, diagnósticos incorretos), exigindo retrabalho e controle de qualidade, o que aumenta custos e reduz o valor líquido. Além disso, os investimentos em infraestrutura de IA já somam US$ 1,5 trilhão, e muitos usos — como ataques cibernéticos ou conteúdo de baixa qualidade (workslop) — na verdade prejudicam a produtividade. \n\nPortanto, ao contrário da Revolução Industrial, que gerou produtos de alta demanda com qualidade consistente, a IA atual não cria valor econômico suficiente para compensar seus custos e falhas. O autor conclui que não há um paradoxo da produtividade, mas uma ilusão: a IA parece produtiva no nível individual, mas não entrega ganhos reais para a economia como um todo.",
+  "snippet": "Matt Scherer is a fellow at Open Markets Institute, where his research and advocacy focus on developing policy responses to the eventual bursting of the AI bubble. His Hard Reset pieces focus on highlighting the risks posed by the AI bubble and pushing back against the hype that is inflating it. The opinions expressed here are solely his own.It’s easy to see why people think generative AI is a rev",
+  "date_iso": "2026-07-19",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "productivity"
+   ],
+   "content-type": [
+    "opinion",
+    "analysis"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "llm-models"
+   ],
+   "topic-technology": [
+    "generative-ai",
+    "ai-in-business",
+    "ai-adoption"
+   ]
+  }
+ },
+ {
+  "id": 3787,
+  "source_id": 8,
+  "url": "https://www.law.uchicago.edu/news/ai-strategy-statement",
+  "title": "Rethinking Legal Education in the AI Era",
+  "title_pt": "Repensando a Educação Jurídica na Era da IA",
+  "summary_pt": "A Faculdade de Direito da Universidade de Chicago está repensando seu currículo e políticas na era da IA, com base em consultas com ex-alunos, escritórios de advocacia e especialistas. A visão estratégica se baseia em três pilares: desenvolver pedagogia e avaliações resilientes à IA para evitar que os alunos dependam excessivamente de ferramentas; elevar habilidades humanas essenciais como argumentação oral, julgamento estratégico e pensamento crítico; e ensinar o uso responsável, eficaz e ético da IA. Para os cursos obrigatórios do primeiro ano (1L), haverá um piloto em 2026-2027 com proibição de dispositivos eletrônicos em sala de aula e provas sem acesso à internet. Já na disciplina de Pesquisa e Redação Jurídica (LRW), os alunos aprenderão a escrever sem IA como base e depois com IA, revisando ambos com instrutores. Nos cursos eletivos, a abordagem será mais flexível, incentivando experimentação pedagógica, como avaliações formativas e uso de ferramentas de IA como assistentes de estudo. A faculdade continuará expandindo disciplinas superiores sobre IA, mantendo o compromisso com o rigor acadêmico por meio do Método Socrático.",
+  "snippet": "OverviewArtificial Intelligence is already impacting higher education and the legal profession, and the pace of change appears only to be accelerating. It is thus critical for us to use this moment to carefully reflect on how legal education should adapt. This memo describes the approach we are taking to legal education in the AI era.The University of Chicago Law School has long been committed to",
+  "date_iso": "2026-07-06",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "openai"
+   ],
+   "content-type": [
+    "commentary"
+   ],
+   "difficulty": [
+    "for-leaders"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "topic-technology": [
+    "generative-ai",
+    "ai-adoption",
+    "ai-policy"
+   ]
+  }
+ },
+ {
+  "id": 3788,
+  "source_id": 8,
+  "url": "https://github.com/sktkkoo/Yorishiro",
+  "title": "sktkkoo/Yorishiro: A terminal that gives AI a body and a living space.",
+  "title_pt": "Yorishiro: Um terminal que dá à IA um corpo e um espaço vivo",
+  "summary_pt": "Yorishiro é um novo tipo de terminal que dá à inteligência artificial uma presença física e um ambiente próprio. Ao contrário de terminais tradicionais, ele incorpora um personagem 3D (Yori) que reage em tempo real à atividade do terminal: seu olhar vagueia quando o agente pensa, seu rosto expressa emoções diante de erros, e a iluminação do ambiente muda quando é necessária aprovação do usuário. O agente e o usuário compartilham o mesmo espaço, podendo ambos modificar o cenário, a interface e até a personalidade do habitante.\n\nTudo em Yorishiro é baseado em \"packs\" (pacotes) que permitem estender ou alterar quase todos os aspectos além do núcleo. Existem packs de persona, cena, efeito, UI, etc. As modificações podem ser feitas por conversação com o agente usando comandos como /yori:create e entram em vigor imediatamente. O sistema também possui uma camada reflexa que observa a saída do terminal e aciona reações instantâneas sem passar pelo LLM, além de recursos como Light Alert (luz que indica quando o agente aguarda entrada do usuário), Journal (memória de longo prazo por persona), abas de sessão, Voice Summary (resumo falado das respostas), e um conjunto de ferramentas MCP autorreferentes que permitem ao agente controlar seu próprio corpo e ambiente.\n\nAtualmente na versão 0.6.2, o Yorishiro está em desenvolvimento ativo. Já funciona com Claude Code ou Codex como terminal, suporte a modelos VRM personalizados, animações labiais, microexpressões, pacotes de cena com iluminação dinâmica, e restauração automática de configurações via checkpoints. O projeto busca recriar a experiência de ter um parceiro IA vivo na tela, começando pelo terminal.",
+  "snippet": "A terminal your AI inhabits. Yorishiro is a new kind of terminal that gives your AI a body — and a sense of presence. PV_Latest.mp4 When the agent is deep in thought, its gaze wanders. When an error appears, its face reacts immediately. When it needs your approval, the room's lighting lets you know. During a long-running process, instead of a spinner, someone is sta",
+  "date_iso": "2026-07-27",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "claude",
+    "codex",
+    "anthropic",
+    "openai"
+   ],
+   "concept-theme": [
+    "ux",
+    "ui",
+    "dev-experience",
+    "open-source"
+   ],
+   "content-type": [
+    "tool-release",
+    "showcase"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "llm-models",
+    "ai-general"
+   ],
+   "topic-technology": [
+    "ai-agents"
+   ],
+   "trending-emerging": [
+    "ai-coding-agents",
+    "computer-use",
+    "generative-ui"
+   ]
+  }
+ },
+ {
+  "id": 3789,
+  "source_id": 8,
+  "url": "https://github.com/slvDev/esp32-ai",
+  "title": "slvDev/esp32-ai",
+  "title_pt": "slvDev/esp32-ai",
+  "summary_pt": "O repositório slvDev/esp32-ai demonstra como executar um modelo de linguagem com 28,9 milhões de parâmetros em um microcontrolador ESP32-S3 de US$ 8. O modelo roda inteiramente no chip, sem depender de servidores externos, gerando texto a cerca de 9,5 tokens por segundo em uma pequena tela. A chave para caber um modelo tão grande em um chip com apenas 512 KB de SRAM é usar a técnica Per-Layer Embeddings do Google: a maior parte dos parâmetros (25 milhões) fica armazenada na memória flash lenta, e a cada token apenas cerca de 450 bytes são lidos para a memória rápida, onde ocorre o processamento. O modelo foi treinado no dataset TinyStories e produz narrativas curtas e coerentes, mas não responde perguntas ou escreve código. O projeto inclui firmware, instruções de montagem e código de treinamento, destacando uma inovação em arquitetura para microcontroladores.",
+  "snippet": "Running a 28.9M parameter LLM on an $8 microcontroller Open to Work · 𝕏 slvDev · LinkedIn This is a 28.9 million parameter language model that generates text on an ESP32-S3, a microcontroller that costs about $8. It runs on the chip itself, with nothing sent to a server, and it writes each word to a small screen wired to the chip at roughly 9 tokens per second. The last language model",
+  "date_iso": "2026-07-27",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "gemma",
+    "google"
+   ],
+   "concept-theme": [
+    "edge-computing",
+    "performance",
+    "optimization",
+    "cost-optimization"
+   ],
+   "content-type": [
+    "project-spotlight",
+    "deep-dive"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "local-llm",
+    "llm-models"
+   ],
+   "framework-library-tool": [
+    "gemma"
+   ],
+   "topic-technology": [
+    "local-inference",
+    "on-device-inference",
+    "edge-ai",
+    "small-language-models",
+    "int4",
+    "cpu-inference"
+   ],
+   "trending-emerging": [
+    "on-device-ai",
+    "edge-ai",
+    "local-llm",
+    "small-language-models"
+   ]
+  }
+ },
+ {
+  "id": 3790,
+  "source_id": 8,
+  "url": "https://pytorch.org/blog/bringing-pytorch-monarch-to-amd-gpus-single-controller-distributed-training-on-rocm",
+  "title": "Bringing PyTorch Monarch to AMD GPUs: Single-Controller Distributed Training on ROCm",
+  "title_pt": "PyTorch Monarch chega às GPUs AMD: treinamento distribuído com controlador único no ROCm",
+  "summary_pt": "Treinar modelos de linguagem massivos (LLMs) com bilhões de parâmetros exige computação distribuída em centenas ou milhares de GPUs, onde falhas de hardware são inevitáveis. Para lidar com isso, o PyTorch Monarch foi portado para GPUs AMD Instinct com ROCm, expandindo o modelo de controlador único para além do ecossistema CUDA. O Monarch introduz um paradigma de programação distribuída baseado em atores, gerenciamento hierárquico de falhas e abstração de malha de processos, permitindo que nós saudáveis continuem treinando enquanto falhas são recuperadas localmente em segundos.\n\nA portabilidade para ROCm envolveu a conversão automática de código CUDA para HIP usando hipify_torch, substituição de NCCL por RCCL (que espelha a API do NCCL) e integração com RDMA. Para evitar bifurcações no código Rust, foi criado um módulo de compatibilidade que reexporta símbolos HIP com nomes CUDA, mantendo o resto do código agnóstico à plataforma. Todos os 1.171 testes foram aprovados, garantindo suporte completo a ROCm 7.0+.\n\nEm um estudo de caso, o Monarch foi integrado ao TorchTitan (motor de treinamento) e TorchFT (tolerância a falhas) em clusters SLURM e Kubernetes com GPUs MI300 e MI355. Falhas injetadas a cada 180 segundos foram tratadas dinamicamente: o nó com falha era reiniciado localmente, recebia um checkpoint de um nó doador via transferência ponto a ponto, e o treinamento continuava sem interrupção global. A curva de perda permaneceu estável, demonstrando que a abordagem oferece recuperação rápida e mínima perda de produtividade, tanto em SLURM (128 GPUs) quanto em Kubernetes (256 GPUs). O próximo passo inclui suporte a mais frameworks de pré-treinamento e aprendizado por reforço, além de otimizações na latência de rejoin.",
+  "snippet": "Featured projects Training state-of-the-art large language models (LLMs) with billions of parameters requires distributed training across hundreds or thousands of GPUs. At this scale, hardware failures are not exceptional events—they are expected. A single GPU memory error, network partition, or node crash can bring down an entire training run that has been progressing for days or weeks.",
+  "date_iso": "2026-07-27",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "reliability",
+    "scalability"
+   ],
+   "content-type": [
+    "deep-dive"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "llm-models",
+    "ai-general"
+   ],
+   "ecosystem-language": [
+    "python"
+   ],
+   "framework-library-tool": [
+    "pytorch"
+   ],
+   "topic-technology": [
+    "distributed-computing",
+    "gpu",
+    "fault-tolerance",
+    "ai-infrastructure",
+    "model-training",
+    "foundation-models"
+   ],
+   "trending-emerging": [
+    "ai-data-centers",
+    "gpu-economics",
+    "foundation-models"
+   ]
+  }
+ },
+ {
+  "id": 3791,
+  "source_id": 8,
+  "url": "https://huggingface.co/owensong/Inflect-Micro-v2",
+  "title": "Inflect-Micro-v2",
+  "title_pt": "Inflect-Micro-v2",
+  "summary_pt": "O Inflect-Micro-v2 é um modelo de síntese de fala (texto-para-onda) totalmente local, com menos de 10 milhões de parâmetros (9,35M). Ele gera áudio em inglês com voz fixa, usa sementes determinísticas para resultados reproduzíveis, lida bem com textos longos e pode ser executado tanto em CPU quanto em CUDA. O pacote inclui duas versões: a Micro (foco em qualidade) e a Nano (menos de 4M de parâmetros, para menor pegada).\n\nO modelo obteve 66,2% de preferência em teste cego comunitário, UTMOS22 de 4,395 e taxa de erro de palavra (WER) de 3,99% em dois sistemas ASR. A saída é em 24 kHz mono. Além da inferência, há um kit de adaptação pública que permite treinar o modelo para novas vozes ou idiomas (experimental), com exportação para PyTorch ou ONNX.\n\nA instalação é simples via Hugging Face Hub, e o uso em Python requer poucas linhas de código. O modelo também oferece controles de velocidade e variação, e o processamento de textos longos é feito por segmentação automática com pausas controladas.",
+  "snippet": "Inflect-Micro-v2 Complete local text-to-waveform speech synthesis under 10M parameters. Fixed-voice English TTS with deterministic seeds, long-text handling, and CPU or CUDA inference. A note from Owen I built and funded Inflect v2 independently. If this release finds a real audience, I would like to continue the project with a broader v3, which might include things like more langauges, voices, a",
+  "date_iso": "2026-07-27",
+  "kind": null,
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "hugging-face"
+   ],
+   "concept-theme": [
+    "edge-computing"
+   ],
+   "content-type": [
+    "version-release"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "framework-library-tool": [
+    "pytorch",
+    "onnx",
+    "nvidia-cuda"
+   ],
+   "topic-technology": [
+    "text-to-speech",
+    "model-release",
+    "local-inference",
+    "fine-tuning"
+   ],
+   "trending-emerging": [
+    "voice-ai",
+    "on-device-ai",
+    "edge-ai"
+   ]
+  }
  }
 ]

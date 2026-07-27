@@ -2,6 +2,7 @@
 // (src/index.js) e a UI (src/ui/). Os comandos logam por util log/warn/errorLog, então a UI
 // captura tudo via setLogSink. As contagens vêm de getStatus() (dado), reusado pela UI.
 import { mkdirSync, writeFileSync } from 'node:fs';
+import { execSync } from 'node:child_process';
 import path from 'node:path';
 import { stmts, wipeAll, removeSource } from './db.js';
 import {
@@ -1171,4 +1172,71 @@ export async function cmdKey(rest, flags) {
   else log(`nenhuma chave configurada ainda — arquivo previsível: ${ENV_PATH}`);
   log('uso: ncrawl key set <chave>   valida na OpenRouter e salva');
   log('     ncrawl key test          valida a chave atual');
+}
+
+// Deploy do site: exporta o snapshot web + API pública, commita e dá push.
+// Fallback fail-open: se o git falhar (sem remote, sem permissão), o export já foi feito —
+// o usuário pode commitar/pushar manualmente.
+export function cmdDeploy(flags) {
+  const dataDir = path.join(ROOT, 'webapp', 'public', 'data');
+  const apiDir = path.join(ROOT, 'webapp', 'public', 'api', 'v1');
+
+  // 1. Exporta o snapshot web + API pública
+  log('exportando o snapshot do webapp a partir do banco local…');
+  exportWebSnapshot({ outDir: dataDir });
+  exportPublicApi({ outDir: apiDir });
+
+  // 2. Verifica mudanças reais (ignorando o campo volátil generatedAt)
+  const metaPath = path.join(dataDir, 'meta.json');
+  const corpusPath = path.join(apiDir, 'corpus.json');
+
+  let realChange = false;
+  try {
+    execSync('git diff --quiet HEAD -- webapp/public/data/articles.json webapp/public/data/contents.json', {
+      cwd: ROOT, stdio: 'pipe',
+    });
+  } catch {
+    realChange = true; // diff não-vazio → mudança
+  }
+
+  if (!realChange) {
+    try {
+      const headMeta = execSync('git show HEAD:webapp/public/data/meta.json', { cwd: ROOT, stdio: 'pipe', encoding: 'utf8' })
+        .replace(/"generatedAt":\s*"[^"]+"/, '');
+      const curMeta = execSync(`cat ${metaPath}`, { encoding: 'utf8' }).replace(/"generatedAt":\s*"[^"]+"/, '');
+      if (headMeta !== curMeta) realChange = true;
+    } catch { /* sem HEAD do meta → primeiro commit */ realChange = true; }
+  }
+
+  if (!realChange) {
+    try {
+      const headCorpus = execSync('git show HEAD:webapp/public/api/v1/corpus.json', { cwd: ROOT, stdio: 'pipe', encoding: 'utf8' })
+        .replace(/"generatedAt":\s*"[^"]+"/, '');
+      const curCorpus = execSync(`cat ${corpusPath}`, { encoding: 'utf8' }).replace(/"generatedAt":\s*"[^"]+"/, '');
+      if (headCorpus !== curCorpus) realChange = true;
+    } catch { realChange = true; }
+  }
+
+  if (!realChange) {
+    log('snapshot já em dia — nada a publicar.');
+    return;
+  }
+
+  // 3. Commit e push
+  try {
+    log('dados novos detectados — commitando o snapshot…');
+    execSync('git add -- webapp/public/data webapp/public/api/v1', { cwd: ROOT, stdio: 'pipe' });
+    execSync(
+      'git commit --no-verify -m "chore(data): atualiza snapshot do webapp + API pública (deploy)" -- webapp/public/data webapp/public/api/v1',
+      { cwd: ROOT, stdio: 'pipe' },
+    );
+    log('commit criado — enviando para origin/main…');
+    const pushOut = execSync('git push origin main', { cwd: ROOT, stdio: 'pipe', encoding: 'utf8' });
+    log(`push concluído ✓ a Vercel fará o deploy automaticamente.\n${pushOut.trim()}`);
+  } catch (e) {
+    const msg = (e.stderr || e.stdout || e.message || '').toString().trim();
+    errorLog(`git falhou: ${msg}`);
+    log('o export foi feito — corrija o problema de git e rode git push manualmente.');
+    process.exit(1);
+  }
 }

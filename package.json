@@ -25,6 +25,7 @@
     "key": "node src/index.js key",
     "limits": "node --env-file-if-exists=.env src/index.js limits",
     "reset": "node --env-file-if-exists=.env src/index.js reset",
+    "deploy": "node --env-file-if-exists=.env src/index.js deploy",
     "test": "node --test",
     "ui": "NODE_NO_WARNINGS=1 node --env-file-if-exists=.env src/index.js ui",
     "menu": "NODE_NO_WARNINGS=1 node --env-file-if-exists=.env src/index.js menu",

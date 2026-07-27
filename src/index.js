@@ -9,7 +9,7 @@ import {
   printStatus, cmdCrawl, cmdAdd, cmdRemove, cmdReset, cmdExport, cmdSearch, cmdKey,
   cmdWeb,
   cmdLimits,
-  cmdReclean, cmdInspect, cmdPurge, cmdFinish,
+  cmdReclean, cmdInspect, cmdPurge, cmdFinish, cmdDeploy,
 } from './commands.js';
 
 function parseFlags(argv) {
@@ -60,6 +60,7 @@ function printHelp() {
       '  node src/index.js web [--port N] [--no-open]   buscador web (React) com filtros da base',
       '  node src/index.js key set <chave> | key test   valida/salva a chave OpenRouter (em ~/.newsletter-crawler/.env)',
       '  node src/index.js limits [show | set --budget USD --parallel N --ram-max-pct P]   limites persistentes',
+      '  node src/index.js deploy          exporta o snapshot web, commita e dá push (Vercel publica)',
       '  node src/index.js reset --yes     APAGA TODOS OS DADOS (slate limpo)',
       '',
       'Global: instale com `npm run link` e use `ncrawl <comando>` de qualquer lugar (dados em NC_HOME=~/.newsletter-crawler).',
@@ -129,13 +130,16 @@ try {
     } else if (cmd === 'limits') {
       cmdLimits(rest, flags);
       db.close();
+    } else if (cmd === 'deploy') {
+      cmdDeploy(flags);
+      db.close();
     } else if (cmd === 'reset' || cmd === 'clean') {
       cmdReset(flags);
       db.close();
     } else {
       errorLog(
         `comando desconhecido: ${cmd} ` +
-          '(use: crawl | status | inspect | reclean | purge | add | remove | export | finish | search | web | key | limits | reset | ui)',
+          '(use: crawl | status | inspect | reclean | purge | add | remove | export | finish | search | web | key | limits | deploy | reset | ui)',
       );
       process.exit(1);
     }

@@ -1,6 +1,6 @@
 {
  "schemaVersion": 1,
- "generatedAt": "2026-07-27T15:10:26.668Z",
+ "generatedAt": "2026-07-28T12:37:02.932Z",
  "totals": {
   "articles": 3751,
   "summaries": 3751,
@@ -4196,7 +4196,7 @@
  ],
  "dates": {
   "min": "2015-01-02",
-  "max": "2026-08-22"
+  "max": "2026-07-28"
  },
  "toolContentTypes": [
   "tool-release",

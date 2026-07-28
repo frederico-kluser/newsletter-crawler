@@ -151054,7 +151054,7 @@
   "title_pt": "Bun v1.4 será o maior salto em compatibilidade com Node.js desde o Bun v1.0",
   "summary_pt": "A equipe do Bun anunciou que a versão 1.4 trará o maior avanço em compatibilidade com Node.js desde o lançamento do Bun v1.0. Mais de 505 testes e correções estão aguardando para serem incorporados. Além de fazer os testes passarem, eles estão realizando differential fuzzing contra o Node.js, fuzzing de APIs de runtime, chamadas de sistema e varredura de vulnerabilidades de segurança. Também foram feitas melhorias significativas no uso de memória e correções para casos extremos que não estavam cobertos pelos testes.",
   "snippet": "the imminent release of Bun 1.4, which will have the \"biggest jump in Node.js compatibility since Bun v1.0\".",
-  "date_iso": "2026-08-22",
+  "date_iso": "2026-07-28",
   "kind": "news",
   "section": "IN BRIEF",
   "verify_status": "ok",

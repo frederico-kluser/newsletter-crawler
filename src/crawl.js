@@ -21,7 +21,7 @@ import { inStage, dateSeen, floorHit, bump } from './progress.js';
 import { abortErrorOf } from './deadline.js';
 import { isSubstack, substackArchive } from './substack.js';
 import {
-  normalizeUrl, sha256, domainSig, hostOf, parseDate, log, warn, errorLog, debug,
+  normalizeUrl, sha256, domainSig, hostOf, parseDate, clampFutureDate, log, warn, errorLog, debug,
 } from './util.js';
 import {
   HAS_LLM, RESPECT_ROBOTS, MAX_CRAWL_DEPTH, ROUNDUP_MIN_LINKS,
@@ -693,6 +693,10 @@ async function processArticle(job, source, opts) {
   // Guarda de texto puro no armazenamento (anti "HTML cru" na UI): o caminho Readability já é
   // texto garantido; o seletor e o fallback LLM podem trazer marcação — normaliza SÓ esses.
   content = method === 'readability' ? content : ensurePlainText(content);
+
+  // Trava de data futura: vale p/ os DOIS caminhos de escrita abaixo (insert e enrich) e p/ o
+  // dateSeen do progresso, que leem `published` daqui.
+  published = clampFutureDate(published);
 
   const contentHash = sha256(content);
   const dupHash = stmts.getArticleByHash.get(contentHash);

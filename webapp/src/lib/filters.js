@@ -7,10 +7,14 @@
 // AND dentro da faceta E entre facetas — em vez do "AND-de-OR" do SQL. Escolha de produto do
 // site público: selecionar duas tags = itens que têm AS DUAS. NÃO "ressincronize" para OR sem
 // checar o pedido (o web-ui SQL local segue OR; são superfícies distintas). Ver computeFacetCounts.
+//
+// 2ª DIVERGÊNCIA (só no webapp): FONTE é MULTI-SELEÇÃO em UNIÃO (OR) — `sourceIds: []`, vazio =
+// todas — enquanto o WEB_WHERE do SQL só tem `@sourceId` de uma fonte por vez. Fonte é atributo
+// único do artigo, então AND entre fontes devolveria sempre vazio: aqui OR é a única semântica útil.
 import { articleIsTool } from './taxonomy.js';
 
 export const EMPTY_FILTERS = Object.freeze({
-  sourceId: null,
+  sourceIds: [],
   from: '',
   to: '',
   facets: {},
@@ -18,10 +22,24 @@ export const EMPTY_FILTERS = Object.freeze({
   verify: '',
 });
 
+/**
+ * Escopo de uma busca IA ({sourceIds, from, to}) num shape único e retrocompatível: as buscas
+ * gravadas ANTES da multi-seleção (histórico/checkpoint no localStorage) trazem `sourceId` de uma
+ * fonte só — aqui vira lista de um item, e o resto do app só conhece `sourceIds`.
+ */
+export function normalizeScope(scope = {}) {
+  const ids = Array.isArray(scope.sourceIds)
+    ? scope.sourceIds
+    : scope.sourceId != null
+      ? [scope.sourceId]
+      : [];
+  return { sourceIds: ids, from: scope.from || '', to: scope.to || '' };
+}
+
 /** Filtros ativos (para o badge "Filtros (n)" e as pills). Kind fica fora — mora no Segmented. */
 export function countActiveFilters(f) {
   let n = 0;
-  if (f.sourceId != null) n++;
+  n += f.sourceIds?.length || 0;
   if (f.from || f.to) n++;
   if (f.verify) n++;
   for (const tags of Object.values(f.facets || {})) n += tags.length;
@@ -31,8 +49,9 @@ export function countActiveFilters(f) {
 /** Aplica os filtros de browse. `toolTypes` vem de meta.toolContentTypes. */
 export function applyFilters(articles, f, toolTypes) {
   const facetEntries = Object.entries(f.facets || {}).filter(([, tags]) => tags && tags.length);
+  const sourceIds = f.sourceIds?.length ? new Set(f.sourceIds) : null; // vazio = todas as fontes
   return articles.filter((a) => {
-    if (f.sourceId != null && a.source_id !== f.sourceId) return false;
+    if (sourceIds && !sourceIds.has(a.source_id)) return false;
     if (f.from && a.date_iso < f.from) return false;
     if (f.to && a.date_iso > f.to) return false;
     // INTERSEÇÃO (AND) total: o artigo tem de conter TODA tag selecionada (dentro da faceta e
@@ -80,10 +99,49 @@ export function computeFacetCounts(articles) {
   return counts;
 }
 
-/** Ordenação de exibição do browse: data DESC, id DESC (o snapshot vem por id ASC). */
-export function sortForDisplay(articles) {
-  return [...articles].sort((x, y) => {
-    if (x.date_iso !== y.date_iso) return x.date_iso < y.date_iso ? 1 : -1;
-    return y.id - x.id;
-  });
+/**
+ * Ordenação de exibição: SEMPRE data DESC (mais nova primeiro). O que muda é o desempate DENTRO
+ * de uma mesma data — e é aí que morava o problema: o snapshot é gravado na ordem de COLETA, que é
+ * fonte por fonte, então desempatar por id fazia um dia inteiro sair em blocos (84 itens de uma
+ * newsletter, depois 67 de outra).
+ *
+ * `mix` (default) = RODÍZIO entre as fontes: 1º item da fonte A, 1º da B, 1º da C, 2º da A… e quando
+ * uma fonte esgota as demais seguem sozinhas até o fim. A volta do rodízio é ALFABÉTICA pelo nome da
+ * fonte (`sourceName`) — ordem estável entre visitas, independente do filtro. Dentro de cada fonte a
+ * fila é `id` ASC = a ordem editorial da issue (manchete primeiro), então o rodízio mostra a matéria
+ * principal de cada fonte antes das secundárias.
+ *
+ * `mix: false` = agrupado por fonte dentro da data (fonte alfabética, `id` ASC) — o modo do toggle
+ * "misturar fontes" desligado.
+ *
+ * Puro: não muta a entrada. `sourceName` é opcional (sem ele o rodízio cai no `source_id`).
+ */
+export function sortForDisplay(articles, { mix = true, sourceName } = {}) {
+  const nameOf = (a) => (sourceName ? sourceName(a.source_id) : '') || String(a.source_id ?? '');
+  const byDate = new Map(); // date_iso -> Map(nome da fonte -> fila de artigos)
+  for (const a of articles) {
+    const date = a.date_iso || '';
+    let queues = byDate.get(date);
+    if (!queues) byDate.set(date, (queues = new Map()));
+    const name = nameOf(a);
+    const queue = queues.get(name);
+    if (queue) queue.push(a);
+    else queues.set(name, [a]);
+  }
+  const out = [];
+  for (const date of [...byDate.keys()].sort().reverse()) {
+    const queues = [...byDate.get(date).entries()]
+      .sort((x, y) => x[0].localeCompare(y[0]))
+      .map(([, queue]) => queue.sort((x, y) => x.id - y.id));
+    if (mix) {
+      // rodízio: uma volta por rodada, pulando as filas que já esgotaram
+      const rounds = Math.max(...queues.map((q) => q.length));
+      for (let round = 0; round < rounds; round++) {
+        for (const queue of queues) if (round < queue.length) out.push(queue[round]);
+      }
+    } else {
+      for (const queue of queues) out.push(...queue);
+    }
+  }
+  return out;
 }

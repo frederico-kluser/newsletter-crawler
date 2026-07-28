@@ -227,6 +227,63 @@
   flex-direction: column;
   gap: 7px;
 }
+/* fontes: checkbox por fonte (multi-seleção em união; nenhuma marcada = todas) */
+.source-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.source-item,
+.switch-row {
+  display: flex;
+  flex-direction: row; /* .filter-block é column — o switch precisa de checkbox e rótulo lado a lado */
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  color: var(--fg-soft);
+  cursor: pointer;
+  border-radius: var(--radius-m);
+  padding: 3px 4px;
+  margin: 0 -4px;
+}
+.source-item:hover,
+.switch-row:hover {
+  background: var(--chip-bg);
+}
+.source-item input,
+.switch-row input {
+  accent-color: var(--accent);
+  width: 15px;
+  height: 15px;
+  flex: none;
+  cursor: pointer;
+  color-scheme: light dark;
+}
+.source-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.switch-row {
+  align-items: flex-start;
+  padding-top: 14px;
+  border-top: 1px solid var(--hairline);
+  border-radius: 0;
+}
+.switch-row > span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.filter-hint {
+  font-size: 11.5px;
+  color: var(--fg-muted);
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 400;
+}
 .input {
   width: 100%;
   padding: 8px 10px;

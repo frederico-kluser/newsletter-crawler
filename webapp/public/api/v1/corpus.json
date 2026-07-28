@@ -1,6 +1,6 @@
 {
  "schemaVersion": 1,
- "generatedAt": "2026-07-27T15:10:27.112Z",
+ "generatedAt": "2026-07-28T12:37:03.401Z",
  "documentation": "/api/v1/README.md",
  "schema": "/api/v1/schema.json",
  "totals": {
@@ -16,7 +16,7 @@
  },
  "dates": {
   "min": "2015-01-02",
-  "max": "2026-08-22"
+  "max": "2026-07-28"
  },
  "sources": [
   {
@@ -155261,7 +155261,7 @@
    "snippet": "the imminent release of Bun 1.4, which will have the \"biggest jump in Node.js compatibility since Bun v1.0\".",
    "kind": "news",
    "section": "IN BRIEF",
-   "date": "2026-08-22",
+   "date": "2026-07-28",
    "verifyStatus": "ok",
    "tags": {
     "concept-theme": [

@@ -24,7 +24,7 @@ const result = (over = {}) => ({
 });
 
 test('addToHistory congela a busca e loadHistory devolve novo→antigo', () => {
-  addToHistory(result({ query: 'primeira' }), { sourceId: 3, from: '2026-06-01', to: '' });
+  addToHistory(result({ query: 'primeira' }), { sourceIds: [3], from: '2026-06-01', to: '' });
   addToHistory(result({ query: 'segunda', deep: true }), {});
   const list = loadHistory();
   assert.equal(list.length, 2);
@@ -32,7 +32,7 @@ test('addToHistory congela a busca e loadHistory devolve novo→antigo', () => {
   assert.equal(list[0].deep, true);
   const first = list[1];
   assert.equal(first.query, 'primeira');
-  assert.deepEqual(first.scope, { sourceId: 3, from: '2026-06-01', to: '' });
+  assert.deepEqual(first.scope, { sourceIds: [3], from: '2026-06-01', to: '' });
   assert.equal(first.stats.relevant, 2);
   assert.equal(first.stats.spentUsd, 0.0021);
   // hits guardam SÓ id+relation+kind (leves; a ficha é re-hidratada na restauração)
@@ -67,5 +67,5 @@ test('clearHistory esvazia', () => {
 test('scope ausente vira campos vazios (nunca undefined)', () => {
   addToHistory(result(), undefined);
   const e = loadHistory()[0];
-  assert.deepEqual(e.scope, { sourceId: null, from: '', to: '' });
+  assert.deepEqual(e.scope, { sourceIds: [], from: '', to: '' });
 });

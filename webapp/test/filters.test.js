@@ -3,7 +3,14 @@
 // tags; NULL cai no fallback por tags), período sobre date_iso e verify. Sem React/DOM.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { applyFilters, computeFacetCounts, countActiveFilters, sortForDisplay, EMPTY_FILTERS } from '../src/lib/filters.js';
+import {
+  applyFilters,
+  computeFacetCounts,
+  countActiveFilters,
+  normalizeScope,
+  sortForDisplay,
+  EMPTY_FILTERS,
+} from '../src/lib/filters.js';
 import { effectiveKind, isToolByTags } from '../src/lib/taxonomy.js';
 
 const TOOL_TYPES = ['tool-release', 'tooling', 'library-release', 'product-launch'];
@@ -110,7 +117,7 @@ test('período sobre date_iso (inclusive) e fonte', () => {
   assert.deepEqual(ids(applyFilters(all, f({ from: '2026-06-21' }), TOOL_TYPES)), [junho22.id, junho25.id]);
   assert.deepEqual(ids(applyFilters(all, f({ to: '2026-06-05' }), TOOL_TYPES)), [junho01.id]);
   assert.deepEqual(ids(applyFilters(all, f({ from: '2026-06-22', to: '2026-06-22' }), TOOL_TYPES)), [junho22.id]);
-  assert.deepEqual(ids(applyFilters(all, f({ sourceId: 2 }), TOOL_TYPES)), [junho22.id]);
+  assert.deepEqual(ids(applyFilters(all, f({ sourceIds: [2] }), TOOL_TYPES)), [junho22.id]);
 });
 
 test('verify filtra pelo selo exato', () => {
@@ -122,20 +129,69 @@ test('verify filtra pelo selo exato', () => {
   assert.deepEqual(ids(applyFilters(all, f({ verify: 'ok' }), TOOL_TYPES)), [ok.id]);
 });
 
-test('sortForDisplay: data DESC com desempate por id DESC (não muta a entrada)', () => {
-  const a = art({ date_iso: '2026-06-20' });
-  const b = art({ date_iso: '2026-06-25' });
-  const c = art({ date_iso: '2026-06-25' });
-  const input = [a, b, c];
-  const sorted = sortForDisplay(input);
-  assert.deepEqual(ids(sorted), [c.id, b.id, a.id]);
-  assert.deepEqual(ids(input), [a.id, b.id, c.id], 'entrada intacta');
+test('fonte: multi-seleção em UNIÃO (nenhuma marcada = todas)', () => {
+  const f1 = art({ source_id: 1 });
+  const f2 = art({ source_id: 2 });
+  const f3 = art({ source_id: 3 });
+  const all = [f1, f2, f3];
+  assert.deepEqual(ids(applyFilters(all, f({ sourceIds: [] }), TOOL_TYPES)), [f1.id, f2.id, f3.id]);
+  assert.deepEqual(ids(applyFilters(all, f({ sourceIds: [2] }), TOOL_TYPES)), [f2.id]);
+  assert.deepEqual(ids(applyFilters(all, f({ sourceIds: [1, 3] }), TOOL_TYPES)), [f1.id, f3.id]);
+});
+
+test('normalizeScope: aceita o `sourceId` legado do histórico salvo', () => {
+  assert.deepEqual(normalizeScope({ sourceId: 4, from: '2026-06-01' }), { sourceIds: [4], from: '2026-06-01', to: '' });
+  assert.deepEqual(normalizeScope({ sourceIds: [1, 2] }), { sourceIds: [1, 2], from: '', to: '' });
+  assert.deepEqual(normalizeScope({}), { sourceIds: [], from: '', to: '' });
+  assert.deepEqual(normalizeScope(), { sourceIds: [], from: '', to: '' });
+});
+
+// nomes fora de ordem de propósito: a volta do rodízio é ALFABÉTICA pelo nome, não pelo source_id
+const NAMES = { 1: 'Node Weekly', 2: 'AI Weekly', 3: 'React Status' };
+const named = (id) => NAMES[id] || '';
+
+test('sortForDisplay: data DESC e, dentro da data, RODÍZIO alfabético entre fontes', () => {
+  // dia 25: fonte 1 (Node) tem 3 itens, fonte 2 (AI) tem 1, fonte 3 (React) tem 2
+  const n1 = art({ date_iso: '2026-06-25', source_id: 1 });
+  const n2 = art({ date_iso: '2026-06-25', source_id: 1 });
+  const n3 = art({ date_iso: '2026-06-25', source_id: 1 });
+  const a1 = art({ date_iso: '2026-06-25', source_id: 2 });
+  const r1 = art({ date_iso: '2026-06-25', source_id: 3 });
+  const r2 = art({ date_iso: '2026-06-25', source_id: 3 });
+  const velho = art({ date_iso: '2026-06-20', source_id: 1 });
+  const input = [n1, n2, n3, a1, r1, r2, velho];
+
+  const sorted = sortForDisplay(input, { sourceName: named });
+  // 1ª volta: AI, Node, React; 2ª volta: Node, React (AI esgotou); 3ª: só Node. Depois o dia 20.
+  assert.deepEqual(ids(sorted), [a1.id, n1.id, r1.id, n2.id, r2.id, n3.id, velho.id]);
+  assert.deepEqual(ids(input), [n1.id, n2.id, n3.id, a1.id, r1.id, r2.id, velho.id], 'entrada intacta');
+});
+
+test('sortForDisplay: dentro da fonte a fila é id ASC (ordem editorial da issue)', () => {
+  const primeiro = art({ id: 500, date_iso: '2026-06-25', source_id: 1 });
+  const segundo = art({ id: 501, date_iso: '2026-06-25', source_id: 1 });
+  assert.deepEqual(ids(sortForDisplay([segundo, primeiro], { sourceName: named })), [primeiro.id, segundo.id]);
+});
+
+test('sortForDisplay: mix:false agrupa por fonte dentro da data (data DESC continua)', () => {
+  const n1 = art({ date_iso: '2026-06-25', source_id: 1 });
+  const a1 = art({ date_iso: '2026-06-25', source_id: 2 });
+  const n2 = art({ date_iso: '2026-06-25', source_id: 1 });
+  const velho = art({ date_iso: '2026-06-24', source_id: 2 });
+  const sorted = sortForDisplay([n1, a1, n2, velho], { mix: false, sourceName: named });
+  assert.deepEqual(ids(sorted), [a1.id, n1.id, n2.id, velho.id]);
+});
+
+test('sortForDisplay: sem sourceName cai no source_id, e data ausente vai para o fim', () => {
+  const comData = art({ date_iso: '2026-06-25', source_id: 9 });
+  const semData = art({ date_iso: null, source_id: 9 });
+  assert.deepEqual(ids(sortForDisplay([semData, comData])), [comData.id, semData.id]);
 });
 
 test('countActiveFilters conta fonte/período/verify/tags (kind fica no Segmented)', () => {
   assert.equal(countActiveFilters(f()), 0);
   assert.equal(
-    countActiveFilters(f({ sourceId: 1, from: '2026-06-01', verify: 'ok', facets: { domain: ['a', 'b'] }, kind: 'tool' })),
+    countActiveFilters(f({ sourceIds: [1], from: '2026-06-01', verify: 'ok', facets: { domain: ['a', 'b'] }, kind: 'tool' })),
     5,
   );
 });

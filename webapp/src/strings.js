@@ -85,8 +85,11 @@ const pt = {
 
   // filtros
   filters: 'Filtros',
-  filterSource: 'Fonte',
+  filterSource: 'Fontes',
   filterAllSources: 'Todas as fontes',
+  filterSourcesHint: 'Nenhuma marcada = todas',
+  mixSources: 'Misturar fontes',
+  mixSourcesHint: 'Alterna as fontes dentro de cada data',
   filterPeriod: 'Período',
   filterFrom: 'de',
   filterTo: 'até',
@@ -246,8 +249,11 @@ const en = {
   keySaved: 'key saved ✓',
 
   filters: 'Filters',
-  filterSource: 'Source',
+  filterSource: 'Sources',
   filterAllSources: 'All sources',
+  filterSourcesHint: 'None checked = all',
+  mixSources: 'Mix sources',
+  mixSourcesHint: 'Alternates sources within each date',
   filterPeriod: 'Period',
   filterFrom: 'from',
   filterTo: 'to',

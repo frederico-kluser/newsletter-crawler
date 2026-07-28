@@ -6,6 +6,7 @@
 // poda o suficiente p/ caber quando a quota do localStorage estoura (fail-open — nunca quebra a
 // busca que já custou dinheiro).
 import { getHistoryRaw, trySetHistory } from './storage.js';
+import { normalizeScope } from './filters.js';
 
 const VERSION = 1;
 const MAX_HITS = 1000; // teto defensivo por registro (paridade com SEARCH_WEB_MAX_ITEMS do servidor)
@@ -48,7 +49,7 @@ function persist(items) {
 /**
  * Adiciona uma busca concluída ao topo do histórico e devolve a lista atualizada.
  * `result` = o retorno de runSearch (query/deep/scanned/total/relevant/failed/truncated/spentUsd/hits).
- * `scope` = {sourceId, from, to} usado na busca (p/ o re-rodar restaurar o mesmo recorte).
+ * `scope` = {sourceIds, from, to} usado na busca (p/ o re-rodar restaurar o mesmo recorte).
  */
 export function addToHistory(result, scope = {}) {
   const entry = {
@@ -56,7 +57,7 @@ export function addToHistory(result, scope = {}) {
     createdAt: new Date().toISOString(),
     query: result.query,
     deep: Boolean(result.deep),
-    scope: { sourceId: scope.sourceId ?? null, from: scope.from || '', to: scope.to || '' },
+    scope: normalizeScope(scope),
     spec: result.spec || null, // o "entendimento" da consulta — banner ao reabrir (paridade com o fim da busca)
     stats: {
       scanned: result.scanned ?? 0,

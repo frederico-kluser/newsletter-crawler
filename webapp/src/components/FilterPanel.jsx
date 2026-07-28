@@ -9,9 +9,9 @@ function daysAgoIso(days) {
 
 /**
  * Conteúdo dos filtros — COMPARTILHADO entre a Sidebar (desktop) e o FilterDrawer (mobile).
- * Fonte, período (com presets 7/30 dias), verificação e as 9 facetas.
+ * Fontes (multi-seleção), rodízio de fontes, período (presets 7/30 dias), verificação e as 9 facetas.
  */
-export default function FilterPanel({ meta, filters, dispatch, facetCounts }) {
+export default function FilterPanel({ meta, filters, dispatch, facetCounts, mix, onMixChange }) {
   const STR = useStrings();
   const { FACET_LABEL, VERIFY_LABEL } = STR;
   const set = (key, value) => dispatch({ type: 'set', key, value });
@@ -19,23 +19,42 @@ export default function FilterPanel({ meta, filters, dispatch, facetCounts }) {
     dispatch({ type: 'set', key: 'from', value: daysAgoIso(days) });
     dispatch({ type: 'set', key: 'to', value: '' });
   };
+  const selected = filters.sourceIds || [];
 
   return (
     <div className="filter-panel">
-      <label className="filter-block">
-        <span className="facet-label">{STR.filterSource}</span>
-        <select
-          className="input"
-          value={filters.sourceId ?? ''}
-          onChange={(e) => set('sourceId', e.target.value ? Number(e.target.value) : null)}
-        >
-          <option value="">{STR.filterAllSources}</option>
+      <fieldset className="filter-block">
+        <legend className="facet-label">{STR.filterSource}</legend>
+        {/* multi-seleção em UNIÃO: nada marcado = todas (o "Todas as fontes" é o estado vazio) */}
+        <div className="source-list">
           {meta.sources.map((s) => (
-            <option key={s.id} value={s.id}>
-              {s.name} ({s.count})
-            </option>
+            <label key={s.id} className="source-item">
+              <input
+                type="checkbox"
+                checked={selected.includes(s.id)}
+                onChange={() => dispatch({ type: 'toggleSource', id: s.id })}
+              />
+              <span className="source-name">{s.name}</span>
+              <span className="chip-count">{s.count}</span>
+            </label>
           ))}
-        </select>
+        </div>
+        {selected.length > 0 ? (
+          <button type="button" className="chip chip-more" onClick={() => set('sourceIds', [])}>
+            {STR.filterAllSources}
+          </button>
+        ) : (
+          <span className="filter-hint">{STR.filterSourcesHint}</span>
+        )}
+      </fieldset>
+
+      {/* Ordem de exibição: rodízio entre fontes dentro de cada data (ligado) vs agrupado por fonte. */}
+      <label className="filter-block switch-row">
+        <input type="checkbox" checked={mix} onChange={(e) => onMixChange(e.target.checked)} />
+        <span>
+          <span className="facet-label">{STR.mixSources}</span>
+          <span className="filter-hint">{STR.mixSourcesHint}</span>
+        </span>
       </label>
 
       <fieldset className="filter-block">

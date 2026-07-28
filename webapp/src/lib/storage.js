@@ -67,6 +67,11 @@ export const clearActive = () => del('nc-search-active');
 export const getLocale = () => get('nc-locale');
 export const setLocale = (l) => set('nc-locale', l);
 
+// Rodízio de fontes dentro de cada data (toggle "misturar fontes"). LIGADO por padrão: só o
+// desligamento explícito é persistido, então uma visita nova já cai no modo misturado.
+export const getMixSources = () => get('nc-mix-sources') !== '0';
+export const setMixSources = (on) => set('nc-mix-sources', on ? '1' : '0');
+
 // Tutorial de introdução: mostra sozinho só na 1ª visita; o botão de ajuda reabre sempre.
 export const getTutorialSeen = () => get('nc-tutorial-seen') === '1';
 export const setTutorialSeen = () => set('nc-tutorial-seen', '1');

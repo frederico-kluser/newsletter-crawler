@@ -23,12 +23,19 @@ import { useAiSearch } from './hooks/useAiSearch.js';
 import { useVisibleCount } from './hooks/useVisibleCount.js';
 import { useMediaQuery } from './hooks/useMediaQuery.js';
 import { useDebouncedValue } from './hooks/useDebouncedValue.js';
-import { EMPTY_FILTERS, applyFilters, computeFacetCounts, countActiveFilters, sortForDisplay } from './lib/filters.js';
+import {
+  EMPTY_FILTERS,
+  applyFilters,
+  computeFacetCounts,
+  countActiveFilters,
+  normalizeScope,
+  sortForDisplay,
+} from './lib/filters.js';
 import { searchText } from './lib/textSearch.js';
 import { useStrings } from './i18n.jsx';
 import Tutorial from './components/Tutorial.jsx';
 import { PlayerProvider } from './player.jsx';
-import { getTutorialSeen, setTutorialSeen } from './lib/storage.js';
+import { getMixSources, setMixSources, getTutorialSeen, setTutorialSeen } from './lib/storage.js';
 import './styles/app.css';
 
 function filtersReducer(state, action) {
@@ -37,6 +44,10 @@ function filtersReducer(state, action) {
       return { ...state, [action.key]: action.value };
     case 'setPeriod':
       return { ...state, from: action.from, to: action.to };
+    case 'toggleSource': {
+      const cur = state.sourceIds || [];
+      return { ...state, sourceIds: cur.includes(action.id) ? cur.filter((i) => i !== action.id) : [...cur, action.id] };
+    }
     case 'toggleTag': {
       const cur = state.facets[action.facet] || [];
       const next = cur.includes(action.tag) ? cur.filter((t) => t !== action.tag) : [...cur, action.tag];
@@ -63,6 +74,12 @@ export default function App() {
   const [detailId, setDetailId] = useState(null);
   const [strict, setStrict] = useState(false); // AMPLO por padrão: mostra 'direct' + 'similar' (Estrito é opt-in)
   const [drawerOpen, setDrawerOpen] = useState(false);
+  // rodízio de fontes dentro de cada data (ligado por padrão; a escolha persiste entre visitas)
+  const [mix, setMix] = useState(getMixSources);
+  const onMixChange = useCallback((on) => {
+    setMix(on);
+    setMixSources(on);
+  }, []);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [textInput, setTextInput] = useState('');
   const textQuery = useDebouncedValue(textInput, 180);
@@ -87,8 +104,9 @@ export default function App() {
   // Restaura o ESCOPO salvo (fonte/período) nos filtros — pills/sidebar refletem a busca reaberta.
   const restoreScope = (scope) => {
     if (!scope) return;
-    dispatch({ type: 'set', key: 'sourceId', value: scope.sourceId ?? null });
-    dispatch({ type: 'setPeriod', from: scope.from || '', to: scope.to || '' });
+    const s = normalizeScope(scope); // escopos salvos antes da multi-seleção trazem `sourceId`
+    dispatch({ type: 'set', key: 'sourceIds', value: s.sourceIds });
+    dispatch({ type: 'setPeriod', from: s.from, to: s.to });
   };
 
   // Retomada de busca (reload/reabrir a aba): o hook decidiu retomar e expôs {query, scope} —
@@ -121,10 +139,16 @@ export default function App() {
   useMotionValueEvent(scrollY, 'change', (v) => setScrolled(v > 8));
 
   const toolTypes = meta?.toolContentTypes || [];
+  // id → nome da fonte: é o nome que define a volta do rodízio (alfabética), não o id de coleta.
+  const sourceName = useCallback(
+    (id) => meta?.sources.find((s) => s.id === id)?.name || '',
+    [meta],
+  );
+  const sortOpts = useMemo(() => ({ mix, sourceName }), [mix, sourceName]);
   // Browse = filtros estruturados (sidebar) + busca textual LOCAL (o "search sem inteligência").
   const filtered = useMemo(
-    () => (articles ? sortForDisplay(searchText(applyFilters(articles, filters, toolTypes), textQuery)) : []),
-    [articles, filters, toolTypes, textQuery],
+    () => (articles ? sortForDisplay(searchText(applyFilters(articles, filters, toolTypes), textQuery), sortOpts) : []),
+    [articles, filters, toolTypes, textQuery, sortOpts],
   );
   // Contagens de co-ocorrência das tags sobre o conjunto JÁ filtrado: cada chip mostra quantos
   // itens do resultado atual também têm aquela tag, e a UI desabilita as zeradas. null enquanto o
@@ -170,7 +194,15 @@ export default function App() {
     }
   }, [ai.phase, aiActive, filters.kind]);
 
-  const displayItems = aiShown ? aiShown.map((x) => x.article) : filtered;
+  // IA: durante o streaming os cards ficam na ORDEM DE CHEGADA (reordenar ao vivo faria o card
+  // que o usuário está lendo pular de lugar); ao TERMINAR, o resultado congelado é reordenado por
+  // data + rodízio de fontes. Com o toggle desligado, a IA mantém a ordem por relevância.
+  const aiOrdered = useMemo(() => {
+    if (!aiShown) return null;
+    const list = aiShown.map((x) => x.article);
+    return aiActive && mix ? sortForDisplay(list, sortOpts) : list;
+  }, [aiShown, aiActive, mix, sortOpts]);
+  const displayItems = aiOrdered ?? filtered;
   // Itens do player de áudio: a lista EXIBIDA (na ordem da tela) reduzida ao que o TTS narra
   // (id + título p/ rótulo + summary_pt como conteúdo). Itens sem resumo são pulados no player.
   const playerItems = useMemo(
@@ -251,7 +283,16 @@ export default function App() {
         </main>
       ) : (
         <main className="layout" data-desktop={isDesktop || undefined}>
-          {isDesktop && meta && <Sidebar meta={meta} filters={filters} dispatch={dispatch} facetCounts={facetCounts} />}
+          {isDesktop && meta && (
+            <Sidebar
+              meta={meta}
+              filters={filters}
+              dispatch={dispatch}
+              facetCounts={facetCounts}
+              mix={mix}
+              onMixChange={onMixChange}
+            />
+          )}
           <section className="content">
             <div className="content-head">
               <Segmented
@@ -369,6 +410,8 @@ export default function App() {
           filters={filters}
           dispatch={dispatch}
           facetCounts={facetCounts}
+          mix={mix}
+          onMixChange={onMixChange}
         />
       )}
 

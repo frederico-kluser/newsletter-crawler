@@ -3,7 +3,7 @@ import { getContent } from '../lib/data.js';
 import { estimateSearch } from '../lib/cost.js';
 import { runSearch } from '../lib/search.js';
 import { probeKey } from '../lib/openrouter.js';
-import { applyFilters, EMPTY_FILTERS } from '../lib/filters.js';
+import { applyFilters, EMPTY_FILTERS, normalizeScope } from '../lib/filters.js';
 import { clearApiKey, getApiKey, setApiKey } from '../lib/storage.js';
 import { addToHistory, clearHistory, loadHistory, removeFromHistory } from '../lib/history.js';
 import { clearActiveSearch, loadActiveSearch, makeCheckpointWriter, saveActiveSearch } from '../lib/activeSearch.js';
@@ -44,11 +44,7 @@ export function useAiSearch({ articles, meta, filters }) {
 
   const scopeCandidates = useCallback(
     (f) =>
-      applyFilters(
-        articles || [],
-        { ...EMPTY_FILTERS, sourceId: f.sourceId, from: f.from, to: f.to },
-        meta?.toolContentTypes || [],
-      ),
+      applyFilters(articles || [], { ...EMPTY_FILTERS, ...normalizeScope(f) }, meta?.toolContentTypes || []),
     [articles, meta],
   );
 
@@ -66,7 +62,7 @@ export function useAiSearch({ articles, meta, filters }) {
       const seededScanned = resume ? resume.scanned || 0 : 0;
       metaRef.current = { startedAt: Date.now(), resumeAttempts, baseScanned: seededScanned };
 
-      const savedScope = { sourceId: scope.sourceId ?? null, from: scope.from || '', to: scope.to || '' };
+      const savedScope = normalizeScope(scope);
       if (!resume) clearActiveSearch(); // busca NOVA limpa o slot antes de recriar
       writerRef.current = makeCheckpointWriter({
         write: (data) =>
@@ -161,7 +157,7 @@ export function useAiSearch({ articles, meta, filters }) {
     [meta],
   );
 
-  // Dispara com um ESCOPO explícito {sourceId, from, to} — o re-rodar do histórico usa o escopo
+  // Dispara com um ESCOPO explícito {sourceIds, from, to} — o re-rodar do histórico usa o escopo
   // salvo (não os filtros atuais), então a busca reproduz o mesmo recorte independentemente do
   // que estiver selecionado na tela.
   const run = useCallback(
@@ -185,7 +181,7 @@ export function useAiSearch({ articles, meta, filters }) {
   );
 
   const submit = useCallback(
-    (query, deep) => run(query, deep, { sourceId: filters.sourceId, from: filters.from, to: filters.to }),
+    (query, deep) => run(query, deep, normalizeScope(filters)),
     [run, filters],
   );
 
@@ -360,7 +356,7 @@ export function useAiSearch({ articles, meta, filters }) {
       const pending = keyModal?.pending;
       setKeyModal(null);
       if (pending?.resume) resumeFromCheckpoint(pending.resume); // RETOMA (não repaga o já julgado)
-      else if (pending) run(pending.query, pending.deep, pending.scope || { sourceId: filters.sourceId, from: filters.from, to: filters.to });
+      else if (pending) run(pending.query, pending.deep, pending.scope || normalizeScope(filters));
     },
     [keyModal, run, resumeFromCheckpoint, filters, STR],
   );

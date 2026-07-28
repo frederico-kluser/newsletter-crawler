@@ -6,9 +6,9 @@ import { fmtDate } from '../lib/format.js';
 /** Deriva as pills removíveis do estado de filtros (kind fica no Segmented). */
 function pillsOf(filters, meta, STR) {
   const pills = [];
-  if (filters.sourceId != null) {
-    const s = meta.sources.find((x) => x.id === filters.sourceId);
-    pills.push({ key: 'source', label: s ? s.name : STR.sourceFallback(filters.sourceId), clear: { type: 'set', key: 'sourceId', value: null } });
+  for (const id of filters.sourceIds || []) {
+    const s = meta.sources.find((x) => x.id === id);
+    pills.push({ key: `source:${id}`, label: s ? s.name : STR.sourceFallback(id), clear: { type: 'toggleSource', id } });
   }
   if (filters.from || filters.to) {
     const label =

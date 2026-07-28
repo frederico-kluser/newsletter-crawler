@@ -10,7 +10,7 @@ import {
 } from './clean.js';
 import { curateRoundupItems, curateLeftoverLinks } from './llm.js';
 import { logEvent } from './events.js';
-import { normalizeUrl, hostOf, parseDate, sha256, warn, debug } from './util.js';
+import { normalizeUrl, hostOf, parseDate, clampFutureDate, sha256, warn, debug } from './util.js';
 import { CURATE_CHUNK_CHARS } from './config.js';
 
 // Backstop DETERMINÍSTICO de patrocínio/vaga: o rótulo do LLM é clampado p/ 'news' quando
@@ -279,7 +279,9 @@ export async function curateRoundup({ html, url, source, runId = null, depth = 0
 
   // Data da issue: curadoria -> metadados da página. É a âncora temporal dos itens (um item
   // curado pertence à SEMANA da issue, mesmo que o alvo tenha data própria mais antiga).
-  const issueDate = issueDateRaw || extractPublishedDate(capped);
+  // clampFutureDate: a âncora vale p/ TODOS os itens da issue, então uma data futura errada aqui
+  // cravaria a issue inteira no topo do site.
+  const issueDate = clampFutureDate(issueDateRaw || extractPublishedDate(capped));
   const d = parseDate(issueDate);
   if (sinceDate && d && d < sinceDate) {
     logEvent({ ...ev, stage: 'curate', status: 'skip', detail: { reason: 'below-since', issueDate } });

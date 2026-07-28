@@ -39,6 +39,22 @@ export function parseDate(str) {
   return Number.isNaN(d.getTime()) ? null : d;
 }
 
+// Tolerância p/ fuso: um boletim publicado "amanhã" em UTC+13 é legítimo; 2 dias à frente, não.
+const FUTURE_DATE_TOLERANCE_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * Trava de data no FUTURO, aplicada na COLETA (antes de gravar published_at). Extração errada de
+ * data (JSON-LD de "próxima edição", regex pegando o ano errado) cravava o item no topo do site
+ * para sempre — ordenamos por data. Passou de hoje + 1 dia? grava a data de hoje (YYYY-MM-DD).
+ * Data inparseável ou dentro do prazo volta INTACTA: published_at é string crua do scrape e quem
+ * normaliza é o iso_date do db.js.
+ */
+export function clampFutureDate(raw, now = new Date()) {
+  const d = parseDate(raw);
+  if (!d) return raw;
+  return d.getTime() > now.getTime() + FUTURE_DATE_TOLERANCE_MS ? now.toISOString().slice(0, 10) : raw;
+}
+
 export function sleep(ms) {
   return new Promise((r) => setTimeout(r, ms));
 }

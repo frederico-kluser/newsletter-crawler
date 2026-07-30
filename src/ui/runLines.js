@@ -57,6 +57,27 @@ export function progressDateLine(tele) {
   return line;
 }
 
+// Desfecho do DEPLOY p/ o Alert final do painel: o comando tem 6 saídas distintas (publicado no ar,
+// pushado sem esperar, nada a publicar, tempo esgotado, simulação, erro) e "Concluído ✓" genérico
+// esconderia justamente a diferença que importa. Retorna { variant, text } (variantes do @inkjs/ui).
+export function deployOutcome(res) {
+  if (!res || !res.status) return null;
+  const artigos = res.articles != null ? ` (${res.articles} ${t('articles')})` : '';
+  if (res.status === 'live') {
+    return { variant: 'success', text: `${t('deploySuccess')} ${res.url}${artigos}` };
+  }
+  if (res.status === 'pushed') {
+    return { variant: 'success', text: `${t('deployPushed')} ${res.url || ''}`.trim() };
+  }
+  if (res.status === 'up-to-date') return { variant: 'info', text: t('deployNoChanges') };
+  if (res.status === 'dry-run') return { variant: 'info', text: t('deployDryRun') };
+  if (res.status === 'timeout') return { variant: 'warning', text: t('deployTimeout') };
+  if (res.status === 'error') {
+    return { variant: 'error', text: [t('deployFail'), res.message, res.hint].filter(Boolean).join(' ') };
+  }
+  return null;
+}
+
 // Linha "agora:" — só as FASES ATIVAS (fetch/render/limpeza/curadoria/verificação/resumo/…), sem os
 // contadores acumulados (esses já aparecem na tabela de fases do dashboard). Ex.: `agora: 3 fetch · 2 render`.
 export function nowStagesLine(tele) {

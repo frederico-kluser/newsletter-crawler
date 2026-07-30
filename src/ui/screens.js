@@ -75,6 +75,7 @@ export function Menu({ onSelect }) {
     { label: t('menuAdd'), value: 'add' },
     { label: t('menuSources'), value: 'sources' },
     { label: t('menuLimits'), value: 'limits' },
+    { label: t('menuDeploy'), value: 'deploy' },
     { label: t('menuReset'), value: 'reset' },
     { label: t('menuQuit'), value: 'quit' },
   ];
@@ -567,6 +568,34 @@ export function LimitsConfig({ onBack }) {
     <${Select} options=${[{ label: t('back'), value: 'back' }]} onChange=${onBack} />
   </${Box}>`;
 }
+// Deploy: escolha do MODO (publicar / republicar forçando / simular) e depois a revisão com o
+// comando equivalente — o deploy é ação de fora pra fora (push + build público), então nunca dispara
+// direto do menu. O painel de execução espera a publicação e mostra o desfecho (deployOutcome).
+export function DeployConfirm({ onRun, onBack }) {
+  const [flags, setFlags] = useState(null);
+  if (flags) return html`<${Review} sub="deploy" flags=${flags} onRun=${onRun} onBack=${() => setFlags(null)} />`;
+  return html`<${Box} flexDirection="column">
+    <${StatusMessage} variant="info">${t('deployDesc')}</${StatusMessage}>
+    <${Box} marginTop=${1} flexDirection="column">
+      <${Text} bold>${t('deployMode')}</${Text}>
+      <${Select}
+        options=${[
+          { label: t('deployModePublish'), value: 'publish' },
+          { label: t('deployModeForce'), value: 'force' },
+          { label: t('deployModeDry'), value: 'dry' },
+          { label: t('back'), value: 'back' },
+        ]}
+        onChange=${(v) => {
+          if (v === 'back') return onBack();
+          if (v === 'force') return setFlags({ force: true });
+          if (v === 'dry') return setFlags({ 'dry-run': true });
+          return setFlags({});
+        }}
+      />
+    </${Box}>
+  </${Box}>`;
+}
+
 export function ResetConfirm({ onRun, onBack }) {
   return html`<${Box} flexDirection="column">
     <${Alert} variant="error">${t('resetWarn')}</${Alert}>

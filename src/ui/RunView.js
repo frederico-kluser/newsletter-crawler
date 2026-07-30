@@ -87,7 +87,7 @@ export function RunView({ spec, onDone, onResults }) {
           onResults?.(value); // App troca p/ a ResultsView com os resultados
           return;
         }
-        setResult({ ok: true });
+        setResult({ ok: true, value }); // `value` alimenta spec.outcome (desfecho por comando)
       })
       .catch((e) => {
         if (!mounted.current) return;
@@ -160,11 +160,15 @@ export function RunView({ spec, onDone, onResults }) {
       : `${t('articles')} +${dArticles} · ${t('classif')} +${dClassif} · ` +
         `${t('frontier')} ${f.pending}/${f.in_progress}/${f.done}/${f.failed}`;
 
+  // Desfecho POR COMANDO (opcional): `spec.outcome(value)` -> { variant, text }. Sem ele, o
+  // genérico "Concluído ✓"/"Falhou" de sempre.
+  const outcome = result?.ok && spec.outcome ? spec.outcome(result.value) : null;
+
   return html`<${Box} flexDirection="column">
     <${Box}>
       ${result
-        ? html`<${Alert} variant=${result.ok ? 'success' : 'error'}>${
-            result.ok ? t('done') : `${t('failed')}${result.error ? ': ' + result.error : ''}`
+        ? html`<${Alert} variant=${outcome?.variant || (result.ok ? 'success' : 'error')}>${
+            outcome?.text || (result.ok ? t('done') : `${t('failed')}${result.error ? ': ' + result.error : ''}`)
           }</${Alert}>`
         : html`<${Spinner} label=${`${t('running')} (${spec.sub})`} />`}
     </${Box}>

@@ -11,13 +11,15 @@ import {
   getStatus, cmdCrawl, cmdExport, cmdAdd, cmdReset, cmdFinish, cmdSearch,
   getArticle, listSearchHistory, getSearchHistoryEntry, deleteSearchHistory,
   listSourcesForUI, setSourceType, redetectSourceType, removeSourceById,
+  deploySnapshot,
 } from '../commands.js';
 import { openBrowser } from '../web.js';
 import {
   Menu, StatusScreen, CrawlConfig, ExportConfig, AddConfig, ResetConfirm,
-  FinishConfig, SearchConfig, WebConfig, LimitsConfig,
+  FinishConfig, SearchConfig, WebConfig, LimitsConfig, DeployConfirm,
 } from './screens.js';
 import { RunView } from './RunView.js';
+import { deployOutcome } from './runLines.js';
 import { ResultsView } from './ResultsView.js';
 import { HistoryView } from './HistoryView.js';
 import { SourcesView } from './SourcesView.js';
@@ -30,7 +32,19 @@ const THUNKS = {
   search: (flags, rest) => cmdSearch(rest, { ...flags, origin: 'tui' }),
   add: (flags, rest) => cmdAdd(rest, flags),
   reset: (flags) => cmdReset(flags),
+  // O deploy ABORTA em condições previsíveis (branch errada, remoto à frente): a mensagem já vem
+  // pronta na DeployError, então virá um resultado 'error' em vez de estourar o painel genérico.
+  deploy: async (flags) => {
+    try {
+      return await deploySnapshot(flags);
+    } catch (e) {
+      return { status: 'error', message: e?.message || String(e), hint: e?.hint || null };
+    }
+  },
 };
+
+// Desfecho customizado do Alert final, por comando (o resto cai no "Concluído ✓" genérico).
+const OUTCOMES = { deploy: deployOutcome };
 
 function StatusBar() {
   const s = getStatus();
@@ -71,7 +85,7 @@ export default function App() {
   const [, setRefresh] = useState(0);
 
   const onRun = ({ sub, flags = {}, rest = [] }) => {
-    setRunSpec({ sub, flags, rest, thunk: () => THUNKS[sub](flags, rest) });
+    setRunSpec({ sub, flags, rest, thunk: () => THUNKS[sub](flags, rest), outcome: OUTCOMES[sub] });
     setScreen('run');
   };
   const toMenu = () => {
@@ -133,6 +147,8 @@ export default function App() {
     />`;
   } else if (screen === 'reset') {
     body = html`<${ResetConfirm} onRun=${onRun} onBack=${toMenu} />`;
+  } else if (screen === 'deploy') {
+    body = html`<${DeployConfirm} onRun=${onRun} onBack=${toMenu} />`;
   } else if (screen === 'run') {
     body = html`<${RunView}
       spec=${runSpec}

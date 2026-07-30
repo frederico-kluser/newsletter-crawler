@@ -405,6 +405,17 @@ export const SEARCH_WEB_DEEP_CONCURRENCY = Number(process.env.SEARCH_WEB_DEEP_CO
 export const SEARCH_UI_CONCURRENCY_DEFAULT = Number(process.env.SEARCH_UI_CONCURRENCY_DEFAULT || 8);
 export const SEARCH_UI_CONCURRENCY_CEILING = Number(process.env.SEARCH_UI_CONCURRENCY_CEILING || 24);
 
+// ---- deploy do site (ncrawl deploy) ----
+// Site em produção: a Vercel publica o que está commitado em DEPLOY_BRANCH (Git integration, Root
+// Directory webapp/). O deploy CONFIRMA a publicação lendo o snapshot NO AR (SITE_URL + META_PATH)
+// e comparando o `generatedAt` com o do HEAD pós-push — é o único sinal de "está no ar" que não
+// exige credencial da Vercel. Espera até DEPLOY_WAIT_MS, sondando a cada DEPLOY_POLL_MS.
+export const SITE_URL = (process.env.NC_SITE_URL || 'https://newsletter-crawler.vercel.app').replace(/\/+$/, '');
+export const SITE_META_PATH = process.env.NC_SITE_META_PATH || '/data/meta.json';
+export const DEPLOY_BRANCH = process.env.NC_DEPLOY_BRANCH || 'main';
+export const DEPLOY_WAIT_MS = Number(process.env.DEPLOY_WAIT_MS || 300000);
+export const DEPLOY_POLL_MS = Number(process.env.DEPLOY_POLL_MS || 5000);
+
 // sources.json do USUÁRIO mora em NC_HOME (o `ncrawl add`/assistente grava aqui). É semeado 1x a
 // partir do default versionado do repo, para não perder as fontes que já vêm no projeto.
 export const DEFAULT_SOURCES_PATH = path.join(ROOT, 'config', 'sources.json');

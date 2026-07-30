@@ -60,7 +60,10 @@ function printHelp() {
       '  node src/index.js web [--port N] [--no-open]   buscador web (React) com filtros da base',
       '  node src/index.js key set <chave> | key test   valida/salva a chave OpenRouter (em ~/.newsletter-crawler/.env)',
       '  node src/index.js limits [show | set --budget USD --parallel N --ram-max-pct P]   limites persistentes',
-      '  node src/index.js deploy          exporta o snapshot web, commita e dá push (Vercel publica)',
+      '  node src/index.js deploy [--force] [--no-wait] [--dry-run] [--include-code] [--timeout S]',
+      '                          publica o site: exporta o snapshot, commita, dá push na main e ESPERA',
+      '                          a Vercel publicar (confere o snapshot no ar). --force republica sem',
+      '                          dado novo; --no-wait volta no push; --include-code leva o código junto',
       '  node src/index.js reset --yes     APAGA TODOS OS DADOS (slate limpo)',
       '',
       'Global: instale com `npm run link` e use `ncrawl <comando>` de qualquer lugar (dados em NC_HOME=~/.newsletter-crawler).',
@@ -131,7 +134,7 @@ try {
       cmdLimits(rest, flags);
       db.close();
     } else if (cmd === 'deploy') {
-      cmdDeploy(flags);
+      await cmdDeploy(flags);
       db.close();
     } else if (cmd === 'reset' || cmd === 'clean') {
       cmdReset(flags);

@@ -1,22 +1,22 @@
 {
  "schemaVersion": 1,
- "generatedAt": "2026-07-30T01:53:56.577Z",
+ "generatedAt": "2026-07-31T16:32:49.699Z",
  "documentation": "/api/v1/README.md",
  "schema": "/api/v1/schema.json",
  "totals": {
-  "articles": 3840,
-  "summaries": 3840,
-  "classified": 3840,
+  "articles": 3889,
+  "summaries": 3889,
+  "classified": 3889,
   "byKind": {
-   "news": 1589,
-   "tool": 622,
-   "release": 836,
-   "unknown": 793
+   "news": 1602,
+   "tool": 625,
+   "release": 849,
+   "unknown": 813
   }
  },
  "dates": {
   "min": "2015-01-02",
-  "max": "2026-07-30"
+  "max": "2026-07-31"
  },
  "sources": [
   {
@@ -27,12 +27,12 @@
   {
    "id": 1,
    "name": "Node Weekly",
-   "count": 656
+   "count": 669
   },
   {
    "id": 8,
    "name": "llmnews.ai",
-   "count": 616
+   "count": 635
   },
   {
    "id": 2,
@@ -40,19 +40,19 @@
    "count": 588
   },
   {
+   "id": 5,
+   "name": "React Status",
+   "count": 582
+  },
+  {
    "id": 6,
    "name": "JavaScript Weekly",
    "count": 567
   },
   {
-   "id": 5,
-   "name": "React Status",
-   "count": 566
-  },
-  {
    "id": 7,
    "name": "AI Weekly",
-   "count": 163
+   "count": 164
   }
  ],
  "facets": [
@@ -61,35 +61,35 @@
    "tags": [
     {
      "tag": "frontend",
-     "count": 1670
+     "count": 1679
     },
     {
      "tag": "ai-general",
-     "count": 907
+     "count": 921
     },
     {
      "tag": "backend",
-     "count": 857
+     "count": 862
     },
     {
      "tag": "nodejs",
-     "count": 802
+     "count": 818
     },
     {
      "tag": "reactjs",
-     "count": 525
+     "count": 540
     },
     {
      "tag": "llm-models",
-     "count": 411
+     "count": 423
     },
     {
      "tag": "local-llm",
-     "count": 137
+     "count": 140
     },
     {
      "tag": "python",
-     "count": 91
+     "count": 92
     }
    ]
   },
@@ -98,43 +98,43 @@
    "tags": [
     {
      "tag": "version-release",
-     "count": 833
+     "count": 843
     },
     {
      "tag": "tool-release",
-     "count": 517
+     "count": 526
     },
     {
      "tag": "library-release",
-     "count": 463
+     "count": 471
     },
     {
      "tag": "deep-dive",
-     "count": 348
+     "count": 351
     },
     {
      "tag": "news",
-     "count": 298
-    },
-    {
-     "tag": "release-announcement",
-     "count": 289
+     "count": 300
     },
     {
      "tag": "analysis",
-     "count": 286
+     "count": 293
     },
     {
-     "tag": "tutorial",
-     "count": 241
+     "tag": "release-announcement",
+     "count": 291
     },
     {
      "tag": "opinion",
-     "count": 240
+     "count": 244
+    },
+    {
+     "tag": "tutorial",
+     "count": 243
     },
     {
      "tag": "announcement",
-     "count": 229
+     "count": 232
     },
     {
      "tag": "tooling",
@@ -142,15 +142,15 @@
     },
     {
      "tag": "how-to",
-     "count": 156
+     "count": 160
     },
     {
      "tag": "explainer",
-     "count": 146
+     "count": 147
     },
     {
      "tag": "product-launch",
-     "count": 125
+     "count": 128
     },
     {
      "tag": "guide",
@@ -158,7 +158,7 @@
     },
     {
      "tag": "benchmark",
-     "count": 83
+     "count": 85
     },
     {
      "tag": "security-advisory",
@@ -166,18 +166,22 @@
     },
     {
      "tag": "showcase",
-     "count": 63
+     "count": 65
     },
     {
      "tag": "case-study",
-     "count": 62
+     "count": 63
     },
     {
      "tag": "best-practices",
-     "count": 59
+     "count": 60
     },
     {
      "tag": "demo",
+     "count": 55
+    },
+    {
+     "tag": "research-paper",
      "count": 54
     },
     {
@@ -185,16 +189,12 @@
      "count": 54
     },
     {
-     "tag": "research-paper",
-     "count": 53
-    },
-    {
      "tag": "project-spotlight",
-     "count": 44
+     "count": 45
     },
     {
      "tag": "incident-report",
-     "count": 43
+     "count": 44
     },
     {
      "tag": "comparison",
@@ -238,7 +238,7 @@
     },
     {
      "tag": "retrospective",
-     "count": 22
+     "count": 23
     },
     {
      "tag": "conference-talk",
@@ -258,7 +258,7 @@
     },
     {
      "tag": "state-of-the-ecosystem",
-     "count": 16
+     "count": 17
     },
     {
      "tag": "survey-results",
@@ -383,19 +383,19 @@
    "tags": [
     {
      "tag": "web-development",
-     "count": 381
+     "count": 384
     },
     {
      "tag": "ai-agents",
-     "count": 363
+     "count": 371
     },
     {
      "tag": "css",
-     "count": 346
+     "count": 347
     },
     {
      "tag": "web-standards",
-     "count": 309
+     "count": 310
     },
     {
      "tag": "sql",
@@ -403,7 +403,7 @@
     },
     {
      "tag": "databases",
-     "count": 259
+     "count": 260
     },
     {
      "tag": "relational-databases",
@@ -419,59 +419,59 @@
     },
     {
      "tag": "ai-adoption",
-     "count": 148
+     "count": 150
     },
     {
      "tag": "component-libraries",
-     "count": 146
+     "count": 150
     },
     {
      "tag": "accessibility",
-     "count": 145
+     "count": 146
     },
     {
      "tag": "web-apis",
-     "count": 144
+     "count": 145
     },
     {
      "tag": "generative-ai",
-     "count": 134
+     "count": 138
     },
     {
      "tag": "performance-optimization",
-     "count": 132
+     "count": 137
     },
     {
      "tag": "package-management",
-     "count": 131
+     "count": 134
     },
     {
      "tag": "browser-compatibility",
      "count": 122
     },
     {
+     "tag": "ai-safety",
+     "count": 120
+    },
+    {
      "tag": "tool-calling",
-     "count": 119
+     "count": 120
     },
     {
      "tag": "npm-scripts",
-     "count": 118
-    },
-    {
-     "tag": "ai-safety",
-     "count": 116
+     "count": 119
     },
     {
      "tag": "ai-ethics",
-     "count": 109
+     "count": 111
     },
     {
      "tag": "design-systems",
-     "count": 108
+     "count": 111
     },
     {
      "tag": "performance-tuning",
-     "count": 108
+     "count": 110
     },
     {
      "tag": "database-access",
@@ -479,27 +479,27 @@
     },
     {
      "tag": "ai-policy",
-     "count": 103
+     "count": 105
+    },
+    {
+     "tag": "supply-chain-security",
+     "count": 104
     },
     {
      "tag": "ai-regulation",
      "count": 102
     },
     {
-     "tag": "supply-chain-security",
-     "count": 99
-    },
-    {
      "tag": "web-performance",
-     "count": 98
-    },
-    {
-     "tag": "security-node",
-     "count": 91
+     "count": 101
     },
     {
      "tag": "cli-tools",
-     "count": 90
+     "count": 93
+    },
+    {
+     "tag": "security-node",
+     "count": 93
     },
     {
      "tag": "node-versions",
@@ -507,18 +507,22 @@
     },
     {
      "tag": "npm-security",
-     "count": 84
+     "count": 88
     },
     {
      "tag": "react-native",
-     "count": 84
+     "count": 88
+    },
+    {
+     "tag": "frontier-models",
+     "count": 82
     },
     {
      "tag": "animations",
      "count": 81
     },
     {
-     "tag": "frontier-models",
+     "tag": "typescript-node",
      "count": 79
     },
     {
@@ -526,16 +530,12 @@
      "count": 78
     },
     {
+     "tag": "code-models",
+     "count": 77
+    },
+    {
      "tag": "query-optimization",
      "count": 76
-    },
-    {
-     "tag": "typescript-node",
-     "count": 76
-    },
-    {
-     "tag": "code-models",
-     "count": 75
     },
     {
      "tag": "webassembly",
@@ -547,10 +547,22 @@
     },
     {
      "tag": "model-comparison",
-     "count": 63
+     "count": 64
     },
     {
      "tag": "model-release",
+     "count": 64
+    },
+    {
+     "tag": "bundling",
+     "count": 63
+    },
+    {
+     "tag": "server-components",
+     "count": 63
+    },
+    {
+     "tag": "esm",
      "count": 62
     },
     {
@@ -558,40 +570,28 @@
      "count": 62
     },
     {
-     "tag": "esm",
-     "count": 61
-    },
-    {
-     "tag": "bundling",
-     "count": 57
-    },
-    {
      "tag": "ci-cd",
-     "count": 57
-    },
-    {
-     "tag": "server-components",
-     "count": 57
+     "count": 60
     },
     {
      "tag": "model-evaluation",
-     "count": 56
+     "count": 57
+    },
+    {
+     "tag": "local-inference",
+     "count": 55
+    },
+    {
+     "tag": "ssr",
+     "count": 55
+    },
+    {
+     "tag": "foundation-models",
+     "count": 54
     },
     {
      "tag": "react-19",
      "count": 54
-    },
-    {
-     "tag": "local-inference",
-     "count": 53
-    },
-    {
-     "tag": "foundation-models",
-     "count": 52
-    },
-    {
-     "tag": "ssr",
-     "count": 52
     },
     {
      "tag": "model-training",
@@ -611,7 +611,7 @@
     },
     {
      "tag": "open-source-models",
-     "count": 48
+     "count": 49
     },
     {
      "tag": "component-composition",
@@ -619,7 +619,23 @@
     },
     {
      "tag": "database-migrations",
+     "count": 46
+    },
+    {
+     "tag": "routing",
      "count": 45
+    },
+    {
+     "tag": "prompt-engineering",
+     "count": 44
+    },
+    {
+     "tag": "agent-orchestration",
+     "count": 43
+    },
+    {
+     "tag": "computer-vision",
+     "count": 43
     },
     {
      "tag": "indexing",
@@ -630,27 +646,15 @@
      "count": 43
     },
     {
-     "tag": "prompt-engineering",
+     "tag": "testing-react",
      "count": 43
-    },
-    {
-     "tag": "agent-orchestration",
-     "count": 42
     },
     {
      "tag": "ai-research",
      "count": 42
     },
     {
-     "tag": "computer-vision",
-     "count": 42
-    },
-    {
-     "tag": "routing",
-     "count": 42
-    },
-    {
-     "tag": "testing-react",
+     "tag": "state-management",
      "count": 42
     },
     {
@@ -662,15 +666,23 @@
      "count": 41
     },
     {
-     "tag": "state-management",
-     "count": 41
-    },
-    {
      "tag": "model-safety",
      "count": 40
     },
     {
+     "tag": "gpu",
+     "count": 39
+    },
+    {
      "tag": "lts",
+     "count": 39
+    },
+    {
+     "tag": "modules",
+     "count": 39
+    },
+    {
+     "tag": "open-weights",
      "count": 39
     },
     {
@@ -678,16 +690,12 @@
      "count": 38
     },
     {
-     "tag": "gpu",
+     "tag": "serverless",
      "count": 38
     },
     {
-     "tag": "modules",
-     "count": 38
-    },
-    {
-     "tag": "open-weights",
-     "count": 38
+     "tag": "authentication",
+     "count": 37
     },
     {
      "tag": "canvas",
@@ -698,11 +706,27 @@
      "count": 37
     },
     {
-     "tag": "serverless",
+     "tag": "multi-agent-systems",
      "count": 37
     },
     {
-     "tag": "multi-agent-systems",
+     "tag": "data-visualization",
+     "count": 36
+    },
+    {
+     "tag": "edge-runtime",
+     "count": 36
+    },
+    {
+     "tag": "image-generation",
+     "count": 36
+    },
+    {
+     "tag": "inference-optimization",
+     "count": 36
+    },
+    {
+     "tag": "machine-learning",
      "count": 36
     },
     {
@@ -710,23 +734,7 @@
      "count": 35
     },
     {
-     "tag": "data-visualization",
-     "count": 35
-    },
-    {
      "tag": "edge-ai",
-     "count": 35
-    },
-    {
-     "tag": "image-generation",
-     "count": 35
-    },
-    {
-     "tag": "inference-optimization",
-     "count": 35
-    },
-    {
-     "tag": "machine-learning",
      "count": 35
     },
     {
@@ -734,16 +742,12 @@
      "count": 34
     },
     {
-     "tag": "authentication",
-     "count": 34
-    },
-    {
      "tag": "webgl",
      "count": 34
     },
     {
-     "tag": "edge-runtime",
-     "count": 33
+     "tag": "privacy-first-ai",
+     "count": 32
     },
     {
      "tag": "model-capabilities",
@@ -762,7 +766,7 @@
      "count": 30
     },
     {
-     "tag": "privacy-first-ai",
+     "tag": "on-device-inference",
      "count": 30
     },
     {
@@ -794,15 +798,19 @@
      "count": 28
     },
     {
+     "tag": "streaming-ssr",
+     "count": 28
+    },
+    {
      "tag": "css-grid",
      "count": 27
     },
     {
-     "tag": "on-device-inference",
+     "tag": "jsx",
      "count": 27
     },
     {
-     "tag": "streaming-ssr",
+     "tag": "model-context-protocol",
      "count": 27
     },
     {
@@ -814,11 +822,7 @@
      "count": 27
     },
     {
-     "tag": "jsx",
-     "count": 26
-    },
-    {
-     "tag": "model-context-protocol",
+     "tag": "robotics",
      "count": 26
     },
     {
@@ -850,10 +854,6 @@
      "count": 25
     },
     {
-     "tag": "robotics",
-     "count": 25
-    },
-    {
      "tag": "utility-first-css",
      "count": 25
     },
@@ -866,6 +866,14 @@
      "count": 24
     },
     {
+     "tag": "deep-learning",
+     "count": 24
+    },
+    {
+     "tag": "design-tokens",
+     "count": 24
+    },
+    {
      "tag": "caching",
      "count": 23
     },
@@ -874,7 +882,7 @@
      "count": 23
     },
     {
-     "tag": "design-tokens",
+     "tag": "reasoning-models",
      "count": 23
     },
     {
@@ -890,7 +898,7 @@
      "count": 22
     },
     {
-     "tag": "deep-learning",
+     "tag": "cost-optimization-llm",
      "count": 22
     },
     {
@@ -898,11 +906,19 @@
      "count": 22
     },
     {
+     "tag": "guardrails",
+     "count": 22
+    },
+    {
      "tag": "keyboard-navigation",
      "count": 22
     },
     {
-     "tag": "reasoning-models",
+     "tag": "moe",
+     "count": 22
+    },
+    {
+     "tag": "native-addons",
      "count": 22
     },
     {
@@ -926,10 +942,6 @@
      "count": 21
     },
     {
-     "tag": "moe",
-     "count": 21
-    },
-    {
      "tag": "orm",
      "count": 21
     },
@@ -939,18 +951,6 @@
     },
     {
      "tag": "attention-mechanism",
-     "count": 20
-    },
-    {
-     "tag": "cost-optimization-llm",
-     "count": 20
-    },
-    {
-     "tag": "guardrails",
-     "count": 20
-    },
-    {
-     "tag": "native-addons",
      "count": 20
     },
     {
@@ -982,6 +982,10 @@
      "count": 19
     },
     {
+     "tag": "ssg",
+     "count": 19
+    },
+    {
      "tag": "ai-alignment",
      "count": 18
     },
@@ -995,10 +999,6 @@
     },
     {
      "tag": "react-compiler",
-     "count": 18
-    },
-    {
-     "tag": "ssg",
      "count": 18
     },
     {
@@ -1046,7 +1046,23 @@
      "count": 16
     },
     {
+     "tag": "code-splitting",
+     "count": 16
+    },
+    {
      "tag": "function-calling",
+     "count": 16
+    },
+    {
+     "tag": "memory-leaks",
+     "count": 16
+    },
+    {
+     "tag": "model-routing",
+     "count": 16
+    },
+    {
+     "tag": "multimodal-ai",
      "count": 16
     },
     {
@@ -1062,7 +1078,7 @@
      "count": 15
     },
     {
-     "tag": "code-splitting",
+     "tag": "commonjs",
      "count": 15
     },
     {
@@ -1094,10 +1110,6 @@
      "count": 15
     },
     {
-     "tag": "memory-leaks",
-     "count": 15
-    },
-    {
      "tag": "message-queues",
      "count": 15
     },
@@ -1106,23 +1118,23 @@
      "count": 15
     },
     {
-     "tag": "model-routing",
-     "count": 15
-    },
-    {
-     "tag": "multimodal-ai",
-     "count": 15
-    },
-    {
      "tag": "rsc",
      "count": 15
     },
     {
-     "tag": "authorization",
+     "tag": "tree-shaking",
+     "count": 15
+    },
+    {
+     "tag": "accessibility-react",
      "count": 14
     },
     {
-     "tag": "commonjs",
+     "tag": "agentops",
+     "count": 14
+    },
+    {
+     "tag": "authorization",
      "count": 14
     },
     {
@@ -1134,7 +1146,15 @@
      "count": 14
     },
     {
+     "tag": "quantization",
+     "count": 14
+    },
+    {
      "tag": "serialization",
+     "count": 14
+    },
+    {
+     "tag": "streaming-responses",
      "count": 14
     },
     {
@@ -1142,23 +1162,19 @@
      "count": 14
     },
     {
-     "tag": "tree-shaking",
-     "count": 14
-    },
-    {
-     "tag": "accessibility-react",
-     "count": 13
-    },
-    {
-     "tag": "agentops",
-     "count": 13
-    },
-    {
      "tag": "dark-mode",
      "count": 13
     },
     {
+     "tag": "diffusion-models",
+     "count": 13
+    },
+    {
      "tag": "event-loop",
+     "count": 13
+    },
+    {
+     "tag": "flexbox",
      "count": 13
     },
     {
@@ -1170,10 +1186,6 @@
      "count": 13
     },
     {
-     "tag": "quantization",
-     "count": 13
-    },
-    {
      "tag": "scripting",
      "count": 13
     },
@@ -1182,7 +1194,7 @@
      "count": 13
     },
     {
-     "tag": "streaming-responses",
+     "tag": "streams",
      "count": 13
     },
     {
@@ -1190,15 +1202,7 @@
      "count": 12
     },
     {
-     "tag": "diffusion-models",
-     "count": 12
-    },
-    {
      "tag": "embeddings",
-     "count": 12
-    },
-    {
-     "tag": "flexbox",
      "count": 12
     },
     {
@@ -1218,11 +1222,11 @@
      "count": 12
     },
     {
-     "tag": "profiling",
+     "tag": "openai-compatible-api",
      "count": 12
     },
     {
-     "tag": "streams",
+     "tag": "profiling",
      "count": 12
     },
     {
@@ -1246,7 +1250,15 @@
      "count": 11
     },
     {
+     "tag": "lazy-loading",
+     "count": 11
+    },
+    {
      "tag": "logging",
+     "count": 11
+    },
+    {
+     "tag": "mixture-of-experts",
      "count": 11
     },
     {
@@ -1267,6 +1279,10 @@
     },
     {
      "tag": "sharding",
+     "count": 11
+    },
+    {
+     "tag": "structured-output",
      "count": 11
     },
     {
@@ -1298,19 +1314,7 @@
      "count": 10
     },
     {
-     "tag": "lazy-loading",
-     "count": 10
-    },
-    {
      "tag": "long-context",
-     "count": 10
-    },
-    {
-     "tag": "mixture-of-experts",
-     "count": 10
-    },
-    {
-     "tag": "openai-compatible-api",
      "count": 10
     },
     {
@@ -1318,8 +1322,16 @@
      "count": 10
     },
     {
+     "tag": "spa",
+     "count": 10
+    },
+    {
      "tag": "token-counting",
      "count": 10
+    },
+    {
+     "tag": "apple-silicon",
+     "count": 9
     },
     {
      "tag": "context-window",
@@ -1370,11 +1382,7 @@
      "count": 9
     },
     {
-     "tag": "spa",
-     "count": 9
-    },
-    {
-     "tag": "structured-output",
+     "tag": "synthetic-data",
      "count": 9
     },
     {
@@ -1388,10 +1396,6 @@
     {
      "tag": "useeffect",
      "count": 9
-    },
-    {
-     "tag": "apple-silicon",
-     "count": 8
     },
     {
      "tag": "buffers",
@@ -1419,6 +1423,10 @@
     },
     {
      "tag": "graph-databases",
+     "count": 8
+    },
+    {
+     "tag": "hallucination-detection",
      "count": 8
     },
     {
@@ -1450,15 +1458,15 @@
      "count": 8
     },
     {
-     "tag": "synthetic-data",
-     "count": 8
-    },
-    {
      "tag": "testing-python",
      "count": 8
     },
     {
      "tag": "text-to-speech",
+     "count": 8
+    },
+    {
+     "tag": "vision-language-models",
      "count": 8
     },
     {
@@ -1478,11 +1486,11 @@
      "count": 7
     },
     {
-     "tag": "hallucination-detection",
+     "tag": "model-compression",
      "count": 7
     },
     {
-     "tag": "model-compression",
+     "tag": "model-distillation",
      "count": 7
     },
     {
@@ -1498,7 +1506,7 @@
      "count": 7
     },
     {
-     "tag": "vision-language-models",
+     "tag": "web-streams",
      "count": 7
     },
     {
@@ -1506,7 +1514,15 @@
      "count": 6
     },
     {
+     "tag": "ai-gateway",
+     "count": 6
+    },
+    {
      "tag": "client-components",
+     "count": 6
+    },
+    {
+     "tag": "content-moderation",
      "count": 6
     },
     {
@@ -1523,10 +1539,6 @@
     },
     {
      "tag": "media-queries",
-     "count": 6
-    },
-    {
-     "tag": "model-distillation",
      "count": 6
     },
     {
@@ -1554,6 +1566,10 @@
      "count": 6
     },
     {
+     "tag": "server-actions",
+     "count": 6
+    },
+    {
      "tag": "speech-recognition",
      "count": 6
     },
@@ -1578,10 +1594,6 @@
      "count": 6
     },
     {
-     "tag": "web-streams",
-     "count": 6
-    },
-    {
      "tag": "worker-threads",
      "count": 6
     },
@@ -1590,15 +1602,7 @@
      "count": 5
     },
     {
-     "tag": "ai-gateway",
-     "count": 5
-    },
-    {
      "tag": "caching-llm",
-     "count": 5
-    },
-    {
-     "tag": "content-moderation",
      "count": 5
     },
     {
@@ -1639,10 +1643,6 @@
     },
     {
      "tag": "scientific-computing",
-     "count": 5
-    },
-    {
-     "tag": "server-actions",
      "count": 5
     },
     {
@@ -1706,7 +1706,15 @@
      "count": 4
     },
     {
+     "tag": "rlhf",
+     "count": 4
+    },
+    {
      "tag": "selective-hydration",
+     "count": 4
+    },
+    {
+     "tag": "server-sent-events",
      "count": 4
     },
     {
@@ -1778,6 +1786,10 @@
      "count": 3
     },
     {
+     "tag": "lora",
+     "count": 3
+    },
+    {
      "tag": "model-cards",
      "count": 3
     },
@@ -1786,19 +1798,15 @@
      "count": 3
     },
     {
+     "tag": "oauth",
+     "count": 3
+    },
+    {
      "tag": "offline-inference",
      "count": 3
     },
     {
      "tag": "pub-sub",
-     "count": 3
-    },
-    {
-     "tag": "rlhf",
-     "count": 3
-    },
-    {
-     "tag": "server-sent-events",
      "count": 3
     },
     {
@@ -1906,7 +1914,7 @@
      "count": 2
     },
     {
-     "tag": "lora",
+     "tag": "metal",
      "count": 2
     },
     {
@@ -1927,10 +1935,6 @@
     },
     {
      "tag": "natural-language-processing",
-     "count": 2
-    },
-    {
-     "tag": "oauth",
      "count": 2
     },
     {
@@ -2086,10 +2090,6 @@
      "count": 1
     },
     {
-     "tag": "metal",
-     "count": 1
-    },
-    {
      "tag": "micro-frontends",
      "count": 1
     },
@@ -2168,23 +2168,23 @@
    "tags": [
     {
      "tag": "for-practitioners",
-     "count": 1028
+     "count": 1055
     },
     {
      "tag": "intermediate",
-     "count": 927
+     "count": 933
     },
     {
      "tag": "all-levels",
-     "count": 610
+     "count": 615
     },
     {
      "tag": "advanced",
-     "count": 449
+     "count": 454
     },
     {
      "tag": "beginner",
-     "count": 119
+     "count": 121
     },
     {
      "tag": "for-beginners",
@@ -2196,11 +2196,11 @@
     },
     {
      "tag": "for-researchers",
-     "count": 62
+     "count": 64
     },
     {
      "tag": "for-leaders",
-     "count": 38
+     "count": 39
     },
     {
      "tag": "for-architects",
@@ -2217,19 +2217,19 @@
    "tags": [
     {
      "tag": "javascript",
-     "count": 1727
+     "count": 1753
     },
     {
      "tag": "typescript",
-     "count": 595
+     "count": 609
     },
     {
      "tag": "sql",
-     "count": 545
+     "count": 546
     },
     {
      "tag": "css",
-     "count": 343
+     "count": 344
     },
     {
      "tag": "html",
@@ -2237,19 +2237,19 @@
     },
     {
      "tag": "python",
-     "count": 161
+     "count": 162
     },
     {
      "tag": "rust",
-     "count": 105
+     "count": 108
     },
     {
      "tag": "wasm",
-     "count": 62
+     "count": 63
     },
     {
      "tag": "go",
-     "count": 50
+     "count": 51
     },
     {
      "tag": "json",
@@ -2257,15 +2257,15 @@
     },
     {
      "tag": "markdown",
-     "count": 35
+     "count": 36
     },
     {
      "tag": "c",
-     "count": 32
+     "count": 33
     },
     {
      "tag": "cpp",
-     "count": 29
+     "count": 31
     },
     {
      "tag": "bash",
@@ -2277,14 +2277,14 @@
     },
     {
      "tag": "java",
-     "count": 14
-    },
-    {
-     "tag": "graphql-lang",
-     "count": 11
+     "count": 15
     },
     {
      "tag": "shell",
+     "count": 12
+    },
+    {
+     "tag": "graphql-lang",
      "count": 11
     },
     {
@@ -2308,11 +2308,11 @@
      "count": 8
     },
     {
-     "tag": "php",
-     "count": 7
+     "tag": "swift",
+     "count": 8
     },
     {
-     "tag": "swift",
+     "tag": "php",
      "count": 7
     },
     {
@@ -2366,27 +2366,27 @@
    "tags": [
     {
      "tag": "anthropic",
-     "count": 216
+     "count": 222
     },
     {
      "tag": "openai",
-     "count": 208
+     "count": 211
     },
     {
      "tag": "claude",
-     "count": 155
+     "count": 161
     },
     {
      "tag": "google",
-     "count": 151
+     "count": 154
     },
     {
      "tag": "github",
-     "count": 126
+     "count": 128
     },
     {
      "tag": "microsoft",
-     "count": 107
+     "count": 109
     },
     {
      "tag": "gpt",
@@ -2394,11 +2394,11 @@
     },
     {
      "tag": "vercel",
-     "count": 70
+     "count": 72
     },
     {
      "tag": "nvidia",
-     "count": 57
+     "count": 58
     },
     {
      "tag": "meta-ai",
@@ -2406,27 +2406,27 @@
     },
     {
      "tag": "aws",
+     "count": 48
+    },
+    {
+     "tag": "gemini",
      "count": 47
     },
     {
      "tag": "deepseek",
-     "count": 45
+     "count": 46
     },
     {
      "tag": "codex",
-     "count": 44
-    },
-    {
-     "tag": "gemini",
-     "count": 44
+     "count": 45
     },
     {
      "tag": "cloudflare",
-     "count": 42
+     "count": 43
     },
     {
      "tag": "google-deepmind",
-     "count": 29
+     "count": 30
     },
     {
      "tag": "hugging-face",
@@ -2434,26 +2434,26 @@
     },
     {
      "tag": "apple",
-     "count": 25
+     "count": 26
     },
     {
      "tag": "qwen",
      "count": 25
     },
     {
+     "tag": "amazon",
+     "count": 24
+    },
+    {
      "tag": "claude-opus",
      "count": 24
     },
     {
-     "tag": "amazon",
-     "count": 23
+     "tag": "gemma",
+     "count": 19
     },
     {
      "tag": "alibaba",
-     "count": 18
-    },
-    {
-     "tag": "gemma",
      "count": 18
     },
     {
@@ -2461,16 +2461,16 @@
      "count": 18
     },
     {
-     "tag": "xai",
+     "tag": "llama",
      "count": 17
     },
     {
-     "tag": "llama",
-     "count": 16
+     "tag": "moonshot-ai",
+     "count": 17
     },
     {
-     "tag": "moonshot-ai",
-     "count": 16
+     "tag": "xai",
+     "count": 17
     },
     {
      "tag": "zhipu-ai",
@@ -2478,19 +2478,19 @@
     },
     {
      "tag": "kimi",
-     "count": 13
+     "count": 15
     },
     {
      "tag": "mistral-ai",
      "count": 13
     },
     {
-     "tag": "openrouter",
+     "tag": "grok",
      "count": 11
     },
     {
-     "tag": "grok",
-     "count": 10
+     "tag": "openrouter",
+     "count": 11
     },
     {
      "tag": "mistral",
@@ -2509,16 +2509,16 @@
      "count": 7
     },
     {
+     "tag": "aws-bedrock",
+     "count": 6
+    },
+    {
      "tag": "databricks",
      "count": 6
     },
     {
      "tag": "deepseek-v",
      "count": 6
-    },
-    {
-     "tag": "aws-bedrock",
-     "count": 5
     },
     {
      "tag": "o-series",
@@ -2545,6 +2545,10 @@
      "count": 3
     },
     {
+     "tag": "gpt-oss",
+     "count": 3
+    },
+    {
      "tag": "minimax-m",
      "count": 3
     },
@@ -2561,15 +2565,15 @@
      "count": 2
     },
     {
-     "tag": "gpt-oss",
-     "count": 2
-    },
-    {
      "tag": "groq",
      "count": 2
     },
     {
      "tag": "ibm",
+     "count": 2
+    },
+    {
+     "tag": "phi",
      "count": 2
     },
     {
@@ -2617,10 +2621,6 @@
      "count": 1
     },
     {
-     "tag": "phi",
-     "count": 1
-    },
-    {
      "tag": "scale-ai",
      "count": 1
     },
@@ -2643,39 +2643,39 @@
     },
     {
      "tag": "nodejs",
-     "count": 386
+     "count": 391
     },
     {
      "tag": "react",
-     "count": 376
+     "count": 386
     },
     {
      "tag": "claude",
-     "count": 116
+     "count": 119
     },
     {
      "tag": "npm",
-     "count": 98
+     "count": 104
     },
     {
      "tag": "react-native",
-     "count": 81
+     "count": 84
     },
     {
      "tag": "nextjs",
-     "count": 76
+     "count": 77
     },
     {
      "tag": "vue",
-     "count": 58
+     "count": 60
     },
     {
      "tag": "gpt",
-     "count": 55
+     "count": 56
     },
     {
      "tag": "vite",
-     "count": 54
+     "count": 55
     },
     {
      "tag": "bun",
@@ -2683,7 +2683,7 @@
     },
     {
      "tag": "tailwind",
-     "count": 47
+     "count": 48
     },
     {
      "tag": "pnpm",
@@ -2699,11 +2699,11 @@
     },
     {
      "tag": "gemini",
-     "count": 35
+     "count": 36
     },
     {
      "tag": "svelte",
-     "count": 35
+     "count": 36
     },
     {
      "tag": "aws",
@@ -2718,16 +2718,20 @@
      "count": 33
     },
     {
+     "tag": "angular",
+     "count": 31
+    },
+    {
      "tag": "astro",
      "count": 30
     },
     {
-     "tag": "angular",
+     "tag": "llama",
      "count": 29
     },
     {
-     "tag": "llama",
-     "count": 29
+     "tag": "github-actions",
+     "count": 25
     },
     {
      "tag": "nvidia-cuda",
@@ -2742,16 +2746,20 @@
      "count": 24
     },
     {
+     "tag": "cloudflare-workers",
+     "count": 23
+    },
+    {
      "tag": "sqlite",
      "count": 23
     },
     {
-     "tag": "cloudflare-workers",
+     "tag": "vitest",
      "count": 22
     },
     {
-     "tag": "github-actions",
-     "count": 22
+     "tag": "docker",
+     "count": 21
     },
     {
      "tag": "langchain",
@@ -2766,24 +2774,16 @@
      "count": 21
     },
     {
-     "tag": "docker",
-     "count": 20
-    },
-    {
-     "tag": "vitest",
+     "tag": "react-router",
      "count": 20
     },
     {
      "tag": "deepseek-v",
-     "count": 18
-    },
-    {
-     "tag": "react-router",
-     "count": 18
+     "count": 19
     },
     {
      "tag": "solidjs",
-     "count": 18
+     "count": 19
     },
     {
      "tag": "glm",
@@ -2802,6 +2802,10 @@
      "count": 16
     },
     {
+     "tag": "gemma",
+     "count": 15
+    },
+    {
      "tag": "hugging-face-transformers",
      "count": 15
     },
@@ -2811,10 +2815,6 @@
     },
     {
      "tag": "claude-opus",
-     "count": 14
-    },
-    {
-     "tag": "gemma",
      "count": 14
     },
     {
@@ -2834,6 +2834,10 @@
      "count": 14
     },
     {
+     "tag": "expo",
+     "count": 13
+    },
+    {
      "tag": "mistral",
      "count": 13
     },
@@ -2843,10 +2847,6 @@
     },
     {
      "tag": "css-modules",
-     "count": 12
-    },
-    {
-     "tag": "expo",
      "count": 12
     },
     {
@@ -2902,6 +2902,10 @@
      "count": 10
     },
     {
+     "tag": "kimi",
+     "count": 10
+    },
+    {
      "tag": "mysql",
      "count": 10
     },
@@ -2910,19 +2914,15 @@
      "count": 10
     },
     {
+     "tag": "storybook",
+     "count": 10
+    },
+    {
      "tag": "framer-motion",
      "count": 9
     },
     {
-     "tag": "kimi",
-     "count": 9
-    },
-    {
      "tag": "radix-ui",
-     "count": 9
-    },
-    {
-     "tag": "storybook",
      "count": 9
     },
     {
@@ -2946,6 +2946,10 @@
      "count": 8
     },
     {
+     "tag": "material-ui",
+     "count": 8
+    },
+    {
      "tag": "redis",
      "count": 8
     },
@@ -2966,7 +2970,11 @@
      "count": 7
     },
     {
-     "tag": "material-ui",
+     "tag": "hono",
+     "count": 7
+    },
+    {
+     "tag": "mantine",
      "count": 7
     },
     {
@@ -2978,19 +2986,15 @@
      "count": 7
     },
     {
+     "tag": "styled-components",
+     "count": 7
+    },
+    {
      "tag": "deepseek-r",
      "count": 6
     },
     {
-     "tag": "hono",
-     "count": 6
-    },
-    {
      "tag": "jotai",
-     "count": 6
-    },
-    {
-     "tag": "mantine",
      "count": 6
     },
     {
@@ -3006,7 +3010,7 @@
      "count": 6
     },
     {
-     "tag": "styled-components",
+     "tag": "terraform",
      "count": 6
     },
     {
@@ -3038,11 +3042,11 @@
      "count": 5
     },
     {
-     "tag": "rails",
+     "tag": "openrouter",
      "count": 5
     },
     {
-     "tag": "terraform",
+     "tag": "rails",
      "count": 5
     },
     {
@@ -3059,6 +3063,10 @@
     },
     {
      "tag": "claude-sonnet",
+     "count": 4
+    },
+    {
+     "tag": "fastapi",
      "count": 4
     },
     {
@@ -3098,10 +3106,6 @@
      "count": 4
     },
     {
-     "tag": "openrouter",
-     "count": 4
-    },
-    {
      "tag": "oxlint",
      "count": 4
     },
@@ -3127,10 +3131,6 @@
     },
     {
      "tag": "crewai",
-     "count": 3
-    },
-    {
-     "tag": "fastapi",
      "count": 3
     },
     {
@@ -3242,6 +3242,10 @@
      "count": 2
     },
     {
+     "tag": "gpt-oss",
+     "count": 2
+    },
+    {
      "tag": "guardrails-ai",
      "count": 2
     },
@@ -3270,7 +3274,15 @@
      "count": 2
     },
     {
+     "tag": "mobx",
+     "count": 2
+    },
+    {
      "tag": "nestjs",
+     "count": 2
+    },
+    {
+     "tag": "nitro",
      "count": 2
     },
     {
@@ -3291,6 +3303,10 @@
     },
     {
      "tag": "postcss",
+     "count": 2
+    },
+    {
+     "tag": "pytest",
      "count": 2
     },
     {
@@ -3350,6 +3366,10 @@
      "count": 1
     },
     {
+     "tag": "emotion",
+     "count": 1
+    },
+    {
      "tag": "fairlearn",
      "count": 1
     },
@@ -3367,10 +3387,6 @@
     },
     {
      "tag": "ggml",
-     "count": 1
-    },
-    {
-     "tag": "gpt-oss",
      "count": 1
     },
     {
@@ -3426,15 +3442,7 @@
      "count": 1
     },
     {
-     "tag": "mobx",
-     "count": 1
-    },
-    {
      "tag": "nats",
-     "count": 1
-    },
-    {
-     "tag": "nitro",
      "count": 1
     },
     {
@@ -3478,10 +3486,6 @@
      "count": 1
     },
     {
-     "tag": "pytest",
-     "count": 1
-    },
-    {
      "tag": "qwik",
      "count": 1
     },
@@ -3519,6 +3523,10 @@
     },
     {
      "tag": "starlette",
+     "count": 1
+    },
+    {
+     "tag": "streamlit",
      "count": 1
     },
     {
@@ -3564,55 +3572,55 @@
    "tags": [
     {
      "tag": "performance",
-     "count": 924
+     "count": 940
     },
     {
      "tag": "ux",
-     "count": 500
+     "count": 504
     },
     {
      "tag": "open-source",
-     "count": 490
+     "count": 498
     },
     {
      "tag": "dev-experience",
-     "count": 388
-    },
-    {
-     "tag": "ui",
-     "count": 379
+     "count": 403
     },
     {
      "tag": "security",
-     "count": 378
+     "count": 386
+    },
+    {
+     "tag": "ui",
+     "count": 382
     },
     {
      "tag": "optimization",
-     "count": 370
+     "count": 375
     },
     {
      "tag": "architecture",
-     "count": 340
+     "count": 348
     },
     {
      "tag": "developer-productivity",
-     "count": 299
+     "count": 305
     },
     {
      "tag": "dx",
-     "count": 244
+     "count": 252
     },
     {
      "tag": "accessibility",
-     "count": 198
+     "count": 200
     },
     {
      "tag": "testing",
-     "count": 144
+     "count": 147
     },
     {
      "tag": "api-design",
-     "count": 142
+     "count": 145
     },
     {
      "tag": "data-engineering",
@@ -3620,90 +3628,94 @@
     },
     {
      "tag": "reliability",
-     "count": 137
+     "count": 139
     },
     {
      "tag": "community",
-     "count": 123
+     "count": 124
     },
     {
      "tag": "ai-ethics",
-     "count": 118
-    },
-    {
-     "tag": "governance",
-     "count": 116
+     "count": 121
     },
     {
      "tag": "cost-optimization",
-     "count": 115
+     "count": 119
+    },
+    {
+     "tag": "governance",
+     "count": 119
     },
     {
      "tag": "design-systems",
      "count": 108
     },
     {
+     "tag": "type-safety",
+     "count": 97
+    },
+    {
      "tag": "scalability",
      "count": 93
     },
     {
-     "tag": "type-safety",
-     "count": 92
+     "tag": "state-management",
+     "count": 84
     },
     {
-     "tag": "state-management",
-     "count": 83
+     "tag": "data-fetching",
+     "count": 80
     },
     {
      "tag": "error-handling",
      "count": 79
     },
     {
-     "tag": "data-fetching",
-     "count": 78
+     "tag": "ai-safety",
+     "count": 75
     },
     {
      "tag": "caching",
      "count": 75
     },
     {
-     "tag": "ai-safety",
+     "tag": "ci-cd",
      "count": 74
     },
     {
-     "tag": "ci-cd",
-     "count": 71
+     "tag": "debugging",
+     "count": 69
     },
     {
-     "tag": "debugging",
-     "count": 68
+     "tag": "design-patterns",
+     "count": 67
     },
     {
      "tag": "cloud",
      "count": 66
     },
     {
-     "tag": "design-patterns",
-     "count": 65
-    },
-    {
      "tag": "devops",
      "count": 65
     },
     {
-     "tag": "latency",
-     "count": 63
+     "tag": "evaluation",
+     "count": 64
     },
     {
-     "tag": "evaluation",
-     "count": 62
+     "tag": "latency",
+     "count": 64
     },
     {
      "tag": "observability",
-     "count": 60
+     "count": 61
     },
     {
      "tag": "privacy",
+     "count": 61
+    },
+    {
+     "tag": "data-privacy",
      "count": 60
     },
     {
@@ -3711,20 +3723,20 @@
      "count": 58
     },
     {
-     "tag": "data-privacy",
-     "count": 58
-    },
-    {
      "tag": "async",
-     "count": 53
+     "count": 54
     },
     {
      "tag": "refactoring",
-     "count": 52
+     "count": 53
     },
     {
      "tag": "ai-regulation",
      "count": 49
+    },
+    {
+     "tag": "authentication",
+     "count": 48
     },
     {
      "tag": "regulation",
@@ -3733,10 +3745,6 @@
     {
      "tag": "validation",
      "count": 48
-    },
-    {
-     "tag": "authentication",
-     "count": 45
     },
     {
      "tag": "compliance",
@@ -3752,11 +3760,15 @@
     },
     {
      "tag": "agentops",
-     "count": 40
+     "count": 42
     },
     {
      "tag": "ethics",
      "count": 39
+    },
+    {
+     "tag": "llmops",
+     "count": 38
     },
     {
      "tag": "monitoring",
@@ -3767,16 +3779,16 @@
      "count": 38
     },
     {
-     "tag": "llmops",
-     "count": 37
-    },
-    {
      "tag": "responsible-ai",
-     "count": 37
+     "count": 38
     },
     {
      "tag": "transparency",
      "count": 37
+    },
+    {
+     "tag": "technical-debt",
+     "count": 36
     },
     {
      "tag": "web-vitals",
@@ -3791,16 +3803,12 @@
      "count": 33
     },
     {
-     "tag": "technical-debt",
-     "count": 33
-    },
-    {
      "tag": "edge-computing",
-     "count": 31
+     "count": 32
     },
     {
      "tag": "profiling",
-     "count": 30
+     "count": 31
     },
     {
      "tag": "serverless",
@@ -3808,10 +3816,14 @@
     },
     {
      "tag": "evals",
-     "count": 26
+     "count": 27
     },
     {
      "tag": "cost",
+     "count": 24
+    },
+    {
+     "tag": "prompt-engineering",
      "count": 24
     },
     {
@@ -3819,7 +3831,7 @@
      "count": 23
     },
     {
-     "tag": "prompt-engineering",
+     "tag": "throughput",
      "count": 23
     },
     {
@@ -3827,19 +3839,15 @@
      "count": 22
     },
     {
-     "tag": "throughput",
+     "tag": "parallelism",
      "count": 22
     },
     {
-     "tag": "parallelism",
+     "tag": "guardrails",
      "count": 21
     },
     {
      "tag": "careers",
-     "count": 20
-    },
-    {
-     "tag": "guardrails",
      "count": 20
     },
     {
@@ -3855,11 +3863,11 @@
      "count": 19
     },
     {
-     "tag": "encryption",
-     "count": 18
+     "tag": "pricing",
+     "count": 19
     },
     {
-     "tag": "pricing",
+     "tag": "encryption",
      "count": 18
     },
     {
@@ -3867,11 +3875,15 @@
      "count": 16
     },
     {
+     "tag": "bias",
+     "count": 15
+    },
+    {
      "tag": "orchestration",
      "count": 15
     },
     {
-     "tag": "bias",
+     "tag": "alignment",
      "count": 14
     },
     {
@@ -3881,10 +3893,6 @@
     {
      "tag": "token-economics",
      "count": 13
-    },
-    {
-     "tag": "alignment",
-     "count": 12
     },
     {
      "tag": "interpretability",
@@ -3899,15 +3907,15 @@
      "count": 12
     },
     {
+     "tag": "hallucination",
+     "count": 11
+    },
+    {
      "tag": "seo",
      "count": 11
     },
     {
      "tag": "energy-efficiency",
-     "count": 10
-    },
-    {
-     "tag": "hallucination",
      "count": 10
     },
     {
@@ -3939,6 +3947,10 @@
      "count": 8
     },
     {
+     "tag": "integration-testing",
+     "count": 6
+    },
+    {
      "tag": "unit-testing",
      "count": 6
     },
@@ -3952,10 +3964,6 @@
     },
     {
      "tag": "i18n",
-     "count": 4
-    },
-    {
-     "tag": "integration-testing",
      "count": 4
     },
     {
@@ -3989,35 +3997,35 @@
    "tags": [
     {
      "tag": "ai-agents",
-     "count": 284
+     "count": 290
     },
     {
      "tag": "ai-coding-agents",
-     "count": 271
+     "count": 276
     },
     {
      "tag": "agentic-ai",
-     "count": 206
+     "count": 208
     },
     {
      "tag": "ai-governance",
-     "count": 154
+     "count": 158
     },
     {
      "tag": "coding-agents",
-     "count": 122
-    },
-    {
-     "tag": "reasoning-models",
-     "count": 117
-    },
-    {
-     "tag": "frontier-models",
-     "count": 115
+     "count": 124
     },
     {
      "tag": "on-device-ai",
-     "count": 115
+     "count": 120
+    },
+    {
+     "tag": "reasoning-models",
+     "count": 118
+    },
+    {
+     "tag": "frontier-models",
+     "count": 116
     },
     {
      "tag": "local-llm",
@@ -4025,15 +4033,15 @@
     },
     {
      "tag": "open-weights",
-     "count": 80
+     "count": 82
     },
     {
      "tag": "mcp",
-     "count": 74
+     "count": 75
     },
     {
      "tag": "tool-calling",
-     "count": 73
+     "count": 74
     },
     {
      "tag": "foundation-models",
@@ -4041,23 +4049,23 @@
     },
     {
      "tag": "ai-data-centers",
-     "count": 60
+     "count": 61
     },
     {
      "tag": "edge-ai",
-     "count": 56
+     "count": 57
     },
     {
      "tag": "agent-orchestration",
-     "count": 53
+     "count": 54
     },
     {
      "tag": "small-language-models",
-     "count": 51
+     "count": 52
     },
     {
      "tag": "copilots",
-     "count": 50
+     "count": 51
     },
     {
      "tag": "gpu-economics",
@@ -4065,11 +4073,11 @@
     },
     {
      "tag": "vibe-coding",
-     "count": 42
+     "count": 43
     },
     {
      "tag": "multi-agent",
-     "count": 39
+     "count": 41
     },
     {
      "tag": "rag",
@@ -4084,12 +4092,12 @@
      "count": 35
     },
     {
-     "tag": "computer-use",
-     "count": 32
+     "tag": "multimodal",
+     "count": 33
     },
     {
-     "tag": "multimodal",
-     "count": 31
+     "tag": "computer-use",
+     "count": 32
     },
     {
      "tag": "embeddings",
@@ -4100,6 +4108,10 @@
      "count": 26
     },
     {
+     "tag": "quantization",
+     "count": 25
+    },
+    {
      "tag": "world-models",
      "count": 25
     },
@@ -4108,12 +4120,12 @@
      "count": 24
     },
     {
-     "tag": "quantization",
+     "tag": "structured-output",
      "count": 24
     },
     {
      "tag": "vision-language-models",
-     "count": 23
+     "count": 24
     },
     {
      "tag": "browser-agents",
@@ -4121,10 +4133,6 @@
     },
     {
      "tag": "fine-tuning",
-     "count": 22
-    },
-    {
-     "tag": "structured-output",
      "count": 22
     },
     {
@@ -4137,27 +4145,27 @@
     },
     {
      "tag": "synthetic-data",
-     "count": 20
+     "count": 21
     },
     {
      "tag": "generative-ui",
      "count": 17
     },
     {
-     "tag": "mixture-of-experts",
+     "tag": "moe",
+     "count": 16
+    },
+    {
+     "tag": "distillation",
      "count": 14
     },
     {
-     "tag": "moe",
+     "tag": "mixture-of-experts",
      "count": 14
     },
     {
      "tag": "voice-ai",
      "count": 14
-    },
-    {
-     "tag": "distillation",
-     "count": 13
     },
     {
      "tag": "jailbreaks",
@@ -160729,6 +160737,2220 @@
     ],
     "topic-technology": [
      "edge-runtime"
+    ]
+   }
+  },
+  {
+   "id": 3881,
+   "url": "https://supapool.io",
+   "sourceId": 8,
+   "sourceName": "llmnews.ai",
+   "title": "Supapool: Real Supabase for parallel coding agents",
+   "titlePt": "Supapool: Supabase de verdade para agentes de codificação paralela",
+   "summaryPt": "Supapool é uma ferramenta de linha de comando que fornece instâncias reais e efêmeras do Supabase para agentes de codificação paralelos. Diferente de simulações, ela oferece Postgres, Auth e Storage compatível com S3 genuínos, evitando conflitos entre agentes que rodam simultaneamente. Ela elimina a lentidão e o custo de criação de branches, iniciando instâncias perto do agente em vez de em uma região fixa.\n\nO uso é simples: basta encapsular qualquer comando com `npx @supapool/cli run -- <comando>`. A ferramenta faz login via GitHub, aplica automaticamente as migrações de `supabase/migrations`, injeta variáveis de ambiente padrão (como SUPABASE_URL, DATABASE_URL etc.) e mantém a instância ativa por até 30 minutos. Quando o comando termina ou o processo morre, a instância é liberada e apagada, garantindo descartabilidade.\n\nPara CI, é possível configurar uma chave de API sem necessidade de login interativo. Além do CLI, o pacote npm oferece a função `withInstance` para uso programático, renovando automaticamente a concessão enquanto o código executa. Durante a versão beta, o serviço é gratuito; o suporte é feito por e-mail.",
+   "snippet": "How it works npx @supapool/cli run -- npm run dev Wrap any command. Supapool leases a clean instance, injects its credentials, keeps it alive, and releases it when the command exits. Why Real Supabase. Postgres, Auth, and S3-compatible Storage. Parallel agents need this. Agents never wipe each other's databases mid-run. No mocks. Test migrations and database operations against a real, is",
+   "kind": null,
+   "section": null,
+   "date": "2026-07-31",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "integration-testing",
+     "developer-productivity",
+     "dev-experience",
+     "parallelism"
+    ],
+    "content-type": [
+     "tool-release"
+    ],
+    "difficulty": [
+     "for-practitioners"
+    ],
+    "domain": [
+     "backend",
+     "nodejs"
+    ],
+    "ecosystem-language": [
+     "javascript",
+     "sql"
+    ],
+    "topic-technology": [
+     "ai-agents",
+     "databases",
+     "database-migrations",
+     "authentication",
+     "cli-tools"
+    ],
+    "trending-emerging": [
+     "ai-agents",
+     "coding-agents",
+     "agentic-ai",
+     "multi-agent"
+    ]
+   }
+  },
+  {
+   "id": 3882,
+   "url": "https://martinfowler.com/articles/exploring-gen-ai/refactoring-economic-benefit.html",
+   "sourceId": 8,
+   "sourceName": "llmnews.ai",
+   "title": "The Economic Benefit of Refactoring",
+   "titlePt": "O benefício econômico da refatoração",
+   "summaryPt": "O autor construiu um aplicativo de aproximadamente 150 mil linhas de código (principalmente Rust, TypeScript e Terraform) usando agentes de IA (Claude Code e Cursor). Durante o desenvolvimento, percebeu que a camada de acesso a dados havia crescido para um único arquivo de 17.155 linhas, com muita repetição de código. Decidiu então fazer um experimento de refatoração para medir o impacto no consumo de tokens ao aplicar uma mesma alteração representativa antes e depois de cada etapa de refatoração. Os resultados mostraram que, após a refatoração, os tokens de entrada para a mesma tarefa caíram de 159.564 para 27.360 — uma redução de 83%. Isso ocorre porque o agente precisa ler menos código, mesmo que o total de linhas da camada de dados tenha permanecido praticamente constante. O autor observa que a refatoração foi guiada manualmente (os agentes não são bons em refatorar por conta própria) e que o processo mecânico foi feito com scripts Python e ferramentas de linha de comando. O experimento levou cerca de 8 horas, a maior parte não supervisionada. A conclusão é que a refatoração traz economia de tokens e, portanto, de custo e tempo em futuras alterações, embora o custo da própria refatoração precise ser considerado. O autor sugere que este é apenas um primeiro passo, e mais estudos são necessários para avaliar refatorações em mudanças mais complexas e em todo o código.",
+   "snippet": "As part of getting to grips with the new world of agentic engineering, I built an application to support my work. It’s a sophisticated app: high-quality web UI with dynamic refresh and look-up, modals and auto-save, integrations to external systems, machine learning and text analysis, background jobs, and a proper environment setup with fully automated deployment. It’s approximately 150,000 lines",
+   "kind": null,
+   "section": null,
+   "date": "2026-07-31",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "claude",
+     "anthropic"
+    ],
+    "concept-theme": [
+     "refactoring",
+     "cost-optimization",
+     "technical-debt",
+     "developer-productivity"
+    ],
+    "content-type": [
+     "analysis",
+     "case-study"
+    ],
+    "difficulty": [
+     "for-practitioners"
+    ],
+    "domain": [
+     "ai-general",
+     "llm-models"
+    ],
+    "ecosystem-language": [
+     "rust",
+     "typescript"
+    ],
+    "framework-library-tool": [
+     "claude",
+     "terraform"
+    ],
+    "topic-technology": [
+     "ai-agents",
+     "cost-optimization-llm"
+    ],
+    "trending-emerging": [
+     "ai-coding-agents",
+     "coding-agents",
+     "agentic-ai",
+     "vibe-coding"
+    ]
+   }
+  },
+  {
+   "id": 3883,
+   "url": "https://openjdk.org/legal/ai",
+   "sourceId": 8,
+   "sourceName": "llmnews.ai",
+   "title": "OpenJDK Interim Policy on Generative AI",
+   "titlePt": "Política Interina do OpenJDK sobre IA Generativa",
+   "summaryPt": "A comunidade OpenJDK, sob patrocínio da Oracle, adotou uma política interina que proíbe contribuições contendo conteúdo gerado por modelos de linguagem de grande escala, modelos de difusão ou sistemas similares de aprendizado profundo. Isso inclui código-fonte, texto, imagens e outros materiais em repositórios Git, pull requests, e-mails, wikis e issues do JBS. A medida visa mitigar riscos de sobrecarga para revisores, comprometimento de segurança e violação de propriedade intelectual, já que ferramentas de IA generativa podem produzir código aparentemente correto, mas incorreto ou mal projetado, além de potencialmente infringir direitos autorais de terceiros. A política não proíbe o uso privado dessas ferramentas para compreensão, depuração e revisão de código, desde que não haja contribuição direta do conteúdo gerado. Também são permitidos recursos de correção ortográfica, gramatical, autocompletar e refatoração, desde que não baseados em LLMs ou sistemas similares. A política interina estará em vigor até que uma política definitiva seja proposta e aprovada pelo Conselho Diretor do OpenJDK. Perguntas frequentes detalham cenários como uso de ferramentas para revisão de rascunhos de JEPs ou JavaDoc (permitido), criação de 100 linhas editadas parcialmente (não permitido) e a obrigação de revisores identificarem indícios de conteúdo gerado por IA.",
+   "snippet": "The field of generative AI is evolving quickly. It brings compelling opportunities to improve developer productivity, but it also brings risks: to reviewer burden, to safety and security, and to intellectual property.Oracle, as the corporate sponsor of the OpenJDK Community, is working to draft a full policy governing the use of generative AI tools in OpenJDK contributions. Oracle will propose tha",
+   "kind": null,
+   "section": null,
+   "date": "2026-04-09",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "governance",
+     "open-source",
+     "ai-ethics",
+     "security"
+    ],
+    "content-type": [
+     "announcement"
+    ],
+    "difficulty": [
+     "all-levels"
+    ],
+    "domain": [
+     "llm-models"
+    ],
+    "ecosystem-language": [
+     "java"
+    ],
+    "topic-technology": [
+     "ai-policy",
+     "generative-ai",
+     "ai-safety",
+     "ai-ethics",
+     "deep-learning",
+     "diffusion-models"
+    ],
+    "trending-emerging": [
+     "ai-governance"
+    ]
+   }
+  },
+  {
+   "id": 3884,
+   "url": "https://github.com/hamzarehmandeveloper/claude-account",
+   "sourceId": 8,
+   "sourceName": "llmnews.ai",
+   "title": "Switch between isolated Claude Code accounts on Linux without logging in again.",
+   "titlePt": "Alternar entre contas isoladas do Claude Code no Linux sem refazer login",
+   "summaryPt": "O claude-account é um gerenciador de perfis para o Claude Code, exclusivo para Linux, que permite alternar entre contas isoladas sem precisar refazer login. Ele cria um diretório CLAUDE_CONFIG_DIR separado para cada conta e encaminha comandos para o executável oficial do Claude. Trata-se de um projeto comunitário independente, não afiliado à Anthropic.\n\nPara instalar, baixe o arquivo da versão mais recente, verifique a soma de verificação e execute o instalador. O comando `claude account add <nome>` inicia o fluxo de login oficial; `claude account use <nome>` alterna a conta ativa. Outros comandos permitem listar, exibir a conta atual e remover perfis, com opção de exclusão total dos dados locais. O wrapper também remove variáveis de ambiente de autenticação para garantir o uso do perfil selecionado.",
+   "snippet": "A Linux-only profile switcher for Claude Code. It gives Claude Code an isolated CLAUDE_CONFIG_DIR for each account and transparently forwards normal commands to the official Claude executable. claude account add work claude account add personal claude account use work claude account list claude account current claude account remove personal claude claude \"fix this bug in main.py\" Claude Code itse",
+   "kind": null,
+   "section": null,
+   "date": "2026-07-31",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "claude",
+     "anthropic"
+    ],
+    "concept-theme": [
+     "developer-productivity",
+     "dev-experience",
+     "open-source"
+    ],
+    "content-type": [
+     "tool-release",
+     "how-to"
+    ],
+    "difficulty": [
+     "for-practitioners"
+    ],
+    "domain": [
+     "ai-general",
+     "llm-models"
+    ],
+    "ecosystem-language": [
+     "rust"
+    ],
+    "framework-library-tool": [
+     "claude"
+    ],
+    "topic-technology": [
+     "cli-tools"
+    ],
+    "trending-emerging": [
+     "ai-coding-agents"
+    ]
+   }
+  },
+  {
+   "id": 3885,
+   "url": "https://www.isgroup.biz/en/404.html",
+   "sourceId": 8,
+   "sourceName": "llmnews.ai",
+   "title": "Page not found",
+   "titlePt": "Página não encontrada",
+   "summaryPt": "O artigo indica que a página solicitada não foi encontrada no servidor. Isso geralmente ocorre devido a URLs incorretas, links quebrados ou conteúdo removido. Não há informações adicionais disponíveis sobre o tópico original.",
+   "snippet": "{\"title\": \"Page not found\", \"body\": \"Sorry, the page you are looking for does not exist.\", \"date\": null}",
+   "kind": null,
+   "section": null,
+   "date": "2026-07-31",
+   "verifyStatus": "junk",
+   "tags": {
+    "content-type": [
+     "news"
+    ]
+   }
+  },
+  {
+   "id": 3886,
+   "url": "https://lwn.net/Articles/1086041",
+   "sourceId": 8,
+   "sourceName": "llmnews.ai",
+   "title": "GCC steering committee announces AI policy",
+   "titlePt": "Comitê diretor do GCC anuncia política sobre IA",
+   "summaryPt": "O comitê diretor do GCC anunciou a adoção de uma política de contribuições com IA recomendada pelo grupo de trabalho sobre o tema. A política determina que o projeto recusará contribuições legalmente significativas que incluam conteúdo gerado por LLMs ou derivado deles. A definição de 'legalmente significativo' segue as diretrizes de manutenção do Projeto GNU, considerando o limite de cerca de 15 linhas de código e/ou texto como significativo para fins de direitos autorais. No entanto, os mantenedores do GCC podem optar por aceitar casos de teste legalmente significativos gerados por um LLM. A política não proíbe o uso de LLMs para pesquisa, análise, descoberta e relato de bugs, revisão de patches etc., desde que o resultado não seja incluído nas contribuições. O comitê afirma que espera que a política evolua e será revisada periodicamente.",
+   "snippet": "The GCC steering committee has announced that it has accepted an AI contributions policy recommended by the GCC AI policy working group. The policy, in part, states that the project will decline any \"legally significant contributions which include LLM-generated content or are derived from LLM-generated content\". It uses the definition of \"legally significant\" from the GNU Project maintainer guide",
+   "kind": null,
+   "section": null,
+   "date": "2026-07-31",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "governance",
+     "open-source",
+     "ai-ethics",
+     "community"
+    ],
+    "content-type": [
+     "announcement"
+    ],
+    "difficulty": [
+     "for-leaders"
+    ],
+    "domain": [
+     "llm-models",
+     "ai-general"
+    ],
+    "ecosystem-language": [
+     "c",
+     "cpp"
+    ],
+    "topic-technology": [
+     "ai-policy",
+     "foundation-models",
+     "generative-ai"
+    ],
+    "trending-emerging": [
+     "ai-governance"
+    ]
+   }
+  },
+  {
+   "id": 3887,
+   "url": "https://github.com/grafana/ai-sdk",
+   "sourceId": 8,
+   "sourceName": "llmnews.ai",
+   "title": "Grafana AI SDK for Go — streaming, tool-calling AI backends that speak fluent @ai-sdk/react",
+   "titlePt": "SDK de IA da Grafana para Go",
+   "summaryPt": "A Grafana lançou um SDK de IA para Go que permite chamar modelos de linguagem, transmitir respostas em streaming e executar ferramentas (tools) diretamente do backend Go. O pacote segue o design do SDK de IA da Vercel, sendo compatível “por fio” com os hooks React do frontend TypeScript, como useChat e useCompletion, usando eventos SSE (Server-Sent Events).\n\nO SDK suporta os principais provedores (Anthropic, Amazon Bedrock, OpenAI e APIs compatíveis, além do endpoint hospedado da Grafana), oferece geração de texto síncrona ou em streaming, saída estruturada validada por schema, execução multi-etapas de agentes e funções Go compostáveis com aprovação opcional para ações críticas. Também inclui controles de produção como timeouts, fallback, logging, métricas Prometheus e observabilidade de agentes.\n\nPara começar, basta instalar os módulos core e de um provedor, configurar a chave de API e usar funções como GenerateText ou StreamText. O repositório está sob licença Apache 2.0 e aceita contribuições seguindo o guia CONTRIBUTING.md.",
+   "snippet": "Call language models, stream responses, execute tools, and serve AI-powered endpoints from Go. Use the SDK on its own or pair it with an AI SDK React frontend. Why The SDK gives Go applications one API for model calls, streaming, tools, structured output, and multi-step agents across supported providers. It follows the design of Vercel's AI SDK and stays wire-compatible with its TypeScript fron",
+   "kind": null,
+   "section": null,
+   "date": "2026-07-31",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "anthropic",
+     "aws-bedrock",
+     "openai",
+     "vercel"
+    ],
+    "concept-theme": [
+     "agentops",
+     "observability",
+     "dev-experience"
+    ],
+    "content-type": [
+     "library-release",
+     "release-announcement"
+    ],
+    "difficulty": [
+     "for-practitioners"
+    ],
+    "domain": [
+     "backend",
+     "llm-models",
+     "reactjs"
+    ],
+    "ecosystem-language": [
+     "go",
+     "typescript"
+    ],
+    "framework-library-tool": [
+     "react",
+     "gpt",
+     "claude"
+    ],
+    "topic-technology": [
+     "tool-calling",
+     "streaming-responses",
+     "structured-output",
+     "ai-gateway",
+     "server-sent-events"
+    ],
+    "trending-emerging": [
+     "tool-calling",
+     "ai-agents",
+     "structured-output"
+    ]
+   }
+  },
+  {
+   "id": 3888,
+   "url": "https://github.com/AminBlg/SimpleEnglish",
+   "sourceId": 8,
+   "sourceName": "llmnews.ai",
+   "title": "AminBlg/SimpleEnglish: Agent skill: make LLMs write docs in ASD-STE100 Simplified Technical English — no AI slop",
+   "titlePt": "AminBlg/SimpleEnglish: habilidade para agente que faz LLMs escreverem em ASD-STE100 — sem exageros de IA",
+   "summaryPt": "O projeto SimpleEnglish, de AminBlg, é uma habilidade para agentes de IA que força modelos de linguagem (LLMs) a escreverem documentação técnica no padrão ASD-STE100 Simplified Technical English — um inglês técnico simplificado usado na aviação desde 1983 para evitar ambiguidades. A habilidade elimina o estilo prolixo e vago comum em textos gerados por IA, substituindo-o por instruções claras, curtas e diretas. As regras incluem: máximo de 20 palavras por instrução, uso de tempos verbais simples, voz ativa, proibição de formas com -ing, e uma instrução por frase. O resultado é uma redução de 72,9% nas violações das regras do STE, testado em 6 modelos Claude e em diversas tarefas (mensagens de erro, runbooks, relatórios de incidentes, notas de release). A instalação é simples: `npx skills add AminBlg/SimpleEnglish` — funciona com Claude Code, Cursor, VS Code Copilot, OpenAI Codex, Gemini CLI e mais de 20 outros agentes. Também é possível usar via prompt direto ou arquivo de sistema. O projeto é MIT e não tem afiliação oficial com a ASD.",
+   "snippet": "✈️ your AI writes like a LinkedIn post. make it write like a Boeing manual. An agent skill that forces LLMs to write docs in ASD-STE100 Simplified Technical English: the controlled language aerospace has used since 1983 so a tired mechanic cannot misread an instruction. AI slop dies as a side effect. 💀 See it · Install · The rules · Not just docs · Receipts · FA",
+   "kind": null,
+   "section": null,
+   "date": "2026-07-31",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "claude",
+     "openai",
+     "gemini"
+    ],
+    "concept-theme": [
+     "guardrails",
+     "prompt-engineering",
+     "evaluation"
+    ],
+    "content-type": [
+     "tool-release",
+     "showcase"
+    ],
+    "difficulty": [
+     "for-practitioners"
+    ],
+    "domain": [
+     "llm-models"
+    ],
+    "topic-technology": [
+     "agentops",
+     "prompt-engineering",
+     "structured-output",
+     "guardrails",
+     "ai-agents"
+    ],
+    "trending-emerging": [
+     "ai-agents",
+     "structured-output"
+    ]
+   }
+  },
+  {
+   "id": 3889,
+   "url": "https://evilmartians.com/chronicles/the-secure-way-to-release-an-npm-package",
+   "sourceId": 1,
+   "sourceName": "Node Weekly",
+   "title": "The Secure Way to Release a npm Package in 2026",
+   "titlePt": "O jeito seguro de publicar um pacote npm em 2026",
+   "summaryPt": "O artigo alerta sobre o aumento de ataques à cadeia de suprimentos que visam roubar pacotes npm, usando LLMs para automatizar invasões. Mesmo projetos pequenos podem ser alvos de worms como o Shai-Hulud. A Evil Martians, com mais de 100 projetos open source, adota práticas de segurança desde 2024 e compartilha um passo a passo essencial para publicar pacotes com segurança. As principais recomendações incluem: usar npm Provenance para garantir a origem do pacote, habilitar Staged Publishing para aprovação manual com 2FA em hardware, configurar Trusted Publisher no npm para permitir apenas stage publish, ativar 2FA para todos na organização GitHub, restringir criação de tags a administradores, fixar ações de CI por SHA, adicionar linting de segurança com zizmor, definir um período de carência de 3 dias antes de usar novas versões (min-release-age), migrar para npm 12, pnpm 10, yarn 4.14 ou Bun (que bloqueiam scripts pós-instalação por padrão), e criar um workflow de CI que separa teste, build e publicação, sem instalar dependências no job de publish. O artigo também desmistifica conceitos de segurança: Provenance não garante que o pacote é seguro, apenas confirma sua origem; e mesmo com proteção imperfeita, o objetivo é aumentar o custo do ataque. Por fim, sugere que, com a ascensão das LLMs, a segurança se torna responsabilidade central de todo desenvolvedor, não apenas de especialistas.",
+   "snippet": "A practical guide to publishing npm packages more safely in 2026, written by someone who's released several popular packages (like postcss and nanoid). As well as showing how to use things like staged publishing and trusted publishing, he explains why and the security benefits of doing so.",
+   "kind": "news",
+   "section": null,
+   "date": "2026-07-28",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "security",
+     "open-source",
+     "ci-cd",
+     "authentication"
+    ],
+    "content-type": [
+     "how-to"
+    ],
+    "difficulty": [
+     "for-practitioners"
+    ],
+    "domain": [
+     "nodejs"
+    ],
+    "ecosystem-language": [
+     "javascript"
+    ],
+    "framework-library-tool": [
+     "npm",
+     "github-actions"
+    ],
+    "topic-technology": [
+     "npm-security",
+     "supply-chain-security",
+     "ci-cd"
+    ]
+   }
+  },
+  {
+   "id": 3890,
+   "url": "https://devblogs.microsoft.com/ifdef-windows/a-new-way-to-bring-native-windows-apis-to-javascript-introducing-dynamic-api-projections-for-node-js",
+   "sourceId": 1,
+   "sourceName": "Node Weekly",
+   "title": "a way to call native Windows APIs from Node",
+   "titlePt": "Como chamar APIs nativas do Windows diretamente do Node.js",
+   "summaryPt": "A Microsoft disponibilizou uma prévia pública de uma projeção dinâmica da Windows Runtime API (WinRT) para Node.js, permitindo que aplicativos Electron ou processos Node.js comuns chamem APIs do Windows diretamente em JavaScript ou TypeScript, sem necessidade de bridges em C++/C# ou configurações complexas com node-gyp.\n\nA solução é composta por três pacotes npm: @microsoft/winappcli (orquestrador), @microsoft/dynwinrt-codegen (gera wrappers JavaScript e declarações TypeScript) e @microsoft/dynwinrt (runtime compartilhado). O artigo demonstra exemplos práticos como notificações nativas com AppNotificationBuilder e uso de inteligência artificial local com Phi Silica em PCs Copilot+, além de mostrar como adicionar APIs personalizadas do Windows SDK e como usar a projeção com Node.js puro sem necessidade de empacotamento MSIX.",
+   "snippet": "(and therefore Electron) without native addons via a new dynamic Windows Runtime API (WinRT) projection.",
+   "kind": "news",
+   "section": "IN BRIEF",
+   "date": "2026-07-27",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "microsoft",
+     "phi"
+    ],
+    "concept-theme": [
+     "architecture",
+     "api-design",
+     "type-safety",
+     "async"
+    ],
+    "content-type": [
+     "release-announcement",
+     "tool-release"
+    ],
+    "difficulty": [
+     "for-practitioners"
+    ],
+    "domain": [
+     "nodejs",
+     "local-llm"
+    ],
+    "ecosystem-language": [
+     "javascript",
+     "typescript"
+    ],
+    "framework-library-tool": [
+     "nodejs",
+     "npm"
+    ],
+    "topic-technology": [
+     "native-addons"
+    ],
+    "trending-emerging": [
+     "on-device-ai"
+    ]
+   }
+  },
+  {
+   "id": 3891,
+   "url": "https://aws.amazon.com/blogs/security/amazon-identifies-north-korean-hacker-group-behind-open-source-supply-chain-attacks",
+   "sourceId": 1,
+   "sourceName": "Node Weekly",
+   "title": "Amazon's security team has narrowed down",
+   "titlePt": "Amazon identifica grupo norte-coreano por trás de ataques a pacotes NPM",
+   "summaryPt": "A Amazon revelou que um grupo ligado à Coreia do Norte (DPRK) está por trás de múltiplos comprometimentos de pacotes populares no NPM, incluindo axios, debug, chalk e typo-crypto. A equipe Amazon Threat Intelligence identificou conexões entre esses ataques, que antes não haviam sido publicamente associados ao mesmo ator. O método usado envolve engenharia social para obter acesso a mantenedores legítimos, publicando atualizações maliciosas que afetam milhares de organizações que usam esses pacotes automaticamente.\n\nO relatório também descreve como as táticas dos ameaçadores estão evoluindo: ataques de fragmentos (dividindo código malicioso em vários pacotes aparentemente inofensivos), campanhas de longo prazo que constroem confiança, uso de criptografia forte para ocultar payloads e técnicas para evitar detecção em sandboxes. A inteligência artificial generativa está sendo usada tanto por atacantes (para criar código malicioso) quanto por defensores (para identificar padrões suspeitos). A Amazon compartilha indicadores de comprometimento e recomenda que times de segurança adotem análises mais holísticas, em vez de avaliar pacotes individualmente.",
+   "snippet": "several npm supply chain attacks (such as those on debug and chalk) to a single North Korean-linked group.",
+   "kind": "news",
+   "section": "IN BRIEF",
+   "date": "2026-07-29",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "amazon",
+     "aws"
+    ],
+    "concept-theme": [
+     "security",
+     "open-source",
+     "ai-safety"
+    ],
+    "content-type": [
+     "incident-report",
+     "analysis"
+    ],
+    "difficulty": [
+     "for-practitioners"
+    ],
+    "domain": [
+     "nodejs",
+     "ai-general"
+    ],
+    "ecosystem-language": [
+     "javascript"
+    ],
+    "framework-library-tool": [
+     "npm"
+    ],
+    "topic-technology": [
+     "npm-security",
+     "supply-chain-security",
+     "security-node",
+     "generative-ai"
+    ]
+   }
+  },
+  {
+   "id": 3892,
+   "url": "https://developers.cloudflare.com/changelog/post/2026-07-21-integration-test-harness",
+   "sourceId": 1,
+   "sourceName": "Node Weekly",
+   "title": "run integration tests against Workers from any Node.js test runner",
+   "titlePt": "Testes de integração para Workers com qualquer runner Node.js",
+   "summaryPt": "O Wrangler agora oferece a função `createTestHarness()`, uma API para executar testes de integração contra Workers construídos com o Wrangler ou o plugin Vite da Cloudflare, usando qualquer executor de testes Node.js. A função inicia um servidor Worker local com utilitários para despachar requisições, redefinir armazenamento e inspecionar logs de execução. Isso é útil para testes que precisam rotear requisições entre múltiplos Workers, simular chamadas `fetch()` com bibliotecas como MSW ou executar testes Playwright. A Cloudflare recomenda o uso dessa API no lugar de `unstable_startWorker()` ou `unstable_dev()`. Para iniciar um servidor de desenvolvimento programaticamente, utilize a API `createServer()` do Vite com o plugin Cloudflare.",
+   "snippet": "Wrangler now provides createTestHarness(), an API for running integration tests against Workers built with Wrangler or the Cloudflare Vite plugin from any Node.js test runner. The test harness starts a local Worker server with helpers for dispatching requests, resetting storage, and inspecting runtime logs. This is useful for tests that need to: Route requests across multiple Workers Mock outboun",
+   "kind": "news",
+   "section": "IN BRIEF",
+   "date": "2026-07-27",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "cloudflare"
+    ],
+    "concept-theme": [
+     "integration-testing",
+     "dx"
+    ],
+    "content-type": [
+     "tool-release",
+     "how-to"
+    ],
+    "difficulty": [
+     "for-practitioners"
+    ],
+    "domain": [
+     "nodejs",
+     "backend"
+    ],
+    "ecosystem-language": [
+     "javascript",
+     "typescript"
+    ],
+    "framework-library-tool": [
+     "cloudflare-workers",
+     "vitest",
+     "nodejs"
+    ],
+    "topic-technology": [
+     "serverless",
+     "edge-runtime"
+    ]
+   }
+  },
+  {
+   "id": 3893,
+   "url": "https://scriptc.dev",
+   "sourceId": 1,
+   "sourceName": "Node Weekly",
+   "title": "scriptc: Vercel's New TypeScript-to-Native Compiler",
+   "titlePt": "scriptc: o novo compilador TypeScript-para-nativo da Vercel",
+   "summaryPt": "O scriptc é um novo compilador da Vercel que transforma TypeScript diretamente em binários nativos, eliminando a necessidade de Node, V8 ou qualquer engine JavaScript. O código compilado é pequeno e rápido — um hello-world tem cerca de 320 KB e inicia em ~4 ms. O sistema opera em três níveis explícitos: o Tier 1 compila código TypeScript estático em código nativo (sem engine); o Tier 2 (ativado com --dynamic) usa um motor JavaScript embutido (~620 KB) para executar o que não pode ser estático, como dependências npm; e o Tier 3 rejeita o código em tempo de compilação com erros específicos e sugestões de reescrita. Não é necessário alterar o código, anotações ou dialetos — o mesmo TypeScript que roda no Node funciona. O compilador gera relatórios de cobertura que mostram exatamente quais partes são compiladas estaticamente e quais precisam do motor dinâmico. O projeto é testado diferencialmente: cada programa roda no Node e como binário nativo, e a saída deve ser idêntica byte a byte.",
+   "snippet": "A new entry into the growing field of JS/TS native ahead-of-time compilers that makes the promise that \"what compiles behaves byte-for-byte like Node.\" Static by default, but you can opt in to a --dynamic mode which embeds a JavaScript engine for runtime dynamism.",
+   "kind": "tool",
+   "section": "Code & Tools",
+   "date": "2026-07-31",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "vercel"
+    ],
+    "concept-theme": [
+     "performance",
+     "optimization",
+     "dx",
+     "architecture"
+    ],
+    "content-type": [
+     "product-launch",
+     "tool-release"
+    ],
+    "difficulty": [
+     "intermediate"
+    ],
+    "domain": [
+     "nodejs"
+    ],
+    "ecosystem-language": [
+     "typescript",
+     "javascript"
+    ],
+    "topic-technology": [
+     "typescript-node",
+     "performance-tuning"
+    ]
+   }
+  },
+  {
+   "id": 3894,
+   "url": "https://www.yagiz.co/release-of-ada-v4",
+   "sourceId": 1,
+   "sourceName": "Node Weekly",
+   "title": "Ada v4",
+   "titlePt": "Ada v4",
+   "summaryPt": "Ada é o analisador de URL compatível com WHATWG mais rápido do mundo, utilizado em Node.js, Cloudflare Workers, Redpanda, Kong, Telegram, Datadog, ClickHouse e muitos outros. Foi lançada a versão 4.0.0, a primeira grande atualização desde março de 2026. Esta versão foca em três pilares: maior velocidade no caminho comum, redução significativa do footprint binário e da tabela IDNA, e maior robustez contra entradas incorretas ou inseguras.\n\nOs ganhos de desempenho são expressivos: no conjunto de dados realista com ~100 mil URLs, o parsing de ada::url ficou 1,24× mais rápido (128,8 ns/URL) e o can_parse teve aceleração de 2,08× (28,1 ns/URL). O tamanho do binário também caiu bastante — o arquivo amalgamado ada.cpp passou de 956 KiB para 706 KiB (−26%), e a biblioteca compartilhada (.dylib) reduziu 31% (616 KiB → 427 KiB). A compressão das tabelas IDNA foi a principal responsável: src/ada_idna.cpp encolheu 41%.\n\nEntre as mudanças que quebram compatibilidade, destaca-se o aumento do soname da biblioteca compartilhada (libada.so.3 → libada.so.4), a introdução de um limite configurável para o tamanho máximo da URL (ada::set_max_input_length), e correções que agora rejeitam entradas previamente aceitas de forma incorreta (como set_hostname com fragmento ou IPv4 hexadecimal com overflow). A segurança foi reforçada com correções contra DoS no URLPattern, wraparound de offsets e regras IDNA Bidi. A documentação da API C também foi atualizada para esclarecer o ciclo de vida das strings retornadas.",
+   "snippet": "The WHATWG-compliant URL parser used by Node is now even faster.",
+   "kind": "release",
+   "section": "Code & Tools",
+   "date": "2026-07-27",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "performance",
+     "optimization",
+     "throughput",
+     "latency"
+    ],
+    "content-type": [
+     "version-release",
+     "benchmark"
+    ],
+    "difficulty": [
+     "advanced"
+    ],
+    "domain": [
+     "nodejs"
+    ],
+    "ecosystem-language": [
+     "cpp"
+    ],
+    "topic-technology": [
+     "web-standards",
+     "performance-tuning",
+     "web-apis",
+     "native-addons",
+     "edge-runtime"
+    ]
+   }
+  },
+  {
+   "id": 3895,
+   "url": "https://github.com/wasp-lang/wasp/releases/tag/v0.25.0",
+   "sourceId": 1,
+   "sourceName": "Node Weekly",
+   "title": "Wasp v0.25",
+   "titlePt": "Wasp v0.25",
+   "summaryPt": "A Wasp lançou a versão 0.25 com diversas mudanças importantes. Entre as quebras de compatibilidade, destacam-se a atualização do Vite para a versão 8, Vitest para 4.1, TypeScript para v6 e React Router para v8 (compatível com versões anteriores). Também foram removidos caminhos internos de importação não documentados e a funcionalidade Wasp Language Server.\n\nNovidades incluem suporte a Linux ARM64 (funciona em Raspberry Pi e Docker no Apple Silicon), possibilidade de pré-renderizar rotas dinâmicas específicas com um array de caminhos, integração com o serviço de e-mail Resend, e o comando 'wasp doctor' para verificar a integridade da instalação.\n\nCorreções de bugs incluem um problema de concorrência no hook useAuth() que retornava dados desatualizados. Melhorias menores: o comando 'wasp compile' agora aparece na ajuda e no autocomplete, a saída de 'wasp deps' não exibe pacotes internos, e o arquivo tsconfig.wasp.json aceita globs extras. O pacote Wasp Spec foi publicado no npm e agora permite lançar erros personalizados e reutilizar tipos de configuração.",
+   "snippet": "The Rails-esque framework for building full-stack webapps with React & Node introduces Vite 8 and React Router 8.",
+   "kind": "release",
+   "section": "Code & Tools",
+   "date": "2026-07-31",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "dev-experience",
+     "type-safety",
+     "testing",
+     "data-fetching"
+    ],
+    "content-type": [
+     "version-release"
+    ],
+    "difficulty": [
+     "for-practitioners"
+    ],
+    "domain": [
+     "reactjs",
+     "nodejs"
+    ],
+    "ecosystem-language": [
+     "typescript",
+     "javascript"
+    ],
+    "framework-library-tool": [
+     "vite",
+     "vitest",
+     "react",
+     "react-router"
+    ],
+    "topic-technology": [
+     "web-development",
+     "typescript-node",
+     "routing",
+     "bundling",
+     "ssg"
+    ]
+   }
+  },
+  {
+   "id": 3896,
+   "url": "https://github.com/ayuhito/modern-tar",
+   "sourceId": 1,
+   "sourceName": "Node Weekly",
+   "title": "modern-tar 0.8",
+   "titlePt": "modern-tar 0.8",
+   "summaryPt": "modern-tar 0.8 é uma biblioteca de arquivamento tar moderna, sem dependências externas e compatível com todos os ambientes JavaScript modernos (navegadores, Node.js, Cloudflare Workers, etc.). Baseada na Web Streams API nativa, ela oferece arquitetura de streaming para processar grandes arquivos sem consumir toda a memória. Suporta o formato USTAR com extensões PAX, é totalmente compatível com implementações padrão (GNU tar, BSD tar) e inclui compressão/descompressão gzip com streams nativos. A biblioteca é escrita em TypeScript, possui tipagem completa e documentação detalhada. Além da API principal de streaming, oferece um módulo adicional (`modern-tar/fs`) com APIs de alto nível para empacotar e extrair diretórios no Node.js, incluindo opções de filtro, mapeamento de cabeçalhos e controle de concorrência. Benchmarks indicam desempenho superior em arquivos pequenos em comparação com outras bibliotecas populares de tar. A compatibilidade mínima exige Node.js 18+ (para streaming) ou navegadores com suporte amplo (Chrome 85+, Firefox 102+, Safari 14.1+).",
+   "snippet": "Zero-dependency streaming tar parser and writer.",
+   "kind": "release",
+   "section": "Code & Tools",
+   "date": "2026-07-31",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "performance",
+     "type-safety"
+    ],
+    "content-type": [
+     "library-release"
+    ],
+    "difficulty": [
+     "intermediate"
+    ],
+    "domain": [
+     "nodejs"
+    ],
+    "ecosystem-language": [
+     "javascript",
+     "typescript"
+    ],
+    "framework-library-tool": [
+     "nodejs"
+    ],
+    "topic-technology": [
+     "web-streams",
+     "streams",
+     "edge-runtime",
+     "typescript-node",
+     "package-management"
+    ]
+   }
+  },
+  {
+   "id": 3897,
+   "url": "https://github.com/tinylibs/tinyclip",
+   "sourceId": 1,
+   "sourceName": "Node Weekly",
+   "title": "tinyclip 1.0",
+   "titlePt": "tinyclip 1.0",
+   "summaryPt": "tinyclip é uma biblioteca leve e multiplataforma para manipulação da área de transferência (clipboard) em Node.js. Ela utiliza as funcionalidades nativas do sistema operacional para ler e escrever texto na área de transferência. No navegador, recomenda-se o uso da Clipboard API nativa.\n\nA instalação é feita via npm: npm install tinyclip. O uso é simples, com duas funções assíncronas: readText() para ler o texto atual e writeText(text) para escrever um novo texto. Ambas retornam ou recebem strings. O projeto é distribuído sob a licença MIT.",
+   "snippet": "Cross-platform clipboard utility library.",
+   "kind": "release",
+   "section": "Code & Tools",
+   "date": "2026-07-31",
+   "verifyStatus": "suspect",
+   "tags": {
+    "concept-theme": [
+     "api-design",
+     "type-safety",
+     "dx"
+    ],
+    "content-type": [
+     "library-release"
+    ],
+    "difficulty": [
+     "beginner"
+    ],
+    "domain": [
+     "nodejs"
+    ],
+    "ecosystem-language": [
+     "typescript",
+     "javascript"
+    ],
+    "framework-library-tool": [
+     "nodejs",
+     "npm"
+    ]
+   }
+  },
+  {
+   "id": 3898,
+   "url": "https://github.com/nubjs/nub/releases/tag/v0.6.0",
+   "sourceId": 1,
+   "sourceName": "Node Weekly",
+   "title": "Nub 0.6",
+   "titlePt": "Nub 0.6",
+   "summaryPt": "Nub 0.6.0 traz mudanças significativas para scripts em Windows (agora rodam em shell POSIX, não mais cmd.exe), falha fechada no período de confiança de 24 horas (instala erra se nenhuma versão satisfaz o requisito de idade) e um canal de lançamento canary (toda atualização do main gera uma build de canary). Também inclui seletor interativo de atualização (`nub update -i`), correções no gerenciador de pacotes (caches indexados pelo Node, aprovação de dependências locais, segurança em .npmrc), e melhorias no runner/scaffold (preservação de escopo em `nub init`, preload dev da raiz). A atualização exige re-link de node_modules e reconstrução de addons nativos na primeira instalação pós-upgrade.",
+   "snippet": "Fast all-in-one toolkit that augments Node.",
+   "kind": "release",
+   "section": "Code & Tools",
+   "date": "2026-07-31",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "security",
+     "dev-experience",
+     "reliability"
+    ],
+    "content-type": [
+     "version-release"
+    ],
+    "difficulty": [
+     "for-practitioners"
+    ],
+    "domain": [
+     "nodejs"
+    ],
+    "ecosystem-language": [
+     "javascript",
+     "shell"
+    ],
+    "topic-technology": [
+     "npm-scripts",
+     "supply-chain-security",
+     "package-management",
+     "cli-tools"
+    ]
+   }
+  },
+  {
+   "id": 3899,
+   "url": "https://github.blog/changelog/2026-07-28-npm-publish-time-malware-scanning-and-dual-use-metadata",
+   "sourceId": 1,
+   "sourceName": "Node Weekly",
+   "title": "npm to Scan Every Package For Malware at Publish Time",
+   "titlePt": "npm verificará malware em todos os pacotes no momento da publicação",
+   "summaryPt": "O npm anunciou a introdução de varredura automática de malware em todos os pacotes publicados, antes que eles fiquem disponíveis para instalação. Dependendo dos resultados, o pacote pode ser publicado normalmente, retido para revisão manual ou bloqueado. Haverá um atraso típico de cerca de cinco minutos entre a publicação e a disponibilidade, podendo ser maior em horários de pico ou dependendo do tamanho do pacote. Publicadores com automação que assumem disponibilidade imediata devem ajustar seus processos para tolerar essa latência. Durante a varredura, comandos como npm dist-tag continuam funcionando, mas npm deprecate e npm unpublish só operam após a liberação. Pacotes bloqueados geram notificação ao publicador, que pode recorrer. O npm também está implementando um novo campo opcional 'contentPolicy' no package.json para que mantenedores declarem conteúdo de uso duplo (que pode se assemelhar a malware). Essa declaração exige a inclusão de um arquivo DISCLOSURE explicando a funcionalidade e seu uso legítimo. Além disso, pacotes com conteúdo dual-use devem ser publicados usando métodos que exijam autenticação de dois fatores (2FA), e a declaração deve persistir em todas as versões futuras; publicações que removam o campo ou o arquivo serão rejeitadas.",
+   "snippet": "The npm registry is beginning to scan packages at publish time, meaning new versions can take several minutes to become installable, and could be held or blocked.",
+   "kind": "news",
+   "section": null,
+   "date": "2026-07-28",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "github",
+     "microsoft"
+    ],
+    "concept-theme": [
+     "security",
+     "open-source",
+     "governance"
+    ],
+    "content-type": [
+     "announcement"
+    ],
+    "difficulty": [
+     "for-practitioners"
+    ],
+    "domain": [
+     "nodejs"
+    ],
+    "ecosystem-language": [
+     "javascript"
+    ],
+    "framework-library-tool": [
+     "npm"
+    ],
+    "topic-technology": [
+     "npm-security",
+     "supply-chain-security",
+     "package-management"
+    ]
+   }
+  },
+  {
+   "id": 3900,
+   "url": "https://github.blog/security/supply-chain-security/disrupting-supply-chain-attacks-on-npm-and-github-actions",
+   "sourceId": 1,
+   "sourceName": "Node Weekly",
+   "title": "How GitHub Is Disrupting Supply Chain Attacks on npm and Actions",
+   "titlePt": "Como o GitHub está combatendo ataques à cadeia de suprimentos no npm e Actions",
+   "summaryPt": "O GitHub implementou uma série de melhorias de segurança no npm e no GitHub Actions para interromper ataques à cadeia de suprimentos, que exploram vulnerabilidades em repositórios de pacotes e sistemas CI/CD para distribuir malware. As medidas visam cortar técnicas comuns usadas por invasores, como comprometimento inicial de contas de mantenedores, execução de código não confiável em pipelines, envenenamento de cache e exfiltração de credenciais.\n\nEntre as mudanças estão: proteção preventiva de contas npm de alto impacto (modo somente leitura por 72 horas após alteração de e-mail ou uso de código de recuperação 2FA); padrões mais seguros para actions/checkout em pull requests de forks; políticas de execução de workflows para limitar quem pode acioná-los; cache de Actions somente leitura para gatilhos não confiáveis; suporte a trusted publishing para CircleCI; firewall de rede para Actions (em preview técnico); publicação em etapas no npm (staged publishing) que exige aprovação adicional e 2FA; quebra de compatibilidade no npm v12 que desabilita scripts de instalação por padrão; e um período de espera de três dias no Dependabot para atualizações de versão.\n\nAlém disso, o GitHub disponibilizou ferramentas de resposta a incidentes, como revogação autogerenciada de credenciais em toda a empresa e suporte expandido na API de revogação para tokens OAuth e de App. Essas ações, desenvolvidas em colaboração com a comunidade de pesquisa e desenvolvedores, buscam fortalecer a segurança por padrão e proteger o ecossistema de código aberto contra ataques cada vez mais sofisticados.",
+   "snippet": "Separate to the scanning news above, GitHub's team explains recent npm and Actions changes designed to mitigate supply chain attack techniques.",
+   "kind": "news",
+   "section": null,
+   "date": "2026-07-28",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "github"
+    ],
+    "concept-theme": [
+     "security",
+     "ci-cd",
+     "open-source"
+    ],
+    "content-type": [
+     "deep-dive",
+     "analysis"
+    ],
+    "difficulty": [
+     "for-practitioners"
+    ],
+    "domain": [
+     "nodejs"
+    ],
+    "ecosystem-language": [
+     "javascript"
+    ],
+    "framework-library-tool": [
+     "npm",
+     "github-actions"
+    ],
+    "topic-technology": [
+     "supply-chain-security",
+     "npm-security",
+     "ci-cd",
+     "authentication"
+    ]
+   }
+  },
+  {
+   "id": 3901,
+   "url": "https://github.com/sindresorhus/crypto-random-string",
+   "sourceId": 1,
+   "sourceName": "Node Weekly",
+   "title": "crypto-random-string 6.0: Generate a Cryptographically Strong Random String",
+   "titlePt": "crypto-random-string 6.0: Gere uma string aleatória criptograficamente forte",
+   "summaryPt": "A biblioteca `crypto-random-string` permite gerar strings aleatórias criptograficamente seguras, úteis para criar identificadores, slugs, salts, PINs, fixtures e outros. Funciona tanto em Node.js quanto em navegadores.\n\nPara usar, importe a função `cryptoRandomString` e passe um objeto de opções. O campo `length` (obrigatório) define o número de caracteres da string gerada. É possível especificar um tipo predefinido via `type`, como `'hex'` (padrão), `'base64'`, `'url-safe'`, `'numeric'`, `'distinguishable'` (letras maiúsculas e dígitos de fácil distinção), `'ascii-printable'` (todos os caracteres ASCII imprimíveis exceto espaço) e `'alphanumeric'` (letras e dígitos). Alternativamente, é possível usar o campo `characters` para definir um conjunto personalizado de caracteres (cada caractere tem igual probabilidade de ser escolhido). Os parâmetros `type` e `characters` são mutuamente exclusivos.",
+   "snippet": "For example: cryptoRandomString({length: 10}) might return 2cf05d94db. v6.0 improves performance and removes cryptoRandomStringAsync.",
+   "kind": "release",
+   "section": null,
+   "date": "2026-07-31",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "security"
+    ],
+    "content-type": [
+     "version-release"
+    ],
+    "difficulty": [
+     "beginner"
+    ],
+    "domain": [
+     "nodejs"
+    ],
+    "ecosystem-language": [
+     "javascript"
+    ],
+    "topic-technology": [
+     "security-node"
+    ]
+   }
+  },
+  {
+   "id": 3902,
+   "url": "https://aiweekly.co/issues/what-happens-when-ai-runs-out-of-content-to-steal",
+   "sourceId": 7,
+   "sourceName": "AI Weekly",
+   "title": "What Happens When AI Runs Out of Content to Steal?",
+   "titlePt": "O Fim do Conteúdo Grátis para IA?",
+   "summaryPt": "O artigo discute o esgotamento do texto humano limpo que alimentou a primeira geração de grandes modelos de linguagem (LLMs). Com a proliferação de conteúdo gerado por IA, dados confiáveis tornam-se escassos. Empresas de IA, como a xAI, estão comprando livros impressos para garantir material pré-IA, enquanto a Nvidia lança um simulador (Cosmos-H-Dreams) que treina robôs com vídeos, movimentos e consequências sintéticas. Paralelamente, iniciativas como o Skill Self-Play permitem que agentes gerem e validem suas próprias tarefas de treinamento, e a Wikipedia cria um processo para remover contribuições suspeitas de IA. O artigo também aborda a divisão do mercado de modelos: o Kimi K3 (com 2,8 trilhões de parâmetros) se torna acessível para download, enquanto o Opus 5 da Anthropic reduz o custo de acesso fechado. Grandes investimentos em infraestrutura, como o acordo da Anthropic com a AMD em escala de gigawatts e o aporte da Nvidia na SSI, mostram que inteligência barata depende de hardware caro. Além disso, questões de confiança e privacidade surgem, como links públicos do Claude sendo indexados por mecanismos de busca. A conclusão principal é que a próxima vantagem competitiva em IA não virá de mais conteúdo bruto, mas do controle sobre experiências confiáveis – arquivos humanos licenciados, prática sintética verificável ou ambientes físicos proprietários.",
+   "snippet": "The world still contains vast amounts of unused data. But the cheap, clean and permissionless text that powered the first LLM boom is becoming polluted by AI output, contested by its owners and costly to replace. This week, AI companies were reportedly buying old books while Nvidia released a simulator that teaches robots through video, motion and synthetic consequences. In the",
+   "kind": null,
+   "section": null,
+   "date": "2026-07-29",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "anthropic",
+     "moonshot-ai",
+     "nvidia",
+     "kimi"
+    ],
+    "concept-theme": [
+     "cost-optimization",
+     "evaluation"
+    ],
+    "content-type": [
+     "analysis",
+     "news"
+    ],
+    "difficulty": [
+     "all-levels"
+    ],
+    "domain": [
+     "llm-models",
+     "ai-general"
+    ],
+    "topic-technology": [
+     "model-release",
+     "open-weights",
+     "mixture-of-experts",
+     "frontier-models",
+     "gpu",
+     "synthetic-data"
+    ],
+    "trending-emerging": [
+     "synthetic-data",
+     "moe",
+     "open-weights",
+     "ai-data-centers"
+    ]
+   }
+  },
+  {
+   "id": 3903,
+   "url": "https://deepmind.google/blog/gemini-robotics-2-brings-whole-body-intelligence-to-robots",
+   "sourceId": 8,
+   "sourceName": "llmnews.ai",
+   "title": "Gemini Robotics 2 brings whole body intelligence to robots",
+   "titlePt": "Gemini Robotics 2: inteligência de corpo inteiro para robôs",
+   "summaryPt": "O Google DeepMind apresentou o Gemini Robotics 2, uma nova geração de modelos de IA projetada para dar a robôs controle inteligente do corpo inteiro, destreza avançada e capacidade de colaboração entre múltiplos robôs. O sistema é composto por três modelos principais: o Gemini Robotics 2, um modelo de visão-linguagem-ação (VLA) que converte entrada visual e textual em comandos motores para controlar humanoides e robôs bimanuais; o Gemini Robotics ER 2, um modelo de raciocínio incorporado (ER) que atua como agente de alto nível para planejar tarefas de múltiplas etapas, comunicar-se com humanos e coordenar ações com o VLA; e o Gemini Robotics On-Device 2, um VLA otimizado para execução local em dispositivos robóticos, permitindo rápida adaptação a novas configurações robóticas com poucas horas de dados.\n\nEntre as inovações, destaca-se o controle de corpo inteiro, permitindo que humanoides como o Apollo 2, da Apptronik, realizem tarefas como andar, agachar, alcançar e manipular objetos em ambientes desordenados. A destreza foi ampliada para mãos de cinco dedos (como a SharpaWave) e garras de dois dedos, possibilitando ações delicadas como amarrar nós ou fechar sacos zip. O modelo ER 2 também introduz colaboração entre robôs de diferentes tipos, dividindo tarefas complexas que um único robô não conseguiria executar sozinho. Além disso, o sistema é capaz de adaptação rápida a novos corpos robóticos, mesmo com sensores e graus de liberdade muito diferentes.\n\nA segurança foi priorizada: o Gemini Robotics 2 inclui o benchmark ASIMOV-Agentic para recusar ações perigosas e pedir intervenção humana quando necessário. O ER 2 é o modelo mais seguro até o momento em seguir restrições de segurança e detectar proximidade de humanos, acionando paradas seguras. O Gemini Robotics ER 2 já está disponível no Google AI Studio e em preview privado na plataforma Gemini Enterprise Agent. Os modelos VLA e On-Device estão disponíveis para parceiros de acesso antecipado. O projeto representa um passo importante rumo à IA física de propósito geral.",
+   "snippet": "July 30, 2026 ModelsCarolina ParadaFrom feet to fingertips — we are teaching robots intelligent whole-body control, fine dexterity, and teamwork to complete a broad range of complex tasksFor decades, we’ve dreamed of robots that can seamlessly step into our world and lend a hand. Now, that vision takes a significant stride forward.Most robots are pre-programmed or teleoperated for narrow, repetiti",
+   "kind": null,
+   "section": null,
+   "date": "2026-07-30",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "google",
+     "gemini"
+    ],
+    "concept-theme": [
+     "edge-computing"
+    ],
+    "content-type": [
+     "product-launch"
+    ],
+    "difficulty": [
+     "for-researchers"
+    ],
+    "domain": [
+     "llm-models",
+     "local-llm"
+    ],
+    "framework-library-tool": [
+     "gemini"
+    ],
+    "topic-technology": [
+     "robotics",
+     "vision-language-models",
+     "multi-agent-systems",
+     "on-device-inference",
+     "model-release"
+    ],
+    "trending-emerging": [
+     "vision-language-models",
+     "multimodal",
+     "on-device-ai",
+     "multi-agent"
+    ]
+   }
+  },
+  {
+   "id": 3904,
+   "url": "https://tanstack.com/blog/we-stopped-using-rsc-on-tanstack-com",
+   "sourceId": 5,
+   "sourceName": "React Status",
+   "title": "Why TanStack Stopped Using RSC on Its Site",
+   "titlePt": "Por que o TanStack abandonou o RSC no site",
+   "summaryPt": "O TanStack havia adotado React Server Components (RSC) para carregar processamento de markdown e syntax highlighting no servidor, reduzindo significativamente o JavaScript enviado ao navegador. A medida melhorou o desempenho em páginas de documentação e blog. Porém, após remover anúncios, a equipe percebeu que o verdadeiro gargalo era a enorme dependência (Shiki + markdown) e não a divisão cliente-servidor em si. \n\nEles substituíram todo o stack por duas bibliotecas próprias, @tanstack/markdown e @tanstack/highlight, que juntas somam apenas 27 KiB transferidos (gzip). Com isso, a renderização passou a ser feita novamente no cliente via SSR comum. Os ganhos de desempenho se mantiveram e até melhoraram: o site ficou menor (cerca de 200 KiB a menos de JS), o Total Blocking Time caiu e a cada navegação o payload é menor que o equivalente em RSC, pois só os dados brutos são enviados, não a árvore renderizada. \n\nA arquitetura RSC, que exigia arquivos especiais, serialização e conhecimento de limites de servidor, deixou de ser vantajosa para um pipeline de conteúdo que agora cabe em poucos kilobytes. O código ficou mais simples, os dados trafegam como texto comum e a equipe conclui que RSC é útil para dependências enormes, mas quando o problema principal é resolvido, o custo da complexidade extra não compensa.",
+   "snippet": "Tanner, armed with lots of numbers, explains why tanstack.com dropped React Server Components after shrinking its markdown and highlighting stack to 27KB. Plain SSR now serves smaller pages with lower blocking time, and the code is easier to follow.",
+   "kind": "news",
+   "section": null,
+   "date": "2026-07-24",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "performance",
+     "architecture",
+     "dev-experience",
+     "technical-debt"
+    ],
+    "content-type": [
+     "retrospective",
+     "analysis"
+    ],
+    "difficulty": [
+     "for-practitioners"
+    ],
+    "domain": [
+     "reactjs",
+     "frontend"
+    ],
+    "ecosystem-language": [
+     "javascript"
+    ],
+    "framework-library-tool": [
+     "react"
+    ],
+    "topic-technology": [
+     "server-components",
+     "ssr",
+     "performance-optimization",
+     "bundling",
+     "code-splitting"
+    ]
+   }
+  },
+  {
+   "id": 3905,
+   "url": "https://denodell.com/blog/your-spa-is-leaking-memory-soak-test-it",
+   "sourceId": 5,
+   "sourceName": "React Status",
+   "title": "Your SPA is Leaking Memory: 'Soak Test' It",
+   "titlePt": "Sua SPA está vazando memória: faça um teste de imersão",
+   "summaryPt": "Vazamentos de memória em aplicações de página única (SPAs) são um problema crescente, pois, diferentemente de sites tradicionais, a página nunca é recarregada, permitindo que pequenos vazamentos se acumulem e levem ao travamento da aba. Um estudo de 2026 em 500 repositórios populares de React, Vue e Angular revelou que 86% deles configuram listeners, timers ou subscriptions sem removê-los. Para detectar esses vazamentos, o artigo propõe um teste de imersão (soak test) para front-end, usando Playwright para simular um fluxo de usuário repetido dentro de um único contexto de navegador, coletando métricas como contagem de nós DOM e listeners via Chrome DevTools Protocol. O teste executa o fluxo 200 vezes, medindo o estado inicial e final, e faz uma asserção de que a contagem de nós não aumente mais que 100 e a de listeners não aumente, garantindo que não há vazamento. Para lidar com timers, como setTimeout, o artigo recomenda usar o relógio fake do Playwright (page.clock) e também simular as respostas de rede (page.route) para controlar o tempo e evitar que a latência real distorça o teste. Essa abordagem permite detectar vazamentos de forma automatizada em uma execução noturna, complementando os testes de unidade e integração tradicionais.",
+   "snippet": "Loop a Playwright flow in a single browser context and use DOM node and listener counts to catch memory leaks before users do. Den Odell",
+   "kind": "news",
+   "section": null,
+   "date": "2026-07-29",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "testing",
+     "performance",
+     "debugging",
+     "profiling"
+    ],
+    "content-type": [
+     "explainer",
+     "best-practices"
+    ],
+    "difficulty": [
+     "intermediate"
+    ],
+    "domain": [
+     "frontend"
+    ],
+    "ecosystem-language": [
+     "javascript"
+    ],
+    "framework-library-tool": [
+     "react",
+     "vue",
+     "angular"
+    ],
+    "topic-technology": [
+     "memory-leaks",
+     "spa",
+     "performance-optimization"
+    ]
+   }
+  },
+  {
+   "id": 3906,
+   "url": "https://dx-styles.dev/blog/state-of-zero-runtime-css-in-js",
+   "sourceId": 5,
+   "sourceName": "React Status",
+   "title": "The State of Zero-Runtime CSS-in-JS, Mid-2026",
+   "titlePt": "O estado do CSS-in-JS sem runtime em meados de 2026",
+   "summaryPt": "O artigo traça o panorama do CSS-in-JS sem runtime (zero-runtime) em meados de 2026, destacando a transição do modelo tradicional baseado em runtime (como styled-components e Emotion) para soluções que compilam estilos em tempo de build. O autor, mantenedor do Linaria e criador do dx-styles, analisa as principais bibliotecas da categoria: vanilla-extract (arquivos .css.ts separados, maduro e estável), Panda CSS (config-first, atômico, com ecossistema rico), StyleX (da Meta, focado em grandes equipes com restrições rígidas), next-yak (que compila a sintaxe styled-components sem runtime, usando Rust), Linaria (a original, drop-in replacement para styled-components) e dx-styles (voltado para design systems, com nomes de classe semânticos e rastreabilidade). O texto também menciona Griffel (Microsoft) e explica por que Pigment CSS (MUI) está em espera. A escolha depende do contexto: migração de codebases grandes, construção de apps, bibliotecas de componentes ou escalabilidade de equipes. O autor prevê convergência entre as ferramentas, com o custo de build se tornando o próximo campo de batalha.",
+   "snippet": "From the maintainer of Linaria and creator of dx-styles. Anton Evzhakov",
+   "kind": "news",
+   "section": null,
+   "date": "2026-07-27",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "dx",
+     "performance",
+     "architecture"
+    ],
+    "content-type": [
+     "state-of-the-ecosystem"
+    ],
+    "difficulty": [
+     "advanced"
+    ],
+    "domain": [
+     "frontend",
+     "reactjs"
+    ],
+    "ecosystem-language": [
+     "css",
+     "javascript",
+     "typescript"
+    ],
+    "framework-library-tool": [
+     "tailwind",
+     "styled-components",
+     "emotion",
+     "material-ui",
+     "react"
+    ],
+    "topic-technology": [
+     "css",
+     "server-components",
+     "bundling",
+     "web-performance",
+     "design-tokens"
+    ]
+   }
+  },
+  {
+   "id": 3907,
+   "url": "https://blog.margelo.com/on-device-face-recognition-react-native",
+   "sourceId": 5,
+   "sourceName": "React Status",
+   "title": "Building a Real-Time Face Recognition App in React Native with VisionCamera",
+   "titlePt": "Criando um app de reconhecimento facial em tempo real com React Native e VisionCamera",
+   "summaryPt": "O artigo detalha a construção de um pipeline completo de reconhecimento facial em tempo real para um app React Native, rodando inteiramente no dispositivo para garantir privacidade. O processo não é uma única chamada de modelo, mas uma sequência de etapas especializadas: detecção facial (com destaque para o modelo YuNet, leve e de licença comercial), alinhamento facial (que corrige a pose usando pontos de referência), detecção de vivacidade (para evitar ataques com fotos), extração de embeddings (vetores numéricos que representam o rosto) e comparação com uma galeria de rostos cadastrados. A biblioteca central é a VisionCamera (versão 5), que fornece frames da câmera em tempo real para processamento nativo via worklets, com configurações críticas como resolução 640×480, formato YUV e backpressure. O artigo também compara modelos de detecção e reconhecimento, alerta sobre licenças (por exemplo, pesos do InsightFace são apenas para pesquisa) e destaca bugs comuns, como o espelhamento de frames da câmera frontal que exige ajuste no template de alinhamento. O resultado é um sistema viável para controle de acesso e check-in em eventos, com desempenho de dezenas de milissegundos por frame em hardware móvel moderno.",
+   "snippet": "Patrick Kabwe (Margelo)",
+   "kind": "news",
+   "section": null,
+   "date": "2026-07-30",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "authentication",
+     "data-privacy",
+     "performance",
+     "architecture"
+    ],
+    "content-type": [
+     "tutorial",
+     "deep-dive"
+    ],
+    "difficulty": [
+     "advanced"
+    ],
+    "domain": [
+     "ai-general"
+    ],
+    "ecosystem-language": [
+     "javascript"
+    ],
+    "framework-library-tool": [
+     "react-native"
+    ],
+    "topic-technology": [
+     "computer-vision",
+     "react-native",
+     "machine-learning",
+     "deep-learning",
+     "on-device-inference",
+     "privacy-first-ai"
+    ],
+    "trending-emerging": [
+     "on-device-ai",
+     "edge-ai"
+    ]
+   }
+  },
+  {
+   "id": 3908,
+   "url": "https://flaviocopes.com/storybook-tutorial",
+   "sourceId": 5,
+   "sourceName": "React Status",
+   "title": "A Modern Storybook Tutorial: Stories, Interaction Tests, and CI",
+   "titlePt": "Tutorial de Storybook: Histórias, Testes de Interação e CI",
+   "summaryPt": "Este tutorial mostra como usar o Storybook com React para desenvolver componentes de forma isolada, modelando estados como carregamento, erro e conteúdo longo. Você aprenderá a criar histórias (stories) que representam estados úteis, adicionar testes de interação com funções play e verificar acessibilidade com o addon a11y. O fluxo inclui a execução dos testes no CI (integração contínua) usando o addon Vitest, garantindo que as histórias sirvam tanto como documentação quanto como testes de regressão. O artigo também aborda boas práticas como manter histórias perto dos componentes e reproduzir bugs como histórias antes de corrigi-los.",
+   "snippet": "Flavio Copes",
+   "kind": "news",
+   "section": null,
+   "date": "2026-07-30",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "testing",
+     "accessibility",
+     "ci-cd",
+     "dx"
+    ],
+    "content-type": [
+     "tutorial"
+    ],
+    "difficulty": [
+     "intermediate"
+    ],
+    "domain": [
+     "reactjs"
+    ],
+    "ecosystem-language": [
+     "javascript"
+    ],
+    "framework-library-tool": [
+     "storybook",
+     "react"
+    ],
+    "topic-technology": [
+     "testing-react",
+     "accessibility-react",
+     "ci-cd",
+     "component-libraries",
+     "design-systems"
+    ]
+   }
+  },
+  {
+   "id": 3909,
+   "url": "https://tanstack.com/blog/introducing-tanstack-markdown-and-highlight",
+   "sourceId": 5,
+   "sourceName": "React Status",
+   "title": "Introducing TanStack Markdown and Highlight",
+   "titlePt": "Apresentando TanStack Markdown e TanStack Highlight",
+   "summaryPt": "A equipe do TanStack anunciou duas novas bibliotecas: TanStack Markdown e TanStack Highlight. Elas surgiram da necessidade de reduzir o tamanho do pipeline de renderização de conteúdo técnico (blogs, documentação) no site tanstack.com. Anteriormente, uma página de documentação transferia cerca de 1,1 MiB de scripts, sendo 358 KiB apenas para realce de sintaxe com Shiki. Em vez de usar arquiteturas complexas para esconder esse peso, a solução foi tornar a dependência pequena. TanStack Markdown analisa o conteúdo em uma árvore de documento serializável (objetos e arrays simples) com apenas 4,9 KB gzipados, sem dependências de runtime. TanStack Highlight gera HTML semântico com classes th-* (sem cores inline) e temas em CSS, com tamanhos enxutos (1,7 KB vazio, 5,8 KB para nove linguagens de documentação). As duas bibliotecas são independentes — a conexão entre elas é um callback simples. A separação permite que o Markdown seja analisado, armazenado em cache e indexado sem carregar o realçador de sintaxe, e vice-versa. O streaming opcional do Markdown reanalisa o texto acumulado de forma síncrona a cada atualização, evitando estado de parser parcial. O TanStack usa essas bibliotecas em produção no próprio site, substituindo o pipeline de Server Components que escondia o problema. A migração já revelou casos extremos (como listas compactas e imagens), que foram corrigidos com testes de regressão. As bibliotecas estão disponíveis em alfa e focam em conteúdo técnico conhecido, não em todos os casos extremos do CommonMark ou centenas de linguagens.",
+   "snippet": "It's been a productive week for TanStack – they've also released an alpha of TanStack Charts, their take on creating a grammar for charts that AI agents can write. Microsoft is also experimenting in this area with Flint.",
+   "kind": "news",
+   "section": "Code, Tools & Libraries",
+   "date": "2026-07-24",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "performance",
+     "optimization",
+     "architecture",
+     "dev-experience"
+    ],
+    "content-type": [
+     "library-release"
+    ],
+    "difficulty": [
+     "advanced"
+    ],
+    "domain": [
+     "frontend",
+     "reactjs"
+    ],
+    "ecosystem-language": [
+     "markdown",
+     "javascript",
+     "wasm"
+    ],
+    "topic-technology": [
+     "server-components",
+     "web-performance",
+     "bundling"
+    ]
+   }
+  },
+  {
+   "id": 3910,
+   "url": "https://thoughtbot.com/blog/sign-in-with-google-for-react-native",
+   "sourceId": 5,
+   "sourceName": "React Status",
+   "title": "Sign in with Google for React Native",
+   "titlePt": "Login com Google para React Native",
+   "summaryPt": "A thoughtbot lançou a biblioteca @thoughtbot/react-native-social-auth, uma solução moderna de login com Google para React Native. Ela é construída sobre o Credential Manager do Android e o SDK mais recente do GoogleSignIn para iOS (versões 8 e 9), oferecendo suporte a recursos como App Check e nonce criptográfico. A biblioteca inclui um componente de botão em conformidade com a marca do Google, um plugin de configuração para Expo (first-party) e uma API fortemente tipada em TypeScript.\n\nCom a depreciação da antiga API do Google Play Services no Android e as melhorias de segurança no iOS, muitas bibliotecas existentes ainda usam APIs legadas. O @thoughtbot/react-native-social-auth preenche essa lacuna, fornecendo uma integração atualizada que aproveita a interface inferior do Credential Manager, login automático e tratamento estruturado de erros. O código de exemplo mostra que a autenticação é simples: configurar os IDs do cliente e chamar `GoogleSignIn.signIn()` no pressionar do botão.",
+   "snippet": "@thoughtbot/react-native-social-auth is a modern Google Sign-In library for React Native on both iOS and Android with a first-party Expo config plugin. Oluwatomi Oluwafemi Alu (Thoughtbot)",
+   "kind": "tool",
+   "section": "Code, Tools & Libraries",
+   "date": "2026-07-27",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "google"
+    ],
+    "concept-theme": [
+     "authentication",
+     "security"
+    ],
+    "content-type": [
+     "library-release"
+    ],
+    "difficulty": [
+     "for-practitioners"
+    ],
+    "domain": [
+     "reactjs"
+    ],
+    "ecosystem-language": [
+     "typescript",
+     "javascript"
+    ],
+    "framework-library-tool": [
+     "react-native",
+     "expo"
+    ],
+    "topic-technology": [
+     "react-native",
+     "authentication",
+     "oauth"
+    ]
+   }
+  },
+  {
+   "id": 3911,
+   "url": "https://github.com/mobxjs/mobx/releases/tag/mobx%407.0.0",
+   "sourceId": 5,
+   "sourceName": "React Status",
+   "title": "MobX 7.0",
+   "titlePt": "MobX 7.0",
+   "summaryPt": "O MobX 7.0 é uma versão de limpeza que elimina APIs obsoletas e foca em runtime moderno e decorators. Agora, objetos e arrays observáveis sempre usam proxies (sem fallback ES5). As opções configure({ useProxies }) e { proxy: false } foram removidas, assim como os decorators legados. Anotações e comparadores foram renomeados para exportações nomeadas (ex.: observable.ref vira observableRef, comparer.structural vira compareStructural), reduzindo o tamanho do bundle. A API pública trace também foi removida; para depuração, use toJS, getDependencyTree, getObserverTree, spy ou o pacote mobx-log.\n\nAs atualizações dos pacotes React acompanham: mobx-react-lite 5 e mobx-react 10 exigem MobX 7 e React 18+. mobx-react-lite atende componentes funcionais; mobx-react adiciona suporte a componentes de classe e decorator @observer (Stage 3). APIs como Provider, inject, useObserver, useLocalStore e batching manual foram removidas — use React.createContext, observer ou useLocalObservable, e confie no batching automático do React 18. O tamanho do bundle foi reduzido: ESM prod caiu de 17.02 KiB para 13.96 KiB gzip, e um exemplo mínimo tree-shaken tem 10.32 KiB gzip.",
+   "snippet": "The popular state manager slims down, removes deprecations, updates its React bindings, and now always uses Proxy-backed observable objects and arrays.",
+   "kind": "release",
+   "section": "Code, Tools & Libraries",
+   "date": "2026-07-31",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "state-management",
+     "performance",
+     "technical-debt",
+     "dev-experience"
+    ],
+    "content-type": [
+     "version-release"
+    ],
+    "difficulty": [
+     "for-practitioners"
+    ],
+    "domain": [
+     "reactjs"
+    ],
+    "ecosystem-language": [
+     "javascript"
+    ],
+    "framework-library-tool": [
+     "mobx"
+    ],
+    "topic-technology": [
+     "state-management"
+    ]
+   }
+  },
+  {
+   "id": 3912,
+   "url": "https://mantine.dev/changelog/9-5-0",
+   "sourceId": 5,
+   "sourceName": "React Status",
+   "title": "Mantine 9.5",
+   "titlePt": "Mantine 9.5",
+   "summaryPt": "A versão 9.5 do Mantine traz mudanças significativas na ferramenta de linting e formatação, migrando de ESLint e Prettier para oxc (oxlint e oxfmt), baseados em Rust, resultando em maior velocidade. A nova configuração compartilhada oxc-config-mantine está disponível para projetos que desejam seguir o mesmo padrão.\n\nEm componentes de data, o DatePicker agora suporta a prop withNativeLevelSelect, substituindo o cabeçalho por seletores nativos para navegação rápida. O Timeline ganhou suporte a conteúdo oposto (prop opposite) e alternado, permitindo layout centralizado com conteúdo em ambos os lados. O FloatingWindow agora possui um componente ResizeHandle para redimensionar por arrasto, com props de dimensão e acessibilidade via teclado.\n\nNovos componentes incluem Cascader (seleção hierárquica em colunas), SunburstChart (dados hierárquicos em anéis concêntricos) e BulletChart (comparação de medida contra faixas qualitativas). Todos os gráficos do @mantine/charts agora possuem a prop accessibilityLayer (ativa por padrão) para navegação por teclado, e alguns suportam brush para zoom. Outras melhorias: posição dos labels mensais no Heatmap, Accordion com disableCollapse, suporte a intervalos maiores de hora nos componentes de agenda e um novo exemplo de virtualização de tabela com @tanstack/react-virtual.",
+   "snippet": "The popular full-featured React component suite. Date pickers gain a native month/year select, and there's a new SunburstChart component.",
+   "kind": "release",
+   "section": "Code, Tools & Libraries",
+   "date": "2026-07-31",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "dev-experience",
+     "performance",
+     "ui",
+     "ux"
+    ],
+    "content-type": [
+     "version-release"
+    ],
+    "difficulty": [
+     "intermediate"
+    ],
+    "domain": [
+     "reactjs",
+     "frontend"
+    ],
+    "ecosystem-language": [
+     "rust"
+    ],
+    "framework-library-tool": [
+     "mantine",
+     "react"
+    ],
+    "topic-technology": [
+     "component-libraries",
+     "design-systems"
+    ]
+   }
+  },
+  {
+   "id": 3913,
+   "url": "https://github.com/securingsincity/react-ace/releases/tag/v15.0.0",
+   "sourceId": 5,
+   "sourceName": "React Status",
+   "title": "React Ace 15.0",
+   "titlePt": "React Ace 15.0",
+   "summaryPt": "O React Ace 15.0 agora inclui uma build nativa em ESM ao lado do CommonJS, resolvendo problemas de interoperabilidade com o Vite 8 e outros bundlers modernos. O pacote adota um novo mapa de exports com suporte a TypeScript por formato (ESM e CJS), e mantém compatibilidade com ferramentas legadas. Entre as mudanças importantes, os imports profundos (como `react-ace/lib/ace`) deixaram de funcionar; todo o conteúdo deve ser importado diretamente da raiz. Além disso, o carregamento do `ace-builds` passou a ser imediato na importação do React Ace, e não mais preguiçoso. O shim para SSR foi removido, já que as versões modernas do ace-builds funcionam sem a necessidade de um objeto `window`. Correções incluem um problema com `prop-types` que causava erro no loader ESM do Node. O uso via CDN (`window.ace`) e os bundles UMD continuam funcionando normalmente.",
+   "snippet": "Component that wraps the Ace code editor. Now ships a native ESM build alongside CommonJS, fixing import interop under Vite 8.",
+   "kind": "release",
+   "section": "Code, Tools & Libraries",
+   "date": "2026-07-31",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "dx"
+    ],
+    "content-type": [
+     "version-release"
+    ],
+    "difficulty": [
+     "for-practitioners"
+    ],
+    "domain": [
+     "reactjs",
+     "frontend"
+    ],
+    "ecosystem-language": [
+     "javascript",
+     "typescript"
+    ],
+    "framework-library-tool": [
+     "react"
+    ],
+    "topic-technology": [
+     "esm",
+     "commonjs",
+     "bundling",
+     "modules",
+     "ssr",
+     "lazy-loading"
+    ]
+   }
+  },
+  {
+   "id": 3914,
+   "url": "https://github.com/mrousavy/react-native-vision-camera/releases/tag/v5.2.0",
+   "sourceId": 5,
+   "sourceName": "React Status",
+   "title": "VisionCamera 5.2",
+   "titlePt": "VisionCamera 5.2",
+   "summaryPt": "A versão 5.2.0 do VisionCamera foi lançada em 27 de julho de 2026, trazendo novas funcionalidades e correções. Entre as novidades, destaca-se a adição do modo de escala 'stretch' no GPU Resizer, a propriedade targetResolution para o componente <SkiaCamera> e suporte a zoom, exposição e modo de lanterna no mesmo componente. Essas melhorias ampliam o controle sobre o redimensionamento de imagem e os parâmetros da câmera diretamente no Skia.\n\nNas correções de bugs, foram incluídos testes para o método focus com adaptiveness 'locked', ajuste na negociação de resolução de pré-visualização que favorecia demais o 4K, simplificação na detecção e adição do microfone, e uma atualização do Nitro para resolver o problema do @FastNative. A atualização visa garantir maior estabilidade e compatibilidade no uso da câmera em tempo real.",
+   "snippet": "Powerful camera library for React Native. Adds zoom, exposure and torch control to <SkiaCamera>.",
+   "kind": "release",
+   "section": "Code, Tools & Libraries",
+   "date": "2026-07-27",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "performance",
+     "ux",
+     "dev-experience"
+    ],
+    "content-type": [
+     "version-release"
+    ],
+    "difficulty": [
+     "intermediate"
+    ],
+    "domain": [
+     "reactjs"
+    ],
+    "framework-library-tool": [
+     "react-native",
+     "nitro"
+    ],
+    "topic-technology": [
+     "react-native"
+    ]
+   }
+  },
+  {
+   "id": 3915,
+   "url": "https://github.com/rphlmr/react-router-hono-server/releases/tag/v3.0.0",
+   "sourceId": 5,
+   "sourceName": "React Status",
+   "title": "react-router-hono-server 3.0",
+   "titlePt": "Servidor React-Router-Hono 3.0",
+   "summaryPt": "O título do artigo é 'react-router-hono-server 3.0', mas o conteúdo fornecido consiste apenas em menus de navegação do GitHub, sem informações sobre o lançamento ou atualizações da biblioteca. Portanto, não é possível gerar um resumo fiel do artigo.",
+   "snippet": "Spin up a Hono-based server for your React Router app in seconds. Now targets React Router v8.",
+   "kind": "release",
+   "section": "Code, Tools & Libraries",
+   "date": "2026-07-31",
+   "verifyStatus": "suspect",
+   "tags": {
+    "concept-theme": [
+     "api-design",
+     "architecture",
+     "dev-experience"
+    ],
+    "content-type": [
+     "version-release"
+    ],
+    "difficulty": [
+     "for-practitioners"
+    ],
+    "domain": [
+     "reactjs",
+     "nodejs",
+     "backend"
+    ],
+    "ecosystem-language": [
+     "typescript"
+    ],
+    "framework-library-tool": [
+     "react-router",
+     "hono"
+    ],
+    "topic-technology": [
+     "routing",
+     "ssr",
+     "server-components",
+     "web-development"
+    ]
+   }
+  },
+  {
+   "id": 3916,
+   "url": "https://github.com/inokawa/virtua",
+   "sourceId": 5,
+   "sourceName": "React Status",
+   "title": "Virtua 0.50",
+   "titlePt": "Virtua 0.50: Componente de lista virtual leve e rápido",
+   "summaryPt": "Virtua 0.50 é uma biblioteca de virtualização de listas e grids de tamanho reduzido (~3kB) que não exige configuração. Ela oferece suporte nativo a React, Vue, Solid, Svelte e Angular, lidando com itens de tamanho dinâmico, rolagem reversa, compatibilidade com iOS e outras situações complexas do mundo real. O componente pode ser usado como substituição direta para listas simples (VList) ou com mais flexibilidade (Virtualizer, WindowVirtualizer). Inclui também um grid experimental (VGrid) e uma tabela de comparação com alternativas como react-virtuoso, react-window, react-virtualized e @tanstack/react-virtual, destacando diferenças de desempenho, funcionalidades e tamanho de bundle.",
+   "snippet": "A zero-config ~3KB virtual list and grid component for React, Vue, Solid and Svelte – now joined by Angular. (Demo)",
+   "kind": "release",
+   "section": "Code, Tools & Libraries",
+   "date": "2026-07-31",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "performance",
+     "optimization",
+     "dev-experience"
+    ],
+    "content-type": [
+     "library-release"
+    ],
+    "difficulty": [
+     "for-practitioners"
+    ],
+    "domain": [
+     "frontend"
+    ],
+    "ecosystem-language": [
+     "javascript",
+     "typescript"
+    ],
+    "framework-library-tool": [
+     "react",
+     "vue",
+     "solidjs",
+     "svelte",
+     "angular"
+    ],
+    "topic-technology": [
+     "component-libraries",
+     "performance-optimization",
+     "web-performance",
+     "web-development",
+     "bundling",
+     "tree-shaking"
+    ]
+   }
+  },
+  {
+   "id": 3917,
+   "url": "https://github.com/sidorares/react-x11",
+   "sourceId": 5,
+   "sourceName": "React Status",
+   "title": "react-x11 1.2",
+   "titlePt": "react-x11 1.2: Renderizador React para o X Window System",
+   "summaryPt": "react-x11 é um renderizador React cujo ambiente hospedeiro é um servidor X11. Ao contrário de react-dom, não há DOM, HTML ou engine de navegador: as mudanças na árvore de componentes são convertidas em requisições do protocolo X11 escritas em um socket. Tudo é implementado em JavaScript puro, usando node-x11 (implementação do protocolo X11 em JS), yoga-layout (para layout flexbox) e fontkit (para formatação de texto). O npm install nunca compila nada, e os testes podem rodar sem um servidor X real, graças a um servidor X em processo fornecido pelo node-x11.\n\nA principal vantagem é que o wire transporta operações de desenho, não pixels. Retângulos arredondados, gradientes, regiões de recorte e índices de glifos são enviados como comandos; o servidor possui os pixels. Isso torna a comunicação extremamente eficiente, mesmo em displays remotos via ssh -X. Um update típico usa apenas alguns KBs. O projeto é ideal para cenários como servidores headless, dispositivos com pouca memória (kiosks, painéis), ou quando se deseja que a UI esteja no mesmo processo que o backend (fs, serialport, banco de dados) sem uma ponte IPC.\n\nPor outro lado, react-x11 funciona apenas com X11 (no macOS via XQuartz), não suporta Wayland nativo (embora funcione via Xwayland) e não permite reutilizar componentes web como MUI ou Tailwind. O desempenho gráfico intenso (60 fps, vídeo) não é o foco. O pacote inclui elementos como window, box, text, textinput, scrollview, image, canvas, markdown, html, svg, tex e glarea (para OpenGL indireto via GLX). Os eventos são sintéticos com fases de captura e bolha, e há suporte a hot reloading via React Fast Refresh. Exemplos práticos incluem dashboard, formulários, gerenciador de janelas e cenas 3D.",
+   "snippet": "A React renderer whose host environment is an X11 server.",
+   "kind": "release",
+   "section": "Code, Tools & Libraries",
+   "date": "2026-07-31",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "performance",
+     "architecture",
+     "dx",
+     "ui"
+    ],
+    "content-type": [
+     "version-release",
+     "library-release"
+    ],
+    "difficulty": [
+     "for-practitioners"
+    ],
+    "domain": [
+     "reactjs",
+     "nodejs"
+    ],
+    "ecosystem-language": [
+     "javascript"
+    ],
+    "framework-library-tool": [
+     "react",
+     "nodejs"
+    ],
+    "topic-technology": [
+     "react-native",
+     "flexbox"
+    ]
+   }
+  },
+  {
+   "id": 3918,
+   "url": "https://microcharts.dev",
+   "sourceId": 5,
+   "sourceName": "React Status",
+   "title": "Microcharts",
+   "titlePt": "Microcharts: gráficos minúsculos que cabem em uma frase",
+   "summaryPt": "Microcharts é uma biblioteca de componentes React para criar gráficos extremamente compactos, com tamanho mediano de apenas 5,24 kB (gzip) por gráfico interativo. Ela oferece 106 tipos de gráficos organizados em quatro coleções, todos seguindo a mesma API: basta passar um array de dados para o componente e ele renderiza corretamente. A biblioteca não possui dependências além do React e é ideal para ser usada em linhas de texto, células de tabelas ou cartões de KPI, onde gráficos tradicionais como pizza ou violino perderiam legibilidade.\n\nOs gráficos podem ser renderizados estaticamente no servidor, consumindo 0 kB de JavaScript no cliente. A acessibilidade é nativa: cada gráfico ocupa apenas uma parada de tab, permite navegação com setas e gera automaticamente texto alternativo a partir dos dados. O sistema de temas aceita uma cor primária e deriva automaticamente uma paleta completa, incluindo cores para variações positivas/negativas e até seis categorias distintas, sempre respeitando daltonismo e suporte a modos de alto contraste.\n\nPara gráficos que exigem eixos e legendas, a documentação recomenda bibliotecas completas como Recharts, mas para contextos onde cada kilobyte importa — como relatórios impressos ou células de tabela — o Microcharts oferece alternativas especializadas: barras segmentadas substituem pizzas, bullets substituem mostradores de agulha, e microboxes substituem violinos. Sete aplicativos de exemplo demonstram todos os 106 tipos funcionando, com código-fonte disponível no repositório.",
+   "snippet": "Charts that fit in a sentence.It’s small in the bundle too: the median chart is 5.24 kB and the biggest is < 7 kB.There are 106 of them in four collections, the largest being the 34 in core.Seven example apps ship with it and between them they use all 106 types.On the page it stays just as light and the median one draws 1,375 bytes of SVG.2.18 kB0 dependenciesrole=\"img\"arrow keys, one tab stop",
+   "kind": "tool",
+   "section": "A Smaller Chart Bonus",
+   "date": "2026-07-31",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "performance",
+     "accessibility",
+     "dev-experience",
+     "type-safety"
+    ],
+    "content-type": [
+     "library-release",
+     "showcase"
+    ],
+    "difficulty": [
+     "all-levels"
+    ],
+    "domain": [
+     "reactjs",
+     "frontend"
+    ],
+    "ecosystem-language": [
+     "javascript"
+    ],
+    "topic-technology": [
+     "data-visualization",
+     "component-libraries",
+     "server-components",
+     "jsx",
+     "accessibility",
+     "performance-optimization"
+    ]
+   }
+  },
+  {
+   "id": 3919,
+   "url": "https://aurorascharff.no/posts/experimenting-with-rsc-for-performance-and-ux-in-nextjs",
+   "sourceId": 5,
+   "sourceName": "React Status",
+   "title": "Experimenting with RSCs for Performance and UX in Next.js",
+   "titlePt": "Experimentando com React Server Components para Performance e Experiência do Usuário no Next.js",
+   "summaryPt": "O artigo explora como usar React Server Components (RSCs) no Next.js para melhorar performance e experiência do usuário, evitando buscar dados no cliente. São apresentados três exemplos práticos de um app social chamado Drop: um botão \"Carregar mais\" que apenas altera o parâmetro ?page na URL, deixando o servidor buscar e transmitir a próxima página via streaming com Suspense; um campo de busca que lê o termo via useSearchParams, mas mantém o input fora da árvore dinâmica para preservar foco enquanto os resultados são transmitidos do servidor; e um compositor de mensagens que usa uma Server Function para renderizar um preview do rascunho sob demanda. O texto também discute os trade-offs, como a necessidade de re-renderizar páginas anteriores no servidor e o uso de cache (use cache e cacheTag) para otimizar requisições e invalidar dados após mutações. A abordagem mantém os dados e a renderização no servidor, resultando em páginas mais rápidas e URLs compartilháveis, com o cliente atuando apenas na navegação.",
+   "snippet": "Aurora digs into three interesting patterns that arose while building a social app on Next.js 16.3 (currently in preview, but expected imminently).",
+   "kind": "news",
+   "section": null,
+   "date": "2026-07-24",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "performance",
+     "ux",
+     "data-fetching",
+     "design-patterns"
+    ],
+    "content-type": [
+     "deep-dive"
+    ],
+    "difficulty": [
+     "advanced"
+    ],
+    "domain": [
+     "reactjs",
+     "frontend"
+    ],
+    "ecosystem-language": [
+     "javascript",
+     "typescript"
+    ],
+    "framework-library-tool": [
+     "nextjs"
+    ],
+    "topic-technology": [
+     "server-components",
+     "streaming-ssr",
+     "server-actions",
+     "routing",
+     "performance-optimization"
+    ]
+   }
+  },
+  {
+   "id": 3920,
+   "url": "https://github.com/YoanWai/agent-manager",
+   "sourceId": 8,
+   "sourceName": "llmnews.ai",
+   "title": "Terminal UI to manage AI coding-agent sessions (Claude Code, OpenCode, Codex, Grok Build) in tmux: live status, group tree, live pane preview, resource gauges.",
+   "titlePt": "Interface de terminal para gerenciar sessões de agentes de IA (Claude Code, OpenCode, Codex, Grok Build) no tmux: status ao vivo, árvore de grupos, pré-visualização ao vivo de painéis e medidores de recursos.",
+   "summaryPt": "O agent-manager é uma ferramenta de terminal que organiza e controla sessões de agentes de IA (como Claude Code, OpenCode, Codex, Grok Build e Gemini CLI) rodando no tmux. Cada agente fica em uma sessão tmux própria, que continua ativa mesmo após fechar o gerenciador. A interface exibe uma lista única com status ao vivo, agrupada em uma árvore de projetos que pode ser dobrada e reordenada. Você pode interagir com qualquer agente sem precisar anexar: a tecla espaço envia um prompt direto para o painel da sessão ou cria um novo agente no grupo selecionado. Sessões mortas podem ser revividas mantendo o histórico da conversa. O atalho Ctrl+R abre uma revisão de diff das alterações feitas pelo agente, com destaque de sintaxe e suporte para comentários que podem ser enviados de volta como um prompt único.\n\nA instalação é simples via Homebrew, script de instalação, Arch Linux (AUR), mise, Go ou binários pré-compilados. No Windows, funciona dentro do WSL2. O gerenciador verifica atualizações automaticamente e exibe um ícone quando há uma nova versão disponível. O uso é feito pelo comando `agent-manager`, que inicia a interface interativa. As sessões ficam em um servidor tmux privado chamado agentmgr, separado das suas sessões pessoais. O programa oferece diversos comandos de teclado para gerenciar sessões, grupos, prompts rápidos, revisão de diff e muito mais.\n\nRecursos avançados incluem: auto-nomeação de sessões (o agente pode se renomear usando o comando `agent-manager rename`), declaração do repositório sob revisão (`agent-manager review-repo`), suporte MCP (os agentes descobrem comandos como rename, review_repo, review_base e review_mode como ferramentas nativas), e revisão de diff com teclas de navegação, alternância entre modos unificado e lado a lado, e seleção de repositório. O sistema também permite matar e reviver sessões, arquivar/restaurar, e personalizar configurações via tecla S.",
+   "snippet": "The fastest workflow for every AI coding agent. Claude Code, Codex, OpenCode, Grok, and Gemini CLI run side by side, each in its own tmux session, so they keep working after you quit the manager. Instead of hunting through terminal tabs to see which agent is done and which is stuck, every session shows up in one list with live status, grouped into a project tree you can fold and reorder. You a",
+   "kind": null,
+   "section": null,
+   "date": "2026-07-31",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "claude",
+     "codex",
+     "grok",
+     "gemini"
+    ],
+    "concept-theme": [
+     "agentops",
+     "developer-productivity",
+     "dev-experience"
+    ],
+    "content-type": [
+     "tool-release"
+    ],
+    "difficulty": [
+     "for-practitioners"
+    ],
+    "domain": [
+     "ai-general"
+    ],
+    "topic-technology": [
+     "agent-orchestration",
+     "ai-agents"
+    ],
+    "trending-emerging": [
+     "ai-coding-agents",
+     "agent-orchestration"
+    ]
+   }
+  },
+  {
+   "id": 3921,
+   "url": "https://geospatialml.com/posts/reviewing-ai-slop",
+   "sourceId": 8,
+   "sourceName": "llmnews.ai",
+   "title": "Q&A from the slop trenches",
+   "titlePt": "Q&A das Trincheiras da Porcaria",
+   "summaryPt": "Dois revisores acadêmicos analisaram 22 submissões de artigos para conferências como NeurIPS, WACV e TerraBytes. Eles constataram que 68% dos trabalhos continham citações fabricadas, listas de autores inventadas ou texto claramente gerado por LLM, com alucinações e jargões sem sentido. O artigo relata a frustração com a perda de tempo em revisar esses 'slop' (porcaria gerada por IA) e cita estudos que mostram o crescimento alarmante do problema: dezenas de milhares de publicações em 2025 provavelmente contêm referências inválidas, e a maioria das revisões não detecta essas fraudes. Além disso, análises apontam que 21% das revisões do ICLR 2026 foram totalmente geradas por IA, e ataques adversariais em abstracts podem inflar notas de revisão sem alterar o conteúdo científico.\n\nOs autores compartilham os piores exemplos encontrados, como artigos com 53 páginas de jargão alucinado ou referências que trocam autores reais por nomes inventados. Eles defendem que submissões com referências fabricadas deveriam ser rejeitadas na triagem, pois indicam que os autores não leram nem o próprio trabalho. Apesar disso, ambos usam LLMs no dia a dia para pesquisa e escrita, mas enfatizam a necessidade de verificar manualmente cada citação e editar profundamente o output da IA. O texto inclui dicas para identificar sinais de automação, como frases repetitivas ('Não é X, é Y'), métricas inconsistentes entre texto e tabelas, e ausência de reflexão crítica nas seções de discussão.",
+   "snippet": "Between the two of us, we reviewed 22 paper submissions this summer, spread across NeurIPS, WACV, and TerraBytes (a geospatial workshop at ECCV). Fifteen of the 22 (68%) contained entirely fabricated citations, fabricated author lists for existing papers, and/or were clearly LLM-generated (e.g. hallucinated technical jargon, nonsensical writing, irrelevant citations). This is called being in the “",
+   "kind": null,
+   "section": null,
+   "date": "2026-07-31",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "claude",
+     "llama"
+    ],
+    "concept-theme": [
+     "hallucination",
+     "ai-ethics",
+     "responsible-ai"
+    ],
+    "content-type": [
+     "analysis",
+     "opinion"
+    ],
+    "difficulty": [
+     "for-researchers"
+    ],
+    "domain": [
+     "llm-models",
+     "ai-general"
+    ],
+    "topic-technology": [
+     "hallucination-detection",
+     "generative-ai",
+     "ai-ethics",
+     "content-moderation",
+     "ai-safety"
+    ],
+    "trending-emerging": [
+     "ai-governance"
+    ]
+   }
+  },
+  {
+   "id": 3922,
+   "url": "https://usetokenless.com",
+   "sourceId": 8,
+   "sourceName": "llmnews.ai",
+   "title": "Tokenless",
+   "titlePt": "Tokenless: Roteamento Inteligente de Modelos de IA com Redução de Custos",
+   "summaryPt": "Tokenless é uma solução que substitui chamadas de API tradicionais, roteando cada requisição para o modelo de IA mais adequado entre um grupo selecionado. A ideia central é que a maioria das tarefas não exige modelos de fronteira (de alto custo); a plataforma distribui a requisição para vários modelos, monitora o raciocínio de cada um e, assim que um deles demonstra estar no caminho certo, interrompe os demais. O usuário paga apenas pelo que realmente utiliza, resultando em até metade do custo com a mesma qualidade.\n\nA ferramenta oferece endpoints compatíveis com OpenAI e Anthropic, permitindo integração simples. Dados de benchmarks públicos mostram que o Tokenless Pro atinge 40,2% de taxa de resolução a um custo médio de US$ 0,57 por tarefa, superando modelos como GPT-5.6 Sol, Claude Opus 5 e Gemini 3.6 Flash em eficiência de custo-benefício. Desenvolvido por pesquisadores do Google DeepMind, Princeton e UC Berkeley, e apoiado pelo Y Combinator, o serviço promete cortar despesas mantendo a qualidade, com opção de demonstração personalizada baseada no tráfego real do usuário.",
+   "snippet": "TokenlessA drop-in replacement for your API calls — always routed to the right model.Same quality, half the cost.Most calls don’t need a frontier model. Tokenless fans out your request to a group of models and watches them think. Once a model is clearly on track, we select it and cancel the other models, and you only pay for what you need.We expose an OpenAI and Anthropic compatible endpoint. Poin",
+   "kind": null,
+   "section": null,
+   "date": "2026-07-31",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "openai",
+     "anthropic",
+     "google"
+    ],
+    "concept-theme": [
+     "cost-optimization",
+     "pricing",
+     "llmops"
+    ],
+    "content-type": [
+     "product-launch",
+     "benchmark"
+    ],
+    "difficulty": [
+     "for-practitioners"
+    ],
+    "domain": [
+     "ai-general",
+     "backend"
+    ],
+    "framework-library-tool": [
+     "openrouter"
+    ],
+    "topic-technology": [
+     "model-routing",
+     "cost-optimization-llm",
+     "openai-compatible-api",
+     "inference-optimization",
+     "frontier-models",
+     "model-comparison"
+    ],
+    "trending-emerging": [
+     "frontier-models",
+     "ai-agents"
+    ]
+   }
+  },
+  {
+   "id": 3923,
+   "url": "https://github.com/sawfwair/mere-run",
+   "sourceId": 8,
+   "sourceName": "llmnews.ai",
+   "title": "Run local image, text, speech, vision, music, and video workflows, plus model management and a loopback OpenAI-compatible API server. The repo ships the core libraries and the mere.run executable.",
+   "titlePt": "mere.run: runtime de inferência local com suporte multimodal e API compatível com OpenAI",
+   "summaryPt": "mere.run é um runtime de inferência focado em execução local, projetado para Apple Silicon e Linux sem interface gráfica. Através de uma única CLI, oferece suporte a uma ampla gama de modelos de IA: geração de imagens, textos, código, fala, música, som, vídeos, modelos 3D e até mesmo treinamento local. O sistema inclui um servidor de API compatível com OpenAI, gerenciamento de modelos e um guia offline de comandos. Opcionalmente, há um estúdio macOS nativo (SwiftUI) que compartilha a mesma CLI e armazenamento de modelos. O runtime pode ser estendido com plugins dedicados e permite a criação de pools de máquinas via relay e nodes, mantendo a inferência local mas distribuída entre computadores autorizados sob a mesma conta mere.world. O repositório contém todo o código-fonte (Swift, MLX, llama.cpp) e instruções de compilação para macOS e Linux com suporte CUDA. A instalação é feita via DMG no macOS ou tarball/DEB no Linux, e a CLI já inclui comandos para puxar modelos, verificar capacidade do hardware e executar workflows de forma imutável e reproduzível.",
+   "snippet": "mere.run is a local-first inference runtime for Apple Silicon and headless Linux. One public CLI covers image, text, speech, vision, music, sound, video, 3D, worlds, training, and local API serving. The optional macOS Studio uses that same CLI, model store, and run history rather than a separate backend. One real terminal session on an M4 Max — chat, image, grounding, image→3D, SFX, music, spe",
+   "kind": null,
+   "section": null,
+   "date": "2026-07-31",
+   "verifyStatus": "ok",
+   "tags": {
+    "content-type": [
+     "tool-release"
+    ],
+    "difficulty": [
+     "for-practitioners"
+    ],
+    "domain": [
+     "ai-general"
+    ],
+    "topic-technology": [
+     "local-inference",
+     "multimodal-ai",
+     "image-generation",
+     "openai-compatible-api",
+     "ai-agents",
+     "lora"
+    ],
+    "trending-emerging": [
+     "on-device-ai",
+     "multimodal",
+     "ai-agents"
+    ]
+   }
+  },
+  {
+   "id": 3924,
+   "url": "https://blog.jim-nielsen.com/2026/ai-aesthetic",
+   "sourceId": 8,
+   "sourceName": "llmnews.ai",
+   "title": "The AI Aesthetic",
+   "titlePt": "A Estética da IA",
+   "summaryPt": "O artigo explora como a era da inteligência artificial está gerando novos idiomas de design, comparáveis a padrões passados como o menu hambúrguer. Entre os ícones emergentes, o emoji de brilhos (✨) tornou-se sinônimo de IA, e o texto “cintilante” (shimmering text) passou a indicar tarefas assíncronas como “pensamento” ou carregamento. Além disso, aplicativos de IA (Claude, Codex, Cursor) adotam ícones minúsculos em desktops, destoando do visual nativo de sistemas como macOS, e também trazem paletas de cores beges/creme, acentos alaranjados e fontes serifadas, além de controles “whack-a-mole” que reposicionam elementos após um clique. O texto questiona quais dessas tendências estéticas se consolidarão como paradigmas duradouros de interação.",
+   "snippet": "Every zeitgeist comes with new design idioms unique to its challenges. Many of them disappear as fads change, but others bake themselves into deeper parts of existing software interaction paradigms. For example, there’s the hamburger menu (≡) which saw a proliferation during the rise of mobile due to the constraints around screen size. It has since spread to many other parts of software interactio",
+   "kind": null,
+   "section": null,
+   "date": "2026-07-31",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "design-patterns",
+     "ux",
+     "ui"
+    ],
+    "content-type": [
+     "opinion"
+    ],
+    "difficulty": [
+     "all-levels"
+    ],
+    "domain": [
+     "ai-general"
+    ],
+    "topic-technology": [
+     "ai-adoption",
+     "design-systems"
+    ]
+   }
+  },
+  {
+   "id": 3925,
+   "url": "https://github.com/drumih/turbo-fieldfare",
+   "sourceId": 8,
+   "sourceName": "llmnews.ai",
+   "title": "Gemma 4 26B-A4B inference in ~2 GB of RAM on any M-series MacBook",
+   "titlePt": "Gemma 4 26B-A4B: inferência em ~2 GB de RAM em Macs com Apple Silicon",
+   "summaryPt": "TurboFieldfare é um runtime em Swift e Metal para Apple Silicon que executa o modelo Gemma 4 26B-A4B (MoE) utilizando apenas cerca de 2 GB de RAM, mesmo em Macs com 8 GB. Isso é possível mantendo na memória o núcleo compartilhado de 1,35 GB e o cache KV, enquanto os especialistas necessários para cada token são transmitidos do SSD. O instalador em streaming baixa e reorganiza o modelo (~14,3 GB) sem materializar o checkpoint completo. O projeto oferece um aplicativo nativo para Mac, interface de linha de comando e um servidor OpenAI-compatível. As taxas de geração medidas foram de 5,1-6,3 tok/s em um MacBook Air M2 (8 GB) e 31-35 tok/s em um M5 Pro (24 GB). Os requisitos incluem macOS 26 com Metal 4, Xcode 26 e Swift 6.2. O runtime é específico para o modelo e suporta apenas texto, com recursos como preenchimento em blocos de até 128 tokens e cache LFU de especialistas. TurboFieldfare é um projeto independente, licenciado sob Apache 2.0, e não é afiliado ao Google.",
+   "snippet": "TurboFieldfare Gemma 4 26B-A4B inference in about 2 GB of RAM A custom Swift + Metal runtime for any Apple Silicon Mac, even the 8 GB ones. Memory got expensive. So I gave a 26-billion-parameter model a ~2 GB budget. TurboFieldfare runs the instruction-tuned Gemma 4 26B-A4B without loading the entire 14.3 GB model into memory. It keeps the shared 1.35 GB core and FP16 KV cache in m",
+   "kind": null,
+   "section": null,
+   "date": "2026-07-31",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "gemma",
+     "google-deepmind",
+     "apple"
+    ],
+    "concept-theme": [
+     "performance",
+     "optimization",
+     "cost-optimization"
+    ],
+    "content-type": [
+     "how-to",
+     "demo"
+    ],
+    "difficulty": [
+     "for-practitioners"
+    ],
+    "domain": [
+     "local-llm",
+     "llm-models"
+    ],
+    "ecosystem-language": [
+     "swift"
+    ],
+    "framework-library-tool": [
+     "gemma"
+    ],
+    "topic-technology": [
+     "local-inference",
+     "on-device-inference",
+     "apple-silicon",
+     "metal",
+     "quantization",
+     "moe"
+    ],
+    "trending-emerging": [
+     "small-language-models",
+     "quantization",
+     "moe",
+     "on-device-ai"
+    ]
+   }
+  },
+  {
+   "id": 3926,
+   "url": "https://github.com/yashmahajan10/llm-differential-privacy-gateway",
+   "sourceId": 8,
+   "sourceName": "llmnews.ai",
+   "title": "Noisegate: a differential privacy gateway that lets an untrusted LLM agent query sensitive data over MCP (Model Context Protocol), with a formal guarantee no individual's record can leak even if the agent is adversarial - enforcement lives in trusted code below the model, validated by a runnable attack gallery.",
+   "titlePt": "Noisegate: gateway de privacidade diferencial para agentes de IA consultarem dados confidenciais",
+   "summaryPt": "O Noisegate é um gateway de privacidade diferencial que permite que agentes de IA consultem dados confidenciais com garantia matemática de que nenhum registro individual pode ser exposto, mesmo que o agente seja adversarial. O sistema funciona como um servidor MCP (Model Context Protocol) para o Claude Desktop e separa a parte não confiável (o LLM que traduz perguntas em consultas) da parte confiável (validação, engine de privacidade). As consultas passam por um mecanismo de ruído calibrado (Laplace) e um orçamento de privacidade que impede a extração de informações individuais. O projeto inclui uma galeria de ataques reais (diferenciação, inferência de associação e reidentificação) que demonstram como o sistema derrota essas tentativas quando a privacidade está ativada. O mecanismo foi validado de forma independente contra a implementação de referência OpenDP, com concordância até 1e-9. A implantação usa uma composição híbrida zCDP que permite mais consultas com o mesmo orçamento. A pilha inclui Python, DuckDB, FastAPI, Streamlit, MCP SDK, Docker e GitHub Actions, com mais de 250 testes em CI.",
+   "snippet": "Give an AI agent query access to sensitive data, with a mathematical guarantee that no individual's record can leak — even if the agent is wrong, manipulated, or adversarial. A recorded Claude Desktop session (replies trimmed; the chart cards are the session's own). An AI agent breaks 20 patients down by diagnosis, and the ±12 noise swamps every bin. Reminded that it cannot turn the noise off",
+   "kind": null,
+   "section": null,
+   "date": "2026-07-31",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "anthropic",
+     "claude"
+    ],
+    "concept-theme": [
+     "data-privacy",
+     "privacy"
+    ],
+    "content-type": [
+     "tool-release",
+     "project-spotlight"
+    ],
+    "difficulty": [
+     "for-practitioners"
+    ],
+    "domain": [
+     "ai-general",
+     "python"
+    ],
+    "ecosystem-language": [
+     "python"
+    ],
+    "framework-library-tool": [
+     "fastapi",
+     "streamlit",
+     "docker",
+     "github-actions",
+     "pytest"
+    ],
+    "topic-technology": [
+     "privacy-first-ai",
+     "model-context-protocol",
+     "ai-agents",
+     "guardrails",
+     "ai-safety"
+    ],
+    "trending-emerging": [
+     "mcp",
+     "ai-agents"
+    ]
+   }
+  },
+  {
+   "id": 3927,
+   "url": "https://negativezone.github.io/2026/07/29/zeno.html",
+   "sourceId": 8,
+   "sourceName": "llmnews.ai",
+   "title": "The Zeno's Paradox of AI · Anuroop Bisaria",
+   "titlePt": "O Paradoxo de Zeno da IA",
+   "summaryPt": "O artigo explora por que agentes de codificação baseados em modelos de linguagem nunca parecem concluir totalmente uma tarefa, sempre deixando uma ponta solta — um fenômeno comparado ao paradoxo de Zeno (Aquiles nunca alcança a tartaruga). São catalogadas várias espécies de 'incompletude': ofertas extras ('quer que eu adicione testes?'), respostas cautelosas ('deve funcionar, mas verifique'), TODOs inseridos no código, disclaimers, perguntas de acompanhamento, entre outras.\n\nAs causas vão desde o viés do corpus de treinamento (manuais de atendimento, slides de consultoria com 'próximos passos') até o treinamento por preferência humana, que recompensa respostas longas e ofertas de ajuda, penalizando assimétricamente declarações de conclusão. Do ponto de vista de negócio, uma tarefa finalizada encerra a sessão, diminuindo métricas de engajamento e faturamento por token. O problema oposto também existe: quando o modelo é treinado para otimizar apenas a aprovação em testes, ele pode trapacear para 'passar' em vez de realmente concluir.\n\nA solução, argumenta o autor, é colocar uma linha de chegada fora do controle do modelo — testes que ele não escreveu e não pode editar. No fundo, porém, a autoridade para declarar uma tarefa 'concluída' foi intencionalmente retirada do modelo e cabe ao ser humano. O texto termina ironicamente com 'Próximos passos' e um 'Oh hell no', recusando a oferta de continuar.",
+   "snippet": "On why coding agents always have one more thing, and what actually makes them stop. Ask a coding agent for a one-line fix. You get the fix, and then a question: want me to also add tests? Say yes and the tests arrive with an offer to wire up CI. A few yeses later you’re refactoring the deploy pipeline behind a typo fix, and there goes your afternoon. I use these tools every day and I have never o",
+   "kind": null,
+   "section": null,
+   "date": "2026-07-31",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "alignment",
+     "developer-productivity",
+     "dx"
+    ],
+    "content-type": [
+     "opinion"
+    ],
+    "difficulty": [
+     "all-levels"
+    ],
+    "domain": [
+     "ai-general"
+    ],
+    "topic-technology": [
+     "ai-agents",
+     "rlhf",
+     "foundation-models",
+     "code-models"
+    ],
+    "trending-emerging": [
+     "ai-coding-agents"
+    ]
+   }
+  },
+  {
+   "id": 3928,
+   "url": "https://obryant.dev/p/2x-not-10x",
+   "sourceId": 8,
+   "sourceName": "llmnews.ai",
+   "title": "2x, not 10x: coding with LLMs in 2026",
+   "titlePt": "2x, não 10x: como uso LLMs para programar em 2026",
+   "summaryPt": "O autor reflete sobre sua experiência com LLMs (Large Language Models) nos últimos seis meses e conclui que, embora eles tenham se tornado ferramentas úteis e confiáveis, o ganho real de produtividade é de cerca de 2x, e não os 10x frequentemente propagandeados. A principal razão é que os modelos atingiram um limite: são excelentes para gerar código que atende a critérios objetivos e verificáveis (como 'fazer um botão que executa X'), mas ainda falham em questões subjetivas e de alto nível, como manutenibilidade do código ou qualidade da documentação.\n\nPara contornar essas limitações, o autor usa LLMs para produzir um rascunho inicial do código, que depois revisa pesadamente — e ressalta que essa iteração agora consome mais tempo do que antes. Ele também adota uma regra simples: nunca pedir ao LLM para escrever READMEs, docstrings ou comentários, preferindo fazê-los manualmente. Sua hipótese é que, a partir de agora, melhorias incrementais nos modelos trarão menos impacto; o verdadeiro ganho virá de retrabalhar as ferramentas e fluxos de trabalho ao redor das capacidades já existentes. Por fim, menciona que explora 'vibe coding' (gerar código sem entendê-lo completamente) em projetos pessoais, mas mantém ceticismo quanto ao seu uso em produção.",
+   "snippet": "Something I've learned about myself over the past 6 months is that if I ever discover Harry Potter is nonfiction and magic is real, my reaction will be approximately \"OK that's interesting, but is this magic stuff good for anything more complex than writing unit tests?\" LLMs have certainly passed that threshold of usefulness, though as of July 2026 and based solely on my own direct observations, t",
+   "kind": null,
+   "section": null,
+   "date": "2026-07-31",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "developer-productivity",
+     "dev-experience",
+     "reliability"
+    ],
+    "content-type": [
+     "opinion",
+     "analysis"
+    ],
+    "difficulty": [
+     "for-practitioners"
+    ],
+    "domain": [
+     "llm-models"
+    ],
+    "topic-technology": [
+     "code-models",
+     "ai-agents",
+     "ai-adoption"
+    ],
+    "trending-emerging": [
+     "ai-coding-agents",
+     "copilots"
+    ]
+   }
+  },
+  {
+   "id": 3929,
+   "url": "https://www.ctgt.ai/research/distillation-censorship-transfer",
+   "sourceId": 8,
+   "sourceName": "llmnews.ai",
+   "title": "What a Distilled Model Inherits From Its Teacher",
+   "titlePt": "O que um modelo destilado herda de seu professor",
+   "summaryPt": "Pesquisadores investigaram se um modelo destilado a partir de um modelo chinês censurado (DeepSeek V4 Flash) herda comportamentos indesejados, como censura política, junto com ganhos de desempenho. O experimento focou em raciocínio financeiro: treinaram um modelo americano (GPT-OSS-120B) nas saídas do DeepSeek V4 Flash para uma tarefa específica de finanças. O modelo destilado melhorou significativamente em raciocínio financeiro (atingiu 83,61% no benchmark FinanceReasoning com orçamento de 8.000 tokens), superando Kimi K3 (81,93%) e Inkling (65,13%), com custo por consulta 62x menor que Inkling e 160x menor que Kimi K3. Contudo, a censura política não foi transferida: em 152 pares de perguntas sensíveis sobre a China e controles correspondentes, o DeepSeek V4 Flash mostrou um viés de censura de +45,45 pontos, enquanto o modelo destilado não apresentou diferença estatisticamente significativa em relação ao modelo base americano. Além disso, a autodestilação (o modelo aprendendo com suas próprias correções) produziu resultados equivalentes aos da destilação com o professor chinês, sem necessidade de um modelo externo. O estudo conclui que, para domínios especializados, um professor avançado pode não ser necessário, e que comportamentos indesejados como censura não se transferem automaticamente. O modelo resultante (CTGT 120B) é leve o suficiente para rodar em uma única GPU H100 ou A100, com 63 GB de pesos.",
+   "snippet": "+45.45 DeepSeek V4 Flash censorship gap on China-sensitive prompts vs matched controls · 76 pairs · four judges 83.61% CTGT GPT-OSS-120B on FinanceReasoning at 8k budget · above Kimi K3 at 81.93% and Inkling at 65.13% 62× Lower cost per query than Inkling at the same budget · 160× lower than Kimi K3 ‍ The affordability and accessibility of open frontier models has led to their w",
+   "kind": null,
+   "section": null,
+   "date": "2026-07-31",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "deepseek",
+     "kimi",
+     "gpt-oss"
+    ],
+    "concept-theme": [
+     "bias",
+     "alignment",
+     "evals",
+     "open-source"
+    ],
+    "content-type": [
+     "research-paper"
+    ],
+    "difficulty": [
+     "for-practitioners"
+    ],
+    "domain": [
+     "llm-models",
+     "ai-general"
+    ],
+    "framework-library-tool": [
+     "deepseek-v",
+     "gpt-oss",
+     "kimi"
+    ],
+    "topic-technology": [
+     "model-distillation",
+     "ai-safety",
+     "model-evaluation",
+     "reasoning-models",
+     "frontier-models",
+     "open-source-models"
+    ],
+    "trending-emerging": [
+     "distillation",
+     "open-weights",
+     "reasoning-models",
+     "ai-governance"
     ]
    }
   }

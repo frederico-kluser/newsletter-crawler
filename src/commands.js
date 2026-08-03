@@ -7,7 +7,7 @@ import { stmts, wipeAll, removeSource } from './db.js';
 import {
   ROOT, EXPORT_DIR, DB_PATH, CONCURRENCY, MAX_RETRIES, HAS_LLM, CLASSIFY_AFTER_CRAWL, SUMMARIZE_AFTER_CRAWL,
   SEARCH_MODE_A_CONFIRM, OPENROUTER_API_KEY, ENV_PATH, BUDGET_USD, MAX_PARALLEL, RAM_MAX_PCT,
-  AGGRESSIVE_DEFAULT, DEFAULT_SINCE, VERIFY_AFTER_CRAWL, VERIFY_STREAMING, JOB_TIMEOUT_MS, JOB_HARD_TIMEOUT_MS,
+  AGGRESSIVE_DEFAULT, DEFAULT_SINCE, MIN_CRAWL_DATE, VERIFY_AFTER_CRAWL, VERIFY_STREAMING, JOB_TIMEOUT_MS, JOB_HARD_TIMEOUT_MS,
   CLASSIFY_STREAMING, SUMMARIZE_STREAMING, CURATE_JOBS, ROUNDUP_TIMEOUT_MS, COST_LOG_INTERVAL_MS,
   defaultParallel, loadSources, addSourceToConfig, removeSourceFromConfig, setRuntimeKey,
 } from './config.js';
@@ -242,15 +242,24 @@ async function crawlRun(flags) {
   // à data da issue E do artigo. Data inválida aborta (em vez de ignorar o filtro silenciosamente).
   // Parseado ANTES do seed p/ o rastreador de progresso nascer já com a data-alvo (% por fonte).
   const sinceRaw = typeof flags.since === 'string' ? flags.since : (DEFAULT_SINCE || null);
-  const sinceDate = sinceRaw ? parseDate(sinceRaw) : null;
+  let sinceDate = sinceRaw ? parseDate(sinceRaw) : null;
   if (sinceRaw && !sinceDate) {
     errorLog(`--since inválido (use ISO, ex.: 2026-06-25): ${sinceRaw}`);
     process.exit(1);
   }
-  if (sinceDate) {
-    const origem = typeof flags.since === 'string' ? 'flag' : 'CRAWLER_SINCE';
-    log(`--since ativo (${origem}): piso ${sinceDate.toISOString()}`);
+  // Piso mínimo DURO (MIN_CRAWL_DATE): --since anterior a ele é avisado e clampado (uma flag
+  // mais recente vence — mais restritivo); sem flag E sem CRAWLER_SINCE, o piso vira o default.
+  // Garante que SEMPRE há um piso: nada de varrer o arquivo inteiro de um índice Cooperpress.
+  const minDate = parseDate(MIN_CRAWL_DATE);
+  if (sinceDate && sinceDate < minDate) {
+    warn(`--since ${sinceRaw} anterior ao piso mínimo ${MIN_CRAWL_DATE} — clampado p/ ${MIN_CRAWL_DATE}`);
+    sinceDate = minDate;
+  } else if (!sinceDate) {
+    sinceDate = minDate; // sem flag/env: piso mínimo da casa
   }
+  const origem =
+    typeof flags.since === 'string' ? 'flag' : process.env.CRAWLER_SINCE ? 'CRAWLER_SINCE' : 'piso mínimo';
+  log(`--since ativo (${origem}): piso ${sinceDate.toISOString()}`);
   progressReset({ sinceDate });
   runEventsReset(); // zera o feed de MARCOS do painel (o ring é global ao processo, como o progresso)
 

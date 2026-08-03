@@ -244,7 +244,7 @@ export function CrawlConfig({ onRun, onBack }) {
     <${Text} bold>${t('crawlSummary')}</${Text}>
     <${Box} flexDirection="column" marginY=${1}>
       <${Text}>${t('sources')}: <${Text} color=${colors.accent}>${flags.sources || t('sourceAll')}</${Text}></${Text}>
-      <${Text}>${t('sinceLabel')}: <${Text} color=${colors.accent}>${flags.since || t('noneVal')}</${Text}></${Text}>
+      <${Text}>${t('sinceLabel')}: <${Text} color=${colors.accent}>${flags.since || t('minSinceVal')}</${Text}></${Text}>
       <${Text}>${t('maxPagesLabel')}: <${Text} color=${colors.accent}>${flags['max-pages'] || t('noLimitVal')}</${Text}></${Text}>
       <${Text}>${t('maxArticlesLabel')}: <${Text} color=${colors.accent}>${flags['max-articles'] || t('noLimitVal')}</${Text}></${Text}>
       <${Text}>${t('aggressiveLabel')}: <${Text} color=${aggressiveOn ? colors.err : colors.ok}>${aggressiveOn ? t('on') : t('off')}</${Text}></${Text}>

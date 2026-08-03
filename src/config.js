@@ -124,6 +124,9 @@ export const RESPECT_ROBOTS = process.env.CRAWLER_RESPECT_ROBOTS !== 'false';
 // real. Desligue por run com --no-aggressive ou globalmente com CRAWLER_AGGRESSIVE=false.
 // isBlockedPage e o circuit breaker seguem valendo — agressivo nunca salva página de desafio.
 export const AGGRESSIVE_DEFAULT = process.env.CRAWLER_AGGRESSIVE !== 'false';
+// Data de início padrão (piso ISO): quando --since não é passado, usa este valor do .env.
+// Vazio = sem piso (coleta todo o histórico). Ex.: CRAWLER_SINCE=2026-01-01
+export const DEFAULT_SINCE = process.env.CRAWLER_SINCE || '';
 
 // ---- pipeline de qualidade por IA (curadoria de roundup, limpeza pré-save, verificação) ----
 // Curadoria: a página do agregador é processada por LLM em ITENS estruturados (news/tool/

@@ -7,7 +7,7 @@ import { stmts, wipeAll, removeSource } from './db.js';
 import {
   ROOT, EXPORT_DIR, DB_PATH, CONCURRENCY, MAX_RETRIES, HAS_LLM, CLASSIFY_AFTER_CRAWL, SUMMARIZE_AFTER_CRAWL,
   SEARCH_MODE_A_CONFIRM, OPENROUTER_API_KEY, ENV_PATH, BUDGET_USD, MAX_PARALLEL, RAM_MAX_PCT,
-  AGGRESSIVE_DEFAULT, VERIFY_AFTER_CRAWL, VERIFY_STREAMING, JOB_TIMEOUT_MS, JOB_HARD_TIMEOUT_MS,
+  AGGRESSIVE_DEFAULT, DEFAULT_SINCE, VERIFY_AFTER_CRAWL, VERIFY_STREAMING, JOB_TIMEOUT_MS, JOB_HARD_TIMEOUT_MS,
   CLASSIFY_STREAMING, SUMMARIZE_STREAMING, CURATE_JOBS, ROUNDUP_TIMEOUT_MS, COST_LOG_INTERVAL_MS,
   defaultParallel, loadSources, addSourceToConfig, removeSourceFromConfig, setRuntimeKey,
 } from './config.js';
@@ -241,13 +241,16 @@ async function crawlRun(flags) {
   // --since <YYYY-MM-DD|ISO>: piso de data (coleta do mais novo até esse piso e para). Aplica
   // à data da issue E do artigo. Data inválida aborta (em vez de ignorar o filtro silenciosamente).
   // Parseado ANTES do seed p/ o rastreador de progresso nascer já com a data-alvo (% por fonte).
-  const sinceRaw = typeof flags.since === 'string' ? flags.since : null;
+  const sinceRaw = typeof flags.since === 'string' ? flags.since : (DEFAULT_SINCE || null);
   const sinceDate = sinceRaw ? parseDate(sinceRaw) : null;
   if (sinceRaw && !sinceDate) {
     errorLog(`--since inválido (use ISO, ex.: 2026-06-25): ${sinceRaw}`);
     process.exit(1);
   }
-  if (sinceDate) log(`--since ativo: piso ${sinceDate.toISOString()}`);
+  if (sinceDate) {
+    const origem = typeof flags.since === 'string' ? 'flag' : 'CRAWLER_SINCE';
+    log(`--since ativo (${origem}): piso ${sinceDate.toISOString()}`);
+  }
   progressReset({ sinceDate });
   runEventsReset(); // zera o feed de MARCOS do painel (o ring é global ao processo, como o progresso)
 

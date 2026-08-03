@@ -189,7 +189,8 @@ test('sortForDisplay: sem sourceName cai no source_id, e data ausente vai para o
 });
 
 test('countActiveFilters conta fonte/período/verify/tags (kind fica no Segmented)', () => {
-  assert.equal(countActiveFilters(f()), 0);
+  assert.equal(countActiveFilters(f({ from: '' })), 0); // sem piso: nenhum filtro ativo
+  assert.equal(countActiveFilters(f()), 1); // o `from` DEFAULT (piso 2026-01-01) conta como período
   assert.equal(
     countActiveFilters(f({ sourceIds: [1], from: '2026-06-01', verify: 'ok', facets: { domain: ['a', 'b'] }, kind: 'tool' })),
     5,

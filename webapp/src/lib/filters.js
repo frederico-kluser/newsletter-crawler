@@ -15,7 +15,9 @@ import { articleIsTool } from './taxonomy.js';
 
 export const EMPTY_FILTERS = Object.freeze({
   sourceIds: [],
-  from: '',
+  // piso de data padrão (CRAWLER_SINCE): o campo "from" vem pré-preenchido com 2026-01-01 em vez
+  // de vazio (= "sem piso"); o usuário pode limpar para ver o acervo inteiro (2015+).
+  from: '2026-01-01',
   to: '',
   facets: {},
   kind: 'all',

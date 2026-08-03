@@ -124,9 +124,15 @@ export const RESPECT_ROBOTS = process.env.CRAWLER_RESPECT_ROBOTS !== 'false';
 // real. Desligue por run com --no-aggressive ou globalmente com CRAWLER_AGGRESSIVE=false.
 // isBlockedPage e o circuit breaker seguem valendo — agressivo nunca salva página de desafio.
 export const AGGRESSIVE_DEFAULT = process.env.CRAWLER_AGGRESSIVE !== 'false';
-// Data de início padrão (piso ISO): quando --since não é passado, usa este valor do .env.
-// Vazio = sem piso (coleta todo o histórico). Ex.: CRAWLER_SINCE=2026-01-01
-export const DEFAULT_SINCE = process.env.CRAWLER_SINCE || '';
+// ---- piso mínimo de coleta (data dura) ----
+// Nenhuma coleta desce abaixo desta data: um --since anterior é clampado (com aviso) em
+// commands.js; sem flag e sem CRAWLER_SINCE, ele vira o default. O arquivo de um índice
+// Cooperpress (fontes de fábrica) tem ~600 issues — coletar "todo o histórico" gastaria
+// horas/dólares à toa.
+export const MIN_CRAWL_DATE = '2026-01-01';
+// Data de início padrão (piso ISO): quando --since não é passado, usa este valor do .env;
+// sem .env, o fallback é MIN_CRAWL_DATE (nunca mais vazio = sem piso). Ex.: CRAWLER_SINCE=2026-01-01
+export const DEFAULT_SINCE = process.env.CRAWLER_SINCE || MIN_CRAWL_DATE;
 
 // ---- pipeline de qualidade por IA (curadoria de roundup, limpeza pré-save, verificação) ----
 // Curadoria: a página do agregador é processada por LLM em ITENS estruturados (news/tool/

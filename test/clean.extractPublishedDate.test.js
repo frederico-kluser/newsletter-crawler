@@ -1,6 +1,7 @@
 // Eval da extração de data do HTML (padrão que retorna as datas numa issue): prioriza
 // JSON-LD datePublished (mesmo dentro de @graph), depois <meta article:published_time>,
-// depois <time datetime>. Fixtures inline (commitáveis). Rode com: npm test.
+// depois <time datetime>, depois atributos data-* comuns. Fixtures inline (commitáveis).
+// Rode com: npm test.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { extractPublishedDate } from '../src/clean.js';
@@ -33,6 +34,11 @@ test('extractPublishedDate: fallback <time datetime>', () => {
   const html = '<html><body><article><time class="published" datetime="2026-06-25">' +
     'June 25th 2026</time></article></body></html>';
   assert.equal(extractPublishedDate(html), '2026-06-25');
+});
+
+test('extractPublishedDate: fallback atributos data-* (sem JSON-LD/meta/time)', () => {
+  const html = '<html><body><article data-published="2026-07-02">Anúncio sem <time></article></body></html>';
+  assert.equal(extractPublishedDate(html), '2026-07-02');
 });
 
 test('extractPublishedDate: sem nenhuma data -> null', () => {

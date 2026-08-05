@@ -349,6 +349,13 @@ export const stmts = {
   ),
   getArticleByHash: db.prepare(`SELECT id FROM articles WHERE content_hash = ?`),
   getArticleByUrl: db.prepare(`SELECT id FROM articles WHERE url = ?`),
+  // Fallback de data: a issue é a âncora temporal do item — se outro artigo da MESMA issue_url
+  // já tem data, ela vale para o irmão sem data (a issue inteira foi publicada no mesmo dia).
+  getIssueDate: db.prepare(`
+    SELECT published_at FROM articles
+    WHERE issue_url = ? AND published_at IS NOT NULL
+    LIMIT 1
+  `),
   // URL conhecida em QUALQUER conteúdo já capturado (articles/pages/frontier done) — base da
   // parada determinística de paginação: não depende do estado da frontier, que pode ter sido
   // limpa e transformar todo link em "novo" de novo.

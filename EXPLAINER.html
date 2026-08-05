@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="pt-BR" data-bs-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>EXPLAINER — Correção do Crawl Incremental</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+<style>
+  body { background: #1a1a2e; color: #e0e0e0; }
+  .card { background: #16213e; border: 1px solid #0f3460; }
+  .table { color: #e0e0e0; }
+  pre { background: #0d1117; padding: 1rem; border-radius: 6px; }
+  .badge-ok { background: #00ff88; color: #000; }
+  .badge-fix { background: #00d4ff; color: #000; }
+</style>
+</head>
+<body class="container py-4">
+<h1 class="mb-4">🔧 Correção do Crawl Incremental</h1>
+<p class="text-muted">2026-08-04 · branch <code>main</code> · 2 commits squash</p>
+
+<div class="card mb-4">
+<div class="card-body">
+<h5>🔍 Diagnóstico</h5>
+<p>O commit <code>5235410</code> introduziu <code>MIN_CRAWL_DATE = '2026-01-01'</code> que força <code>--since</code> sempre ativo. Para fontes <code>index</code> (Cooperpress), isso expandia <code>maxPages</code> de 1 para 60 (<code>SINCE_MAX_INDEX_PAGES</code>) em <strong>toda</strong> execução — mesmo sem <code>--since</code> explícito do usuário.</p>
+<p>As páginas Cooperpress não têm seletores de data cacheados → a parada por piso (<code>below &gt; 0</code>) nunca disparava → o crawler andava 60 páginas do arquivo enfileirando TODAS as issues históricas (2.646 roundups de uma vez em 2026-08-03).</p>
+</div>
+</div>
+
+<div class="card mb-4">
+<div class="card-body">
+<h5>🩹 Correção</h5>
+<table class="table table-dark table-sm">
+<tr><th>Arquivo</th><th>Mudança</th></tr>
+<tr><td><code>src/commands.js</code></td><td>Adiciona <code>sinceIsDefault</code> (true quando o piso vem de MIN_CRAWL_DATE, não de --since/CRAWLER_SINCE)</td></tr>
+<tr><td><code>src/crawl.js</code></td><td>Fallback do <code>maxPages</code> para fontes index: <code>1</code> no default, respeita <code>--max-pages</code>, preserva expansão para 60 com --since explícito</td></tr>
+</table>
+<h6>Antes:</h6>
+<pre>const maxPages = isIndex
+    ? opts.sinceDate                      // ← SEMPRE true (MIN_CRAWL_DATE)
+      ? Math.max(... ?? 1, 60)            // 60 páginas!
+      : ...</pre>
+<h6>Depois:</h6>
+<pre>const maxPages = isIndex
+    ? opts.sinceDate && !opts.sinceIsDefault  // só expande com --since EXPLÍCITO
+      ? Math.max(source?.max_index_pages ?? 1, SINCE_MAX_INDEX_PAGES)
+      : source?.max_index_pages ?? (opts.maxPages === Infinity ? 1 : opts.maxPages)
+    : opts.maxPages ?? Infinity;</pre>
+</div>
+</div>
+
+<div class="card mb-4">
+<div class="card-body">
+<h5>🧹 Limpeza de dados</h5>
+<ul>
+<li>2.646 roundups <code>pending</code> deletados da tabela <code>frontier</code></li>
+<li>24 jobs <code>in_progress</code> travados do run #58 resetados</li>
+<li>2.101 artigos pending legítimos preservados (filhos de roundups <code>done</code>)</li>
+<li>Backup: <code>~/.newsletter-crawler/crawler.db.bak-20260804-*</code></li>
+</ul>
+</div>
+</div>
+
+<div class="card mb-4">
+<div class="card-body">
+<h5>📊 Resultado</h5>
+<ul>
+<li>✅ 340/340 testes passam</li>
+<li>✅ Smoke test (<code>npm run status</code>) OK</li>
+<li>✅ Frontier: 0 in_progress, 2.101 pending artigos legítimos, 1.600 done</li>
+<li>✅ Próximo <code>npm run crawl</code> fará apenas 1 página do índice → incremental puro</li>
+</ul>
+</div>
+</div>
+
+<div class="card mb-4">
+<div class="card-body">
+<h5>🎯 Decisões</h5>
+<ul>
+<li><strong>sinceIsDefault</strong>: derivado de <code>!flags.since && !process.env.CRAWLER_SINCE</code> — CRAWLER_SINCE no .env conta como explícito (backfill intencional)</li>
+<li><strong>Fallback maxPages=1</strong>: o <code>added === 0</code> (parada incremental) continua sendo a guarda principal; a página 1 é o ponto de partida</li>
+<li><strong>Restauração dos 51 artigos</strong>: o filtro de órfãos era amplo demais e removeu artigos de listings e splits; restaurados do backup</li>
+</ul>
+</div>
+</div>
+
+<footer class="text-muted small">
+Commits: <code>f0dcdf9</code> (fix-maxpages) · <code>34571db</code> (cleanup-frontier) — 🤖 Gerado com Claude Code
+</footer>
+</body>
+</html>

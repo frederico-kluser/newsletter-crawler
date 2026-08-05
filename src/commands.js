@@ -260,6 +260,10 @@ async function crawlRun(flags) {
   const origem =
     typeof flags.since === 'string' ? 'flag' : process.env.CRAWLER_SINCE ? 'CRAWLER_SINCE' : 'piso mínimo';
   log(`--since ativo (${origem}): piso ${sinceDate.toISOString()}`);
+  // sinceIsDefault: o piso veio do DEFAULT (MIN_CRAWL_DATE), não de --since/CRAWLER_SINCE explícitos.
+  // Nesse caso o índice NÃO expande a paginação (só a 1ª página): o backfill do arquivo inteiro
+  // exige pedido explícito — o default não pode virar uma varredura de 60 páginas a cada run.
+  const sinceIsDefault = !flags.since && !process.env.CRAWLER_SINCE;
   progressReset({ sinceDate });
   runEventsReset(); // zera o feed de MARCOS do painel (o ring é global ao processo, como o progresso)
 
@@ -310,6 +314,7 @@ async function crawlRun(flags) {
   const opts = {
     maxPages: flags['max-pages'] ? Number(flags['max-pages']) : Infinity,
     sinceDate,
+    sinceIsDefault,
     aggressive,
     runId,
   };

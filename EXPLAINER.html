@@ -1,11 +1,29 @@
-<!doctype html><html lang="pt-BR" data-bs-theme="dark"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>EXPLAINER — Limpeza + Datas</title><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous"><style>body{background:#1a1a2e;color:#e0e0e0}.card{background:#16213e;border:1px solid #0f3460}pre{background:#0d1117;padding:1rem;border-radius:6px;color:#c9d1d9}</style></head><body class="container py-4">
-<h1>🧹 Limpeza + 📅 Datas</h1><p class="text-muted">2026-08-05</p>
-<div class="card mb-4"><div class="card-body"><h5>Commits</h5><table class="table table-dark table-sm"><tr><th>Commit</th><th>Mudança</th></tr>
-<tr><td><code>624969f</code></td><td>Remove código morto: <code>sinceIsDefault</code> e <code>SINCE_MAX_INDEX_PAGES</code></td></tr>
-<tr><td><code>a6f193f</code></td><td>Backfill de datas: +1.826 artigos ganharam <code>published_at</code> da issue. Novo fallback em <code>processArticle</code> herda data do irmão. <code>extractPublishedDate</code> tenta atributos <code>data-*</code>. Statement <code>getIssueDate</code>.</td></tr></table></div></div>
-<div class="card mb-4"><div class="card-body"><h5>Antes → Depois</h5><table class="table table-dark table-sm"><tr><th>Métrica</th><th>Antes</th><th>Depois</th></tr>
-<tr><td>Artigos com data</td><td>2.101 (50%)</td><td>3.931 (93.9%)</td></tr>
-<tr><td>Artigos sem data</td><td>2.087 (50%)</td><td>257 (6.1%)</td></tr>
-<tr><td>Datas absurdas (&lt;2020)</td><td>3</td><td>0</td></tr>
-<tr><td>Cobertura do --since</td><td>50% cego</td><td>94% funcional</td></tr></table></div></div>
-<footer class="text-muted small">🤖 Gerado com Claude Code</footer></body></html>
+<!doctype html><html lang="pt-BR" data-bs-theme="dark"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>v3.0.0 — Crawl Incremental + Parada Determinística</title><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous"><style>body{background:#1a1a2e;color:#e0e0e0}.card{background:#16213e;border:1px solid #0f3460}pre{background:#0d1117;padding:1rem;border-radius:6px;color:#c9d1d9}h2{color:#00d4ff}</style></head><body class="container py-4">
+<h1>🚀 v3.0.0</h1><p class="text-muted">2026-08-05 · Breaking change no comportamento de paginação</p>
+
+<div class="card mb-4"><div class="card-body">
+<h2>🎯 Tema: Crawl incremental determinístico</h2>
+<p>O crawler agora usa <strong>conteúdo já capturado</strong> como freio da paginação, não limites artificiais de páginas. Zero desperdício de LLM para re-processar issues já conhecidas.</p>
+</div></div>
+
+<div class="card mb-4"><div class="card-body"><h2>🛑 Parada determinística (isUrlKnown)</h2>
+<p>Consulta articles.url / pages.url / frontier-done.url / articles.issue_url para detectar se um link da listagem já foi capturado. Se <strong>100% dos links</strong> da página são conhecidos → break imediato. Zero LLM, puramente SQL.</p></div></div>
+
+<div class="card mb-4"><div class="card-body"><h2>📅 Backfill de datas</h2>
+<p>1.828 artigos (de 2.085 sem data) herdaram <code>published_at</code> da issue. Cobertura de datas: 50% → <strong>93.9%</strong>. Fallback data-* no extractPublishedDate + herança no processArticle.</p></div></div>
+
+<div class="card mb-4"><div class="card-body"><h2>🛡️ Guardas de qualidade</h2>
+<ul><li><strong>isErrorPage()</strong>: bloqueia salvamento de páginas 404/403/500 como artigos</li><li><strong>URL validation</strong>: rejeita URLs malformadas (quebradas pelo LLM) no enqueue</li><li><strong>Taxonomia</strong>: javascript/typescript/react/vue/nodejs/oxc adicionados ao vocab</li></ul></div></div>
+
+<div class="card mb-4"><div class="card-body"><h2>🧹 Limpeza</h2>
+<ul><li>Código morto removido: sinceIsDefault, SINCE_MAX_INDEX_PAGES</li><li>maxPages sem limite artificial — isUrlKnown é o freio</li><li>1 artigo "404 Not Found" e 1 URL quebrada removidos do banco</li></ul></div></div>
+
+<div class="card mb-4"><div class="card-body"><h2>📊 Impacto</h2><table class="table table-dark table-sm">
+<tr><th>Métrica</th><th>Antes</th><th>Depois</th></tr>
+<tr><td>Páginas visitadas por crawl</td><td>60 (SINCE_MAX_INDEX_PAGES)</td><td>1-3 (isUrlKnown para)</td></tr>
+<tr><td>Artigos com data</td><td>50%</td><td>93.9%</td></tr>
+<tr><td>Páginas 404 salvas</td><td>Sim</td><td>Bloqueado</td></tr>
+<tr><td>Tags comuns no vocab</td><td>Ausentes</td><td>Presentes</td></tr>
+</table></div></div>
+
+<footer class="text-muted small">🤖 Gerado com Claude Code · v3.0.0</footer></body></html>

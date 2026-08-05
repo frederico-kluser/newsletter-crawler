@@ -349,6 +349,19 @@ export const stmts = {
   ),
   getArticleByHash: db.prepare(`SELECT id FROM articles WHERE content_hash = ?`),
   getArticleByUrl: db.prepare(`SELECT id FROM articles WHERE url = ?`),
+  // URL conhecida em QUALQUER conteúdo já capturado (articles/pages/frontier done) — base da
+  // parada determinística de paginação: não depende do estado da frontier, que pode ter sido
+  // limpa e transformar todo link em "novo" de novo.
+  isUrlKnown: db.prepare(`
+    SELECT 1 FROM articles WHERE url = ?
+    UNION ALL
+    SELECT 1 FROM pages WHERE url = ?
+    UNION ALL
+    SELECT 1 FROM frontier WHERE url = ? AND state = 'done'
+    UNION ALL
+    SELECT 1 FROM articles WHERE issue_url = ?
+    LIMIT 1
+  `),
   getArticleFullByUrl: db.prepare(`SELECT * FROM articles WHERE url = ?`),
   // Enriquecimento de item curado: preenche o corpo vindo do ALVO sem tocar kind/blurb/section.
   enrichArticle: db.prepare(

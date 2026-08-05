@@ -530,6 +530,21 @@ function keepAggregatorVersion(row, ev, reason) {
   emitRunEvent({ phase: 'articles', kind: 'kept-blurb', level: 'warn', detail: reason });
 }
 
+// Descarta páginas de erro (404, 500, etc.): o Playwright renderiza a página de erro e o
+// título/conteúdo extraídos são a própria mensagem — nunca um artigo real.
+function isErrorPage(title, content) {
+  const t = (title || '').toLowerCase().trim();
+  // Títulos que indicam página de erro
+  if (/^(404|403|500|502|503)(\s|-|$)/.test(t)) return true;
+  if (/^not found$/i.test(t)) return true;
+  if (/^(page|página)\s+not\s+found/i.test(t)) return true;
+  if (/^(error|erro)\b/i.test(t) && (content || '').length < 200) return true;
+  // Conteúdo muito curto com palavras de erro
+  const c = (content || '').toLowerCase().trim();
+  if (c.length < 100 && /\b(not found|404|403|500|error|erro)\b/i.test(c)) return true;
+  return false;
+}
+
 async function processArticle(job, source, opts) {
   const url = job.url;
   const depth = job.depth ?? 0;
@@ -660,6 +675,13 @@ async function processArticle(job, source, opts) {
       }
     }
     if (!title) title = fallbackTitle(html) || url;
+  }
+
+  if (isErrorPage(title, content)) {
+    if (enriching) return keepAggregatorVersion(enriching, ev, 'error-page');
+    warn(`página de erro ignorada: ${url}`);
+    logEvent({ ...ev, stage: 'article', status: 'skip', detail: { reason: 'error-page', title } });
+    return;
   }
 
   if (!content || content.length < 50) {

@@ -233,9 +233,6 @@ export const ARTICLE_ROUNDUP_MIN_LINKS = Number(process.env.ARTICLE_ROUNDUP_MIN_
 export const ARTICLE_ROUNDUP_MAX_LINKS = Number(process.env.ARTICLE_ROUNDUP_MAX_LINKS || 60);
 // Acima disto de prosa (chars do corpo Readability) a página é um ARTIGO, não uma lista.
 export const ROUNDUP_MAX_PROSE_CHARS = Number(process.env.ROUNDUP_MAX_PROSE_CHARS || 1500);
-// Teto de segurança da paginação do índice quando `--since` está ativo (a parada por data
-// deve disparar antes; isto evita varrer um arquivo gigante se as datas faltarem/falharem).
-export const SINCE_MAX_INDEX_PAGES = Number(process.env.SINCE_MAX_INDEX_PAGES || 60);
 // Scroll infinito (perfil listing): nº de checagens CONSECUTIVAS sem nenhum link novo no DOM
 // p/ declarar o feed estagnado e parar de rolar (a parada por data --since e o teto de rodadas
 // continuam valendo). Evita gastar sempre as 60 rodadas/90s num feed que não cresce mais.

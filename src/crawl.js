@@ -26,7 +26,7 @@ import {
 import {
   HAS_LLM, RESPECT_ROBOTS, MAX_CRAWL_DEPTH, ROUNDUP_MIN_LINKS,
   ARTICLE_ROUNDUP_MIN_LINKS, ARTICLE_ROUNDUP_MAX_LINKS, ROUNDUP_MAX_PROSE_CHARS,
-  SINCE_MAX_INDEX_PAGES, CURATE_ROUNDUPS, CLEAN_BEFORE_SAVE, CLEAN_MAX_CHARS,
+  CURATE_ROUNDUPS, CLEAN_BEFORE_SAVE, CLEAN_MAX_CHARS,
 } from './config.js';
 
 export function enqueue(url, kind, fromUrl, sourceId, depth = 0) {
@@ -109,15 +109,12 @@ async function processListing(job, source, opts) {
   // `index` => os filhos são roundups (issues); senão => os filhos são artigos (default).
   const isIndex = source?.type === 'index';
   const childKind = isIndex ? 'roundup' : 'article';
-  // O índice só pagina a 1ª página por padrão (max_index_pages); listagem normal usa --max-pages.
-  // Com --since EXPLÍCITO (--since/CRAWLER_SINCE), o índice pode paginar mais fundo (a data é que
-  // para), até um teto de segurança. Com o piso DEFAULT da casa (MIN_CRAWL_DATE, sinceIsDefault),
-  // NÃO expande: o default existe só p/ não salvar item velho — paginar fundo p/ repetir o arquivo
-  // inteiro (e enfileirar tudo de novo) a cada run não é o comportamento pedido.
+  // Fontes index: sem limite artificial de páginas. O isUrlKnown (parada determinística
+  // por URL já capturada) é o freio principal — o crawler anda até encontrar uma página
+  // onde todos os links já existem em articles/pages/frontier/issue_url. As paradas por
+  // data (below>0) e incremental (added===0) são as redes de segurança.
   const maxPages = isIndex
-    ? opts.sinceDate && !opts.sinceIsDefault
-      ? Math.max(source?.max_index_pages ?? 1, SINCE_MAX_INDEX_PAGES)
-      : source?.max_index_pages ?? (opts.maxPages === Infinity ? 1 : opts.maxPages)
+    ? source?.max_index_pages ?? opts.maxPages ?? Infinity
     : opts.maxPages ?? Infinity;
 
   // Atalho Substack: usa API JSON pública e pula HTML/LLM. Detecta domínio próprio (probe) e

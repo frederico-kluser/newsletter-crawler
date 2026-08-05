@@ -1,44 +1,35 @@
 <!doctype html>
 <html lang="pt-BR" data-bs-theme="dark">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="color-scheme" content="dark">
-<title>EXPLAINER — Parada Determinística de Paginação</title>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="dark">
+<title>EXPLAINER — maxPages sem limite · isUrlKnown como freio</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-<style>body{background:#1a1a2e;color:#e0e0e0}.card{background:#16213e;border:1px solid #0f3460}pre{background:#0d1117;padding:1rem;border-radius:6px;color:#c9d1d9}</style>
-</head>
+<style>body{background:#1a1a2e;color:#e0e0e0}.card{background:#16213e;border:1px solid #0f3460}pre{background:#0d1117;padding:1rem;border-radius:6px;color:#c9d1d9}</style></head>
 <body class="container py-4">
-<h1>🛑 Parada Determinística de Paginação por URL Conhecida</h1>
-<p class="text-muted">2026-08-05 · branch <code>main</code> · commit <code>bde5def</code></p>
+<h1>🚫 maxPages sem limite · isUrlKnown como freio</h1>
+<p class="text-muted">2026-08-05 · commit <code>ce718e5</code></p>
 
-<div class="card mb-4">
-<div class="card-body"><h5>Diagnóstico</h5>
-<p>A parada de paginação <code>added === 0</code> depende da tabela <code>frontier</code> para reconhecer URLs já vistas. Se a frontier for limpa (purge/reset), TODOS os links voltam a ser "novos" e o crawler anda o arquivo inteiro novamente.</p>
-<p>A parada por data (<code>below &gt; 0</code>) depende de seletores de data que não existem para fontes Cooperpress.</p>
-<p><strong>Solução</strong>: verificar se as URLs dos links da página de listagem já existem nas tabelas de conteúdo capturado (<code>articles</code>, <code>pages</code>, <code>frontier done</code>, <code>articles.issue_url</code>) — determinístico, zero LLM.</p>
-</div></div>
+<div class="card mb-4"><div class="card-body"><h5>Problema</h5>
+<p>O fix anterior (<code>maxPages=1</code> para fontes index sem <code>--since</code> explícito) capava a paginação na primeira página. Se uma fonte publica 30 itens/dia e o crawler fica 2 dias sem rodar, notícias na página 2 ficavam invisíveis. O <code>isUrlKnown</code> foi construído exatamente para ser o freio — mas nunca chegava a agir porque a paginação parava antes.</p></div></div>
 
-<div class="card mb-4">
-<div class="card-body"><h5>Mudanças</h5>
-<table class="table table-dark table-sm">
-<tr><th>Arquivo</th><th>Mudança</th></tr>
-<tr><td><code>src/db.js</code></td><td>Novo statement <code>isUrlKnown</code>: consulta URL em <code>articles.url</code>, <code>pages.url</code>, <code>frontier.url</code> (done) e <code>articles.issue_url</code></td></tr>
-<tr><td><code>src/crawl.js</code></td><td><code>crawlArchive</code> + fallback item-a-item: conta links conhecidos antes de enfileirar; se 100% conhecidos → break imediato; se ≥50% → log de território conhecido</td></tr>
-</table></div></div>
+<div class="card mb-4"><div class="card-body"><h5>Mudança</h5>
+<pre>// Antes:
+const maxPages = isIndex
+    ? opts.sinceDate && !opts.sinceIsDefault
+      ? Math.max(source?.max_index_pages ?? 1, SINCE_MAX_INDEX_PAGES)
+      : source?.max_index_pages ?? (opts.maxPages === Infinity ? 1 : opts.maxPages)
+    : opts.maxPages ?? Infinity;
 
-<div class="card mb-4">
-<div class="card-body"><h5>Cobertura</h5>
-<ul><li>Fontes <code>index</code> (Cooperpress): URLs de issue reconhecidas via <code>articles.issue_url</code> — 158/240 (66%) das issues processadas têm artigos</li>
-<li>Fontes <code>listing</code> (llmnews.ai): URLs de artigo reconhecidas via <code>articles.url</code> — ~82% de match</li>
-<li>Parada 100%: quando TODOS os links da página são conhecidos → break imediato</li></ul>
-</div></div>
+// Depois:
+const maxPages = isIndex
+    ? source?.max_index_pages ?? opts.maxPages ?? Infinity
+    : opts.maxPages ?? Infinity;</pre>
+<p><strong>Sem limite artificial.</strong> O crawler anda até uma das 5 paradas disparar:</p>
+<ol><li><code>isUrlKnown</code> 100% — todos os links já capturados</li><li><code>added === 0</code> — todos na frontier</li><li><code>below > 0</code> — data abaixo do --since</li><li>Hash repetido — mesma página 2x</li><li><code>findNextPage</code> null — sem próxima</li></ol></div></div>
 
-<div class="card mb-4">
-<div class="card-body"><h5>Resultado</h5>
-<ul><li>✅ 340/340 testes passam</li><li>✅ Smoke test OK</li><li>✅ Zero LLM — puramente SQL determinístico</li></ul>
-</div></div>
-
-<footer class="text-muted small">🤖 Gerado com Claude Code</footer>
-</body>
-</html>
+<div class="card mb-4"><div class="card-body"><h5>Stack de proteção</h5>
+<table class="table table-dark table-sm"><tr><th>Camada</th><th>Mecanismo</th><th>Sobrevive a frontier limpa?</th></tr>
+<tr><td>1. isUrlKnown 100%</td><td>articles.url / pages.url / frontier-done / articles.issue_url</td><td>✅ Parcial (66% issues)</td></tr>
+<tr><td>2. added === 0</td><td>INSERT OR IGNORE na frontier</td><td>❌</td></tr>
+<tr><td>3. below > 0</td><td>Data do item < --since</td><td>✅</td></tr>
+<tr><td>4. Hash</td><td>sha256 do HTML</td><td>✅</td></tr></table></div></div>
+<footer class="text-muted small">🤖 Gerado com Claude Code</footer></body></html>

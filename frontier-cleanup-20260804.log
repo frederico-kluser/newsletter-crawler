@@ -1,0 +1,31 @@
+frontier cleanup - bug de paginacao profunda (2026-08-04)
+=========================================================
+Motivo: crawler percorreu 60 paginas do arquivo de 5 newsletters Cooperpress em 2026-08-03,
+criando 2.646 roundups pending (arquivo inteiro das newsletters) que nunca seriam processados.
+
+Operacoes (transacao unica, sqlite3 em ~/.newsletter-crawler/crawler.db):
+1. UPDATE frontier SET state='pending' WHERE state='in_progress';
+   24 jobs in_progress (16 articles + 8 roundups) resetados para pending.
+2. DELETE FROM frontier WHERE kind='roundup' AND state='pending';
+   2.646 roundups pending removidos (inclui os 8 roundups resetados no passo 1,
+   orfaos de filhos: 0 artigos pending apontavam para eles).
+3. DELETE FROM frontier WHERE kind='article' AND state='pending'
+   AND (discovered_from IS NULL OR discovered_from NOT IN (SELECT url FROM frontier WHERE kind='roundup'));
+   51 artigos pending avulsos/orfaos removidos.
+
+Estado antes (frontier):
+  roundup pending 2646 | article pending 2085 | article done 1353
+  roundup done 240 | listing done 7 | article in_progress 16 | roundup in_progress 8 | article failed 1
+
+Estado depois (frontier):
+  article pending 2050 | article done 1353 | roundup done 240 | listing done 7 | article failed 1
+  (2050 = 2034 filhos de roundups done + 16 artigos in_progress resetados; todos com discovered_from
+  apontando para roundup existente - verificacao: 2050/2050 validos, 0 orfaos)
+
+Verificacoes:
+- PRAGMA integrity_check: ok
+- articles: 4106 (inalterado)
+- Nenhum roundup pending, nenhum job in_progress
+- 1 artigo failed preservado (fora do escopo da tarefa)
+
+Backup: ~/.newsletter-crawler/crawler.db.bak-20260804-224557

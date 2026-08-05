@@ -234,7 +234,8 @@ function findDatePublished(node) {
 /**
  * Data de publicação a partir do HTML (a issue/edição expõe isso de forma confiável):
  * JSON-LD `datePublished` (inclusive dentro de @graph) -> <meta article:published_time> ->
- * primeiro <time datetime>. Retorna a STRING crua (o parsing fica em util.parseDate).
+ * primeiro <time datetime> -> atributos data-* comuns. Retorna a STRING crua (o parsing fica em
+ * util.parseDate).
  */
 export function extractPublishedDate(html) {
   try {
@@ -255,6 +256,14 @@ export function extractPublishedDate(html) {
     if (meta) return meta.trim();
     const t = $('time[datetime]').first().attr('datetime');
     if (t) return t.trim();
+    // Fallback adicional: atributos data-* comuns (alguns CMS só expõem a data em data-*)
+    const $dateEl = $('[data-date], [data-published], [data-publish-date], [data-post-date]').first();
+    const dataAttr =
+      $dateEl.attr('data-date') ||
+      $dateEl.attr('data-published') ||
+      $dateEl.attr('data-publish-date') ||
+      $dateEl.attr('data-post-date');
+    if (dataAttr) return dataAttr.trim();
   } catch {
     /* fail-open */
   }

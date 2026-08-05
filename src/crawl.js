@@ -748,6 +748,17 @@ async function processArticle(job, source, opts) {
     }
   }
 
+  // Fallback de data: alvo sem data própria? Herda da issue (outro artigo da MESMA issue_url já
+  // tem data — a issue é a âncora temporal; sem isso, enriquecidos de páginas sem data ficam com
+  // published_at NULL e somem das superfícies ordenadas por data).
+  if (!published) {
+    const issueUrl = enriching?.issue_url || job.discovered_from;
+    if (issueUrl) {
+      const siblingDate = stmts.getIssueDate.get(issueUrl);
+      if (siblingDate?.published_at) published = siblingDate.published_at;
+    }
+  }
+
   // Guarda de texto puro no armazenamento (anti "HTML cru" na UI): o caminho Readability já é
   // texto garantido; o seletor e o fallback LLM podem trazer marcação — normaliza SÓ esses.
   content = method === 'readability' ? content : ensurePlainText(content);

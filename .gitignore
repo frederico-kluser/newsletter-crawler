@@ -1,5 +1,5 @@
-# dependências
-node_modules/
+# dependências (sem barra: cobre diretório real E o symlink usado em worktrees)
+node_modules
 
 # segredos — NUNCA commitar
 .env

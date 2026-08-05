@@ -200,6 +200,20 @@ async function processListing(job, source, opts) {
   if (HAS_LLM) {
     const links = await extractLinksItemByItem(await cpuParse(() => pruneForLLM(capHtml(html))));
     mergeScrollHarvest(links, fetched.harvest, url, source?.id);
+    // Mesma parada determinística do crawlArchive: todos os links já capturados => nada a
+    // re-enfileirar (a frontier limpa não deve re-coletar o arquivo inteiro).
+    let knownCount = 0;
+    for (const l of links) {
+      const abs = normalizeUrl(l.url, url);
+      if (abs && stmts.isUrlKnown.get(abs, abs, abs, abs)) knownCount++;
+    }
+    if (links.length > 0 && knownCount === links.length) {
+      log(`paginação: todos os ${links.length} links já conhecidos (articles/pages/frontier), parando`);
+      return;
+    }
+    if (knownCount > 0 && knownCount >= links.length * 0.5) {
+      log(`paginação: ${knownCount}/${links.length} links já conhecidos — território conhecido`);
+    }
     let n = 0;
     for (const l of links) {
       const d = l.date ? parseDate(l.date) : null;
@@ -318,6 +332,22 @@ async function crawlArchive(startUrl, source, sel, firstHtml, ctx) {
     // piso/enfileiramento; a colheita é da página corrente (a próxima traz a sua).
     mergeScrollHarvest(dated, harvest, pageUrl, source?.id);
     harvest = undefined;
+
+    // Parada determinística (zero LLM) por conteúdo já capturado: se TODOS os links desta
+    // página já existem em articles/pages/frontier done, o resto do arquivo é território
+    // conhecido — para ANTES de enfileirar. O sinal added===0 não basta: se a frontier foi
+    // limpa, todo link volta a ser "novo" e o arquivo inteiro seria re-coletado.
+    let knownCount = 0;
+    for (const it of dated) {
+      if (stmts.isUrlKnown.get(it.url, it.url, it.url, it.url)) knownCount++;
+    }
+    if (knownCount === dated.length) {
+      log(`paginação: todos os ${dated.length} links já conhecidos (articles/pages/frontier), parando`);
+      break;
+    }
+    if (knownCount > 0 && knownCount >= dated.length * 0.5) {
+      log(`paginação: ${knownCount}/${dated.length} links já conhecidos — território conhecido`);
+    }
 
     let added = 0;
     let below = 0;

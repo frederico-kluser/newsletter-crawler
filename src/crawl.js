@@ -32,6 +32,14 @@ import {
 export function enqueue(url, kind, fromUrl, sourceId, depth = 0) {
   const n = normalizeUrl(url, fromUrl);
   if (!n) return false;
+  // Rejeita URLs malformadas: `%20` colado em nome de query param (concatenação quebrada do
+  // LLM — ex.: "watch%20itemv=" no lugar de "watch?v=...&item=..."). Em URLs boas o %20 é
+  // espaço no path ("my%20page") ou em VALOR de query ("q=hello%20world"), nunca antes de
+  // "param=" — então exigir `=` após o token evita falso positivo com "learning%20items".
+  if (/%20(?:item[a-z0-9_]*=|utm[a-z0-9_]*=|v=|id=|ref=|src=)/i.test(n)) {
+    debug(`URL provavelmente quebrada ignorada: ${n}`);
+    return false;
+  }
   return stmts.enqueue.run(n, kind, fromUrl || null, sourceId || null, depth).changes > 0;
 }
 

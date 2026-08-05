@@ -110,13 +110,14 @@ async function processListing(job, source, opts) {
   const isIndex = source?.type === 'index';
   const childKind = isIndex ? 'roundup' : 'article';
   // O índice só pagina a 1ª página por padrão (max_index_pages); listagem normal usa --max-pages.
-  // Com --since, o índice pode paginar mais fundo (a data é que para), até um teto de segurança.
+  // Com --since EXPLÍCITO (--since/CRAWLER_SINCE), o índice pode paginar mais fundo (a data é que
+  // para), até um teto de segurança. Com o piso DEFAULT da casa (MIN_CRAWL_DATE, sinceIsDefault),
+  // NÃO expande: o default existe só p/ não salvar item velho — paginar fundo p/ repetir o arquivo
+  // inteiro (e enfileirar tudo de novo) a cada run não é o comportamento pedido.
   const maxPages = isIndex
-    ? opts.sinceDate
+    ? opts.sinceDate && !opts.sinceIsDefault
       ? Math.max(source?.max_index_pages ?? 1, SINCE_MAX_INDEX_PAGES)
-      : source?.max_index_pages != null
-        ? source.max_index_pages
-        : opts.maxPages ?? 1
+      : source?.max_index_pages ?? (opts.maxPages === Infinity ? 1 : opts.maxPages)
     : opts.maxPages ?? Infinity;
 
   // Atalho Substack: usa API JSON pública e pula HTML/LLM. Detecta domínio próprio (probe) e

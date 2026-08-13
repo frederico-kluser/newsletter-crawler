@@ -1,6 +1,6 @@
 // Cliente OpenRouter (SDK openai) + derivação de seletores, fallbacks e classificação.
 // Modelo + reasoning effort de CADA etapa vêm de stageModel() (config/models.json + env);
-// default de tudo: deepseek/deepseek-v4-pro + xhigh ("max" => 400, então o teto é xhigh).
+// default de tudo: deepseek/deepseek-v4-flash-0731 + xhigh ("max" => 400, então o teto é xhigh).
 import OpenAI from 'openai';
 import { z } from 'zod';
 import {
@@ -160,15 +160,16 @@ export async function callJSON({
   messages.push({ role: 'user', content: user });
   const response_format = responseFormat(schemaName, schema);
 
-  // Retry no JSON inválido: o Flash às vezes trunca/malforma a resposta (esp. com reasoning alto).
-  // Estratégia: até `retries+1` tentativas re-amostrando o MESMO modelo (a chamada não é
-  // temperatura 0, então uma nova amostra costuma resolver); na ÚLTIMA tentativa, se o modelo é
-  // Flash, escala p/ o Pro (`fallbackModel`), que é mais confiável no JSON. maxRetries do SDK já
-  // cobre 429/5xx; aqui cobrimos resposta 200 com conteúdo não-parseável.
+  // Retry no JSON inválido: o modelo às vezes trunca/malforma a resposta (esp. com reasoning alto).
+  // Estratégia: até `retries+1` tentativas re-amostrando no MESMO modelo (a chamada não é
+  // temperatura 0, então uma nova amostra costuma resolver); na ÚLTIMA tentativa, se
+  // `fallbackModel` diferir do modelo, escala para ele — mais confiável no JSON. No perfil atual
+  // `fallbackModel` aponta para o MESMO slug do modelo, então a escalada é no-op. maxRetries do
+  // SDK já cobre 429/5xx; aqui cobrimos resposta 200 com conteúdo não-parseável.
   for (let attempt = 0; ; attempt++) {
     const isLast = attempt >= retries;
     const useModel = isLast && fallbackModel && model !== fallbackModel ? fallbackModel : model;
-    // Cada tentativa (inclusive a escalada p/ o Pro) é uma admissão própria no transporte:
+    // Cada tentativa (inclusive a escalada p/ `fallbackModel`) é uma admissão própria no transporte:
     // lane llm + reserva de orçamento com o modelo certo + registro do custo real.
     const resp = await createWithRateLimitRetry({
       stage, model: useModel, reasoning, response_format, messages, signal,
@@ -659,7 +660,7 @@ const facetZ = z.object({
   confidence: z.number(),
 });
 export async function classifyFacet({ facet, system, user }) {
-  // Modelo POR FACETA: facetas de baixo valor caem p/ Flash (models.json), o resto segue Pro.
+  // Modelo POR FACETA: facetas de baixo valor caem p/ effort medium (models.json); as demais seguem a etapa base.
   const { model, effort } = facet ? classifyFacetModel(facet) : stageModel('classify');
   const out = await callJSON({
     model,

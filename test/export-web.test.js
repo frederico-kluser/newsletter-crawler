@@ -92,7 +92,7 @@ test('export web: meta traz totais, fontes, facetas em ordem canônica e config 
   assert.equal(meta.search.batchSize, 40);
   assert.equal(meta.search.deepConfirm, 200);
   assert.ok(meta.search.models.searchBatch.model.includes('flash'));
-  assert.ok(meta.search.models.fallback.model.includes('pro'));
+  assert.ok(meta.search.models.fallback.model.includes('flash-0731'));
   // sem llm_usage semeado não há amostra: costHints omitido por completo (cliente usa seeds)
   assert.deepEqual(meta.search.costHints, {});
   assert.equal(meta.dates.min, pendenteIso);

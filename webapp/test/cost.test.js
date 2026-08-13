@@ -9,9 +9,9 @@ const SEARCH = {
   softConfirm: 4000,
   deepConfirm: 200,
   models: {
-    searchBatch: { model: 'deepseek/deepseek-v4-flash', effort: 'xhigh' },
-    searchRelevance: { model: 'deepseek/deepseek-v4-flash', effort: 'high' },
-    fallback: { model: 'deepseek/deepseek-v4-pro' },
+    searchBatch: { model: 'deepseek/deepseek-v4-flash-0731', effort: 'xhigh' },
+    searchRelevance: { model: 'deepseek/deepseek-v4-flash-0731', effort: 'high' },
+    fallback: { model: 'deepseek/deepseek-v4-flash-0731' },
   },
   costHints: {},
 };
@@ -37,8 +37,8 @@ test('costHints do export (média real) têm precedência sobre o seed', () => {
   assert.ok(Math.abs(r.usd - 2 * 0.0031) < 1e-9);
 });
 
-test('modelo pro no estágio → seed 0.05', () => {
-  const s = { ...SEARCH, models: { ...SEARCH.models, searchRelevance: { model: 'deepseek/deepseek-v4-pro' } } };
+test('modelo sem flash no estágio → seed 0.05', () => {
+  const s = { ...SEARCH, models: { ...SEARCH.models, searchRelevance: { model: 'acme/llm-probe' } } };
   const r = estimateSearch({ count: 2, deep: true, search: s });
   assert.ok(Math.abs(r.usd - 0.1) < 1e-9);
 });

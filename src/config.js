@@ -78,8 +78,8 @@ export function setRuntimeKey(key) {
 }
 
 export const MODELS = {
-  pro: process.env.LLM_PRO_MODEL || 'deepseek/deepseek-v4-pro',
-  flash: process.env.LLM_FLASH_MODEL || 'deepseek/deepseek-v4-flash',
+  pro: process.env.LLM_PRO_MODEL || 'deepseek/deepseek-v4-flash-0731',
+  flash: process.env.LLM_FLASH_MODEL || 'deepseek/deepseek-v4-flash-0731',
 };
 
 export const USER_AGENT =
@@ -252,7 +252,7 @@ export const RENDER_ARTICLE_DEADLINE_MS = Number(process.env.RENDER_ARTICLE_DEAD
 export const MAX_LOAD_MORE = Number(process.env.MAX_LOAD_MORE || 50);
 
 // ---- modelos por etapa do pipeline (config/models.json + override por env) ----
-// Default de TODAS as etapas: deepseek/deepseek-v4-pro + xhigh ("ultrathink"). Para o
+// Default de TODAS as etapas: deepseek/deepseek-v4-flash-0731 + xhigh ("ultrathink"). Para o
 // DeepSeek V4, "max" é rejeitado com HTTP 400 — por isso o teto real é "xhigh" (guard abaixo).
 export const STAGE_KEYS = [
   'linkSelector', // deriva o seletor CSS dos links da listagem
@@ -262,16 +262,16 @@ export const STAGE_KEYS = [
   'contentSelector', // deriva o seletor CSS do corpo do artigo
   'articleExtract', // fallback: extrai título/corpo/data do artigo
   'classify', // classificação multi-faceta de tags
-  'summarize', // resumo + título em PT-BR (Flash high)
-  'searchRelevance', // busca modo A: julga artigo vs consulta (Flash high, 50x)
-  'searchBatch', // busca soft da web: julga um LOTE de ~40 artigos vs consulta (Flash)
-  'searchTags', // busca modo B: mapeia consulta -> tags por faceta (Pro)
-  'searchSpec', // busca precisão-primeiro: "entende" a consulta -> spec (Pro high, 1x por busca)
-  'curate', // curadoria da issue: itens estruturados news/tool/release (Flash, chunks paralelos)
-  'articleClean', // limpeza pré-save do conteúdo extraído (Flash)
-  'verifyRecord', // verificação pós-cadastro: veredito ok|suspect|junk (Flash)
-  'dateSelector', // seletor de DATA da listagem (CSS + regex) lendo a página real (Flash)
-  'detectType', // detecção automática do tipo da fonte (index|listing) ao adicionar (Flash high, 1x/add)
+  'summarize', // resumo + título em PT-BR (high)
+  'searchRelevance', // busca modo A: julga artigo vs consulta (high, 50x)
+  'searchBatch', // busca soft da web: julga um LOTE de ~40 artigos vs consulta (medium)
+  'searchTags', // busca modo B: mapeia consulta -> tags por faceta (high)
+  'searchSpec', // busca precisão-primeiro: "entende" a consulta -> spec (high, 1x por busca)
+  'curate', // curadoria da issue: itens estruturados news/tool/release (high, chunks paralelos)
+  'articleClean', // limpeza pré-save do conteúdo extraído (medium)
+  'verifyRecord', // verificação pós-cadastro: veredito ok|suspect|junk (high)
+  'dateSelector', // seletor de DATA da listagem (CSS + regex) lendo a página real (high)
+  'detectType', // detecção automática do tipo da fonte (index|listing) ao adicionar (high, 1x/add)
 ];
 const DEFAULT_MODEL = MODELS.pro;
 const DEFAULT_EFFORT = 'xhigh';
@@ -314,7 +314,7 @@ function resolveStage(stage, cfg) {
 const _modelsCfg = loadModelsConfig();
 export const STAGE_MODELS = Object.fromEntries(STAGE_KEYS.map((s) => [s, resolveStage(s, _modelsCfg)]));
 
-/** {model, effort} resolvido para uma etapa do pipeline (default: Pro + xhigh). */
+/** {model, effort} resolvido para uma etapa do pipeline (default: deepseek/deepseek-v4-flash-0731 + xhigh). */
 export function stageModel(stage) {
   return STAGE_MODELS[stage] || { model: DEFAULT_MODEL, effort: DEFAULT_EFFORT };
 }
@@ -322,8 +322,8 @@ export function stageModel(stage) {
 /**
  * Modelo por FACETA da classificação (o estágio mais caro): models.json pode ter uma chave
  * "classify:<faceta>" (ou env LLM_MODEL_CLASSIFY_<FACETA>) p/ escolher o modelo por faceta. Só as
- * facetas CORE (domain, topic-technology) herdam a etapa base 'classify' (Pro/high); as outras 7 têm
- * override Flash/medium (classificação = tarefa de vocabulário fixo, small-output → Flash basta).
+ * facetas CORE (domain, topic-technology) herdam a etapa base 'classify' (effort high); as outras 7
+ * têm override medium (classificação = tarefa de vocabulário fixo, small-output → medium basta).
  */
 export function classifyFacetModel(facetName) {
   const fileStage = _modelsCfg.stages && _modelsCfg.stages[`classify:${facetName}`];

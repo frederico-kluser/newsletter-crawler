@@ -179,7 +179,7 @@ async function processListing(job, source, opts) {
         sel = putSelector(sig, {
           link_selector: cand.selector,
           link_attribute: cand.attribute,
-          model_used: 'deepseek-v4-pro',
+          model_used: 'deepseek-v4-flash-0731',
           confidence: cand.confidence,
         });
         log(`seletor derivado p/ ${sig}: "${cand.selector}" (${v.count} links)`);
@@ -638,7 +638,7 @@ async function processArticle(job, source, opts) {
         if (validateContentSelector(html, cand.content_selector).ok) {
           csel = putSelector(sig, {
             content_selector: cand.content_selector,
-            model_used: 'deepseek-v4-pro',
+            model_used: 'deepseek-v4-flash-0731',
             confidence: cand.confidence,
           });
           log(`content selector derivado p/ ${sig}: "${cand.content_selector}"`);

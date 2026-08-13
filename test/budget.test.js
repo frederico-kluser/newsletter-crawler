@@ -23,7 +23,7 @@ test('ilimitado (budget 0): nunca bloqueia, mas registra tudo', () => {
   const rows = [];
   const l = new BudgetLedger({ budgetUsd: 0, persist: (r) => rows.push(r) });
   for (let i = 0; i < 5; i++) {
-    const t = l.reserve('summarize', 'deepseek/deepseek-v4-flash');
+    const t = l.reserve('summarize', 'deepseek/deepseek-v4-flash-0731');
     t.commit({ usage: flashUsage(0.001) });
   }
   assert.equal(l.shouldStop(), false);
@@ -35,22 +35,22 @@ test('ilimitado (budget 0): nunca bloqueia, mas registra tudo', () => {
 
 test('bloqueia quando spent + reservado + estimativa > budget; latch + code', () => {
   const l = new BudgetLedger({ budgetUsd: 0.02 });
-  const t1 = l.reserve('classify', 'deepseek/deepseek-v4-pro'); // 1ª chamada: sempre admite
+  const t1 = l.reserve('classify', 'acme/llm-probe'); // 1ª chamada: sempre admite
   t1.commit({ usage: flashUsage(0.015) });
   // sobra 0.005 < seed pro (0.05) -> nega e trava
-  assert.throws(() => l.reserve('classify', 'deepseek/deepseek-v4-pro'), (e) => {
+  assert.throws(() => l.reserve('classify', 'acme/llm-probe'), (e) => {
     assert.ok(e instanceof BudgetExceededError);
     assert.equal(e.code, 'BUDGET_EXCEEDED');
     return true;
   });
   assert.equal(l.stopped, true, 'negação trava o ledger');
-  assert.throws(() => l.reserve('summarize', 'deepseek/deepseek-v4-flash'), BudgetExceededError);
+  assert.throws(() => l.reserve('summarize', 'deepseek/deepseek-v4-flash-0731'), BudgetExceededError);
   assert.equal(l.shouldStop(), true);
 });
 
 test('regra da 1ª chamada: budget menor que o seed ainda admite 1 chamada', () => {
   const l = new BudgetLedger({ budgetUsd: 0.001 });
-  const t = l.reserve('classify', 'deepseek/deepseek-v4-pro'); // seed 0.05 > 0.001, mas é a 1ª
+  const t = l.reserve('classify', 'acme/llm-probe'); // seed 0.05 > 0.001, mas é a 1ª
   t.commit({ usage: flashUsage(0.0008) });
   assert.equal(l.calls, 1);
   assert.equal(l.shouldStop(), true, 'depois da 1ª, a sobra não paga nem uma Flash');
@@ -58,23 +58,23 @@ test('regra da 1ª chamada: budget menor que o seed ainda admite 1 chamada', () 
 
 test('estimativa: seed antes de dados; converge p/ 2x EMA com clamp', () => {
   const l = new BudgetLedger({ budgetUsd: 10 });
-  assert.equal(l.estimate('summarize', 'deepseek/deepseek-v4-flash'), 0.005, 'seed flash');
-  assert.equal(l.estimate('classify', 'deepseek/deepseek-v4-pro'), 0.05, 'seed pro');
+  assert.equal(l.estimate('summarize', 'deepseek/deepseek-v4-flash-0731'), 0.005, 'seed flash');
+  assert.equal(l.estimate('classify', 'acme/llm-probe'), 0.05, 'seed pro');
   for (let i = 0; i < 30; i++) {
-    l.reserve('summarize', 'deepseek/deepseek-v4-flash').commit({ usage: flashUsage(0.002) });
+    l.reserve('summarize', 'deepseek/deepseek-v4-flash-0731').commit({ usage: flashUsage(0.002) });
   }
-  const est = l.estimate('summarize', 'deepseek/deepseek-v4-flash');
+  const est = l.estimate('summarize', 'deepseek/deepseek-v4-flash-0731');
   assert.ok(est > 0.0035 && est < 0.0045, `2x EMA ~ 0.004 (veio ${est})`);
   // clamp inferior: custos ~0 não derrubam a reserva abaixo de seed/10
   for (let i = 0; i < 50; i++) {
-    l.reserve('summarize', 'deepseek/deepseek-v4-flash').commit({ usage: flashUsage(0) });
+    l.reserve('summarize', 'deepseek/deepseek-v4-flash-0731').commit({ usage: flashUsage(0) });
   }
-  assert.equal(l.estimate('summarize', 'deepseek/deepseek-v4-flash'), 0.0005, 'piso seed/10');
+  assert.equal(l.estimate('summarize', 'deepseek/deepseek-v4-flash-0731'), 0.0005, 'piso seed/10');
 });
 
 test('cancel devolve a reserva (e o token é de uso único)', () => {
   const l = new BudgetLedger({ budgetUsd: 1 });
-  const t = l.reserve('classify', 'deepseek/deepseek-v4-pro');
+  const t = l.reserve('classify', 'acme/llm-probe');
   assert.ok(l.reservedUsd > 0);
   t.cancel();
   assert.equal(l.reservedUsd, 0);
@@ -87,8 +87,8 @@ test('singleton: beginRun/endRun persistem runs + llm_usage no NC_HOME temporár
   const runId = beginRun({ command: 'crawl', budgetUsd: 0.5, args: { 'max-articles': 3 } });
   assert.ok(Number.isInteger(runId));
   assert.equal(shouldStop(), false);
-  reserve('summarize', 'deepseek/deepseek-v4-flash').commit({ usage: flashUsage(0.0012) });
-  reserve('classify', 'deepseek/deepseek-v4-pro').commit({ usage: flashUsage(0.02) });
+  reserve('summarize', 'deepseek/deepseek-v4-flash-0731').commit({ usage: flashUsage(0.0012) });
+  reserve('classify', 'acme/llm-probe').commit({ usage: flashUsage(0.02) });
   const state = getBudgetState();
   assert.equal(state.runId, runId);
   assert.equal(state.calls, 2);

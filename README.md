@@ -17,13 +17,13 @@ Usa um **LLM no OpenRouter (DeepSeek V4)** para *derivar seletores CSS reutiliz�
 - **Parada por data** (`--since`): coleta do mais novo ao mais antigo e para no piso (issue e artigo).
 - **Re-crawl incremental + delta:** rodar de novo re-visita as fontes e traz **só o que é novo** (para na 1ª página conhecida; nunca re-baixa o que já tem; `--no-refresh` desliga a re-visita). `export`/`busca` mostram só o novo da **última execução** por padrão (`--all` = acervo todo).
 - **Modo agressivo (DEFAULT):** ignora `robots.txt` e finge um navegador real (UA + headers/client-hints) para passar por 403/anti-bot — sem salvar páginas de desafio. `--no-aggressive` (ou `CRAWLER_AGGRESSIVE=false`) volta ao modo educado. Use só onde você tem direito de arquivar.
-- **Curadoria por IA do agregador:** cada issue de fonte `index` vira **itens estruturados** (`kind` news/tool/release + seção + o blurb do próprio agregador) extraídos por agentes Flash em paralelo (chunks). O item é **cadastrado já na curadoria** — se o alvo for raso/bloqueado (ferramenta em GitHub, release page…), a informação do agregador fica; o corpo do alvo é **enriquecimento**. Patrocínio/vaga não entram (backstop determinístico além do LLM).
-- **Limpeza por IA antes de salvar:** o conteúdo extraído passa pelo Flash p/ remover sujeira de UI (menus, contadores, subscribe, rodapé) preservando o texto real — com régua anti-truncamento (`sanityCheckCleaned`); rejeitou, mantém o original e registra o motivo.
+- **Curadoria por IA do agregador:** cada issue de fonte `index` vira **itens estruturados** (`kind` news/tool/release + seção + o blurb do próprio agregador) extraídos pelo modelo em paralelo (chunks). O item é **cadastrado já na curadoria** — se o alvo for raso/bloqueado (ferramenta em GitHub, release page…), a informação do agregador fica; o corpo do alvo é **enriquecimento**. Patrocínio/vaga não entram (backstop determinístico além do LLM).
+- **Limpeza por IA antes de salvar:** o conteúdo extraído passa pelo modelo p/ remover sujeira de UI (menus, contadores, subscribe, rodapé) preservando o texto real — com régua anti-truncamento (`sanityCheckCleaned`); rejeitou, mantém o original e registra o motivo.
 - **Verificação pós-cadastro:** varredura paralela dá um veredito `ok|suspect|junk` + notas a CADA artigo salvo (persistidos). `ncrawl verify` re-roda sob demanda.
 - **Trace total + `ncrawl inspect`:** todo estágio (fetch, curadoria, item salvo/ignorado com motivo, limpeza, enriquecimento, verificação) grava na tabela `events`; `inspect` mostra a árvore da run (itens por issue, vereditos, custos por etapa) e `--url <substr>` audita um link específico.
-- **Seletores por IA lendo a página real:** links/conteúdo (Pro) e **data por item** (Flash, par CSS+regex) são derivados do HTML real, validados contra a própria página, cacheados por template de weekly e re-derivados quando quebram (self-healing).
+- **Seletores por IA lendo a página real:** links/conteúdo (xhigh) e **data por item** (high, par CSS+regex) são derivados do HTML real, validados contra a própria página, cacheados por template de weekly e re-derivados quando quebram (self-healing).
 - **Tags multi-faceta** contra um vocabulário controlado (9 facetas, ~800 tags) e **resumos + títulos em PT-BR**.
-- **Busca na base 100% IA:** no CLI/TUI, exaustiva (Flash, avalia cada artigo do escopo) ou por tags (Pro); no **buscador web**, soft **em lote** (1 Flash por ~40 artigos) ou **profunda** por artigo com escopo de **fontes+período** e confirmação de custo — sempre devolvendo **Notícias** e **Ferramentas**. Na TUI os resultados são navegáveis, com **preview** do artigo e abertura do link no navegador.
+- **Busca na base 100% IA:** no CLI/TUI, exaustiva (high, avalia cada artigo do escopo) ou por tags (high); no **buscador web**, soft **em lote** (1 chamada por ~40 artigos) ou **profunda** por artigo com escopo de **fontes+período** e confirmação de custo — sempre devolvendo **Notícias** e **Ferramentas**. Na TUI os resultados são navegáveis, com **preview** do artigo e abertura do link no navegador.
 - **Histórico de buscas (a busca não é mais efêmera):** toda busca IA concluída é **salva automaticamente**; **reabrir** mostra o resultado **congelado** re-hidratado do acervo (**zero LLM**) e **rodar de novo** re-paga com a confirmação de custo usual. Persistido no **SQLite** (CLI/TUI e buscador web local — tabela `searches`) e no **navegador** (webapp estático — localStorage). Dropdown de recentes no campo + painel/tela de histórico nas três frentes.
 - **Publicação do site (push = deploy):** um **buscador estático** (`webapp/`, Vite+React, sem backend) lê um snapshot JSON do acervo; `git push` na main re-exporta o snapshot (hook `.githooks/pre-push`) e a **Vercel** publica sozinha (Git integration). Veja [Publicar o site](#publicar-o-site-buscador-estático).
 - **Menu guiado (TUI)** bilíngue PT/EN que monta os parâmetros, mostra o comando equivalente e exibe progresso ao vivo — sem substituir as flags.
@@ -35,12 +35,12 @@ seed (listing) ─► fetchSmart (got → Playwright se precisar de JS)
                      │
                      ├─ cache de seletor? ──sim──► aplica (Cheerio) ──► enfileira artigos
                      │
-                     └─ não/quebrou ─► DeepSeek V4 Pro (reasoning xhigh) deriva seletor
+                     └─ não/quebrou ─► o modelo (reasoning xhigh) deriva seletor
                                         └─ valida (≥3 links) ─► salva no SQLite ─► usa p/ todas as páginas
-                                        └─ falhou ─► fallback DeepSeek V4 Flash item-a-item
+                                        └─ falhou ─► fallback item-a-item (mesmo modelo)
 
 artigo ─► fetchSmart ─► Readability ──ok──► salva (SQLite)
-                         └─ falhou ─► content selector (Pro, cacheado) ─► senão ─► Flash extrai
+                         └─ falhou ─► content selector (xhigh, cacheado) ─► senão ─► o modelo extrai
 ```
 
 Tudo passa por uma **fila/frontier no SQLite** (`pending → in_progress → done/failed`), então o crawler é **resumível**: se cair, é só rodar de novo.
@@ -116,8 +116,8 @@ npm run add -- https://exemplo.com/arquivo --name "Minha" --type index --max-ind
 npm run export -- --format md          # data/export/<fonte>/*.md — só a última run (--all = tudo; ou --format json)
 npm run export -- --format web         # snapshot JSON do acervo p/ o buscador estático (webapp/public/data)
 npm run finish -- --budget 2           # termina os PENDENTES (verify+classify+summarize) sem novo crawl; teto US$2, retomável
-npm run search -- react server components --mode B   # por tags (5 Pro); só a última run (--all = acervo)
-npm run search -- "local llm" --mode A --limit 20 --yes --all   # exaustiva no acervo todo (Flash)
+npm run search -- react server components --mode B   # por tags (5 chamadas, high); só a última run (--all = acervo)
+npm run search -- "local llm" --mode A --limit 20 --yes --all   # exaustiva no acervo todo (high)
 npm run web                            # buscador no navegador (localhost:8477): busca IA soft/profunda + browse
 npm run key -- set <chave>             # valida a chave OpenRouter e salva em ~/.newsletter-crawler/.env (ou: ncrawl key set)
 npm run reset -- --yes                 # APAGA TODOS OS DADOS (slate limpo); respeita DB_PATH
@@ -126,9 +126,9 @@ npm test                               # node:test (datas, anti-bot, busca em lo
 
 ### Resumos PT-BR e busca na base
 - **Resumos:** o estágio de resumo gera `title_pt` + `summary_pt` (resumo legível em **português do Brasil**) por artigo. O `content` original é mantido (busca/tags usam ele). Roda **dentro do crawl** (streaming + sweep pós-crawl) e no `npm run finish` — não há comando solto (desligue no crawl com `SUMMARIZE_AFTER_CRAWL=false` ou `--no-summarize`).
-- **Busca — Modo A (exaustivo):** `--mode A` faz **1 chamada Flash por artigo** (concorrência 50), julgando `direto`/`parecido`; rankeia direto>parecido. Guard de custo: acima de `SEARCH_MODE_A_CONFIRM` (~200) artigos exige `--yes`. O prompt de relevância foi **calibrado por avaliação** (`eval/`, rubrica + few-shot): F1 macro no Flash 0.73 → **0.85**, cortando falsos positivos.
-- **Busca — Modo B (por tags):** `--mode B` faz **5 chamadas Pro** (1 por faceta de retrieval) → une as tags → traz artigos cujas tags cruzam. Rápido; **exige classificação feita**.
-- **Buscador web (`npm run web`):** a busca digitada é **100% IA** — Enter dispara a **soft** (1 Flash `xhigh` por lote de ~40 artigos, lendo título+resumo) e o toggle **Busca profunda** avalia artigo a artigo (conteúdo), com **fontes (chips) + período** como escopo e um diálogo de confirmação com contagem + ~US$. Sem key configurada, um **modal** valida e salva a key OpenRouter em `~/.newsletter-crawler/.env` (vale na hora, sem reiniciar). O browse sem consulta continua instantâneo por filtros SQL (fonte/período/facetas/kind — incl. `release`); a busca por palavras foi **removida**.
+- **Busca — Modo A (exaustivo):** `--mode A` faz **1 chamada do modelo por artigo** (concorrência 50, high), julgando `direto`/`parecido`; rankeia direto>parecido. Guard de custo: acima de `SEARCH_MODE_A_CONFIRM` (~200) artigos exige `--yes`. O prompt de relevância foi **calibrado por avaliação** (`eval/`, rubrica + few-shot): F1 macro 0.73 → **0.85**, cortando falsos positivos.
+- **Busca — Modo B (por tags):** `--mode B` faz **5 chamadas** (high; 1 por faceta de retrieval) → une as tags → traz artigos cujas tags cruzam. Rápido; **exige classificação feita**.
+- **Buscador web (`npm run web`):** a busca digitada é **100% IA** — Enter dispara a **soft** (1 chamada por lote de ~40 artigos, `medium`, lendo título+resumo) e o toggle **Busca profunda** avalia artigo a artigo (conteúdo), com **fontes (chips) + período** como escopo e um diálogo de confirmação com contagem + ~US$. Sem key configurada, um **modal** valida e salva a key OpenRouter em `~/.newsletter-crawler/.env` (vale na hora, sem reiniciar). O browse sem consulta continua instantâneo por filtros SQL (fonte/período/facetas/kind — incl. `release`); a busca por palavras foi **removida**.
 - Toda busca devolve dois grupos: **Notícias** e **Ferramentas** (artigo que é *sobre* uma ferramenta vai p/ Ferramentas). Na TUI (`npm run ui` → Buscar), os resultados são **navegáveis**: ↑/↓ selecionam, **Enter** abre a preview (conteúdo completo, rolável), **`o`** abre o link no navegador, Esc/b volta.
 - **Escopo padrão** do `search`: a última run **que trouxe artigos** (delta real); `--all` = acervo todo.
 - **Histórico de buscas:** toda busca IA concluída entra sozinha num histórico. **Reabrir** re-hidrata os resultados **congelados** do acervo (consulta, escopo, custo real, cards) **sem chamar a IA de novo**; **rodar de novo** re-executa com o mesmo escopo (passando pela confirmação de custo). No CLI/TUI e no buscador web local o histórico vive no **SQLite** (tabela `searches`; na TUI é o item de menu **Histórico de buscas** — Enter abre, `r` re-roda, `d` apaga, `x`×2 limpa); no **webapp estático** vive no **navegador** (localStorage, auto-save sem limite). Itens que saíram do acervo (por `purge`) são contados, nunca quebram a restauração.
@@ -153,11 +153,10 @@ O acervo pode virar um **buscador estático** (`webapp/`, Vite+React, **sem back
 - ⚠️ Enquanto uma coleta/enriquecimento estiver **escrevendo no banco em outro terminal**, cada push encontra dado novo e re-exporta/aborta em loop; use `git push --no-verify` para publicar o snapshot já commitado.
 
 ## Modelos (OpenRouter / DeepSeek V4)
-- **Pro** `deepseek/deepseek-v4-pro` com `reasoning.effort: "xhigh"` — deriva/repara seletores (1 chamada amortizada por template). Use `"xhigh"`, **nunca** `"max"`.
-- **Flash** `deepseek/deepseek-v4-flash` com `reasoning.effort: "high"` — fallback item-a-item, próxima página, extração de artigo, resumo PT-BR, busca modo A.
-- **Classificação (custo):** as 9 facetas de tag rodam **por faceta**; só as **core** (`domain`, `topic-technology`) no **Pro/high**, as outras 7 no **Flash/medium** sobre título+início do corpo (`CLASSIFY_MAX_CHARS`=2000; ajuste por faceta com `LLM_MODEL_CLASSIFY_<FACETA>`/`LLM_EFFORT_CLASSIFY_<FACETA>`). Classificar já foi ~92% do gasto de uma coleta longa; este perfil corta ~4× (o próximo salto seria classificar em **lote** de artigos por chamada).
+- **Modelo único** `deepseek/deepseek-v4-flash-0731` — derivação de seletor e os fallbacks de extração/paginação (item-a-item, próxima página, extração de artigo) usam `reasoning.effort: "xhigh"` (1 chamada amortizada por template; use `"xhigh"`, **nunca** `"max"`); resumo PT-BR, busca, curadoria e verificação usam `"high"`; etapas mecânicas (limpeza pré-save, lote da busca soft) usam `"medium"`.
+- **Classificação (custo):** as 9 facetas de tag rodam **por faceta**; só as **core** (`domain`, `topic-technology`) em `effort: "high"`, as outras 7 em `effort: "medium"` sobre título+início do corpo (`CLASSIFY_MAX_CHARS`=2000; ajuste por faceta com `LLM_MODEL_CLASSIFY_<FACETA>`/`LLM_EFFORT_CLASSIFY_<FACETA>`). Classificar já foi ~92% do gasto de uma coleta longa; este perfil corta ~4× (o próximo salto seria classificar em **lote** de artigos por chamada).
 - Saídas estruturadas via `response_format: json_schema` (strict) + validação `zod`.
-- **JSON inválido é retomável:** o Flash às vezes trunca a resposta; `callJSON` re-amostra **2× no Flash** e, se ainda falhar, faz **uma última tentativa no Pro** (mais confiável no JSON). O `maxRetries` do SDK cobre 429/5xx à parte.
+- **JSON inválido é retomável:** o modelo às vezes trunca a resposta; `callJSON` re-amostra **2×** e, se ainda falhar, faz **uma última tentativa**. O `maxRetries` do SDK cobre 429/5xx à parte.
 
 ## Estrutura
 ```
@@ -172,8 +171,8 @@ src/substack.js   atalho opcional via API JSON do Substack
 src/crawl.js      frontier + processJob + crawlArchive + paginação
 src/classify.js   classificação multi-faceta de tags (vocabulário controlado)
 src/taxonomy.js   vocabulário/facetas + prompts (classificação e busca por tags)
-src/summarize.js  resumo + título PT-BR por artigo (Flash)
-src/search.js     busca na base: modo A (Flash, varre o escopo) + modo B (Pro, por tags) + searchWeb (web: soft em lote / profunda)
+src/summarize.js  resumo + título PT-BR por artigo (high)
+src/search.js     busca na base: modo A (high, varre o escopo) + modo B (high, por tags) + searchWeb (web: soft em lote / profunda)
 src/web.js        buscador web: servidor node:http zero-dep (API JSON + busca IA + key) — `npm run web`
 src/web-ui/       app React zero-build do buscador (htm + UMD servidos de node_modules)
 src/keys.js       chave OpenRouter: probe (GET /api/v1/key) + upsert idempotente em NC_HOME/.env
@@ -181,10 +180,10 @@ src/commands.js   implementação dos comandos (compartilhada CLI + UI) + getSta
 src/index.js      CLI (parseFlags + dispatch) + gate do menu guiado
 src/ui/           menu Ink/React (htm, sem build): App, screens, RunView (painel ao vivo), HistoryView, i18n
 webapp/           buscador ESTÁTICO (Vite+React, deploy Vercel): lê o snapshot JSON, busca IA no navegador
-eval/             harness de avaliação do prompt de busca (golden set, variantes, Flash vs Pro) → REPORT.md
+eval/             harness de avaliação do prompt de busca (golden set, variantes) → REPORT.md
 ```
 
 ## Notas
 - **Cortesia/legal:** respeita `robots.txt` e Crawl-delay (desative com `CRAWLER_RESPECT_ROBOTS=false`, ou por execução com `--aggressive` — que também usa UA de navegador real —, só para conteúdo que você tem direito de arquivar), usa UA identificável, delay com jitter e circuit breaker por host. Raspe apenas conteúdo público.
 - **Sem `axios`** (incidente de supply-chain de 31/03/2026); usamos `got`. As versões são fixadas no `package-lock.json`.
-- **Custo:** `xhigh` é cobrado como tokens de saída — por isso o Pro só deriva seletor (uma vez por template) e o DOM é podado antes de ir ao LLM.
+- **Custo:** `xhigh` é cobrado como tokens de saída — por isso o modelo só usa xhigh na derivação de seletor (uma vez por template) e o DOM é podado antes de ir ao LLM.

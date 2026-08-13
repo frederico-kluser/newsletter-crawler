@@ -1,29 +1,789 @@
-<!doctype html><html lang="pt-BR" data-bs-theme="dark"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>v3.0.0 — Crawl Incremental + Parada Determinística</title><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous"><style>body{background:#1a1a2e;color:#e0e0e0}.card{background:#16213e;border:1px solid #0f3460}pre{background:#0d1117;padding:1rem;border-radius:6px;color:#c9d1d9}h2{color:#00d4ff}</style></head><body class="container py-4">
-<h1>🚀 v3.0.0</h1><p class="text-muted">2026-08-05 · Breaking change no comportamento de paginação</p>
+<!doctype html>
 
-<div class="card mb-4"><div class="card-body">
-<h2>🎯 Tema: Crawl incremental determinístico</h2>
-<p>O crawler agora usa <strong>conteúdo já capturado</strong> como freio da paginação, não limites artificiais de páginas. Zero desperdício de LLM para re-processar issues já conhecidas.</p>
-</div></div>
+<html lang="pt-BR" data-bs-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Diz ao navegador que a página é escura ANTES do CSS carregar: sem flash
+     branco, e os controles nativos (scrollbar, select, input) já nascem escuros. -->
+<meta name="color-scheme" content="dark">
+<title>EXPLAINER — deep-orchestrator · de-para da execução</title>
 
-<div class="card mb-4"><div class="card-body"><h2>🛑 Parada determinística (isUrlKnown)</h2>
-<p>Consulta articles.url / pages.url / frontier-done.url / articles.issue_url para detectar se um link da listagem já foi capturado. Se <strong>100% dos links</strong> da página são conhecidos → break imediato. Zero LLM, puramente SQL.</p></div></div>
+<link rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+      integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+      crossorigin="anonymous">
+<link rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"
+      integrity="sha384-CK2SzKma4jA5H/MXDUU7i1TqZlCFaD4T01vtyDFvPlD97JQyS+IsSh1nI2EFbpyk"
+      crossorigin="anonymous">
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github-dark.min.css"
+      integrity="sha384-wH75j6z1lH97ZOpMOInqhgKzFkAInZPPSPlZpYKYTOqsaizPvhQZmAtLcPKXpLyH"
+      crossorigin="anonymous">
 
-<div class="card mb-4"><div class="card-body"><h2>📅 Backfill de datas</h2>
-<p>1.828 artigos (de 2.085 sem data) herdaram <code>published_at</code> da issue. Cobertura de datas: 50% → <strong>93.9%</strong>. Fallback data-* no extractPublishedDate + herança no processArticle.</p></div></div>
+<style>
+  /* ── Paleta do deep-orchestrator ──────────────────────────────────────────
+     Fundo #1a1a2e, accent #00d4ff (ciano), sucesso #00ff88, warning #ffaa00.
+     Tudo deriva destas variáveis — não cravamos hex no conteúdo. */
+  :root {
+    --do-bg: #1a1a2e;
+    --do-bg-soft: #16213e;
+    --do-card: #1e1e38;
+    --do-accent: #00d4ff;
+    --do-success: #00ff88;
+    --do-warning: #ffaa00;
+    --do-danger: #ff6b6b;
+  }
 
-<div class="card mb-4"><div class="card-body"><h2>🛡️ Guardas de qualidade</h2>
-<ul><li><strong>isErrorPage()</strong>: bloqueia salvamento de páginas 404/403/500 como artigos</li><li><strong>URL validation</strong>: rejeita URLs malformadas (quebradas pelo LLM) no enqueue</li><li><strong>Taxonomia</strong>: javascript/typescript/react/vue/nodejs/oxc adicionados ao vocab</li></ul></div></div>
+  [data-bs-theme="dark"] {
+    --bs-body-bg: var(--do-bg);
+    --bs-body-color: #dcdce8;
+    --bs-secondary-color: #8b8ba7;
+    --bs-border-color: #2e2e4a;
+    --bs-body-font-family: system-ui, -apple-system, 'Segoe UI', Roboto,
+                           'Helvetica Neue', Arial, sans-serif;
+  }
 
-<div class="card mb-4"><div class="card-body"><h2>🧹 Limpeza</h2>
-<ul><li>Código morto removido: sinceIsDefault, SINCE_MAX_INDEX_PAGES</li><li>maxPages sem limite artificial — isUrlKnown é o freio</li><li>1 artigo "404 Not Found" e 1 URL quebrada removidos do banco</li></ul></div></div>
+  body { background-image: radial-gradient(ellipse 80% 40% at 50% -10%, rgba(0,212,255,.07), transparent 60%); }
 
-<div class="card mb-4"><div class="card-body"><h2>📊 Impacto</h2><table class="table table-dark table-sm">
-<tr><th>Métrica</th><th>Antes</th><th>Depois</th></tr>
-<tr><td>Páginas visitadas por crawl</td><td>60 (SINCE_MAX_INDEX_PAGES)</td><td>1-3 (isUrlKnown para)</td></tr>
-<tr><td>Artigos com data</td><td>50%</td><td>93.9%</td></tr>
-<tr><td>Páginas 404 salvas</td><td>Sim</td><td>Bloqueado</td></tr>
-<tr><td>Tags comuns no vocab</td><td>Ausentes</td><td>Presentes</td></tr>
-</table></div></div>
+  /* Âncora não fica escondida atrás da navbar fixa. */
+  [id] { scroll-margin-top: 5rem; }
 
-<footer class="text-muted small">🤖 Gerado com Claude Code · v3.0.0</footer></body></html>
+  a { color: var(--do-accent); }
+  a:hover { color: #4de0ff; }
+
+  .brand-accent, .stat-value { color: var(--do-accent); }
+
+  /* Navbar com borda inferior em tom de accent. */
+  .navbar { border-bottom: 1px solid rgba(0,212,255,.25); }
+
+  /* Hero com gradiente sutil: azul-noite para um leve toque ciano. */
+  .explainer-hero {
+    background: linear-gradient(135deg, #16213e 0%, #1a1a2e 55%, #0f3460 100%);
+    border: 1px solid var(--bs-border-color);
+    box-shadow: inset 0 0 2.5rem rgba(0,212,255,.05);
+  }
+
+  /* Título de seção com filete de gradiente sutil sob o texto. */
+  .pane-title { position: relative; padding-bottom: .5rem; }
+  .pane-title::after {
+    content: ''; position: absolute; left: 0; bottom: 0;
+    height: 2px; width: 4.5rem; border-radius: 2px;
+    background: linear-gradient(90deg, var(--do-accent), transparent);
+  }
+
+  /* Cards e grupos de lista: tom levemente mais claro que o fundo. */
+  .card { --bs-card-bg: var(--do-card); --bs-card-border-color: var(--bs-border-color); }
+  .card-header {
+    background: linear-gradient(90deg, rgba(0,212,255,.10), rgba(0,212,255,0));
+    border-bottom: 1px solid var(--bs-border-color);
+  }
+  .list-group-item { background-color: var(--do-card); }
+
+  /* Abas: ativa em accent com sublinhado no mesmo tom. */
+  .nav-tabs { border-bottom-color: var(--bs-border-color); }
+  .nav-tabs .nav-link { color: var(--bs-secondary-color); }
+  .nav-tabs .nav-link:hover { color: var(--bs-body-color); border-color: var(--bs-border-color) var(--bs-border-color) transparent; }
+  .nav-tabs .nav-link.active {
+    color: var(--do-accent); font-weight: 600;
+    background-color: transparent;
+    border-color: var(--bs-border-color) var(--bs-border-color) var(--do-accent);
+  }
+
+  /* Badges da paleta. */
+  .badge-accent  { background: rgba(0,212,255,.14);  color: var(--do-accent);  border: 1px solid rgba(0,212,255,.35); }
+  .badge-ok      { background: rgba(0,255,136,.12);  color: var(--do-success); border: 1px solid rgba(0,255,136,.35); }
+  .badge-warn    { background: rgba(255,170,0,.12);  color: var(--do-warning); border: 1px solid rgba(255,170,0,.35); }
+  .badge-danger  { background: rgba(255,107,107,.12); color: var(--do-danger); border: 1px solid rgba(255,107,107,.35); }
+  .badge-soft    { background: rgba(139,139,167,.12); color: var(--bs-secondary-color); border: 1px solid var(--bs-border-color); }
+
+  /* Diff stats: + verde, − vermelho, dígitos tabulares. */
+  .diff-plus  { color: var(--do-success); font-variant-numeric: tabular-nums; }
+  .diff-minus { color: var(--do-danger); font-variant-numeric: tabular-nums; }
+
+  /* De-Para: cartões com borda indicando o lado da comparação. */
+  .depara-antes  { border-color: rgba(139,139,167,.45); }
+  .depara-depois { border-color: rgba(0,255,136,.35); }
+
+  /* Timeline vertical: linha + marcador ciano com brilho sutil. */
+  .timeline { position: relative; }
+  .timeline-item { position: relative; padding-left: 1.4rem; border-left: 2px solid var(--bs-border-color); }
+  .timeline-item::before {
+    content: ''; position: absolute; left: -.42rem; top: .3rem;
+    width: .7rem; height: .7rem; border-radius: 50%;
+    background: var(--do-accent); box-shadow: 0 0 .6rem rgba(0,212,255,.6);
+  }
+  .timeline-item:last-child { border-left-color: transparent; }
+
+  /* Bloco de código: espaço à direita para o botão de copiar não cobrir o texto. */
+  pre { position: relative; margin-bottom: 1rem; }
+  pre code.hljs { padding-right: 4rem; border-radius: var(--bs-border-radius); font-size: .875rem; }
+
+  .copy-btn { position: absolute; top: .5rem; right: .5rem; opacity: .4; transition: opacity .15s; }
+  pre:hover .copy-btn, .copy-btn:focus-visible { opacity: 1; }
+
+  /* Abrir o arquivo em #pane-x foca o painel (bom: o leitor de tela cai no
+     conteúdo), e o outline branco do navegador fica gritante. Anel discreto,
+     do tema, no lugar — tirar o indicador por completo quebraria quem navega
+     por teclado. */
+  .tab-pane:focus-visible { outline: 0; box-shadow: 0 0 0 .2rem rgba(var(--bs-emphasis-color-rgb), .15); }
+
+  /* Impressão/PDF: abre TODAS as abas, senão o papel sai com uma só. */
+  @media print {
+    .nav-tabs, .copy-btn, details, .explainer-hero { display: none !important; }
+    .tab-content > .tab-pane { display: block !important; opacity: 1 !important; page-break-inside: avoid; }
+    .tab-pane::before { content: attr(data-print-title); display: block;
+                        font-size: 1.25rem; font-weight: 600; margin: 1.5rem 0 .5rem; }
+  }
+</style>
+</head>
+
+<body class="bg-body">
+
+<nav class="navbar navbar-expand-lg sticky-top bg-body-tertiary">
+  <div class="container">
+    <span class="navbar-brand fw-semibold"><i class="bi bi-diagram-3 brand-accent me-2"></i>deep-orchestrator <span class="text-body-secondary fw-normal">· EXPLAINER</span></span>
+    <span class="navbar-text small text-body-secondary d-none d-md-inline">v2 · 2026-08-13</span>
+  </div>
+</nav>
+
+<main class="container py-4" style="max-width: 62rem">
+
+  <header class="explainer-hero rounded-4 p-4 p-md-5 mb-4">
+    <span class="badge badge-accent mb-3"><i class="bi bi-clipboard-data me-1"></i>Relatório de execução</span>
+    <h1 class="display-6 fw-semibold text-white mb-2">O que aconteceu nesta execução</h1>
+    <p class="lead text-white-50 mb-3">Troca de TODOS os modelos LLM do pipeline para <code>deepseek/deepseek-v4-flash-0731</code> mantendo os níveis de think (effort xhigh/high/medium) já definidos — incluindo o think mínimo (medium) no lote de ~40 artigos da busca soft (searchBatch). 2 ondas de feature + 1 testing subwave, revisão adversarial em todas as ondas, gates verdes (352 testes raiz + 66 webapp).</p>
+    <div class="d-flex flex-wrap gap-2">
+      <span class="badge badge-accent">v2</span>
+      <span class="badge badge-soft"><i class="bi bi-calendar3 me-1"></i>2026-08-13</span>
+      <span class="badge badge-soft"><i class="bi bi-git-branch me-1"></i>main</span>
+    </div>
+  </header>
+
+  <!-- ABAS
+       Regras que não podem ser quebradas:
+       · <ul role="tablist"> e cada <button role="tab">
+       · button.id  ←→  tabpanel.aria-labelledby
+       · button.data-bs-target ←→ #id do tabpanel (e aria-controls com o mesmo id, sem #)
+       · exatamente UM botão .active + UM painel .show.active
+       O Bootstrap já faz navegação por seta/Home/End no tablist; não reimplemente. -->
+  <ul class="nav nav-tabs" id="doc-tabs" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button class="nav-link active" id="tab-visao" data-bs-toggle="tab" data-bs-target="#pane-visao"
+              type="button" role="tab" aria-controls="pane-visao" aria-selected="true">
+        <i class="bi bi-eye me-1"></i>Visão geral
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="tab-ondas" data-bs-toggle="tab" data-bs-target="#pane-ondas"
+              type="button" role="tab" aria-controls="pane-ondas" aria-selected="false">
+        <i class="bi bi-layers me-1"></i>Ondas
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="tab-arquivos" data-bs-toggle="tab" data-bs-target="#pane-arquivos"
+              type="button" role="tab" aria-controls="pane-arquivos" aria-selected="false">
+        <i class="bi bi-files me-1"></i>Arquivos
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="tab-depara" data-bs-toggle="tab" data-bs-target="#pane-depara"
+              type="button" role="tab" aria-controls="pane-depara" aria-selected="false">
+        <i class="bi bi-arrow-left-right me-1"></i>De-Para
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="tab-decisoes" data-bs-toggle="tab" data-bs-target="#pane-decisoes"
+              type="button" role="tab" aria-controls="pane-decisoes" aria-selected="false">
+        <i class="bi bi-lightbulb me-1"></i>Decisões
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="tab-timeline" data-bs-toggle="tab" data-bs-target="#pane-timeline"
+              type="button" role="tab" aria-controls="pane-timeline" aria-selected="false">
+        <i class="bi bi-clock-history me-1"></i>Timeline
+      </button>
+    </li>
+  </ul>
+
+  <div class="tab-content border border-top-0 rounded-bottom p-4" id="doc-tabs-content">
+
+    <!-- ══════════════ ABA 1 · VISÃO GERAL ══════════════ -->
+    <div class="tab-pane fade show active" id="pane-visao" role="tabpanel"
+         aria-labelledby="tab-visao" tabindex="0" data-print-title="Visão geral">
+      <h2 class="h4 pane-title">Resumo da execução</h2>
+      <p class="text-body-secondary">Troca de TODOS os modelos LLM do pipeline para <code>deepseek/deepseek-v4-flash-0731</code> mantendo os níveis de think (effort xhigh/high/medium) já definidos — incluindo o think mínimo (medium) no lote de ~40 artigos da busca soft (searchBatch). 2 ondas de feature + 1 testing subwave, revisão adversarial em todas as ondas, gates verdes (352 testes raiz + 66 webapp).</p>
+
+      <div class="alert alert-primary d-flex gap-2" role="alert">
+        <i class="bi bi-info-circle-fill flex-shrink-0"></i>
+        <div><strong>O que é este documento:</strong> o EXPLAINER gerado pelo deep-orchestrator na fase COMMIT-FINAL, ao fim de cada execução. Mostra o de-para (antes/depois) de tudo que foi feito: ondas, worktrees, arquivos modificados, decisões autônomas e timeline.</div>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-6 col-lg-4">
+          <div class="card h-100 text-center">
+            <div class="card-body py-4">
+              <i class="bi bi-layers fs-3 stat-value"></i>
+              <div class="display-6 fw-bold stat-value">2</div>
+              <div class="text-body-secondary small">Ondas executadas</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-lg-4">
+          <div class="card h-100 text-center">
+            <div class="card-body py-4">
+              <i class="bi bi-robot fs-3 stat-value"></i>
+              <div class="display-6 fw-bold stat-value">6</div>
+              <div class="text-body-secondary small">Sub-agentes</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-lg-4">
+          <div class="card h-100 text-center">
+            <div class="card-body py-4">
+              <i class="bi bi-git-commit fs-3 stat-value"></i>
+              <div class="display-6 fw-bold stat-value">4</div>
+              <div class="text-body-secondary small">Commits (squash)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h2 class="h4 pane-title mt-5">Como este documento é gerado</h2>
+      <p>O orquestrador, na fase COMMIT-FINAL, gera o explainer a partir deste template:</p>
+<pre><code class="language-bash"># Gera o explainer a partir do template
+./scripts/generate-explainer.sh &gt; EXPLAINER.html
+# Ou preenche manualmente os placeholders 2, 2026-08-13, main, ...</code></pre>
+      <p class="text-body-secondary small">O template é <code>templates/html-explainer.html</code> — arquivo único, sem build: abre por file:// e imprime em PDF com todas as abas.</p>
+
+      <details class="mt-4">
+        <summary class="text-body-secondary">Placeholders usados na geração</summary>
+        <div class="table-responsive mt-2">
+          <table class="table table-sm align-middle">
+            <thead>
+              <tr><th scope="col">Placeholder</th><th scope="col">Onde aparece</th><th scope="col">Preenchido com</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>&#123;&#123;VERSION&#125;&#125;</code></td><td>Navbar, hero, rodapé</td><td>Versão do orquestrador</td></tr>
+              <tr><td><code>&#123;&#123;DATE&#125;&#125;</code></td><td>Navbar, hero, rodapé</td><td>Data da execução</td></tr>
+              <tr><td><code>&#123;&#123;BRANCH&#125;&#125;</code></td><td>Hero, rodapé</td><td>Branch principal</td></tr>
+              <tr><td><code>&#123;&#123;TASK_SUMMARY&#125;&#125;</code></td><td>Visão geral</td><td>Resumo da tarefa</td></tr>
+              <tr><td><code>&#123;&#123;TOTAL_WAVES&#125;&#125;</code></td><td>Cards de estatística</td><td>Número de ondas</td></tr>
+              <tr><td><code>&#123;&#123;TOTAL_AGENTS&#125;&#125;</code></td><td>Cards de estatística</td><td>Número de sub-agentes</td></tr>
+              <tr><td><code>&#123;&#123;TOTAL_COMMITS&#125;&#125;</code></td><td>Cards de estatística</td><td>Número de commits</td></tr>
+              <tr><td><code>&#123;&#123;WAVES_TABLE&#125;&#125;</code></td><td>Aba Ondas</td><td>Tabela HTML de ondas (Onda | Worktree | Tarefas | Commits | Status)</td></tr>
+              <tr><td><code>&#123;&#123;FILES_TABLE&#125;&#125;</code></td><td>Aba Arquivos</td><td>Tabela HTML de arquivos modificados (Arquivo | Tipo | Diff)</td></tr>
+              <tr><td><code>&#123;&#123;BEFORE_AFTER&#125;&#125;</code></td><td>Aba De-Para</td><td>Seções de de-para adicionais</td></tr>
+              <tr><td><code>&#123;&#123;DECISIONS&#125;&#125;</code></td><td>Aba Decisões</td><td>Lista de decisões autônomas</td></tr>
+              <tr><td><code>&#123;&#123;TIMELINE&#125;&#125;</code></td><td>Aba Timeline</td><td>Linha do tempo da execução</td></tr>
+              <tr><td><code>&#123;&#123;COMMITS_LIST&#125;&#125;</code></td><td>Aba Arquivos</td><td>Lista de commits squash</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </details>
+    </div>
+
+    <!-- ══════════════ ABA 2 · ONDAS EXECUTADAS ══════════════ -->
+    <div class="tab-pane fade" id="pane-ondas" role="tabpanel"
+         aria-labelledby="tab-ondas" tabindex="0" data-print-title="Ondas executadas">
+      <h2 class="h4 pane-title">Ondas executadas</h2>
+      <p>Uma linha por sub-agente. Cada sub-agente trabalha numa worktree Git nomeada; a integração é squash-merge um a um, com gate (build + testes) entre merges. Worktrees e branches <code>wt/*</code> são removidos ao fim de cada onda.</p>
+
+            <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead>
+            <tr>
+              <th scope="col">Onda</th>
+              <th scope="col">Worktree</th>
+              <th scope="col">Tarefas</th>
+              <th scope="col" class="text-end">Commits</th>
+              <th scope="col">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="badge badge-accent">Onda 1</span></td>
+              <td><code>onda1-swap-modelo</code></td>
+              <td>Troca de slugs em config/models.json (26 entradas), src/config.js (MODELS.pro/flash), src/llm.js, src/crawl.js, README.md, test/budget.test.js, test/export-web.test.js, .env.example — efforts preservados. 2 rodadas de fix pós-revisão adversarial (docs/comentários com tiers extintos).</td>
+              <td class="text-end">1</td>
+              <td><span class="badge badge-ok">Concluída</span></td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-accent">Onda 2</span></td>
+              <td><code>onda2-meta-json-slugs</code></td>
+              <td>webapp/public/data/meta.json — 4 slugs de search.models (searchBatch/searchRelevance/searchSpec/fallback) → slug novo. Edição cirúrgica: o webapp faz chamadas REAIS ao OpenRouter com esses slugs e o banco local está vazio (export seria destrutivo).</td>
+              <td class="text-end">1</td>
+              <td><span class="badge badge-ok">Concluída</span></td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-accent">Onda 2</span></td>
+              <td><code>onda2-cost-test-fixtures</code></td>
+              <td>webapp/test/cost.test.js — fixtures → slug novo; caminho não-flash do seed via <code>acme/llm-probe</code> (mesma convenção do budget.test.js); label do teste renomeado.</td>
+              <td class="text-end">1</td>
+              <td><span class="badge badge-ok">Concluída</span></td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-ok">Testes</span></td>
+              <td><code>test-onda1-model-swap</code></td>
+              <td>11 testes novos (model-config.test.js + model-config.env.test.js): slug único em todos os STAGE_KEYS, efforts por tabela literal, searchBatch=medium, MODELS.pro===flash, seedForModel, contrato do models.json, gotcha articleReclean, override por env + guard max→xhigh. Mutation test provou a não-vacuidade.</td>
+              <td class="text-end">1</td>
+              <td><span class="badge badge-ok">Concluída</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+
+      <h3 class="h6 mt-4 text-body-secondary">Legenda de status</h3>
+      <div class="d-flex flex-wrap gap-2">
+        <span class="badge badge-ok">Concluída</span>
+        <span class="badge badge-warn">Parcial</span>
+        <span class="badge badge-danger">Bloqueada</span>
+      </div>
+    </div>
+
+    <!-- ══════════════ ABA 3 · ARQUIVOS MODIFICADOS ══════════════ -->
+    <div class="tab-pane fade" id="pane-arquivos" role="tabpanel"
+         aria-labelledby="tab-arquivos" tabindex="0" data-print-title="Arquivos modificados">
+      <h2 class="h4 pane-title">Arquivos modificados</h2>
+      <p>Diff stats da execução: <span class="diff-plus">+</span> linhas adicionadas, <span class="diff-minus">−</span> removidas.</p>
+
+            <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead>
+            <tr>
+              <th scope="col">Arquivo</th>
+              <th scope="col">Tipo</th>
+              <th scope="col" class="text-end">Diff</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>config/models.json</code></td>
+              <td><span class="badge badge-accent">modificado</span></td>
+              <td class="text-end"><span class="diff-plus">+26</span> <span class="diff-minus">−26</span></td>
+            </tr>
+            <tr>
+              <td><code>src/config.js</code></td>
+              <td><span class="badge badge-accent">modificado</span></td>
+              <td class="text-end"><span class="diff-plus">+16</span> <span class="diff-minus">−16</span></td>
+            </tr>
+            <tr>
+              <td><code>README.md</code></td>
+              <td><span class="badge badge-accent">modificado</span></td>
+              <td class="text-end"><span class="diff-plus">+20</span> <span class="diff-minus">−19</span></td>
+            </tr>
+            <tr>
+              <td><code>src/llm.js</code></td>
+              <td><span class="badge badge-accent">modificado</span></td>
+              <td class="text-end"><span class="diff-plus">+9</span> <span class="diff-minus">−8</span></td>
+            </tr>
+            <tr>
+              <td><code>src/crawl.js</code></td>
+              <td><span class="badge badge-accent">modificado</span></td>
+              <td class="text-end"><span class="diff-plus">+2</span> <span class="diff-minus">−2</span></td>
+            </tr>
+            <tr>
+              <td><code>test/budget.test.js</code></td>
+              <td><span class="badge badge-accent">modificado</span></td>
+              <td class="text-end"><span class="diff-plus">+14</span> <span class="diff-minus">−14</span></td>
+            </tr>
+            <tr>
+              <td><code>test/export-web.test.js</code></td>
+              <td><span class="badge badge-accent">modificado</span></td>
+              <td class="text-end"><span class="diff-plus">+1</span> <span class="diff-minus">−1</span></td>
+            </tr>
+            <tr>
+              <td><code>.env.example</code></td>
+              <td><span class="badge badge-accent">modificado</span></td>
+              <td class="text-end"><span class="diff-plus">+2</span> <span class="diff-minus">−2</span></td>
+            </tr>
+            <tr>
+              <td><code>webapp/public/data/meta.json</code></td>
+              <td><span class="badge badge-accent">modificado</span></td>
+              <td class="text-end"><span class="diff-plus">+4</span> <span class="diff-minus">−4</span></td>
+            </tr>
+            <tr>
+              <td><code>webapp/test/cost.test.js</code></td>
+              <td><span class="badge badge-accent">modificado</span></td>
+              <td class="text-end"><span class="diff-plus">+5</span> <span class="diff-minus">−5</span></td>
+            </tr>
+            <tr>
+              <td><code>test/model-config.test.js</code></td>
+              <td><span class="badge badge-ok">novo</span></td>
+              <td class="text-end diff-plus">+186</td>
+            </tr>
+            <tr>
+              <td><code>test/model-config.env.test.js</code></td>
+              <td><span class="badge badge-ok">novo</span></td>
+              <td class="text-end diff-plus">+48</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+
+      <h2 class="h4 pane-title mt-4">Commits (squash)</h2>
+      <p>Histórico final do branch principal: um commit squash por sub-agente. Nenhuma worktree ou branch <code>wt/*</code> sobra ao final.</p>
+
+            <ul class="list-group list-group-flush">
+        <li class="list-group-item d-flex gap-3 align-items-start">
+          <span class="badge badge-soft font-monospace">54c5c68</span>
+          <div><strong>Onda 1:</strong> troca todos os modelos para deepseek/deepseek-v4-flash-0731 (efforts preservados, docs/comentários sincronizados)</div>
+        </li>
+        <li class="list-group-item d-flex gap-3 align-items-start">
+          <span class="badge badge-soft font-monospace">48037b6</span>
+          <div><strong>Onda 2:</strong> webapp snapshot — search.models aponta para deepseek-v4-flash-0731 (chamadas reais do site)</div>
+        </li>
+        <li class="list-group-item d-flex gap-3 align-items-start">
+          <span class="badge badge-soft font-monospace">8324133</span>
+          <div><strong>Onda 2:</strong> fixtures de custo do webapp no slug único (caminho não-flash via acme/llm-probe)</div>
+        </li>
+        <li class="list-group-item d-flex gap-3 align-items-start">
+          <span class="badge badge-soft font-monospace">187ecec</span>
+          <div><strong>Testes:</strong> 11 testes da resolução de modelos pós-swap (slug único, efforts, searchBatch medium, env override, contrato do models.json)</div>
+        </li>
+      </ul>
+
+    </div>
+
+    <!-- ══════════════ ABA 4 · DE-PARA (BEFORE/AFTER) ══════════════ -->
+    <div class="tab-pane fade" id="pane-depara" role="tabpanel"
+         aria-labelledby="tab-depara" tabindex="0" data-print-title="De-Para">
+      <h2 class="h4 pane-title">De-Para: o que mudou</h2>
+      <p>Comparação lado a lado entre o estado inicial do repositório e o estado final após a execução.</p>
+
+      <div class="row g-3 mb-4">
+        <div class="col-lg-6">
+          <div class="card h-100 depara-antes">
+            <div class="card-header"><i class="bi bi-arrow-left-circle me-1"></i><strong>Antes</strong></div>
+            <div class="card-body">
+              <p class="card-text text-body-secondary">Estado inicial do repositório — apenas o skill de orquestração, sem recursos auxiliares.</p>
+              <ul class="list-unstyled mb-0 d-grid gap-2">
+                <li><i class="bi bi-file-earmark-text me-2 text-body-secondary"></i><code>SKILL.md</code> — definição do orquestrador (XML, fases, regras)</li>
+                <li><i class="bi bi-file-earmark-text me-2 text-body-secondary"></i><code>README.md</code> — documentação pública</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-6">
+          <div class="card h-100 depara-depois">
+            <div class="card-header"><i class="bi bi-arrow-right-circle me-1"></i><strong>Depois</strong></div>
+            <div class="card-body">
+              <p class="card-text text-body-secondary">Estado final — três novos diretórios e o skill atualizado.</p>
+              <ul class="list-unstyled mb-0 d-grid gap-2">
+                <li><i class="bi bi-terminal me-2 text-body-secondary"></i><code>scripts/</code> — brave-search.sh · check-brave-credits.sh</li>
+                <li><i class="bi bi-file-earmark-text me-2 text-body-secondary"></i><code>prompts/</code> — ecc-prompts.md · ecc-skills.md · search-prompts.md</li>
+                <li><i class="bi bi-file-earmark-code me-2 text-body-secondary"></i><code>templates/</code> — html-explainer.html</li>
+                <li><i class="bi bi-gear me-2 text-body-secondary"></i><code>SKILL.md</code> — atualizado (ondas ilimitadas, novos recursos)</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+            <div class="row g-3 mb-4">
+        <div class="col-lg-6">
+          <div class="card h-100 depara-antes">
+            <div class="card-header"><i class="bi bi-arrow-left-circle me-1"></i><strong>Antes</strong></div>
+            <div class="card-body">
+              <p class="card-text text-body-secondary">Dois modelos por tier: <code>deepseek/deepseek-v4-pro</code> (xhigh/high) e <code>deepseek/deepseek-v4-flash</code> (high/medium).</p>
+              <ul class="list-unstyled mb-0 d-grid gap-2">
+                <li><i class="bi bi-file-earmark-text me-2 text-body-secondary"></i><code>config/models.json</code> — default Pro + 25 estágios alternando Pro/Flash</li>
+                <li><i class="bi bi-file-earmark-text me-2 text-body-secondary"></i><code>MODELS.pro ≠ MODELS.flash</code> — escalada de retry Flash→Pro real</li>
+                <li><i class="bi bi-file-earmark-text me-2 text-body-secondary"></i><code>webapp/public/data/meta.json</code> — site chamava os 2 slugs antigos no runtime</li>
+                <li><i class="bi bi-file-earmark-text me-2 text-body-secondary"></i>README/STAGE_KEYS descreviam tiers "Pro"/"Flash"</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-6">
+          <div class="card h-100 depara-depois">
+            <div class="card-header"><i class="bi bi-arrow-right-circle me-1"></i><strong>Depois</strong></div>
+            <div class="card-body">
+              <p class="card-text text-body-secondary">Um modelo único <code>deepseek/deepseek-v4-flash-0731</code> com os MESMOS efforts por estágio.</p>
+              <ul class="list-unstyled mb-0 d-grid gap-2">
+                <li><i class="bi bi-file-earmark-text me-2 text-body-secondary"></i><code>config/models.json</code> — 26 entradas no slug novo; efforts intactos (xhigh/high/medium)</li>
+                <li><i class="bi bi-file-earmark-text me-2 text-body-secondary"></i><code>MODELS.pro === MODELS.flash</code> — escalada de retry vira no-op documentado</li>
+                <li><i class="bi bi-file-earmark-text me-2 text-body-secondary"></i><code>meta.json</code> — site chama o slug novo; seed do ledger cai em SEED_FLASH (0.005)</li>
+                <li><i class="bi bi-file-earmark-text me-2 text-body-secondary"></i>README/STAGE_KEYS falam em efforts; 11 testes novos congelam o contrato</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h2 class="h4 pane-title">Impacto</h2>
+      <p>O que cada mudança significa para quem usa o deep-orchestrator:</p>
+      <div class="list-group list-group-flush mb-4">
+        <div class="list-group-item d-flex gap-3 align-items-start">
+          <i class="bi bi-search fs-5 stat-value flex-shrink-0 mt-1"></i>
+          <div><strong>Busca Brave integrada</strong> — sub-agentes pesquisam na web direto do terminal (curl + API Brave), sem depender de outras ferramentas.</div>
+        </div>
+        <div class="list-group-item d-flex gap-3 align-items-start">
+          <i class="bi bi-credit-card-2-front fs-5 stat-value flex-shrink-0 mt-1"></i>
+          <div><strong>Créditos sob controle</strong> — o orquestrador consulta os créditos restantes da API antes de disparar ondas longas.</div>
+        </div>
+        <div class="list-group-item d-flex gap-3 align-items-start">
+          <i class="bi bi-shield-check fs-5 stat-value flex-shrink-0 mt-1"></i>
+          <div><strong>Execução confiável</strong> — contratos ECC (execução de código confiável) que os sub-agentes seguem ao executar código.</div>
+        </div>
+        <div class="list-group-item d-flex gap-3 align-items-start">
+          <i class="bi bi-chat-square-text fs-5 stat-value flex-shrink-0 mt-1"></i>
+          <div><strong>Busca padronizada</strong> — prompts de pesquisa consistentes entre sub-agentes (search-prompts.md).</div>
+        </div>
+        <div class="list-group-item d-flex gap-3 align-items-start">
+          <i class="bi bi-file-earmark-code fs-5 stat-value flex-shrink-0 mt-1"></i>
+          <div><strong>De-para visível</strong> — toda execução termina com um EXPLAINER.html legível (este documento).</div>
+        </div>
+        <div class="list-group-item d-flex gap-3 align-items-start">
+          <i class="bi bi-gear fs-5 stat-value flex-shrink-0 mt-1"></i>
+          <div><strong>Processo documentado</strong> — ondas ilimitadas e o novo fluxo registrados no SKILL.md.</div>
+        </div>
+      </div>
+
+      <h2 class="h4 pane-title">Novas capacidades</h2>
+      <div class="row g-3">
+        <div class="col-md-6 col-lg-4">
+          <div class="card h-100">
+            <div class="card-body">
+              <i class="bi bi-search fs-3 stat-value"></i>
+              <h3 class="h6 mt-2 mb-1">Busca Brave interna</h3>
+              <p class="small text-body-secondary mb-0">Sub-agentes pesquisam na web via API Brave, direto do terminal — sem sair do fluxo.</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-4">
+          <div class="card h-100">
+            <div class="card-body">
+              <i class="bi bi-shield-check fs-3 stat-value"></i>
+              <h3 class="h6 mt-2 mb-1">ECC prompts</h3>
+              <p class="small text-body-secondary mb-0">Contratos de execução de código confiável que os sub-agentes seguem (ecc-prompts.md, ecc-skills.md).</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-4">
+          <div class="card h-100">
+            <div class="card-body">
+              <i class="bi bi-infinity fs-3 stat-value"></i>
+              <h3 class="h6 mt-2 mb-1">Ondas ilimitadas</h3>
+              <p class="small text-body-secondary mb-0">O plano não fica limitado a N ondas — a topologia das dependências manda.</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-4">
+          <div class="card h-100">
+            <div class="card-body">
+              <i class="bi bi-credit-card-2-front fs-3 stat-value"></i>
+              <h3 class="h6 mt-2 mb-1">Verificação de créditos</h3>
+              <p class="small text-body-secondary mb-0">Créditos da API Brave consultados antes de ondas longas — o orquestrador sabe quando parar.</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-4">
+          <div class="card h-100">
+            <div class="card-body">
+              <i class="bi bi-file-earmark-code fs-3 stat-value"></i>
+              <h3 class="h6 mt-2 mb-1">HTML explainer</h3>
+              <p class="small text-body-secondary mb-0">Este documento: o de-para (antes/depois) de tudo que foi feito na execução.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════ ABA 5 · DECISÕES AUTÔNOMAS ══════════════ -->
+    <div class="tab-pane fade" id="pane-decisoes" role="tabpanel"
+         aria-labelledby="tab-decisoes" tabindex="0" data-print-title="Decisões autônomas">
+      <h2 class="h4 pane-title">Premissas inferidas sem perguntar</h2>
+      <p>O orquestrador opera em autonomia total: nenhuma pergunta foi feita ao usuário. Toda premissa assumida fica registrada aqui — para revisão e reprodutibilidade.</p>
+
+            <ul class="list-group list-group-flush">
+        <li class="list-group-item d-flex gap-3 align-items-start">
+          <i class="bi bi-lightbulb fs-5 stat-value flex-shrink-0 mt-1"></i>
+          <div><strong>"Think no mínimo na busca soft" = manter searchBatch em medium:</strong> efforts já definidos foram mantidos; o requisito do lote de ~40 artigos já era medium — nada foi elevado.</div>
+        </li>
+        <li class="list-group-item d-flex gap-3 align-items-start">
+          <i class="bi bi-lightbulb fs-5 stat-value flex-shrink-0 mt-1"></i>
+          <div><strong>Edição cirúrgica do meta.json em vez de re-export:</strong> o banco local está vazio (0 artigos) — rodar o export geraria snapshot destrutivo e brigaria com o guard do pre-push. Os 4 slugs foram editados à mão espelhando exatamente o que o export emitiria da config nova.</div>
+        </li>
+        <li class="list-group-item d-flex gap-3 align-items-start">
+          <i class="bi bi-lightbulb fs-5 stat-value flex-shrink-0 mt-1"></i>
+          <div><strong>acme/llm-probe como slug genérico de teste:</strong> o caminho não-flash do seedForModel (SEED_PRO 0.05) precisa continuar coberto; um slug fictício sem "flash" o exercita sem citar modelo que não existe mais.</div>
+        </li>
+        <li class="list-group-item d-flex gap-3 align-items-start">
+          <i class="bi bi-lightbulb fs-5 stat-value flex-shrink-0 mt-1"></i>
+          <div><strong>Onda 2 descoberta pelo REVISOR DE PLANO:</strong> o webapp faz chamadas REAIS ao OpenRouter com os slugs do snapshot — sem corrigir o meta.json, o site continuaria usando os modelos antigos.</div>
+        </li>
+        <li class="list-group-item d-flex gap-3 align-items-start">
+          <i class="bi bi-lightbulb fs-5 stat-value flex-shrink-0 mt-1"></i>
+          <div><strong>Escalada de retry Flash→Pro documentada como no-op:</strong> com fallbackModel === model, o callJSON nunca troca de modelo; comentários foram sincronizados com o comportamento real.</div>
+        </li>
+        <li class="list-group-item d-flex gap-3 align-items-start">
+          <i class="bi bi-lightbulb fs-5 stat-value flex-shrink-0 mt-1"></i>
+          <div><strong>Skills (.agents/skills) e docs históricas (PLANO-*) intocadas:</strong> evolução de skills é passo de meta-skill-evolution pós-entrega; as ocorrências restantes de slugs antigos estão nesses arquivos ou em conteúdo de artigos (acervo) — nada de config.</div>
+        </li>
+      </ul>
+
+    </div>
+
+    <!-- ══════════════ ABA 6 · TIMELINE ══════════════ -->
+    <div class="tab-pane fade" id="pane-timeline" role="tabpanel"
+         aria-labelledby="tab-timeline" tabindex="0" data-print-title="Timeline">
+      <h2 class="h4 pane-title">Linha do tempo da execução</h2>
+      <p>As quatro fases do orquestrador e o que aconteceu em cada uma.</p>
+
+            <ol class="timeline list-unstyled mb-0">
+        <li class="timeline-item mb-4">
+          <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+            <span class="badge badge-accent">Fase 0-1</span>
+            <strong>DELIMITAR + ANALYZE</strong>
+          </div>
+          <p class="mb-0 text-body-secondary small">Fronteira resolvida (MODE=normal, main); escopo mapeado por grep: 8 arquivos com slugs + pendências webapp; NC_HOME sem overrides de modelo; busca Tier 1 OK.</p>
+        </li>
+        <li class="timeline-item mb-4">
+          <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+            <span class="badge badge-accent">Fase 2</span>
+            <strong>PLAN</strong>
+          </div>
+          <p class="mb-0 text-body-secondary small">1 onda prevista (onda1-swap-modelo) + gate; TASK_PLAN.md publicado.</p>
+        </li>
+        <li class="timeline-item mb-4">
+          <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+            <span class="badge badge-accent">Fase 3</span>
+            <strong>EXECUTE-ONDA 1</strong>
+          </div>
+          <p class="mb-0 text-body-secondary small">Swap implementado (gate 341/341); revisão adversarial REFUTOU docs (README/STAGE_KEYS com tiers extintos) → 2 rodadas de fix; REPLAN descobriu o consumo real do meta.json → Onda 2 (2 worktrees paralelas, revisões adversariais "nada a refutar"); integração um-a-um com gates; testing subwave em background.</p>
+        </li>
+        <li class="timeline-item mb-4">
+          <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+            <span class="badge badge-ok">Fase 4</span>
+            <strong>COMMIT-FINAL</strong>
+          </div>
+          <p class="mb-0 text-body-secondary small">Testing subwave revisada (mutation test provou a eficácia; assert vacuoso corrigido) e integrada (352/352); gate completo raiz + webapp (66/66); EXPLAINER.html gerado; commit final; limpeza + contenção OK.</p>
+        </li>
+      </ol>
+
+    </div>
+
+  </div>
+
+  <footer class="text-body-secondary small border-top mt-5 pt-3">
+    Gerado por <strong>deep-orchestrator</strong> v2 · 2026-08-13 · branch main.
+    Documento de arquivo único — salve, abra com duplo clique ou imprima em PDF (todas as abas entram no papel).
+  </footer>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+        crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"
+        integrity="sha384-RH2xi4eIQ/gjtbs9fUXM68sLSi99C7ZWBRX1vDrVv6GQXRibxXLbwO2NGZB74MbU"
+        crossorigin="anonymous"></script>
+
+<script>
+/* ── runtime do documento ────────────────────────────────────────────────────
+   Copie este bloco inteiro, sem editar. Ele faz três coisas:
+   1. guarda o código-fonte cru ANTES de qualquer transformação (para o copiar);
+   2. destaca a sintaxe e injeta o botão de copiar;
+   3. liga as abas ao #hash da URL, nos dois sentidos.
+   ────────────────────────────────────────────────────────────────────────── */
+(function () {
+  'use strict';
+
+  // 1. Fonte cru primeiro. Depois do highlight o DOM ganha <span>; textContent ainda
+  //    devolve o texto certo, mas plugins de numeração de linha o contaminam. Guardar
+  //    antes é a única versão que nunca mente.
+  var sources = new WeakMap();
+  document.querySelectorAll('pre > code').forEach(function (code) {
+    sources.set(code, code.textContent.replace(/\n$/, ''));
+  });
+
+  // 2. Highlight. Declare sempre a linguagem na classe: a auto-detecção erra em
+  //    trechos curtos (o mesmo snippet vira "ruby" numa aba e "perl" na outra).
+  if (window.hljs) hljs.highlightAll();
+
+  // Copiar. navigator.clipboard exige contexto seguro; em file:// o comportamento
+  // varia por navegador, então o fallback com execCommand não é opcional.
+  function copyText(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+      return navigator.clipboard.writeText(text).then(function () { return true; },
+                                                      function () { return legacyCopy(text); });
+    }
+    return Promise.resolve(legacyCopy(text));
+  }
+
+  function legacyCopy(text) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    // position:fixed + opacity:0 evita que a página role até o textarea.
+    ta.style.cssText = 'position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;';
+    document.body.appendChild(ta);
+    ta.select();
+    ta.setSelectionRange(0, ta.value.length); // iOS ignora select() sozinho
+    var ok = false;
+    try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+    document.body.removeChild(ta);
+    return ok;
+  }
+
+  document.querySelectorAll('pre > code').forEach(function (code) {
+    var pre = code.parentElement;
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn btn-sm btn-outline-secondary copy-btn';
+    btn.innerHTML = '<i class="bi bi-clipboard"></i>';
+    btn.setAttribute('aria-label', 'Copiar código');
+    btn.addEventListener('click', function () {
+      copyText(sources.get(code) || code.textContent).then(function (ok) {
+        btn.innerHTML = ok ? '<i class="bi bi-check-lg"></i>' : '<i class="bi bi-x-lg"></i>';
+        btn.classList.toggle('btn-outline-success', ok);
+        btn.classList.toggle('btn-outline-danger', !ok);
+        btn.classList.remove('btn-outline-secondary');
+        setTimeout(function () {
+          btn.innerHTML = '<i class="bi bi-clipboard"></i>';
+          btn.className = 'btn btn-sm btn-outline-secondary copy-btn';
+        }, 1500);
+      });
+    });
+    pre.appendChild(btn);
+  });
+
+  // 3. Aba ↔ URL. Sem isto, mandar "olha a aba De-Para" exige explicar o clique.
+  var tabs = document.querySelectorAll('[data-bs-toggle="tab"]');
+  if (!tabs.length) return;
+
+  function activateFromHash() {
+    var hash = window.location.hash;
+    if (!hash || hash.length < 2) return;
+    var target = document.querySelector(hash);
+    if (!target) return;
+    // O #hash pode apontar para o painel OU para um título dentro dele.
+    var pane = target.closest('.tab-pane') || (target.classList.contains('tab-pane') ? target : null);
+    if (!pane) return;
+    var trigger = document.querySelector('[data-bs-target="#' + CSS.escape(pane.id) + '"]');
+    if (trigger) bootstrap.Tab.getOrCreateInstance(trigger).show();
+    // O navegador já tentou rolar até o alvo — e falhou, porque naquele instante o
+    // painel ainda era display:none. Agora que apareceu, role de novo: sem isto a
+    // página abre num scroll intermediário, com as abas escondidas atrás da navbar.
+    var scrollTo = target !== pane ? target : (trigger && trigger.closest('[role="tablist"]')) || pane;
+    requestAnimationFrame(function () { scrollTo.scrollIntoView({ block: 'start' }); });
+  }
+
+  tabs.forEach(function (t) {
+    t.addEventListener('shown.bs.tab', function (e) {
+      var id = (e.target.getAttribute('data-bs-target') || '').slice(1);
+      // replaceState, não location.hash: mudar o hash direto faz a página pular.
+      if (id) history.replaceState(null, '', '#' + id);
+    });
+  });
+
+  window.addEventListener('hashchange', activateFromHash);
+  activateFromHash();
+})();
+</script>
+</body>
+</html>

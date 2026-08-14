@@ -172,12 +172,20 @@ pico).
 
 ## 7. CORS / uso no browser (BYOK)
 
-- **NÃO CONFIRMADO — requer teste manual.** Nenhuma documentação oficial sobre
-  CORS foi encontrada (a doc oficial não menciona uso client-side/browser). A busca
-  não encontrou evidência pública (issues, respostas oficiais) sobre headers
-  `Access-Control-Allow-Origin` em api.deepseek.com. O webapp deve **testar um
-  `fetch` direto com `Authorization: Bearer`** antes de assumir BYOK browser; se
-  falhar, o fallback é rotear pelo servidor local (que já existe no crawler).
+- **CONFIRMADO por probe real em 2026-08-14** (curl com `Origin: https://example.com`):
+  - `GET https://api.deepseek.com/models` com `Authorization: Bearer` → **HTTP 200**
+    com `access-control-allow-origin: https://example.com` (**refletido**),
+    `access-control-allow-credentials: true` e
+    `vary: origin, access-control-request-method, access-control-request-headers`.
+  - Preflight `OPTIONS /models` → **HTTP 200** com
+    `access-control-allow-methods: GET`, `access-control-allow-headers: authorization,content-type`
+    e origin refletida.
+  - Comparativo OpenRouter (`GET /api/v1/key`): 200 com `access-control-allow-origin: *`
+    e preflight 204 — **BYOK funcionando nos DOIS provedores** (a chave do usuário nunca
+    passa por servidor nosso no webapp).
+- Nenhuma documentação oficial sobre CORS foi encontrada (a doc oficial não menciona uso
+  client-side/browser), mas o comportamento REAL responde ao preflight corretamente —
+  o webapp faz fetch direto com `Authorization: Bearer` sem fallback.
 
 ## 8. Probe de chave (validação de API key)
 
@@ -229,10 +237,14 @@ pico).
 
 ## 11. Pendências de teste manual (o que o implementador deve validar com uma chave real)
 
-1. CORS: fetch direto do browser em api.deepseek.com com `Authorization` header.
+1. ~~CORS: fetch direto do browser em api.deepseek.com com `Authorization` header.~~
+   **RESOLVIDO (2026-08-14)** — ver §7: preflight 200 + allow-origin refletido + `authorization`
+   liberado; GET com Bearer → 200.
 2. `response_format: {type: "json_schema", ...}` — aceito ou 422/ignorado?
 3. Parâmetros desconhecidos (ex.: `usage: {include: true}`, `reasoning: {effort}`):
-   erro ou silêncio?
+   erro ou silêncio? (Observação 2026-08-14: `reasoning`/`usage`/`response_format`
+   json_schema NÃO são enviados pelo crawler no direto — o body só carrega o que a API
+   documenta; slug não traduzido devolve 400 com mensagem clara, ver §1.)
 4. Código HTTP exato devolvido por `deepseek-chat`/`deepseek-reasoner` pós-retirement.
 5. `thinking.reasoning_effort` aninhado (forma da tabela da referência) vs
    `reasoning_effort` top-level — ambos aceitos?

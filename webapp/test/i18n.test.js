@@ -55,3 +55,32 @@ test('tutorial: mesmos passos/ícones e todo passo com título + corpo', () => {
     assert.ok(step.title && step.body, 'cada passo tem título e corpo não-vazios');
   }
 });
+
+test('provedor LLM (KeyModal): todas as chaves existem nos DOIS dicionários e as variantes Ds são próprias', () => {
+  const keys = [
+    'keyProviderLabel', 'keyProviderOr', 'keyProviderDeepSeek',
+    'keyTitle', 'keyBody', 'keyHint', 'keyPlaceholder', 'keySave', 'keySaving',
+    'keyInvalid', 'keyNetwork', 'keyForget', 'keyExpired', 'keyManageTitle', 'keyManageBody',
+    'keyBtnHas', 'keyBtnMissing', 'keySaved',
+    'keyTitleDs', 'keyBodyDs', 'keyHintDs', 'keyPlaceholderDs',
+    'keyInvalidDs', 'keyExpiredDs', 'keyManageTitleDs', 'keyManageBodyDs', 'keyBtnHasDs', 'keyBtnMissingDs',
+  ];
+  for (const k of keys) {
+    assert.ok(typeof DICTS.pt[k] === 'string' && DICTS.pt[k].length > 0, `pt.${k} não-vazio`);
+    assert.ok(typeof DICTS.en[k] === 'string' && DICTS.en[k].length > 0, `en.${k} não-vazio`);
+  }
+  // as variantes Ds existem com texto PRÓPRIO (não são alias vazios/iguais)
+  for (const d of [DICTS.pt, DICTS.en]) {
+    assert.notEqual(d.keyTitleDs, d.keyTitle);
+    assert.notEqual(d.keyInvalidDs, d.keyInvalid);
+    assert.notEqual(d.keyExpiredDs, d.keyExpired);
+    assert.notEqual(d.keyManageTitleDs, d.keyManageTitle);
+    assert.notEqual(d.keyBtnHasDs, d.keyBtnHas);
+    assert.notEqual(d.keyBtnMissingDs, d.keyBtnMissing);
+  }
+  // rótulos do seletor são fixos (ids no KeyModal)
+  assert.equal(DICTS.pt.keyProviderOr, 'OpenRouter');
+  assert.equal(DICTS.pt.keyProviderDeepSeek, 'DeepSeek');
+  assert.equal(DICTS.en.keyProviderOr, 'OpenRouter');
+  assert.equal(DICTS.en.keyProviderDeepSeek, 'DeepSeek');
+});

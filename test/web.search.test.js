@@ -47,7 +47,7 @@ const srv = await startWebServer({
   open: false,
   deps: {
     search: (query, opts) => searchImpl(query, opts),
-    probeKey: (key) => probeImpl(key),
+    probeKey: (key, provider) => probeImpl(key, provider),
   },
 });
 const base = `http://127.0.0.1:${srv.port}`;
@@ -201,4 +201,42 @@ test('key: status reflete o runtime; POST com probe ok persiste em NC_HOME/.env 
   assert.equal((await getJSON('/api/key/status')).body.hasKey, true, 'ativa SEM reiniciar o servidor');
 
   assert.equal((await postJSON('/api/key', { key: '' })).status, 400, 'key vazia é 400');
+});
+
+// ---- key: fluxo provider-aware (POST /api/key com provider; dispatcher via deps.probeKey) ----
+test('key: sem provider no body usa o ATIVO (openrouter); com deepseek persiste DEEPSEEK_API_KEY e troca em runtime', async () => {
+  setRuntimeKey('', 'openrouter'); // pin: provedor ativo = openrouter p/ o default do POST
+  let gotProvider = null;
+  probeImpl = async (key, provider) => {
+    gotProvider = provider;
+    return { ok: true, status: 200 };
+  };
+  const sem = await postJSON('/api/key', { key: 'sk-or-v1-default' });
+  assert.equal(gotProvider, 'openrouter', 'default do POST = provedor ativo (comportamento de sempre)');
+  assert.equal(sem.body.ok, true);
+  assert.equal(sem.body.keyVar, 'OPENROUTER_API_KEY');
+
+  const r = await postJSON('/api/key', { key: 'sk-ds-v1-valida', provider: 'deepseek' });
+  assert.equal(gotProvider, 'deepseek', 'dispatcher recebe o provider do body');
+  assert.equal(r.body.ok, true);
+  assert.equal(r.body.provider, 'deepseek');
+  assert.equal(r.body.keyVar, 'DEEPSEEK_API_KEY');
+  const envPath = path.join(NC_HOME_TMP, '.env');
+  const envTxt = readFileSync(envPath, 'utf8');
+  assert.ok(envTxt.includes('DEEPSEEK_API_KEY=sk-ds-v1-valida'), 'persistida na var do provedor');
+  assert.ok(envTxt.includes('OPENROUTER_API_KEY=sk-or-v1-default'), 'chave do outro provider preservada');
+
+  const st = await getJSON('/api/key/status');
+  assert.equal(st.body.hasKey, true);
+  assert.equal(st.body.provider.name, 'DeepSeek', 'status expõe o provider ativo (aditivo)');
+  assert.equal(st.body.provider.keyVar, 'DEEPSEEK_API_KEY');
+  assert.equal(st.body.provider.baseURL, 'https://api.deepseek.com');
+
+  // probe recusado no provider NÃO derruba a chave ativa nem persiste a nova
+  probeImpl = async () => ({ ok: false, status: 401 });
+  const ruim = await postJSON('/api/key', { key: 'sk-ds-v1-ruim', provider: 'deepseek' });
+  assert.equal(ruim.body.ok, false);
+  assert.equal((await getJSON('/api/key/status')).body.hasKey, true, 'key ruim NÃO desativa a chave ativa');
+
+  setRuntimeKey('sk-or-v1-teste', 'openrouter'); // restaura openrouter p/ não vazar pro resto da suíte
 });

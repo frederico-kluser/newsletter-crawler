@@ -90,12 +90,16 @@ const STR = {
   searchFailed: 'A busca falhou — veja o terminal do servidor e tente de novo.',
   sourcesScope: 'Fontes no escopo',
   allSelected: 'todas',
-  keyTitle: 'Configurar a chave do OpenRouter',
-  keyBody: 'A busca por IA usa o OpenRouter (DeepSeek). Cole sua chave: ela é validada na API e salva em ~/.newsletter-crawler/.env — vale também para o CLI.',
-  keyPlaceholder: 'sk-or-v1-…',
+  // Strings do modal de chave provider-aware: (p) recebe o nome do provedor ('OpenRouter'|'DeepSeek').
+  keyProviderLabel: 'Provedor LLM:',
+  keyProviderOpenRouter: 'OpenRouter',
+  keyProviderDeepSeek: 'DeepSeek (API direta)',
+  keyTitle: (p) => `Configurar a chave LLM (${p})`,
+  keyBody: (p) => `A busca por IA usa ${p}. Cole sua chave: ela é validada na API e salva em ~/.newsletter-crawler/.env — vale também para o CLI.`,
+  keyPlaceholder: (p) => (p === 'DeepSeek' ? 'sk-…' : 'sk-or-v1-…'),
   keySave: 'Validar e salvar',
   keyChecking: 'Validando…',
-  keyInvalid: 'Chave inválida (a API do OpenRouter recusou). Confira e tente de novo.',
+  keyInvalid: (p) => `Chave inválida (a API do ${p} recusou). Confira e tente de novo.`,
   keyNetwork: 'Não deu para validar (sem rede?). Tente de novo.',
   // histórico de buscas (persistido no SQLite; toda busca concluída entra sozinha)
   historyTitle: 'Histórico de buscas',
@@ -609,12 +613,16 @@ function ConfirmDialog({ title, body, confirmLabel, onConfirm, onCancel }) {
   </div>`;
 }
 
-// Modal da key OpenRouter: valida no servidor (probe) e persiste em NC_HOME/.env; a busca
-// pendente re-dispara via onSaved. A key só é gravada se o probe passar.
-function KeyModal({ onSaved, onClose }) {
+// Modal da chave LLM (provider-aware): valida no servidor (probe do provedor escolhido) e
+// persiste em NC_HOME/.env; a busca pendente re-dispara via onSaved. A key só é gravada se o
+// probe passar. `provider` = nome do provedor ATIVO (do /api/key/status), pré-selecionado no
+// select; o usuário pode trocar (espelha o KeyModal do webapp estático).
+function KeyModal({ onSaved, onClose, provider = 'OpenRouter' }) {
   const [key, setKey] = useState('');
+  const [selProvider, setSelProvider] = useState(provider === 'DeepSeek' ? 'deepseek' : 'openrouter');
   const [checking, setChecking] = useState(false);
   const [errMsg, setErrMsg] = useState('');
+  const pName = selProvider === 'deepseek' ? 'DeepSeek' : 'OpenRouter';
   useEffect(() => {
     const onKey = (e) => e.key === 'Escape' && onClose();
     window.addEventListener('keydown', onKey);
@@ -626,9 +634,9 @@ function KeyModal({ onSaved, onClose }) {
     setChecking(true);
     setErrMsg('');
     try {
-      const r = await postJSON('/api/key', { key: k });
+      const r = await postJSON('/api/key', { key: k, provider: selProvider });
       if (r.ok) return onSaved();
-      setErrMsg(r.status === 0 ? STR.keyNetwork : STR.keyInvalid);
+      setErrMsg(r.status === 0 ? STR.keyNetwork : STR.keyInvalid(pName));
     } catch (e) {
       setErrMsg(e.message || STR.keyNetwork);
     } finally {
@@ -636,14 +644,27 @@ function KeyModal({ onSaved, onClose }) {
     }
   };
   return html`<div className="overlay" onClick=${(e) => e.target === e.currentTarget && onClose()}>
-    <div className="dialog" role="dialog" aria-modal="true" aria-label=${STR.keyTitle}>
-      <h2>${STR.keyTitle}</h2>
-      <p>${STR.keyBody}</p>
+    <div className="dialog" role="dialog" aria-modal="true" aria-label=${STR.keyTitle(pName)}>
+      <h2>${STR.keyTitle(pName)}</h2>
+      <p>${STR.keyBody(pName)}</p>
+      <label className="provider-select">
+        <span>${STR.keyProviderLabel}</span>
+        <select
+          className="control"
+          value=${selProvider}
+          onChange=${(e) => setSelProvider(e.target.value)}
+          autoComplete="off"
+          disabled=${checking}
+        >
+          <option value="openrouter">${STR.keyProviderOpenRouter}</option>
+          <option value="deepseek">${STR.keyProviderDeepSeek}</option>
+        </select>
+      </label>
       <input
         className="control key-input"
         type="password"
         value=${key}
-        placeholder=${STR.keyPlaceholder}
+        placeholder=${STR.keyPlaceholder(pName)}
         onInput=${(e) => setKey(e.target.value)}
         onKeyDown=${(e) => e.key === 'Enter' && save()}
         autoFocus
@@ -744,6 +765,7 @@ function App() {
   const [strict, setStrict] = useState(true); // ESTRITO (só 'direct') vs AMPLO (direct+similar) — re-filtra sem repagar
   const [concurrency, setConcurrency] = useState(8); // paralelismo escolhido (slider); teto vem do meta; AIMD por baixo
   const [hasKey, setHasKey] = useState(null); // null = ainda não checado
+  const [keyProvider, setKeyProvider] = useState('OpenRouter'); // provedor ATIVO (do /api/key/status)
   const [keyOpen, setKeyOpen] = useState(false);
 
   // Histórico de buscas (tabela `searches` no servidor): lista leve p/ dropdown+painel.
@@ -796,10 +818,14 @@ function App() {
     setConcurrency(meta.search.concurrency.default || 8);
   }, [meta]);
 
-  // A key do LLM existe? (o modal só abre quando o usuário tenta BUSCAR sem key)
+  // A key do LLM existe? (o modal só abre quando o usuário tenta BUSCAR sem key). O provider
+  // ativo (aditivo no /api/key/status) pré-seleciona o select do modal de chave.
   useEffect(() => {
     fetchJSON('/api/key/status')
-      .then((r) => setHasKey(Boolean(r.hasKey)))
+      .then((r) => {
+        setHasKey(Boolean(r.hasKey));
+        setKeyProvider(r.provider?.name || 'OpenRouter');
+      })
       .catch(() => setHasKey(null));
   }, []);
 
@@ -1458,6 +1484,7 @@ function App() {
     />`}
     ${keyOpen &&
     html`<${KeyModal}
+      provider=${keyProvider}
       onSaved=${() => {
         setHasKey(true);
         setKeyOpen(false);

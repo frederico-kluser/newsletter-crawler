@@ -5,6 +5,7 @@ import { db } from './db.js';
 import { closeBrowser } from './fetch.js';
 import { closeParsePool } from './parse-pool.js';
 import { errorLog } from './util.js';
+import { providerInfo } from './config.js';
 import {
   printStatus, cmdCrawl, cmdAdd, cmdRemove, cmdReset, cmdExport, cmdSearch, cmdKey,
   cmdWeb,
@@ -58,7 +59,8 @@ function printHelp() {
       '                          termina os PENDENTES (verify+classify+summarize) SEM novo crawl; use --budget p/ limitar e retomar',
       '  node src/index.js search <consulta> [--mode A|B] [--limit N] [--yes] [--all] [--budget USD] [--parallel N]',
       '  node src/index.js web [--port N] [--no-open]   buscador web (React) com filtros da base',
-      '  node src/index.js key set <chave> | key test   valida/salva a chave OpenRouter (em ~/.newsletter-crawler/.env)',
+      `  node src/index.js key set <CHAVE> [--provider openrouter|deepseek] | key test [--provider …]`,
+      `                          valida/salva a chave LLM (${providerInfo().name}; em ~/.newsletter-crawler/.env)`,
       '  node src/index.js limits [show | set --budget USD --parallel N --ram-max-pct P]   limites persistentes',
       '  node src/index.js deploy [--force] [--no-wait] [--dry-run] [--include-code] [--timeout S]',
       '                          publica o site: exporta o snapshot, commita, dá push na main e ESPERA',

@@ -11,8 +11,9 @@ import { Panel, FooterHints } from './widgets.js';
 import { buildCommandPreview } from './commandPreview.js';
 import {
   loadSources, HAS_LLM, BUDGET_USD, MAX_PARALLEL, RAM_MAX_PCT, ENV_PATH, stageModel,
+  LLM_PROVIDER, providerInfo, setRuntimeKey,
 } from '../config.js';
-import { upsertEnvVar } from '../keys.js';
+import { upsertEnvVar, probeProviderKey, providerInfoFor } from '../keys.js';
 import { estimateStageCallUsd } from '../budget.js';
 import { parseDate } from '../util.js';
 import { getStatus, getSearchScope } from '../commands.js';
@@ -75,12 +76,13 @@ export function Menu({ onSelect }) {
     { label: t('menuAdd'), value: 'add' },
     { label: t('menuSources'), value: 'sources' },
     { label: t('menuLimits'), value: 'limits' },
+    { label: t('menuKey'), value: 'key' },
     { label: t('menuDeploy'), value: 'deploy' },
     { label: t('menuReset'), value: 'reset' },
     { label: t('menuQuit'), value: 'quit' },
   ];
   return html`<${Box} flexDirection="column">
-    <${Select} options=${options} onChange=${onSelect} visibleOptionCount=${12} />
+    <${Select} options=${options} onChange=${onSelect} visibleOptionCount=${options.length} />
     <${FooterHints} hints=${[
       { k: '↑/↓', label: t('hint_move') },
       { k: 'Enter', label: t('hint_select') },
@@ -297,7 +299,7 @@ export function FinishConfig({ onRun, onBack }) {
   const [err, setErr] = useState(null);
   if (!HAS_LLM) {
     return html`<${Box} flexDirection="column">
-      <${Alert} variant="error">${t('finishNoLLM')}</${Alert}>
+      <${Alert} variant="error">${t('finishNoLLM', { keyVar: providerInfo().keyVar })}</${Alert}>
       <${Select} options=${[{ label: t('back'), value: 'back' }]} onChange=${onBack} />
     </${Box}>`;
   }
@@ -335,7 +337,7 @@ export function SearchConfig({ onRun, onBack, initial = null }) {
   const [err, setErr] = useState(null);
   if (!HAS_LLM) {
     return html`<${Box} flexDirection="column">
-      <${Alert} variant="error">${t('searchNoLLM')}</${Alert}>
+      <${Alert} variant="error">${t('searchNoLLM', { keyVar: providerInfo().keyVar })}</${Alert}>
       <${Select} options=${[{ label: t('back'), value: 'back' }]} onChange=${onBack} />
     </${Box}>`;
   }
@@ -565,6 +567,67 @@ export function LimitsConfig({ onBack }) {
     <${StatusMessage} variant=${savedTo ? 'success' : 'info'}>
       ${savedTo ? t('limitsSaved', { file: savedTo }) : t('limitsNothing')}
     </${StatusMessage}>
+    <${Select} options=${[{ label: t('back'), value: 'back' }]} onChange=${onBack} />
+  </${Box}>`;
+}
+
+// Tela de CHAVE LLM (provedor-aware): wizard por step (provedor -> chave -> salvo), como a de
+// limites — não é um "run": valida (probe do provedor), persiste no .env do NC_HOME e volta ao
+// menu. O probe é o único momento de rede: falhou, o erro fica DENTRO do step da chave e o texto
+// digitado sobrevive (o TextInput não desmonta — só o Spinner entra/sai). `setRuntimeKey` vale
+// JÁ no processo (a TUI encadeia comandos sem reiniciar), igual ao `ncrawl key set`.
+export function KeyConfig({ onBack }) {
+  const [step, setStep] = useState('provider');
+  const [provider, setProvider] = useState(LLM_PROVIDER === 'deepseek' ? 'deepseek' : 'openrouter');
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState(null);
+  const [savedTo, setSavedTo] = useState(null);
+
+  if (step === 'provider') {
+    return html`<${Field} label=${t('keyProviderPrompt')}>
+      <${Select}
+        options=${[
+          { label: 'OpenRouter', value: 'openrouter' },
+          { label: 'DeepSeek (API direta)', value: 'deepseek' },
+        ]}
+        onChange=${(v) => {
+          setProvider(v);
+          setStep('key');
+        }}
+      />
+    </${Field}>`;
+  }
+  if (step === 'key') {
+    const info = providerInfoFor(provider);
+    const submit = async (val) => {
+      const k = val.trim();
+      if (!k) return setErr(t('keyRequired'));
+      if (busy) return;
+      setErr(null);
+      setBusy(true);
+      try {
+        // O probe é FAIL-OPEN: nunca lança — `status 0` = erro de REDE/timeout, HTTP real = chave
+        // recusada. Sem o split, rede fora mostrava "Chave inválida" p/ uma chave boa.
+        const r = await probeProviderKey(k, provider);
+        if (r.status === 0) return setErr(t('keyProbeFail', { msg: r.reason ?? '' }));
+        if (!r.ok) return setErr(t('keyInvalid', { name: info.name }));
+        const { file } = upsertEnvVar(info.keyVar, k);
+        setRuntimeKey(k, provider); // vale JÁ neste processo (a TUI encadeia comandos sem reiniciar)
+        setSavedTo(file);
+        setStep('done');
+      } finally {
+        setBusy(false);
+      }
+    };
+    return html`<${Field} label=${t('keyPrompt', { name: info.name })} error=${err}>
+      <${Box} flexDirection="column">
+        <${TextInput} key=${step} placeholder=${info.name === 'DeepSeek' ? 'sk-…' : 'sk-or-v1-…'} onSubmit=${submit} />
+        ${busy ? html`<${Box} marginTop=${1}><${Spinner} label=${t('keyChecking')} /></${Box}>` : null}
+      </${Box}>
+    </${Field}>`;
+  }
+  return html`<${Box} flexDirection="column">
+    <${StatusMessage} variant="success">${t('keySaved', { file: savedTo })}</${StatusMessage}>
     <${Select} options=${[{ label: t('back'), value: 'back' }]} onChange=${onBack} />
   </${Box}>`;
 }

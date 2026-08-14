@@ -16,7 +16,7 @@ import {
 import { openBrowser } from '../web.js';
 import {
   Menu, StatusScreen, CrawlConfig, ExportConfig, AddConfig, ResetConfirm,
-  FinishConfig, SearchConfig, WebConfig, LimitsConfig, DeployConfirm,
+  FinishConfig, SearchConfig, WebConfig, LimitsConfig, KeyConfig, DeployConfirm,
 } from './screens.js';
 import { RunView } from './RunView.js';
 import { deployOutcome } from './runLines.js';
@@ -134,6 +134,8 @@ export default function App() {
     body = html`<${WebConfig} onBack=${toMenu} />`;
   } else if (screen === 'limits') {
     body = html`<${LimitsConfig} onBack=${toMenu} />`;
+  } else if (screen === 'key') {
+    body = html`<${KeyConfig} onBack=${toMenu} />`;
   } else if (screen === 'add') {
     body = html`<${AddConfig} onRun=${onRun} onBack=${toMenu} />`;
   } else if (screen === 'sources') {

@@ -107,7 +107,7 @@ export function deepseekModelId(slug) {
 }
 
 // Preços por 1M tokens (USD) — tarifa oficial corrente (2026-08-13; a DeepSeek anunciou revisão
-// de preço p/ 17/08 — se mudar, atualizar aqui). Cache-hit automático p/ prefixo ≥1024 tokens.
+// de preço p/ peak/off-peak efetivo em 2026-08-16 16:00 UTC — se mudar, atualizar aqui).
 const DEEPSEEK_PRICES = {
   'deepseek-v4-flash': { inputCacheHit: 0.0028, input: 0.14, output: 0.28 },
   'deepseek-v4-pro': { inputCacheHit: 0.003625, input: 0.435, output: 0.87 },

@@ -8,7 +8,7 @@
 > para leigos: o pipeline, o paralelismo (governador/lanes), as boas decisões, os gargalos e os números
 > reais da validação. Abra no navegador (arquivo local, zero dependências).
 
-Usa um **LLM no OpenRouter (DeepSeek V4)** para *derivar seletores CSS reutilizáveis* — não para extrair página a página. O seletor é validado com Cheerio, **cacheado por template no SQLite** e só re-derivado quando o cache falha (**self-healing**) — então o custo de LLM da **descoberta/extração** fica próximo de zero por artigo depois do primeiro acerto. Classificação de tags e resumos PT-BR são passes **opcionais** por artigo (rodam automáticos pós-crawl e podem ser desligados).
+Usa um **LLM (DeepSeek V4 — via OpenRouter ou via API direta da DeepSeek)** para *derivar seletores CSS reutilizáveis* — não para extrair página a página. O seletor é validado com Cheerio, **cacheado por template no SQLite** e só re-derivado quando o cache falha (**self-healing**) — então o custo de LLM da **descoberta/extração** fica próximo de zero por artigo depois do primeiro acerto. Classificação de tags e resumos PT-BR são passes **opcionais** por artigo (rodam automáticos pós-crawl e podem ser desligados).
 
 ## Recursos
 - **Crawl multinível** `índice → issue (roundup) → artigo`: abre cada edição e segue os links externos curados; uma página que é uma coleção de notícias é **dividida em N** automaticamente.
@@ -47,13 +47,13 @@ Tudo passa por uma **fila/frontier no SQLite** (`pending → in_progress → don
 
 ## Requisitos
 - Node.js >= 22 (testado em Node 24)
-- Uma chave do OpenRouter
+- Uma chave LLM: OpenRouter (`OPENROUTER_API_KEY`) **ou** DeepSeek direto (`DEEPSEEK_API_KEY` + `LLM_PROVIDER=deepseek`) — veja [Modelos e provedor LLM](#modelos-e-provedor-llm-openrouter-deepseek-direto)
 
 ## Instalação
 ```bash
 npm install
 npx playwright install chromium      # baixa o browser headless
-cp .env.example .env                 # e preencha OPENROUTER_API_KEY
+cp .env.example .env                 # e preencha a chave do provider que for usar (OPENROUTER_API_KEY ou DEEPSEEK_API_KEY)
 ```
 
 ## Instalação global (`ncrawl`)
@@ -61,13 +61,14 @@ Para chamar o crawler **de qualquer diretório** como um comando único:
 ```bash
 npm run link          # install + playwright + `npm link` + status (setup completo)
 ncrawl key set <sua-chave-openrouter>   # valida na OpenRouter e salva em ~/.newsletter-crawler/.env
+                                        # (a chave da DeepSeek DIRETA vai por env: DEEPSEEK_API_KEY)
 ncrawl status         # já funciona de qualquer pasta
 ncrawl                # sem args, em TTY: abre o menu guiado
 npm run unlink        # remove o link global quando quiser
 ```
 - O comando é **`ncrawl`** (e o alias longo `newsletter-crawler`). Não é `nc` de propósito: `nc` já é o **netcat** no sistema — usar esse nome o sombrearia.
 - **`NC_HOME` (default `~/.newsletter-crawler/`)** é o lugar **previsível** onde ficam os **dados do usuário**: o banco SQLite (`crawler.db`), o `.env` (segredos), o `sources.json` (fontes que você adiciona) e os `export/`. Assim o binário linkado não depende de onde o repo está. Mude com `NC_HOME=/outro/caminho ncrawl ...`.
-- **Chave OpenRouter pelo CLI:** `ncrawl key set <chave>` faz um *probe* (`GET /api/v1/key`) e **só grava se a chave for válida**; `ncrawl key test` valida a chave atual. A chave em `NC_HOME/.env` tem **precedência** sobre o `.env` do repo.
+- **Chave pelo CLI:** `ncrawl key set <chave>` faz um *probe* (`GET /api/v1/key`) e **só grava se a chave for válida** — salva `OPENROUTER_API_KEY` em `NC_HOME/.env`; `ncrawl key test` valida a chave atual. A chave da **DeepSeek direta** vai por env: `DEEPSEEK_API_KEY=...` no `.env` do repo ou no `NC_HOME/.env` (com `LLM_PROVIDER=deepseek`). **Resolução de env:** shell < `.env` do repo < `NC_HOME/.env` — o último a rodar vence (é o que o `ncrawl key set` aproveita).
 - O `sources.json` do usuário é **semeado** uma vez a partir do default versionado do repo (`config/sources.json`) — suas fontes de fábrica não se perdem. Dados já coletados em `./data/` **não** são migrados; se quiser reaproveitá-los, copie `data/crawler.db` para `~/.newsletter-crawler/crawler.db`.
 
 ## Configuração
@@ -145,18 +146,22 @@ npm test                               # node:test (datas, anti-bot, busca em lo
 - **Terminar só o pós-processamento:** `npm run finish -- [--budget USD] [--parallel N] [--limit N] [--no-verify|--no-classify|--no-summarize]` roda verify+classify+summarize dos **pendentes**, sem novo crawl (também no menu da TUI → "Finalizar pendentes"). É **delta/idempotente** e o `--budget` **para no teto e devolve os pendentes** — dá p/ terminar um backlog grande em fatias, com custo controlado e retomável.
 
 ## Publicar o site (buscador estático)
-O acervo pode virar um **buscador estático** (`webapp/`, Vite+React, **sem backend** — a busca IA roda no navegador com a chave do próprio usuário) publicado na **Vercel**. O site lê 3 JSONs commitados em `webapp/public/data`, gerados por `ncrawl export --format web` (determinístico: dois exports sem dado novo geram bytes idênticos, exceto o `generatedAt`).
+O acervo pode virar um **buscador estático** (`webapp/`, Vite+React, **sem backend** — a busca IA roda no navegador com a chave do próprio usuário, BYOK: **OpenRouter ou DeepSeek direto**, escolhida no modal de chave) publicado na **Vercel**. O site lê 3 JSONs commitados em `webapp/public/data`, gerados por `ncrawl export --format web` (determinístico: dois exports sem dado novo geram bytes idênticos, exceto o `generatedAt`).
 
 - **Fluxo normal = só `git push` na main.** Com o projeto Vercel conectado ao repo (Root Directory `webapp/`), todo push publica. O hook versionado **`.githooks/pre-push`** (instalado por `npm install` via `postinstall` → `core.hooksPath`) re-exporta o snapshot do seu **SQLite local** e, se houver dado novo, **commita `webapp/public/data` e interrompe o push** — é só repetir o `git push` (um commit criado durante o push não entra nele) e a Vercel faz o deploy.
 - **Guards fail-open** (o hook nunca trava trabalho legítimo): export falhou → o push segue; snapshot com **menos** artigos que o publicado (máquina sem o banco exportaria um acervo vazio) → restaura sem commitar; mudança só no `generatedAt` volátil → sem ruído.
 - **Manualmente:** `ncrawl export --format web && git add webapp/public/data && git commit && git push`.
 - ⚠️ Enquanto uma coleta/enriquecimento estiver **escrevendo no banco em outro terminal**, cada push encontra dado novo e re-exporta/aborta em loop; use `git push --no-verify` para publicar o snapshot já commitado.
 
-## Modelos (OpenRouter / DeepSeek V4)
+## Modelos e provedor LLM (OpenRouter | DeepSeek direto)
+- **Dois provedores** (`LLM_PROVIDER=openrouter|deepseek`, default `openrouter` — sem auto-detecção: inválido/ausente cai em openrouter). O provider ativo decide transporte, chave e fonte do custo:
+  - **OpenRouter** (default): baseURL `https://openrouter.ai/api/v1`, chave `OPENROUTER_API_KEY`, custo real na resposta (`usage.cost`, via `usage:{include:true}`).
+  - **DeepSeek direto** (api.deepseek.com): baseURL `DEEPSEEK_BASE_URL` (default `https://api.deepseek.com`), chave `DEEPSEEK_API_KEY`. Os slugs do `config/models.json` (formato OpenRouter) são traduzidos p/ o id da API direta (`deepseek/deepseek-v4-flash-0731` → `deepseek-v4-flash`; overrides `DEEPSEEK_MODEL_MAP`/`DEEPSEEK_DEFAULT_MODEL`). A API não aceita os params da OpenRouter (`reasoning`, `usage:{include:true}` — são omitidos) nem `response_format` json_schema (degrada p/ `json_object`); o effort efetivo é `low|high|max` (xhigh/medium → high; `max` só existe no enum do direto, nunca é enviado — no OpenRouter o DeepSeek V4 rejeita `max` com 400). **Custo calculado localmente** (a API não traz `usage.cost`): tokens × tabela do `src/config.js` (`DEEPSEEK_PRICES` ou env `DEEPSEEK_PRICE_<MODEL>_INPUT_PER_M`/`_OUTPUT_PER_M`) — preços atuais em `docs/deepseek-direct.md`.
 - **Modelo único** `deepseek/deepseek-v4-flash-0731` — derivação de seletor e os fallbacks de extração/paginação (item-a-item, próxima página, extração de artigo) usam `reasoning.effort: "xhigh"` (1 chamada amortizada por template; use `"xhigh"`, **nunca** `"max"`); resumo PT-BR, busca, curadoria e verificação usam `"high"`; etapas mecânicas (limpeza pré-save, lote da busca soft) usam `"medium"`.
 - **Classificação (custo):** as 9 facetas de tag rodam **por faceta**; só as **core** (`domain`, `topic-technology`) em `effort: "high"`, as outras 7 em `effort: "medium"` sobre título+início do corpo (`CLASSIFY_MAX_CHARS`=2000; ajuste por faceta com `LLM_MODEL_CLASSIFY_<FACETA>`/`LLM_EFFORT_CLASSIFY_<FACETA>`). Classificar já foi ~92% do gasto de uma coleta longa; este perfil corta ~4× (o próximo salto seria classificar em **lote** de artigos por chamada).
-- Saídas estruturadas via `response_format: json_schema` (strict) + validação `zod`.
+- Saídas estruturadas via `response_format: json_schema` (strict) + validação `zod` (no provedor direto: `json_object` — o zod e o parse defensivo seguem como guarda).
 - **JSON inválido é retomável:** o modelo às vezes trunca a resposta; `callJSON` re-amostra **2×** e, se ainda falhar, faz **uma última tentativa**. O `maxRetries` do SDK cobre 429/5xx à parte.
+- **TTS (leitura em voz alta):** segue **OpenRouter-only** (`/api/v1/audio/speech`) — a DeepSeek não tem API de áudio; no webapp, o botão de reprodução só funciona com chave da OpenRouter salva.
 
 ## Estrutura
 ```
@@ -165,7 +170,7 @@ src/util.js       normalizeUrl, sha256, jitter, slugify, log
 src/db.js         better-sqlite3: schema (WAL) + prepared statements
 src/fetch.js      fetchStatic/fetchRendered/fetchSmart + robots + circuit breaker
 src/clean.js      pruneForLLM (HtmlRAG) + Readability + turndown
-src/llm.js        OpenRouter: deriveLinkSelector/Content/Next + extractLinks/Article
+src/llm.js        LLM (OpenRouter | DeepSeek direto): deriveLinkSelector/Content/Next + extractLinks/Article
 src/selectors.js  cache get/put + validação Cheerio (self-healing)
 src/substack.js   atalho opcional via API JSON do Substack
 src/crawl.js      frontier + processJob + crawlArchive + paginação
@@ -175,7 +180,7 @@ src/summarize.js  resumo + título PT-BR por artigo (high)
 src/search.js     busca na base: modo A (high, varre o escopo) + modo B (high, por tags) + searchWeb (web: soft em lote / profunda)
 src/web.js        buscador web: servidor node:http zero-dep (API JSON + busca IA + key) — `npm run web`
 src/web-ui/       app React zero-build do buscador (htm + UMD servidos de node_modules)
-src/keys.js       chave OpenRouter: probe (GET /api/v1/key) + upsert idempotente em NC_HOME/.env
+src/keys.js       chave (OpenRouter): probe (GET /api/v1/key) + upsert idempotente em NC_HOME/.env (a chave da DeepSeek direta vai por env)
 src/commands.js   implementação dos comandos (compartilhada CLI + UI) + getStatus
 src/index.js      CLI (parseFlags + dispatch) + gate do menu guiado
 src/ui/           menu Ink/React (htm, sem build): App, screens, RunView (painel ao vivo), HistoryView, i18n

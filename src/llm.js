@@ -167,12 +167,44 @@ function tryParseJSON(content) {
 }
 
 let _warnedMaxEffort = false;
+// O `zod:` do callJSON decide o retry pelo shape ESTRITO (sem os .default()): uma chave
+// tolerada AUSENTE conta como shape inválido e re-amostra — o default do schema só vale
+// esgotados os retries (na issue 637 da Node Weekly, items ausente na 1ª resposta; a 2ª
+// tentativa recuperou a seção inteira — se o default valesse de cara, a seção viraria vazia
+// silenciosa). Em zod v4 o `.default()` é detectável por `_def.defaultValue` (nullish/optional
+// NÃO têm — não são desembrulhados e seguem opcionais).
+function strictZodShape(zod) {
+  if (!zod?.shape) return null;
+  const shape = {};
+  for (const [k, v] of Object.entries(zod.shape)) {
+    shape[k] = v._def?.defaultValue !== undefined ? v._def.innerType : v;
+  }
+  return z.object(shape);
+}
+
+// Último recurso esgotados os retries: zera as chaves de TOPO que falharam e re-parseia — os
+// `.default([])` dos schemas tolerantes (curateZ.items, cleanZ.junk_spans, verifyZ.problems)
+// preenchem. Um item malformado DENTRO da coleção zera a coleção inteira (fail-open: o passe
+// de cobertura da curadoria recupera os itens; melhor do que derrubar a etapa). null se nem
+// assim o resultado for válido (aí o callJSON lança e o chamador decide).
+function tolerantParse(zod, parsed) {
+  const check = zod.safeParse(parsed);
+  if (check.success) return check.data;
+  const drop = new Set(check.error.issues.map((i) => String(i.path[0])));
+  if (!drop.size) return null;
+  const tolerant = { ...parsed };
+  for (const k of drop) delete tolerant[k];
+  const r = zod.safeParse(tolerant);
+  return r.success ? r.data : null;
+}
+
 // Exportado para o harness de avaliação (eval/) reusar EXATAMENTE o mesmo caminho de chamada
 // (reasoning-only, guard de 'max', retry de JSON). Passe fallbackModel:null p/ isolar o modelo.
 export async function callJSON({
   model, reasoning, schema, schemaName, system, user, retries = 2, fallbackModel = translateModel(MODELS.pro),
   stage = 'other', // rótulo do estágio p/ o ledger de custo (default p/ usos avulsos/eval)
   signal = null, // AbortSignal do job (teto duro): cancela a chamada em voo e os retries
+  zod = null, // schema zod de validação de shape; inválido re-amostra (mesmo fluxo do JSON inválido)
 }) {
   // Guard: "max" não é suportado pelo DeepSeek V4 (HTTP 400); rebaixa para "xhigh".
   if (reasoning?.effort === 'max') {
@@ -187,13 +219,18 @@ export async function callJSON({
   if (system) messages.push({ role: 'system', content: system });
   messages.push({ role: 'user', content: user });
   const response_format = responseFormat(schemaName, schema);
+  // Shape ESTRITO p/ a decisão de retry (ver strictZodShape acima). Sem `zod:` o fluxo é o
+  // histórico: só o parse de JSON decide (backward-compat — o eval chama sem zod).
+  const strictShape = zod?.shape ? strictZodShape(zod) : null;
 
   // Retry no JSON inválido: o modelo às vezes trunca/malforma a resposta (esp. com reasoning alto).
   // Estratégia: até `retries+1` tentativas re-amostrando no MESMO modelo (a chamada não é
   // temperatura 0, então uma nova amostra costuma resolver); na ÚLTIMA tentativa, se
   // `fallbackModel` diferir do modelo, escala para ele — mais confiável no JSON. No perfil atual
   // `fallbackModel` aponta para o MESMO slug do modelo, então a escalada é no-op. maxRetries do
-  // SDK já cobre 429/5xx; aqui cobrimos resposta 200 com conteúdo não-parseável.
+  // SDK já cobre 429/5xx; aqui cobrimos resposta 200 com conteúdo não-parseável — e, com `zod:`,
+  // também resposta JSON ok porém FORA do schema (P2: o zod rodava FORA do callJSON e o retry
+  // nunca disparava p/ shape inválido — a seção de curadoria da issue 637 caiu inteira).
   for (let attempt = 0; ; attempt++) {
     const isLast = attempt >= retries;
     const useModel = isLast && fallbackModel && model !== fallbackModel ? fallbackModel : model;
@@ -203,7 +240,26 @@ export async function callJSON({
       stage, model: useModel, reasoning, response_format, messages, signal,
     });
     const parsed = tryParseJSON(resp.choices?.[0]?.message?.content ?? '');
-    if (parsed !== undefined) return parsed;
+    if (parsed !== undefined && !zod) return parsed;
+    if (parsed !== undefined) {
+      const strictOk = strictShape ? strictShape.safeParse(parsed).success : true;
+      const check = zod.safeParse(parsed);
+      if (!strictOk || !check.success) {
+        if (!isLast) {
+          const next = attempt + 1 >= retries && fallbackModel && model !== fallbackModel ? fallbackModel : model;
+          warn(`resposta fora do schema do LLM (tentativa ${attempt + 1}/${retries + 1}); repetindo com ${next}…`);
+          continue;
+        }
+        // Esgotados os retries: defaults tolerantes em vez de derrubar a etapa (ver tolerantParse).
+        const tolerant = tolerantParse(zod, parsed);
+        if (tolerant) {
+          warn(`resposta fora do schema (${stage}); aplicando defaults tolerantes`);
+          return tolerant;
+        }
+        throw new Error('resposta fora do schema retornada pelo LLM');
+      }
+      return check.data;
+    }
     if (isLast) throw new Error('JSON inválido retornado pelo LLM');
     const next = attempt + 1 >= retries && fallbackModel && model !== fallbackModel ? fallbackModel : model;
     warn(`JSON inválido do LLM (tentativa ${attempt + 1}/${retries + 1}); repetindo com ${next}…`);
@@ -238,6 +294,7 @@ export async function deriveLinkSelector(prunedHtml) {
     stage: 'linkSelector',
     schemaName: 'link_selector',
     schema: linkSelectorSchema,
+    zod: linkSelectorZ, // validação de shape: inválido re-amostra no callJSON (o .parse() abaixo segue como guarda)
     system: 'Você é um especialista em CSS e web scraping. Responda apenas com JSON.',
     user:
       'Dado este HTML (podado) de uma página de arquivo/listagem de uma newsletter, retorne um ' +
@@ -271,6 +328,7 @@ export async function deriveContentSelector(prunedHtml, { signal = null } = {}) 
     stage: 'contentSelector',
     schemaName: 'content_selector',
     schema: contentSelectorSchema,
+    zod: contentSelectorZ,
     system: 'Você é um especialista em CSS e web scraping. Responda apenas com JSON.',
     user:
       'Dado este HTML (podado) de uma PÁGINA DE ARTIGO de newsletter, retorne um seletor CSS para ' +
@@ -299,6 +357,7 @@ export async function deriveNextLink(prunedHtml, baseUrl) {
     stage: 'nextLink',
     schemaName: 'next_link',
     schema: nextSchema,
+    zod: nextZ,
     system: 'Você localiza o link de próxima página de listagens. Responda apenas com JSON.',
     user:
       `Nesta página de listagem (URL base ${baseUrl}), qual é a URL da PRÓXIMA página de arquivo ` +
@@ -334,6 +393,7 @@ export async function extractLinksItemByItem(prunedHtml) {
     stage: 'linkExtract',
     schemaName: 'links',
     schema: linksSchema,
+    zod: linksZ,
     system: 'Você extrai links de artigos. Responda apenas com JSON.',
     user:
       'Extraia todos os links de artigos/edições individuais deste HTML como {links:[{url,title}]} ' +
@@ -353,6 +413,7 @@ export async function extractRoundupLinks(prunedHtml, baseUrl) {
     stage: 'roundupExtract',
     schemaName: 'roundup_links',
     schema: linksSchema,
+    zod: linksZ,
     system: 'Você extrai os links das fontes externas citadas numa edição de newsletter. Responda apenas com JSON.',
     user:
       `Esta é uma EDIÇÃO/ROUNDUP de newsletter (URL ${baseUrl}) com comentário editorial e links ` +
@@ -389,6 +450,7 @@ export async function extractArticleViaLLM(prunedHtmlOrText, { signal = null } =
     stage: 'articleExtract',
     schemaName: 'article',
     schema: articleSchema,
+    zod: articleZ,
     system: 'Você extrai o conteúdo principal de um artigo. Responda apenas com JSON.',
     user:
       'Extraia o título, o corpo do artigo em texto limpo (sem menus/rodapé/relacionados) e a data ' +
@@ -426,19 +488,24 @@ const curateSchema = {
   required: ['issue_date', 'items'],
   additionalProperties: false,
 };
+// `items` com .default([]): DEFAULT TOLERANTE esgotados os retries do callJSON — a seção fica
+// vazia em vez de cair (P2; o passe de cobertura recupera os itens reais). O retry de shape
+// roda ANTES do default valer (strictZodShape), então uma resposta sem items re-amostra.
 const curateZ = z.object({
   issue_date: z.string().nullish(),
-  items: z.array(
-    z.object({
-      url: z.string(),
-      title: z.string(),
-      kind: z
-        .string()
-        .transform((s) => (CURATE_KINDS.has(String(s).toLowerCase().trim()) ? String(s).toLowerCase().trim() : 'news')),
-      section: z.string().nullish(),
-      blurb: z.string().nullish(),
-    }),
-  ),
+  items: z
+    .array(
+      z.object({
+        url: z.string(),
+        title: z.string(),
+        kind: z
+          .string()
+          .transform((s) => (CURATE_KINDS.has(String(s).toLowerCase().trim()) ? String(s).toLowerCase().trim() : 'news')),
+        section: z.string().nullish(),
+        blurb: z.string().nullish(),
+      }),
+    )
+    .default([]),
 });
 // Hint por SEÇÃO: o tipo de conteúdo mais provável de cada seção, p/ o agente especializar o
 // kind. É só um viés (o agente decide item a item), não uma regra dura.
@@ -463,6 +530,7 @@ export async function curateRoundupItems({ markdown, baseUrl, section = null, pa
     stage: 'curate',
     schemaName: 'curated_items',
     schema: curateSchema,
+    zod: curateZ, // shape inválido re-amostra (P2); esgotado, items vira [] em vez de cair a seção
     system:
       'Você é o curador de uma edição de newsletter agregadora. Extrai CADA item curado com fidelidade ' +
       'total ao texto do agregador. Responda apenas com JSON.',
@@ -507,6 +575,7 @@ export async function curateLeftoverLinks({ pageContext, baseUrl, leftovers }) {
     stage: 'curate',
     schemaName: 'curated_items',
     schema: curateSchema,
+    zod: curateZ,
     system:
       'Você é o curador de uma edição de newsletter agregadora, fazendo o passe de COBERTURA: ' +
       'classificar links que ficaram fora da primeira extração. Responda apenas com JSON.',
@@ -545,9 +614,12 @@ const cleanSchema = {
   required: ['title', 'junk_spans', 'published_at'],
   additionalProperties: false,
 };
+// junk_spans com .default([]): default tolerante do callJSON (P2 — o zod matou o clean do
+// meiert.com com "expected array, received undefined"; agora o original cru só fica se o
+// modelo repetir shape inválido até esgotar os retries).
 const cleanZ = z.object({
   title: z.string().nullish(),
-  junk_spans: z.array(z.string()),
+  junk_spans: z.array(z.string()).default([]),
   published_at: z.string().nullish(),
 });
 export async function cleanArticleContent({ title, content, stage = 'articleClean' }, { signal = null } = {}) {
@@ -559,6 +631,7 @@ export async function cleanArticleContent({ title, content, stage = 'articleClea
     stage,
     schemaName: 'clean_article',
     schema: cleanSchema,
+    zod: cleanZ, // esgotados os retries, junk_spans vira [] (o original cru só fica se o modelo repetir o shape errado)
     system:
       'Você identifica sujeira de interface em texto extraído de páginas web. Você copia os trechos ' +
       'EXATAMENTE como aparecem (verbatim) — nunca resume nem reescreve. Responda apenas com JSON.',
@@ -593,7 +666,8 @@ const verifyZ = z.object({
   verdict: z
     .string()
     .transform((s) => (VERIFY_VERDICTS.has(String(s).toLowerCase().trim()) ? String(s).toLowerCase().trim() : 'suspect')),
-  problems: z.array(z.string()),
+  // problems com .default([]): default tolerante do callJSON (mesma mecânica de curateZ/cleanZ).
+  problems: z.array(z.string()).default([]),
 });
 export async function verifyRecordLLM({ url, kind, title, blurb, content }) {
   const { model, effort } = stageModel('verifyRecord');
@@ -603,6 +677,7 @@ export async function verifyRecordLLM({ url, kind, title, blurb, content }) {
     stage: 'verifyRecord',
     schemaName: 'verify_record',
     schema: verifySchema,
+    zod: verifyZ,
     system:
       'Você audita registros salvos por um crawler de newsletters. Seja rigoroso e específico. ' +
       'Responda apenas com JSON.',
@@ -614,6 +689,9 @@ export async function verifyRecordLLM({ url, kind, title, blurb, content }) {
       'sujo, conteúdo raso demais p/ o título, kind aparentemente errado). Liste-os em problems.\n' +
       '- "junk": não é conteúdo real (página de erro/bloqueio/captcha, só navegação, propaganda pura, ' +
       'stub de paywall, texto ilegível).\n' +
+      'EXEMPLO (caso real): se o conteúdo COMEÇA com o menu de navegação do site — ex.: "Website • Docs • ' +
+      'Community • Blog • Changelog" — o menu no topo é resto de interface => verdict "suspect", problems ' +
+      'ex.: "conteúdo começa com menu de navegação".\n' +
       'problems: lista curta e específica em PT-BR (vazia se ok).\n\n' +
       `REGISTRO\nurl: ${url}\nkind: ${kind || '(sem kind)'}\ntítulo: ${title || '(vazio)'}\n` +
       `blurb do agregador: ${blurb || '(nenhum)'}\n\nconteúdo (recorte):\n${clamp(content)}`,
@@ -649,6 +727,7 @@ export async function deriveDateSelector(prunedHtml, baseUrl) {
     stage: 'dateSelector',
     schemaName: 'date_selector',
     schema: dateSelectorSchema,
+    zod: dateSelectorZ,
     system:
       'Você é um especialista em CSS, regex e web scraping. Você lê o HTML REAL e devolve seletores ' +
       'que funcionam nesta página específica. Responda apenas com JSON.',
@@ -697,6 +776,7 @@ export async function classifyFacet({ facet, system, user }) {
 
     schemaName: 'facet_tags',
     schema: facetSchema,
+    zod: facetZ,
     system,
     user,
   });
@@ -719,6 +799,7 @@ export async function summarizeArticle({ title, content }) {
     stage: 'summarize',
     schemaName: 'summary_pt',
     schema: summarySchema,
+    zod: summaryZ,
     system:
       'Você é um editor técnico brasileiro. Resuma artigos de tecnologia em português do Brasil, ' +
       'de forma fiel e fluente. Responda apenas com JSON.',
@@ -775,6 +856,7 @@ export async function judgeRelevance({ query, title, content, spec = null, signa
     stage: 'searchRelevance',
     schemaName: 'relevance',
     schema: relevanceSchema,
+    zod: relevanceZ,
     signal,
     system:
       'Você é um avaliador de relevância de busca, rigoroso e consistente. ' +
@@ -873,6 +955,7 @@ export async function judgeRelevanceBatch({ query, items, spec = null, signal = 
     stage: 'searchBatch',
     schemaName: 'relevance_batch',
     schema: relevanceBatchSchema,
+    zod: relevanceBatchZ,
     signal,
     system,
     user,
@@ -916,6 +999,7 @@ export async function compileQuerySpec(query, { signal = null } = {}) {
     stage: 'searchSpec',
     schemaName: 'query_spec',
     schema: querySpecSchema,
+    zod: querySpecZ,
     signal,
     system:
       'Você interpreta uma CONSULTA de busca (pode estar em PT-BR e ser longa/detalhada) e devolve um ' +
@@ -950,6 +1034,7 @@ export async function mapQueryToFacetTags({ system, user }) {
     stage: 'searchTags',
     schemaName: 'search_tags',
     schema: searchTagsSchema,
+    zod: searchTagsZ,
     system,
     user,
   });

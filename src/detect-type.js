@@ -78,6 +78,7 @@ async function classifyWithLLM({ url, title, sig, sampleLinks }) {
     stage: 'detectType',
     schemaName: 'detect_source_type',
     schema: detectSchema,
+    zod: detectZ, // shape inválido entra no retry do callJSON (P2) — o parse abaixo fica como guarda
     system:
       'Você classifica a página INICIAL de uma newsletter/blog em um de dois tipos, para um crawler. ' +
       'Responda apenas com JSON.\n' +

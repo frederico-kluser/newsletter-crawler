@@ -13,6 +13,29 @@ import { stageWindow } from './governor.js';
 import { shouldStop, getBudgetState } from './budget.js';
 import { sha256, log, errorLog } from './util.js';
 
+// ---- heurística determinística pré-LLM: corpo ABRINDO com menu de navegação ----
+// Padrão isBlockedPage: barata e sem custo de LLM. Caso real (P4): o corpo do artigo da
+// Drizzle no Node Weekly 637 começava com "Website • / Docs • / Community • / Blog • /
+// Changelog" e a verificação deu "ok" — o verificador não distinguia menu no topo. Dispara
+// só no INÍCIO do corpo: ≥3 separadores de menu (• · | /, inclusive os pares "• /") nos
+// primeiros ~120 chars, com os tokens (itens de menu) curtos e sem marca de URL (':', '.')
+// — "https://…" no início não pode contar como menu. Verdict "suspect" é barato (advisory;
+// o reclean pode remover o menu e o re-verify atualiza o veredito), então falso-positivo
+// ocasional de prosa com separadores é aceitável.
+const NAV_MENU_HEAD = 120;
+const NAV_TOKEN_MAX = 24;
+export function startsWithNavMenu(text) {
+  const parts = String(text || '').slice(0, NAV_MENU_HEAD).split(/\s*(?:[•·|/]\s*)+/);
+  if (parts.length < 4) return false; // menos de 3 separadores
+  for (let i = 0; i < Math.min(parts.length, 4); i++) {
+    const t = parts[i].trim();
+    // token vazio só é aceito no INÍCIO (menu pode abrir com "• Home • …"); no meio, vazio
+    // = separadores duplos/URL
+    if ((i > 0 && !t) || t.length > NAV_TOKEN_MAX || /[:.]/.test(t)) return false;
+  }
+  return true;
+}
+
 /**
  * Verifica UMA ficha (heurística grátis anti-bot -> LLM), persiste o veredito + notas e loga o
  * evento. Compartilhado pelo sweep (verifyPending) e pela verificação em STREAMING do crawl
@@ -24,6 +47,12 @@ export async function verifyArticleRow(a, { runId = null } = {}) {
   if (isBlockedPage(a.title, a.content)) {
     verdict = 'junk';
     problems = ['página de desafio anti-bot salva como conteúdo'];
+  } else if (startsWithNavMenu(a.content)) {
+    // Heurística pré-LLM: corpo abrindo com menu de navegação (P4 — falso-positivo real da
+    // Drizzle). Determinístico e sem custo; o reclean pode remover o menu e o re-verify
+    // (verifyArticleRow de novo) atualiza o veredito.
+    verdict = 'suspect';
+    problems = ['conteúdo começa com menu de navegação'];
   } else {
     const out = await verifyRecordLLM({
       url: a.url,

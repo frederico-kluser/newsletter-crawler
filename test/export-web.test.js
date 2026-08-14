@@ -15,6 +15,8 @@ process.env.NC_HOME = NC_HOME_TMP;
 
 const { stmts, db } = await import('../src/db.js');
 const { buildWebSnapshot, exportWebSnapshot } = await import('../src/export-web.js');
+// config importado para o teste provider-aware de meta.search.models (mesma instância do ESM).
+const config = await import('../src/config.js');
 
 // ---- seed (mesmo helper do web.api.test.js) ----
 const alpha = stmts.upsertSource.get({ name: 'Fonte Alpha', base_url: 'http://alpha.test', type: 'index', max_index_pages: null });
@@ -91,11 +93,35 @@ test('export web: meta traz totais, fontes, facetas em ordem canônica e config 
   assert.ok(meta.toolContentTypes.includes('tooling'));
   assert.equal(meta.search.batchSize, 40);
   assert.equal(meta.search.deepConfirm, 200);
-  assert.ok(meta.search.models.searchBatch.model.includes('flash'));
-  assert.ok(meta.search.models.fallback.model.includes('flash-0731'));
+  // O export espelha o modelo RESOLVIDO do runtime (stageModel já traduz; fallback via
+  // translateModel) — não o slug cru do config/models.json. No provider default (openrouter)
+  // translateModel é identidade, então vale o slug OpenRouter de hoje.
+  assert.equal(meta.search.models.searchBatch.model, config.stageModel('searchBatch').model);
+  assert.equal(meta.search.models.searchRelevance.model, config.stageModel('searchRelevance').model);
+  assert.equal(meta.search.models.searchSpec.model, config.stageModel('searchSpec').model);
+  assert.equal(meta.search.models.fallback.model, config.translateModel(config.MODELS.pro));
   // sem llm_usage semeado não há amostra: costHints omitido por completo (cliente usa seeds)
   assert.deepEqual(meta.search.costHints, {});
   assert.equal(meta.dates.min, pendenteIso);
+});
+
+test('export web: meta.search.models reflete o provider ATIVO (deepseek direto = slug traduzido)', () => {
+  // Troca o provider em runtime (setRuntimeKey, mesmo padrão do llm.provider.test.js) e volta no
+  // finally — o snapshot precisa refletir o que o runtime usa de fato, nunca o slug OpenRouter cru.
+  const prevProvider = config.LLM_PROVIDER;
+  const prevKey = config.LLM_PROVIDER === 'deepseek' ? config.DEEPSEEK_API_KEY : config.OPENROUTER_API_KEY;
+  try {
+    config.setRuntimeKey('sk-ds-teste', 'deepseek');
+    const { meta } = buildWebSnapshot();
+    // Slugs diretos da API da DeepSeek (deepseek-v4-flash | deepseek-v4-pro); forma preservada.
+    assert.equal(meta.search.models.searchBatch.model, 'deepseek-v4-flash');
+    assert.equal(meta.search.models.searchRelevance.model, 'deepseek-v4-flash');
+    assert.equal(meta.search.models.searchSpec.model, 'deepseek-v4-flash');
+    assert.equal(meta.search.models.fallback.model, 'deepseek-v4-flash');
+    assert.equal(meta.search.models.searchBatch.effort, 'medium', 'effort preservado');
+  } finally {
+    config.setRuntimeKey(prevKey, prevProvider);
+  }
 });
 
 test('export web: articles tolera nulls, normaliza datas e prefere blurb no snippet', () => {

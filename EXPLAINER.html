@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="dark">
-<title>EXPLAINER — captura 3 dias + qualidade + fixes · de-para da execução</title>
+<title>EXPLAINER — logs + reset + captura total + fixes · de-para da execução</title>
 <link rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
       integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
@@ -80,8 +80,8 @@
 
   <header class="explainer-hero rounded-4 p-4 p-md-5 mb-4">
     <span class="badge badge-accent mb-3"><i class="bi bi-clipboard-data me-1"></i>Relatório de execução</span>
-    <h1 class="display-6 fw-semibold text-white mb-2">Captura real (3 dias, 1 fonte) + teste de qualidade + correções P1–P6</h1>
-    <p class="lead text-white-50 mb-3">Node Weekly issue 637 capturada com a chave real; extração testada artigo a artigo; 6 problemas encontrados (datas, curadoria, taxonomia, verify, extração) e todos corrigidos e re-verificados contra os dados reais.</p>
+    <h1 class="display-6 fw-semibold text-white mb-2">Logs melhores → reset → captura TOTAL (7 fontes, 1 semana) → análise e correção de tudo</h1>
+    <p class="lead text-white-50 mb-3">Log persistente por run (acompanhamento real), limpeza dos dados, captura completa de 188 artigos em 7 fontes, 8 problemas encontrados e corrigidos com backfill dos dados reais.</p>
     <div class="d-flex flex-wrap gap-2">
       <span class="badge badge-accent">v2.0</span>
       <span class="badge badge-soft"><i class="bi bi-calendar3 me-1"></i>2026-08-14</span>
@@ -134,11 +134,11 @@
     <div class="tab-pane fade show active" id="pane-visao" role="tabpanel"
          aria-labelledby="tab-visao" tabindex="0" data-print-title="Visão geral">
       <h2 class="h4 pane-title">Resumo da execução</h2>
-      <p class="text-body-secondary">Tarefa: "pegue nossa key e faça a captura dos últimos 3 dias para apenas uma fonte; teste a captura, teste a qualidade da extração, analise os erros e corrija tudo que estiver errado."</p>
+      <p class="text-body-secondary">Tarefa: "limpe todos os dados e faça novamente com TODAS as fontes e 1 semana de tempo; antes melhore os logs para conseguir acompanhar tudo; faça, analise e arrume TODOS os problemas."</p>
 
       <div class="alert alert-primary d-flex gap-2" role="alert">
         <i class="bi bi-info-circle-fill flex-shrink-0"></i>
-        <div><strong>O que foi entregue:</strong> captura real da Node Weekly (issue 637, 15→21 artigos) com o pipeline completo; teste de qualidade artigo a artigo; 6 problemas reais encontrados (P1 datas erradas em 13/15 artigos, P2 seção de curadoria perdida, P3 taxonomia sem termos core, P4 falso-positivo de verify, P5 botão de UI no fim das release notes, P6 newlines/moldura) — todos corrigidos, com 31 testes novos (471→533) e RE-VERIFICADOS contra o banco real (replay da issue, reextract, reclean). Custo total das provas: ~US$ 0,16.</div>
+        <div><strong>O que foi entregue:</strong> (1) logs persistentes por run com flush imediato + resumo periódico + <code>crawl --help</code> seguro; (2) reset completo dos dados; (3) captura TOTAL: 7 fontes, 1 semana, 188 artigos, US$ 0,8559, pipeline completo; (4) 8 problemas reais encontrados e CORRIGIDOS (guarda de idioma, guards de artigo, GitHub recovery, vocabulário, kind) com backfill dos dados reais e re-verificação 7/7 com evidência. Estado final: 186 artigos, ok=169/suspect=15/junk=2, 0 pendentes, US$ 1,34 total.</div>
       </div>
 
       <div class="row g-3">
@@ -147,7 +147,7 @@
             <div class="card-body py-4">
               <i class="bi bi-layers fs-3 stat-value"></i>
               <div class="display-6 fw-bold stat-value">4</div>
-              <div class="text-body-secondary small">Ondas + 2 fix subwaves</div>
+              <div class="text-body-secondary small">Ondas (8 worktrees)</div>
             </div>
           </div>
         </div>
@@ -155,8 +155,8 @@
           <div class="card h-100 text-center">
             <div class="card-body py-4">
               <i class="bi bi-robot fs-3 stat-value"></i>
-              <div class="display-6 fw-bold stat-value">16</div>
-              <div class="text-body-secondary small">Sub-agentes (incl. revisores)</div>
+              <div class="display-6 fw-bold stat-value">12</div>
+              <div class="text-body-secondary small">Sub-agentes (3 revisões falharam por 402)</div>
             </div>
           </div>
         </div>
@@ -175,23 +175,19 @@
       <div class="list-group list-group-flush">
         <div class="list-group-item d-flex gap-3 align-items-start">
           <i class="bi bi-file-earmark-diff fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>30 arquivos alterados</strong> — <span class="diff-plus">+3.634</span> / <span class="diff-minus">−54</span> linhas (ac07ce0..HEAD).</div>
+          <div><strong>28 arquivos alterados</strong> — <span class="diff-plus">+3.822</span> / <span class="diff-minus">−96</span> linhas (10e8bec..HEAD).</div>
         </div>
         <div class="list-group-item d-flex gap-3 align-items-start">
           <i class="bi bi-check2-circle fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>Testes:</strong> 471 → 533 (31 novos: wire tests com fetch/SDK mockados, fixtures de páginas reais).</div>
+          <div><strong>Testes:</strong> 546 → 574 (28 novos: log/help/summary, guards JSON+piso, idioma, GitHub recovery, kind, vocabulário).</div>
         </div>
         <div class="list-group-item d-flex gap-3 align-items-start">
           <i class="bi bi-cash-stack fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>Custo da captura+provas:</strong> run 1 US$ 0,0676 · re-verificação US$ 0,0373 · acidente de --help US$ 0,0147 (fora das provas).</div>
-        </div>
-        <div class="list-group-item d-flex gap-3 align-items-start">
-          <i class="bi bi-shield-check fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>Revisões adversariais:</strong> 4 (P1, P2+P4, P5+P6 + convergência) — 3 "PROBLEMAS PARCIAIS" com fixes aplicados, 1 convergência; + 1 revisor de plano (fixes).</div>
+          <div><strong>Custo total:</strong> US$ 1,3382 em 4.112 chamadas (captura US$ 0,8559 + re-verificação US$ 0,4823 — teto US$ 2 respeitado).</div>
         </div>
         <div class="list-group-item d-flex gap-3 align-items-start">
           <i class="bi bi-database-check fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>Dados reais corrigidos:</strong> 15 artigos backfillados para 2026-08-13 (13 estavam com data do alvo); issue 637 re-processada → 6 itens IN BRIEF recuperados (15→21, dedup 13/13).</div>
+          <div><strong>Dados reais corrigidos:</strong> 11 resumos em chinês → PT-BR (guarda disparou 1× em produção); 2 abaixo-do-piso deletados; JSON cru restaurado; 3 release notes do GitHub recuperadas; 63 kinds derivados + 123 curados restaurados do backup; 186/186 re-classificados com vocabulário novo.</div>
         </div>
       </div>
     </div>
@@ -200,7 +196,7 @@
     <div class="tab-pane fade" id="pane-ondas" role="tabpanel"
          aria-labelledby="tab-ondas" tabindex="0" data-print-title="Ondas executadas">
       <h2 class="h4 pane-title">Ondas executadas</h2>
-      <p>Uma linha por worktree. Cada sub-agente trabalhou numa worktree Git nomeada; integração por squash-merge um a um, com gate (build + testes) entre merges. Todas as worktrees/branches desta execução foram removidas ao fim (arquivadas em refs/do-archive/).</p>
+      <p>Uma linha por worktree. Integração por squash-merge um a um, com gate (build + testes) entre merges. Todas as worktrees/branches desta execução foram removidas ao fim (arquivadas em refs/do-archive/).</p>
 
       <div class="table-responsive">
         <table class="table table-hover align-middle">
@@ -216,66 +212,66 @@
           <tbody>
             <tr>
               <td><span class="badge badge-accent">Onda 1</span></td>
-              <td><code>onda1-captura-node-weekly</code></td>
-              <td>Captura REAL (Node Weekly, --since 2026-08-11, 3 dias): run 1 done, US$ 0,0676, 15 artigos, issue 637; relatório docs/captura-2026-08-14-node-weekly.md com achados P1-P6</td>
-              <td class="text-end"><code>5994b89</code></td>
+              <td><code>onda1-logs-observabilidade</code></td>
+              <td>Log persistente por run (NC_HOME/logs + latest.log, flush writeSync), resumo periódico (fila/voo/vereditos/erros), crawl --help/--version seguros</td>
+              <td class="text-end"><code>eef2cd5</code></td>
               <td><span class="badge badge-ok">Concluída</span></td>
             </tr>
             <tr>
               <td><span class="badge badge-accent">Onda 2</span></td>
-              <td><code>onda2-p1-data-issue</code></td>
-              <td>P1: herança da data da issue (listagem→roundup→itens), fallback mês-por-extenso com ordinal, enrich nunca adota data do alvo, Substack com data (+2 fixes da revisão)</td>
-              <td class="text-end"><code>7116b35</code></td>
-              <td><span class="badge badge-ok">Concluída</span></td>
-            </tr>
-            <tr>
-              <td><span class="badge badge-accent">Onda 2</span></td>
-              <td><code>onda2-p2p4-llm-verify</code></td>
-              <td>P2: retry central de zod no callJSON (18 call sites, defaults tolerantes); P4: heurística de nav-menu pré-LLM + exemplo no prompt (+fix detect-type)</td>
-              <td class="text-end"><code>d2d231b</code></td>
-              <td><span class="badge badge-ok">Concluída</span></td>
-            </tr>
-            <tr>
-              <td><span class="badge badge-accent">Onda 2</span></td>
-              <td><code>onda2-p3-taxonomia</code></td>
-              <td>P3: vocabulário cobre o ecossistema Node (nodejs/static-analysis/sast/dom/activitypub), version 2026-08-14, auditoria tag→faceta</td>
-              <td class="text-end"><code>0232df1</code></td>
+              <td><code>onda2-reset-captura-total</code></td>
+              <td>RESET (pedido explícito) + captura TOTAL: 7 fontes, --since 2026-08-07, 188 artigos, US$ 0,8559; relatório docs/captura-total-2026-08-14.md com 8 achados</td>
+              <td class="text-end"><code>9285112</code></td>
               <td><span class="badge badge-ok">Concluída</span></td>
             </tr>
             <tr>
               <td><span class="badge badge-accent">Onda 3</span></td>
-              <td><code>onda3-p5p6-extracao</code></td>
-              <td>P5: strip do gatilho "View changes on GitHub" + 2º passe do container + comando <code>ncrawl reextract</code> (guards de erro/bloqueio, --limit default 20); P6: newlines entre blocos + prunePageFrame no fallback (+fix de integridade da revisão)</td>
-              <td class="text-end"><code>dea316b</code></td>
+              <td><code>onda1-idioma</code></td>
+              <td>Guarda de idioma do summarize: prompt reforçado + hasCjk/cjkRatio + 1 re-try + fail-open NULL (mata os 11 resumos em chinês)</td>
+              <td class="text-end"><code>8e07931</code></td>
               <td><span class="badge badge-ok">Concluída</span></td>
             </tr>
             <tr>
               <td><span class="badge badge-accent">Onda 3</span></td>
-              <td><code>onda3-backfill-datas</code></td>
-              <td>scripts/fix-issue-dates.mjs + EXECUÇÃO real: 15 artigos da issue 637 → 2026-08-13 (idempotente, 0 rows no re-run)</td>
-              <td class="text-end"><code>b340553</code></td>
+              <td><code>onda1-guards-artigo</code></td>
+              <td>looksLikeJson (JSON cru nunca vira conteúdo) + guarda pós-hoc do piso em listings (below-since posthoc)</td>
+              <td class="text-end"><code>53dcc95</code></td>
               <td><span class="badge badge-ok">Concluída</span></td>
             </tr>
             <tr>
-              <td><span class="badge badge-warn">Fix</span></td>
-              <td><code>onda3-fix-test-env-reextract</code></td>
-              <td>Gate vermelho: ROOT/.env real re-injetava a chave nos testes → seed do NC_HOME tmp (533/533 em ~6s na raiz)</td>
-              <td class="text-end"><code>d221a89</code></td>
+              <td><span class="badge badge-accent">Onda 3</span></td>
+              <td><code>onda1-reextract</code></td>
+              <td>Recovery de release notes p/ raiz de repo GitHub (raiz → /releases com marcadores) + guarda JSON no reextract</td>
+              <td class="text-end"><code>9794b29</code></td>
+              <td><span class="badge badge-ok">Concluída</span></td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-accent">Onda 3</span></td>
+              <td><code>onda1-taxonomia</code></td>
+              <td>Vocabulário: llm-models/agentic-ai/model-provenance/software-development/system-design (version 2026-08-15)</td>
+              <td class="text-end"><code>0b867e0</code></td>
+              <td><span class="badge badge-ok">Concluída</span></td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-accent">Onda 3</span></td>
+              <td><code>onda1-kind</code></td>
+              <td>Derivação determinística de kind das classifications (kindFromTags + setKindIfNull NULL-only)</td>
+              <td class="text-end"><code>b996191</code></td>
               <td><span class="badge badge-ok">Concluída</span></td>
             </tr>
             <tr>
               <td><span class="badge badge-ok">Onda 4</span></td>
-              <td><code>onda4-reverificacao</code></td>
-              <td>Re-verificação integrada contra os dados reais: replay da issue 637, reextract Vitest, reclean Drizzle, backfill SELECT, zero WARNs de zod — docs/reverificacao-2026-08-14.md</td>
-              <td class="text-end"><code>ef3c75c</code></td>
+              <td><code>onda2-backfill-reverificacao</code></td>
+              <td>Backfill real: 11 chineses re-summarizados (guarda disparou 1× e convergiu), 2 below-floor deletados, JSON restaurado, GitHub recover, kind 0 NULL (123 curados restaurados do backup), re-classify 2026-08-15, reclean 10 suspects→ok; docs/reverificacao-total-2026-08-14.md</td>
+              <td class="text-end"><code>a24d630</code></td>
               <td><span class="badge badge-ok">Concluída</span></td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      <h3 class="h6 mt-4 text-body-secondary">Nota sobre testing subwaves</h3>
-      <p class="text-body-secondary small">Os fixes das ondas 2/3 vieram com os próprios testes (31 novos, incluindo wire tests com filhos mockados e fixtures de páginas reais) + revisões adversariais com evidência — testing subwaves separadas foram consideradas duplicação e não criadas (decisão documentada).</p>
+      <h3 class="h6 mt-4 text-body-secondary">Nota de processo</h3>
+      <p class="text-body-secondary small">As 3 revisões adversariais da Onda 3 falharam por <code>402 Insufficient Balance</code> (saldo da API do CLI esgotado) — substituídas por gates completos (552→574 verdes) + inspeção direta dos diffs. A correção de um desvio de escopo do agente de backfill (re-conciliação de kinds que sobrescreveu curados) foi aplicada por instrução direta com evidência.</p>
 
       <h3 class="h6 mt-4 text-body-secondary">Legenda de status</h3>
       <div class="d-flex flex-wrap gap-2">
@@ -289,7 +285,7 @@
     <div class="tab-pane fade" id="pane-arquivos" role="tabpanel"
          aria-labelledby="tab-arquivos" tabindex="0" data-print-title="Arquivos modificados">
       <h2 class="h4 pane-title">Arquivos modificados</h2>
-      <p>Diff stats da execução (ac07ce0..HEAD): <span class="diff-plus">+3.634</span> / <span class="diff-minus">−54</span>, 30 arquivos.</p>
+      <p>Diff stats da execução (10e8bec..HEAD): <span class="diff-plus">+3.822</span> / <span class="diff-minus">−96</span>, 28 arquivos.</p>
 
       <div class="table-responsive">
         <table class="table table-hover align-middle table-sm">
@@ -297,36 +293,34 @@
             <tr><th scope="col">Arquivo</th><th scope="col">Tipo</th><th scope="col" class="text-end">Diff</th></tr>
           </thead>
           <tbody>
-            <tr><td><code>docs/captura-2026-08-14-node-weekly.md</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+215</td></tr>
-            <tr><td><code>docs/reverificacao-2026-08-14.md</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+337</td></tr>
-            <tr><td><code>scripts/fix-issue-dates.mjs</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+55</td></tr>
-            <tr><td><code>src/reextract.js</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+224</td></tr>
-            <tr><td><code>src/parse-core.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+211</span> <span class="diff-minus">−8</span></td></tr>
-            <tr><td><code>src/llm.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+115</span> <span class="diff-minus">−6</span></td></tr>
-            <tr><td><code>src/crawl.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+104</span> <span class="diff-minus">−6</span></td></tr>
-            <tr><td><code>src/db.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+17</span> <span class="diff-minus">−2</span></td></tr>
-            <tr><td><code>src/curate.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+16</span> <span class="diff-minus">−2</span></td></tr>
-            <tr><td><code>src/verify.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end diff-plus">+29</td></tr>
-            <tr><td><code>src/clean.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end diff-plus">+2</td></tr>
-            <tr><td><code>src/commands.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end diff-plus">+17</td></tr>
-            <tr><td><code>src/index.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+11</span> <span class="diff-minus">−2</span></td></tr>
-            <tr><td><code>src/detect-type.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end diff-plus">+1</td></tr>
-            <tr><td><code>config/taxonomy.json</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+10</span> <span class="diff-minus">−2</span></td></tr>
-            <tr><td><code>.gitignore</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end diff-plus">+2</td></tr>
-            <tr><td><code>test/crawl.issue-date.test.js</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+239</td></tr>
-            <tr><td><code>test/commands.reextract.test.js</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+282</td></tr>
-            <tr><td><code>test/clean.truncation.test.js</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+108</td></tr>
-            <tr><td><code>test/parse-core.github.test.js</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+131</td></tr>
-            <tr><td><code>test/crawl.prune-frame.test.js</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+97</td></tr>
-            <tr><td><code>test/llm.zod-retry.test.js</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+187</td></tr>
-            <tr><td><code>test/verify.navmenu.test.js</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+117</td></tr>
-            <tr><td><code>test/fixtures/vitest-release.html</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+722</td></tr>
-            <tr><td><code>test/fixtures/meiert-5-npx-helpers.html</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+1</td></tr>
-            <tr><td><code>test/clean.extractPublishedDate.test.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end diff-plus">+55</td></tr>
-            <tr><td><code>test/curate.consolidate.test.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+145</span> <span class="diff-minus">−2</span></td></tr>
-            <tr><td><code>test/substack.archive.test.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end diff-plus">+112</td></tr>
-            <tr><td><code>test/taxonomy.search.test.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end diff-plus">+53</td></tr>
-            <tr><td><code>test/commands.reextract.test.js (seed env)</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end diff-plus">+11</td></tr>
+            <tr><td><code>docs/captura-total-2026-08-14.md</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+244</td></tr>
+            <tr><td><code>docs/reverificacao-total-2026-08-14.md</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+431</td></tr>
+            <tr><td><code>src/util.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+133</span> <span class="diff-minus">−6</span></td></tr>
+            <tr><td><code>src/index.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+155</span> <span class="diff-minus">−22</span></td></tr>
+            <tr><td><code>src/commands.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+63</span> <span class="diff-minus">−4</span></td></tr>
+            <tr><td><code>src/run-events.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end diff-plus">+6</td></tr>
+            <tr><td><code>src/llm.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+87</span> <span class="diff-minus">−16</span></td></tr>
+            <tr><td><code>src/config.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end diff-plus">+5</td></tr>
+            <tr><td><code>src/parse-core.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end diff-plus">+76</td></tr>
+            <tr><td><code>src/crawl.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+28</span> <span class="diff-minus">−2</span></td></tr>
+            <tr><td><code>src/clean.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+5</span> <span class="diff-minus">−1</span></td></tr>
+            <tr><td><code>src/reextract.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+84</span> <span class="diff-minus">−2</span></td></tr>
+            <tr><td><code>src/classify.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+34</span> <span class="diff-minus">−2</span></td></tr>
+            <tr><td><code>src/db.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end diff-plus">+4</td></tr>
+            <tr><td><code>config/taxonomy.json</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+6</span> <span class="diff-minus">−1</span></td></tr>
+            <tr><td><code>test/log-file.test.js</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+79</td></tr>
+            <tr><td><code>test/log-file.cli.test.js</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+63</td></tr>
+            <tr><td><code>test/commands.help.test.js</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+71</td></tr>
+            <tr><td><code>test/commands.summary.test.js</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+75</td></tr>
+            <tr><td><code>test/summarize.language-guard.test.js</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+185</td></tr>
+            <tr><td><code>test/crawl.json-page.test.js</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+181</td></tr>
+            <tr><td><code>test/crawl.floor-posthoc.test.js</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+182</td></tr>
+            <tr><td><code>test/reextract.github.test.js</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+159</td></tr>
+            <tr><td><code>test/taxonomy.vocab.test.js</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+80</td></tr>
+            <tr><td><code>test/classify.kind.test.js</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+137</td></tr>
+            <tr><td><code>test/fixtures/github-bullmq-releases.html</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+1252</td></tr>
+            <tr><td><code>test/fixtures/github-bullmq-root.html</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+27</td></tr>
+            <tr><td><code>test/fixtures/json-page.html</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+14</td></tr>
           </tbody>
         </table>
       </div>
@@ -334,36 +328,36 @@
       <h2 class="h4 pane-title mt-4">Commits (squash)</h2>
       <ul class="list-group list-group-flush">
         <li class="list-group-item d-flex gap-3 align-items-start">
-          <span class="badge badge-soft font-monospace">ef3c75c</span>
-          <div><strong>Onda 4:</strong> relatório de re-verificação integrada — todos os fixes P1-P6 provados contra os dados reais</div>
+          <span class="badge badge-soft font-monospace">a24d630</span>
+          <div><strong>Onda 4:</strong> backfill real + relatório de re-verificação (docs/reverificacao-total-2026-08-14.md)</div>
         </li>
         <li class="list-group-item d-flex gap-3 align-items-start">
-          <span class="badge badge-soft font-monospace">d221a89</span>
-          <div><strong>Onda 3 (fix):</strong> testes do reextract neutralizam o ROOT/.env real (seed do NC_HOME tmp) — suíte 533/533 em ~6s</div>
+          <span class="badge badge-soft font-monospace">b996191</span>
+          <div><strong>Onda 3:</strong> kindFromTags + setKindIfNull (derivação determinística NULL-only)</div>
         </li>
         <li class="list-group-item d-flex gap-3 align-items-start">
-          <span class="badge badge-soft font-monospace">b340553</span>
-          <div><strong>Onda 3:</strong> scripts/fix-issue-dates.mjs — backfill idempotente (15 artigos → 2026-08-13 no NC_HOME real)</div>
+          <span class="badge badge-soft font-monospace">0b867e0</span>
+          <div><strong>Onda 3:</strong> vocabulário +5 termos (version 2026-08-15)</div>
         </li>
         <li class="list-group-item d-flex gap-3 align-items-start">
-          <span class="badge badge-soft font-monospace">dea316b</span>
-          <div><strong>Onda 3:</strong> P5+P6 — strip do gatilho do GitHub + 2º passe do container, newlines, prunePageFrame, comando reextract com guards</div>
+          <span class="badge badge-soft font-monospace">9794b29</span>
+          <div><strong>Onda 3:</strong> recovery GitHub raiz→/releases + guarda JSON no reextract</div>
         </li>
         <li class="list-group-item d-flex gap-3 align-items-start">
-          <span class="badge badge-soft font-monospace">0232df1</span>
-          <div><strong>Onda 2:</strong> P3 — taxonomia cobre o ecossistema Node (version 2026-08-14)</div>
+          <span class="badge badge-soft font-monospace">53dcc95</span>
+          <div><strong>Onda 3:</strong> looksLikeJson + guarda pós-hoc do piso</div>
         </li>
         <li class="list-group-item d-flex gap-3 align-items-start">
-          <span class="badge badge-soft font-monospace">d2d231b</span>
-          <div><strong>Onda 2:</strong> P2+P4 — retry central de zod no callJSON (18 call sites) + heurística de nav-menu no verify</div>
+          <span class="badge badge-soft font-monospace">8e07931</span>
+          <div><strong>Onda 3:</strong> guarda de idioma do summarize (hasCjk/cjkRatio + re-try)</div>
         </li>
         <li class="list-group-item d-flex gap-3 align-items-start">
-          <span class="badge badge-soft font-monospace">7116b35</span>
-          <div><strong>Onda 2:</strong> P1 — herança da data da issue + fallback mês-por-extenso + enrich nunca adota data do alvo</div>
+          <span class="badge badge-soft font-monospace">9285112</span>
+          <div><strong>Onda 2:</strong> reset + captura TOTAL (7 fontes, 188 artigos) + relatório com 8 achados</div>
         </li>
         <li class="list-group-item d-flex gap-3 align-items-start">
-          <span class="badge badge-soft font-monospace">5994b89</span>
-          <div><strong>Onda 1:</strong> relatório da captura real (run 1, US$ 0,0676, 15 artigos) + análise de erros P1-P6</div>
+          <span class="badge badge-soft font-monospace">eef2cd5</span>
+          <div><strong>Onda 1:</strong> log persistente por run + resumo periódico + crawl --help/--version</div>
         </li>
       </ul>
     </div>
@@ -372,25 +366,29 @@
     <div class="tab-pane fade" id="pane-depara" role="tabpanel"
          aria-labelledby="tab-depara" tabindex="0" data-print-title="De-Para">
       <h2 class="h4 pane-title">De-Para: o que mudou</h2>
-      <p>Comparação por problema encontrado na captura real (antes × depois).</p>
+      <p>Comparação por frente da tarefa (antes × depois).</p>
 
       <div class="row g-3 mb-4">
         <div class="col-lg-6">
           <div class="card h-100 depara-antes">
-            <div class="card-header"><i class="bi bi-arrow-left-circle me-1"></i><strong>Antes — P1 datas</strong></div>
+            <div class="card-header"><i class="bi bi-arrow-left-circle me-1"></i><strong>Antes — logs</strong></div>
             <div class="card-body">
               <ul class="list-unstyled mb-0 d-grid gap-2">
-                <li><i class="bi bi-x-circle me-2 text-body-secondary"></i>13/15 artigos datados 08-05 (data do ALVO espalhada), 1× 07-13, 1× NULL — a data real da issue (08-13) existia na listagem mas era descartada</li>
+                <li><i class="bi bi-x-circle me-2 text-body-secondary"></i>Log só no stdout (pipe do npm BUFFERIZAVA — monitoramento cego por minutos)</li>
+                <li><i class="bi bi-x-circle me-2 text-body-secondary"></i>Sem arquivo persistente por run; resumo só de gasto parcial</li>
+                <li><i class="bi bi-x-circle me-2 text-body-secondary"></i><code>crawl --help</code> INICIAVA o crawl (acidente real de US$ 0,0147)</li>
               </ul>
             </div>
           </div>
         </div>
         <div class="col-lg-6">
           <div class="card h-100 depara-depois">
-            <div class="card-header"><i class="bi bi-arrow-right-circle me-1"></i><strong>Depois — P1 datas</strong></div>
+            <div class="card-header"><i class="bi bi-arrow-right-circle me-1"></i><strong>Depois — logs</strong></div>
             <div class="card-body">
               <ul class="list-unstyled mb-0 d-grid gap-2">
-                <li><i class="bi bi-check-circle me-2 text-body-secondary"></i>Herança autoritativa (listagem→frontier→roundup→itens); fallback mês-por-extenso (com ordinal); enrich NUNCA adota data do alvo; backfill aplicado → 15× 2026-08-13; replay provou a cadeia (6 itens novos com a data certa)</li>
+                <li><i class="bi bi-check-circle me-2 text-body-secondary"></i>Log persistente em <code>NC_HOME/logs/</code> com <code>writeSync</code> (flush imediato) + <code>latest.log</code> — <code>tail -f</code> funciona de verdade</li>
+                <li><i class="bi bi-check-circle me-2 text-body-secondary"></i>Resumo periódico (fase/fila/voo/salvos/vereditos/erros) a cada ~10s</li>
+                <li><i class="bi bi-check-circle me-2 text-body-secondary"></i><code>--help</code>/<code>--version</code> seguros (exit 0, sem run/log/rede)</li>
               </ul>
             </div>
           </div>
@@ -400,20 +398,20 @@
       <div class="row g-3 mb-4">
         <div class="col-lg-6">
           <div class="card h-100 depara-antes">
-            <div class="card-header"><i class="bi bi-arrow-left-circle me-1"></i><strong>Antes — P2/P3/P4</strong></div>
+            <div class="card-header"><i class="bi bi-arrow-left-circle me-1"></i><strong>Antes — captura</strong></div>
             <div class="card-body">
               <ul class="list-unstyled mb-0 d-grid gap-2">
-                <li><i class="bi bi-x-circle me-2 text-body-secondary"></i>P2: seção de curadoria inteira perdida (zod lança fora do callJSON, sem retry); P3: 16 tags core descartadas (nodejs×5 etc.); P4: Drizzle "ok" com corpo começando em menu</li>
+                <li><i class="bi bi-x-circle me-2 text-body-secondary"></i>21 artigos de 1 fonte (execução anterior); dados antigos no banco</li>
               </ul>
             </div>
           </div>
         </div>
         <div class="col-lg-6">
           <div class="card h-100 depara-depois">
-            <div class="card-header"><i class="bi bi-arrow-right-circle me-1"></i><strong>Depois — P2/P3/P4</strong></div>
+            <div class="card-header"><i class="bi bi-arrow-right-circle me-1"></i><strong>Depois — captura</strong></div>
             <div class="card-body">
               <ul class="list-unstyled mb-0 d-grid gap-2">
-                <li><i class="bi bi-check-circle me-2 text-body-secondary"></i>P2: retry de zod no callJSON (18/18 call sites) + defaults tolerantes — replay: 0 "fora do schema" em 80 chamadas; P3: taxonomia 2026-08-14 (nodejs/static-analysis/sast/dom/activitypub), quedas remanescentes = aceitas por design; P4: Drizzle → suspect determinístico com nota de nav-menu</li>
+                <li><i class="bi bi-check-circle me-2 text-body-secondary"></i>Reset completo + captura TOTAL: 7 fontes, 1 semana, 188 artigos, US$ 0,8559, pipeline completo, 0 pendentes</li>
               </ul>
             </div>
           </div>
@@ -423,20 +421,26 @@
       <div class="row g-3 mb-4">
         <div class="col-lg-6">
           <div class="card h-100 depara-antes">
-            <div class="card-header"><i class="bi bi-arrow-left-circle me-1"></i><strong>Antes — P5/P6</strong></div>
+            <div class="card-header"><i class="bi bi-arrow-left-circle me-1"></i><strong>Antes — 8 problemas da captura</strong></div>
             <div class="card-body">
               <ul class="list-unstyled mb-0 d-grid gap-2">
-                <li><i class="bi bi-x-circle me-2 text-body-secondary"></i>P5: release notes do GitHub terminando em botão de UI ("View changes on GitHub") — verify suspect; P6: quebras de linha coladas; clean falhou → salva o cru com moldura (meiert)</li>
+                <li><i class="bi bi-x-circle me-2 text-body-secondary"></i>11 resumos PT-BR em CHINÊS (5,8%)</li>
+                <li><i class="bi bi-x-circle me-2 text-body-secondary"></i>2 itens abaixo do piso salvos; JSON cru como conteúdo (react-dropzone)</li>
+                <li><i class="bi bi-x-circle me-2 text-body-secondary"></i>Release notes do GitHub com README/truncadas (raiz do repo)</li>
+                <li><i class="bi bi-x-circle me-2 text-body-secondary"></i>65 kind NULL (listings); vocabulário sem llm-models/agentic-ai</li>
               </ul>
             </div>
           </div>
         </div>
         <div class="col-lg-6">
           <div class="card h-100 depara-depois">
-            <div class="card-header"><i class="bi bi-arrow-right-circle me-1"></i><strong>Depois — P5/P6</strong></div>
+            <div class="card-header"><i class="bi bi-arrow-right-circle me-1"></i><strong>Depois — 8 problemas corrigidos</strong></div>
             <div class="card-body">
               <ul class="list-unstyled mb-0 d-grid gap-2">
-                <li><i class="bi bi-check-circle me-2 text-body-secondary"></i>P5: strip do gatilho + 2º passe do container do GitHub + comando <code>ncrawl reextract</code> (com guards de erro/bloqueio e --limit default 20) — Vitest re-extraída: botão removido, verify ok; P6: newlines entre blocos (htmlBlockText) + prunePageFrame no fallback do clean (meiert limpo)</li>
+                <li><i class="bi bi-check-circle me-2 text-body-secondary"></i>Guarda de idioma (hasCjk + re-try + fail-open NULL) — 0 CJK no acervo; disparou 1× em produção</li>
+                <li><i class="bi bi-check-circle me-2 text-body-secondary"></i>looksLikeJson + guarda pós-hoc do piso; JSON restaurado para blurb → ok</li>
+                <li><i class="bi bi-check-circle me-2 text-body-secondary"></i>Recovery raiz→/releases com marcadores (3 fichas com notas reais)</li>
+                <li><i class="bi bi-check-circle me-2 text-body-secondary"></i>kindFromTags: 0 NULL (63 derivados + 123 curados restaurados do backup); vocabulário 2026-08-15 usado (llm-models 62×…)</li>
               </ul>
             </div>
           </div>
@@ -446,20 +450,20 @@
       <h2 class="h4 pane-title">Impacto</h2>
       <div class="list-group list-group-flush mb-4">
         <div class="list-group-item d-flex gap-3 align-items-start">
-          <i class="bi bi-calendar-check fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>Datas corretas de fábrica</strong> — a âncora da issue (a SEMANA da newsletter) vale para todos os itens; a data do alvo nunca mais vaza para o item; superfícies por data e escopo de busca ficam corretos.</div>
+          <i class="bi bi-eye fs-5 stat-value flex-shrink-0 mt-1"></i>
+          <div><strong>Acompanhamento real</strong> — o usuário (e qualquer script) acompanha o crawl ao vivo com <code>tail -f ~/.newsletter-crawler/logs/latest.log</code>; o resumo mostra erros recentes com timestamp.</div>
         </div>
         <div class="list-group-item d-flex gap-3 align-items-start">
-          <i class="bi bi-shield-exclamation fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>Robustez do pipeline LLM</strong> — resposta fora do schema agora re-amostra (recupera seções da curadoria) e só no fim aplica defaults; verify pega nav-menu sem custo de LLM.</div>
-        </div>
-        <div class="list-group-item d-flex gap-3 align-items-start">
-          <i class="bi bi-tools fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>Operação nova</strong> — <code>ncrawl reextract</code> (re-extração com guards, nunca sobrescreve com página de erro) e <code>scripts/fix-issue-dates.mjs</code> (backfill idempotente de datas).</div>
+          <i class="bi bi-shield-check fs-5 stat-value flex-shrink-0 mt-1"></i>
+          <div><strong>Guardas de qualidade</strong> — idioma (0 CJK), JSON (nunca vira conteúdo), piso (nada abaixo do --since), release notes reais do GitHub.</div>
         </div>
         <div class="list-group-item d-flex gap-3 align-items-start">
           <i class="bi bi-collection fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>Completude</strong> — o replay recuperou 6 itens IN BRIEF que a 1ª captura perdeu (15→21) e dedup 13/13 sem duplicatas.</div>
+          <div><strong>Acervo completo e limpo</strong> — 186 artigos de 7 fontes, kinds em 100% (0 NULL), vocabulário do domínio LLM/IA coberto.</div>
+        </div>
+        <div class="list-group-item d-flex gap-3 align-items-start">
+          <i class="bi bi-arrow-repeat fs-5 stat-value flex-shrink-0 mt-1"></i>
+          <div><strong>Segurança operacional</strong> — <code>crawl --help</code> nunca mais inicia crawl; backup <code>crawler.db.bak-2026-08-14</code> criado antes do backfill.</div>
         </div>
       </div>
     </div>
@@ -473,39 +477,39 @@
       <ul class="list-group list-group-flush">
         <li class="list-group-item d-flex gap-3 align-items-start">
           <i class="bi bi-lightbulb fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>Fonte única = Node Weekly</strong> — 1ª fonte de fábrica Cooperpress (tipo index); "últimos 3 dias" = --since 2026-08-11 (piso documentado).</div>
+          <div><strong>"1 semana" = --since 2026-08-07</strong> (7 dias até 14/08); tetos de segurança: BUDGET_USD=5 na captura, US$ 2 no backfill.</div>
         </li>
         <li class="list-group-item d-flex gap-3 align-items-start">
           <i class="bi bi-lightbulb fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>Âncora da issue é a semana da newsletter</strong> — item curado pertence à SEMANA da issue, mesmo que o alvo tenha data própria mais antiga; por isso o backfill sobrescreve até a data "legítima" do alvo (inngest 07-13).</div>
+          <div><strong>Reset é destrutivo e foi pedido explicitamente</strong> — executado com evidência antes/depois (tudo zerado, fontes voltaram ao seed).</div>
         </li>
         <li class="list-group-item d-flex gap-3 align-items-start">
           <i class="bi bi-lightbulb fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>Retry de zod pelo shape ESTRITO</strong> — chave tolerada ausente re-amostra em vez de virar default silencioso na 1ª tentativa; default só esgotados os retries (sem isso a 637 viraria seção vazia sem tentativa).</div>
+          <div><strong>Guarda de idioma com fail-open NULL</strong> — resposta CJK persistente vira NULL (retomável no próximo run), nunca persiste idioma errado; custo extra desprezível (só nos casos ruins).</div>
         </li>
         <li class="list-group-item d-flex gap-3 align-items-start">
           <i class="bi bi-lightbulb fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>reextract NUNCA sobrescreve com página de erro</strong> — guards isErrorPage/isBlockedPage + keepAggregatorVersion + --limit default 20 (varredura completa exige --all); achado da revisão adversarial aceito e corrigido.</div>
+          <div><strong>Curadoria é a autoridade do kind</strong> — a re-conciliação indevida do agente (70 flips sobre curados) foi revertida via backup; a derivação é NULL-only.</div>
         </li>
         <li class="list-group-item d-flex gap-3 align-items-start">
           <i class="bi bi-lightbulb fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>"Truncamento" da Vitest era UI, não perda</strong> — a investigação com a página real provou que o corpo terminava mesmo no botão; o fix virou strip do gatilho + container quando mais longo.</div>
+          <div><strong>Recovery GitHub cai na release MAIS RECENTE do repo</strong> (BullMQ 6.1 recebeu notas da 6.1.1) — conteúdo válido, verify ok, limitação documentada (R2).</div>
         </li>
         <li class="list-group-item d-flex gap-3 align-items-start">
           <i class="bi bi-lightbulb fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>Falso-positivo estreito da heurística de nav-menu aceito</strong> — suspect é advisory e o reclean conserta; a classe real (prosa com separadores) é estreita e documentada.</div>
+          <div><strong>looksLikeJson duplicado por design</strong> (reextract leniente p/ JSON truncado; parse-core estrito p/ o crawl) — divergência documentada, unificação deferida.</div>
         </li>
         <li class="list-group-item d-flex gap-3 align-items-start">
           <i class="bi bi-lightbulb fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>Quedas de tag remanescentes = aceitas por design</strong> — typescript/javascript/postgresql/docker/ai-agents existem em OUTRAS facetas (facet-mismatch é o modelo errando a faceta, não vocabulário faltando); bun ficou como sugestão futura.</div>
+          <div><strong>Predicado issue_url NÃO distingue listing de roundup</strong> (todo item carrega issue_url) — discriminante real: kind do backup / tipo da fonte (nota de modelo de dados).</div>
         </li>
         <li class="list-group-item d-flex gap-3 align-items-start">
           <i class="bi bi-lightbulb fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>Testing subwaves não criadas</strong> — os fixes vieram com 31 testes próprios + wire tests + revisões adversariais; subwaves separadas seriam duplicação.</div>
+          <div><strong>Revisões adversariais falharam por 402 (saldo)</strong> — substituídas por gates completos + inspeção direta; os fixes tinham 28 testes novos com wire/mocks.</div>
         </li>
         <li class="list-group-item d-flex gap-3 align-items-start">
           <i class="bi bi-lightbulb fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>Acidente de --help documentado</strong> — <code>crawl --help</code> inicia crawl (pré-existente); run 2 marcado failed, frontier restaurado, custo US$ 0,0147 fora das provas; recomendação de fix do parse registrada para fora.</div>
+          <div><strong>15 suspects remanescentes aceitos</strong> — rasos/blurb-only/kind contestável (reclean com passe forte já converteu 10; os 6 fora do limit não têm conteúdo recuperável).</div>
         </li>
       </ul>
     </div>
@@ -514,7 +518,7 @@
     <div class="tab-pane fade" id="pane-timeline" role="tabpanel"
          aria-labelledby="tab-timeline" tabindex="0" data-print-title="Timeline">
       <h2 class="h4 pane-title">Linha do tempo da execução</h2>
-      <p>2026-08-14 09:26 → 16:10 UTC (run 20260814-092616-342878).</p>
+      <p>2026-08-14 12:39 → 18:00 UTC (run 20260814-123910-1654592).</p>
 
       <ol class="timeline list-unstyled mb-0">
         <li class="timeline-item mb-4">
@@ -522,42 +526,42 @@
             <span class="badge badge-accent">Fase 0-2</span>
             <strong>DELIMITAR + ANALYZE + PLAN</strong>
           </div>
-          <p class="mb-0 text-body-secondary small">FASE 0 (MODE=normal, main); fontes/chaves/banco vazio/Chromium verificados; decisão: Node Weekly, --since 2026-08-11, tetos de segurança; 4 ondas planejadas.</p>
+          <p class="mb-0 text-body-secondary small">FASE 0; fontes (7), chaves, banco (21 artigos), R7 OK; plano: logs → reset+captura → análise → fixes → backfill.</p>
         </li>
         <li class="timeline-item mb-4">
           <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
-            <span class="badge badge-accent">Fase 3 · Onda 1</span>
-            <strong>CAPTURA REAL</strong>
+            <span class="badge badge-accent">Onda 1</span>
+            <strong>LOGS</strong>
           </div>
-          <p class="mb-0 text-body-secondary small">Run 1 done em 8 min: US$ 0,0676, 15 artigos (issue 637), pipeline completo; relatório com achados P1-P6 (datas erradas em 13/15, seção de curadoria perdida, taxonomia, verify, extração).</p>
+          <p class="mb-0 text-body-secondary small">Log persistente (writeSync + latest.log), resumo periódico, --help/--version — NADA A REFUTAR na revisão; smoke confirmado.</p>
         </li>
         <li class="timeline-item mb-4">
           <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
-            <span class="badge badge-accent">Fase 3 · Onda 2</span>
-            <strong>FIXES P1-P4</strong>
+            <span class="badge badge-accent">Onda 2</span>
+            <strong>RESET + CAPTURA TOTAL</strong>
           </div>
-          <p class="mb-0 text-body-secondary small">Revisor de plano converteu os achados em ondas; 3 worktrees paralelas (datas / llm+verify / taxonomia); revisões adversariais acharam 2+1 furos → fixes aplicados na mesma worktree (regex ordinal+janela, Substack, detect-type zod); merges com gate (502/502).</p>
+          <p class="mb-0 text-body-secondary small">Reset (tudo zerado); crawl 7 fontes/1 semana em 51 min: 188 artigos, US$ 0,8559; acompanhado pelo log novo (prova no relatório §8); 8 achados.</p>
         </li>
         <li class="timeline-item mb-4">
           <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
-            <span class="badge badge-accent">Fase 3 · Onda 3</span>
-            <strong>FIXES P5-P6 + BACKFILL</strong>
+            <span class="badge badge-accent">Onda 3</span>
+            <strong>5 FIXES PARALELOS</strong>
           </div>
-          <p class="mb-0 text-body-secondary small">P5+P6 (reextract com guards, newlines, prunePageFrame) — revisão achou furos de integridade → corrigidos (teste revelou bug real do 1º gatilho → endurecido); backfill REAL aplicado (15× 2026-08-13, idempotente); gate vermelho por leak do ROOT/.env → fix de isolamento (533/533 em ~6s).</p>
+          <p class="mb-0 text-body-secondary small">Idioma (hasCjk), guards (JSON+piso), GitHub recovery, vocabulário 2026-08-15, kindFromTags — revisões falharam por 402 (saldo) → gates completos (574/574) + inspeção.</p>
         </li>
         <li class="timeline-item mb-4">
           <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
-            <span class="badge badge-accent">Fase 3 · Onda 4</span>
-            <strong>RE-VERIFICAÇÃO</strong>
+            <span class="badge badge-accent">Onda 4</span>
+            <strong>BACKFILL + RE-VERIFICAÇÃO</strong>
           </div>
-          <p class="mb-0 text-body-secondary small">Replay da issue 637 (6 itens IN BRIEF recuperados, data herdada, 0 zod warns em 80 chamadas, taxonomia nova); reextract Vitest (botão removido, verify ok); Drizzle → suspect determinístico; amostragem ok; relatório docs/reverificacao-2026-08-14.md.</p>
+          <p class="mb-0 text-body-secondary small">11 chineses re-summarizados (guarda disparou 1× em produção), 2 below-floor deletados, JSON restaurado, GitHub recover, kind 0 NULL (correção da re-conciliação indevida via backup), re-classify 2026-08-15, reclean 10 suspects→ok — 7/7 com evidência; US$ 0,48 (teto 2).</p>
         </li>
         <li class="timeline-item">
           <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
             <span class="badge badge-ok">Fase 4</span>
             <strong>COMMIT-FINAL</strong>
           </div>
-          <p class="mb-0 text-body-secondary small">Revisor declarou CONVERGÊNCIA (4 achados → backlog, nenhum bloqueia); gate final 533/533; EXPLAINER.html gerado; commit final; sweep+verify; relatório.</p>
+          <p class="mb-0 text-body-secondary small">Revisor declarou CONVERGÊNCIA (resíduos aceitos por design, sem pendência); gate final 574/574; EXPLAINER.html; commit final; sweep+verify; relatório.</p>
         </li>
       </ol>
     </div>

@@ -1,11 +1,16 @@
 // Partes PURAS da curadoria: chunking sem cortar item e consolidação (normalização de URL,
 // descarte de interno/sponsor/job com backstop determinístico, dedup, data da issue).
+// Também cobre o parâmetro AUTORITATIVO issueDate do curateRoundup (P1 da captura
+// 2026-08-14: a data da issue vinha da listagem mas era descartada) via um filho com o
+// LLM mockado (mesmo padrão de classify.incomplete.test.js — sem rede, sem SDK).
 // NC_HOME temporário ANTES do import (curate.js importa db.js).
 import { test, after } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { mkdtempSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
+import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 
 process.env.NC_HOME = mkdtempSync(path.join(os.tmpdir(), 'nc-curate-'));
 const { chunkMarkdown, consolidateItems, isRealRecoveredItem, splitIntoSections, sectionTitleOf } =
@@ -107,4 +112,142 @@ test('consolidateItems: normaliza, deduplica, descarta interno e força sponsor/
   assert.equal(skipped.job, 1, 'backstop: section de classificados vira job');
   assert.equal(skipped.internal, 1);
   assert.equal(skipped.invalid, 1);
+});
+
+// ---- curateRoundup com issueDate AUTORITATIVO (da listagem) ----
+// O insert usa `issueDate` (cadastrado com published_at: issueDate); o parâmetro novo vence o
+// issue_date que o modelo viu na página E o texto/meta da página. Wire em filho com o
+// transporte do SDK fake (padrão do llm.provider-client.test.js): o llm.js REAL (callJSON +
+// zod) roda por cima, sem rede.
+const CURATE_WIRE_CHILD_SOURCE = `import { mock } from 'node:test';
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
+import { pathToFileURL } from 'node:url';
+import OpenAI from 'openai';
+
+const root = process.argv[2]; // raiz da worktree (passada pelo teste pai)
+const ncHome = mkdtempSync(path.join(tmpdir(), 'nc-curate-wire-'));
+process.env.NC_HOME = ncHome;
+process.on('exit', () => rmSync(ncHome, { recursive: true, force: true }));
+for (const k of Object.keys(process.env)) {
+  if (k.startsWith('LLM_') || k.startsWith('DEEPSEEK_') || k.startsWith('OPENROUTER_')) delete process.env[k];
+}
+process.env.OPENROUTER_API_KEY = 'sk-or-teste'; // HAS_LLM on p/ a curadoria rodar
+
+const Completions = OpenAI.Chat.Completions;
+mock.method(Completions.prototype, 'create', async function createMock(body) {
+  const name = body?.response_format?.json_schema?.name;
+  if (name === 'curated_items') {
+    return {
+      model: 'deepseek-v4-flash', usage: { prompt_tokens: 10, completion_tokens: 5 },
+      choices: [{ message: { content: JSON.stringify(itemFor(curSuffix)) } }],
+    };
+  }
+  throw new Error('schema inesperado no wire test: ' + name);
+});
+
+// Página da issue SEM meta/time/JSON-LD e SEM data no texto: a data da página é null — tudo o
+// que o insert gravar veio da cadeia issueDate(autoritativo) -> issue_date(LLM) -> página.
+const FIXTURE = \`<html><head><title>Cur Weekly #10</title></head><body>
+<article>
+<h1>Cur Weekly #10</h1>
+<p>This is a fake newsletter issue body with enough prose to pass the curatable threshold and exercise the pipeline without any network call at all.</p>
+<p>Second paragraph keeps the body comfortably above the 200-char minimum so extraction succeeds deterministically.</p>
+</article></body></html>\`;
+
+let curSuffix = 'a';
+const itemFor = (suffix) => ({
+  // issue_date que o MODELO viu na página — deve PERDER para o issueDate autoritativo.
+  issue_date: '2026-08-05',
+  items: [{
+    url: 'https://ex.org/cur-' + suffix, title: 'Post ' + suffix,
+    kind: 'news', section: null, blurb: 'blurb do agregador ' + suffix,
+  }],
+});
+// Logs da curadoria vão p/ o console (stdout) — silencia p/ o stdout carregar SÓ o JSON final.
+const { setLogSink } = await import(pathToFileURL(path.join(root, 'src/util.js')).href);
+setLogSink(() => {});
+const { stmts, db } = await import(pathToFileURL(path.join(root, 'src/db.js')).href);
+const { curateRoundup } = await import(pathToFileURL(path.join(root, 'src/curate.js')).href);
+
+const src = stmts.upsertSource.get({
+  name: 'CurWeekly', base_url: 'https://cur.test', type: 'index', max_index_pages: null,
+});
+const publishedByIssue = (url) =>
+  stmts.listArticlesBySource.all(src.id).filter((r) => r.issue_url === url).map((r) => r.published_at);
+
+const out = {};
+try {
+  // (a) autoritativo vence o issue_date do LLM e a página.
+  {
+    const url = 'https://cur.test/issues/10-a';
+    curSuffix = 'a';
+    const summary = await curateRoundup({
+      html: FIXTURE, url, source: src, runId: 1, depth: 1, sinceDate: null, issueDate: '2026-08-13',
+    });
+    out.a = { published: publishedByIssue(url), issueDate: summary.issueDate };
+  }
+  // (b) data FUTURA do par da listagem: clampFutureDate crava hoje (âncora vale p/ a issue toda).
+  {
+    const url = 'https://cur.test/issues/10-b';
+    curSuffix = 'b';
+    await curateRoundup({
+      html: FIXTURE, url, source: src, runId: 1, depth: 1, sinceDate: null, issueDate: '2027-06-01',
+    });
+    out.b = publishedByIssue(url);
+    out.today = new Date().toISOString().slice(0, 10);
+  }
+  // (c) SEM autoritativo: o issue_date do modelo segue valendo (cadeia preservada).
+  {
+    const url = 'https://cur.test/issues/10-c';
+    curSuffix = 'c';
+    await curateRoundup({ html: FIXTURE, url, source: src, runId: 1, depth: 1, sinceDate: null, issueDate: null });
+    out.c = publishedByIssue(url);
+  }
+  // (d) issue autoritativamente ANTERIOR ao piso -> belowFloor, nada inserido.
+  {
+    const url = 'https://cur.test/issues/10-d';
+    curSuffix = 'd';
+    const summary = await curateRoundup({
+      html: FIXTURE, url, source: src, runId: 1, depth: 1,
+      sinceDate: new Date('2026-08-11'), issueDate: '2026-07-01',
+    });
+    out.d = { belowFloor: Boolean(summary?.belowFloor), count: publishedByIssue(url).length };
+  }
+  process.stdout.write(JSON.stringify(out));
+} catch (e) {
+  process.stderr.write(String((e && e.stack) || e));
+  process.exitCode = 1;
+} finally {
+  db.close();
+}
+`;
+
+test('curateRoundup: issueDate autoritativo (da listagem) vence a página; futura é clampada; piso respeitado', () => {
+  const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+  // Script num tmp com symlink p/ o node_modules da worktree: o `import 'openai'` do filho
+  // resolve para a MESMA instância de módulo que o llm.js usa (a identidade do prototype mock).
+  const wireDir = mkdtempSync(path.join(os.tmpdir(), 'nc-curate-wire-dir-'));
+  try {
+    symlinkSync(path.join(root, 'node_modules'), path.join(wireDir, 'node_modules'), 'dir');
+    const scriptPath = path.join(wireDir, 'wire-curate-issue-date.mjs');
+    writeFileSync(scriptPath, CURATE_WIRE_CHILD_SOURCE, 'utf8');
+    const child = spawnSync(
+      process.execPath,
+      [scriptPath, root],
+      { encoding: 'utf8', timeout: 60000 },
+    );
+    assert.equal(child.status, 0, `filho do wire test falhou: ${child.stderr || child.stdout || child.error}`);
+    assert.ok(child.stdout.trim(), 'filho sem stdout');
+    const out = JSON.parse(child.stdout);
+    assert.deepEqual(out.a.published, ['2026-08-13'], 'insert usa o issueDate AUTORITATIVO (vence o 08-05 do LLM)');
+    assert.equal(out.a.issueDate, '2026-08-13');
+    assert.deepEqual(out.b, [out.today], 'data futura da listagem é clampada p/ hoje');
+    assert.deepEqual(out.c, ['2026-08-05'], 'sem autoritativo: o issue_date do modelo segue valendo');
+    assert.equal(out.d.belowFloor, true, 'issue anterior ao piso --since é ignorada');
+    assert.equal(out.d.count, 0);
+  } finally {
+    rmSync(wireDir, { recursive: true, force: true });
+  }
 });

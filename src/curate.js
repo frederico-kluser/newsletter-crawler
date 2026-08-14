@@ -168,7 +168,7 @@ export function consolidateItems(results, { baseUrl }) {
  * enfileiramento do enriquecimento. Retorna um resumo, {belowFloor:true} quando a issue é
  * anterior ao piso --since, ou null p/ o chamador cair no fluxo antigo (página sem corpo).
  */
-export async function curateRoundup({ html, url, source, runId = null, depth = 0, sinceDate = null }) {
+export async function curateRoundup({ html, url, source, runId = null, depth = 0, sinceDate = null, issueDate: issueDateFromListing = null }) {
   const ev = { runId, sourceId: source?.id ?? null, url };
   const capped = capHtml(html);
   const art = await extractArticleAsync(capped, url); // JSDOM no pool de workers
@@ -277,11 +277,13 @@ export async function curateRoundup({ html, url, source, runId = null, depth = 0
     },
   });
 
-  // Data da issue: curadoria -> metadados da página. É a âncora temporal dos itens (um item
-  // curado pertence à SEMANA da issue, mesmo que o alvo tenha data própria mais antiga).
-  // clampFutureDate: a âncora vale p/ TODOS os itens da issue, então uma data futura errada aqui
-  // cravaria a issue inteira no topo do site.
-  const issueDate = clampFutureDate(issueDateRaw || extractPublishedDate(capped));
+  // Data da issue: PAR da LISTAGEM (issueDate — AUTORITATIVA, vem do frontier.discovered_date
+  // via processRoundup; a listagem exibe a data real) -> curadoria (issue_date que o modelo viu
+  // na página) -> metadados/texto da página (extractPublishedDate). É a âncora temporal dos
+  // itens (um item curado pertence à SEMANA da issue, mesmo que o alvo tenha data própria mais
+  // antiga). clampFutureDate: a âncora vale p/ TODOS os itens da issue, então uma data futura
+  // errada aqui cravaria a issue inteira no topo do site.
+  const issueDate = clampFutureDate(issueDateFromListing || issueDateRaw || extractPublishedDate(capped));
   const d = parseDate(issueDate);
   if (sinceDate && d && d < sinceDate) {
     logEvent({ ...ev, stage: 'curate', status: 'skip', detail: { reason: 'below-since', issueDate } });
@@ -332,7 +334,7 @@ export async function curateRoundup({ html, url, source, runId = null, depth = 0
         if (prev?.needs_enrich) stmts.requeueUrl.run(it.url);
         else continue; // já completo: nem re-enfileira
       }
-      if (stmts.enqueue.run(it.url, 'article', url, source?.id ?? null, depth + 1).changes > 0) enqueued++;
+      if (stmts.enqueue.run(it.url, 'article', url, source?.id ?? null, depth + 1, issueDate || null).changes > 0) enqueued++;
     }
   });
   applyItems();

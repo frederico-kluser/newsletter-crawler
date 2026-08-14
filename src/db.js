@@ -173,6 +173,10 @@ function ensureColumn(table, column, ddl) {
   if (!has) db.exec(`ALTER TABLE ${table} ADD COLUMN ${ddl}`);
 }
 ensureColumn('frontier', 'depth', 'depth INTEGER DEFAULT 0');
+// Data do item NO MOMENTO do enfileiramento, herdada do PAR da listagem datada (ex.:
+// <span class="issue-date">) — a âncora temporal AUTORITATIVA do roundup p/ o piso --since
+// e a curadoria (P1 da captura 2026-08-14: 13/15 artigos com a data do ALVO por falta dela).
+ensureColumn('frontier', 'discovered_date', 'discovered_date TEXT');
 ensureColumn('sources', 'type', "type TEXT DEFAULT 'listing'");
 ensureColumn('sources', 'max_index_pages', 'max_index_pages INTEGER');
 // Resumo PT-BR p/ leitura (o `content` segue original, p/ busca/tags). Ambos nullable.
@@ -356,6 +360,13 @@ export const stmts = {
     WHERE issue_url = ? AND published_at IS NOT NULL
     LIMIT 1
   `),
+  // Backfill por issue (data descoberta DEPOIS — listagem datada/backfill): corrige os irmãos
+  // ainda SEM data ou com data divergente; a issue é a âncora temporal de TODOS os seus itens.
+  // NULL != 'x' é NULL (não casa), por isso o braço explícito de NULL.
+  updateArticleDatesByIssue: db.prepare(
+    `UPDATE articles SET published_at = @date
+      WHERE issue_url = @url AND (published_at IS NULL OR published_at != @date)`,
+  ),
   // URL conhecida em QUALQUER conteúdo já capturado (articles/pages/frontier done) — base da
   // parada determinística de paginação: não depende do estado da frontier, que pode ter sido
   // limpa e transformar todo link em "novo" de novo.
@@ -575,10 +586,10 @@ export const stmts = {
        last_validated  = datetime('now')`,
   ),
 
-  // frontier
+  // frontier (6º parâmetro: discovered_date — data do par da listagem, âncora do roundup)
   enqueue: db.prepare(
-    `INSERT OR IGNORE INTO frontier (url, kind, discovered_from, source_id, depth)
-     VALUES (?, ?, ?, ?, ?)`,
+    `INSERT OR IGNORE INTO frontier (url, kind, discovered_from, source_id, depth, discovered_date)
+     VALUES (?, ?, ?, ?, ?, ?)`,
   ),
   // retries ASC: um job devolvido a 'pending' por falha só volta DEPOIS dos jobs frescos —
   // sem isso o FIFO puro reivindica a falha de novo em segundos (hot-loop num host quebrado).

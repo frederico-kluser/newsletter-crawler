@@ -5,7 +5,7 @@
 // além das páginas reais salvas em test/fixtures.
 import { test, after } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, rmSync, readFileSync } from 'node:fs';
+import { mkdtempSync, rmSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import { fileURLToPath } from 'node:url';
@@ -16,6 +16,16 @@ process.env.NC_HOME = mkdtempSync(path.join(os.tmpdir(), 'nc-reextract-'));
 for (const k of Object.keys(process.env)) {
   if (k.startsWith('LLM_') || k.startsWith('DEEPSEEK_') || k.startsWith('OPENROUTER_')) delete process.env[k];
 }
+// Semeia o NC_HOME/.env do TMP com valores VAZIOS: no load do config.js ele é o ÚLTIMO a ser
+// lido (precedência documentada: shell < .env do repo < NC_HOME/.env), então o vazio VENCE o
+// .env do REPO real (ROOT/.env — a máquina de integração tem a chave real lá, que o
+// loadDotEnvOverride releria por cima do delete acima) e o HAS_LLM fica false: o caminho
+// determinístico do cabeçalho roda de verdade (sem clean/verify por IA). Mesmo padrão do
+// config.provider-load.test.js / config.provider-invalid.test.js.
+writeFileSync(
+  path.join(process.env.NC_HOME, '.env'),
+  'OPENROUTER_API_KEY=\nDEEPSEEK_API_KEY=\nLLM_PROVIDER=\n',
+);
 const { reextractTargets, REEXTRACT_DEFAULT_LIMIT } = await import('../src/reextract.js');
 const { stmts, db } = await import('../src/db.js');
 // O buffer de eventos só grava em lote (EVENTS_FLUSH_AT=50) — os testes consultam a tabela,

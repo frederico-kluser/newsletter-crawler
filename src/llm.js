@@ -1,10 +1,14 @@
-// Cliente OpenRouter (SDK openai) + derivação de seletores, fallbacks e classificação.
+// Cliente LLM (SDK openai): OpenRouter (DEFAULT) ou DeepSeek DIRETO (api.deepseek.com) +
+// derivação de seletores, fallbacks e classificação. O provider ativo vem de LLM_PROVIDER
+// (config.js); no deepseek o body omite reasoning/usage.include (parâmetros do OpenRouter) e o
+// custo é calculado LOCALMENTE (a API direta não traz usage.cost).
 // Modelo + reasoning effort de CADA etapa vêm de stageModel() (config/models.json + env);
 // default de tudo: deepseek/deepseek-v4-flash-0731 + xhigh ("max" => 400, então o teto é xhigh).
 import OpenAI from 'openai';
 import { z } from 'zod';
 import {
-  OPENROUTER_API_KEY, HTTP_REFERER, X_TITLE, HAS_LLM, MAX_HTML_FOR_LLM, SEARCH_MAX_CHARS,
+  OPENROUTER_API_KEY, DEEPSEEK_API_KEY, LLM_PROVIDER, providerInfo, translateModel,
+  computeUsageCost, HTTP_REFERER, X_TITLE, HAS_LLM, MAX_HTML_FOR_LLM, SEARCH_MAX_CHARS,
   MODELS, stageModel, classifyFacetModel, LLM_TIMEOUT_MS,
 } from './config.js';
 import { getLane, reportRateLimit } from './governor.js';
@@ -12,22 +16,34 @@ import { reserve as budgetReserve } from './budget.js';
 import { warn, sleep } from './util.js';
 
 let _client = null;
-let _clientKey = null; // a key pode mudar em runtime (setRuntimeKey) — recria o client se mudou
+// O provider E a key podem mudar em runtime (setRuntimeKey troca ambos) — recria o client se
+// QUALQUER um mudou: baseURL/headers diferem por provider e a key também pode mudar sozinha.
+let _clientProvider = null;
+let _clientKey = null;
 function client() {
-  if (!HAS_LLM) throw new Error('OPENROUTER_API_KEY ausente: caminho LLM indisponível');
-  if (!_client || _clientKey !== OPENROUTER_API_KEY) {
-    _clientKey = OPENROUTER_API_KEY;
-    _client = new OpenAI({
-      baseURL: 'https://openrouter.ai/api/v1',
-      apiKey: OPENROUTER_API_KEY,
-      defaultHeaders: { 'HTTP-Referer': HTTP_REFERER, 'X-Title': X_TITLE },
+  const info = providerInfo();
+  if (!HAS_LLM) throw new Error(`${info.keyVar} ausente: caminho LLM indisponível`);
+  const key = LLM_PROVIDER === 'deepseek' ? DEEPSEEK_API_KEY : OPENROUTER_API_KEY;
+  if (!_client || _clientProvider !== LLM_PROVIDER || _clientKey !== key) {
+    _clientProvider = LLM_PROVIDER;
+    _clientKey = key;
+    const opts = {
+      apiKey: key,
       // maxRetries 1 + timeout curto: o default do SDK (3 retries × 10 min, timeouts
       // re-tentados) deixaria uma chamada pendurada segurar um slot da lane por até 40 min.
       // 429/5xx pontuais ainda têm 1 retry interno; tempestades de 429 são tratadas pelo
       // gate de penalidade abaixo (que também recua a lane llm no governador).
       maxRetries: 1,
       timeout: LLM_TIMEOUT_MS,
-    });
+    };
+    if (LLM_PROVIDER === 'deepseek') {
+      opts.baseURL = info.baseURL; // DEEPSEEK_BASE_URL (default https://api.deepseek.com)
+    } else {
+      opts.baseURL = info.baseURL; // https://openrouter.ai/api/v1
+      // HTTP-Referer/X-Title identificam a app no OpenRouter — NÃO existem na API direta.
+      opts.defaultHeaders = { 'HTTP-Referer': HTTP_REFERER, 'X-Title': X_TITLE };
+    }
+    _client = new OpenAI(opts);
   }
   return _client;
 }
@@ -71,21 +87,29 @@ async function createOnce({ stage, model, reasoning, response_format, messages, 
     if (signal?.aborted) throw signal.reason || new Error('chamada LLM abortada');
     const resv = budgetReserve(stage, model); // lança BudgetExceededError quando esgotado
     try {
+      // Body provider-aware: o OpenRouter quer `reasoning` (effort) e `usage:{include:true}`
+      // (custo real em usage.cost); a API direta da DeepSeek NÃO suporta nenhum dos dois
+      // (o equivalente de reasoning é `thinking`, com outra semântica) — omite ambos.
+      const body = { model, response_format, messages };
+      if (LLM_PROVIDER !== 'deepseek') {
+        body.reasoning = reasoning;
+        // OpenRouter usage accounting: a resposta traz usage.cost (USD) — o custo REAL que
+        // alimenta o ledger/orçamento. Passa pelo SDK como campo extra, igual ao `reasoning`.
+        body.usage = { include: true };
+      }
       const resp = await client().chat.completions.create(
-        {
-          model,
-          reasoning,
-          response_format,
-          messages,
-          // OpenRouter usage accounting: a resposta traz usage.cost (USD) — o custo REAL que
-          // alimenta o ledger/orçamento. Passa pelo SDK como campo extra, igual ao `reasoning`.
-          usage: { include: true },
-        },
+        body,
         // Abort do job (teto duro): cancela a chamada em voo e devolve o slot da lane já.
         signal ? { signal } : undefined,
       );
       // Commit ANTES do parse de JSON: um 200 malformado também custou dinheiro.
-      resv.commit({ model: resp.model || model, usage: resp.usage });
+      let usage = resp.usage;
+      if (LLM_PROVIDER === 'deepseek' && usage && usage.cost == null) {
+        // A API direta não traz usage.cost — injeta o custo calculado LOCALMENTE (tokens ×
+        // preço do modelo) p/ o ledger/orçamento (budget.js lê usage.cost e fica INTOCADO).
+        usage = { ...usage, cost: computeUsageCost(usage, resp.model || model) };
+      }
+      resv.commit({ model: resp.model || model, usage });
       if (Date.now() >= _penaltyUntil) _penaltyK = 0; // janela limpa: zera o backoff
       return resp;
     } catch (e) {
@@ -103,7 +127,7 @@ async function createWithRateLimitRetry(args) {
     } catch (e) {
       if (e?.status === 429 && attempt < 3 && !args.signal?.aborted) {
         bumpPenalty(e);
-        warn(`429 do OpenRouter (${args.stage}); aguardando a janela de penalidade…`);
+        warn(`429 ${LLM_PROVIDER === 'deepseek' ? 'da DeepSeek' : 'do OpenRouter'} (${args.stage}); aguardando a janela de penalidade…`);
         continue; // re-admite pela lane e espera a penalidade
       }
       throw e;
@@ -111,10 +135,14 @@ async function createWithRateLimitRetry(args) {
   }
 }
 
-const responseFormat = (name, schema) => ({
-  type: 'json_schema',
-  json_schema: { name, strict: true, schema },
-});
+// OpenRouter: response_format json_schema strict (validação server-side). A API direta da
+// DeepSeek NÃO suporta json_schema como response_format (docs: só text|json_object) — degrada
+// p/ json_object; os prompts já instruem "responda apenas com JSON" e o retry/parse defensivo
+// do callJSON cobre o pior caso (modelo que não emite JSON). Exportado p/ testes e onda 2.
+export const responseFormat = (name, schema) => {
+  if (LLM_PROVIDER === 'deepseek') return { type: 'json_object' };
+  return { type: 'json_schema', json_schema: { name, strict: true, schema } };
+};
 
 // IMPORTANTE: enviar SÓ o objeto aninhado `reasoning` (nunca `reasoning_effort` junto);
 // para DeepSeek V4 o efeito máximo é "xhigh" — "max" é rejeitado com 400 (guard abaixo).
@@ -142,7 +170,7 @@ let _warnedMaxEffort = false;
 // Exportado para o harness de avaliação (eval/) reusar EXATAMENTE o mesmo caminho de chamada
 // (reasoning-only, guard de 'max', retry de JSON). Passe fallbackModel:null p/ isolar o modelo.
 export async function callJSON({
-  model, reasoning, schema, schemaName, system, user, retries = 2, fallbackModel = MODELS.pro,
+  model, reasoning, schema, schemaName, system, user, retries = 2, fallbackModel = translateModel(MODELS.pro),
   stage = 'other', // rótulo do estágio p/ o ledger de custo (default p/ usos avulsos/eval)
   signal = null, // AbortSignal do job (teto duro): cancela a chamada em voo e os retries
 }) {

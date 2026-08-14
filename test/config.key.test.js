@@ -27,3 +27,27 @@ test('setRuntimeKey: liga/desliga HAS_LLM em runtime e propaga via live binding'
   config.setRuntimeKey(original);
   assert.equal(config.HAS_LLM, Boolean(original));
 });
+
+test('setRuntimeKey: troca de provider em runtime (deepseek) atualiza DEEPSEEK_API_KEY/HAS_LLM', () => {
+  const origOr = config.OPENROUTER_API_KEY; // restaura no fim (o import pode ter achado uma key)
+  const origDs = config.DEEPSEEK_API_KEY;
+  const origProvider = config.LLM_PROVIDER;
+
+  // Troca p/ deepseek com chave: a chave passa a valer no DEEPSEEK_API_KEY.
+  config.setRuntimeKey('sk-ds-v1-teste', 'deepseek');
+  assert.equal(config.LLM_PROVIDER, 'deepseek');
+  assert.equal(config.HAS_LLM, true, 'key deepseek setada em runtime -> HAS_LLM true');
+  assert.equal(config.DEEPSEEK_API_KEY, 'sk-ds-v1-teste');
+  assert.equal(process.env.DEEPSEEK_API_KEY, 'sk-ds-v1-teste', 'process.env acompanha');
+  assert.equal(config.providerInfo().keyVar, 'DEEPSEEK_API_KEY');
+
+  // Volta p/ openrouter com a chave original (provider default).
+  config.setRuntimeKey(origOr, 'openrouter');
+  assert.equal(config.LLM_PROVIDER, 'openrouter');
+  assert.equal(config.OPENROUTER_API_KEY, origOr);
+
+  // Restaura o estado original completo (inclusive se o ambiente iniciou em deepseek).
+  config.setRuntimeKey(origProvider === 'deepseek' ? origDs : origOr, origProvider);
+  assert.equal(config.LLM_PROVIDER, origProvider);
+  assert.equal(config.HAS_LLM, Boolean(origProvider === 'deepseek' ? origDs : origOr));
+});

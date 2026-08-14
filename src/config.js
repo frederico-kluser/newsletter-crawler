@@ -68,12 +68,54 @@ loadDotEnvOverride(ENV_PATH);
 // importadores (llm.js, commands.js, crawl.js, screens.js) enxergam o valor novo sem reiniciar —
 // semântica de live bindings do ESM. Não capture em const local ao importar.
 export let OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || '';
-export let HAS_LLM = Boolean(OPENROUTER_API_KEY);
-/** Atualiza a chave em RUNTIME (web UI / `ncrawl key set` no mesmo processo). */
-export function setRuntimeKey(key) {
+// Chave da API DIRETA da DeepSeek (api.deepseek.com) — usada quando LLM_PROVIDER=deepseek.
+export let DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY || '';
+
+// ---- provedor LLM ativo: 'openrouter' (DEFAULT) | 'deepseek' ----
+// Sem auto-detecção: o env decide. Inválido/ausente -> openrouter (comportamento de sempre).
+const clampProvider = (p) => (p === 'deepseek' ? 'deepseek' : 'openrouter');
+export let LLM_PROVIDER = clampProvider(String(process.env.LLM_PROVIDER || 'openrouter').toLowerCase());
+// HAS_LLM é provider-aware: vale o provider ATIVO ter a chave correspondente.
+export let HAS_LLM = Boolean(LLM_PROVIDER === 'deepseek' ? DEEPSEEK_API_KEY : OPENROUTER_API_KEY);
+
+// BaseURL da API direta da DeepSeek (OpenAI-compatível; o SDK openai anexa /chat/completions).
+export const DEEPSEEK_BASE_URL = process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com';
+
+// Info do provedor ATUAL, calculada em runtime (live bindings): consumida por llm.js e pela
+// onda 2 (keys.js/commands.js/web.js). `keyVar` é o nome da variável de env da chave do provedor.
+export function providerInfo() {
+  if (LLM_PROVIDER === 'deepseek') {
+    return {
+      name: 'DeepSeek',
+      baseURL: DEEPSEEK_BASE_URL,
+      keyVar: 'DEEPSEEK_API_KEY',
+      keyPresent: Boolean(DEEPSEEK_API_KEY),
+    };
+  }
+  return {
+    name: 'OpenRouter',
+    baseURL: 'https://openrouter.ai/api/v1',
+    keyVar: 'OPENROUTER_API_KEY',
+    keyPresent: Boolean(OPENROUTER_API_KEY),
+  };
+}
+
+/**
+ * Atualiza a chave em RUNTIME (web UI / `ncrawl key set` no mesmo processo) e pode TROCAR o
+ * provedor de uma vez. `setRuntimeKey(key)` mantém o comportamento de hoje (provider atual);
+ * `setRuntimeKey(key, 'deepseek')` muda p/ a API direta e grava a chave nela. `HAS_LLM` e
+ * `LLM_PROVIDER` acompanham (live bindings — todo importador vê sem reiniciar).
+ */
+export function setRuntimeKey(key, provider = LLM_PROVIDER) {
   const k = String(key || '');
-  process.env.OPENROUTER_API_KEY = k;
-  OPENROUTER_API_KEY = k;
+  LLM_PROVIDER = clampProvider(String(provider || '').toLowerCase());
+  if (LLM_PROVIDER === 'deepseek') {
+    process.env.DEEPSEEK_API_KEY = k;
+    DEEPSEEK_API_KEY = k;
+  } else {
+    process.env.OPENROUTER_API_KEY = k;
+    OPENROUTER_API_KEY = k;
+  }
   HAS_LLM = Boolean(k);
 }
 
@@ -81,6 +123,104 @@ export const MODELS = {
   pro: process.env.LLM_PRO_MODEL || 'deepseek/deepseek-v4-flash-0731',
   flash: process.env.LLM_FLASH_MODEL || 'deepseek/deepseek-v4-flash-0731',
 };
+
+// ---- provedor DeepSeek DIRETO (api.deepseek.com): tradução de slugs + custo local ----
+// O OpenRouter usa slugs "vendor/model" (ex.: deepseek/deepseek-v4-flash-0731); a API direta só
+// aceita o id do MODELO (deepseek-v4-flash | deepseek-v4-pro — os legados deepseek-chat/reasoner
+// foram descontinuados em jul/2026, api-docs.deepseek.com). translateModel é aplicado por
+// stageModel/classifyFacetModel, então o pipeline inteiro resolve o slug direto quando o provider
+// ativo é o deepseek; no openrouter é IDENTIDADE (nenhuma chamada muda).
+// Tabela embutida slugOpenRouter -> idDireto. Overrides por env: DEEPSEEK_MODEL_MAP (JSON de mapa,
+// vence a tabela) e DEEPSEEK_DEFAULT_MODEL (id direto p/ slugs FORA da tabela).
+const DEEPSEEK_DIRECT_SLUGS = {
+  'deepseek/deepseek-v4-flash-0731': 'deepseek-v4-flash', // slug atual do pipeline
+  'deepseek/deepseek-v4-flash': 'deepseek-v4-flash',
+  'deepseek/deepseek-v4-pro': 'deepseek-v4-pro',
+};
+
+// Lido no CALL-TIME (não no load): a função fica pura/testável e o override vale sem reiniciar.
+function envDeepseekModelMap() {
+  try {
+    const raw = process.env.DEEPSEEK_MODEL_MAP;
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === 'object' ? parsed : null;
+  } catch {
+    return null; // JSON inválido: falha-open, segue a tabela embutida
+  }
+}
+
+/**
+ * Traduz um slug OpenRouter p/ o id direto da API da DeepSeek (somente com o provider ativo
+ * 'deepseek'; senão, identidade). Regras: slug sem "/" já é direto -> inalterado; DEEPSEEK_MODEL_MAP
+ * vence a tabela embutida; slug na tabela -> direto; fora da tabela -> DEEPSEEK_DEFAULT_MODEL se
+ * setado, senão INALTERADO (fail-open: nunca adivinhar o modelo do outro provedor).
+ */
+export function translateModel(model) {
+  if (LLM_PROVIDER !== 'deepseek') return model;
+  const m = String(model || '');
+  if (!m || !m.includes('/')) return m; // vazio ou já direto (sem prefixo vendor/)
+  const map = envDeepseekModelMap();
+  if (map && map[m]) return String(map[m]);
+  if (DEEPSEEK_DIRECT_SLUGS[m]) return DEEPSEEK_DIRECT_SLUGS[m];
+  return process.env.DEEPSEEK_DEFAULT_MODEL || m;
+}
+
+// Preços oficiais da API direta em USD por 1M de tokens (api-docs.deepseek.com/quick_start/pricing,
+// situação 13/ago/2026): flash input US$0.14 / output US$0.28; pro US$0.435 / US$0.87. Em
+// 16/ago/2026 a DeepSeek migra p/ preços peak/off-peak — override por env cobre a virada:
+// DEEPSEEK_PRICES={"deepseek-v4-flash":{"input":0.44,"output":1.32}} ou vars finas
+// DEEPSEEK_PRICE_<MODEL>_INPUT_PER_M / _OUTPUT_PER_M (ex.: DEEPSEEK_PRICE_DEEPSEEK_V4_FLASH_INPUT_PER_M).
+const DEEPSEEK_PRICE_DEFAULT = { input: 0.14, output: 0.28 }; // modelo genérico fora da tabela (base flash)
+const DEEPSEEK_PRICES = {
+  'deepseek-v4-flash': { input: 0.14, output: 0.28 },
+  'deepseek-v4-pro': { input: 0.435, output: 0.87 },
+};
+
+function envDeepseekPrices() {
+  try {
+    const raw = process.env.DEEPSEEK_PRICES;
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === 'object' ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+// Normaliza o slug p/ chave de env: 'deepseek-v4-flash' -> DEEPSEEK_V4_FLASH.
+const deepseekEnvKeyOf = (slug) => String(slug || '').replace(/[^a-z0-9]+/gi, '_').toUpperCase();
+
+function deepseekPriceFor(model) {
+  // O slug que chega é o DIRETO (o pipeline traduz antes de chamar); o split('/') cobre um slug
+  // OpenRouter que eventualmente caia aqui (lookup pelo nome do modelo).
+  const slug = String(model || '').split('/').pop();
+  const envPrices = envDeepseekPrices();
+  const fromMap = envPrices && typeof envPrices[slug] === 'object' ? envPrices[slug] : null;
+  if (fromMap) {
+    const input = Number(fromMap.input);
+    const output = Number(fromMap.output);
+    if (Number.isFinite(input) && Number.isFinite(output)) return { input, output };
+  }
+  const ek = deepseekEnvKeyOf(slug);
+  const inEnv = Number(process.env[`DEEPSEEK_PRICE_${ek}_INPUT_PER_M`]);
+  const outEnv = Number(process.env[`DEEPSEEK_PRICE_${ek}_OUTPUT_PER_M`]);
+  if (Number.isFinite(inEnv) && Number.isFinite(outEnv)) return { input: inEnv, output: outEnv };
+  return DEEPSEEK_PRICES[slug] || DEEPSEEK_PRICE_DEFAULT;
+}
+
+/**
+ * Custo LOCAL (USD) de uma chamada no provedor direto: a api.deepseek.com NÃO traz usage.cost
+ * (isso é accounting do OpenRouter) — calcula de prompt_tokens/completion_tokens × preço do
+ * modelo. É injetado no usage ANTES do commit do ledger (llm.js), que lê usage.cost e fica
+ * INTOCADO.
+ */
+export function computeUsageCost(usage, model) {
+  const price = deepseekPriceFor(model);
+  const inputTokens = Number(usage?.prompt_tokens) || 0;
+  const outputTokens = Number(usage?.completion_tokens) || 0;
+  return (inputTokens * price.input + outputTokens * price.output) / 1_000_000;
+}
 
 export const USER_AGENT =
   process.env.CRAWLER_UA ||
@@ -316,7 +456,10 @@ export const STAGE_MODELS = Object.fromEntries(STAGE_KEYS.map((s) => [s, resolve
 
 /** {model, effort} resolvido para uma etapa do pipeline (default: deepseek/deepseek-v4-flash-0731 + xhigh). */
 export function stageModel(stage) {
-  return STAGE_MODELS[stage] || { model: DEFAULT_MODEL, effort: DEFAULT_EFFORT };
+  const base = STAGE_MODELS[stage] || { model: DEFAULT_MODEL, effort: DEFAULT_EFFORT };
+  // O modelo resolve pelo provedor ATIVO: identidade no openrouter, slug direto no deepseek
+  // (translateModel; STAGE_MODELS continua guardando o slug OpenRouter do config/models.json).
+  return { model: translateModel(base.model), effort: base.effort };
 }
 
 /**
@@ -330,11 +473,13 @@ export function classifyFacetModel(facetName) {
   const ek = `CLASSIFY_${String(facetName).replace(/[^a-z0-9]+/gi, '_').toUpperCase()}`;
   const model = process.env[`LLM_MODEL_${ek}`] || (fileStage && fileStage.model);
   let effort = process.env[`LLM_EFFORT_${ek}`] || (fileStage && fileStage.effort);
-  if (!model && !effort) return stageModel('classify'); // sem override: etapa base
+  if (!model && !effort) return stageModel('classify'); // sem override: etapa base (já traduzida)
   const base = stageModel('classify');
   effort = effort || base.effort;
   if (effort === 'max') effort = 'xhigh'; // DeepSeek V4 rejeita "max"
-  return { model: model || base.model, effort };
+  // Traduz o modelo final p/ o provider ativo (env com slug direto passa inalterado; base.model
+  // já vem traduzido de stageModel e translateModel é idempotente).
+  return { model: translateModel(model || base.model), effort };
 }
 
 // ---- classificação multi-faceta (pós-processamento) ----

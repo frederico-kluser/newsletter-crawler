@@ -88,7 +88,7 @@ function specBlock(spec) {
   );
 }
 /** 1 chamada (searchSpec, Pro) que "entende" a consulta → {must_have, nice_to_have, query_en, terms}. */
-export async function compileSpec({ query, search, apiKey, signal, onCost }) {
+export async function compileSpec({ query, search, apiKey, signal, onCost, provider = 'openrouter' }) {
   const cfg = search.models?.searchSpec;
   if (!cfg) return null; // snapshot antigo sem searchSpec: segue com a query crua
   const out = await callJSON({
@@ -96,6 +96,7 @@ export async function compileSpec({ query, search, apiKey, signal, onCost }) {
     model: cfg.model,
     effort: cfg.effort,
     fallbackModel: search.models.fallback?.model || null,
+    provider,
     schemaName: 'query_spec',
     schema: querySpecSchema,
     signal,
@@ -228,7 +229,7 @@ export function buildCheckpoint(verdicts, hits, counters) {
 
 // ---- juízes (prompts verbatim de judgeRelevance/judgeRelevanceBatch, llm.js:740-817) ----
 
-async function judgeBatch({ query, items, spec, search, apiKey, signal, onCost }) {
+async function judgeBatch({ query, items, spec, search, apiKey, signal, onCost, provider = 'openrouter' }) {
   const cfg = search.models.searchBatch;
   const sb = specBlock(spec);
   const out = await callJSON({
@@ -236,6 +237,7 @@ async function judgeBatch({ query, items, spec, search, apiKey, signal, onCost }
     model: cfg.model,
     effort: cfg.effort,
     fallbackModel: search.models.fallback?.model || null,
+    provider,
     schemaName: 'relevance_batch',
     schema: relevanceBatchSchema,
     signal,
@@ -255,7 +257,7 @@ async function judgeBatch({ query, items, spec, search, apiKey, signal, onCost }
   return Array.isArray(out?.results) ? out.results : [];
 }
 
-async function judgeOne({ query, title, content, spec, search, apiKey, signal, onCost }) {
+async function judgeOne({ query, title, content, spec, search, apiKey, signal, onCost, provider = 'openrouter' }) {
   const cfg = search.models.searchRelevance;
   const sb = specBlock(spec);
   const out = await callJSON({
@@ -263,6 +265,7 @@ async function judgeOne({ query, title, content, spec, search, apiKey, signal, o
     model: cfg.model,
     effort: cfg.effort,
     fallbackModel: search.models.fallback?.model || null,
+    provider,
     schemaName: 'relevance',
     schema: relevanceSchema,
     signal,
@@ -289,7 +292,7 @@ const RANK = { direct: 0, similar: 1 };
  * KEY_INVALID propaga (o hook reabre o KeyModal). Retorna hits {id, relation, kind} direct-first
  * capados em search.maxItems + contadores + custo real acumulado.
  */
-export async function runSearch({ query, deep, candidates, search, apiKey, signal, onProgress, onHit, onSpec, getContent, resume = null, onCheckpoint }) {
+export async function runSearch({ query, deep, candidates, search, apiKey, provider = 'openrouter', signal, onProgress, onHit, onSpec, getContent, resume = null, onCheckpoint }) {
   // Retomada: semeia ids já julgados + hits + contadores/custo de um checkpoint (lib/activeSearch.js).
   const seeded = resume ? seedResume(resume) : null;
   const verdicts = seeded ? seeded.verdicts : new Map();
@@ -325,7 +328,7 @@ export async function runSearch({ query, deep, candidates, search, apiKey, signa
   // Na RETOMADA o spec vem do checkpoint (não repaga a chamada Pro).
   if (!spec && candidates.length) {
     try {
-      spec = await compileSpec({ query, search, apiKey, signal, onCost });
+      spec = await compileSpec({ query, search, apiKey, signal, onCost, provider });
     } catch (e) {
       if (isAbort(e, signal) || e?.code === 'KEY_INVALID') throw e;
     }
@@ -345,7 +348,7 @@ export async function runSearch({ query, deep, candidates, search, apiKey, signa
         if (signal?.aborted) throw signal.reason || new DOMException('abortado', 'AbortError');
         try {
           const content = await getContent(a.id);
-          verdicts.set(a.id, await judgeOne({ query, title: a.title, content, spec, search, apiKey, signal, onCost }));
+          verdicts.set(a.id, await judgeOne({ query, title: a.title, content, spec, search, apiKey, signal, onCost, provider }));
         } catch (e) {
           if (isAbort(e, signal) || e?.code === 'KEY_INVALID') throw e;
           verdicts.set(a.id, { relation: 'none', kind: 'news' }); // fail-open
@@ -376,7 +379,7 @@ export async function runSearch({ query, deep, candidates, search, apiKey, signa
         if (signal?.aborted) throw signal.reason || new DOMException('abortado', 'AbortError');
         let batchFailed = false;
         try {
-          const results = await judgeBatch({ query, items: batch.map(toBatchItem), spec, search, apiKey, signal, onCost });
+          const results = await judgeBatch({ query, items: batch.map(toBatchItem), spec, search, apiKey, signal, onCost, provider });
           mergeBatchVerdicts(batch, results, verdicts);
         } catch (e) {
           if (isAbort(e, signal) || e?.code === 'KEY_INVALID') throw e;

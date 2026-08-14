@@ -31,6 +31,13 @@ export const getApiKey = () => get('nc-or-key');
 export const setApiKey = (k) => set('nc-or-key', k);
 export const clearApiKey = () => del('nc-or-key');
 
+// Provedor LLM da chave salva (BYOK): 'openrouter' (default) | 'deepseek'. Sem valor salvo =
+// openrouter (migração silenciosa: usuários antigos só têm chave da OpenRouter e o seletor
+// nem existia). O provedor SÓ importa quando há chave salva; persiste junto dela.
+export const getProvider = () => (get('nc-llm-provider') === 'deepseek' ? 'deepseek' : 'openrouter');
+export const setProvider = (p) => set('nc-llm-provider', p === 'deepseek' ? 'deepseek' : 'openrouter');
+export const clearProvider = () => del('nc-llm-provider');
+
 // Histórico de buscas (lido/escrito por lib/history.js). `trySetHistory` distingue QUOTA CHEIA
 // (retorna false → o history poda os mais antigos e re-tenta) de storage INDISPONÍVEL (Safari
 // private/iframe → cai no Map da sessão e retorna true; sem localStorage, quota é irrelevante).

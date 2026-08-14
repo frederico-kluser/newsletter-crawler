@@ -240,3 +240,75 @@ test('key: sem provider no body usa o ATIVO (openrouter); com deepseek persiste 
 
   setRuntimeKey('sk-or-v1-teste', 'openrouter'); // restaura openrouter p/ não vazar pro resto da suíte
 });
+
+// ---- painel de chaves: testar (sem salvar), selecionar (persistente) e status dos 2 ----
+
+test('key/test: valida SEM salvar — nada no .env, runtime intocado', async () => {
+  setRuntimeKey('', 'deepseek'); // limpa a chave deepseek; ativo segue deepseek do teste anterior
+  setRuntimeKey('', 'openrouter'); // limpa a openrouter também
+  const envPath = path.join(NC_HOME_TMP, '.env');
+  if (existsSync(envPath)) rmSync(envPath); // estado limpo p/ o assert de "não persiste"
+
+  probeImpl = async () => ({ ok: true, status: 200 });
+  const t = await postJSON('/api/key/test', { key: 'sk-test-ok', provider: 'deepseek' });
+  assert.equal(t.body.ok, true, 'probe ok');
+  assert.equal(t.body.provider, 'deepseek');
+  assert.equal(t.body.keyVar, 'DEEPSEEK_API_KEY');
+  assert.ok(!existsSync(envPath), 'testar NÃO persiste no .env');
+  assert.equal((await getJSON('/api/key/status')).body.hasKey, false, 'testar NÃO ativa em runtime');
+
+  probeImpl = async () => ({ ok: false, status: 401 });
+  const ruim = await postJSON('/api/key/test', { key: 'sk-test-bad', provider: 'openrouter' });
+  assert.equal(ruim.body.ok, false);
+  assert.equal(ruim.body.status, 401);
+  assert.ok(!existsSync(envPath), 'teste recusado também não persiste');
+});
+
+test('key/select: ativa provedor com chave já salva e persiste LLM_PROVIDER p/ o crawler', async () => {
+  // as DUAS chaves "já salvas", openrouter ATIVO (LLM_PROVIDER=openrouter)
+  setRuntimeKey('sk-ds-x', 'deepseek');
+  setRuntimeKey('sk-or-x', 'openrouter');
+  const sel = await postJSON('/api/key/select', { provider: 'deepseek' });
+  assert.equal(sel.body.ok, true);
+  assert.equal(sel.body.provider, 'deepseek');
+  const env = readFileSync(path.join(NC_HOME_TMP, '.env'), 'utf8');
+  assert.ok(env.includes('LLM_PROVIDER=deepseek'), 'seleção PERSISTIDA (vale p/ web e crawler no próximo processo)');
+
+  const st = await getJSON('/api/key/status');
+  assert.equal(st.body.hasKey, true);
+  assert.equal(st.body.provider.name, 'DeepSeek', 'status expõe o novo ativo');
+  const ds = st.body.providers.find((p) => p.name === 'DeepSeek');
+  const or = st.body.providers.find((p) => p.name === 'OpenRouter');
+  assert.equal(ds.active, true);
+  assert.equal(ds.keyPresent, true);
+  assert.equal(or.active, false);
+  assert.equal(or.keyPresent, true, 'a chave da OpenRouter segue salva (só não é a ativa)');
+
+  // selecionar de volta p/ openrouter (chave salva lá) — agora com provider diferente do ativo
+  const volta = await postJSON('/api/key/select', { provider: 'openrouter' });
+  assert.equal(volta.body.ok, true);
+  assert.ok(readFileSync(path.join(NC_HOME_TMP, '.env'), 'utf8').includes('LLM_PROVIDER=openrouter'));
+  assert.equal((await getJSON('/api/key/status')).body.provider.name, 'OpenRouter');
+
+  // sem chave salva no provedor → erro claro
+  setRuntimeKey('', 'deepseek'); // esquece a deepseek; ativo segue openrouter
+  const sem = await postJSON('/api/key/select', { provider: 'deepseek' });
+  assert.equal(sem.body.ok, false);
+  assert.ok(/nenhuma chave salva/.test(sem.body.reason), 'mensagem acionável');
+});
+
+test('key/status: lista os DOIS provedores com keyPresent e active', async () => {
+  setRuntimeKey('sk-or-x', 'openrouter');
+  setRuntimeKey('sk-ds-y', 'deepseek');
+  setRuntimeKey('sk-or-x', 'openrouter'); // ativo volta p/ openrouter
+  const st = await getJSON('/api/key/status');
+  assert.equal(st.body.hasKey, true);
+  assert.equal(st.body.providers.length, 2);
+  const or = st.body.providers.find((p) => p.name === 'OpenRouter');
+  const ds = st.body.providers.find((p) => p.name === 'DeepSeek');
+  assert.equal(or.keyPresent, true);
+  assert.equal(or.active, true, 'ativo = LLM_PROVIDER atual');
+  assert.equal(ds.keyPresent, true);
+  assert.equal(ds.active, false);
+  assert.equal(ds.keyVar, 'DEEPSEEK_API_KEY');
+});

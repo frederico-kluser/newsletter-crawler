@@ -434,6 +434,7 @@ export default function App() {
         onSave={ai.saveKey}
         onDismiss={ai.dismissKey}
         onForget={ai.forgetKey}
+        onSelect={ai.selectProvider}
       />
       <HistoryPanel
         open={historyOpen}

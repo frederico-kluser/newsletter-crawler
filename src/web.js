@@ -12,6 +12,7 @@ import {
   WEB_PORT, WEB_HOST, HAS_LLM, LLM_PROVIDER, providerInfo, setRuntimeKey, BUDGET_USD,
   SEARCH_MODE_A_CONFIRM, SEARCH_SOFT_CONFIRM, SEARCH_BATCH_SIZE, stageModel,
   SEARCH_UI_CONCURRENCY_DEFAULT, SEARCH_UI_CONCURRENCY_CEILING,
+  OPENROUTER_API_KEY, DEEPSEEK_API_KEY, DEEPSEEK_BASE_URL,
 } from './config.js';
 import { TOOL_CONTENT_TYPES, isToolByTags, getFacets } from './taxonomy.js';
 import { parseDate, log, warn, errorLog } from './util.js';
@@ -568,10 +569,14 @@ async function apiSearchStream(req, res, deps, u) {
   }
 }
 
+// Chave salva do provedor (live bindings do config) — p/ o /api/key/select e o status.
+const savedKeyOf = (provider) => (provider === 'deepseek' ? DEEPSEEK_API_KEY : OPENROUTER_API_KEY);
+
 /**
  * POST /api/key {key, provider?}: valida no provedor (probe via dispatcher) e só então persiste
  * + ativa em runtime. `provider` default = o ATIVO (LLM_PROVIDER); o cliente pode trocar explícito
- * (ex.: o seletor do modal) — `setRuntimeKey(key, provider)` troca o provedor em runtime também.
+ * (ex.: o seletor do modal). Salvar ATIVA o provedor de forma PERSISTENTE (grava LLM_PROVIDER no
+ * NC_HOME/.env) — a seleção vale também para o crawler/CLI no próximo processo.
  */
 async function apiKeySet(req, res, deps) {
   const parsed = await readJsonBody(req);
@@ -584,7 +589,46 @@ async function apiKeySet(req, res, deps) {
   if (!r.ok) return sendJSON(res, 200, { ok: false, status: r.status, reason: r.reason || null });
   const info = providerInfoFor(provider);
   upsertEnvVar(info.keyVar, key); // persiste (NC_HOME/.env), igual `ncrawl key set`
+  if (provider !== LLM_PROVIDER) upsertEnvVar('LLM_PROVIDER', provider); // salvar = ativar (persistente)
   setRuntimeKey(key, provider); // live binding: HAS_LLM/client() enxergam a key nova sem reiniciar
+  return sendJSON(res, 200, { ok: true, provider, keyVar: info.keyVar });
+}
+
+/**
+ * POST /api/key/test {key, provider}: valida a chave SEM salvar (probe do provedor) — o botão
+ * "Testar" do painel. Nunca toca o NC_HOME/.env nem o runtime.
+ */
+async function apiKeyTest(req, res, deps) {
+  const parsed = await readJsonBody(req);
+  if (parsed.error) return sendJSON(res, parsed.status, { error: parsed.error });
+  const body = parsed.body || {};
+  const key = String(body.key || '').trim();
+  if (!key) return sendJSON(res, 400, { error: 'informe a chave' });
+  const provider = String(body.provider || LLM_PROVIDER).toLowerCase() === 'deepseek' ? 'deepseek' : 'openrouter';
+  const r = await deps.probeKey(key, provider);
+  const info = providerInfoFor(provider);
+  return sendJSON(res, 200, { ok: r.ok, status: r.status, reason: r.reason || null, provider, keyVar: info.keyVar });
+}
+
+/**
+ * POST /api/key/select {provider}: TROCA o provedor ativo sem re-digitar chave — exige chave já
+ * salva no slot do provedor (NC_HOME/.env ou runtime). Persiste LLM_PROVIDER no NC_HOME/.env
+ * (vale para o crawler/CLI no próximo processo) e ativa em runtime via setRuntimeKey.
+ */
+async function apiKeySelect(req, res, deps) {
+  const parsed = await readJsonBody(req);
+  if (parsed.error) return sendJSON(res, parsed.status, { error: parsed.error });
+  const provider = String((parsed.body || {}).provider || LLM_PROVIDER).toLowerCase() === 'deepseek' ? 'deepseek' : 'openrouter';
+  const key = savedKeyOf(provider);
+  if (!key) {
+    return sendJSON(res, 200, {
+      ok: false,
+      reason: `nenhuma chave salva para ${providerInfoFor(provider).name} — salve uma primeiro`,
+    });
+  }
+  const info = providerInfoFor(provider);
+  if (provider !== LLM_PROVIDER) upsertEnvVar('LLM_PROVIDER', provider); // seleção persistente
+  setRuntimeKey(key, provider);
   return sendJSON(res, 200, { ok: true, provider, keyVar: info.keyVar });
 }
 
@@ -612,6 +656,8 @@ async function handleRequest(req, res, deps) {
     if (req.method === 'POST') {
       // POST só nas rotas de AÇÃO (busca IA e key); todo o resto é GET.
       if (p === '/api/search') return await apiSearch(req, res, deps);
+      if (p === '/api/key/test') return await apiKeyTest(req, res, deps);
+      if (p === '/api/key/select') return await apiKeySelect(req, res, deps);
       if (p === '/api/key') return await apiKeySet(req, res, deps);
       return sendJSON(res, 405, { error: 'somente GET nesta rota' });
     }
@@ -666,9 +712,22 @@ async function handleRequest(req, res, deps) {
     }
     if (p === '/api/key/status') {
       const info = providerInfo();
+      // Aditivo: `providers` traz o estado de AMBOS (chave salva + qual é o ativo) p/ o painel
+      // de gerenciamento (testar/ativar por provedor). Os campos antigos seguem iguais.
+      const providers = [
+        {
+          name: 'OpenRouter', keyVar: 'OPENROUTER_API_KEY', baseURL: 'https://openrouter.ai/api/v1',
+          keyPresent: Boolean(OPENROUTER_API_KEY), active: LLM_PROVIDER !== 'deepseek',
+        },
+        {
+          name: 'DeepSeek', keyVar: 'DEEPSEEK_API_KEY', baseURL: DEEPSEEK_BASE_URL,
+          keyPresent: Boolean(DEEPSEEK_API_KEY), active: LLM_PROVIDER === 'deepseek',
+        },
+      ];
       return sendJSON(res, 200, {
         hasKey: HAS_LLM,
-        provider: { name: info.name, baseURL: info.baseURL, keyVar: info.keyVar }, // aditivo: cliente provider-aware
+        provider: { name: info.name, baseURL: info.baseURL, keyVar: info.keyVar },
+        providers,
       });
     }
     if (p === '/api/tts') return await apiTts(res, Number(u.searchParams.get('id')));

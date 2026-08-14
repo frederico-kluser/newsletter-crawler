@@ -99,20 +99,56 @@ test('migração: usuário com chave antiga da OpenRouter e SEM provedor salvo c
   }
 });
 
-test('fluxo saveKey/forgetKey (o que useAiSearch faz): salva par junto; esquecer limpa os DOIS', () => {
+test('fluxo saveKey/forgetKey (o que useAiSearch faz): salva no slot do provedor e ativa; esquecer limpa o slot', () => {
   const restore = installStorage(makeFakeStorage());
   try {
     const ls = globalThis.localStorage;
-    setApiKey('sk-ds-x'); // após probe ok
-    setProvider('deepseek');
+    setApiKey('sk-ds-x', 'deepseek'); // após probe ok — slot DO provedor
+    setProvider('deepseek'); // salvar ATIVA o provedor
     assert.equal(getApiKey(), 'sk-ds-x');
     assert.equal(getProvider(), 'deepseek');
-    // forgetKey do hook: clearApiKey + clearProvider
-    clearApiKey();
+    assert.equal(ls._items.get('nc-ds-key'), 'sk-ds-x', 'slot deepseek preenchido');
+    assert.ok(!ls._items.has('nc-or-key'), 'slot openrouter intocado');
+    // forgetKey do hook: clearApiKey(provider ativo) + clearProvider
+    clearApiKey('deepseek');
     clearProvider();
     assert.equal(getApiKey(), null);
     assert.equal(getProvider(), 'openrouter', 'sem chave o provedor volta ao default');
-    assert.equal(ls._items.size, 0);
+  } finally {
+    restore();
+  }
+});
+
+test('as DUAS chaves convivem em slots independentes; getApiKey() devolve a do provedor ATIVO', () => {
+  const restore = installStorage(makeFakeStorage());
+  try {
+    setApiKey('sk-or-x'); // ativo default = openrouter
+    setApiKey('sk-ds-y', 'deepseek');
+    assert.equal(getApiKey('openrouter'), 'sk-or-x');
+    assert.equal(getApiKey('deepseek'), 'sk-ds-y');
+    assert.equal(getApiKey(), 'sk-or-x', 'ativo openrouter → chave da OpenRouter');
+    setProvider('deepseek'); // troca o ativo SEM tocar as chaves
+    assert.equal(getApiKey(), 'sk-ds-y', 'ativo deepseek → chave da DeepSeek');
+    clearApiKey('openrouter'); // esquece só a OpenRouter
+    assert.equal(getApiKey('openrouter'), null);
+    assert.equal(getApiKey(), 'sk-ds-y', 'a chave do outro provedor segue valendo');
+  } finally {
+    restore();
+  }
+});
+
+test('esquecer a chave ATIVA sem outra salva zera o hasKey (getApiKey() null); com outra salva, sobra ela', () => {
+  const restore = installStorage(makeFakeStorage());
+  try {
+    setApiKey('sk-or-x');
+    setApiKey('sk-ds-y', 'deepseek');
+    setProvider('deepseek');
+    clearApiKey('deepseek'); // esquece a ativa
+    clearProvider();
+    assert.equal(getProvider(), 'openrouter');
+    assert.equal(getApiKey(), 'sk-or-x', 'sobra a chave da OpenRouter → hasKey segue true');
+    clearApiKey('openrouter'); // esqueceu as duas
+    assert.equal(getApiKey(), null, 'sem nenhuma chave → hasKey false');
   } finally {
     restore();
   }

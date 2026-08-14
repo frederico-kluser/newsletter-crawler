@@ -24,7 +24,7 @@ import {
   normalizeUrl, sha256, domainSig, hostOf, parseDate, clampFutureDate, log, warn, errorLog, debug,
 } from './util.js';
 import {
-  HAS_LLM, RESPECT_ROBOTS, MAX_CRAWL_DEPTH, ROUNDUP_MIN_LINKS,
+  HAS_LLM, RESPECT_ROBOTS, MAX_CRAWL_DEPTH, ROUNDUP_MIN_LINKS, providerInfo,
   ARTICLE_ROUNDUP_MIN_LINKS, ARTICLE_ROUNDUP_MAX_LINKS, ROUNDUP_MAX_PROSE_CHARS,
   CURATE_ROUNDUPS, CLEAN_BEFORE_SAVE, CLEAN_MAX_CHARS,
 } from './config.js';
@@ -228,7 +228,7 @@ async function processListing(job, source, opts) {
     }
     log(`fallback Flash: ${n} links (${childKind}) enfileirados de ${url}`);
   } else {
-    warn(`sem OPENROUTER_API_KEY e sem seletor cacheado — não há como descobrir links em ${url}`);
+    warn(`sem ${providerInfo().keyVar} e sem seletor cacheado — não há como descobrir links em ${url}`);
   }
 }
 

@@ -714,6 +714,16 @@ select.control:disabled { opacity: 0.5; cursor: default; }
   font-size: 14px;
 }
 .dialog .key-input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.dialog .provider-select {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 12px;
+  font-size: 14px;
+  color: var(--text-2);
+}
+.dialog .provider-select select.control { max-width: 220px; }
 .key-error { color: #dc2626; font-size: 13px; margin: 8px 0 0; }
 
 /* ---- sheet de leitura ---- */

@@ -6,7 +6,8 @@ import path from 'node:path';
 import { stmts, wipeAll, removeSource } from './db.js';
 import {
   ROOT, EXPORT_DIR, DB_PATH, CONCURRENCY, MAX_RETRIES, HAS_LLM, CLASSIFY_AFTER_CRAWL, SUMMARIZE_AFTER_CRAWL,
-  SEARCH_MODE_A_CONFIRM, OPENROUTER_API_KEY, ENV_PATH, BUDGET_USD, MAX_PARALLEL, RAM_MAX_PCT,
+  SEARCH_MODE_A_CONFIRM, OPENROUTER_API_KEY, DEEPSEEK_API_KEY, LLM_PROVIDER, providerInfo, ENV_PATH,
+  BUDGET_USD, MAX_PARALLEL, RAM_MAX_PCT,
   AGGRESSIVE_DEFAULT, DEFAULT_SINCE, MIN_CRAWL_DATE, VERIFY_AFTER_CRAWL, VERIFY_STREAMING, JOB_TIMEOUT_MS, JOB_HARD_TIMEOUT_MS,
   CLASSIFY_STREAMING, SUMMARIZE_STREAMING, CURATE_JOBS, ROUNDUP_TIMEOUT_MS, COST_LOG_INTERVAL_MS,
   defaultParallel, loadSources, addSourceToConfig, removeSourceFromConfig, setRuntimeKey,
@@ -33,7 +34,7 @@ import {
 } from './progress.js';
 import { runEventsReset, emitRunEvent } from './run-events.js';
 import { startWebServer } from './web.js';
-import { probeOpenRouterKey, upsertEnvVar, maskKey } from './keys.js';
+import { probeProviderKey, providerInfoFor, upsertEnvVar, maskKey } from './keys.js';
 import { slugify, normalizeUrl, parseDate, hostOf, log, warn, errorLog, debug } from './util.js';
 
 // Re-export p/ a UI importar de um lugar só (igual getStatus).
@@ -218,7 +219,7 @@ export async function cmdCrawl(flags) {
 
 async function crawlRun(flags) {
   if (!HAS_LLM) {
-    log('AVISO: OPENROUTER_API_KEY ausente — só o caminho estático/cache roda; sem derivação de seletor.');
+    log(`AVISO: ${providerInfo().keyVar} ausente — só o caminho estático/cache roda; sem derivação de seletor.`);
   }
 
   // Resume: jobs que ficaram travados voltam para a fila.
@@ -756,7 +757,7 @@ export function cmdExport(flags) {
 // por execução e retomar depois. Espelha o bloco pós-crawl (crawlRun) num comando avulso.
 export async function cmdFinish(flags) {
   if (!HAS_LLM) {
-    errorLog('OPENROUTER_API_KEY ausente — finalizar os pendentes requer o caminho LLM.');
+    errorLog(`${providerInfo().keyVar} ausente — finalizar os pendentes requer o caminho LLM.`);
     process.exit(1);
   }
   const limit = flags.limit ? Number(flags.limit) : Infinity;
@@ -780,7 +781,7 @@ export async function cmdFinish(flags) {
 // reclean: re-limpa os 'suspect' com o passe FORTE (Pro) e re-verifica (melhoria da seção 7).
 export async function cmdReclean(flags) {
   if (!HAS_LLM) {
-    errorLog('OPENROUTER_API_KEY ausente — o reclean requer o caminho LLM.');
+    errorLog(`${providerInfo().keyVar} ausente — o reclean requer o caminho LLM.`);
     process.exit(1);
   }
   const limit = flags.limit ? Number(flags.limit) : Infinity;
@@ -946,7 +947,7 @@ export function cmdInspect(flags) {
 // Busca na base. Modo A (Flash, varre tudo) ou B (Pro, por tags). RETORNA os resultados (a UI captura).
 export async function cmdSearch(rest, flags) {
   if (!HAS_LLM) {
-    errorLog('OPENROUTER_API_KEY ausente — a busca requer o caminho LLM.');
+    errorLog(`${providerInfo().keyVar} ausente — a busca requer o caminho LLM.`);
     process.exit(1);
   }
   const query = (rest || []).join(' ').trim(); // multiword sem aspas
@@ -1138,52 +1139,65 @@ export async function cmdWeb(flags) {
   await srv.close();
 }
 
-// Gerência da chave OpenRouter. `key set <chave>` valida (probe) e grava em NC_HOME/.env; `key test`
-// valida a chave atual. Sem subcomando: mostra o estado. A validação impede salvar uma chave ruim.
+// Gerência da chave LLM, PROVIDER-AWARE. `key set <chave>` valida (probe do provedor) e grava em
+// NC_HOME/.env; `key test` valida a chave do provedor. `--provider openrouter|deepseek` escolhe o
+// provedor; sem a flag, usa o ATIVO (LLM_PROVIDER) — `key set <chave>` sem flag continua salvando
+// OPENROUTER_API_KEY e validando na OpenRouter (comportamento de sempre). Sem subcomando: mostra o
+// estado. A validação impede salvar uma chave ruim.
 export async function cmdKey(rest, flags) {
   // `rest` já vem SEM o "key" (index.js faz rest.shift()): rest[0]=subcomando, rest[1]=chave.
   const sub = String(rest[0] || '').toLowerCase();
+  // --provider: inválido/ausente = provedor ativo (mesma regra de clamp do config.js).
+  const provider = String(flags.provider || LLM_PROVIDER).toLowerCase() === 'deepseek' ? 'deepseek' : 'openrouter';
+  const info = providerInfoFor(provider);
 
   if (sub === 'set') {
     const key = rest[1] || (typeof flags.key === 'string' ? flags.key : '');
     if (!key) {
-      errorLog('uso: ncrawl key set <OPENROUTER_API_KEY>');
+      errorLog('uso: ncrawl key set <CHAVE> [--provider openrouter|deepseek]');
       process.exit(1);
     }
-    log('validando a chave na OpenRouter (GET /api/v1/key)…');
-    const r = await probeOpenRouterKey(key);
+    log(`validando a chave na ${info.name} (probe)…`);
+    const r = await probeProviderKey(key, provider);
     if (!r.ok) {
       errorLog(
         `chave INVÁLIDA (HTTP ${r.status || '—'}${r.reason ? `: ${r.reason}` : ''}) — nada foi salvo.`,
       );
       process.exit(1);
     }
-    const { updated, file } = upsertEnvVar('OPENROUTER_API_KEY', key);
-    setRuntimeKey(key); // vale JÁ neste processo (a TUI encadeia comandos sem reiniciar)
+    const { updated, file } = upsertEnvVar(info.keyVar, key);
+    setRuntimeKey(key, provider); // vale JÁ neste processo (a TUI encadeia comandos sem reiniciar)
     log(`chave válida ✓ ${maskKey(key)} — ${updated ? 'atualizada' : 'salva'} em ${file}`);
     return;
   }
 
   if (sub === 'test') {
-    if (!OPENROUTER_API_KEY) {
-      errorLog(`nenhuma chave configurada. Rode: ncrawl key set <chave>  (será salva em ${ENV_PATH})`);
+    const cur = provider === 'deepseek' ? DEEPSEEK_API_KEY : OPENROUTER_API_KEY;
+    if (!cur) {
+      errorLog(`nenhuma chave ${info.name} configurada. Rode: ncrawl key set <CHAVE>  (será salva em ${ENV_PATH})`);
       process.exit(1);
     }
-    log(`testando a chave atual ${maskKey(OPENROUTER_API_KEY)}…`);
-    const r = await probeOpenRouterKey(OPENROUTER_API_KEY);
+    log(`testando a chave atual ${maskKey(cur)} (${info.name})…`);
+    const r = await probeProviderKey(cur, provider);
     if (!r.ok) {
-      errorLog(`chave INVÁLIDA (HTTP ${r.status || '—'}). Rode: ncrawl key set <chave>`);
+      errorLog(`chave INVÁLIDA (HTTP ${r.status || '—'}). Rode: ncrawl key set <CHAVE>`);
       process.exit(1);
     }
     log('chave válida ✓ (HTTP 200)');
     return;
   }
 
-  // Sem subcomando: estado atual + uso (não é erro).
-  if (OPENROUTER_API_KEY) log(`chave configurada: ${maskKey(OPENROUTER_API_KEY)} — arquivo previsível: ${ENV_PATH}`);
-  else log(`nenhuma chave configurada ainda — arquivo previsível: ${ENV_PATH}`);
-  log('uso: ncrawl key set <chave>   valida na OpenRouter e salva');
-  log('     ncrawl key test          valida a chave atual');
+  // Sem subcomando: estado atual + uso (não é erro). Mostra o provedor ATIVO e a chave de CADA
+  // provedor (se setada) — o usuário vê o que está configurado num comando só.
+  log(`provedor ativo: ${providerInfo().name}`);
+  for (const p of ['openrouter', 'deepseek']) {
+    const pi = providerInfoFor(p);
+    const k = p === 'deepseek' ? DEEPSEEK_API_KEY : OPENROUTER_API_KEY;
+    log(k ? `${pi.name}: chave configurada ${maskKey(k)}` : `${pi.name}: nenhuma chave (${pi.keyVar})`);
+  }
+  log(`arquivo previsível: ${ENV_PATH}`);
+  log('uso: ncrawl key set <CHAVE> [--provider openrouter|deepseek]   valida no provedor e salva');
+  log('     ncrawl key test [--provider openrouter|deepseek]          valida a chave do provedor');
 }
 
 // Deploy do site: a lógica vive em deploy.js (export → commit → push → ESPERA a publicação).

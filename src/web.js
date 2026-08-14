@@ -9,7 +9,7 @@ import { createRequire } from 'node:module';
 import { spawn } from 'node:child_process';
 import { stmts } from './db.js';
 import {
-  WEB_PORT, WEB_HOST, HAS_LLM, setRuntimeKey, BUDGET_USD,
+  WEB_PORT, WEB_HOST, HAS_LLM, LLM_PROVIDER, providerInfo, setRuntimeKey, BUDGET_USD,
   SEARCH_MODE_A_CONFIRM, SEARCH_SOFT_CONFIRM, SEARCH_BATCH_SIZE, stageModel,
   SEARCH_UI_CONCURRENCY_DEFAULT, SEARCH_UI_CONCURRENCY_CEILING,
 } from './config.js';
@@ -17,7 +17,7 @@ import { TOOL_CONTENT_TYPES, isToolByTags, getFacets } from './taxonomy.js';
 import { parseDate, log, warn, errorLog } from './util.js';
 import { searchWeb } from './search.js';
 import { synthesizeSpeech, TtsError } from './tts.js';
-import { probeOpenRouterKey, upsertEnvVar } from './keys.js';
+import { probeProviderKey, providerInfoFor, upsertEnvVar } from './keys.js';
 import { initGovernor, stopGovernor } from './governor.js';
 import { beginRun, endRun, estimateStageCallUsd, getBudgetState } from './budget.js';
 
@@ -347,7 +347,7 @@ async function apiSearch(req, res, deps) {
   if (!query) return sendJSON(res, 400, { error: 'informe uma consulta' });
   if (!HAS_LLM) {
     return sendJSON(res, 400, {
-      error: 'OPENROUTER_API_KEY ausente — configure a chave para buscar com IA.',
+      error: `${providerInfo().keyVar} ausente — configure a chave para buscar com IA.`,
       code: 'NO_KEY',
     });
   }
@@ -493,7 +493,7 @@ async function apiSearchStream(req, res, deps, u) {
   const query = String(sp.get('q') || '').trim().slice(0, 500);
   if (!query) return sendJSON(res, 400, { error: 'informe uma consulta' });
   if (!HAS_LLM) {
-    return sendJSON(res, 400, { error: 'OPENROUTER_API_KEY ausente — configure a chave para buscar com IA.', code: 'NO_KEY' });
+    return sendJSON(res, 400, { error: `${providerInfo().keyVar} ausente — configure a chave para buscar com IA.`, code: 'NO_KEY' });
   }
   const deep = sp.get('deep') === '1' || sp.get('deep') === 'true';
   const concurrency = clampConcurrency(sp.get('concurrency'));
@@ -568,17 +568,24 @@ async function apiSearchStream(req, res, deps, u) {
   }
 }
 
-/** POST /api/key {key}: valida no OpenRouter (probe) e só então persiste + ativa em runtime. */
+/**
+ * POST /api/key {key, provider?}: valida no provedor (probe via dispatcher) e só então persiste
+ * + ativa em runtime. `provider` default = o ATIVO (LLM_PROVIDER); o cliente pode trocar explícito
+ * (ex.: o seletor do modal) — `setRuntimeKey(key, provider)` troca o provedor em runtime também.
+ */
 async function apiKeySet(req, res, deps) {
   const parsed = await readJsonBody(req);
   if (parsed.error) return sendJSON(res, parsed.status, { error: parsed.error });
-  const key = String(parsed.body?.key || '').trim();
+  const body = parsed.body || {};
+  const key = String(body.key || '').trim();
   if (!key) return sendJSON(res, 400, { error: 'informe a chave' });
-  const r = await deps.probeKey(key);
+  const provider = String(body.provider || LLM_PROVIDER).toLowerCase() === 'deepseek' ? 'deepseek' : 'openrouter';
+  const r = await deps.probeKey(key, provider);
   if (!r.ok) return sendJSON(res, 200, { ok: false, status: r.status, reason: r.reason || null });
-  upsertEnvVar('OPENROUTER_API_KEY', key); // persiste (NC_HOME/.env), igual `ncrawl key set`
-  setRuntimeKey(key); // live binding: HAS_LLM/client() enxergam a key nova sem reiniciar
-  return sendJSON(res, 200, { ok: true });
+  const info = providerInfoFor(provider);
+  upsertEnvVar(info.keyVar, key); // persiste (NC_HOME/.env), igual `ncrawl key set`
+  setRuntimeKey(key, provider); // live binding: HAS_LLM/client() enxergam a key nova sem reiniciar
+  return sendJSON(res, 200, { ok: true, provider, keyVar: info.keyVar });
 }
 
 // ---- servidor ----
@@ -658,7 +665,11 @@ async function handleRequest(req, res, deps) {
       return sendJSON(res, r.status, r.body);
     }
     if (p === '/api/key/status') {
-      return sendJSON(res, 200, { hasKey: HAS_LLM });
+      const info = providerInfo();
+      return sendJSON(res, 200, {
+        hasKey: HAS_LLM,
+        provider: { name: info.name, baseURL: info.baseURL, keyVar: info.keyVar }, // aditivo: cliente provider-aware
+      });
     }
     if (p === '/api/tts') return await apiTts(res, Number(u.searchParams.get('id')));
     const m = p.match(/^\/api\/article\/(\d+)$/);
@@ -696,7 +707,7 @@ export function openBrowser(url) {
  * `deps` injeta o motor de busca/probe de key (testes trocam por fakes sem rede/LLM).
  */
 export function startWebServer({ port = WEB_PORT, host = WEB_HOST, open = false, deps = {} } = {}) {
-  const d = { search: searchWeb, probeKey: probeOpenRouterKey, ...deps };
+  const d = { search: searchWeb, probeKey: probeProviderKey, ...deps };
   return new Promise((resolve, reject) => {
     // A busca IA responde MINUTOS depois do request. Isso é seguro nos defaults do Node: o body
     // do POST é consumido ANTES do trabalho (request "completo"), e o requestTimeout (5 min)

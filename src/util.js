@@ -118,6 +118,25 @@ export function foldText(s) {
     .replace(/[̀-ͯ]/g, '');
 }
 
+// ---- detecção de texto CJK (chinês/japonês/coreano) ----
+// Usada pela guarda de idioma do stage summarize: title_pt/summary_pt são PT-BR e o Flash às
+// vezes responde no idioma do ARTIGO (captura 2026-08-14: 11/188 resumos em chinês). Cobre Han
+// (U+3400–U+4DBF ext. A, U+4E00–U+9FFF unificado, U+F900–U+FAFF compat.), hiragana+katakana
+// (U+3040–U+30FF) e hangeul (U+AC00–U+D7AF) — todos BMP, 1 code unit cada.
+const CJK_RE = /[㐀-䶿一-鿿぀-ヿ가-힯豈-﫿]/;
+
+/** True se a string contém QUALQUER caractere CJK (Han/hiragana/katakana/hangeul). */
+export function hasCjk(s) {
+  return CJK_RE.test(String(s ?? ''));
+}
+
+/** Razão de caracteres CJK sobre o total (0..1); 0 para string vazia/sem CJK. */
+export function cjkRatio(s) {
+  const t = String(s ?? '');
+  const m = t.match(/[㐀-䶿一-鿿぀-ヿ가-힯豈-﫿]/g); // /g: conta TODAS as ocorrências
+  return m ? m.length / t.length : 0;
+}
+
 const ts = () => new Date().toISOString();
 
 // Sink opcional de logs: quando setado (ex.: a UI Ink), TODO o output do crawl vai p/ ele em

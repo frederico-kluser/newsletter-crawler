@@ -9,11 +9,12 @@ import { z } from 'zod';
 import {
   OPENROUTER_API_KEY, DEEPSEEK_API_KEY, LLM_PROVIDER, providerInfo, translateModel,
   computeUsageCost, HTTP_REFERER, X_TITLE, HAS_LLM, MAX_HTML_FOR_LLM, SEARCH_MAX_CHARS,
-  MODELS, stageModel, classifyFacetModel, LLM_TIMEOUT_MS,
+  MODELS, stageModel, classifyFacetModel, LLM_TIMEOUT_MS, SUMMARIZE_LANG_GUARD,
 } from './config.js';
 import { getLane, reportRateLimit } from './governor.js';
 import { reserve as budgetReserve } from './budget.js';
-import { warn, sleep } from './util.js';
+import { warn, sleep, hasCjk, cjkRatio } from './util.js';
+import { logEvent } from './events.js';
 
 let _client = null;
 // O provider E a key podem mudar em runtime (setRuntimeKey troca ambos) — recria o client se
@@ -784,6 +785,20 @@ export async function classifyFacet({ facet, system, user }) {
 }
 
 // ---------- etapa summarize: título + resumo em PT-BR (Flash high) ----------
+// Guarda de idioma (Achado 1 da captura 2026-08-14: 11/188 resumos PT-BR em CHINÊS): o Flash às
+// vezes ecoa o idioma citado/escrito no artigo. Duas camadas: (1) o system pede PT-BR
+// explicitamente (cláusula de idioma); (2) a saída é VALIDADA deterministicamente (hasCjk/
+// cjkRatio, util.js) — CJK dispara 1 re-try com reforço e, persistindo, THROW (a ficha fica
+// NULL — o chamador nunca chega ao setSummary — e é re-resumida no próximo run, sem nunca
+// persistir idioma errado). Desliga: SUMMARIZE_LANG_GUARD=false.
+const SUMMARY_SYSTEM =
+  'Você é um editor técnico brasileiro. Resuma artigos de tecnologia em português do Brasil, ' +
+  'de forma fiel e fluente. ' +
+  'Responda SEMPRE em português do Brasil; nunca em chinês, japonês ou coreano — mesmo que o ' +
+  'artigo cite ou esteja escrito nesses idiomas, traduza o conteúdo. Responda apenas com JSON.';
+const SUMMARY_LANG_HINT =
+  '\n\nIMPORTANTE: a resposta anterior veio em chinês/japonês/coreano (idioma do artigo). ' +
+  'Responda NOVAMENTE, agora TUDO em português do Brasil — traduza o conteúdo, não o copie.';
 const summarySchema = {
   type: 'object',
   properties: { title_pt: { type: 'string' }, summary_pt: { type: 'string' } },
@@ -791,28 +806,56 @@ const summarySchema = {
   additionalProperties: false,
 };
 const summaryZ = z.object({ title_pt: z.string(), summary_pt: z.string() });
+// Saída em idioma errado? Título com QUALQUER CJK (um título traduzido nunca contém Han/kana/
+// hangeul) OU resumo com razão CJK > 0.25 (um nome de produto citado, ex. "o 腾讯 da Tencent",
+// tem razão baixa e NÃO dispara).
+function summaryInWrongLanguage(summary) {
+  return hasCjk(summary.title_pt) || cjkRatio(summary.summary_pt) > 0.25;
+}
 export async function summarizeArticle({ title, content }) {
   const { model, effort } = stageModel('summarize');
-  const out = await callJSON({
-    model,
-    reasoning: { effort },
-    stage: 'summarize',
-    schemaName: 'summary_pt',
-    schema: summarySchema,
-    zod: summaryZ,
-    system:
-      'Você é um editor técnico brasileiro. Resuma artigos de tecnologia em português do Brasil, ' +
-      'de forma fiel e fluente. Responda apenas com JSON.',
-    user:
-      'Traduza o TÍTULO e escreva um RESUMO em português do Brasil do artigo abaixo.\n' +
-      '- title_pt: o título adaptado para PT-BR (curto, natural).\n' +
-      '- summary_pt: um resumo CLARO e LEGÍVEL em PT-BR (NÃO é tradução literal palavra-por-palavra). ' +
-      'Cubra os pontos principais em 1–3 parágrafos curtos; preserve nomes próprios, termos técnicos e ' +
-      'nomes de produtos/bibliotecas no original quando fizer sentido.\n' +
-      'Devolva SOMENTE JSON {"title_pt","summary_pt"}.\n\n' +
-      `ARTIGO\nTítulo: ${title || ''}\n\nConteúdo:\n${clamp(content)}`,
-  });
-  return summaryZ.parse(out);
+  const user =
+    'Traduza o TÍTULO e escreva um RESUMO em português do Brasil do artigo abaixo.\n' +
+    '- title_pt: o título adaptado para PT-BR (curto, natural).\n' +
+    '- summary_pt: um resumo CLARO e LEGÍVEL em PT-BR (NÃO é tradução literal palavra-por-palavra). ' +
+    'Cubra os pontos principais em 1–3 parágrafos curtos; preserve nomes próprios, termos técnicos e ' +
+    'nomes de produtos/bibliotecas no original quando fizer sentido.\n' +
+    'Devolva SOMENTE JSON {"title_pt","summary_pt"}.\n\n' +
+    `ARTIGO\nTítulo: ${title || ''}\n\nConteúdo:\n${clamp(content)}`;
+  const call = (langHint) =>
+    callJSON({
+      model,
+      reasoning: { effort },
+      stage: 'summarize',
+      schemaName: 'summary_pt',
+      schema: summarySchema,
+      zod: summaryZ,
+      system: SUMMARY_SYSTEM,
+      user: langHint ? user + langHint : user,
+    });
+  let out = await call(null);
+  let summary = summaryZ.parse(out);
+  if (SUMMARIZE_LANG_GUARD && summaryInWrongLanguage(summary)) {
+    warn('summarize: resposta em idioma CJK; repetindo com o reforço de idioma…');
+    out = await call(SUMMARY_LANG_HINT);
+    summary = summaryZ.parse(out);
+  }
+  if (SUMMARIZE_LANG_GUARD && summaryInWrongLanguage(summary)) {
+    // Persistiu: a ficha fica NULL (o chamador não chega ao setSummary) e é re-resumida no
+    // próximo run — autocorretivo, nunca persiste idioma errado. Evento p/ `ncrawl inspect`
+    // e p/ o backfill (onda 2) localizarem a ficha.
+    logEvent({
+      stage: 'summarize',
+      status: 'language-guard',
+      detail: { title_pt: summary.title_pt, summary_pt: summary.summary_pt },
+    });
+    throw new Error(
+      'summarize: resposta em idioma CJK mesmo após o re-try ' +
+        `(title_pt hasCjk=${hasCjk(summary.title_pt)}; ` +
+        `summary_pt cjkRatio=${cjkRatio(summary.summary_pt).toFixed(3)})`,
+    );
+  }
+  return summary;
 }
 
 // ---------- etapa searchRelevance: julga artigo vs consulta (modo A, Flash high, 50x) ----------

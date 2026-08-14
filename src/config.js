@@ -526,6 +526,11 @@ export const SUMMARIZE_CONCURRENCY = envIntOr0('SUMMARIZE_CONCURRENCY');
 export const SUMMARIZE_MAX_CHARS = Number(process.env.SUMMARIZE_MAX_CHARS || 12000);
 // Hook pós-crawl: gera os resumos ao fim do crawl (desligue com =false ou --no-summarize).
 export const SUMMARIZE_AFTER_CRAWL = process.env.SUMMARIZE_AFTER_CRAWL !== 'false';
+// Guarda de idioma do summarize (default ON): title_pt/summary_pt com texto CJK (Han/kana/
+// hangeul — o Flash às vezes ecoa o idioma do artigo; 11/188 em chinês na captura 2026-08-14)
+// disparam 1 re-try com reforço e, persistindo, o THROW deixa a ficha NULL (re-resumida no
+// próximo run). =false restaura o comportamento antigo (persiste o que o modelo devolver).
+export const SUMMARIZE_LANG_GUARD = process.env.SUMMARIZE_LANG_GUARD !== 'false';
 
 // ---- buscador web (`ncrawl web`) ----
 // Servidor local do buscador React (zero-build). Só escuta em loopback por padrão: a base é

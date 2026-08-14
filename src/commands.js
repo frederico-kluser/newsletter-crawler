@@ -21,6 +21,7 @@ import { detectSourceType } from './detect-type.js';
 import { exportWebSnapshot } from './export-web.js';
 import { exportPublicApi } from './export-api.js';
 import { runDeploy, DeployError } from './deploy.js';
+import { reextractTargets, REEXTRACT_DEFAULT_LIMIT } from './reextract.js';
 import { classifyPending, classifyArticleRow } from './classify.js';
 import { summarizePending, summarizeArticleRow } from './summarize.js';
 import { verifyPending, verifyArticleRow, recleanSuspects } from './verify.js';
@@ -775,6 +776,22 @@ export async function cmdFinish(flags) {
     }
     return Promise.all(tasks);
   });
+  printStatus();
+}
+
+// reextract: RE-EXTRAI do zero artigos salvos (re-fetch + re-parse + re-clean + re-verify) —
+// o conserto dos casos P5/P6 da captura 2026-08-14 (release notes do GitHub terminando no
+// botão; quebras de linha perdidas; moldura de página no fallback). Difere do reclean (spans
+// no texto SALVO): aqui a extração é refeita do HTML-fonte. Sem chave LLM, roda só a parte
+// determinística (re-extração + moldura) e pula clean/verify.
+export async function cmdReextract(flags) {
+  // Varredura completa exige --all EXPLÍCITO: sem --limit o default é PEQUENO
+  // (REEXTRACT_DEFAULT_LIMIT) — uma migração acidental não reescreve o corpus inteiro.
+  const all = flags.all === true;
+  const limit = all ? Infinity : (flags.limit ? Number(flags.limit) : REEXTRACT_DEFAULT_LIMIT);
+  const urlFilter = typeof flags.url === 'string' && flags.url.trim() ? flags.url.trim() : null;
+  await runWithLimits({ command: 'reextract', flags, profile: 'llm-only' }, () =>
+    reextractTargets({ urlFilter, limit }));
   printStatus();
 }
 

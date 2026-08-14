@@ -10,7 +10,7 @@ import {
   printStatus, cmdCrawl, cmdAdd, cmdRemove, cmdReset, cmdExport, cmdSearch, cmdKey,
   cmdWeb,
   cmdLimits,
-  cmdReclean, cmdInspect, cmdPurge, cmdFinish, cmdDeploy,
+  cmdReclean, cmdInspect, cmdPurge, cmdFinish, cmdDeploy, cmdReextract,
 } from './commands.js';
 
 function parseFlags(argv) {
@@ -49,6 +49,10 @@ function printHelp() {
       '  node src/index.js status',
       '  node src/index.js inspect [--run N] [--url <substr>] [--verbose]   auditoria da run (itens, vereditos, motivos)',
       '  node src/index.js reclean [--limit N]   re-limpa os "suspect" com passe forte (Pro) e re-verifica',
+      '  node src/index.js reextract [--url <substr>] [--limit N] [--all]   RE-EXTRAI do zero artigos salvos',
+      '                          (re-fetch + re-parse + re-clean + re-verify; conserta release notes',
+      '                          do GitHub truncadas em botão e molduras/colagens da captura 2026-08-14;',
+      '                          sem --limit, só as primeiras 20 fichas — varredura completa exige --all)',
       '  node src/index.js purge <fonte> --yes [--selectors]   apaga os DADOS de uma fonte p/ refazer do zero',
       '  node src/index.js add <url> [--name "Nome"] [--type index|listing] [--max-index-pages N]',
       '                          (o TIPO é detectado por IA automaticamente; --type força manual)',
@@ -108,6 +112,9 @@ try {
     } else if (cmd === 'reclean') {
       await cmdReclean(flags);
       db.close();
+    } else if (cmd === 'reextract') {
+      await cmdReextract(flags);
+      db.close();
     } else if (cmd === 'purge') {
       cmdPurge(rest, flags);
       db.close();
@@ -144,7 +151,7 @@ try {
     } else {
       errorLog(
         `comando desconhecido: ${cmd} ` +
-          '(use: crawl | status | inspect | reclean | purge | add | remove | export | finish | search | web | key | limits | deploy | reset | ui)',
+          '(use: crawl | status | inspect | reclean | reextract | purge | add | remove | export | finish | search | web | key | limits | deploy | reset | ui)',
       );
       process.exit(1);
     }

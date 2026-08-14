@@ -10,6 +10,8 @@ export {
   capHtml, extractArticle, linksInHtml, readableLinks, probablyArticle, pruneForLLM,
   htmlToMarkdown, isBlockedPage, extractPublishedDate, fallbackTitle, applyJunkSpans,
   sanityCheckCleaned, ensurePlainText, looksLikeHtml,
+  blockTextFromHtml, htmlBlockText, detectTruncatedEnd, stripTrailingTrigger,
+  isGithubUrl, githubReleaseText, prunePageFrame,
 } from './parse-core.js';
 
 // Cede o event loop antes de um parse cheerio SÍNCRONO leve (prune), sob a lane cpu do

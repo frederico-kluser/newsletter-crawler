@@ -4,7 +4,7 @@ import { estimateSearch } from '../lib/cost.js';
 import { runSearch } from '../lib/search.js';
 import { probeKey } from '../lib/openrouter.js';
 import { applyFilters, EMPTY_FILTERS, normalizeScope } from '../lib/filters.js';
-import { clearApiKey, getApiKey, setApiKey } from '../lib/storage.js';
+import { clearApiKey, clearProvider, getApiKey, getProvider, setApiKey, setProvider } from '../lib/storage.js';
 import { addToHistory, clearHistory, loadHistory, removeFromHistory } from '../lib/history.js';
 import { clearActiveSearch, loadActiveSearch, makeCheckpointWriter, saveActiveSearch } from '../lib/activeSearch.js';
 import { useStrings } from '../i18n.jsx';
@@ -51,6 +51,7 @@ export function useAiSearch({ articles, meta, filters }) {
   const start = useCallback(
     async ({ query, deep, candidates, scope = {}, resume = null }) => {
       const apiKey = getApiKey();
+      const provider = getProvider(); // provedor da chave salva (openrouter|deepseek) — lido FRESCO aqui
       const controller = new AbortController();
       abortRef.current?.abort(); // evita 2 buscas concorrentes (race de submit/retomada)
       abortRef.current = controller;
@@ -96,6 +97,7 @@ export function useAiSearch({ articles, meta, filters }) {
           candidates,
           search: meta.search,
           apiKey,
+          provider,
           signal: controller.signal,
           getContent,
           resume,
@@ -346,12 +348,15 @@ export function useAiSearch({ articles, meta, filters }) {
 
   /** Valida via probe e salva; com busca pendente, re-dispara (retomada se havia checkpoint). */
   const saveKey = useCallback(
-    async (key) => {
+    async (key, provider = getProvider()) => {
+      const prov = provider === 'deepseek' ? 'deepseek' : 'openrouter';
       const k = String(key || '').trim();
-      if (!k) throw new Error(STR.keyInvalid);
-      const probe = await probeKey(k);
-      if (!probe.ok) throw new Error(probe.status === 0 ? STR.keyNetwork : STR.keyInvalid);
+      if (!k) throw new Error(prov === 'deepseek' ? STR.keyInvalidDs : STR.keyInvalid);
+      const probe = await probeKey(k, prov);
+      if (!probe.ok)
+        throw new Error(probe.status === 0 ? STR.keyNetwork : (prov === 'deepseek' ? STR.keyInvalidDs : STR.keyInvalid));
       setApiKey(k);
+      setProvider(prov); // chave e provedor são salvos JUNTOS (o KeyModal mostra o ativo)
       setHasKey(true);
       const pending = keyModal?.pending;
       setKeyModal(null);
@@ -364,6 +369,7 @@ export function useAiSearch({ articles, meta, filters }) {
   const dismissKey = useCallback(() => setKeyModal(null), []);
   const forgetKey = useCallback(() => {
     clearApiKey();
+    clearProvider(); // sem chave o provedor não importa — volta ao default openrouter
     setHasKey(false);
     setKeyModal(null);
   }, []);

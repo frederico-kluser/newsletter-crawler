@@ -11,7 +11,7 @@ const pt = {
   searchAi: 'Buscar com IA (semântica)',
   searchAiShort: 'IA',
   searchClear: 'limpar texto',
-  aiNoKeyHint: 'Sem chave você busca por texto e filtros. Adicione uma chave da OpenRouter para a busca inteligente (IA).',
+  aiNoKeyHint: 'Sem chave você busca por texto e filtros. Adicione uma chave (OpenRouter ou DeepSeek) para a busca inteligente (IA).',
   deepToggle: 'Busca profunda',
   deepHint: 'lê o conteúdo completo de cada artigo do escopo (1 chamada por artigo)',
   softHint: 'julga títulos e resumos em lotes (1 chamada a cada ~40 artigos)',
@@ -83,6 +83,22 @@ const pt = {
   keyBtnMissing: 'Adicionar chave da OpenRouter (busca com IA)',
   keySaved: 'chave salva ✓',
 
+  // provedor da chave (BYOK): openrouter (default) | deepseek direto
+  keyProviderLabel: 'Provedor',
+  keyProviderOr: 'OpenRouter',
+  keyProviderDeepSeek: 'DeepSeek',
+  keyTitleDs: 'Chave da DeepSeek',
+  keyBodyDs:
+    'A busca digitada usa IA e precisa da SUA chave da DeepSeek (platform.deepseek.com). Ela fica salva só neste navegador (localStorage) e as chamadas vão direto para a DeepSeek — nada passa por servidor nosso.',
+  keyHintDs: 'Dica: crie uma chave dedicada em platform.deepseek.com (API Keys).',
+  keyPlaceholderDs: 'sk-…',
+  keyInvalidDs: 'Chave inválida — a DeepSeek recusou. Confira e tente de novo.',
+  keyExpiredDs: 'A chave salva foi recusada pela DeepSeek (expirou ou foi revogada?). Cole outra.',
+  keyManageTitleDs: 'Chave da DeepSeek salva',
+  keyManageBodyDs: 'Você já tem uma chave da DeepSeek salva neste navegador — a busca com IA está liberada. Cole outra para trocar, ou esqueça a atual.',
+  keyBtnHasDs: 'Chave da DeepSeek salva — gerenciar',
+  keyBtnMissingDs: 'Adicionar chave da DeepSeek (busca com IA)',
+
   // filtros
   filters: 'Filtros',
   filterSource: 'Fontes',
@@ -151,7 +167,7 @@ const pt = {
     {
       icon: 'search',
       title: 'Busque do seu jeito',
-      body: 'Filtre por texto na hora, ou ative a busca por IA (semântica) pra encontrar por ideia, não só por palavra exata. A busca com IA usa a sua própria chave da OpenRouter.',
+      body: 'Filtre por texto na hora, ou ative a busca por IA (semântica) pra encontrar por ideia, não só por palavra exata. A busca com IA usa a sua própria chave (OpenRouter ou DeepSeek).',
     },
     {
       icon: 'sliders',
@@ -179,7 +195,7 @@ const en = {
   searchAi: 'Search with AI (semantic)',
   searchAiShort: 'AI',
   searchClear: 'clear text',
-  aiNoKeyHint: 'Without a key you can search by text and filters. Add an OpenRouter key for smart (AI) search.',
+  aiNoKeyHint: 'Without a key you can search by text and filters. Add an OpenRouter or DeepSeek key for smart (AI) search.',
   deepToggle: 'Deep search',
   deepHint: 'reads the full content of every article in scope (1 call per article)',
   softHint: 'judges titles and summaries in batches (1 call per ~40 articles)',
@@ -248,6 +264,22 @@ const en = {
   keyBtnMissing: 'Add OpenRouter key (AI search)',
   keySaved: 'key saved ✓',
 
+  // key provider (BYOK): openrouter (default) | deepseek direct
+  keyProviderLabel: 'Provider',
+  keyProviderOr: 'OpenRouter',
+  keyProviderDeepSeek: 'DeepSeek',
+  keyTitleDs: 'DeepSeek key',
+  keyBodyDs:
+    'Typed search uses AI and needs YOUR DeepSeek key (platform.deepseek.com). It is stored only in this browser (localStorage) and calls go straight to DeepSeek — nothing passes through our server.',
+  keyHintDs: 'Tip: create a dedicated key at platform.deepseek.com (API Keys).',
+  keyPlaceholderDs: 'sk-…',
+  keyInvalidDs: 'Invalid key — DeepSeek rejected it. Check and try again.',
+  keyExpiredDs: 'The saved key was rejected by DeepSeek (expired or revoked?). Paste another.',
+  keyManageTitleDs: 'DeepSeek key saved',
+  keyManageBodyDs: 'You already have a DeepSeek key saved in this browser — AI search is enabled. Paste another to replace it, or forget the current one.',
+  keyBtnHasDs: 'DeepSeek key saved — manage',
+  keyBtnMissingDs: 'Add DeepSeek key (AI search)',
+
   filters: 'Filters',
   filterSource: 'Sources',
   filterAllSources: 'All sources',
@@ -312,7 +344,7 @@ const en = {
     {
       icon: 'search',
       title: 'Search your way',
-      body: 'Filter by text instantly, or turn on AI (semantic) search to find by idea, not just exact words. AI search uses your own OpenRouter key.',
+      body: 'Filter by text instantly, or turn on AI (semantic) search to find by idea, not just exact words. AI search uses your own key (OpenRouter or DeepSeek).',
     },
     {
       icon: 'sliders',

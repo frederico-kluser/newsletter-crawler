@@ -1178,6 +1178,20 @@
   flex: 1;
 }
 
+/* seletor de provedor LLM no KeyModal (BYOK): rótulo em cima, select embaixo */
+.provider-select {
+  display: block;
+  margin: 12px 0;
+}
+.provider-select span {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 11.5px;
+  color: var(--fg-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
 /* botão de filtros na topbar (mobile) — badge com o nº de filtros ativos */
 .filter-btn {
   position: relative;

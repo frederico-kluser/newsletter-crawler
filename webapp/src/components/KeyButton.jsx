@@ -1,6 +1,7 @@
 import { motion } from 'motion/react';
 import { useStrings } from '../i18n.jsx';
 import { springs } from '../motion/transitions.js';
+import { getProvider } from '../lib/storage.js';
 
 const KeyIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -12,9 +13,15 @@ const KeyIcon = () => (
 /**
  * Ponto de entrada FIXO da chave (topbar): identifica se há chave salva (ponto verde) e abre
  * o modal p/ inserir/trocar/esquecer — proativamente, sem precisar tentar uma busca antes.
+ * Rótulo provider-aware: sem chave o provedor é sempre o default (openrouter); com chave, o
+ * texto reflete o provedor salvo.
  */
 export default function KeyButton({ hasKey, onClick }) {
   const STR = useStrings();
+  const isDs = hasKey && getProvider() === 'deepseek';
+  const label = hasKey
+    ? (isDs ? STR.keyBtnHasDs : STR.keyBtnHas)
+    : (isDs ? STR.keyBtnMissingDs : STR.keyBtnMissing);
   return (
     <motion.button
       type="button"
@@ -24,8 +31,8 @@ export default function KeyButton({ hasKey, onClick }) {
       whileHover={{ scale: 1.06 }}
       whileTap={{ scale: 0.92 }}
       transition={springs.snappy}
-      aria-label={hasKey ? STR.keyBtnHas : STR.keyBtnMissing}
-      title={hasKey ? STR.keyBtnHas : STR.keyBtnMissing}
+      aria-label={label}
+      title={label}
     >
       <KeyIcon />
       {hasKey && <span className="key-dot" aria-hidden="true" />}

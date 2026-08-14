@@ -101,6 +101,12 @@ const STR = {
   keyChecking: 'Validando…',
   keyInvalid: (p) => `Chave inválida (a API do ${p} recusou). Confira e tente de novo.`,
   keyNetwork: 'Não deu para validar (sem rede?). Tente de novo.',
+  keyTest: 'Testar',
+  keyTestOk: 'chave válida ✓',
+  keyActivate: 'Usar esta chave',
+  keyActive: 'ativa',
+  keyNoKey: 'sem chave',
+  keySaved: 'chave salva ✓',
   // histórico de buscas (persistido no SQLite; toda busca concluída entra sozinha)
   historyTitle: 'Histórico de buscas',
   historyEmpty: 'Nenhuma busca salva ainda — toda busca concluída com IA aparece aqui.',
@@ -613,68 +619,112 @@ function ConfirmDialog({ title, body, confirmLabel, onConfirm, onCancel }) {
   </div>`;
 }
 
-// Modal da chave LLM (provider-aware): valida no servidor (probe do provedor escolhido) e
-// persiste em NC_HOME/.env; a busca pendente re-dispara via onSaved. A key só é gravada se o
-// probe passar. `provider` = nome do provedor ATIVO (do /api/key/status), pré-selecionado no
-// select; o usuário pode trocar (espelha o KeyModal do webapp estático).
-function KeyModal({ onSaved, onClose, provider = 'OpenRouter' }) {
-  const [key, setKey] = useState('');
-  const [selProvider, setSelProvider] = useState(provider === 'DeepSeek' ? 'deepseek' : 'openrouter');
-  const [checking, setChecking] = useState(false);
+// Painel de CHAVES (web local): uma linha por provedor (do /api/key/status), com as chaves dos
+// DOIS podendo conviver em NC_HOME/.env. Por linha: [Testar] (probe SEM salvar), [Salvar]
+// (valida + persiste + ATIVA), e [Usar] (ativa a chave já salva — seleção persistente via
+// LLM_PROVIDER, vale para o crawler/CLI). A linha ATIVA fica destacada. `onChanged` re-busca o
+// status (badges/ativa) após qualquer ação.
+function KeyModal({ onSaved, onClose, providers = [], onChanged }) {
+  const [rows, setRows] = useState({}); // id -> {key, checking, result}
+  const [busy, setBusy] = useState(false); // salvar/usar (ação de escrita) — trava tudo
   const [errMsg, setErrMsg] = useState('');
-  const pName = selProvider === 'deepseek' ? 'DeepSeek' : 'OpenRouter';
+  const idOf = (name) => (name === 'DeepSeek' ? 'deepseek' : 'openrouter');
+  const setRow = (id, patch) => setRows((r) => ({ ...r, [id]: { ...(r[id] || {}), ...patch } }));
   useEffect(() => {
     const onKey = (e) => e.key === 'Escape' && onClose();
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [onClose]);
-  const save = async () => {
-    const k = key.trim();
-    if (!k || checking) return;
-    setChecking(true);
+  const test = async (p) => {
+    const id = idOf(p.name);
+    const k = String((rows[id] || {}).key || '').trim();
+    if (!k) return;
+    setRow(id, { checking: true, result: null });
+    try {
+      const r = await postJSON('/api/key/test', { key: k, provider: id });
+      setRow(id, { checking: false, result: r.ok ? 'ok' : r.status === 0 ? 'network' : 'invalid' });
+    } catch (e) {
+      setRow(id, { checking: false, result: 'network' });
+    }
+  };
+  const save = async (p) => {
+    const id = idOf(p.name);
+    const k = String((rows[id] || {}).key || '').trim();
+    if (!k || busy) return;
+    setBusy(true);
     setErrMsg('');
     try {
-      const r = await postJSON('/api/key', { key: k, provider: selProvider });
-      if (r.ok) return onSaved();
-      setErrMsg(r.status === 0 ? STR.keyNetwork : STR.keyInvalid(pName));
+      const r = await postJSON('/api/key', { key: k, provider: id });
+      if (r.ok) return onSaved(); // fecha + re-dispara a busca pendente
+      setErrMsg(r.status === 0 ? STR.keyNetwork : STR.keyInvalid(p.name));
     } catch (e) {
       setErrMsg(e.message || STR.keyNetwork);
     } finally {
-      setChecking(false);
+      setBusy(false);
+    }
+  };
+  const select = async (p) => {
+    const id = idOf(p.name);
+    if (busy) return;
+    setBusy(true);
+    setErrMsg('');
+    try {
+      const r = await postJSON('/api/key/select', { provider: id });
+      if (r.ok) onChanged(); // atualiza badges/ativa sem fechar (usuário decide quando fechar)
+      else setErrMsg(r.reason || STR.keyNetwork);
+    } catch (e) {
+      setErrMsg(e.message || STR.keyNetwork);
+    } finally {
+      setBusy(false);
     }
   };
   return html`<div className="overlay" onClick=${(e) => e.target === e.currentTarget && onClose()}>
-    <div className="dialog" role="dialog" aria-modal="true" aria-label=${STR.keyTitle(pName)}>
-      <h2>${STR.keyTitle(pName)}</h2>
-      <p>${STR.keyBody(pName)}</p>
-      <label className="provider-select">
-        <span>${STR.keyProviderLabel}</span>
-        <select
-          className="control"
-          value=${selProvider}
-          onChange=${(e) => setSelProvider(e.target.value)}
-          autoComplete="off"
-          disabled=${checking}
-        >
-          <option value="openrouter">${STR.keyProviderOpenRouter}</option>
-          <option value="deepseek">${STR.keyProviderDeepSeek}</option>
-        </select>
-      </label>
-      <input
-        className="control key-input"
-        type="password"
-        value=${key}
-        placeholder=${STR.keyPlaceholder(pName)}
-        onInput=${(e) => setKey(e.target.value)}
-        onKeyDown=${(e) => e.key === 'Enter' && save()}
-        autoFocus
-      />
+    <div className="dialog" role="dialog" aria-modal="true" aria-label="Chaves LLM">
+      <h2>Chaves LLM</h2>
+      <p>Guarde as chaves dos dois provedores em ~/.newsletter-crawler/.env (valem para a web e o crawler). Testar valida sem salvar; salvar ativa o provedor; Usar troca o ativo sem re-digitar.</p>
+      <div className="key-manager">
+        ${providers.map(
+          (p) => html`<section key=${p.keyVar} className=${'key-manager-row' + (p.active ? ' key-manager-row-active' : '')}>
+            <header className="key-manager-head">
+              <strong>${p.name}</strong>
+              ${p.active
+                ? html`<span className="key-manager-badge key-manager-badge-active">${STR.keyActive}</span>`
+                : p.keyPresent
+                  ? html`<span className="key-manager-badge">${STR.keySaved}</span>`
+                  : html`<span className="key-manager-badge key-manager-badge-empty">${STR.keyNoKey}</span>`}
+            </header>
+            <div className="key-row">
+              <input
+                className="control key-input"
+                type="password"
+                value=${(rows[idOf(p.name)] || {}).key || ''}
+                placeholder=${STR.keyPlaceholder(p.name)}
+                onInput=${(e) => setRow(idOf(p.name), { key: e.target.value, result: null })}
+                onKeyDown=${(e) => e.key === 'Enter' && save(p)}
+                disabled=${busy}
+              />
+              <button className="btn-ghost" onClick=${() => test(p)} disabled=${busy || !((rows[idOf(p.name)] || {}).key || '').trim()}>
+                ${(rows[idOf(p.name)] || {}).checking ? STR.keyChecking : STR.keyTest}
+              </button>
+              <button className="btn-primary" onClick=${() => save(p)} disabled=${busy || !((rows[idOf(p.name)] || {}).key || '').trim()}>
+                ${STR.keySave}
+              </button>
+            </div>
+            ${(rows[idOf(p.name)] || {}).result === 'ok' && html`<p className="key-result key-result-ok">${STR.keyTestOk}</p>`}
+            ${(rows[idOf(p.name)] || {}).result === 'invalid' && html`<p className="key-result key-result-bad">${STR.keyInvalid(p.name)}</p>`}
+            ${(rows[idOf(p.name)] || {}).result === 'network' && html`<p className="key-result key-result-bad">${STR.keyNetwork}</p>`}
+            ${p.keyPresent &&
+            html`<footer className="key-manager-actions">
+              <button className="pill" onClick=${() => select(p)} disabled=${busy || p.active}>
+                ${p.active ? STR.keyActive : STR.keyActivate}
+              </button>
+            </footer>`}
+          </section>`,
+        )}
+      </div>
       ${errMsg && html`<p className="key-error">${errMsg}</p>`}
       <div className="dialog-actions">
         <button className="btn-ghost" onClick=${onClose}>${STR.cancel}</button>
-        <button className="btn-primary" onClick=${save} disabled=${checking || !key.trim()}>
-          ${checking ? STR.keyChecking : STR.keySave}
-        </button>
       </div>
     </div>
   </div>`;
@@ -818,16 +868,19 @@ function App() {
     setConcurrency(meta.search.concurrency.default || 8);
   }, [meta]);
 
-  // A key do LLM existe? (o modal só abre quando o usuário tenta BUSCAR sem key). O provider
-  // ativo (aditivo no /api/key/status) pré-seleciona o select do modal de chave.
-  useEffect(() => {
+  // Estado das chaves LLM (ambos os provedores + ativo) p/ o painel do modal e o gate de busca.
+  // Recarregado após QUALQUER ação do painel (salvar/testar/usar) via loadKeyStatus.
+  const [keyStatus, setKeyStatus] = useState(null);
+  const loadKeyStatus = useCallback(() => {
     fetchJSON('/api/key/status')
       .then((r) => {
+        setKeyStatus(r);
         setHasKey(Boolean(r.hasKey));
         setKeyProvider(r.provider?.name || 'OpenRouter');
       })
       .catch(() => setHasKey(null));
   }, []);
+  useEffect(loadKeyStatus, [loadKeyStatus]);
 
   // Histórico é acessório: falha de rede não pode quebrar o browse (fica a lista anterior).
   const loadHistory = useCallback(() => {
@@ -1485,6 +1538,8 @@ function App() {
     ${keyOpen &&
     html`<${KeyModal}
       provider=${keyProvider}
+      providers=${keyStatus?.providers || []}
+      onChanged=${loadKeyStatus}
       onSaved=${() => {
         setHasKey(true);
         setKeyOpen(false);

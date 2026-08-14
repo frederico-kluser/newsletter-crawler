@@ -1178,18 +1178,66 @@
   flex: 1;
 }
 
-/* seletor de provedor LLM no KeyModal (BYOK): rótulo em cima, select embaixo */
-.provider-select {
-  display: block;
-  margin: 12px 0;
+/* gerenciador de chaves (KeyModal): uma linha por provedor; a ATIVA fica destacada */
+.key-manager {
+  display: grid;
+  gap: 14px;
+  margin: 14px 0 4px;
 }
-.provider-select span {
-  display: block;
-  margin-bottom: 5px;
-  font-size: 11.5px;
+.key-manager-row {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px;
+  display: grid;
+  gap: 9px;
+}
+.key-manager-row-active {
+  border-color: color-mix(in oklab, var(--accent) 55%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--accent) 25%, transparent);
+}
+.key-manager-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: space-between;
+}
+.key-manager-head strong {
+  font-size: 13.5px;
+}
+.key-manager-badge {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.key-manager-badge-active {
+  color: var(--fg);
+  border: 1px solid color-mix(in oklab, var(--accent) 55%, transparent);
+}
+.key-manager-badge-empty {
+  background: transparent;
   color: var(--fg-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  border: 1px solid var(--border);
+}
+.key-manager-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.key-manager-link {
+  margin-left: auto;
+  font-size: 11.5px;
+}
+.key-manager-result {
+  font-size: 12.5px;
+  margin: 0;
+}
+.key-manager-result-ok {
+  color: var(--success);
+}
+.key-manager-result-bad {
+  color: var(--danger);
 }
 
 /* botão de filtros na topbar (mobile) — badge com o nº de filtros ativos */

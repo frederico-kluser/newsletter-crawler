@@ -355,8 +355,8 @@ export function useAiSearch({ articles, meta, filters }) {
       const probe = await probeKey(k, prov);
       if (!probe.ok)
         throw new Error(probe.status === 0 ? STR.keyNetwork : (prov === 'deepseek' ? STR.keyInvalidDs : STR.keyInvalid));
-      setApiKey(k);
-      setProvider(prov); // chave e provedor são salvos JUNTOS (o KeyModal mostra o ativo)
+      setApiKey(k, prov); // slot do provedor (as DUAS chaves podem conviver)
+      setProvider(prov); // salvar ATIVA o provedor — a busca usa a chave ativa
       setHasKey(true);
       const pending = keyModal?.pending;
       setKeyModal(null);
@@ -367,12 +367,21 @@ export function useAiSearch({ articles, meta, filters }) {
   );
 
   const dismissKey = useCallback(() => setKeyModal(null), []);
-  const forgetKey = useCallback(() => {
-    clearApiKey();
-    clearProvider(); // sem chave o provedor não importa — volta ao default openrouter
-    setHasKey(false);
-    setKeyModal(null);
+  // Esquece a chave de UM provedor (slot próprio). Se era a ATIVA, o provedor volta ao default
+  // e o hasKey passa a refletir a OUTRA chave salva (as duas podem conviver).
+  const forgetKey = useCallback((provider) => {
+    const prov = provider === 'deepseek' ? 'deepseek' : 'openrouter';
+    clearApiKey(prov);
+    if (prov === getProvider()) clearProvider(); // volta ao default openrouter
+    setHasKey(Boolean(getApiKey())); // pode sobrar a chave do outro provedor
   }, []);
+  // Troca o provedor ATIVO sem re-digitar chave (exige chave salva no slot de destino).
+  const selectProvider = useCallback((provider) => {
+    const prov = provider === 'deepseek' ? 'deepseek' : 'openrouter';
+    if (!getApiKey(prov)) throw new Error(prov === 'deepseek' ? STR.keyNoKeyDs : STR.keyNoKey);
+    setProvider(prov);
+    setHasKey(true);
+  }, [STR]);
 
   return {
     ...state,
@@ -391,6 +400,7 @@ export function useAiSearch({ articles, meta, filters }) {
     saveKey,
     dismissKey,
     forgetKey,
+    selectProvider,
     restore,
     rerun,
     removeEntry,

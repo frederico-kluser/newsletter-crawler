@@ -7,8 +7,9 @@ Dois modos de busca:
 - **Por texto/filtros (padrão, sem chave):** digitar filtra o acervo **localmente** no navegador
   (busca textual acento-insensível sobre título/resumo/tags), combinada com os filtros de fonte,
   período, 9 facetas de tags e verificação. Instantâneo, sem custo, sem rede.
-- **Por IA (opcional, semântica):** o botão **IA** roda uma busca inteligente (OpenRouter) usando
-  a chave do próprio usuário (BYOK), guardada só no navegador. Sem chave, o botão pede a chave —
+- **Por IA (opcional, semântica):** o botão **IA** roda uma busca inteligente (OpenRouter ou
+  DeepSeek direto — provedor escolhido no painel de chaves) usando a chave do próprio usuário
+  (BYOK), guardada só no navegador. Sem chave, o botão pede a chave —
   mas a busca por texto continua funcionando normalmente.
 
 **Histórico de buscas (no navegador):** toda busca IA concluída é **salva automaticamente** no
@@ -103,11 +104,13 @@ No caminho **2** (GitHub), o push já redeploya. Nos caminhos 1/3, rode o deploy
 ## Privacidade da busca por IA
 
 - A busca por texto/filtros é **100% local** — não sai do seu navegador.
-- A chave da OpenRouter fica **só no seu navegador** (`localStorage`), nunca é enviada a nenhum
-  servidor nosso; gerencie-a pelo botão de chave (🔑) na barra do topo. As chamadas de IA vão
-  **direto do seu navegador para a OpenRouter**.
-- Dica: crie uma chave **dedicada com limite de crédito** em
-  [openrouter.ai/keys](https://openrouter.ai/keys).
+- As chaves LLM (OpenRouter **e** DeepSeek direto) ficam **só no seu navegador** (`localStorage`),
+  nunca são enviadas a nenhum servidor nosso; gerencie-as pelo botão de chave (🔑) na barra do
+  topo — **teste** cada uma (valida sem salvar), **salve** as duas e **ative** a que quiser usar.
+  As chamadas de IA vão **direto do seu navegador** para a API do provedor ativo.
+- Dica: crie chaves **dedicadas com limite de crédito** em
+  [openrouter.ai/keys](https://openrouter.ai/keys) e
+  [platform.deepseek.com/api_keys](https://platform.deepseek.com/api_keys).
 - Antes de rodar, o app mostra o escopo, o número de chamadas e o **custo estimado**; a busca
   profunda sempre pede confirmação. O custo **real** aparece no fim.
 

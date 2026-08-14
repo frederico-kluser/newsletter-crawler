@@ -726,6 +726,54 @@ select.control:disabled { opacity: 0.5; cursor: default; }
 .dialog .provider-select select.control { max-width: 220px; }
 .key-error { color: #dc2626; font-size: 13px; margin: 8px 0 0; }
 
+/* painel de chaves (uma linha por provedor; a ATIVA fica destacada) */
+.key-manager {
+  display: grid;
+  gap: 14px;
+  margin-top: 14px;
+}
+.key-manager-row {
+  border: 1px solid var(--hairline);
+  border-radius: 14px;
+  padding: 14px;
+  display: grid;
+  gap: 10px;
+  background: var(--chip);
+}
+.key-manager-row-active {
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 25%, transparent);
+}
+.key-manager-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.key-manager-head strong { font-size: 14.5px; }
+.key-manager-badge {
+  font-size: 11.5px;
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  color: var(--accent);
+}
+.key-manager-badge-active {
+  color: var(--text);
+  border: 1px solid color-mix(in srgb, var(--accent) 55%, transparent);
+}
+.key-manager-badge-empty {
+  background: transparent;
+  color: var(--text-2);
+  border: 1px solid var(--hairline);
+}
+.key-manager .key-row { display: flex; gap: 8px; }
+.key-manager .key-row .key-input { flex: 1; margin-top: 0; }
+.key-manager-actions { display: flex; }
+.key-result { font-size: 13px; margin: 0; }
+.key-result-ok { color: #16a34a; }
+.key-result-bad { color: #dc2626; }
+
 /* ---- sheet de leitura ---- */
 .overlay {
   position: fixed;

@@ -99,6 +99,21 @@ const pt = {
   keyBtnHasDs: 'Chave da DeepSeek salva — gerenciar',
   keyBtnMissingDs: 'Adicionar chave da DeepSeek (busca com IA)',
 
+  // gerenciador de chaves (as DUAS chaves convivem; a ativa decide o provedor da busca)
+  keyTitleAll: 'Chaves da busca IA (BYOK)',
+  keyBodyAll:
+    'Guarde aqui as chaves dos dois provedores — OpenRouter e DeepSeek direto. Elas ficam só neste navegador (localStorage) e as chamadas vão direto à API, nada passa por servidor nosso. Salvar uma chave a ativa; a busca usa a chave ativa.',
+  keyManageBodyAll:
+    'Você já tem chave(s) salva(s) neste navegador. Teste cada uma, cole outra para trocar, ative a que quiser usar ou esqueça a que não usa mais.',
+  keyHintAll: 'Dicas: crie chaves dedicadas com limite de crédito. Testar valida sem salvar; salvar ativa o provedor.',
+  keyTest: 'Testar',
+  keyTesting: 'testando…',
+  keyTestOk: 'chave válida ✓',
+  keyActivate: 'Usar esta chave',
+  keyActive: 'ativa',
+  keyNoKey: 'sem chave',
+  keyNoKeyDs: 'Nenhuma chave da DeepSeek salva — cole uma para poder ativar.',
+
   // filtros
   filters: 'Filtros',
   filterSource: 'Fontes',
@@ -279,6 +294,21 @@ const en = {
   keyManageBodyDs: 'You already have a DeepSeek key saved in this browser — AI search is enabled. Paste another to replace it, or forget the current one.',
   keyBtnHasDs: 'DeepSeek key saved — manage',
   keyBtnMissingDs: 'Add DeepSeek key (AI search)',
+
+  // key manager (both keys can coexist; the active provider decides the search)
+  keyTitleAll: 'AI search keys (BYOK)',
+  keyBodyAll:
+    'Keep keys for both providers here — OpenRouter and DeepSeek direct. They stay only in this browser (localStorage) and calls go straight to the API, nothing passes through our server. Saving a key activates it; search uses the active key.',
+  keyManageBodyAll:
+    'You already have key(s) saved in this browser. Test each one, paste another to replace it, activate the one you want to use, or forget the ones you no longer use.',
+  keyHintAll: 'Tips: create dedicated keys with a credit limit. Test validates without saving; saving activates the provider.',
+  keyTest: 'Test',
+  keyTesting: 'testing…',
+  keyTestOk: 'valid key ✓',
+  keyActivate: 'Use this key',
+  keyActive: 'active',
+  keyNoKey: 'no key',
+  keyNoKeyDs: 'No DeepSeek key saved — paste one to activate it.',
 
   filters: 'Filters',
   filterSource: 'Sources',

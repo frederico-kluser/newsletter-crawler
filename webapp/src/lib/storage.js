@@ -27,13 +27,19 @@ function del(key) {
 export const getTheme = () => get('nc-theme');
 export const setTheme = (t) => set('nc-theme', t);
 
-export const getApiKey = () => get('nc-or-key');
-export const setApiKey = (k) => set('nc-or-key', k);
-export const clearApiKey = () => del('nc-or-key');
+// Chave LLM (BYOK): UM SLOT POR PROVEDOR — nc-or-key (OpenRouter) e nc-ds-key (DeepSeek) — e um
+// seletor INDEPENDENTE (nc-llm-provider) que decide QUAL slot a busca IA usa. As duas chaves
+// podem ficar salvas ao mesmo tempo; o provedor ativo é o que a busca lê.
+// getApiKey() sem argumento devolve a chave do provedor ATIVO — os consumidores existentes
+// (useAiSearch) seguem lendo o par (chave, provedor) consistente, sem mudança de contrato.
+const keySlot = (provider) => (provider === 'deepseek' ? 'nc-ds-key' : 'nc-or-key');
+export const getApiKey = (provider = getProvider()) => get(keySlot(provider));
+export const setApiKey = (k, provider = getProvider()) => set(keySlot(provider), k);
+export const clearApiKey = (provider = getProvider()) => del(keySlot(provider));
 
-// Provedor LLM da chave salva (BYOK): 'openrouter' (default) | 'deepseek'. Sem valor salvo =
-// openrouter (migração silenciosa: usuários antigos só têm chave da OpenRouter e o seletor
-// nem existia). O provedor SÓ importa quando há chave salva; persiste junto dela.
+// Provedor LLM ATIVO (BYOK): 'openrouter' (default) | 'deepseek'. Sem valor salvo = openrouter
+// (migração silenciosa: usuários antigos só têm chave da OpenRouter e o seletor nem existia).
+// O provedor decide qual slot de chave a busca usa; salvar uma chave ATIVA o provedor dela.
 export const getProvider = () => (get('nc-llm-provider') === 'deepseek' ? 'deepseek' : 'openrouter');
 export const setProvider = (p) => set('nc-llm-provider', p === 'deepseek' ? 'deepseek' : 'openrouter');
 export const clearProvider = () => del('nc-llm-provider');

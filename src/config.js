@@ -167,14 +167,17 @@ export function translateModel(model) {
 }
 
 // Preços oficiais da API direta em USD por 1M de tokens (api-docs.deepseek.com/quick_start/pricing,
-// situação 13/ago/2026): flash input US$0.14 / output US$0.28; pro US$0.435 / US$0.87. Em
-// 16/ago/2026 a DeepSeek migra p/ preços peak/off-peak — override por env cobre a virada:
-// DEEPSEEK_PRICES={"deepseek-v4-flash":{"input":0.44,"output":1.32}} ou vars finas
-// DEEPSEEK_PRICE_<MODEL>_INPUT_PER_M / _OUTPUT_PER_M (ex.: DEEPSEEK_PRICE_DEEPSEEK_V4_FLASH_INPUT_PER_M).
-const DEEPSEEK_PRICE_DEFAULT = { input: 0.14, output: 0.28 }; // modelo genérico fora da tabela (base flash)
+// situação 13/ago/2026): flash input (miss) US$0.14 / cache hit US$0.0028 / output US$0.28; pro
+// US$0.435 / US$0.003625 / US$0.87 (cache de contexto automático p/ prefixo ≥1024 tokens; o usage
+// da API traz prompt_cache_hit_tokens/miss_tokens — computaUsageCost cobra cada parte pelo preço
+// dela). Em 16/ago/2026 a DeepSeek migra p/ preços peak/off-peak — override por env cobre a
+// virada: DEEPSEEK_PRICES={"deepseek-v4-flash":{"input":0.44,"output":1.32,"hit":0.01}} (hit
+// opcional: sem ele, usa o hit da tabela) ou vars finas DEEPSEEK_PRICE_<MODEL>_INPUT_PER_M /
+// _OUTPUT_PER_M / _HIT_PER_M (ex.: DEEPSEEK_PRICE_DEEPSEEK_V4_FLASH_INPUT_PER_M).
+const DEEPSEEK_PRICE_DEFAULT = { input: 0.14, output: 0.28, hit: 0.0028 }; // genérico fora da tabela (base flash)
 const DEEPSEEK_PRICES = {
-  'deepseek-v4-flash': { input: 0.14, output: 0.28 },
-  'deepseek-v4-pro': { input: 0.435, output: 0.87 },
+  'deepseek-v4-flash': { input: 0.14, output: 0.28, hit: 0.0028 },
+  'deepseek-v4-pro': { input: 0.435, output: 0.87, hit: 0.003625 },
 };
 
 function envDeepseekPrices() {
@@ -193,30 +196,51 @@ const deepseekEnvKeyOf = (slug) => String(slug || '').replace(/[^a-z0-9]+/gi, '_
 
 function deepseekPriceFor(model) {
   // O slug que chega é o DIRETO (o pipeline traduz antes de chamar); o split('/') cobre um slug
-  // OpenRouter que eventualmente caia aqui (lookup pelo nome do modelo).
+  // OpenRouter que eventualmente caia aqui (lookup pelo nome do modelo). A base é a tabela (ou o
+  // default flash); o override por env cobre {input, output} e o hit (opcional — sem hit no
+  // override, vale o da base, senão cache sairia grátis).
   const slug = String(model || '').split('/').pop();
+  const base = DEEPSEEK_PRICES[slug] || DEEPSEEK_PRICE_DEFAULT;
   const envPrices = envDeepseekPrices();
   const fromMap = envPrices && typeof envPrices[slug] === 'object' ? envPrices[slug] : null;
   if (fromMap) {
     const input = Number(fromMap.input);
     const output = Number(fromMap.output);
-    if (Number.isFinite(input) && Number.isFinite(output)) return { input, output };
+    const hit = Number(fromMap.hit);
+    if (Number.isFinite(input) && Number.isFinite(output)) {
+      return { input, output, hit: Number.isFinite(hit) ? hit : base.hit };
+    }
   }
   const ek = deepseekEnvKeyOf(slug);
   const inEnv = Number(process.env[`DEEPSEEK_PRICE_${ek}_INPUT_PER_M`]);
   const outEnv = Number(process.env[`DEEPSEEK_PRICE_${ek}_OUTPUT_PER_M`]);
-  if (Number.isFinite(inEnv) && Number.isFinite(outEnv)) return { input: inEnv, output: outEnv };
-  return DEEPSEEK_PRICES[slug] || DEEPSEEK_PRICE_DEFAULT;
+  const hitEnv = Number(process.env[`DEEPSEEK_PRICE_${ek}_HIT_PER_M`]);
+  if (Number.isFinite(inEnv) && Number.isFinite(outEnv)) {
+    return { input: inEnv, output: outEnv, hit: Number.isFinite(hitEnv) ? hitEnv : base.hit };
+  }
+  return base;
 }
 
 /**
  * Custo LOCAL (USD) de uma chamada no provedor direto: a api.deepseek.com NÃO traz usage.cost
  * (isso é accounting do OpenRouter) — calcula de prompt_tokens/completion_tokens × preço do
  * modelo. É injetado no usage ANTES do commit do ledger (llm.js), que lê usage.cost e fica
- * INTOCADO.
+ * INTOCADO. Quando o usage traz detalhes de cache (prompt_cache_hit_tokens/prompt_cache_miss_tokens,
+ * ou prompt_tokens_details.cached_tokens — mesmo espelho do webapp deepseekCostFromUsage), cada
+ * parte é cobrada pelo preço dela: hit×hit + miss×input + completion×output. Sem esses campos cai
+ * no cálculo antigo (prompt_tokens total × input) — compat com qualquer resposta.
  */
 export function computeUsageCost(usage, model) {
   const price = deepseekPriceFor(model);
+  const hitRaw = usage?.prompt_cache_hit_tokens ?? usage?.prompt_tokens_details?.cached_tokens;
+  const missRaw = usage?.prompt_cache_miss_tokens;
+  if (hitRaw != null || missRaw != null) {
+    const hit = Number(hitRaw) || 0;
+    // miss ausente/zero -> deriva do total (a API garante prompt_tokens = hit + miss).
+    const miss = Number.isFinite(Number(missRaw)) && Number(missRaw) > 0 ? Number(missRaw) : Math.max((Number(usage?.prompt_tokens) || 0) - hit, 0);
+    const outputTokens = Number(usage?.completion_tokens) || 0;
+    return (hit * price.hit + miss * price.input + outputTokens * price.output) / 1_000_000;
+  }
   const inputTokens = Number(usage?.prompt_tokens) || 0;
   const outputTokens = Number(usage?.completion_tokens) || 0;
   return (inputTokens * price.input + outputTokens * price.output) / 1_000_000;

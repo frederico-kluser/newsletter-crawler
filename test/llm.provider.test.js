@@ -153,6 +153,49 @@ test('computeUsageCost: slug fora da tabela usa o preço genérico (base flash)'
   assert.ok(Math.abs(c - 0.14) < 1e-12, `genérico = flash input (veio ${c})`);
 });
 
+test('computeUsageCost: cache hit/miss cobrados pelos preços PRÓPRIOS (flash hit US$0.0028)', () => {
+  // A API direta traz prompt_cache_hit_tokens/miss_tokens (prompt_tokens = hit + miss); o custo
+  // local cobra hit×US$0.0028 + miss×US$0.14 + out×US$0.28 (não total × input — era ~50× maior).
+  const c = config.computeUsageCost(
+    { prompt_tokens: 1_000_000, completion_tokens: 500_000, prompt_cache_hit_tokens: 999_999, prompt_cache_miss_tokens: 1 },
+    'deepseek-v4-flash',
+  );
+  const expected = (999_999 * 0.0028 + 1 * 0.14 + 500_000 * 0.28) / 1e6;
+  assert.ok(Math.abs(c - expected) < 1e-12, `hit×hit + miss×miss + out×out (veio ${c}, esperado ${expected})`);
+  // Contrasta com o cálculo antigo (1M prompt total × 0.14 = US$0.28): o hit dominante sai a
+  // ~US$0.0028/1M, então o custo total cai para quase metade (veio 0.1428 < 0.28).
+  assert.ok(c < 0.28, `cacheado ~US$0.0028/1M, não US$0.14 (veio ${c})`);
+});
+
+test('computeUsageCost: cache no PRO (hit US$0.003625) com miss + output', () => {
+  const c = config.computeUsageCost(
+    { prompt_tokens: 1_000_000, completion_tokens: 500_000, prompt_cache_hit_tokens: 800_000, prompt_cache_miss_tokens: 200_000 },
+    'deepseek-v4-pro',
+  );
+  const expected = (800_000 * 0.003625 + 200_000 * 0.435 + 500_000 * 0.87) / 1e6;
+  assert.ok(Math.abs(c - expected) < 1e-12, `pro: 800k hit + 200k miss + 500k out (veio ${c}, esperado ${expected})`);
+});
+
+test('computeUsageCost: fallback p/ prompt_tokens_details.cached_tokens (formato OpenRouter)', () => {
+  // Sem os campos prompt_cache_* (formato do OpenRouter), cached_tokens vira o hit e o miss é
+  // derivado do total (prompt_tokens - hit) — mesmo espelho do webapp deepseekCostFromUsage.
+  const c = config.computeUsageCost(
+    { prompt_tokens: 1_000_000, completion_tokens: 0, prompt_tokens_details: { cached_tokens: 900_000 } },
+    'deepseek-v4-flash',
+  );
+  const expected = (900_000 * 0.0028 + 100_000 * 0.14) / 1e6;
+  assert.ok(Math.abs(c - expected) < 1e-12, `cached_tokens conta como hit (veio ${c}, esperado ${expected})`);
+});
+
+test('computeUsageCost: usage SEM campos de cache cai no cálculo antigo (total × input)', () => {
+  // Compat: respostas sem detalhes de cache continuam prompt_tokens × input + completion × output.
+  const c = config.computeUsageCost(
+    { prompt_tokens: 1_000_000, completion_tokens: 500_000, prompt_tokens_details: {} },
+    'deepseek-v4-flash',
+  );
+  assert.ok(Math.abs(c - 0.28) < 1e-12, `sem cache: 1M × 0.14 + 500k × 0.28 (veio ${c})`);
+});
+
 test('computeUsageCost: override por env DEEPSEEK_PRICE_<MODEL>_INPUT_PER_M / _OUTPUT_PER_M', () => {
   process.env.DEEPSEEK_PRICE_DEEPSEEK_V4_FLASH_INPUT_PER_M = '0.10';
   process.env.DEEPSEEK_PRICE_DEEPSEEK_V4_FLASH_OUTPUT_PER_M = '0.20';

@@ -26,7 +26,7 @@ import {
 import {
   HAS_LLM, RESPECT_ROBOTS, MAX_CRAWL_DEPTH, ROUNDUP_MIN_LINKS, providerInfo,
   ARTICLE_ROUNDUP_MIN_LINKS, ARTICLE_ROUNDUP_MAX_LINKS, ROUNDUP_MAX_PROSE_CHARS,
-  CURATE_ROUNDUPS, CLEAN_BEFORE_SAVE, CLEAN_MAX_CHARS,
+  CURATE_ROUNDUPS, CLEAN_BEFORE_SAVE, CLEAN_MAX_CHARS, stageModel,
 } from './config.js';
 
 export function enqueue(url, kind, fromUrl, sourceId, depth = 0) {
@@ -179,7 +179,7 @@ async function processListing(job, source, opts) {
         sel = putSelector(sig, {
           link_selector: cand.selector,
           link_attribute: cand.attribute,
-          model_used: 'deepseek-v4-flash-0731',
+          model_used: stageModel('linkSelector').model,
           confidence: cand.confidence,
         });
         log(`seletor derivado p/ ${sig}: "${cand.selector}" (${v.count} links)`);
@@ -638,7 +638,7 @@ async function processArticle(job, source, opts) {
         if (validateContentSelector(html, cand.content_selector).ok) {
           csel = putSelector(sig, {
             content_selector: cand.content_selector,
-            model_used: 'deepseek-v4-flash-0731',
+            model_used: stageModel('contentSelector').model,
             confidence: cand.confidence,
           });
           log(`content selector derivado p/ ${sig}: "${cand.content_selector}"`);

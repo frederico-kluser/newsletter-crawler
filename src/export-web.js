@@ -9,7 +9,7 @@ import path from 'node:path';
 import { stmts } from './db.js';
 import {
   MODELS, SEARCH_BATCH_SIZE, SEARCH_MAX_CHARS, SEARCH_WEB_MAX_ITEMS,
-  SEARCH_MODE_A_CONFIRM, SEARCH_SOFT_CONFIRM, stageModel,
+  SEARCH_MODE_A_CONFIRM, SEARCH_SOFT_CONFIRM, stageModel, translateModel,
   SEARCH_WEB_SOFT_CONCURRENCY, SEARCH_WEB_DEEP_CONCURRENCY,
   SEARCH_UI_CONCURRENCY_DEFAULT, SEARCH_UI_CONCURRENCY_CEILING,
   TTS_MODEL, TTS_VOICE, TTS_FORMAT,
@@ -77,7 +77,9 @@ export function buildWebSnapshot() {
         searchBatch: stageModel('searchBatch'),
         searchRelevance: stageModel('searchRelevance'),
         searchSpec: stageModel('searchSpec'), // entendimento da consulta (busca precisão-primeiro)
-        fallback: { model: MODELS.pro },
+        // MODELS.pro guarda o slug OpenRouter; o export reflete o que o runtime usa de fato
+        // (translateModel é identidade no openrouter, direto na DeepSeek).
+        fallback: { model: translateModel(MODELS.pro) },
       },
       concurrency: { soft: SEARCH_WEB_SOFT_CONCURRENCY, deep: SEARCH_WEB_DEEP_CONCURRENCY },
       uiConcurrency: { default: SEARCH_UI_CONCURRENCY_DEFAULT, ceiling: SEARCH_UI_CONCURRENCY_CEILING },

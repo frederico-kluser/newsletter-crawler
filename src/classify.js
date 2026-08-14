@@ -6,7 +6,7 @@ import pLimit from 'p-limit';
 import { stmts, db } from './db.js';
 import { getFacets, buildFacetPrompt, validateFacetTags, taxonomyVersion } from './taxonomy.js';
 import { classifyFacet } from './llm.js';
-import { CLASSIFY_MODEL, CLASSIFY_CONCURRENCY, ARTICLE_CONCURRENCY } from './config.js';
+import { stageModel, CLASSIFY_CONCURRENCY, ARTICLE_CONCURRENCY } from './config.js';
 import { stageWindow } from './governor.js';
 import { shouldStop } from './budget.js';
 import { log, warn, errorLog } from './util.js';
@@ -113,7 +113,7 @@ const persist = db.transaction((article, result) => {
     result_json: JSON.stringify(result),
     domain_confidence: result.domain_confidence ?? null,
     taxonomy_version: result.taxonomy_version ?? null,
-    model_used: CLASSIFY_MODEL,
+    model_used: stageModel('classify').model,
     status: result.status,
   });
   stmts.deleteTagsForArticle.run(article.id);
@@ -156,7 +156,7 @@ export async function classifyPending({ limit = Infinity, force = false } = {}) 
 
   const facetCount = getFacets().length;
   log(
-    `classify: ${rows.length} artigo(s) — model=${CLASSIFY_MODEL}, ` +
+    `classify: ${rows.length} artigo(s) — model=${stageModel('classify').model}, ` +
       `${facetCount} facetas/artigo, force=${force}.`,
   );
 

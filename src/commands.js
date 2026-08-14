@@ -33,10 +33,12 @@ import { createJobClock } from './deadline.js';
 import {
   progressReset, progressSnapshot, sourceSeen, sourceListingDone, bump, inStage,
 } from './progress.js';
-import { runEventsReset, emitRunEvent } from './run-events.js';
+import { runEventsReset, emitRunEvent, runEventsSnapshot } from './run-events.js';
 import { startWebServer } from './web.js';
 import { probeProviderKey, providerInfoFor, upsertEnvVar, maskKey } from './keys.js';
-import { slugify, normalizeUrl, parseDate, hostOf, log, warn, errorLog, debug } from './util.js';
+import {
+  slugify, normalizeUrl, parseDate, hostOf, log, warn, errorLog, debug, hasLogSink,
+} from './util.js';
 
 // Re-export p/ a UI importar de um lugar só (igual getStatus).
 export { getSearchProgress };
@@ -98,6 +100,42 @@ function cliProgressLine() {
     parts.push(`alvo ${p.since}: ${p.pctGlobal}%${semData ? ` (${semData} fonte(s) s/ data)` : ''}`);
   }
   return `progresso: ${parts.join(' · ')}`;
+}
+
+// Rótulo PT dos vereditos no resumo (countVerifyForRun agrupa por verify_status; '(pendente)'
+// cobre o resto). Constante p/ o buildCliSummary puro não alocar a cada chamada.
+const VERDICT_LABEL = { ok: 'ok', suspect: 'suspeitos', junk: 'junk' };
+
+/**
+ * Resumo PERIÓDICO do CLI (puro p/ teste): uma linha legível a cada COST_LOG_INTERVAL_MS com a
+ * fase atual, a fila (frontier + em voo POR TIPO), artigos salvos na run, vereditos acumulados e
+ * os últimos avisos/erros da run com timestamp (do ring de run-events). Complementa o "gasto
+ * parcial" e a linha "progresso:" — o acompanhamento do CLI puro fica completo.
+ */
+export function buildCliSummary({
+  progress, frontier, inflight = 0, curating = 0, streaming = 0, verdicts = [], errors = [],
+} = {}) {
+  const c = (progress && progress.counts) || {};
+  const f = frontier || {};
+  const partes = [];
+  const fases = Object.keys((progress && progress.stages) || {});
+  partes.push(`fase ${fases.length ? fases.join(',') : '—'}`);
+  partes.push(`fila ${f.pending || 0}p/${f.in_progress || 0}a/${f.done || 0}d/${f.failed || 0}x`);
+  partes.push(`voo artigos=${inflight} curadoria=${curating} pós=${streaming}`);
+  const salvos = (c.salvos || 0) + (c.enriquecidos || 0);
+  partes.push(`salvos +${salvos}${c.mantidosBlurb ? ` (+${c.mantidosBlurb} blurb)` : ''}`);
+  if (verdicts.length) {
+    partes.push(`vereditos ${verdicts.map((v) => `${VERDICT_LABEL[v.s] || 'pend'}=${v.c}`).join(' ')}`);
+  }
+  if (errors.length) {
+    partes.push(
+      'erros ' +
+        errors
+          .map((e) => `${new Date(e.at).toISOString().slice(11, 19)} ${String(e.detail || e.kind || '').slice(0, 60)}`)
+          .join(' | '),
+    );
+  }
+  return `resumo: ${partes.join(' · ')}`;
 }
 
 /**
@@ -437,6 +475,9 @@ async function crawlRun(flags) {
           errorLog(`job estourou o deadline (${job.kind} ${job.url})`);
         } else {
           errorLog(`job falhou (${job.kind} ${job.url}): ${e.message}`);
+          if (!hasLogSink()) {
+            emitRunEvent({ phase: 'articles', kind: 'job-error', level: 'error', detail: `${e.message}`.slice(0, 80) });
+          }
         }
         const r = stmts.getRetries.get(job.url);
         if ((r?.retries ?? 0) < MAX_RETRIES) stmts.bumpRetry.run(job.url);
@@ -450,6 +491,7 @@ async function crawlRun(flags) {
   // esperar um job fechar). unref p/ não segurar o processo; só loga quando o valor mudou.
   let lastLoggedCalls = -1;
   let lastProgressLine = '';
+  let lastResumoLine = '';
   const costTimer = setInterval(() => {
     const bs = getBudgetState();
     if (bs.calls > 0 && bs.calls !== lastLoggedCalls) {
@@ -463,6 +505,23 @@ async function crawlRun(flags) {
     if (line && line !== lastProgressLine) {
       lastProgressLine = line;
       log(line);
+    }
+    // Resumo periódico: fase/fila por tipo/salvos/vereditos + últimos avisos-erros da run
+    // (ring de run-events, com timestamp). Só loga quando mudou, como as outras linhas.
+    const resumo = buildCliSummary({
+      progress: progressSnapshot(),
+      frontier: getStatus().frontier,
+      inflight: inflight.size,
+      curating: curating.size,
+      streaming: streaming.size,
+      verdicts: runId != null ? stmts.countVerifyForRun.all(runId) : [],
+      errors: runEventsSnapshot().feed
+        .filter((e) => e.level === 'warn' || e.level === 'error')
+        .slice(-3),
+    });
+    if (resumo !== lastResumoLine) {
+      lastResumoLine = resumo;
+      log(resumo);
     }
   }, COST_LOG_INTERVAL_MS);
   costTimer.unref?.();

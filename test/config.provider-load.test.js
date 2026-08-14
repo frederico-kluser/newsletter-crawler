@@ -5,12 +5,23 @@
 // isolado (node --test = 1 processo por arquivo): env setado ANTES do import dinâmico.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
 const NC_HOME_TMP = mkdtempSync(path.join(tmpdir(), 'nc-config-provider-'));
 process.env.NC_HOME = NC_HOME_TMP;
+// Semeia o NC_HOME/.env do TMP com o env do teste: no load do config.js ele é o ÚLTIMO a ser lido
+// (precedência documentada: shell < .env do repo < NC_HOME/.env), então vence o .env do REPO real
+// (ROOT/.env — a máquina de integração tem chaves reais lá e o loadDotEnvOverride as leria por
+// cima do delete abaixo). Chave que DEVE ficar ausente entra como linha de valor vazio.
+writeFileSync(
+  path.join(NC_HOME_TMP, '.env'),
+  'LLM_PROVIDER=DeepSeek\n' +
+    'DEEPSEEK_BASE_URL=https://api.deepseek.example.com\n' +
+    'OPENROUTER_API_KEY=sk-or-load\n' +
+    'DEEPSEEK_API_KEY=\n',
+);
 for (const k of Object.keys(process.env)) {
   if (k.startsWith('LLM_') || k.startsWith('DEEPSEEK_') || k.startsWith('OPENROUTER_')) {
     delete process.env[k];

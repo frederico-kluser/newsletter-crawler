@@ -137,6 +137,25 @@ export function looksLikeHtml(s) {
   return Boolean(str.match(CLOSE_TAG_RE)); // qualquer </tag> => markup real (match, não test: /g é stateful)
 }
 
+/**
+ * A string é JSON puro (objeto/array)? Páginas de dados servidas como JSON estruturado (blobs de
+ * API/__NEXT_DATA__ que Readability, o seletor de conteúdo ou o fallback LLM ecoaram como
+ * "corpo" — caso react-dropzone 20.0 da captura 2026-08-14) não são artigo. Só dispara quando o
+ * parse COMPLETO é um objeto/array (fail-open: JSON truncado ou com prosa ao redor passa);
+ * disjunto de looksLikeHtml — JSON nunca é markup. Puro/testável.
+ */
+export function looksLikeJson(s) {
+  const str = String(s ?? '');
+  const t = str.trim();
+  if (!t || !/^[[{]/.test(t)) return false; // corte rápido: só começa com objeto/array
+  try {
+    const v = JSON.parse(t);
+    return v !== null && typeof v === 'object'; // "null" literal não conta
+  } catch {
+    return false; // prosa/JSON parcial: fail-open
+  }
+}
+
 // Decodifica um conjunto CONHECIDO de entidades sem tocar em "<" cru (preserva a < b, Array<T>).
 function decodeEntities(s) {
   return String(s)

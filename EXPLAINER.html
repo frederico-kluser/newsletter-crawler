@@ -1,14 +1,10 @@
 <!doctype html>
-
 <html lang="pt-BR" data-bs-theme="dark">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<!-- Diz ao navegador que a página é escura ANTES do CSS carregar: sem flash
-     branco, e os controles nativos (scrollbar, select, input) já nascem escuros. -->
 <meta name="color-scheme" content="dark">
-<title>EXPLAINER — deep-orchestrator · de-para da execução</title>
-
+<title>EXPLAINER — deepseek provider direto · de-para da execução</title>
 <link rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
       integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
@@ -21,130 +17,62 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github-dark.min.css"
       integrity="sha384-wH75j6z1lH97ZOpMOInqhgKzFkAInZPPSPlZpYKYTOqsaizPvhQZmAtLcPKXpLyH"
       crossorigin="anonymous">
-
 <style>
-  /* ── Paleta do deep-orchestrator ──────────────────────────────────────────
-     Fundo #1a1a2e, accent #00d4ff (ciano), sucesso #00ff88, warning #ffaa00.
-     Tudo deriva destas variáveis — não cravamos hex no conteúdo. */
   :root {
-    --do-bg: #1a1a2e;
-    --do-bg-soft: #16213e;
-    --do-card: #1e1e38;
-    --do-accent: #00d4ff;
-    --do-success: #00ff88;
-    --do-warning: #ffaa00;
-    --do-danger: #ff6b6b;
+    --do-bg: #1a1a2e; --do-bg-soft: #16213e; --do-card: #1e1e38;
+    --do-accent: #00d4ff; --do-success: #00ff88; --do-warning: #ffaa00; --do-danger: #ff6b6b;
   }
-
   [data-bs-theme="dark"] {
-    --bs-body-bg: var(--do-bg);
-    --bs-body-color: #dcdce8;
-    --bs-secondary-color: #8b8ba7;
-    --bs-border-color: #2e2e4a;
-    --bs-body-font-family: system-ui, -apple-system, 'Segoe UI', Roboto,
-                           'Helvetica Neue', Arial, sans-serif;
+    --bs-body-bg: var(--do-bg); --bs-body-color: #dcdce8;
+    --bs-secondary-color: #8b8ba7; --bs-border-color: #2e2e4a;
+    --bs-body-font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   }
-
   body { background-image: radial-gradient(ellipse 80% 40% at 50% -10%, rgba(0,212,255,.07), transparent 60%); }
-
-  /* Âncora não fica escondida atrás da navbar fixa. */
   [id] { scroll-margin-top: 5rem; }
-
-  a { color: var(--do-accent); }
-  a:hover { color: #4de0ff; }
-
+  a { color: var(--do-accent); } a:hover { color: #4de0ff; }
   .brand-accent, .stat-value { color: var(--do-accent); }
-
-  /* Navbar com borda inferior em tom de accent. */
   .navbar { border-bottom: 1px solid rgba(0,212,255,.25); }
-
-  /* Hero com gradiente sutil: azul-noite para um leve toque ciano. */
-  .explainer-hero {
-    background: linear-gradient(135deg, #16213e 0%, #1a1a2e 55%, #0f3460 100%);
-    border: 1px solid var(--bs-border-color);
-    box-shadow: inset 0 0 2.5rem rgba(0,212,255,.05);
-  }
-
-  /* Título de seção com filete de gradiente sutil sob o texto. */
+  .explainer-hero { background: linear-gradient(135deg, #16213e 0%, #1a1a2e 55%, #0f3460 100%); border: 1px solid var(--bs-border-color); box-shadow: inset 0 0 2.5rem rgba(0,212,255,.05); }
   .pane-title { position: relative; padding-bottom: .5rem; }
-  .pane-title::after {
-    content: ''; position: absolute; left: 0; bottom: 0;
-    height: 2px; width: 4.5rem; border-radius: 2px;
-    background: linear-gradient(90deg, var(--do-accent), transparent);
-  }
-
-  /* Cards e grupos de lista: tom levemente mais claro que o fundo. */
+  .pane-title::after { content: ''; position: absolute; left: 0; bottom: 0; height: 2px; width: 4.5rem; border-radius: 2px; background: linear-gradient(90deg, var(--do-accent), transparent); }
   .card { --bs-card-bg: var(--do-card); --bs-card-border-color: var(--bs-border-color); }
-  .card-header {
-    background: linear-gradient(90deg, rgba(0,212,255,.10), rgba(0,212,255,0));
-    border-bottom: 1px solid var(--bs-border-color);
-  }
+  .card-header { background: linear-gradient(90deg, rgba(0,212,255,.10), rgba(0,212,255,0)); border-bottom: 1px solid var(--bs-border-color); }
   .list-group-item { background-color: var(--do-card); }
-
-  /* Abas: ativa em accent com sublinhado no mesmo tom. */
   .nav-tabs { border-bottom-color: var(--bs-border-color); }
   .nav-tabs .nav-link { color: var(--bs-secondary-color); }
   .nav-tabs .nav-link:hover { color: var(--bs-body-color); border-color: var(--bs-border-color) var(--bs-border-color) transparent; }
-  .nav-tabs .nav-link.active {
-    color: var(--do-accent); font-weight: 600;
-    background-color: transparent;
-    border-color: var(--bs-border-color) var(--bs-border-color) var(--do-accent);
-  }
-
-  /* Badges da paleta. */
+  .nav-tabs .nav-link.active { color: var(--do-accent); font-weight: 600; background-color: transparent; border-color: var(--bs-border-color) var(--bs-border-color) var(--do-accent); }
   .badge-accent  { background: rgba(0,212,255,.14);  color: var(--do-accent);  border: 1px solid rgba(0,212,255,.35); }
   .badge-ok      { background: rgba(0,255,136,.12);  color: var(--do-success); border: 1px solid rgba(0,255,136,.35); }
   .badge-warn    { background: rgba(255,170,0,.12);  color: var(--do-warning); border: 1px solid rgba(255,170,0,.35); }
   .badge-danger  { background: rgba(255,107,107,.12); color: var(--do-danger); border: 1px solid rgba(255,107,107,.35); }
   .badge-soft    { background: rgba(139,139,167,.12); color: var(--bs-secondary-color); border: 1px solid var(--bs-border-color); }
-
-  /* Diff stats: + verde, − vermelho, dígitos tabulares. */
   .diff-plus  { color: var(--do-success); font-variant-numeric: tabular-nums; }
   .diff-minus { color: var(--do-danger); font-variant-numeric: tabular-nums; }
-
-  /* De-Para: cartões com borda indicando o lado da comparação. */
   .depara-antes  { border-color: rgba(139,139,167,.45); }
   .depara-depois { border-color: rgba(0,255,136,.35); }
-
-  /* Timeline vertical: linha + marcador ciano com brilho sutil. */
   .timeline { position: relative; }
   .timeline-item { position: relative; padding-left: 1.4rem; border-left: 2px solid var(--bs-border-color); }
-  .timeline-item::before {
-    content: ''; position: absolute; left: -.42rem; top: .3rem;
-    width: .7rem; height: .7rem; border-radius: 50%;
-    background: var(--do-accent); box-shadow: 0 0 .6rem rgba(0,212,255,.6);
-  }
+  .timeline-item::before { content: ''; position: absolute; left: -.42rem; top: .3rem; width: .7rem; height: .7rem; border-radius: 50%; background: var(--do-accent); box-shadow: 0 0 .6rem rgba(0,212,255,.6); }
   .timeline-item:last-child { border-left-color: transparent; }
-
-  /* Bloco de código: espaço à direita para o botão de copiar não cobrir o texto. */
   pre { position: relative; margin-bottom: 1rem; }
   pre code.hljs { padding-right: 4rem; border-radius: var(--bs-border-radius); font-size: .875rem; }
-
   .copy-btn { position: absolute; top: .5rem; right: .5rem; opacity: .4; transition: opacity .15s; }
   pre:hover .copy-btn, .copy-btn:focus-visible { opacity: 1; }
-
-  /* Abrir o arquivo em #pane-x foca o painel (bom: o leitor de tela cai no
-     conteúdo), e o outline branco do navegador fica gritante. Anel discreto,
-     do tema, no lugar — tirar o indicador por completo quebraria quem navega
-     por teclado. */
   .tab-pane:focus-visible { outline: 0; box-shadow: 0 0 0 .2rem rgba(var(--bs-emphasis-color-rgb), .15); }
-
-  /* Impressão/PDF: abre TODAS as abas, senão o papel sai com uma só. */
   @media print {
     .nav-tabs, .copy-btn, details, .explainer-hero { display: none !important; }
     .tab-content > .tab-pane { display: block !important; opacity: 1 !important; page-break-inside: avoid; }
-    .tab-pane::before { content: attr(data-print-title); display: block;
-                        font-size: 1.25rem; font-weight: 600; margin: 1.5rem 0 .5rem; }
+    .tab-pane::before { content: attr(data-print-title); display: block; font-size: 1.25rem; font-weight: 600; margin: 1.5rem 0 .5rem; }
   }
 </style>
 </head>
-
 <body class="bg-body">
 
 <nav class="navbar navbar-expand-lg sticky-top bg-body-tertiary">
   <div class="container">
     <span class="navbar-brand fw-semibold"><i class="bi bi-diagram-3 brand-accent me-2"></i>deep-orchestrator <span class="text-body-secondary fw-normal">· EXPLAINER</span></span>
-    <span class="navbar-text small text-body-secondary d-none d-md-inline">v2 · 2026-08-13</span>
+    <span class="navbar-text small text-body-secondary d-none d-md-inline">v2.0 · 2026-08-13 → 14</span>
   </div>
 </nav>
 
@@ -152,22 +80,15 @@
 
   <header class="explainer-hero rounded-4 p-4 p-md-5 mb-4">
     <span class="badge badge-accent mb-3"><i class="bi bi-clipboard-data me-1"></i>Relatório de execução</span>
-    <h1 class="display-6 fw-semibold text-white mb-2">O que aconteceu nesta execução</h1>
-    <p class="lead text-white-50 mb-3">Troca de TODOS os modelos LLM do pipeline para <code>deepseek/deepseek-v4-flash-0731</code> mantendo os níveis de think (effort xhigh/high/medium) já definidos — incluindo o think mínimo (medium) no lote de ~40 artigos da busca soft (searchBatch). 2 ondas de feature + 1 testing subwave, revisão adversarial em todas as ondas, gates verdes (352 testes raiz + 66 webapp).</p>
+    <h1 class="display-6 fw-semibold text-white mb-2">Suporte ao provedor DeepSeek DIRETO (api.deepseek.com)</h1>
+    <p class="lead text-white-50 mb-3">Além da OpenRouter — no crawler/CLI, na TUI, no web local e no webapp estático (BYOK). 3 ondas + 2 testing subwaves, 20 sub-agentes, verificação ponta a ponta com chaves reais.</p>
     <div class="d-flex flex-wrap gap-2">
-      <span class="badge badge-accent">v2</span>
-      <span class="badge badge-soft"><i class="bi bi-calendar3 me-1"></i>2026-08-13</span>
+      <span class="badge badge-accent">v2.0</span>
+      <span class="badge badge-soft"><i class="bi bi-calendar3 me-1"></i>2026-08-13 → 14</span>
       <span class="badge badge-soft"><i class="bi bi-git-branch me-1"></i>main</span>
     </div>
   </header>
 
-  <!-- ABAS
-       Regras que não podem ser quebradas:
-       · <ul role="tablist"> e cada <button role="tab">
-       · button.id  ←→  tabpanel.aria-labelledby
-       · button.data-bs-target ←→ #id do tabpanel (e aria-controls com o mesmo id, sem #)
-       · exatamente UM botão .active + UM painel .show.active
-       O Bootstrap já faz navegação por seta/Home/End no tablist; não reimplemente. -->
   <ul class="nav nav-tabs" id="doc-tabs" role="tablist">
     <li class="nav-item" role="presentation">
       <button class="nav-link active" id="tab-visao" data-bs-toggle="tab" data-bs-target="#pane-visao"
@@ -213,11 +134,11 @@
     <div class="tab-pane fade show active" id="pane-visao" role="tabpanel"
          aria-labelledby="tab-visao" tabindex="0" data-print-title="Visão geral">
       <h2 class="h4 pane-title">Resumo da execução</h2>
-      <p class="text-body-secondary">Troca de TODOS os modelos LLM do pipeline para <code>deepseek/deepseek-v4-flash-0731</code> mantendo os níveis de think (effort xhigh/high/medium) já definidos — incluindo o think mínimo (medium) no lote de ~40 artigos da busca soft (searchBatch). 2 ondas de feature + 1 testing subwave, revisão adversarial em todas as ondas, gates verdes (352 testes raiz + 66 webapp).</p>
+      <p class="text-body-secondary">O usuário pediu: "ajuste o projeto para funcionar também com o provedor DeepSeek DIRETO (api.deepseek.com), não só OpenRouter — tanto no web quanto no crawler; não pergunte nada; pesquise e faça tudo sozinho."</p>
 
       <div class="alert alert-primary d-flex gap-2" role="alert">
         <i class="bi bi-info-circle-fill flex-shrink-0"></i>
-        <div><strong>O que é este documento:</strong> o EXPLAINER gerado pelo deep-orchestrator na fase COMMIT-FINAL, ao fim de cada execução. Mostra o de-para (antes/depois) de tudo que foi feito: ondas, worktrees, arquivos modificados, decisões autônomas e timeline.</div>
+        <div><strong>O que foi entregue:</strong> o projeto agora roda com <code>LLM_PROVIDER=openrouter|deepseek</code> em TODAS as superfícies — crawler/CLI, TUI, web local e webapp estático (BYOK). Default permanece OpenRouter (zero mudança de comportamento). Verificado ponta a ponta com chaves reais: 466/466 testes na raiz, 123/123 no webapp, build vite ok, ledger com custo exato calculado localmente.</div>
       </div>
 
       <div class="row g-3">
@@ -225,8 +146,8 @@
           <div class="card h-100 text-center">
             <div class="card-body py-4">
               <i class="bi bi-layers fs-3 stat-value"></i>
-              <div class="display-6 fw-bold stat-value">2</div>
-              <div class="text-body-secondary small">Ondas executadas</div>
+              <div class="display-6 fw-bold stat-value">3</div>
+              <div class="text-body-secondary small">Ondas + 2 testing subwaves</div>
             </div>
           </div>
         </div>
@@ -234,8 +155,8 @@
           <div class="card h-100 text-center">
             <div class="card-body py-4">
               <i class="bi bi-robot fs-3 stat-value"></i>
-              <div class="display-6 fw-bold stat-value">6</div>
-              <div class="text-body-secondary small">Sub-agentes</div>
+              <div class="display-6 fw-bold stat-value">20</div>
+              <div class="text-body-secondary small">Sub-agentes (incl. revisores)</div>
             </div>
           </div>
         </div>
@@ -243,271 +164,351 @@
           <div class="card h-100 text-center">
             <div class="card-body py-4">
               <i class="bi bi-git-commit fs-3 stat-value"></i>
-              <div class="display-6 fw-bold stat-value">4</div>
-              <div class="text-body-secondary small">Commits (squash)</div>
+              <div class="display-6 fw-bold stat-value">10</div>
+              <div class="text-body-secondary small">Commits squash + 1 final</div>
             </div>
           </div>
         </div>
       </div>
 
-      <h2 class="h4 pane-title mt-5">Como este documento é gerado</h2>
-      <p>O orquestrador, na fase COMMIT-FINAL, gera o explainer a partir deste template:</p>
-<pre><code class="language-bash"># Gera o explainer a partir do template
-./scripts/generate-explainer.sh &gt; EXPLAINER.html
-# Ou preenche manualmente os placeholders 2, 2026-08-13, main, ...</code></pre>
-      <p class="text-body-secondary small">O template é <code>templates/html-explainer.html</code> — arquivo único, sem build: abre por file:// e imprime em PDF com todas as abas.</p>
-
-      <details class="mt-4">
-        <summary class="text-body-secondary">Placeholders usados na geração</summary>
-        <div class="table-responsive mt-2">
-          <table class="table table-sm align-middle">
-            <thead>
-              <tr><th scope="col">Placeholder</th><th scope="col">Onde aparece</th><th scope="col">Preenchido com</th></tr>
-            </thead>
-            <tbody>
-              <tr><td><code>&#123;&#123;VERSION&#125;&#125;</code></td><td>Navbar, hero, rodapé</td><td>Versão do orquestrador</td></tr>
-              <tr><td><code>&#123;&#123;DATE&#125;&#125;</code></td><td>Navbar, hero, rodapé</td><td>Data da execução</td></tr>
-              <tr><td><code>&#123;&#123;BRANCH&#125;&#125;</code></td><td>Hero, rodapé</td><td>Branch principal</td></tr>
-              <tr><td><code>&#123;&#123;TASK_SUMMARY&#125;&#125;</code></td><td>Visão geral</td><td>Resumo da tarefa</td></tr>
-              <tr><td><code>&#123;&#123;TOTAL_WAVES&#125;&#125;</code></td><td>Cards de estatística</td><td>Número de ondas</td></tr>
-              <tr><td><code>&#123;&#123;TOTAL_AGENTS&#125;&#125;</code></td><td>Cards de estatística</td><td>Número de sub-agentes</td></tr>
-              <tr><td><code>&#123;&#123;TOTAL_COMMITS&#125;&#125;</code></td><td>Cards de estatística</td><td>Número de commits</td></tr>
-              <tr><td><code>&#123;&#123;WAVES_TABLE&#125;&#125;</code></td><td>Aba Ondas</td><td>Tabela HTML de ondas (Onda | Worktree | Tarefas | Commits | Status)</td></tr>
-              <tr><td><code>&#123;&#123;FILES_TABLE&#125;&#125;</code></td><td>Aba Arquivos</td><td>Tabela HTML de arquivos modificados (Arquivo | Tipo | Diff)</td></tr>
-              <tr><td><code>&#123;&#123;BEFORE_AFTER&#125;&#125;</code></td><td>Aba De-Para</td><td>Seções de de-para adicionais</td></tr>
-              <tr><td><code>&#123;&#123;DECISIONS&#125;&#125;</code></td><td>Aba Decisões</td><td>Lista de decisões autônomas</td></tr>
-              <tr><td><code>&#123;&#123;TIMELINE&#125;&#125;</code></td><td>Aba Timeline</td><td>Linha do tempo da execução</td></tr>
-              <tr><td><code>&#123;&#123;COMMITS_LIST&#125;&#125;</code></td><td>Aba Arquivos</td><td>Lista de commits squash</td></tr>
-            </tbody>
-          </table>
+      <h2 class="h4 pane-title mt-5">Números da execução</h2>
+      <div class="list-group list-group-flush">
+        <div class="list-group-item d-flex gap-3 align-items-start">
+          <i class="bi bi-file-earmark-diff fs-5 stat-value flex-shrink-0 mt-1"></i>
+          <div><strong>45 arquivos alterados</strong> — <span class="diff-plus">+3.171</span> / <span class="diff-minus">−196</span> linhas (f01d1c1..HEAD).</div>
         </div>
-      </details>
+        <div class="list-group-item d-flex gap-3 align-items-start">
+          <i class="bi bi-check2-circle fs-5 stat-value flex-shrink-0 mt-1"></i>
+          <div><strong>Testes:</strong> 466/466 na raiz (era 352 no baseline) + 123/123 webapp (era 66) + build vite.</div>
+        </div>
+        <div class="list-group-item d-flex gap-3 align-items-start">
+          <i class="bi bi-cash-stack fs-5 stat-value flex-shrink-0 mt-1"></i>
+          <div><strong>Custo da verificação real:</strong> ~US$ 0.00033 em chamadas LLM reais (1 chamada por provider + probes + detect-type no direto).</div>
+        </div>
+        <div class="list-group-item d-flex gap-3 align-items-start">
+          <i class="bi bi-shield-check fs-5 stat-value flex-shrink-0 mt-1"></i>
+          <div><strong>Revisões adversariais:</strong> 8 revisões (6 "NADA A REFUTAR", 2 "PROBLEMAS PARCIAIS" com achados corrigidos/aceitos) + 2 re-planes (1 recálculo com sub-tarefa nova, 1 convergência).</div>
+        </div>
+      </div>
     </div>
 
-    <!-- ══════════════ ABA 2 · ONDAS EXECUTADAS ══════════════ -->
+    <!-- ══════════════ ABA 2 · ONDAS ══════════════ -->
     <div class="tab-pane fade" id="pane-ondas" role="tabpanel"
          aria-labelledby="tab-ondas" tabindex="0" data-print-title="Ondas executadas">
       <h2 class="h4 pane-title">Ondas executadas</h2>
-      <p>Uma linha por sub-agente. Cada sub-agente trabalha numa worktree Git nomeada; a integração é squash-merge um a um, com gate (build + testes) entre merges. Worktrees e branches <code>wt/*</code> são removidos ao fim de cada onda.</p>
+      <p>Uma linha por worktree. Cada sub-agente trabalhou numa worktree Git nomeada; a integração foi squash-merge um a um, com gate (build + testes) entre merges. Todas as worktrees/branches desta execução foram removidas ao fim (arquivadas em refs/do-archive/).</p>
 
-            <div class="table-responsive">
+      <div class="table-responsive">
         <table class="table table-hover align-middle">
           <thead>
             <tr>
               <th scope="col">Onda</th>
               <th scope="col">Worktree</th>
               <th scope="col">Tarefas</th>
-              <th scope="col" class="text-end">Commits</th>
+              <th scope="col" class="text-end">Commit</th>
               <th scope="col">Status</th>
             </tr>
           </thead>
           <tbody>
             <tr>
               <td><span class="badge badge-accent">Onda 1</span></td>
-              <td><code>onda1-swap-modelo</code></td>
-              <td>Troca de slugs em config/models.json (26 entradas), src/config.js (MODELS.pro/flash), src/llm.js, src/crawl.js, README.md, test/budget.test.js, test/export-web.test.js, .env.example — efforts preservados. 2 rodadas de fix pós-revisão adversarial (docs/comentários com tiers extintos).</td>
-              <td class="text-end">1</td>
+              <td><code>onda1-pesquisa-deepseek</code></td>
+              <td>docs/deepseek-direct.md — brief de fatos da API direta (slugs v4, preços, params, probes, erros, CORS) com fontes</td>
+              <td class="text-end"><code>7f77b9c</code></td>
+              <td><span class="badge badge-ok">Concluída</span></td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-accent">Onda 1</span></td>
+              <td><code>onda1-llm-provider-core</code></td>
+              <td>src/config.js + src/llm.js — LLM_PROVIDER, translateModel, custo local, response_format provider-aware, setRuntimeKey(key, provider)</td>
+              <td class="text-end"><code>29e99c4</code></td>
+              <td><span class="badge badge-ok">Concluída</span></td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-accent">Onda 1</span></td>
+              <td><code>onda1-webapp-provider</code></td>
+              <td>webapp BYOK — lib/openrouter.js generalizado, KeyModal com select, storage.js, strings PT/EN, custo local</td>
+              <td class="text-end"><code>a4a01cf</code></td>
+              <td><span class="badge badge-ok">Concluída</span></td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-soft">Subwave 1</span></td>
+              <td><code>test-onda1-webapp-provider</code></td>
+              <td>45 testes do provider no webapp (callJSON por provider, custo, storage, busca deepseek, paridade i18n)</td>
+              <td class="text-end"><code>6018b5a</code></td>
+              <td><span class="badge badge-ok">Concluída</span></td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-soft">Subwave 1</span></td>
+              <td><code>test-onda1-provider-core</code></td>
+              <td>28 testes do provider core — ABSORVIDOS pelos commits de fix (arquivos idênticos/superseded; drop sem merge)</td>
+              <td class="text-end">—</td>
+              <td><span class="badge badge-warn">Absorvida</span></td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-accent">Onda 2</span></td>
+              <td><code>onda2-keys-cli-localweb</code></td>
+              <td>keys.js/commands.js/web.js/TUI — probeDeepSeekKey + dispatcher, key set/test --provider, tela KeyConfig, POST /api/key com provider</td>
+              <td class="text-end"><code>fdb93dd</code></td>
               <td><span class="badge badge-ok">Concluída</span></td>
             </tr>
             <tr>
               <td><span class="badge badge-accent">Onda 2</span></td>
-              <td><code>onda2-meta-json-slugs</code></td>
-              <td>webapp/public/data/meta.json — 4 slugs de search.models (searchBatch/searchRelevance/searchSpec/fallback) → slug novo. Edição cirúrgica: o webapp faz chamadas REAIS ao OpenRouter com esses slugs e o banco local está vazio (export seria destrutivo).</td>
-              <td class="text-end">1</td>
+              <td><code>onda2-telemetria-provider-aware</code></td>
+              <td>classify.js/export-web.js/crawl.js — model_used e meta.json com o slug do provider ativo (telemetria traduzida)</td>
+              <td class="text-end"><code>7169d64</code></td>
+              <td><span class="badge badge-ok">Concluída</span></td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-warn">Fix</span></td>
+              <td><code>onda2-fix-custo-cache</code></td>
+              <td>computeUsageCost cobra cache pela tarifa de hit (flash 0.0028 / pro 0.003625) — espelho do webapp; overrides HIT_PER_M</td>
+              <td class="text-end"><code>21501f1</code></td>
               <td><span class="badge badge-ok">Concluída</span></td>
             </tr>
             <tr>
               <td><span class="badge badge-accent">Onda 2</span></td>
-              <td><code>onda2-cost-test-fixtures</code></td>
-              <td>webapp/test/cost.test.js — fixtures → slug novo; caminho não-flash do seed via <code>acme/llm-probe</code> (mesma convenção do budget.test.js); label do teste renomeado.</td>
-              <td class="text-end">1</td>
+              <td><code>onda2-docs</code></td>
+              <td>README, AGENTS.md, calling-the-llm-layer, building-the-webapp, searching-the-corpus, CHANGELOG</td>
+              <td class="text-end"><code>f2b156c</code></td>
               <td><span class="badge badge-ok">Concluída</span></td>
             </tr>
             <tr>
-              <td><span class="badge badge-ok">Testes</span></td>
-              <td><code>test-onda1-model-swap</code></td>
-              <td>11 testes novos (model-config.test.js + model-config.env.test.js): slug único em todos os STAGE_KEYS, efforts por tabela literal, searchBatch=medium, MODELS.pro===flash, seedForModel, contrato do models.json, gotcha articleReclean, override por env + guard max→xhigh. Mutation test provou a não-vacuidade.</td>
-              <td class="text-end">1</td>
+              <td><span class="badge badge-warn">Fix</span></td>
+              <td><code>onda2-fix-gate-tests</code></td>
+              <td>Testes de load/provider isolam o ambiente — seed do NC_HOME tmp vence o ROOT/.env real (421/421 na raiz)</td>
+              <td class="text-end"><code>1e4bccf</code></td>
+              <td><span class="badge badge-ok">Concluída</span></td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-ok">Onda 3</span></td>
+              <td><code>onda3-verificacao-integrada</code></td>
+              <td>Verificação com chaves reais nos 2 providers (probe, chamadas, ledger, CORS BYOK, detect-type) + fixes: CORS no brief, comentário de preço, .env.example</td>
+              <td class="text-end"><code>354e62c</code></td>
               <td><span class="badge badge-ok">Concluída</span></td>
             </tr>
           </tbody>
         </table>
       </div>
-
 
       <h3 class="h6 mt-4 text-body-secondary">Legenda de status</h3>
       <div class="d-flex flex-wrap gap-2">
         <span class="badge badge-ok">Concluída</span>
-        <span class="badge badge-warn">Parcial</span>
+        <span class="badge badge-warn">Fix / Parcial</span>
         <span class="badge badge-danger">Bloqueada</span>
       </div>
     </div>
 
-    <!-- ══════════════ ABA 3 · ARQUIVOS MODIFICADOS ══════════════ -->
+    <!-- ══════════════ ABA 3 · ARQUIVOS ══════════════ -->
     <div class="tab-pane fade" id="pane-arquivos" role="tabpanel"
          aria-labelledby="tab-arquivos" tabindex="0" data-print-title="Arquivos modificados">
       <h2 class="h4 pane-title">Arquivos modificados</h2>
-      <p>Diff stats da execução: <span class="diff-plus">+</span> linhas adicionadas, <span class="diff-minus">−</span> removidas.</p>
+      <p>Diff stats da execução (f01d1c1..HEAD): <span class="diff-plus">+3.171</span> linhas adicionadas, <span class="diff-minus">−196</span> removidas, 45 arquivos.</p>
 
-            <div class="table-responsive">
-        <table class="table table-hover align-middle">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle table-sm">
           <thead>
-            <tr>
-              <th scope="col">Arquivo</th>
-              <th scope="col">Tipo</th>
-              <th scope="col" class="text-end">Diff</th>
-            </tr>
+            <tr><th scope="col">Arquivo</th><th scope="col">Tipo</th><th scope="col" class="text-end">Diff</th></tr>
           </thead>
           <tbody>
-            <tr>
-              <td><code>config/models.json</code></td>
-              <td><span class="badge badge-accent">modificado</span></td>
-              <td class="text-end"><span class="diff-plus">+26</span> <span class="diff-minus">−26</span></td>
-            </tr>
-            <tr>
-              <td><code>src/config.js</code></td>
-              <td><span class="badge badge-accent">modificado</span></td>
-              <td class="text-end"><span class="diff-plus">+16</span> <span class="diff-minus">−16</span></td>
-            </tr>
-            <tr>
-              <td><code>README.md</code></td>
-              <td><span class="badge badge-accent">modificado</span></td>
-              <td class="text-end"><span class="diff-plus">+20</span> <span class="diff-minus">−19</span></td>
-            </tr>
-            <tr>
-              <td><code>src/llm.js</code></td>
-              <td><span class="badge badge-accent">modificado</span></td>
-              <td class="text-end"><span class="diff-plus">+9</span> <span class="diff-minus">−8</span></td>
-            </tr>
-            <tr>
-              <td><code>src/crawl.js</code></td>
-              <td><span class="badge badge-accent">modificado</span></td>
-              <td class="text-end"><span class="diff-plus">+2</span> <span class="diff-minus">−2</span></td>
-            </tr>
-            <tr>
-              <td><code>test/budget.test.js</code></td>
-              <td><span class="badge badge-accent">modificado</span></td>
-              <td class="text-end"><span class="diff-plus">+14</span> <span class="diff-minus">−14</span></td>
-            </tr>
-            <tr>
-              <td><code>test/export-web.test.js</code></td>
-              <td><span class="badge badge-accent">modificado</span></td>
-              <td class="text-end"><span class="diff-plus">+1</span> <span class="diff-minus">−1</span></td>
-            </tr>
-            <tr>
-              <td><code>.env.example</code></td>
-              <td><span class="badge badge-accent">modificado</span></td>
-              <td class="text-end"><span class="diff-plus">+2</span> <span class="diff-minus">−2</span></td>
-            </tr>
-            <tr>
-              <td><code>webapp/public/data/meta.json</code></td>
-              <td><span class="badge badge-accent">modificado</span></td>
-              <td class="text-end"><span class="diff-plus">+4</span> <span class="diff-minus">−4</span></td>
-            </tr>
-            <tr>
-              <td><code>webapp/test/cost.test.js</code></td>
-              <td><span class="badge badge-accent">modificado</span></td>
-              <td class="text-end"><span class="diff-plus">+5</span> <span class="diff-minus">−5</span></td>
-            </tr>
-            <tr>
-              <td><code>test/model-config.test.js</code></td>
-              <td><span class="badge badge-ok">novo</span></td>
-              <td class="text-end diff-plus">+186</td>
-            </tr>
-            <tr>
-              <td><code>test/model-config.env.test.js</code></td>
-              <td><span class="badge badge-ok">novo</span></td>
-              <td class="text-end diff-plus">+48</td>
-            </tr>
+            <tr><td><code>docs/deepseek-direct.md</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+251</td></tr>
+            <tr><td><code>.env.example</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+13</span> <span class="diff-minus">−4</span></td></tr>
+            <tr><td><code>src/config.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+185</span> <span class="diff-minus">−10</span></td></tr>
+            <tr><td><code>src/llm.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+82</span> <span class="diff-minus">−16</span></td></tr>
+            <tr><td><code>src/keys.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+52</span> <span class="diff-minus">−8</span></td></tr>
+            <tr><td><code>src/commands.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+60</span> <span class="diff-minus">−18</span></td></tr>
+            <tr><td><code>src/web.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+35</span> <span class="diff-minus">−8</span></td></tr>
+            <tr><td><code>src/classify.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+6</span> <span class="diff-minus">−4</span></td></tr>
+            <tr><td><code>src/export-web.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+6</span> <span class="diff-minus">−2</span></td></tr>
+            <tr><td><code>src/crawl.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+10</span> <span class="diff-minus">−4</span></td></tr>
+            <tr><td><code>src/index.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+4</span> <span class="diff-minus">−2</span></td></tr>
+            <tr><td><code>src/ui/App.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+4</span> <span class="diff-minus">−2</span></td></tr>
+            <tr><td><code>src/ui/i18n.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+24</span> <span class="diff-minus">−4</span></td></tr>
+            <tr><td><code>src/ui/screens.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+71</span> <span class="diff-minus">−8</span></td></tr>
+            <tr><td><code>src/web-ui/app.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+57</span> <span class="diff-minus">−10</span></td></tr>
+            <tr><td><code>src/web-ui/styles.css</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end diff-plus">+10</td></tr>
+            <tr><td><code>webapp/src/lib/openrouter.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+114</span> <span class="diff-minus">−16</span></td></tr>
+            <tr><td><code>webapp/src/lib/storage.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end diff-plus">+7</td></tr>
+            <tr><td><code>webapp/src/lib/search.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+17</span> <span class="diff-minus">−2</span></td></tr>
+            <tr><td><code>webapp/src/components/KeyModal.jsx</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+55</span> <span class="diff-minus">−8</span></td></tr>
+            <tr><td><code>webapp/src/components/KeyButton.jsx</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+11</span> <span class="diff-minus">−2</span></td></tr>
+            <tr><td><code>webapp/src/hooks/useAiSearch.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+16</span> <span class="diff-minus">−4</span></td></tr>
+            <tr><td><code>webapp/src/strings.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+40</span> <span class="diff-minus">−6</span></td></tr>
+            <tr><td><code>webapp/src/styles/app.css</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end diff-plus">+14</td></tr>
+            <tr><td><code>README.md</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+23</span> <span class="diff-minus">−8</span></td></tr>
+            <tr><td><code>AGENTS.md</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+11</span> <span class="diff-minus">−2</span></td></tr>
+            <tr><td><code>CHANGELOG.md</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end diff-plus">+18</td></tr>
+            <tr><td><code>.agents/skills/calling-the-llm-layer/SKILL.md</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+13</span> <span class="diff-minus">−4</span></td></tr>
+            <tr><td><code>.agents/skills/building-the-webapp/SKILL.md</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+5</span> <span class="diff-minus">−2</span></td></tr>
+            <tr><td><code>.agents/skills/searching-the-corpus/SKILL.md</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+2</span> <span class="diff-minus">−1</span></td></tr>
+            <tr><td><code>test/llm.provider.test.js</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+235</td></tr>
+            <tr><td><code>test/llm.provider-client.test.js</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+445</td></tr>
+            <tr><td><code>test/config.provider-load.test.js</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+176</td></tr>
+            <tr><td><code>test/config.provider-invalid.test.js</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+52</td></tr>
+            <tr><td><code>test/keys.test.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+93</span> <span class="diff-minus">−2</span></td></tr>
+            <tr><td><code>test/config.key.test.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end diff-plus">+24</td></tr>
+            <tr><td><code>test/export-web.test.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+30</span> <span class="diff-minus">−2</span></td></tr>
+            <tr><td><code>test/classify.incomplete.test.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+82</span> <span class="diff-minus">−2</span></td></tr>
+            <tr><td><code>test/ui.menu.test.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+79</span> <span class="diff-minus">−2</span></td></tr>
+            <tr><td><code>test/web.search.test.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+40</span> <span class="diff-minus">−2</span></td></tr>
+            <tr><td><code>webapp/test/provider.test.js</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+165</td></tr>
+            <tr><td><code>webapp/test/provider-call.test.js</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+308</td></tr>
+            <tr><td><code>webapp/test/provider-search.test.js</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+238</td></tr>
+            <tr><td><code>webapp/test/provider-storage.test.js</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+155</td></tr>
+            <tr><td><code>webapp/test/i18n.test.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end diff-plus">+29</td></tr>
           </tbody>
         </table>
       </div>
 
-
       <h2 class="h4 pane-title mt-4">Commits (squash)</h2>
-      <p>Histórico final do branch principal: um commit squash por sub-agente. Nenhuma worktree ou branch <code>wt/*</code> sobra ao final.</p>
+      <p>Histórico final de main — um commit squash por sub-tarefa. Worktrees e branches desta execução foram removidos (arquivados em refs/do-archive/20260813-204910-1326202/).</p>
 
-            <ul class="list-group list-group-flush">
+      <ul class="list-group list-group-flush">
         <li class="list-group-item d-flex gap-3 align-items-start">
-          <span class="badge badge-soft font-monospace">54c5c68</span>
-          <div><strong>Onda 1:</strong> troca todos os modelos para deepseek/deepseek-v4-flash-0731 (efforts preservados, docs/comentários sincronizados)</div>
+          <span class="badge badge-soft font-monospace">354e62c</span>
+          <div><strong>Onda 3:</strong> verificação integrada com chaves reais (2 providers) — CORS confirmado no brief, .env.example documentado, comentário de preço alinhado</div>
         </li>
         <li class="list-group-item d-flex gap-3 align-items-start">
-          <span class="badge badge-soft font-monospace">48037b6</span>
-          <div><strong>Onda 2:</strong> webapp snapshot — search.models aponta para deepseek-v4-flash-0731 (chamadas reais do site)</div>
+          <span class="badge badge-soft font-monospace">6018b5a</span>
+          <div><strong>Subwave 1:</strong> 45 testes do provider no webapp (callJSON por provider, custo local, storage, busca deepseek, paridade i18n)</div>
         </li>
         <li class="list-group-item d-flex gap-3 align-items-start">
-          <span class="badge badge-soft font-monospace">8324133</span>
-          <div><strong>Onda 2:</strong> fixtures de custo do webapp no slug único (caminho não-flash via acme/llm-probe)</div>
+          <span class="badge badge-soft font-monospace">1e4bccf</span>
+          <div><strong>Onda 2 (fix):</strong> testes de load/provider isolam o ambiente — seed do NC_HOME tmp vence o ROOT/.env real</div>
         </li>
         <li class="list-group-item d-flex gap-3 align-items-start">
-          <span class="badge badge-soft font-monospace">187ecec</span>
-          <div><strong>Testes:</strong> 11 testes da resolução de modelos pós-swap (slug único, efforts, searchBatch medium, env override, contrato do models.json)</div>
+          <span class="badge badge-soft font-monospace">f2b156c</span>
+          <div><strong>Onda 2:</strong> docs sincronizadas (README, AGENTS.md, calling-the-llm-layer, building-the-webapp, searching-the-corpus, CHANGELOG)</div>
+        </li>
+        <li class="list-group-item d-flex gap-3 align-items-start">
+          <span class="badge badge-soft font-monospace">21501f1</span>
+          <div><strong>Onda 2 (fix):</strong> computeUsageCost cobra cache pela tarifa de hit (flash 0.0028 / pro 0.003625) — espelho do webapp</div>
+        </li>
+        <li class="list-group-item d-flex gap-3 align-items-start">
+          <span class="badge badge-soft font-monospace">7169d64</span>
+          <div><strong>Onda 2:</strong> telemetria com slug do provider ativo — model_used de classify/selectors via stageModel, fallback do meta.json traduzido</div>
+        </li>
+        <li class="list-group-item d-flex gap-3 align-items-start">
+          <span class="badge badge-soft font-monospace">fdb93dd</span>
+          <div><strong>Onda 2:</strong> keys/CLI/TUI/web local provider-aware — probeDeepSeekKey+dispatcher, key set/test --provider, tela KeyConfig, POST /api/key com provider</div>
+        </li>
+        <li class="list-group-item d-flex gap-3 align-items-start">
+          <span class="badge badge-soft font-monospace">a4a01cf</span>
+          <div><strong>Onda 1:</strong> provider openrouter|deepseek no webapp BYOK — KeyModal com select, custo local por token, probeKey por provider, strings PT/EN</div>
+        </li>
+        <li class="list-group-item d-flex gap-3 align-items-start">
+          <span class="badge badge-soft font-monospace">29e99c4</span>
+          <div><strong>Onda 1:</strong> provider LLM_PROVIDER openrouter|deepseek no CLI — translateModel, custo local por token, response_format provider-aware, setRuntimeKey(key,provider)</div>
+        </li>
+        <li class="list-group-item d-flex gap-3 align-items-start">
+          <span class="badge badge-soft font-monospace">7f77b9c</span>
+          <div><strong>Onda 1:</strong> brief docs/deepseek-direct.md — fatos da API direta (slugs v4, preços, params, probes, erros, CORS)</div>
         </li>
       </ul>
-
     </div>
 
-    <!-- ══════════════ ABA 4 · DE-PARA (BEFORE/AFTER) ══════════════ -->
+    <!-- ══════════════ ABA 4 · DE-PARA ══════════════ -->
     <div class="tab-pane fade" id="pane-depara" role="tabpanel"
          aria-labelledby="tab-depara" tabindex="0" data-print-title="De-Para">
       <h2 class="h4 pane-title">De-Para: o que mudou</h2>
-      <p>Comparação lado a lado entre o estado inicial do repositório e o estado final após a execução.</p>
+      <p>Comparação lado a lado entre o estado inicial (f01d1c1) e o estado final (HEAD) por superfície.</p>
 
       <div class="row g-3 mb-4">
         <div class="col-lg-6">
           <div class="card h-100 depara-antes">
-            <div class="card-header"><i class="bi bi-arrow-left-circle me-1"></i><strong>Antes</strong></div>
+            <div class="card-header"><i class="bi bi-arrow-left-circle me-1"></i><strong>Antes — transporte LLM</strong></div>
             <div class="card-body">
-              <p class="card-text text-body-secondary">Estado inicial do repositório — apenas o skill de orquestração, sem recursos auxiliares.</p>
               <ul class="list-unstyled mb-0 d-grid gap-2">
-                <li><i class="bi bi-file-earmark-text me-2 text-body-secondary"></i><code>SKILL.md</code> — definição do orquestrador (XML, fases, regras)</li>
-                <li><i class="bi bi-file-earmark-text me-2 text-body-secondary"></i><code>README.md</code> — documentação pública</li>
+                <li><i class="bi bi-x-circle me-2 text-body-secondary"></i>Cliente hardcoded: SDK openai → <code>https://openrouter.ai/api/v1</code> (src/llm.js)</li>
+                <li><i class="bi bi-x-circle me-2 text-body-secondary"></i>Slug fixo <code>deepseek/deepseek-v4-flash-0731</code> em todas as etapas (models.json)</li>
+                <li><i class="bi bi-x-circle me-2 text-body-secondary"></i>Custo real só via <code>usage.cost</code> da OpenRouter</li>
+                <li><i class="bi bi-x-circle me-2 text-body-secondary"></i>Chave única: OPENROUTER_API_KEY; TUI/web só conheciam a OpenRouter</li>
               </ul>
             </div>
           </div>
         </div>
         <div class="col-lg-6">
           <div class="card h-100 depara-depois">
-            <div class="card-header"><i class="bi bi-arrow-right-circle me-1"></i><strong>Depois</strong></div>
+            <div class="card-header"><i class="bi bi-arrow-right-circle me-1"></i><strong>Depois — transporte LLM</strong></div>
             <div class="card-body">
-              <p class="card-text text-body-secondary">Estado final — três novos diretórios e o skill atualizado.</p>
               <ul class="list-unstyled mb-0 d-grid gap-2">
-                <li><i class="bi bi-terminal me-2 text-body-secondary"></i><code>scripts/</code> — brave-search.sh · check-brave-credits.sh</li>
-                <li><i class="bi bi-file-earmark-text me-2 text-body-secondary"></i><code>prompts/</code> — ecc-prompts.md · ecc-skills.md · search-prompts.md</li>
-                <li><i class="bi bi-file-earmark-code me-2 text-body-secondary"></i><code>templates/</code> — html-explainer.html</li>
-                <li><i class="bi bi-gear me-2 text-body-secondary"></i><code>SKILL.md</code> — atualizado (ondas ilimitadas, novos recursos)</li>
+                <li><i class="bi bi-check-circle me-2 text-body-secondary"></i><code>LLM_PROVIDER=openrouter|deepseek</code> (default openrouter); baseURL e headers por provider</li>
+                <li><i class="bi bi-check-circle me-2 text-body-secondary"></i><code>translateModel()</code>: slug OR → id direto <code>deepseek-v4-flash</code>/<code>deepseek-v4-pro</code>; identidade no openrouter</li>
+                <li><i class="bi bi-check-circle me-2 text-body-secondary"></i>Custo LOCAL por token (hit/miss/out — tarifas 0.14/0.28/0.0028 flash), injetado no ledger (budget.js intocado)</li>
+                <li><i class="bi bi-check-circle me-2 text-body-secondary"></i><code>DEEPSEEK_API_KEY</code> live binding; <code>setRuntimeKey(key, provider?)</code>; providerInfo()</li>
               </ul>
             </div>
           </div>
         </div>
       </div>
 
-            <div class="row g-3 mb-4">
+      <div class="row g-3 mb-4">
         <div class="col-lg-6">
           <div class="card h-100 depara-antes">
-            <div class="card-header"><i class="bi bi-arrow-left-circle me-1"></i><strong>Antes</strong></div>
+            <div class="card-header"><i class="bi bi-arrow-left-circle me-1"></i><strong>Antes — webapp estático (BYOK)</strong></div>
             <div class="card-body">
-              <p class="card-text text-body-secondary">Dois modelos por tier: <code>deepseek/deepseek-v4-pro</code> (xhigh/high) e <code>deepseek/deepseek-v4-flash</code> (high/medium).</p>
               <ul class="list-unstyled mb-0 d-grid gap-2">
-                <li><i class="bi bi-file-earmark-text me-2 text-body-secondary"></i><code>config/models.json</code> — default Pro + 25 estágios alternando Pro/Flash</li>
-                <li><i class="bi bi-file-earmark-text me-2 text-body-secondary"></i><code>MODELS.pro ≠ MODELS.flash</code> — escalada de retry Flash→Pro real</li>
-                <li><i class="bi bi-file-earmark-text me-2 text-body-secondary"></i><code>webapp/public/data/meta.json</code> — site chamava os 2 slugs antigos no runtime</li>
-                <li><i class="bi bi-file-earmark-text me-2 text-body-secondary"></i>README/STAGE_KEYS descreviam tiers "Pro"/"Flash"</li>
+                <li><i class="bi bi-x-circle me-2 text-body-secondary"></i>fetch direto p/ OpenRouter; KeyModal de chave única; strings só "OpenRouter"</li>
+                <li><i class="bi bi-x-circle me-2 text-body-secondary"></i>Custo via <code>usage.cost</code>; probe GET /key</li>
               </ul>
             </div>
           </div>
         </div>
         <div class="col-lg-6">
           <div class="card h-100 depara-depois">
-            <div class="card-header"><i class="bi bi-arrow-right-circle me-1"></i><strong>Depois</strong></div>
+            <div class="card-header"><i class="bi bi-arrow-right-circle me-1"></i><strong>Depois — webapp estático (BYOK)</strong></div>
             <div class="card-body">
-              <p class="card-text text-body-secondary">Um modelo único <code>deepseek/deepseek-v4-flash-0731</code> com os MESMOS efforts por estágio.</p>
               <ul class="list-unstyled mb-0 d-grid gap-2">
-                <li><i class="bi bi-file-earmark-text me-2 text-body-secondary"></i><code>config/models.json</code> — 26 entradas no slug novo; efforts intactos (xhigh/high/medium)</li>
-                <li><i class="bi bi-file-earmark-text me-2 text-body-secondary"></i><code>MODELS.pro === MODELS.flash</code> — escalada de retry vira no-op documentado</li>
-                <li><i class="bi bi-file-earmark-text me-2 text-body-secondary"></i><code>meta.json</code> — site chama o slug novo; seed do ledger cai em SEED_FLASH (0.005)</li>
-                <li><i class="bi bi-file-earmark-text me-2 text-body-secondary"></i>README/STAGE_KEYS falam em efforts; 11 testes novos congelam o contrato</li>
+                <li><i class="bi bi-check-circle me-2 text-body-secondary"></i>KeyModal com select de provider; <code>nc-llm-provider</code> no localStorage (migração silenciosa); strings PT/EN provider-aware</li>
+                <li><i class="bi bi-check-circle me-2 text-body-secondary"></i>Custo local por token (deepseekCostFromUsage); probe por provider (OR /key · DS /models); CORS confirmado por probe real</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-3 mb-4">
+        <div class="col-lg-6">
+          <div class="card h-100 depara-antes">
+            <div class="card-header"><i class="bi bi-arrow-left-circle me-1"></i><strong>Antes — keys/CLI/TUI</strong></div>
+            <div class="card-body">
+              <ul class="list-unstyled mb-0 d-grid gap-2">
+                <li><i class="bi bi-x-circle me-2 text-body-secondary"></i><code>ncrawl key set</code> só OpenRouter; sem tela de chave na TUI; mensagens "OPENROUTER_API_KEY ausente"</li>
+                <li><i class="bi bi-x-circle me-2 text-body-secondary"></i>Telemetria gravava slug cru/hardcoded (<code>deepseek-v4-flash-0731</code>) mesmo no direto</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-6">
+          <div class="card h-100 depara-depois">
+            <div class="card-header"><i class="bi bi-arrow-right-circle me-1"></i><strong>Depois — keys/CLI/TUI</strong></div>
+            <div class="card-body">
+              <ul class="list-unstyled mb-0 d-grid gap-2">
+                <li><i class="bi bi-check-circle me-2 text-body-secondary"></i><code>key set|test --provider openrouter|deepseek</code>; tela KeyConfig na TUI (wizard); mensagens provider-aware (<code>keyVar</code>); POST /api/key com provider; /api/key/status com bloco provider</li>
+                <li><i class="bi bi-check-circle me-2 text-body-secondary"></i>model_used/meta.json com o slug do provider ativo (telemetria verdadeira)</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-3 mb-4">
+        <div class="col-lg-6">
+          <div class="card h-100 depara-antes">
+            <div class="card-header"><i class="bi bi-arrow-left-circle me-1"></i><strong>Antes — docs</strong></div>
+            <div class="card-body">
+              <ul class="list-unstyled mb-0 d-grid gap-2">
+                <li><i class="bi bi-x-circle me-2 text-body-secondary"></i>README/AGENTS/skills descreviam só OpenRouter; sem .env.example de provider; CORS do direto "NÃO CONFIRMADO"</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-6">
+          <div class="card card h-100 depara-depois">
+            <div class="card-header"><i class="bi bi-arrow-right-circle me-1"></i><strong>Depois — docs</strong></div>
+            <div class="card-body">
+              <ul class="list-unstyled mb-0 d-grid gap-2">
+                <li><i class="bi bi-check-circle me-2 text-body-secondary"></i>docs/deepseek-direct.md (brief com fontes) + README/AGENTS/CHANGELOG + skills calling-the-llm-layer/building-the-webapp/searching-the-corpus; .env.example com LLM_PROVIDER/DEEPSEEK_*; CORS confirmado com headers reais</li>
               </ul>
             </div>
           </div>
@@ -515,162 +516,136 @@
       </div>
 
       <h2 class="h4 pane-title">Impacto</h2>
-      <p>O que cada mudança significa para quem usa o deep-orchestrator:</p>
       <div class="list-group list-group-flush mb-4">
         <div class="list-group-item d-flex gap-3 align-items-start">
-          <i class="bi bi-search fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>Busca Brave integrada</strong> — sub-agentes pesquisam na web direto do terminal (curl + API Brave), sem depender de outras ferramentas.</div>
+          <i class="bi bi-currency-dollar fs-5 stat-value flex-shrink-0 mt-1"></i>
+          <div><strong>Custo menor no direto</strong> — DeepSeek direto é mais barato que via OpenRouter (sem margem do agregador); cache-hit cobrado pela tarifa real (0.0028) em vez de input cheio.</div>
         </div>
         <div class="list-group-item d-flex gap-3 align-items-start">
-          <i class="bi bi-credit-card-2-front fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>Créditos sob controle</strong> — o orquestrador consulta os créditos restantes da API antes de disparar ondas longas.</div>
+          <i class="bi bi-browser-chrome fs-5 stat-value flex-shrink-0 mt-1"></i>
+          <div><strong>Web app com escolha</strong> — o KeyModal do webapp estático deixa o usuário escolher OpenRouter ou DeepSeek; a chave nunca passa por servidor nosso (BYOK, CORS confirmado).</div>
         </div>
         <div class="list-group-item d-flex gap-3 align-items-start">
-          <i class="bi bi-shield-check fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>Execução confiável</strong> — contratos ECC (execução de código confiável) que os sub-agentes seguem ao executar código.</div>
+          <i class="bi bi-terminal fs-5 stat-value flex-shrink-0 mt-1"></i>
+          <div><strong>CLI/TUI provider-aware</strong> — <code>ncrawl key set --provider deepseek</code>, tela de chave na TUI, mensagens que nomeiam a variável certa.</div>
         </div>
         <div class="list-group-item d-flex gap-3 align-items-start">
-          <i class="bi bi-chat-square-text fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>Busca padronizada</strong> — prompts de pesquisa consistentes entre sub-agentes (search-prompts.md).</div>
+          <i class="bi bi-arrow-repeat fs-5 stat-value flex-shrink-0 mt-1"></i>
+          <div><strong>Compat total</strong> — sem LLM_PROVIDER, tudo se comporta byte-idêntico a antes (verificado por revisão adversarial e testes).</div>
         </div>
         <div class="list-group-item d-flex gap-3 align-items-start">
-          <i class="bi bi-file-earmark-code fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>De-para visível</strong> — toda execução termina com um EXPLAINER.html legível (este documento).</div>
-        </div>
-        <div class="list-group-item d-flex gap-3 align-items-start">
-          <i class="bi bi-gear fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>Processo documentado</strong> — ondas ilimitadas e o novo fluxo registrados no SKILL.md.</div>
-        </div>
-      </div>
-
-      <h2 class="h4 pane-title">Novas capacidades</h2>
-      <div class="row g-3">
-        <div class="col-md-6 col-lg-4">
-          <div class="card h-100">
-            <div class="card-body">
-              <i class="bi bi-search fs-3 stat-value"></i>
-              <h3 class="h6 mt-2 mb-1">Busca Brave interna</h3>
-              <p class="small text-body-secondary mb-0">Sub-agentes pesquisam na web via API Brave, direto do terminal — sem sair do fluxo.</p>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-6 col-lg-4">
-          <div class="card h-100">
-            <div class="card-body">
-              <i class="bi bi-shield-check fs-3 stat-value"></i>
-              <h3 class="h6 mt-2 mb-1">ECC prompts</h3>
-              <p class="small text-body-secondary mb-0">Contratos de execução de código confiável que os sub-agentes seguem (ecc-prompts.md, ecc-skills.md).</p>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-6 col-lg-4">
-          <div class="card h-100">
-            <div class="card-body">
-              <i class="bi bi-infinity fs-3 stat-value"></i>
-              <h3 class="h6 mt-2 mb-1">Ondas ilimitadas</h3>
-              <p class="small text-body-secondary mb-0">O plano não fica limitado a N ondas — a topologia das dependências manda.</p>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-6 col-lg-4">
-          <div class="card h-100">
-            <div class="card-body">
-              <i class="bi bi-credit-card-2-front fs-3 stat-value"></i>
-              <h3 class="h6 mt-2 mb-1">Verificação de créditos</h3>
-              <p class="small text-body-secondary mb-0">Créditos da API Brave consultados antes de ondas longas — o orquestrador sabe quando parar.</p>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-6 col-lg-4">
-          <div class="card h-100">
-            <div class="card-body">
-              <i class="bi bi-file-earmark-code fs-3 stat-value"></i>
-              <h3 class="h6 mt-2 mb-1">HTML explainer</h3>
-              <p class="small text-body-secondary mb-0">Este documento: o de-para (antes/depois) de tudo que foi feito na execução.</p>
-            </div>
-          </div>
+          <i class="bi bi-music-note fs-5 stat-value flex-shrink-0 mt-1"></i>
+          <div><strong>TTS segue OpenRouter-only</strong> — a DeepSeek não tem API de áudio; decisão documentada no README/skills.</div>
         </div>
       </div>
     </div>
 
-    <!-- ══════════════ ABA 5 · DECISÕES AUTÔNOMAS ══════════════ -->
+    <!-- ══════════════ ABA 5 · DECISÕES ══════════════ -->
     <div class="tab-pane fade" id="pane-decisoes" role="tabpanel"
          aria-labelledby="tab-decisoes" tabindex="0" data-print-title="Decisões autônomas">
       <h2 class="h4 pane-title">Premissas inferidas sem perguntar</h2>
-      <p>O orquestrador opera em autonomia total: nenhuma pergunta foi feita ao usuário. Toda premissa assumida fica registrada aqui — para revisão e reprodutibilidade.</p>
+      <p>O orquestrador operou em autonomia total: nenhuma pergunta foi feita ao usuário. Toda premissa assumida fica registrada aqui.</p>
 
-            <ul class="list-group list-group-flush">
+      <ul class="list-group list-group-flush">
         <li class="list-group-item d-flex gap-3 align-items-start">
           <i class="bi bi-lightbulb fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>"Think no mínimo na busca soft" = manter searchBatch em medium:</strong> efforts já definidos foram mantidos; o requisito do lote de ~40 artigos já era medium — nada foi elevado.</div>
+          <div><strong>LLM_PROVIDER explícito, sem auto-detecção</strong> — mesmo com DEEPSEEK_API_KEY no ambiente, o provider só troca por env explícito; previsibilidade > conveniência.</div>
         </li>
         <li class="list-group-item d-flex gap-3 align-items-start">
           <i class="bi bi-lightbulb fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>Edição cirúrgica do meta.json em vez de re-export:</strong> o banco local está vazio (0 artigos) — rodar o export geraria snapshot destrutivo e brigaria com o guard do pre-push. Os 4 slugs foram editados à mão espelhando exatamente o que o export emitiria da config nova.</div>
+          <div><strong>json_object no direto</strong> — a API DeepSeek rejeita json_schema (400 confirmado por probe real); o degrade + retry/parse defensivo existentes cobrem o pior caso.</div>
         </li>
         <li class="list-group-item d-flex gap-3 align-items-start">
           <i class="bi bi-lightbulb fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>acme/llm-probe como slug genérico de teste:</strong> o caminho não-flash do seedForModel (SEED_PRO 0.05) precisa continuar coberto; um slug fictício sem "flash" o exercita sem citar modelo que não existe mais.</div>
+          <div><strong>Custo local no ledger via injeção</strong> — computeUsageCost injeta <code>usage.cost</code> antes do <code>resv.commit</code>; budget.js ficou INTOCADO (nenhum risco de regressão no orçamento).</div>
         </li>
         <li class="list-group-item d-flex gap-3 align-items-start">
           <i class="bi bi-lightbulb fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>Onda 2 descoberta pelo REVISOR DE PLANO:</strong> o webapp faz chamadas REAIS ao OpenRouter com os slugs do snapshot — sem corrigir o meta.json, o site continuaria usando os modelos antigos.</div>
+          <div><strong>Effort colapsa no direto</strong> — xhigh/medium não existem na DeepSeek direta (mapeiam p/ high); omite-se o parâmetro reasoning por inteiro (contrato da API).</div>
         </li>
         <li class="list-group-item d-flex gap-3 align-items-start">
           <i class="bi bi-lightbulb fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>Escalada de retry Flash→Pro documentada como no-op:</strong> com fallbackModel === model, o callJSON nunca troca de modelo; comentários foram sincronizados com o comportamento real.</div>
+          <div><strong>TTS permanece OpenRouter-only</strong> — DeepSeek não tem API de áudio; o player do webapp comporta "sem chave" quando só há chave deepseek.</div>
         </li>
         <li class="list-group-item d-flex gap-3 align-items-start">
           <i class="bi bi-lightbulb fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>Skills (.agents/skills) e docs históricas (PLANO-*) intocadas:</strong> evolução de skills é passo de meta-skill-evolution pós-entrega; as ocorrências restantes de slugs antigos estão nesses arquivos ou em conteúdo de artigos (acervo) — nada de config.</div>
+          <div><strong>Troca de provider em runtime não persiste LLM_PROVIDER</strong> — <code>key set --provider deepseek</code> salva só a chave; após restart o provider volta ao env (documentado).</div>
+        </li>
+        <li class="list-group-item d-flex gap-3 align-items-start">
+          <i class="bi bi-lightbulb fs-5 stat-value flex-shrink-0 mt-1"></i>
+          <div><strong>Telemetria do crawl.js mudou de bytes no default</strong> — model_used vira o slug completo <code>deepseek/deepseek-v4-flash-0731</code> (o que o runtime usa) em vez do hardcoded cru; achado do revisor aceito (valor antigo era inválido nos dois mundos).</div>
+        </li>
+        <li class="list-group-item d-flex gap-3 align-items-start">
+          <i class="bi bi-lightbulb fs-5 stat-value flex-shrink-0 mt-1"></i>
+          <div><strong>Browser E2E do webapp substituído</strong> — o E2E completo custaria ~$0.18-0.20 no snapshot (4188 artigos); substituído por: código de produção do webapp com payload real + CORS provado por preflight + 123 testes; procedimento manual documentado.</div>
+        </li>
+        <li class="list-group-item d-flex gap-3 align-items-start">
+          <i class="bi bi-lightbulb fs-5 stat-value flex-shrink-0 mt-1"></i>
+          <div><strong>Preços peak/off-peak pós-16/08</strong> — revisão anunciada p/ 2026-08-16 16:00 UTC; env overrides cobrem o CLI, webapp exige código+deploy; nota de re-verificação registrada (não-bloqueante).</div>
+        </li>
+        <li class="list-group-item d-flex gap-3 align-items-start">
+          <i class="bi bi-lightbulb fs-5 stat-value flex-shrink-0 mt-1"></i>
+          <div><strong>Test-onda1-provider-core absorvido</strong> — os 3 arquivos de teste entraram via fix-custo-cache + fix-gate-tests (conteúdo idêntico/superseded); drop sem merge para não duplicar.</div>
         </li>
       </ul>
-
     </div>
 
     <!-- ══════════════ ABA 6 · TIMELINE ══════════════ -->
     <div class="tab-pane fade" id="pane-timeline" role="tabpanel"
          aria-labelledby="tab-timeline" tabindex="0" data-print-title="Timeline">
       <h2 class="h4 pane-title">Linha do tempo da execução</h2>
-      <p>As quatro fases do orquestrador e o que aconteceu em cada uma.</p>
+      <p>2026-08-13 20:49 UTC → 2026-08-14 01:30 UTC (run 20260813-204910-1326202).</p>
 
-            <ol class="timeline list-unstyled mb-0">
+      <ol class="timeline list-unstyled mb-0">
         <li class="timeline-item mb-4">
           <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
             <span class="badge badge-accent">Fase 0-1</span>
             <strong>DELIMITAR + ANALYZE</strong>
           </div>
-          <p class="mb-0 text-body-secondary small">Fronteira resolvida (MODE=normal, main); escopo mapeado por grep: 8 arquivos com slugs + pendências webapp; NC_HOME sem overrides de modelo; busca Tier 1 OK.</p>
+          <p class="mb-0 text-body-secondary small">FASE 0 (MODE=normal, base=main), leitura do project-router + calling-the-llm-layer, mapeamento dos 2 transportes LLM (CLI + webapp BYOK) e pontos de key/custo/TTS; DEEPSEEK_API_KEY detectada no ambiente.</p>
         </li>
         <li class="timeline-item mb-4">
           <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
             <span class="badge badge-accent">Fase 2</span>
             <strong>PLAN</strong>
           </div>
-          <p class="mb-0 text-body-secondary small">1 onda prevista (onda1-swap-modelo) + gate; TASK_PLAN.md publicado.</p>
+          <p class="mb-0 text-body-secondary small">3 ondas + testing subwaves; mapa de propriedade de arquivo; worktrees batizadas (onda1-pesquisa-deepseek, onda1-llm-provider-core, onda1-webapp-provider).</p>
         </li>
         <li class="timeline-item mb-4">
           <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
             <span class="badge badge-accent">Fase 3</span>
             <strong>EXECUTE-ONDA 1</strong>
           </div>
-          <p class="mb-0 text-body-secondary small">Swap implementado (gate 341/341); revisão adversarial REFUTOU docs (README/STAGE_KEYS com tiers extintos) → 2 rodadas de fix; REPLAN descobriu o consumo real do meta.json → Onda 2 (2 worktrees paralelas, revisões adversariais "nada a refutar"); integração um-a-um com gates; testing subwave em background.</p>
+          <p class="mb-0 text-body-secondary small">3 agentes paralelos; revisor de plano (achou 2.3 telemetria + extensões); 3 revisões "NADA A REFUTAR"; squash 7f77b9c/29e99c4/a4a01cf com gates (365 → 377 testes).</p>
         </li>
         <li class="timeline-item mb-4">
+          <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+            <span class="badge badge-accent">Fase 3</span>
+            <strong>EXECUTE-ONDA 2</strong>
+          </div>
+          <p class="mb-0 text-body-secondary small">3 features paralelas + testing subwave da onda 1 em background; revisões (2 "PROBLEMAS PARCIAIS" — fix TUI na mesma worktree, achado de telemetria aceito); testador achou o BUG de custo de cache → fix dedicado; gate vermelho por env (ROOT/.env real) → fix de isolamento; merges fdb93dd/7169d64/21501f1/f2b156c/1e4bccf (421/421).</p>
+        </li>
+        <li class="timeline-item mb-4">
+          <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+            <span class="badge badge-accent">Fase 3</span>
+            <strong>Subwave 1 + ONDA 3</strong>
+          </div>
+          <p class="mb-0 text-body-secondary small">Subwave processada: 45 testes webapp mergeados (6018b5a, 466/466 raiz); provider-core absorvido. Onda 3: verificação com chaves REAIS (probe OR/DS, 1 chamada por provider, ledger custo exato, web local status, CORS BYOK, detect-type no direto — ~$0.00033); fixes de CORS no brief + comentário + .env.example (354e62c).</p>
+        </li>
+        <li class="timeline-item">
           <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
             <span class="badge badge-ok">Fase 4</span>
             <strong>COMMIT-FINAL</strong>
           </div>
-          <p class="mb-0 text-body-secondary small">Testing subwave revisada (mutation test provou a eficácia; assert vacuoso corrigido) e integrada (352/352); gate completo raiz + webapp (66/66); EXPLAINER.html gerado; commit final; limpeza + contenção OK.</p>
+          <p class="mb-0 text-body-secondary small">Revisor de plano declarou CONVERGÊNCIA; gate completo final (466/466 raiz + 123/123 webapp + build + status); EXPLAINER.html gerado; commit final; sweep+verify; relatório.</p>
         </li>
       </ol>
-
     </div>
 
   </div>
 
   <footer class="text-body-secondary small border-top mt-5 pt-3">
-    Gerado por <strong>deep-orchestrator</strong> v2 · 2026-08-13 · branch main.
+    Gerado por <strong>deep-orchestrator</strong> v2.0 · 2026-08-13 → 14 · branch main.
     Documento de arquivo único — salve, abra com duplo clique ou imprima em PDF (todas as abas entram no papel).
   </footer>
 
@@ -684,52 +659,32 @@
         crossorigin="anonymous"></script>
 
 <script>
-/* ── runtime do documento ────────────────────────────────────────────────────
-   Copie este bloco inteiro, sem editar. Ele faz três coisas:
-   1. guarda o código-fonte cru ANTES de qualquer transformação (para o copiar);
-   2. destaca a sintaxe e injeta o botão de copiar;
-   3. liga as abas ao #hash da URL, nos dois sentidos.
-   ────────────────────────────────────────────────────────────────────────── */
 (function () {
   'use strict';
-
-  // 1. Fonte cru primeiro. Depois do highlight o DOM ganha <span>; textContent ainda
-  //    devolve o texto certo, mas plugins de numeração de linha o contaminam. Guardar
-  //    antes é a única versão que nunca mente.
   var sources = new WeakMap();
   document.querySelectorAll('pre > code').forEach(function (code) {
     sources.set(code, code.textContent.replace(/\n$/, ''));
   });
-
-  // 2. Highlight. Declare sempre a linguagem na classe: a auto-detecção erra em
-  //    trechos curtos (o mesmo snippet vira "ruby" numa aba e "perl" na outra).
   if (window.hljs) hljs.highlightAll();
-
-  // Copiar. navigator.clipboard exige contexto seguro; em file:// o comportamento
-  // varia por navegador, então o fallback com execCommand não é opcional.
   function copyText(text) {
     if (navigator.clipboard && window.isSecureContext) {
-      return navigator.clipboard.writeText(text).then(function () { return true; },
-                                                      function () { return legacyCopy(text); });
+      return navigator.clipboard.writeText(text).then(function () { return true; }, function () { return legacyCopy(text); });
     }
     return Promise.resolve(legacyCopy(text));
   }
-
   function legacyCopy(text) {
     var ta = document.createElement('textarea');
     ta.value = text;
     ta.setAttribute('readonly', '');
-    // position:fixed + opacity:0 evita que a página role até o textarea.
     ta.style.cssText = 'position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;';
     document.body.appendChild(ta);
     ta.select();
-    ta.setSelectionRange(0, ta.value.length); // iOS ignora select() sozinho
+    ta.setSelectionRange(0, ta.value.length);
     var ok = false;
     try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
     document.body.removeChild(ta);
     return ok;
   }
-
   document.querySelectorAll('pre > code').forEach(function (code) {
     var pre = code.parentElement;
     var btn = document.createElement('button');
@@ -751,36 +706,26 @@
     });
     pre.appendChild(btn);
   });
-
-  // 3. Aba ↔ URL. Sem isto, mandar "olha a aba De-Para" exige explicar o clique.
   var tabs = document.querySelectorAll('[data-bs-toggle="tab"]');
   if (!tabs.length) return;
-
   function activateFromHash() {
     var hash = window.location.hash;
     if (!hash || hash.length < 2) return;
     var target = document.querySelector(hash);
     if (!target) return;
-    // O #hash pode apontar para o painel OU para um título dentro dele.
     var pane = target.closest('.tab-pane') || (target.classList.contains('tab-pane') ? target : null);
     if (!pane) return;
     var trigger = document.querySelector('[data-bs-target="#' + CSS.escape(pane.id) + '"]');
     if (trigger) bootstrap.Tab.getOrCreateInstance(trigger).show();
-    // O navegador já tentou rolar até o alvo — e falhou, porque naquele instante o
-    // painel ainda era display:none. Agora que apareceu, role de novo: sem isto a
-    // página abre num scroll intermediário, com as abas escondidas atrás da navbar.
     var scrollTo = target !== pane ? target : (trigger && trigger.closest('[role="tablist"]')) || pane;
     requestAnimationFrame(function () { scrollTo.scrollIntoView({ block: 'start' }); });
   }
-
   tabs.forEach(function (t) {
     t.addEventListener('shown.bs.tab', function (e) {
       var id = (e.target.getAttribute('data-bs-target') || '').slice(1);
-      // replaceState, não location.hash: mudar o hash direto faz a página pular.
       if (id) history.replaceState(null, '', '#' + id);
     });
   });
-
   window.addEventListener('hashchange', activateFromHash);
   activateFromHash();
 })();

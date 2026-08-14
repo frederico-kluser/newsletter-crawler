@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="dark">
-<title>EXPLAINER — deepseek provider direto · de-para da execução</title>
+<title>EXPLAINER — captura 3 dias + qualidade + fixes · de-para da execução</title>
 <link rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
       integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
@@ -72,7 +72,7 @@
 <nav class="navbar navbar-expand-lg sticky-top bg-body-tertiary">
   <div class="container">
     <span class="navbar-brand fw-semibold"><i class="bi bi-diagram-3 brand-accent me-2"></i>deep-orchestrator <span class="text-body-secondary fw-normal">· EXPLAINER</span></span>
-    <span class="navbar-text small text-body-secondary d-none d-md-inline">v2.0 · 2026-08-13 → 14</span>
+    <span class="navbar-text small text-body-secondary d-none d-md-inline">v2.0 · 2026-08-14</span>
   </div>
 </nav>
 
@@ -80,11 +80,11 @@
 
   <header class="explainer-hero rounded-4 p-4 p-md-5 mb-4">
     <span class="badge badge-accent mb-3"><i class="bi bi-clipboard-data me-1"></i>Relatório de execução</span>
-    <h1 class="display-6 fw-semibold text-white mb-2">Suporte ao provedor DeepSeek DIRETO (api.deepseek.com)</h1>
-    <p class="lead text-white-50 mb-3">Além da OpenRouter — no crawler/CLI, na TUI, no web local e no webapp estático (BYOK). 3 ondas + 2 testing subwaves, 20 sub-agentes, verificação ponta a ponta com chaves reais.</p>
+    <h1 class="display-6 fw-semibold text-white mb-2">Captura real (3 dias, 1 fonte) + teste de qualidade + correções P1–P6</h1>
+    <p class="lead text-white-50 mb-3">Node Weekly issue 637 capturada com a chave real; extração testada artigo a artigo; 6 problemas encontrados (datas, curadoria, taxonomia, verify, extração) e todos corrigidos e re-verificados contra os dados reais.</p>
     <div class="d-flex flex-wrap gap-2">
       <span class="badge badge-accent">v2.0</span>
-      <span class="badge badge-soft"><i class="bi bi-calendar3 me-1"></i>2026-08-13 → 14</span>
+      <span class="badge badge-soft"><i class="bi bi-calendar3 me-1"></i>2026-08-14</span>
       <span class="badge badge-soft"><i class="bi bi-git-branch me-1"></i>main</span>
     </div>
   </header>
@@ -134,11 +134,11 @@
     <div class="tab-pane fade show active" id="pane-visao" role="tabpanel"
          aria-labelledby="tab-visao" tabindex="0" data-print-title="Visão geral">
       <h2 class="h4 pane-title">Resumo da execução</h2>
-      <p class="text-body-secondary">O usuário pediu: "ajuste o projeto para funcionar também com o provedor DeepSeek DIRETO (api.deepseek.com), não só OpenRouter — tanto no web quanto no crawler; não pergunte nada; pesquise e faça tudo sozinho."</p>
+      <p class="text-body-secondary">Tarefa: "pegue nossa key e faça a captura dos últimos 3 dias para apenas uma fonte; teste a captura, teste a qualidade da extração, analise os erros e corrija tudo que estiver errado."</p>
 
       <div class="alert alert-primary d-flex gap-2" role="alert">
         <i class="bi bi-info-circle-fill flex-shrink-0"></i>
-        <div><strong>O que foi entregue:</strong> o projeto agora roda com <code>LLM_PROVIDER=openrouter|deepseek</code> em TODAS as superfícies — crawler/CLI, TUI, web local e webapp estático (BYOK). Default permanece OpenRouter (zero mudança de comportamento). Verificado ponta a ponta com chaves reais: 466/466 testes na raiz, 123/123 no webapp, build vite ok, ledger com custo exato calculado localmente.</div>
+        <div><strong>O que foi entregue:</strong> captura real da Node Weekly (issue 637, 15→21 artigos) com o pipeline completo; teste de qualidade artigo a artigo; 6 problemas reais encontrados (P1 datas erradas em 13/15 artigos, P2 seção de curadoria perdida, P3 taxonomia sem termos core, P4 falso-positivo de verify, P5 botão de UI no fim das release notes, P6 newlines/moldura) — todos corrigidos, com 31 testes novos (471→533) e RE-VERIFICADOS contra o banco real (replay da issue, reextract, reclean). Custo total das provas: ~US$ 0,16.</div>
       </div>
 
       <div class="row g-3">
@@ -146,8 +146,8 @@
           <div class="card h-100 text-center">
             <div class="card-body py-4">
               <i class="bi bi-layers fs-3 stat-value"></i>
-              <div class="display-6 fw-bold stat-value">3</div>
-              <div class="text-body-secondary small">Ondas + 2 testing subwaves</div>
+              <div class="display-6 fw-bold stat-value">4</div>
+              <div class="text-body-secondary small">Ondas + 2 fix subwaves</div>
             </div>
           </div>
         </div>
@@ -155,7 +155,7 @@
           <div class="card h-100 text-center">
             <div class="card-body py-4">
               <i class="bi bi-robot fs-3 stat-value"></i>
-              <div class="display-6 fw-bold stat-value">20</div>
+              <div class="display-6 fw-bold stat-value">16</div>
               <div class="text-body-secondary small">Sub-agentes (incl. revisores)</div>
             </div>
           </div>
@@ -164,7 +164,7 @@
           <div class="card h-100 text-center">
             <div class="card-body py-4">
               <i class="bi bi-git-commit fs-3 stat-value"></i>
-              <div class="display-6 fw-bold stat-value">10</div>
+              <div class="display-6 fw-bold stat-value">8</div>
               <div class="text-body-secondary small">Commits squash + 1 final</div>
             </div>
           </div>
@@ -175,19 +175,23 @@
       <div class="list-group list-group-flush">
         <div class="list-group-item d-flex gap-3 align-items-start">
           <i class="bi bi-file-earmark-diff fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>45 arquivos alterados</strong> — <span class="diff-plus">+3.171</span> / <span class="diff-minus">−196</span> linhas (f01d1c1..HEAD).</div>
+          <div><strong>30 arquivos alterados</strong> — <span class="diff-plus">+3.634</span> / <span class="diff-minus">−54</span> linhas (ac07ce0..HEAD).</div>
         </div>
         <div class="list-group-item d-flex gap-3 align-items-start">
           <i class="bi bi-check2-circle fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>Testes:</strong> 466/466 na raiz (era 352 no baseline) + 123/123 webapp (era 66) + build vite.</div>
+          <div><strong>Testes:</strong> 471 → 533 (31 novos: wire tests com fetch/SDK mockados, fixtures de páginas reais).</div>
         </div>
         <div class="list-group-item d-flex gap-3 align-items-start">
           <i class="bi bi-cash-stack fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>Custo da verificação real:</strong> ~US$ 0.00033 em chamadas LLM reais (1 chamada por provider + probes + detect-type no direto).</div>
+          <div><strong>Custo da captura+provas:</strong> run 1 US$ 0,0676 · re-verificação US$ 0,0373 · acidente de --help US$ 0,0147 (fora das provas).</div>
         </div>
         <div class="list-group-item d-flex gap-3 align-items-start">
           <i class="bi bi-shield-check fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>Revisões adversariais:</strong> 8 revisões (6 "NADA A REFUTAR", 2 "PROBLEMAS PARCIAIS" com achados corrigidos/aceitos) + 2 re-planes (1 recálculo com sub-tarefa nova, 1 convergência).</div>
+          <div><strong>Revisões adversariais:</strong> 4 (P1, P2+P4, P5+P6 + convergência) — 3 "PROBLEMAS PARCIAIS" com fixes aplicados, 1 convergência; + 1 revisor de plano (fixes).</div>
+        </div>
+        <div class="list-group-item d-flex gap-3 align-items-start">
+          <i class="bi bi-database-check fs-5 stat-value flex-shrink-0 mt-1"></i>
+          <div><strong>Dados reais corrigidos:</strong> 15 artigos backfillados para 2026-08-13 (13 estavam com data do alvo); issue 637 re-processada → 6 itens IN BRIEF recuperados (15→21, dedup 13/13).</div>
         </div>
       </div>
     </div>
@@ -196,7 +200,7 @@
     <div class="tab-pane fade" id="pane-ondas" role="tabpanel"
          aria-labelledby="tab-ondas" tabindex="0" data-print-title="Ondas executadas">
       <h2 class="h4 pane-title">Ondas executadas</h2>
-      <p>Uma linha por worktree. Cada sub-agente trabalhou numa worktree Git nomeada; a integração foi squash-merge um a um, com gate (build + testes) entre merges. Todas as worktrees/branches desta execução foram removidas ao fim (arquivadas em refs/do-archive/).</p>
+      <p>Uma linha por worktree. Cada sub-agente trabalhou numa worktree Git nomeada; integração por squash-merge um a um, com gate (build + testes) entre merges. Todas as worktrees/branches desta execução foram removidas ao fim (arquivadas em refs/do-archive/).</p>
 
       <div class="table-responsive">
         <table class="table table-hover align-middle">
@@ -212,84 +216,66 @@
           <tbody>
             <tr>
               <td><span class="badge badge-accent">Onda 1</span></td>
-              <td><code>onda1-pesquisa-deepseek</code></td>
-              <td>docs/deepseek-direct.md — brief de fatos da API direta (slugs v4, preços, params, probes, erros, CORS) com fontes</td>
-              <td class="text-end"><code>7f77b9c</code></td>
-              <td><span class="badge badge-ok">Concluída</span></td>
-            </tr>
-            <tr>
-              <td><span class="badge badge-accent">Onda 1</span></td>
-              <td><code>onda1-llm-provider-core</code></td>
-              <td>src/config.js + src/llm.js — LLM_PROVIDER, translateModel, custo local, response_format provider-aware, setRuntimeKey(key, provider)</td>
-              <td class="text-end"><code>29e99c4</code></td>
-              <td><span class="badge badge-ok">Concluída</span></td>
-            </tr>
-            <tr>
-              <td><span class="badge badge-accent">Onda 1</span></td>
-              <td><code>onda1-webapp-provider</code></td>
-              <td>webapp BYOK — lib/openrouter.js generalizado, KeyModal com select, storage.js, strings PT/EN, custo local</td>
-              <td class="text-end"><code>a4a01cf</code></td>
-              <td><span class="badge badge-ok">Concluída</span></td>
-            </tr>
-            <tr>
-              <td><span class="badge badge-soft">Subwave 1</span></td>
-              <td><code>test-onda1-webapp-provider</code></td>
-              <td>45 testes do provider no webapp (callJSON por provider, custo, storage, busca deepseek, paridade i18n)</td>
-              <td class="text-end"><code>6018b5a</code></td>
-              <td><span class="badge badge-ok">Concluída</span></td>
-            </tr>
-            <tr>
-              <td><span class="badge badge-soft">Subwave 1</span></td>
-              <td><code>test-onda1-provider-core</code></td>
-              <td>28 testes do provider core — ABSORVIDOS pelos commits de fix (arquivos idênticos/superseded; drop sem merge)</td>
-              <td class="text-end">—</td>
-              <td><span class="badge badge-warn">Absorvida</span></td>
-            </tr>
-            <tr>
-              <td><span class="badge badge-accent">Onda 2</span></td>
-              <td><code>onda2-keys-cli-localweb</code></td>
-              <td>keys.js/commands.js/web.js/TUI — probeDeepSeekKey + dispatcher, key set/test --provider, tela KeyConfig, POST /api/key com provider</td>
-              <td class="text-end"><code>fdb93dd</code></td>
+              <td><code>onda1-captura-node-weekly</code></td>
+              <td>Captura REAL (Node Weekly, --since 2026-08-11, 3 dias): run 1 done, US$ 0,0676, 15 artigos, issue 637; relatório docs/captura-2026-08-14-node-weekly.md com achados P1-P6</td>
+              <td class="text-end"><code>5994b89</code></td>
               <td><span class="badge badge-ok">Concluída</span></td>
             </tr>
             <tr>
               <td><span class="badge badge-accent">Onda 2</span></td>
-              <td><code>onda2-telemetria-provider-aware</code></td>
-              <td>classify.js/export-web.js/crawl.js — model_used e meta.json com o slug do provider ativo (telemetria traduzida)</td>
-              <td class="text-end"><code>7169d64</code></td>
+              <td><code>onda2-p1-data-issue</code></td>
+              <td>P1: herança da data da issue (listagem→roundup→itens), fallback mês-por-extenso com ordinal, enrich nunca adota data do alvo, Substack com data (+2 fixes da revisão)</td>
+              <td class="text-end"><code>7116b35</code></td>
+              <td><span class="badge badge-ok">Concluída</span></td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-accent">Onda 2</span></td>
+              <td><code>onda2-p2p4-llm-verify</code></td>
+              <td>P2: retry central de zod no callJSON (18 call sites, defaults tolerantes); P4: heurística de nav-menu pré-LLM + exemplo no prompt (+fix detect-type)</td>
+              <td class="text-end"><code>d2d231b</code></td>
+              <td><span class="badge badge-ok">Concluída</span></td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-accent">Onda 2</span></td>
+              <td><code>onda2-p3-taxonomia</code></td>
+              <td>P3: vocabulário cobre o ecossistema Node (nodejs/static-analysis/sast/dom/activitypub), version 2026-08-14, auditoria tag→faceta</td>
+              <td class="text-end"><code>0232df1</code></td>
+              <td><span class="badge badge-ok">Concluída</span></td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-accent">Onda 3</span></td>
+              <td><code>onda3-p5p6-extracao</code></td>
+              <td>P5: strip do gatilho "View changes on GitHub" + 2º passe do container + comando <code>ncrawl reextract</code> (guards de erro/bloqueio, --limit default 20); P6: newlines entre blocos + prunePageFrame no fallback (+fix de integridade da revisão)</td>
+              <td class="text-end"><code>dea316b</code></td>
+              <td><span class="badge badge-ok">Concluída</span></td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-accent">Onda 3</span></td>
+              <td><code>onda3-backfill-datas</code></td>
+              <td>scripts/fix-issue-dates.mjs + EXECUÇÃO real: 15 artigos da issue 637 → 2026-08-13 (idempotente, 0 rows no re-run)</td>
+              <td class="text-end"><code>b340553</code></td>
               <td><span class="badge badge-ok">Concluída</span></td>
             </tr>
             <tr>
               <td><span class="badge badge-warn">Fix</span></td>
-              <td><code>onda2-fix-custo-cache</code></td>
-              <td>computeUsageCost cobra cache pela tarifa de hit (flash 0.0028 / pro 0.003625) — espelho do webapp; overrides HIT_PER_M</td>
-              <td class="text-end"><code>21501f1</code></td>
+              <td><code>onda3-fix-test-env-reextract</code></td>
+              <td>Gate vermelho: ROOT/.env real re-injetava a chave nos testes → seed do NC_HOME tmp (533/533 em ~6s na raiz)</td>
+              <td class="text-end"><code>d221a89</code></td>
               <td><span class="badge badge-ok">Concluída</span></td>
             </tr>
             <tr>
-              <td><span class="badge badge-accent">Onda 2</span></td>
-              <td><code>onda2-docs</code></td>
-              <td>README, AGENTS.md, calling-the-llm-layer, building-the-webapp, searching-the-corpus, CHANGELOG</td>
-              <td class="text-end"><code>f2b156c</code></td>
-              <td><span class="badge badge-ok">Concluída</span></td>
-            </tr>
-            <tr>
-              <td><span class="badge badge-warn">Fix</span></td>
-              <td><code>onda2-fix-gate-tests</code></td>
-              <td>Testes de load/provider isolam o ambiente — seed do NC_HOME tmp vence o ROOT/.env real (421/421 na raiz)</td>
-              <td class="text-end"><code>1e4bccf</code></td>
-              <td><span class="badge badge-ok">Concluída</span></td>
-            </tr>
-            <tr>
-              <td><span class="badge badge-ok">Onda 3</span></td>
-              <td><code>onda3-verificacao-integrada</code></td>
-              <td>Verificação com chaves reais nos 2 providers (probe, chamadas, ledger, CORS BYOK, detect-type) + fixes: CORS no brief, comentário de preço, .env.example</td>
-              <td class="text-end"><code>354e62c</code></td>
+              <td><span class="badge badge-ok">Onda 4</span></td>
+              <td><code>onda4-reverificacao</code></td>
+              <td>Re-verificação integrada contra os dados reais: replay da issue 637, reextract Vitest, reclean Drizzle, backfill SELECT, zero WARNs de zod — docs/reverificacao-2026-08-14.md</td>
+              <td class="text-end"><code>ef3c75c</code></td>
               <td><span class="badge badge-ok">Concluída</span></td>
             </tr>
           </tbody>
         </table>
       </div>
+
+      <h3 class="h6 mt-4 text-body-secondary">Nota sobre testing subwaves</h3>
+      <p class="text-body-secondary small">Os fixes das ondas 2/3 vieram com os próprios testes (31 novos, incluindo wire tests com filhos mockados e fixtures de páginas reais) + revisões adversariais com evidência — testing subwaves separadas foram consideradas duplicação e não criadas (decisão documentada).</p>
 
       <h3 class="h6 mt-4 text-body-secondary">Legenda de status</h3>
       <div class="d-flex flex-wrap gap-2">
@@ -303,7 +289,7 @@
     <div class="tab-pane fade" id="pane-arquivos" role="tabpanel"
          aria-labelledby="tab-arquivos" tabindex="0" data-print-title="Arquivos modificados">
       <h2 class="h4 pane-title">Arquivos modificados</h2>
-      <p>Diff stats da execução (f01d1c1..HEAD): <span class="diff-plus">+3.171</span> linhas adicionadas, <span class="diff-minus">−196</span> removidas, 45 arquivos.</p>
+      <p>Diff stats da execução (ac07ce0..HEAD): <span class="diff-plus">+3.634</span> / <span class="diff-minus">−54</span>, 30 arquivos.</p>
 
       <div class="table-responsive">
         <table class="table table-hover align-middle table-sm">
@@ -311,98 +297,73 @@
             <tr><th scope="col">Arquivo</th><th scope="col">Tipo</th><th scope="col" class="text-end">Diff</th></tr>
           </thead>
           <tbody>
-            <tr><td><code>docs/deepseek-direct.md</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+251</td></tr>
-            <tr><td><code>.env.example</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+13</span> <span class="diff-minus">−4</span></td></tr>
-            <tr><td><code>src/config.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+185</span> <span class="diff-minus">−10</span></td></tr>
-            <tr><td><code>src/llm.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+82</span> <span class="diff-minus">−16</span></td></tr>
-            <tr><td><code>src/keys.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+52</span> <span class="diff-minus">−8</span></td></tr>
-            <tr><td><code>src/commands.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+60</span> <span class="diff-minus">−18</span></td></tr>
-            <tr><td><code>src/web.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+35</span> <span class="diff-minus">−8</span></td></tr>
-            <tr><td><code>src/classify.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+6</span> <span class="diff-minus">−4</span></td></tr>
-            <tr><td><code>src/export-web.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+6</span> <span class="diff-minus">−2</span></td></tr>
-            <tr><td><code>src/crawl.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+10</span> <span class="diff-minus">−4</span></td></tr>
-            <tr><td><code>src/index.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+4</span> <span class="diff-minus">−2</span></td></tr>
-            <tr><td><code>src/ui/App.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+4</span> <span class="diff-minus">−2</span></td></tr>
-            <tr><td><code>src/ui/i18n.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+24</span> <span class="diff-minus">−4</span></td></tr>
-            <tr><td><code>src/ui/screens.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+71</span> <span class="diff-minus">−8</span></td></tr>
-            <tr><td><code>src/web-ui/app.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+57</span> <span class="diff-minus">−10</span></td></tr>
-            <tr><td><code>src/web-ui/styles.css</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end diff-plus">+10</td></tr>
-            <tr><td><code>webapp/src/lib/openrouter.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+114</span> <span class="diff-minus">−16</span></td></tr>
-            <tr><td><code>webapp/src/lib/storage.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end diff-plus">+7</td></tr>
-            <tr><td><code>webapp/src/lib/search.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+17</span> <span class="diff-minus">−2</span></td></tr>
-            <tr><td><code>webapp/src/components/KeyModal.jsx</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+55</span> <span class="diff-minus">−8</span></td></tr>
-            <tr><td><code>webapp/src/components/KeyButton.jsx</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+11</span> <span class="diff-minus">−2</span></td></tr>
-            <tr><td><code>webapp/src/hooks/useAiSearch.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+16</span> <span class="diff-minus">−4</span></td></tr>
-            <tr><td><code>webapp/src/strings.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+40</span> <span class="diff-minus">−6</span></td></tr>
-            <tr><td><code>webapp/src/styles/app.css</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end diff-plus">+14</td></tr>
-            <tr><td><code>README.md</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+23</span> <span class="diff-minus">−8</span></td></tr>
-            <tr><td><code>AGENTS.md</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+11</span> <span class="diff-minus">−2</span></td></tr>
-            <tr><td><code>CHANGELOG.md</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end diff-plus">+18</td></tr>
-            <tr><td><code>.agents/skills/calling-the-llm-layer/SKILL.md</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+13</span> <span class="diff-minus">−4</span></td></tr>
-            <tr><td><code>.agents/skills/building-the-webapp/SKILL.md</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+5</span> <span class="diff-minus">−2</span></td></tr>
-            <tr><td><code>.agents/skills/searching-the-corpus/SKILL.md</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+2</span> <span class="diff-minus">−1</span></td></tr>
-            <tr><td><code>test/llm.provider.test.js</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+235</td></tr>
-            <tr><td><code>test/llm.provider-client.test.js</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+445</td></tr>
-            <tr><td><code>test/config.provider-load.test.js</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+176</td></tr>
-            <tr><td><code>test/config.provider-invalid.test.js</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+52</td></tr>
-            <tr><td><code>test/keys.test.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+93</span> <span class="diff-minus">−2</span></td></tr>
-            <tr><td><code>test/config.key.test.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end diff-plus">+24</td></tr>
-            <tr><td><code>test/export-web.test.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+30</span> <span class="diff-minus">−2</span></td></tr>
-            <tr><td><code>test/classify.incomplete.test.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+82</span> <span class="diff-minus">−2</span></td></tr>
-            <tr><td><code>test/ui.menu.test.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+79</span> <span class="diff-minus">−2</span></td></tr>
-            <tr><td><code>test/web.search.test.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+40</span> <span class="diff-minus">−2</span></td></tr>
-            <tr><td><code>webapp/test/provider.test.js</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+165</td></tr>
-            <tr><td><code>webapp/test/provider-call.test.js</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+308</td></tr>
-            <tr><td><code>webapp/test/provider-search.test.js</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+238</td></tr>
-            <tr><td><code>webapp/test/provider-storage.test.js</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+155</td></tr>
-            <tr><td><code>webapp/test/i18n.test.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end diff-plus">+29</td></tr>
+            <tr><td><code>docs/captura-2026-08-14-node-weekly.md</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+215</td></tr>
+            <tr><td><code>docs/reverificacao-2026-08-14.md</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+337</td></tr>
+            <tr><td><code>scripts/fix-issue-dates.mjs</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+55</td></tr>
+            <tr><td><code>src/reextract.js</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+224</td></tr>
+            <tr><td><code>src/parse-core.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+211</span> <span class="diff-minus">−8</span></td></tr>
+            <tr><td><code>src/llm.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+115</span> <span class="diff-minus">−6</span></td></tr>
+            <tr><td><code>src/crawl.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+104</span> <span class="diff-minus">−6</span></td></tr>
+            <tr><td><code>src/db.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+17</span> <span class="diff-minus">−2</span></td></tr>
+            <tr><td><code>src/curate.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+16</span> <span class="diff-minus">−2</span></td></tr>
+            <tr><td><code>src/verify.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end diff-plus">+29</td></tr>
+            <tr><td><code>src/clean.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end diff-plus">+2</td></tr>
+            <tr><td><code>src/commands.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end diff-plus">+17</td></tr>
+            <tr><td><code>src/index.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+11</span> <span class="diff-minus">−2</span></td></tr>
+            <tr><td><code>src/detect-type.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end diff-plus">+1</td></tr>
+            <tr><td><code>config/taxonomy.json</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+10</span> <span class="diff-minus">−2</span></td></tr>
+            <tr><td><code>.gitignore</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end diff-plus">+2</td></tr>
+            <tr><td><code>test/crawl.issue-date.test.js</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+239</td></tr>
+            <tr><td><code>test/commands.reextract.test.js</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+282</td></tr>
+            <tr><td><code>test/clean.truncation.test.js</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+108</td></tr>
+            <tr><td><code>test/parse-core.github.test.js</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+131</td></tr>
+            <tr><td><code>test/crawl.prune-frame.test.js</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+97</td></tr>
+            <tr><td><code>test/llm.zod-retry.test.js</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+187</td></tr>
+            <tr><td><code>test/verify.navmenu.test.js</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+117</td></tr>
+            <tr><td><code>test/fixtures/vitest-release.html</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+722</td></tr>
+            <tr><td><code>test/fixtures/meiert-5-npx-helpers.html</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+1</td></tr>
+            <tr><td><code>test/clean.extractPublishedDate.test.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end diff-plus">+55</td></tr>
+            <tr><td><code>test/curate.consolidate.test.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+145</span> <span class="diff-minus">−2</span></td></tr>
+            <tr><td><code>test/substack.archive.test.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end diff-plus">+112</td></tr>
+            <tr><td><code>test/taxonomy.search.test.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end diff-plus">+53</td></tr>
+            <tr><td><code>test/commands.reextract.test.js (seed env)</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end diff-plus">+11</td></tr>
           </tbody>
         </table>
       </div>
 
       <h2 class="h4 pane-title mt-4">Commits (squash)</h2>
-      <p>Histórico final de main — um commit squash por sub-tarefa. Worktrees e branches desta execução foram removidos (arquivados em refs/do-archive/20260813-204910-1326202/).</p>
-
       <ul class="list-group list-group-flush">
         <li class="list-group-item d-flex gap-3 align-items-start">
-          <span class="badge badge-soft font-monospace">354e62c</span>
-          <div><strong>Onda 3:</strong> verificação integrada com chaves reais (2 providers) — CORS confirmado no brief, .env.example documentado, comentário de preço alinhado</div>
+          <span class="badge badge-soft font-monospace">ef3c75c</span>
+          <div><strong>Onda 4:</strong> relatório de re-verificação integrada — todos os fixes P1-P6 provados contra os dados reais</div>
         </li>
         <li class="list-group-item d-flex gap-3 align-items-start">
-          <span class="badge badge-soft font-monospace">6018b5a</span>
-          <div><strong>Subwave 1:</strong> 45 testes do provider no webapp (callJSON por provider, custo local, storage, busca deepseek, paridade i18n)</div>
+          <span class="badge badge-soft font-monospace">d221a89</span>
+          <div><strong>Onda 3 (fix):</strong> testes do reextract neutralizam o ROOT/.env real (seed do NC_HOME tmp) — suíte 533/533 em ~6s</div>
         </li>
         <li class="list-group-item d-flex gap-3 align-items-start">
-          <span class="badge badge-soft font-monospace">1e4bccf</span>
-          <div><strong>Onda 2 (fix):</strong> testes de load/provider isolam o ambiente — seed do NC_HOME tmp vence o ROOT/.env real</div>
+          <span class="badge badge-soft font-monospace">b340553</span>
+          <div><strong>Onda 3:</strong> scripts/fix-issue-dates.mjs — backfill idempotente (15 artigos → 2026-08-13 no NC_HOME real)</div>
         </li>
         <li class="list-group-item d-flex gap-3 align-items-start">
-          <span class="badge badge-soft font-monospace">f2b156c</span>
-          <div><strong>Onda 2:</strong> docs sincronizadas (README, AGENTS.md, calling-the-llm-layer, building-the-webapp, searching-the-corpus, CHANGELOG)</div>
+          <span class="badge badge-soft font-monospace">dea316b</span>
+          <div><strong>Onda 3:</strong> P5+P6 — strip do gatilho do GitHub + 2º passe do container, newlines, prunePageFrame, comando reextract com guards</div>
         </li>
         <li class="list-group-item d-flex gap-3 align-items-start">
-          <span class="badge badge-soft font-monospace">21501f1</span>
-          <div><strong>Onda 2 (fix):</strong> computeUsageCost cobra cache pela tarifa de hit (flash 0.0028 / pro 0.003625) — espelho do webapp</div>
+          <span class="badge badge-soft font-monospace">0232df1</span>
+          <div><strong>Onda 2:</strong> P3 — taxonomia cobre o ecossistema Node (version 2026-08-14)</div>
         </li>
         <li class="list-group-item d-flex gap-3 align-items-start">
-          <span class="badge badge-soft font-monospace">7169d64</span>
-          <div><strong>Onda 2:</strong> telemetria com slug do provider ativo — model_used de classify/selectors via stageModel, fallback do meta.json traduzido</div>
+          <span class="badge badge-soft font-monospace">d2d231b</span>
+          <div><strong>Onda 2:</strong> P2+P4 — retry central de zod no callJSON (18 call sites) + heurística de nav-menu no verify</div>
         </li>
         <li class="list-group-item d-flex gap-3 align-items-start">
-          <span class="badge badge-soft font-monospace">fdb93dd</span>
-          <div><strong>Onda 2:</strong> keys/CLI/TUI/web local provider-aware — probeDeepSeekKey+dispatcher, key set/test --provider, tela KeyConfig, POST /api/key com provider</div>
+          <span class="badge badge-soft font-monospace">7116b35</span>
+          <div><strong>Onda 2:</strong> P1 — herança da data da issue + fallback mês-por-extenso + enrich nunca adota data do alvo</div>
         </li>
         <li class="list-group-item d-flex gap-3 align-items-start">
-          <span class="badge badge-soft font-monospace">a4a01cf</span>
-          <div><strong>Onda 1:</strong> provider openrouter|deepseek no webapp BYOK — KeyModal com select, custo local por token, probeKey por provider, strings PT/EN</div>
-        </li>
-        <li class="list-group-item d-flex gap-3 align-items-start">
-          <span class="badge badge-soft font-monospace">29e99c4</span>
-          <div><strong>Onda 1:</strong> provider LLM_PROVIDER openrouter|deepseek no CLI — translateModel, custo local por token, response_format provider-aware, setRuntimeKey(key,provider)</div>
-        </li>
-        <li class="list-group-item d-flex gap-3 align-items-start">
-          <span class="badge badge-soft font-monospace">7f77b9c</span>
-          <div><strong>Onda 1:</strong> brief docs/deepseek-direct.md — fatos da API direta (slugs v4, preços, params, probes, erros, CORS)</div>
+          <span class="badge badge-soft font-monospace">5994b89</span>
+          <div><strong>Onda 1:</strong> relatório da captura real (run 1, US$ 0,0676, 15 artigos) + análise de erros P1-P6</div>
         </li>
       </ul>
     </div>
@@ -411,31 +372,25 @@
     <div class="tab-pane fade" id="pane-depara" role="tabpanel"
          aria-labelledby="tab-depara" tabindex="0" data-print-title="De-Para">
       <h2 class="h4 pane-title">De-Para: o que mudou</h2>
-      <p>Comparação lado a lado entre o estado inicial (f01d1c1) e o estado final (HEAD) por superfície.</p>
+      <p>Comparação por problema encontrado na captura real (antes × depois).</p>
 
       <div class="row g-3 mb-4">
         <div class="col-lg-6">
           <div class="card h-100 depara-antes">
-            <div class="card-header"><i class="bi bi-arrow-left-circle me-1"></i><strong>Antes — transporte LLM</strong></div>
+            <div class="card-header"><i class="bi bi-arrow-left-circle me-1"></i><strong>Antes — P1 datas</strong></div>
             <div class="card-body">
               <ul class="list-unstyled mb-0 d-grid gap-2">
-                <li><i class="bi bi-x-circle me-2 text-body-secondary"></i>Cliente hardcoded: SDK openai → <code>https://openrouter.ai/api/v1</code> (src/llm.js)</li>
-                <li><i class="bi bi-x-circle me-2 text-body-secondary"></i>Slug fixo <code>deepseek/deepseek-v4-flash-0731</code> em todas as etapas (models.json)</li>
-                <li><i class="bi bi-x-circle me-2 text-body-secondary"></i>Custo real só via <code>usage.cost</code> da OpenRouter</li>
-                <li><i class="bi bi-x-circle me-2 text-body-secondary"></i>Chave única: OPENROUTER_API_KEY; TUI/web só conheciam a OpenRouter</li>
+                <li><i class="bi bi-x-circle me-2 text-body-secondary"></i>13/15 artigos datados 08-05 (data do ALVO espalhada), 1× 07-13, 1× NULL — a data real da issue (08-13) existia na listagem mas era descartada</li>
               </ul>
             </div>
           </div>
         </div>
         <div class="col-lg-6">
           <div class="card h-100 depara-depois">
-            <div class="card-header"><i class="bi bi-arrow-right-circle me-1"></i><strong>Depois — transporte LLM</strong></div>
+            <div class="card-header"><i class="bi bi-arrow-right-circle me-1"></i><strong>Depois — P1 datas</strong></div>
             <div class="card-body">
               <ul class="list-unstyled mb-0 d-grid gap-2">
-                <li><i class="bi bi-check-circle me-2 text-body-secondary"></i><code>LLM_PROVIDER=openrouter|deepseek</code> (default openrouter); baseURL e headers por provider</li>
-                <li><i class="bi bi-check-circle me-2 text-body-secondary"></i><code>translateModel()</code>: slug OR → id direto <code>deepseek-v4-flash</code>/<code>deepseek-v4-pro</code>; identidade no openrouter</li>
-                <li><i class="bi bi-check-circle me-2 text-body-secondary"></i>Custo LOCAL por token (hit/miss/out — tarifas 0.14/0.28/0.0028 flash), injetado no ledger (budget.js intocado)</li>
-                <li><i class="bi bi-check-circle me-2 text-body-secondary"></i><code>DEEPSEEK_API_KEY</code> live binding; <code>setRuntimeKey(key, provider?)</code>; providerInfo()</li>
+                <li><i class="bi bi-check-circle me-2 text-body-secondary"></i>Herança autoritativa (listagem→frontier→roundup→itens); fallback mês-por-extenso (com ordinal); enrich NUNCA adota data do alvo; backfill aplicado → 15× 2026-08-13; replay provou a cadeia (6 itens novos com a data certa)</li>
               </ul>
             </div>
           </div>
@@ -445,22 +400,20 @@
       <div class="row g-3 mb-4">
         <div class="col-lg-6">
           <div class="card h-100 depara-antes">
-            <div class="card-header"><i class="bi bi-arrow-left-circle me-1"></i><strong>Antes — webapp estático (BYOK)</strong></div>
+            <div class="card-header"><i class="bi bi-arrow-left-circle me-1"></i><strong>Antes — P2/P3/P4</strong></div>
             <div class="card-body">
               <ul class="list-unstyled mb-0 d-grid gap-2">
-                <li><i class="bi bi-x-circle me-2 text-body-secondary"></i>fetch direto p/ OpenRouter; KeyModal de chave única; strings só "OpenRouter"</li>
-                <li><i class="bi bi-x-circle me-2 text-body-secondary"></i>Custo via <code>usage.cost</code>; probe GET /key</li>
+                <li><i class="bi bi-x-circle me-2 text-body-secondary"></i>P2: seção de curadoria inteira perdida (zod lança fora do callJSON, sem retry); P3: 16 tags core descartadas (nodejs×5 etc.); P4: Drizzle "ok" com corpo começando em menu</li>
               </ul>
             </div>
           </div>
         </div>
         <div class="col-lg-6">
           <div class="card h-100 depara-depois">
-            <div class="card-header"><i class="bi bi-arrow-right-circle me-1"></i><strong>Depois — webapp estático (BYOK)</strong></div>
+            <div class="card-header"><i class="bi bi-arrow-right-circle me-1"></i><strong>Depois — P2/P3/P4</strong></div>
             <div class="card-body">
               <ul class="list-unstyled mb-0 d-grid gap-2">
-                <li><i class="bi bi-check-circle me-2 text-body-secondary"></i>KeyModal com select de provider; <code>nc-llm-provider</code> no localStorage (migração silenciosa); strings PT/EN provider-aware</li>
-                <li><i class="bi bi-check-circle me-2 text-body-secondary"></i>Custo local por token (deepseekCostFromUsage); probe por provider (OR /key · DS /models); CORS confirmado por probe real</li>
+                <li><i class="bi bi-check-circle me-2 text-body-secondary"></i>P2: retry de zod no callJSON (18/18 call sites) + defaults tolerantes — replay: 0 "fora do schema" em 80 chamadas; P3: taxonomia 2026-08-14 (nodejs/static-analysis/sast/dom/activitypub), quedas remanescentes = aceitas por design; P4: Drizzle → suspect determinístico com nota de nav-menu</li>
               </ul>
             </div>
           </div>
@@ -470,45 +423,20 @@
       <div class="row g-3 mb-4">
         <div class="col-lg-6">
           <div class="card h-100 depara-antes">
-            <div class="card-header"><i class="bi bi-arrow-left-circle me-1"></i><strong>Antes — keys/CLI/TUI</strong></div>
+            <div class="card-header"><i class="bi bi-arrow-left-circle me-1"></i><strong>Antes — P5/P6</strong></div>
             <div class="card-body">
               <ul class="list-unstyled mb-0 d-grid gap-2">
-                <li><i class="bi bi-x-circle me-2 text-body-secondary"></i><code>ncrawl key set</code> só OpenRouter; sem tela de chave na TUI; mensagens "OPENROUTER_API_KEY ausente"</li>
-                <li><i class="bi bi-x-circle me-2 text-body-secondary"></i>Telemetria gravava slug cru/hardcoded (<code>deepseek-v4-flash-0731</code>) mesmo no direto</li>
+                <li><i class="bi bi-x-circle me-2 text-body-secondary"></i>P5: release notes do GitHub terminando em botão de UI ("View changes on GitHub") — verify suspect; P6: quebras de linha coladas; clean falhou → salva o cru com moldura (meiert)</li>
               </ul>
             </div>
           </div>
         </div>
         <div class="col-lg-6">
           <div class="card h-100 depara-depois">
-            <div class="card-header"><i class="bi bi-arrow-right-circle me-1"></i><strong>Depois — keys/CLI/TUI</strong></div>
+            <div class="card-header"><i class="bi bi-arrow-right-circle me-1"></i><strong>Depois — P5/P6</strong></div>
             <div class="card-body">
               <ul class="list-unstyled mb-0 d-grid gap-2">
-                <li><i class="bi bi-check-circle me-2 text-body-secondary"></i><code>key set|test --provider openrouter|deepseek</code>; tela KeyConfig na TUI (wizard); mensagens provider-aware (<code>keyVar</code>); POST /api/key com provider; /api/key/status com bloco provider</li>
-                <li><i class="bi bi-check-circle me-2 text-body-secondary"></i>model_used/meta.json com o slug do provider ativo (telemetria verdadeira)</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="row g-3 mb-4">
-        <div class="col-lg-6">
-          <div class="card h-100 depara-antes">
-            <div class="card-header"><i class="bi bi-arrow-left-circle me-1"></i><strong>Antes — docs</strong></div>
-            <div class="card-body">
-              <ul class="list-unstyled mb-0 d-grid gap-2">
-                <li><i class="bi bi-x-circle me-2 text-body-secondary"></i>README/AGENTS/skills descreviam só OpenRouter; sem .env.example de provider; CORS do direto "NÃO CONFIRMADO"</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-        <div class="col-lg-6">
-          <div class="card card h-100 depara-depois">
-            <div class="card-header"><i class="bi bi-arrow-right-circle me-1"></i><strong>Depois — docs</strong></div>
-            <div class="card-body">
-              <ul class="list-unstyled mb-0 d-grid gap-2">
-                <li><i class="bi bi-check-circle me-2 text-body-secondary"></i>docs/deepseek-direct.md (brief com fontes) + README/AGENTS/CHANGELOG + skills calling-the-llm-layer/building-the-webapp/searching-the-corpus; .env.example com LLM_PROVIDER/DEEPSEEK_*; CORS confirmado com headers reais</li>
+                <li><i class="bi bi-check-circle me-2 text-body-secondary"></i>P5: strip do gatilho + 2º passe do container do GitHub + comando <code>ncrawl reextract</code> (com guards de erro/bloqueio e --limit default 20) — Vitest re-extraída: botão removido, verify ok; P6: newlines entre blocos (htmlBlockText) + prunePageFrame no fallback do clean (meiert limpo)</li>
               </ul>
             </div>
           </div>
@@ -518,24 +446,20 @@
       <h2 class="h4 pane-title">Impacto</h2>
       <div class="list-group list-group-flush mb-4">
         <div class="list-group-item d-flex gap-3 align-items-start">
-          <i class="bi bi-currency-dollar fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>Custo menor no direto</strong> — DeepSeek direto é mais barato que via OpenRouter (sem margem do agregador); cache-hit cobrado pela tarifa real (0.0028) em vez de input cheio.</div>
+          <i class="bi bi-calendar-check fs-5 stat-value flex-shrink-0 mt-1"></i>
+          <div><strong>Datas corretas de fábrica</strong> — a âncora da issue (a SEMANA da newsletter) vale para todos os itens; a data do alvo nunca mais vaza para o item; superfícies por data e escopo de busca ficam corretos.</div>
         </div>
         <div class="list-group-item d-flex gap-3 align-items-start">
-          <i class="bi bi-browser-chrome fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>Web app com escolha</strong> — o KeyModal do webapp estático deixa o usuário escolher OpenRouter ou DeepSeek; a chave nunca passa por servidor nosso (BYOK, CORS confirmado).</div>
+          <i class="bi bi-shield-exclamation fs-5 stat-value flex-shrink-0 mt-1"></i>
+          <div><strong>Robustez do pipeline LLM</strong> — resposta fora do schema agora re-amostra (recupera seções da curadoria) e só no fim aplica defaults; verify pega nav-menu sem custo de LLM.</div>
         </div>
         <div class="list-group-item d-flex gap-3 align-items-start">
-          <i class="bi bi-terminal fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>CLI/TUI provider-aware</strong> — <code>ncrawl key set --provider deepseek</code>, tela de chave na TUI, mensagens que nomeiam a variável certa.</div>
+          <i class="bi bi-tools fs-5 stat-value flex-shrink-0 mt-1"></i>
+          <div><strong>Operação nova</strong> — <code>ncrawl reextract</code> (re-extração com guards, nunca sobrescreve com página de erro) e <code>scripts/fix-issue-dates.mjs</code> (backfill idempotente de datas).</div>
         </div>
         <div class="list-group-item d-flex gap-3 align-items-start">
-          <i class="bi bi-arrow-repeat fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>Compat total</strong> — sem LLM_PROVIDER, tudo se comporta byte-idêntico a antes (verificado por revisão adversarial e testes).</div>
-        </div>
-        <div class="list-group-item d-flex gap-3 align-items-start">
-          <i class="bi bi-music-note fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>TTS segue OpenRouter-only</strong> — a DeepSeek não tem API de áudio; decisão documentada no README/skills.</div>
+          <i class="bi bi-collection fs-5 stat-value flex-shrink-0 mt-1"></i>
+          <div><strong>Completude</strong> — o replay recuperou 6 itens IN BRIEF que a 1ª captura perdeu (15→21) e dedup 13/13 sem duplicatas.</div>
         </div>
       </div>
     </div>
@@ -549,43 +473,39 @@
       <ul class="list-group list-group-flush">
         <li class="list-group-item d-flex gap-3 align-items-start">
           <i class="bi bi-lightbulb fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>LLM_PROVIDER explícito, sem auto-detecção</strong> — mesmo com DEEPSEEK_API_KEY no ambiente, o provider só troca por env explícito; previsibilidade > conveniência.</div>
+          <div><strong>Fonte única = Node Weekly</strong> — 1ª fonte de fábrica Cooperpress (tipo index); "últimos 3 dias" = --since 2026-08-11 (piso documentado).</div>
         </li>
         <li class="list-group-item d-flex gap-3 align-items-start">
           <i class="bi bi-lightbulb fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>json_object no direto</strong> — a API DeepSeek rejeita json_schema (400 confirmado por probe real); o degrade + retry/parse defensivo existentes cobrem o pior caso.</div>
+          <div><strong>Âncora da issue é a semana da newsletter</strong> — item curado pertence à SEMANA da issue, mesmo que o alvo tenha data própria mais antiga; por isso o backfill sobrescreve até a data "legítima" do alvo (inngest 07-13).</div>
         </li>
         <li class="list-group-item d-flex gap-3 align-items-start">
           <i class="bi bi-lightbulb fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>Custo local no ledger via injeção</strong> — computeUsageCost injeta <code>usage.cost</code> antes do <code>resv.commit</code>; budget.js ficou INTOCADO (nenhum risco de regressão no orçamento).</div>
+          <div><strong>Retry de zod pelo shape ESTRITO</strong> — chave tolerada ausente re-amostra em vez de virar default silencioso na 1ª tentativa; default só esgotados os retries (sem isso a 637 viraria seção vazia sem tentativa).</div>
         </li>
         <li class="list-group-item d-flex gap-3 align-items-start">
           <i class="bi bi-lightbulb fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>Effort colapsa no direto</strong> — xhigh/medium não existem na DeepSeek direta (mapeiam p/ high); omite-se o parâmetro reasoning por inteiro (contrato da API).</div>
+          <div><strong>reextract NUNCA sobrescreve com página de erro</strong> — guards isErrorPage/isBlockedPage + keepAggregatorVersion + --limit default 20 (varredura completa exige --all); achado da revisão adversarial aceito e corrigido.</div>
         </li>
         <li class="list-group-item d-flex gap-3 align-items-start">
           <i class="bi bi-lightbulb fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>TTS permanece OpenRouter-only</strong> — DeepSeek não tem API de áudio; o player do webapp comporta "sem chave" quando só há chave deepseek.</div>
+          <div><strong>"Truncamento" da Vitest era UI, não perda</strong> — a investigação com a página real provou que o corpo terminava mesmo no botão; o fix virou strip do gatilho + container quando mais longo.</div>
         </li>
         <li class="list-group-item d-flex gap-3 align-items-start">
           <i class="bi bi-lightbulb fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>Troca de provider em runtime não persiste LLM_PROVIDER</strong> — <code>key set --provider deepseek</code> salva só a chave; após restart o provider volta ao env (documentado).</div>
+          <div><strong>Falso-positivo estreito da heurística de nav-menu aceito</strong> — suspect é advisory e o reclean conserta; a classe real (prosa com separadores) é estreita e documentada.</div>
         </li>
         <li class="list-group-item d-flex gap-3 align-items-start">
           <i class="bi bi-lightbulb fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>Telemetria do crawl.js mudou de bytes no default</strong> — model_used vira o slug completo <code>deepseek/deepseek-v4-flash-0731</code> (o que o runtime usa) em vez do hardcoded cru; achado do revisor aceito (valor antigo era inválido nos dois mundos).</div>
+          <div><strong>Quedas de tag remanescentes = aceitas por design</strong> — typescript/javascript/postgresql/docker/ai-agents existem em OUTRAS facetas (facet-mismatch é o modelo errando a faceta, não vocabulário faltando); bun ficou como sugestão futura.</div>
         </li>
         <li class="list-group-item d-flex gap-3 align-items-start">
           <i class="bi bi-lightbulb fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>Browser E2E do webapp substituído</strong> — o E2E completo custaria ~$0.18-0.20 no snapshot (4188 artigos); substituído por: código de produção do webapp com payload real + CORS provado por preflight + 123 testes; procedimento manual documentado.</div>
+          <div><strong>Testing subwaves não criadas</strong> — os fixes vieram com 31 testes próprios + wire tests + revisões adversariais; subwaves separadas seriam duplicação.</div>
         </li>
         <li class="list-group-item d-flex gap-3 align-items-start">
           <i class="bi bi-lightbulb fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>Preços peak/off-peak pós-16/08</strong> — revisão anunciada p/ 2026-08-16 16:00 UTC; env overrides cobrem o CLI, webapp exige código+deploy; nota de re-verificação registrada (não-bloqueante).</div>
-        </li>
-        <li class="list-group-item d-flex gap-3 align-items-start">
-          <i class="bi bi-lightbulb fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>Test-onda1-provider-core absorvido</strong> — os 3 arquivos de teste entraram via fix-custo-cache + fix-gate-tests (conteúdo idêntico/superseded); drop sem merge para não duplicar.</div>
+          <div><strong>Acidente de --help documentado</strong> — <code>crawl --help</code> inicia crawl (pré-existente); run 2 marcado failed, frontier restaurado, custo US$ 0,0147 fora das provas; recomendação de fix do parse registrada para fora.</div>
         </li>
       </ul>
     </div>
@@ -594,50 +514,50 @@
     <div class="tab-pane fade" id="pane-timeline" role="tabpanel"
          aria-labelledby="tab-timeline" tabindex="0" data-print-title="Timeline">
       <h2 class="h4 pane-title">Linha do tempo da execução</h2>
-      <p>2026-08-13 20:49 UTC → 2026-08-14 01:30 UTC (run 20260813-204910-1326202).</p>
+      <p>2026-08-14 09:26 → 16:10 UTC (run 20260814-092616-342878).</p>
 
       <ol class="timeline list-unstyled mb-0">
         <li class="timeline-item mb-4">
           <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
-            <span class="badge badge-accent">Fase 0-1</span>
-            <strong>DELIMITAR + ANALYZE</strong>
+            <span class="badge badge-accent">Fase 0-2</span>
+            <strong>DELIMITAR + ANALYZE + PLAN</strong>
           </div>
-          <p class="mb-0 text-body-secondary small">FASE 0 (MODE=normal, base=main), leitura do project-router + calling-the-llm-layer, mapeamento dos 2 transportes LLM (CLI + webapp BYOK) e pontos de key/custo/TTS; DEEPSEEK_API_KEY detectada no ambiente.</p>
+          <p class="mb-0 text-body-secondary small">FASE 0 (MODE=normal, main); fontes/chaves/banco vazio/Chromium verificados; decisão: Node Weekly, --since 2026-08-11, tetos de segurança; 4 ondas planejadas.</p>
         </li>
         <li class="timeline-item mb-4">
           <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
-            <span class="badge badge-accent">Fase 2</span>
-            <strong>PLAN</strong>
+            <span class="badge badge-accent">Fase 3 · Onda 1</span>
+            <strong>CAPTURA REAL</strong>
           </div>
-          <p class="mb-0 text-body-secondary small">3 ondas + testing subwaves; mapa de propriedade de arquivo; worktrees batizadas (onda1-pesquisa-deepseek, onda1-llm-provider-core, onda1-webapp-provider).</p>
+          <p class="mb-0 text-body-secondary small">Run 1 done em 8 min: US$ 0,0676, 15 artigos (issue 637), pipeline completo; relatório com achados P1-P6 (datas erradas em 13/15, seção de curadoria perdida, taxonomia, verify, extração).</p>
         </li>
         <li class="timeline-item mb-4">
           <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
-            <span class="badge badge-accent">Fase 3</span>
-            <strong>EXECUTE-ONDA 1</strong>
+            <span class="badge badge-accent">Fase 3 · Onda 2</span>
+            <strong>FIXES P1-P4</strong>
           </div>
-          <p class="mb-0 text-body-secondary small">3 agentes paralelos; revisor de plano (achou 2.3 telemetria + extensões); 3 revisões "NADA A REFUTAR"; squash 7f77b9c/29e99c4/a4a01cf com gates (365 → 377 testes).</p>
+          <p class="mb-0 text-body-secondary small">Revisor de plano converteu os achados em ondas; 3 worktrees paralelas (datas / llm+verify / taxonomia); revisões adversariais acharam 2+1 furos → fixes aplicados na mesma worktree (regex ordinal+janela, Substack, detect-type zod); merges com gate (502/502).</p>
         </li>
         <li class="timeline-item mb-4">
           <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
-            <span class="badge badge-accent">Fase 3</span>
-            <strong>EXECUTE-ONDA 2</strong>
+            <span class="badge badge-accent">Fase 3 · Onda 3</span>
+            <strong>FIXES P5-P6 + BACKFILL</strong>
           </div>
-          <p class="mb-0 text-body-secondary small">3 features paralelas + testing subwave da onda 1 em background; revisões (2 "PROBLEMAS PARCIAIS" — fix TUI na mesma worktree, achado de telemetria aceito); testador achou o BUG de custo de cache → fix dedicado; gate vermelho por env (ROOT/.env real) → fix de isolamento; merges fdb93dd/7169d64/21501f1/f2b156c/1e4bccf (421/421).</p>
+          <p class="mb-0 text-body-secondary small">P5+P6 (reextract com guards, newlines, prunePageFrame) — revisão achou furos de integridade → corrigidos (teste revelou bug real do 1º gatilho → endurecido); backfill REAL aplicado (15× 2026-08-13, idempotente); gate vermelho por leak do ROOT/.env → fix de isolamento (533/533 em ~6s).</p>
         </li>
         <li class="timeline-item mb-4">
           <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
-            <span class="badge badge-accent">Fase 3</span>
-            <strong>Subwave 1 + ONDA 3</strong>
+            <span class="badge badge-accent">Fase 3 · Onda 4</span>
+            <strong>RE-VERIFICAÇÃO</strong>
           </div>
-          <p class="mb-0 text-body-secondary small">Subwave processada: 45 testes webapp mergeados (6018b5a, 466/466 raiz); provider-core absorvido. Onda 3: verificação com chaves REAIS (probe OR/DS, 1 chamada por provider, ledger custo exato, web local status, CORS BYOK, detect-type no direto — ~$0.00033); fixes de CORS no brief + comentário + .env.example (354e62c).</p>
+          <p class="mb-0 text-body-secondary small">Replay da issue 637 (6 itens IN BRIEF recuperados, data herdada, 0 zod warns em 80 chamadas, taxonomia nova); reextract Vitest (botão removido, verify ok); Drizzle → suspect determinístico; amostragem ok; relatório docs/reverificacao-2026-08-14.md.</p>
         </li>
         <li class="timeline-item">
           <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
             <span class="badge badge-ok">Fase 4</span>
             <strong>COMMIT-FINAL</strong>
           </div>
-          <p class="mb-0 text-body-secondary small">Revisor de plano declarou CONVERGÊNCIA; gate completo final (466/466 raiz + 123/123 webapp + build + status); EXPLAINER.html gerado; commit final; sweep+verify; relatório.</p>
+          <p class="mb-0 text-body-secondary small">Revisor declarou CONVERGÊNCIA (4 achados → backlog, nenhum bloqueia); gate final 533/533; EXPLAINER.html gerado; commit final; sweep+verify; relatório.</p>
         </li>
       </ol>
     </div>
@@ -645,7 +565,7 @@
   </div>
 
   <footer class="text-body-secondary small border-top mt-5 pt-3">
-    Gerado por <strong>deep-orchestrator</strong> v2.0 · 2026-08-13 → 14 · branch main.
+    Gerado por <strong>deep-orchestrator</strong> v2.0 · 2026-08-14 · branch main.
     Documento de arquivo único — salve, abra com duplo clique ou imprima em PDF (todas as abas entram no papel).
   </footer>
 

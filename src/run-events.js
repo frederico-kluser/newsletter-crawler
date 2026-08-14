@@ -73,6 +73,12 @@ export function bumpWarnCount(n = 1) {
   notify();
 }
 
+/** Snapshot atual do ring (feed/ticker/warnCount/seq) — lido pelo resumo periódico do CLI
+ * (erros recentes com timestamp) sem precisar assinar. Mesmo dado de subscribeRunEvents. */
+export function runEventsSnapshot() {
+  return snap();
+}
+
 /** Assina o fluxo; dispara JÁ com o snapshot atual e devolve o unsubscribe. */
 export function subscribeRunEvents(fn) {
   subs.add(fn);

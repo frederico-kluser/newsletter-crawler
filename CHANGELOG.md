@@ -40,6 +40,24 @@ Webapp bilíngue (PT/EN) com detecção de idioma e tutorial de introdução no 
 - **Knobs de scroll/render por env (`src/config.js`, `.env.example`):** `SCROLL_STEP`,
   `SCROLL_SETTLE_MAX_MS`, `SCROLL_ROUNDS`, `SCROLL_ROUNDS_ARTICLE`, `RENDER_LISTING_DEADLINE_MS`,
   `RENDER_ARTICLE_DEADLINE_MS`, `MAX_LOAD_MORE` — antes hard-coded em `RENDER_PROFILES`/`autoScroll`.
+- **Provedor LLM DeepSeek DIRETO (api.deepseek.com) além da OpenRouter (`src/config.js`, `src/llm.js`):**
+  `LLM_PROVIDER=openrouter|deepseek` (default `openrouter`; sem auto-detecção) escolhe o transporte. No
+  direto: chave `DEEPSEEK_API_KEY`, base `DEEPSEEK_BASE_URL` (default `https://api.deepseek.com`), slugs
+  do `config/models.json` traduzidos p/ o id da API direta (`deepseek/deepseek-v4-flash-0731` →
+  `deepseek-v4-flash`; overrides `DEEPSEEK_MODEL_MAP`/`DEEPSEEK_DEFAULT_MODEL`); o body omite os params
+  da OpenRouter (`reasoning`, `usage:{include:true}`), o `response_format` degrada p/ `json_object`
+  (json_schema não é suportado no direto) e o **custo é calculado localmente** (`computeUsageCost`:
+  tokens × tabela `DEEPSEEK_PRICES` ou env `DEEPSEEK_PRICE_<MODEL>_{INPUT,OUTPUT}_PER_M`, pois a API não
+  traz `usage.cost`) e injetado no ledger. `setRuntimeKey(key, provider)` troca provider+chave em runtime
+  (live bindings `DEEPSEEK_API_KEY`/`LLM_PROVIDER`/`HAS_LLM`). Fatos da API direta em
+  `docs/deepseek-direct.md` (slugs, preços, probes, erros).
+- **Webapp BYOK com seletor de provider (`webapp/`):** o modal de chave ganhou um select
+  **OpenRouter | DeepSeek** (`KeyModal.jsx` + strings PT/EN provider-aware nos dois dicts); chave e
+  provedor persistidos juntos (`nc-or-key` + `nc-llm-provider` no localStorage); `webapp/src/lib/openrouter.js`
+  virou provider-aware — `callJSON({provider})`, `deepseekModelId()`, `deepseekCostFromUsage()` (tabela
+  local de preços, com tarifa de cache-hit), `probeKey(apiKey, provider)` (OpenRouter `GET /key`;
+  DeepSeek `GET /models`). CORS do `api.deepseek.com` confirmado por probe (BYOK no browser funciona).
+  **TTS segue OpenRouter-only** (`/api/v1/audio/speech` — a DeepSeek não tem API de áudio).
 
 ### Corrigido
 - **`normalizeUrl` colapsava `www.` no ápice (`src/util.js`):** `www.host` e `host` podem ser

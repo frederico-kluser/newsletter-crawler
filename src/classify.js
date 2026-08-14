@@ -4,7 +4,7 @@
 // transação (1 linha em `classifications` + índice em `article_tags` + `classification_uncovered`).
 import pLimit from 'p-limit';
 import { stmts, db } from './db.js';
-import { getFacets, buildFacetPrompt, validateFacetTags, taxonomyVersion } from './taxonomy.js';
+import { getFacets, buildFacetPrompt, validateFacetTags, taxonomyVersion, isToolByTags } from './taxonomy.js';
 import { classifyFacet } from './llm.js';
 import { stageModel, CLASSIFY_CONCURRENCY, ARTICLE_CONCURRENCY } from './config.js';
 import { stageWindow } from './governor.js';
@@ -34,6 +34,30 @@ export class ClassifyIncompleteError extends Error {
 export function failedMandatoryFacets(results, facets) {
   const mandatory = new Set(facets.filter((f) => f.mandatory).map((f) => f.name));
   return results.filter((r) => r.ok === false && mandatory.has(r.facet)).map((r) => r.facet);
+}
+
+// Content-types da faceta content-type que marcam o artigo como RELEASE (lançamento nomeado
+// com versão). Os demais content-types de lançamento ficam com `tool` via isToolByTags.
+export const RELEASE_CONTENT_TYPES = new Set(['version-release', 'release-announcement']);
+
+/**
+ * Determina o kind (news|tool|release) a partir das tags JÁ classificadas — determinístico,
+ * sem LLM. Preenche o kind dos itens de fontes listing/avulsos (Achado 6 da captura
+ * 2026-08-14: 65/188 com kind NULL), que nunca passam pela curadoria de roundup — a única
+ * origem do kind até aqui. Recebe as linhas de article_tags ([{facet,tag,rank}]), o MESMO
+ * shape que isToolByTags já consome. Regras, nesta ordem:
+ *   release ← content-type ∈ {version-release, release-announcement} (lançamento nomeado;
+ *             vence a faceta de ferramenta — sinal mais fraco, pode vir junto)
+ *   tool    ← isToolByTags (faceta framework-library-tool OU content-type de ferramenta)
+ *   senão   news
+ */
+export function kindFromTags(tagRows) {
+  const contentTypes = (tagRows || [])
+    .filter((r) => r.facet === 'content-type')
+    .map((r) => r.tag);
+  if (contentTypes.some((t) => RELEASE_CONTENT_TYPES.has(t))) return 'release';
+  if (isToolByTags(tagRows)) return 'tool';
+  return 'news';
 }
 
 // Classifica 1 artigo: dispara as 9 facetas pelo gate e monta o objeto de resultado.
@@ -124,6 +148,14 @@ const persist = db.transaction((article, result) => {
   for (const u of result.uncovered) {
     stmts.insertUncovered.run({ article_id: article.id, facet: u.facet ?? null, term: u.term });
   }
+  // kind determinístico a partir das tags recém-classificadas (itens de listing/avulsos,
+  // que nunca tiveram curadoria — Achado 6 da captura 2026-08-14). O stmt é NULL-only:
+  // um kind curado (roundup de fonte index) é a autoridade e nunca é sobrescrito.
+  const tagRows = [];
+  for (const [facet, tags] of Object.entries(result.facets)) {
+    tags.forEach((tag) => tagRows.push({ facet, tag }));
+  }
+  stmts.setKindIfNull.run({ id: article.id, kind: kindFromTags(tagRows) });
 });
 
 /**

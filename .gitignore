@@ -39,3 +39,5 @@ webapp/scripts/out/
 # Agent skills: disposable task plan + ephemeral validation tokens
 TASK_PLAN.md
 .agents/skills/.validation/
+
+.deep-orchestrator/

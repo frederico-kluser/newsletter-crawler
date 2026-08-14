@@ -9,7 +9,7 @@ import { runParse } from './parse-pool.js';
 export {
   capHtml, extractArticle, linksInHtml, readableLinks, probablyArticle, pruneForLLM,
   htmlToMarkdown, isBlockedPage, extractPublishedDate, fallbackTitle, applyJunkSpans,
-  sanityCheckCleaned, ensurePlainText, looksLikeHtml,
+  sanityCheckCleaned, ensurePlainText, looksLikeHtml, looksLikeJson,
   blockTextFromHtml, htmlBlockText, detectTruncatedEnd, stripTrailingTrigger,
   isGithubUrl, githubReleaseText, prunePageFrame,
 } from './parse-core.js';

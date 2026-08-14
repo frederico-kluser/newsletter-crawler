@@ -6,7 +6,7 @@ import {
   pruneForLLM, extractArticleAsync, fallbackTitle, readableLinksAsync, linksInHtml, isBlockedPage,
   extractPublishedDate, cpuParse, capHtml, applyJunkSpans, ensurePlainText, htmlToMarkdown,
   htmlBlockText, prunePageFrame, detectTruncatedEnd, stripTrailingTrigger, githubReleaseText,
-  isGithubUrl,
+  isGithubUrl, looksLikeJson,
 } from './clean.js';
 import {
   getCachedSelector, putSelector, validateLinkSelector, applyLinkSelector,
@@ -752,6 +752,16 @@ async function processArticle(job, source, opts) {
     return;
   }
 
+  // Página cujo corpo extraído é JSON puro (blob de dados/API que Readability, o seletor ou o
+  // fallback LLM ecoaram como "conteúdo" — caso react-dropzone 20.0 da captura 2026-08-14):
+  // não é artigo. Item curado mantém o blurb do agregador.
+  if (looksLikeJson(content)) {
+    if (enriching) return keepAggregatorVersion(enriching, ev, 'json-page');
+    warn(`conteúdo JSON ignorado (página de dados, não artigo): ${url}`);
+    logEvent({ ...ev, stage: 'article', status: 'skip', detail: { reason: 'json-page' } });
+    return;
+  }
+
   // Piso por data do ARTIGO: descarta artigo AVULSO com data própria anterior ao piso. Item
   // curado NÃO é censurado pelo piso — ele pertence à issue (em range); a âncora temporal do
   // registro é a data da issue, e a data própria do alvo fica no trace.
@@ -837,6 +847,22 @@ async function processArticle(job, source, opts) {
   // Trava de data futura: vale p/ os DOIS caminhos de escrita abaixo (insert e enrich) e p/ o
   // dateSeen do progresso, que leem `published` daqui.
   published = clampFutureDate(published);
+
+  // Piso pós-hoc (rede do Achado 2 — captura 2026-08-14): o filtro por data no processListing só
+  // barra itens DATADOS na própria listagem; item com d===null enfileira, e a data dele só é
+  // RESOLVIDA aqui (clean LLM publicado/fallback sibling) — o guard cedo (acima) já passou com
+  // null. Data final < --since => descarta agora, antes do insert. Item curado de issue PERMANECE
+  // imune: a âncora temporal é a data da issue (comentário do guard cedo).
+  if (opts.sinceDate && !enriching) {
+    const d = parseDate(published);
+    if (d && d < opts.sinceDate) {
+      dateSeen(source?.id, d);
+      floorHit(source?.id); // a fonte entrega artigos anteriores ao alvo (mesmo sinal do guard cedo)
+      log(`artigo anterior a --since detectado pós-limpeza (${published}) ignorado: ${url}`);
+      logEvent({ ...ev, stage: 'article', status: 'skip', detail: { reason: 'below-since', published, posthoc: true } });
+      return;
+    }
+  }
 
   const contentHash = sha256(content);
   const dupHash = stmts.getArticleByHash.get(contentHash);

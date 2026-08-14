@@ -234,8 +234,10 @@ function findDatePublished(node) {
 /**
  * Data de publicação a partir do HTML (a issue/edição expõe isso de forma confiável):
  * JSON-LD `datePublished` (inclusive dentro de @graph) -> <meta article:published_time> ->
- * primeiro <time datetime> -> atributos data-* comuns. Retorna a STRING crua (o parsing fica em
- * util.parseDate).
+ * primeiro <time datetime> -> atributos data-* comuns -> TEXTO VISÍVEL com mês por extenso
+ * (ex.: "August 13, 2026" — nodeweekly não expõe a data em nenhum atributo, só no texto).
+ * Retorna a STRING crua (o parsing fica em util.parseDate); o ordinal do dia (13th) é
+ * removido porque o parse nativo de Date não o entende.
  */
 export function extractPublishedDate(html) {
   try {
@@ -264,6 +266,31 @@ export function extractPublishedDate(html) {
       $dateEl.attr('data-publish-date') ||
       $dateEl.attr('data-post-date');
     if (dataAttr) return dataAttr.trim();
+    // Fallback FINAL por TEXTO VISÍVEL: semanais sem meta (caso real: nodeweekly/issues/637
+    // tem SÓ "August 13, 2026" no corpo). Mês por extenso + dia + ano; o 1º match do body
+    // costuma ser o cabeçalho da própria issue. parseDate entende o formato cru.
+    // Clone + espaço após elementos de bloco: o .text() do cheerio cola elementos vizinhos
+    // ("637August"), o que quebraria o \b do regex em fronteiras de elemento.
+    const $body = $('body').clone();
+    $body.find('script, style, noscript, template, svg').remove();
+    $body
+      .find('br, p, div, li, tr, section, article, blockquote, h1, h2, h3, h4, h5, h6, ul, ol, table, pre')
+      .append(' ');
+    // Ano restrito a uma janela segura (corrente ± 1): prosa citando "May 4, 2019" não pode
+    // ancorar a issue num ano velho — clampFutureDate só pega FUTURO, e um ano abaixo do piso
+    // --since faria o item ser DESCARTADO (pior que NULL). Dia aceita ordinal opcional
+    // ("August 13th, 2026"), com ou sem vírgula antes do ano. RegExp dinâmico pelo ano.
+    const y = new Date().getFullYear();
+    const textMatch = $body.text().match(
+      new RegExp(
+        '\\b(?:January|February|March|April|May|June|July|August|September|October|November|December)' +
+          `\\s+\\d{1,2}(?:st|nd|rd|th)?,?\\s+(?:${y - 2}|${y - 1}|${y}|${y + 1})\\b`,
+        'i',
+      ),
+    );
+    // parseDate (Date nativo) não entende ordinal — devolve o texto SEM o sufixo (13th -> 13)
+    // p/ a data virar âncora de verdade (iso_date/parseDate) e não cair no fallback extracted_at.
+    if (textMatch) return textMatch[0].replace(/\b(\d{1,2})(?:st|nd|rd|th)\b/i, '$1');
   } catch {
     /* fail-open */
   }

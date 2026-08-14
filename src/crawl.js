@@ -29,7 +29,7 @@ import {
   CURATE_ROUNDUPS, CLEAN_BEFORE_SAVE, CLEAN_MAX_CHARS, stageModel,
 } from './config.js';
 
-export function enqueue(url, kind, fromUrl, sourceId, depth = 0) {
+export function enqueue(url, kind, fromUrl, sourceId, depth = 0, discoveredDate = null) {
   const n = normalizeUrl(url, fromUrl);
   if (!n) return false;
   // Rejeita URLs malformadas: `%20` colado em nome de query param (concatenação quebrada do
@@ -40,7 +40,9 @@ export function enqueue(url, kind, fromUrl, sourceId, depth = 0) {
     debug(`URL provavelmente quebrada ignorada: ${n}`);
     return false;
   }
-  return stmts.enqueue.run(n, kind, fromUrl || null, sourceId || null, depth).changes > 0;
+  // discoveredDate: a data do PAR na listagem (roundup -> a data da ISSUE). Herdada pelo job
+  // e usada no piso --since + na curadoria — P1 da captura 2026-08-14.
+  return stmts.enqueue.run(n, kind, fromUrl || null, sourceId || null, depth, discoveredDate || null).changes > 0;
 }
 
 export function upsertSource(seed) {
@@ -140,7 +142,9 @@ async function processListing(job, source, opts) {
             below++; // piso: pula posts mais antigos
             continue;
           }
-          if (enqueue(p.url, childKind, url, source?.id, depth + 1)) n++;
+          // 6º parâmetro: discovered_date = p.published_at do payload (âncora do roundup —
+          // mesma herança autoritativa listagem->issue que os links pareados ganham).
+          if (enqueue(p.url, childKind, url, source?.id, depth + 1, p.published_at)) n++;
         }
         if (opts.sinceDate && below > 0) floorHit(source?.id); // arquivo já passou do alvo
         log(`substack: ${posts.length} posts (${n} novos) de ${hostOf(url)}`);
@@ -224,7 +228,7 @@ async function processListing(job, source, opts) {
       const d = l.date ? parseDate(l.date) : null;
       if (d) dateSeen(source?.id, d);
       if (opts.sinceDate && d && d < opts.sinceDate) continue; // piso vale p/ itens colhidos
-      if (enqueue(l.url, childKind, url, source?.id, depth + 1)) n++;
+      if (enqueue(l.url, childKind, url, source?.id, depth + 1, l.date)) n++;
     }
     log(`fallback Flash: ${n} links (${childKind}) enfileirados de ${url}`);
   } else {
@@ -363,7 +367,7 @@ async function crawlArchive(startUrl, source, sel, firstHtml, ctx) {
         below++; // mais antigo que o piso: não enfileira
         continue;
       }
-      if (enqueue(it.url, childKind, pageUrl, source?.id, baseDepth + 1)) added++;
+      if (enqueue(it.url, childKind, pageUrl, source?.id, baseDepth + 1, it.date)) added++;
     }
     stmts.upsertPage.run({
       source_id: source?.id ?? null,
@@ -445,6 +449,20 @@ async function findNextPage(html, baseUrl, sel) {
 }
 
 // ---------------- ROUNDUP (issue/edição: lista de links externos curados) ----------------
+/**
+ * Data da issue p/ o roundup: a do PAR da LISTAGEM (frontier.discovered_date, repassada pelo
+ * enqueue) é a AUTORITATIVA — a listagem exibe a data real da issue (<span class="issue-date">);
+ * sem ela, cai p/ a data extraída da própria página da issue (meta -> texto visível). Retorna
+ * a string CRUA (p/ a curadoria gravar como published_at) + o Date parseado (p/ o piso --since).
+ * Puro/testável.
+ */
+export function roundupIssueDate(job, pageDateRaw) {
+  const jobDate = parseDate(job?.discovered_date);
+  if (jobDate) return { raw: job.discovered_date, parsed: jobDate };
+  const parsed = parseDate(pageDateRaw);
+  return parsed ? { raw: pageDateRaw, parsed } : { raw: null, parsed: null };
+}
+
 async function processRoundup(job, source, opts = {}) {
   const url = job.url;
   const depth = job.depth ?? 0;
@@ -460,7 +478,9 @@ async function processRoundup(job, source, opts = {}) {
 
   // Piso por data da ISSUE (backstop autoritativo p/ itens do índice sem data legível). Como
   // descartamos a issue ANTES de enfileirar artigos, todo artigo enfileirado é de issue no piso.
-  const issueDate = parseDate(extractPublishedDate(fetched.html));
+  // A data do PAR da LISTAGEM (frontier.discovered_date) é a fonte AUTORITATIVA — sem ela
+  // (issue descoberta fora de uma listagem datada), cai p/ a data da própria página.
+  const { raw: issueDateRaw, parsed: issueDate } = roundupIssueDate(job, extractPublishedDate(fetched.html));
   if (issueDate) dateSeen(source?.id, issueDate); // % rumo ao --since: a issue ancora a fonte
   if (opts.sinceDate && issueDate && issueDate < opts.sinceDate) {
     floorHit(source?.id); // já alcançamos issues anteriores à data-alvo
@@ -476,7 +496,7 @@ async function processRoundup(job, source, opts = {}) {
     try {
       const cur = await inStage('curadoria', () => curateRoundup({
         html: fetched.html, url: finalUrl, source, runId: opts.runId ?? null, depth,
-        sinceDate: opts.sinceDate,
+        sinceDate: opts.sinceDate, issueDate: issueDateRaw,
       }));
       if (cur?.belowFloor) {
         floorHit(source?.id); // a curadoria datou a issue abaixo do alvo
@@ -521,6 +541,18 @@ async function processRoundup(job, source, opts = {}) {
 }
 
 // ---------------- ARTICLE ----------------
+/**
+ * Data que o enrich GRAVA no item curado: item de ISSUE (issue_url set) usa SÓ a data
+ * cadastrada na curadoria (a âncora é a issue — na captura real, 13/15 artigos herdaram a
+ * data do ALVO 08-05 em vez da issue 08-13); a data do alvo segue no trace (targetDate).
+ * Item AVULSO (sem issue_url) mantém a data própria do alvo. Puro/testável.
+ */
+export function enrichAnchorDate(enriching, published) {
+  return enriching?.issue_url
+    ? (enriching.published_at || null)
+    : (enriching?.published_at || published || null);
+}
+
 /** Item curado cujo alvo não rendeu corpo: o registro FICA com o blurb do agregador. */
 function keepAggregatorVersion(row, ev, reason) {
   stmts.finishEnrich.run(row.id);
@@ -748,10 +780,12 @@ async function processArticle(job, source, opts) {
     }
   }
 
-  // Fallback de data: alvo sem data própria? Herda da issue (outro artigo da MESMA issue_url já
-  // tem data — a issue é a âncora temporal; sem isso, enriquecidos de páginas sem data ficam com
-  // published_at NULL e somem das superfícies ordenadas por data).
-  if (!published) {
+  // Fallback de data p/ item AVULSO: alvo sem data própria? Herda da issue (outro artigo da
+  // MESMA issue_url já tem data — a issue é a âncora temporal; sem isso, enriquecidos de
+  // páginas sem data ficam com published_at NULL e somem das superfícies ordenadas por data).
+  // Item de ISSUE NÃO passa por aqui: a data dele é a cadastrada na curadoria (enrichAnchorDate)
+  // — a do alvo jamais vira a data do item (P1 da captura 2026-08-14).
+  if (!published && !enriching?.issue_url) {
     const issueUrl = enriching?.issue_url || job.discovered_from;
     if (issueUrl) {
       const siblingDate = stmts.getIssueDate.get(issueUrl);
@@ -778,13 +812,16 @@ async function processArticle(job, source, opts) {
 
   if (enriching) {
     // Título curado é autoritativo (o agregador nomeia melhor: "Node-GTK 4.0" e não
-    // "The GTK Project - …"); a data-âncora (da issue) só é preenchida se estava vazia.
+    // "The GTK Project - …"). Data: só a âncora da issue (enrichAnchorDate) — a data do
+    // alvo jamais vira a data do item de issue (P1 da captura 2026-08-14); ela segue no
+    // trace via targetDate do evento.
+    const anchorDate = enrichAnchorDate(enriching, published);
     stmts.enrichArticle.run({
       id: enriching.id,
       title: enriching.title || title || canonicalUrl,
       content,
       content_hash: contentHash,
-      published_at: enriching.published_at || published || null,
+      published_at: anchorDate,
       content_source: 'target',
       cleaned,
     });
@@ -793,7 +830,7 @@ async function processArticle(job, source, opts) {
       detail: { method, chars: content.length, cleaned: Boolean(cleaned), targetDate: published || null },
     });
     bump('enriquecidos');
-    dateSeen(source?.id, parseDate(enriching.published_at || published));
+    dateSeen(source?.id, parseDate(anchorDate));
     log(`item enriquecido [${enriching.kind || 'news'}]: ${(enriching.title || canonicalUrl).slice(0, 70)}`);
     emitRunEvent({ phase: 'articles', kind: 'saved', channel: 'ticker', source: source?.name, detail: (enriching.title || canonicalUrl).slice(0, 80) });
     return { verifyUrl: enriching.url }; // streaming verify: verifica esta ficha já

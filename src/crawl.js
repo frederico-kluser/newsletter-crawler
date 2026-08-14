@@ -5,6 +5,8 @@ import { fetchSmart, checkRobots } from './fetch.js';
 import {
   pruneForLLM, extractArticleAsync, fallbackTitle, readableLinksAsync, linksInHtml, isBlockedPage,
   extractPublishedDate, cpuParse, capHtml, applyJunkSpans, ensurePlainText, htmlToMarkdown,
+  htmlBlockText, prunePageFrame, detectTruncatedEnd, stripTrailingTrigger, githubReleaseText,
+  isGithubUrl,
 } from './clean.js';
 import {
   getCachedSelector, putSelector, validateLinkSelector, applyLinkSelector,
@@ -541,6 +543,22 @@ async function processRoundup(job, source, opts = {}) {
 }
 
 // ---------------- ARTICLE ----------------
+
+/**
+ * P5: conserto determinístico (sem LLM) de corpo terminando em botão de UI (release notes do
+ * GitHub: "View changes on GitHub" fecha o corpo). O gatilho SAI sempre (stripTrailingTrigger);
+ * o container da release entra SÓ se mais longo (fail-open — githubReleaseText). Compartilhado
+ * pelo crawl e pelo `ncrawl reextract` (mantém os dois em sincronia).
+ */
+export async function githubTruncationFix(content, html, url) {
+  if (!detectTruncatedEnd(content) || !isGithubUrl(url)) return { content, changed: false };
+  const stripped = stripTrailingTrigger(content);
+  const better = await cpuParse(() => githubReleaseText(capHtml(html)));
+  const recovered = Boolean(better && better.length > stripped.length);
+  const best = recovered ? better : stripped;
+  return { content: best, changed: best !== content, recovered };
+}
+
 /**
  * Data que o enrich GRAVA no item curado: item de ISSUE (issue_url set) usa SÓ a data
  * cadastrada na curadoria (a âncora é a issue — na captura real, 13/15 artigos herdaram a
@@ -657,7 +675,9 @@ async function processArticle(job, source, opts) {
 
   if (art?.textContent && art.textContent.trim().length >= 400) {
     title = art.title;
-    content = art.textContent.trim();
+    // P6a: quebras de linha entre blocos — o textContent do Readability cola parágrafos em
+    // HTML minificado (casos TermDOM/DeepSeek/npx Helpers da captura 2026-08-14).
+    content = htmlBlockText(art);
     published = art.publishedTime || null;
     method = 'readability';
   } else {
@@ -777,6 +797,23 @@ async function processArticle(job, source, opts) {
       if (signal?.aborted) throw abortErrorOf(signal); // job abortado: não salva parcial aqui
       warn(`limpeza IA falhou (${url}): ${e.message} — salvando original`);
       logEvent({ ...ev, stage: 'clean', status: 'fail', detail: { error: e.message } });
+      // P6b: sem o clean por IA, remove a moldura de página DETERMINÍSTICA (byline/menu/CTA/
+      // rodapé no começo/fim — caso meiert.com da captura) antes de salvar o original cru.
+      content = ensurePlainText(prunePageFrame(content));
+    }
+  }
+
+  // P5: corpo terminando em botão de UI (release notes do GitHub: "View changes on GitHub"
+  // fecha o corpo da release) — 2º passe determinístico: remove o gatilho do fim e re-extrai
+  // o container da release (só entra se mais longo). Sem custo de LLM.
+  if (method === 'readability' && isGithubUrl(finalUrl)) {
+    const fix = await githubTruncationFix(content, html, finalUrl);
+    if (fix.changed) {
+      content = fix.content;
+      logEvent({
+        ...ev, stage: 'extract', status: fix.recovered ? 'truncated-recovered' : 'truncated-stripped',
+        detail: { chars: content.length },
+      });
     }
   }
 

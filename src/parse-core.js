@@ -354,3 +354,183 @@ export function sanityCheckCleaned(original, cleaned) {
   if (c.length > o.length * 1.2 + 500) return { ok: false, reason: 'maior que o original' };
   return { ok: true };
 }
+
+// ---- P6a: quebras de linha entre blocos (o textContent do Readability cola blocos) ----
+// O .textContent do JSDOM concatena os text nodes SEM separador: em HTML minificado (sem
+// newline entre elementos), parágrafos/cabeçalhos/li ficam colados ("h1 colado ao parágrafo" —
+// casos TermDOM/DeepSeek da captura 2026-08-14). A correção é SÓ inserir '\n' nas fronteiras
+// de bloco — nenhuma outra normalização de conteúdo (palavras intocadas).
+const BLOCK_BOUNDARY_SEL =
+  'p, div, li, h1, h2, h3, h4, h5, h6, pre, blockquote, ul, ol, table, tr, section, article';
+
+/**
+ * Texto de um fragmento HTML com '\n' entre fronteiras de bloco (p/div/li/h1-6/pre/blockquote/
+ * ul/ol/table; `<br>` vira '\n'). Falha -> null (o chamador cai no textContent). Puro/testável.
+ */
+export function blockTextFromHtml(html) {
+  try {
+    const $ = cheerio.load(html || '');
+    $('script, style, noscript, template, svg, head').remove();
+    $('br').replaceWith('\n');
+    $(BLOCK_BOUNDARY_SEL).append('\n');
+    const text = $('body').text() || $.root().text() || '';
+    // \n{3,} só pode ter nascido das fronteiras aninhadas (ul>li>div etc.): colapsa em \n\n.
+    return text.replace(/\n{3,}/g, '\n\n').trim();
+  } catch {
+    return null; // fail-open: quem chama decide
+  }
+}
+
+/** Conteúdo do Readability com quebras de bloco; falha -> textContent atual (fail-open). */
+export function htmlBlockText(art) {
+  if (art?.content) {
+    const t = blockTextFromHtml(art.content);
+    if (t) return t;
+  }
+  return art?.textContent?.trim() || '';
+}
+
+// ---- P5: fim truncado por botão de UI (release notes do GitHub etc.) ----
+// A captura 2026-08-14 (Node Weekly): a release do Vitest terminava em "View changes on GitHub"
+// — o botão de UI que fecha o corpo da release no GitHub. O corpo extraído pode terminar num
+// gatilho desses (botão de expansão/atalho), o que parece truncamento. Os helpers abaixo dão
+// a detecção determinística + o 2º passe de extração do container da release.
+const TRUNCATED_END_RE = /view changes on github|view on github|view all(?: \d+)? changes?|show more|read more/i;
+
+/** O corpo extraído termina num gatilho de UI ("View changes on GitHub", "Read more", …)? */
+export function detectTruncatedEnd(content) {
+  const tail = String(content || '').trim().replace(/\s+/g, ' ');
+  return TRUNCATED_END_RE.test(tail.slice(-100));
+}
+
+// Gatilho como frase/linha TERMINAL: exige fronteira de início de frase/linha antes do gatilho
+// (^, pontuação de fim seguida de espaço — por lookbehind, p/ NÃO comer o ponto final —, ou
+// quebra de linha). "…want to read more" em prosa NÃO é gatilho (sem fronteira antes de
+// "read more"); "…details. Read more" é. Puro/testável.
+const TRIGGER_STRIP_RE =
+  /(?:^|(?<=[.!?])\s+|\n\s*)(view changes on github|view on github|view all(?: \d+)? changes?|show more|read more)[.!]?\s*$/i;
+
+/** Remove o gatilho de fim quando ele é só UI (frase/linha terminal); prosa fica intacta. */
+export function stripTrailingTrigger(content) {
+  const s = String(content || '');
+  const t = s.trim();
+  if (!t) return s;
+  const m = TRIGGER_STRIP_RE.exec(t);
+  return m ? t.slice(0, m.index).trim() : s;
+}
+
+/** O URL é uma release do github.com? (o 2º passe é específico do GitHub). */
+export function isGithubUrl(u) {
+  try {
+    const h = new URL(u).hostname;
+    return h === 'github.com' || h === 'www.github.com';
+  } catch {
+    return false;
+  }
+}
+
+// Botões de "ver o changelog completo" nas páginas de release do GitHub.
+const GITHUB_TRIGGER_RE = /view changes on github|view on github|view all(?: \d+)? changes?/i;
+
+/**
+ * 2º passe de extração p/ release notes do GitHub (P5): quando o corpo extraído termina no
+ * botão "View changes on GitHub", re-extrai do CONTAINER da release — sobe do botão até o
+ * ancestral com >= 400 chars de texto (o corpo da release) e serializa com fronteiras de bloco
+ * (blockTextFromHtml). O botão é UI: sai do texto. O chamador usa o resultado SÓ se mais longo
+ * que o atual (fail-open: nunca piora o que já tem). Puro/testável.
+ */
+export function githubReleaseText(html) {
+  try {
+    const $ = cheerio.load(html || '');
+    const isTrigger = (el) => GITHUB_TRIGGER_RE.test($(el).text().trim());
+    // Página INTEIRA (não só o container): a nav/sidebar pode trazer um gatilho "View all
+    // changes" ANTES do corpo — o 1º em ordem de documento subiria até um ancestral enorme
+    // (a página inteira) e reintroduziria lixo. O gatilho que FECHA o corpo da release é o
+    // ÚLTIMO em ordem de documento, e vive em main/article quando a página é semântica (a
+    // release do GitHub fica em <main id="js-repo-pjax-container">): preferir essa scope,
+    // com fallback no documento todo p/ páginas sem main/article.
+    const scope = $('main, article').first();
+    const inScope = scope.length ? scope.find('a, button') : $('a, button');
+    let btn = inScope.filter((_, el) => isTrigger(el)).last();
+    if (!btn.length && scope.length) btn = $('a, button').filter((_, el) => isTrigger(el)).last();
+    if (!btn.length) return null;
+    let cur = btn;
+    for (let i = 0; i < 8 && cur.length; i++) {
+      if (cur.text().trim().length >= 400) {
+        cur.find('a, button').each((_, el) => {
+          if (isTrigger(el)) $(el).remove();
+        });
+        return blockTextFromHtml($.html(cur)) ?? null;
+      }
+      cur = cur.parent();
+    }
+  } catch {
+    /* fail-open */
+  }
+  return null;
+}
+
+// ---- P6b: moldura de página no fallback (quando a limpeza IA falha) ----
+// O `clean` por IA remove spans de sujeira; quando ELE falha, o original cru é salvo COM a
+// moldura da página (byline/meta no topo, rodapé/bio no fim — caso meiert.com da captura:
+// "Published on Aug 12, 2026, filed under development. (Share this post…)" + "Here on
+// meiert.com I talk about some of my perspectives…"). prunePageFrame é o conserto
+// DETERMINÍSTICO (sem LLM): padrões CONSERVADORES de moldura de CMS no começo/fim — só
+// blocos claramente de moldura saem; prosa nunca.
+const FRAME_START_PATTERNS = [
+  // byline/meta de blog: "Published on Aug 12, 2026, filed under development. (Share this post…)"
+  // (o espaço de "Aug 12" é NBSP no HTML real — por isso \s+ e não espaço literal)
+  /^published on [a-z]+\s+\d{1,2},\s+\d{4}, filed under [^.]*\.[^)]*\)\.?\s*/i,
+  // banner de pré-release do GitHub (duas variantes de markup vistas na página real)
+  /^pre-release\s+pre-release\s+immutable\s+release\.?\s+only release title and notes can be modified\.?\s*/i,
+  /^pre-release\s+immutable\s+release\.?\s+only release title and notes can be modified\.?\s*/i,
+];
+
+// No FIM: a fronteira de frase/linha antes do padrão impede comer prosa ("…and subscribe to
+// the changelog" não é CTA; "…newsletter. Subscribe to the changelog" é). A fronteira de
+// pontuação usa lookbehind p/ não comer o ponto final da frase anterior.
+const FRAME_END_PATTERNS = [
+  // bio/rodapé: "Here on meiert.com I talk about some of my perspectives and experiences."
+  /\bhere on [a-z0-9.-]+\.[a-z]{2,} i (?:talk|write|share|blog) about[\s\S]*$/i,
+  /(?:^|(?<=[.!?])\s+|\n\s*)share this post[^.!?]*$/i,
+  /(?:^|(?<=[.!?])\s+|\n\s*)read next:?[^.!?]*$/i,
+  /(?:^|(?<=[.!?])\s+|\n\s*)related (?:posts|articles|stories|reading)[^.!?]*$/i,
+  /(?:^|(?<=[.!?])\s+|\n\s*)subscribe(?: to|:)? [^.!?]*$/i,
+  /(?:^|(?<=[.!?])\s+|\n\s*)sign up(?: for| to|:)? [^.!?]*$/i,
+  /(?:^|(?<=[.!?])\s+|\n\s*)©\s*\d{4}[^.!?]*\.?$/i,
+  /(?:^|(?<=[.!?])\s+|\n\s*)all rights reserved\.?$/i,
+];
+
+const PRUNE_MAX_SIDES = 3;
+
+/**
+ * Remove moldura de página (byline/menu/CTA/rodapé) do COMEÇO e do FIM do corpo —
+ * determinístico e conservador: no máx. 3 remoções por lado, cada padrão só casa onde
+ * claramente é moldura. Puro/testável.
+ */
+export function prunePageFrame(content) {
+  let s = String(content || '');
+  for (let i = 0; i < PRUNE_MAX_SIDES; i++) {
+    const before = s;
+    for (const re of FRAME_START_PATTERNS) {
+      const m = s.match(re);
+      if (m && m.index === 0 && m[0].trim()) {
+        s = s.slice(m[0].length).trimStart();
+        break;
+      }
+    }
+    if (s === before) break;
+  }
+  for (let i = 0; i < PRUNE_MAX_SIDES; i++) {
+    const before = s;
+    for (const re of FRAME_END_PATTERNS) {
+      const m = s.match(re);
+      if (m && m[0].trim()) {
+        s = s.slice(0, m.index).trimEnd();
+        break;
+      }
+    }
+    if (s === before) break;
+  }
+  return s.trim();
+}

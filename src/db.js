@@ -731,6 +731,10 @@ export const stmts = {
   getTagsForArticle: db.prepare(
     `SELECT facet, tag, rank FROM article_tags WHERE article_id = ? ORDER BY facet, rank`,
   ),
+  // kind determinístico pós-classificação (kindFromTags em classify.js): só preenche onde
+  // NÃO há curadoria (kind NULL — itens de fontes listing/avulsos). O WHERE protege o kind
+  // curado dos roundups de fontes index: a curadoria é a autoridade, nunca é sobrescrita.
+  setKindIfNull: db.prepare(`UPDATE articles SET kind = @kind WHERE id = @id AND kind IS NULL`),
   listArticlesNeedingClassification: db.prepare(
     `SELECT a.id, a.url, a.title, a.content
        FROM articles a

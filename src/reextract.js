@@ -9,7 +9,8 @@ import { stmts } from './db.js';
 import { fetchSmart } from './fetch.js';
 import {
   extractArticleAsync, capHtml, htmlBlockText, ensurePlainText,
-  applyJunkSpans, prunePageFrame, isGithubUrl, isBlockedPage, fallbackTitle,
+  applyJunkSpans, prunePageFrame, isGithubUrl, isGithubRepoRoot, isBlockedPage,
+  githubLatestReleaseText, looksLikeReleaseNotes, fallbackTitle,
 } from './clean.js';
 import { getCachedSelector, validateContentSelector } from './selectors.js';
 import { cleanArticleContent } from './llm.js';
@@ -39,6 +40,62 @@ function isErrorPage(title, content) {
   const c = (content || '').toLowerCase().trim();
   if (c.length < 100 && /\b(not found|404|403|500|error|erro)\b/i.test(c)) return true;
   return false;
+}
+
+/**
+ * Guarda JSON do reextract (captura 2026-08-14 — react-dropzone: o site serve um JSON
+ * estruturado e a extração o salvou como texto). Conteúdo re-extraído que É JSON nunca é
+ * artigo: quem chama mantém a ficha atual (keepCurrent('json-page')). Puro/exportado —
+ * contrato de merge com o agente 1b (guards-artigo): se no merge a versão de parse-core.js
+ * existir com o mesmo nome, importar de lá e remover esta (definida localmente p/ o merge
+ * resolver sem conflito de contrato).
+ */
+export function looksLikeJson(text) {
+  const s = String(text || '').trim();
+  if (s.length < 40) return false;
+  if (!/^[{[]/.test(s)) return false;
+  try {
+    JSON.parse(s);
+    return true;
+  } catch {
+    /* pode ser JSON truncado pela extração — cai no par chave:valor abaixo */
+  }
+  // Truncado no meio: um par `"chave":` é sinal forte de JSON; prosa que por acaso comece
+  // com '{'/'[' quase nunca tem aspas-palavra-aspas-dois-pontos.
+  return /"[^"\n]{1,80}"\s*:/.test(s);
+}
+
+/** URL da LISTAGEM de releases do repo (github.com/owner/repo/releases) ou null. */
+function githubReleasesUrl(u) {
+  try {
+    const h = new URL(u);
+    const p = h.pathname.split('/').filter(Boolean);
+    if (p.length < 2) return null;
+    return `https://github.com/${p[0]}/${p[1]}/releases`;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * P4 (captura 2026-08-14): item de RELEASE com URL = raiz do repo (github.com/owner/repo —
+ * sinal determinístico: o path NÃO tem /releases). A raiz serve o README, nunca as notas;
+ * as notas ficam em /releases (a 1ª do listing = a mais recente, server-rendered — as notas
+ * reais são CURTAS, ~100 chars; por isso a aceitação é por MARCADOR de release note, não por
+ * "mais longo vence"). Um re-fetch do mesmo host (só nesses casos); sem notas → null
+ * (fail-open: o chamador mantém a ficha atual).
+ */
+async function githubReleasesRecovery(fs, repoUrl) {
+  try {
+    const releasesUrl = githubReleasesUrl(repoUrl);
+    if (!releasesUrl) return null;
+    const fetched = await fs(releasesUrl, { profile: 'article', aggressive: true });
+    const notes = githubLatestReleaseText(fetched.html || '');
+    return notes && looksLikeReleaseNotes(notes) ? notes : null;
+  } catch (e) {
+    warn(`reextract: recovery de /releases falhou (${repoUrl}): ${e.message}`);
+    return null;
+  }
 }
 
 /**
@@ -122,13 +179,30 @@ async function reextractOne(row, { fs }) {
     content = prunePageFrame(content);
   }
 
-  // 3) P5 DEPOIS do clean (mesma ordem do crawl): o clean tira o banner do topo, aí o 2º passe
-  // do GitHub (container da release) fica mais longo que o atual e entra.
+  // 3) 2º passe do GitHub DEPOIS do clean (mesma ordem do crawl): o clean tira o banner do
+  // topo, aí o 2º passe (container da release) fica mais longo que o atual e entra.
   if (method === 'readability' && isGithubUrl(finalUrl)) {
-    const fix = await githubTruncationFix(content, html, finalUrl);
-    if (fix.changed) content = fix.content;
+    if (isGithubRepoRoot(finalUrl) && row.kind === 'release') {
+      // P4 (captura 2026-08-14 — BullMQ/smol-toml/swift-node salvaram o README): raiz do repo
+      // NUNCA é release note — o re-fetch de /releases recupera a release mais recente; sem
+      // notas (página mudou/JS/falha), a ficha atual é mantida (fail-open documentado: o
+      // README é o conteúdo legítimo da URL; o evento registra o porquê).
+      const notes = await githubReleasesRecovery(fs, finalUrl);
+      if (notes) {
+        content = notes;
+      } else {
+        return keepCurrent('github-repo-root-readme', { url: finalUrl });
+      }
+    } else {
+      const fix = await githubTruncationFix(content, html, finalUrl);
+      if (fix.changed) content = fix.content;
+    }
   }
   content = ensurePlainText(content);
+
+  // Guarda JSON (captura 2026-08-14 — react-dropzone salvou o JSON cru do site como texto):
+  // página que É JSON nunca é artigo; a ficha atual é mantida, JSON nunca é gravado.
+  if (looksLikeJson(content)) return keepCurrent('json-page', { chars: content.length });
 
   // 4) Persiste via enrichArticle (não toca kind/blurb/section; needs_enrich já é 0).
   const hash = sha256(content);

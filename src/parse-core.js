@@ -489,6 +489,63 @@ export function githubReleaseText(html) {
   return null;
 }
 
+// ---- P4: README em vez de release notes (item de RELEASE apontando p/ a RAIZ do repo) ----
+// Na captura 2026-08-14, "BullMQ 6.1"/"smol-toml 1.8"/"swift-node 0.1.2" saíram com o README
+// do repo em vez das notas: os boletins linkaram a RAIZ (github.com/owner/repo), que serve o
+// README — a página NÃO contém release notes (githubReleaseText retorna null: não há gatilho
+// "View changes on GitHub"). Sinal determinístico = o URL: path exatamente /owner/repo (sem
+// /releases/tag). As notas ficam na LISTAGEM /releases (server-rendered: a 1ª release do
+// listing = a mais recente). Investigado contra as páginas reais (BullMQ 6.1.1: notas reais
+// têm ~100 chars — o fail-open "mais longo vence" do githubTruncationFix as rejeitaria; por
+// isso a aceitação aqui é por MARCADOR de release note, não por tamanho).
+
+/** O URL é a RAIZ de um repo do github.com (github.com/owner/repo, sem /releases/tag)? */
+export function isGithubRepoRoot(u) {
+  try {
+    const h = new URL(u);
+    if (h.hostname !== 'github.com' && h.hostname !== 'www.github.com') return false;
+    return h.pathname.split('/').filter(Boolean).length === 2;
+  } catch {
+    return false;
+  }
+}
+
+// Marcadores típicos de release note do GitHub: versão no topo ("6.1.1 (2026-08-14)"),
+// "What's Changed"/"Full Changelog", ou refs de PR ("by @autor in #123" / "(#4548)").
+const RELEASE_NOTES_MARKERS = [
+  /^\s*v?\d+\.\d+(?:\.\d+)?(?:[-\s].*)?$/m,
+  /what'?s changed|full changelog/i,
+  /by @[a-z0-9-]+ in #\d+/i,
+  /\(\s*#\d{3,}\s*\)/i,
+];
+
+/** O texto parece release note de verdade (aceitação do 2º passe P4)? Puro/testável. */
+export function looksLikeReleaseNotes(text) {
+  const t = String(text || '');
+  return t.trim().length >= 50 && RELEASE_NOTES_MARKERS.some((re) => re.test(t));
+}
+
+/**
+ * 2º passe p/ a LISTAGEM de releases do GitHub (github.com/owner/repo/releases): as notas da
+ * 1ª release (a mais recente) vêm server-rendered no PRIMEIRO container .markdown-body de
+ * main. A lista INTEIRA misturaria releases antigas — extrai só a 1ª. Botões de UI saem
+ * (GITHUB_TRIGGER_RE). Puro/testável; null se não achar.
+ */
+export function githubLatestReleaseText(html) {
+  try {
+    const $ = cheerio.load(html || '');
+    const body = $('main').first().find('.markdown-body').first();
+    if (!body.length) return null;
+    body.find('a, button').each((_, el) => {
+      if (GITHUB_TRIGGER_RE.test($(el).text().trim())) $(el).remove();
+    });
+    return blockTextFromHtml($.html(body)) ?? null;
+  } catch {
+    /* fail-open */
+  }
+  return null;
+}
+
 // ---- P6b: moldura de página no fallback (quando a limpeza IA falha) ----
 // O `clean` por IA remove spans de sujeira; quando ELE falha, o original cru é salvo COM a
 // moldura da página (byline/meta no topo, rodapé/bio no fim — caso meiert.com da captura:

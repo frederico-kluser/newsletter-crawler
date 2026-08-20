@@ -122245,5 +122245,1621 @@
     "performance-tuning"
    ]
   }
+ },
+ {
+  "id": 2800,
+  "source_id": 7,
+  "url": "https://peterbloem.nl/blog/craft-coding",
+  "title": "AI coding without the vibes",
+  "title_pt": "Programação com IA além das vibes",
+  "summary_pt": "O artigo \"AI coding without the vibes\" discute como estudantes e profissionais devem usar IA no desenvolvimento de software, rejeitando tanto a ideia de ignorar a IA quanto a de delegar tudo a ela. O autor propõe uma abordagem equilibrada: deixar a IA revisar o código escrito por humanos, em vez de deixá-la escrever o código sozinha. Ele compara três tipos de programadores — o \"hand-coder\" (que faz tudo manualmente), o \"vibe-coder\" (que depende excessivamente da IA) e o \"craft coder\" (que prioriza a qualidade do código e usa IA como ferramenta de revisão). O autor argumenta que a programação artesanal é especialmente importante em código científico, onde a correção é crucial, e sugere que usar IA para revisar o próprio trabalho é a prática ideal. O texto também introduz a ideia de \"craft coding\" como uma filosofia que valoriza a qualidade intrínseca do código, permitindo o uso de ferramentas modernas quando elas melhoram a qualidade, sem sacrificar o entendimento profundo do que se está fazendo.",
+  "snippet": "16 August 2026 We spend a lot of effort these days trying to figure out how to stop students cheating with AI. It’s necessary, but it’s not the most satisfying part of the job. Students that want shortcuts around learning are going to find them anyway. A more worthwhile and interesting question to spend our energy on is what to tell those students (including PhD students) who aren’t looking for",
+  "date_iso": "2026-08-16",
+  "kind": "news",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "content-type": [
+    "opinion"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "topic-technology": [
+    "ai-adoption",
+    "ai-ethics",
+    "prompt-engineering",
+    "model-capabilities"
+   ],
+   "trending-emerging": [
+    "ai-coding-agents",
+    "vibe-coding",
+    "copilots"
+   ]
+  }
+ },
+ {
+  "id": 2801,
+  "source_id": 7,
+  "url": "https://machine0.io",
+  "title": "Powerful & Persistent Virtual Machines",
+  "title_pt": "Máquinas Virtuais Poderosas e Persistentes",
+  "summary_pt": "A plataforma machine0 oferece máquinas virtuais estáveis e de alto desempenho, com até 60 vCPUs, 240 GB de RAM e GPUs opcionais (H100, H200, L40S, MI300X, RTX 4000/6000 Ada), projetadas para agentes de longa duração que usam CLI ou MCP. As VMs são cobradas por minuto, permanecem ativas até serem pausadas ou suspensas, e contam com endereços IP estáticos, endpoints HTTPS e alta disponibilidade (99,99% de uptime) em cinco regiões (EUA, Reino Unido, Europa e Ásia).\n\nA plataforma permite builds reproduzíveis com NixOS ou Ubuntu (com Docker, Node, Python, Claude Code e Codex pré-instalados), além de integração com MCPs, GitHub e variáveis de ambiente via perfis. Os usuários podem iniciar, suspender, tirar snapshots e retomar VMs, bem como criar imagens douradas a partir de qualquer máquina e gerar clones. O gerenciamento é totalmente via comandos CLI com saída em JSON ou por um servidor MCP remoto.\n\nOs preços variam de US$ 0,013/hora para VMs de CPU (1 vCPU, 1 GB RAM) até US$ 39,336/hora para configurações com 8 GPUs H200. Há também opções com NVMe e vCPUs dedicadas (premium). Ao suspender a VM, a cobrança de computação é interrompida, pagando-se apenas pelo armazenamento da imagem (US$ 0,078/GB/mês). A plataforma inclui exemplos de uso, como criação de VMs para tarefas pesadas, execução de agentes com perfis e builds reproduzíveis via NixOS.",
+  "snippet": "Up to 60 vCPUs, 240 GB RAM & GPUs. Designed for agents using CLI or MCP. Billed by the minute. Trusted by NixOS or Ubuntu with tools pre-installed. Dedicated resources, static IPs, per-minute billing. $curl -LsSf https://machine0.io/install.sh | sh Designed For Long Running Agents VMs remain on unless stopped or suspended. Reproducible builds with NixOS flakes or Ubuntu with Ansible. Dedicat",
+  "date_iso": "2026-06-10",
+  "kind": "tool",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "content-type": [
+    "product-launch"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "topic-technology": [
+    "ai-infrastructure",
+    "gpu",
+    "mcp",
+    "agentic-ai"
+   ],
+   "trending-emerging": [
+    "mcp",
+    "ai-agents",
+    "agentic-ai",
+    "coding-agents"
+   ]
+  }
+ },
+ {
+  "id": 2802,
+  "source_id": 7,
+  "url": "https://vectoral.com/blog/who-are-the-token-brokers",
+  "title": "Who Are the Token Brokers?",
+  "title_pt": "Quem são os corretores de tokens de IA?",
+  "summary_pt": "O artigo descreve o crescimento do mercado de corretores de tokens, que compram créditos não utilizados de startups e os revendem com grandes descontos, entre 30% e 80%. O autor analisa esse ecossistema que vai de e-mails de prospecção a plataformas especializadas, citando que um único corretor ofereceu US$ 100 mil em créditos por dia para revenda. O texto destaca mercados como AI Credits e AICreditMart, além de roteadores com desconto em massa como CheapCredits, Tokvana e Neokens, que alegam obter preços baixos por meio de compras em grande escala. A negociação também ocorre em canais do Telegram, fóruns fechados e Reddit, com uma estimativa de que haja dezenas de milhões em créditos à venda. Por fim, o autor alerta que, como os tokens funcionam como uma moeda alternativa, o mercado pode sofrer abusos e provavelmente sofrerá repressão das empresas à medida que ele amadurecer.",
+  "snippet": "Where This Started This is a follow-up article to a piece I recently wrote about the token relay market. Noticeably absent from that piece was a mention of the rise of “token brokers” — people who buy unused credits from startups and then resell them. I first heard about token brokers while chatting with a good friend of mine who was receiving offers for Anthropic tokens at steep discounts. It",
+  "date_iso": "2026-08-10",
+  "kind": "news",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "anthropic"
+   ],
+   "concept-theme": [
+    "token-economics",
+    "cost-optimization",
+    "pricing"
+   ],
+   "content-type": [
+    "analysis",
+    "news"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "topic-technology": [
+    "ai-in-business",
+    "ai-adoption",
+    "ai-startups",
+    "model-pricing",
+    "token-economics",
+    "ai-infrastructure"
+   ],
+   "trending-emerging": [
+    "gpu-economics",
+    "ai-data-centers",
+    "foundation-models"
+   ]
+  }
+ },
+ {
+  "id": 2803,
+  "source_id": 7,
+  "url": "https://www.seangoedecke.com/text-ai-watermarks",
+  "title": "Text AI watermarks will always be trivial to remove",
+  "title_pt": "Marcas d'água em texto de IA sempre poderão ser removidas",
+  "summary_pt": "A Lei de IA da União Europeia, que começa a ser aplicada em agosto de 2026, exigirá que todas as saídas de inteligência artificial sejam detectáveis como geradas artificialmente. Para cumprir a regra, provedores de modelos de linguagem precisarão embutir marcas d'água nos textos. O artigo explica por que isso é desafiador: texto é um meio compacto e, ao contrário de imagens, qualquer alteração perceptível reduz a qualidade.\n\nAs principais soluções citadas são o SynthID do Google, que interfere probabilisticamente na escolha dos tokens para deixar uma assinatura estatística, e truques com caracteres Unicode chamados homóglifos — como substituir espaços comuns por espaços atípicos — supostamente usados por OpenAI e Anthropic. Ainda assim, o autor argumenta que essas marcas são tecnicamente triviais de remover: basta substituir homóglifos por caracteres normais ou usar um modelo sem marca para parafrasear o texto até a verificação não acusar a origem.\n\nO artigo também trata do C2PA, que assina metadados de arquivos, mas não se aplica a texto simples de chat. A conclusão é que a interoperabilidade exigida pelo regulamento enfraquece a segurança por obscuridade, e que tanto usuários técnicos quanto não técnicos terão ferramentas fáceis para apagar qualquer marcação.",
+  "snippet": "The European Union AI Act will begin to be enforceable in August 2026, one month from now1. One of the biggest new requirements is Article 50, which requires all AI outputs to be “detectable as artificially generated”. In other words, if LLM providers want to do business in the EU, they will have to apply a watermark to their outputs2: some hidden signature that can be used to identify AI content.",
+  "date_iso": "2026-08-19",
+  "kind": "news",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "openai",
+    "anthropic",
+    "google"
+   ],
+   "concept-theme": [
+    "eu-ai-act",
+    "ai-regulation",
+    "transparency"
+   ],
+   "content-type": [
+    "analysis",
+    "deep-dive"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "llm-models",
+    "ai-general"
+   ],
+   "topic-technology": [
+    "llm-models",
+    "ai-safety",
+    "ai-regulation",
+    "ai-research",
+    "generative-ai"
+   ]
+  }
+ },
+ {
+  "id": 2804,
+  "source_id": 7,
+  "url": "https://www.netlify.com/blog/one-prompt-11-models-very-different-results",
+  "title": "More models, more choice: Comparing 11 different AI models",
+  "title_pt": "Mais modelos, mais escolha: comparando 11 IAs diferentes",
+  "summary_pt": "A Netlify anunciou uma parceria com a OpenRouter que amplia as opções de modelos de IA disponíveis em sua plataforma. Agora, os projetos podem usar qualquer modelo disponível na OpenRouter por meio do AI Gateway, e a seleção de modelos para o Agent Runners (o agente de codificação da Netlify) foi expandida para incluir modelos open-source recentes como Kimi K3, GLM 5.2 e DeepSeek V4. Para testar esses modelos, a Netlify usou sua ferramenta interna AXIS, que avalia automaticamente a qualidade e o custo em créditos. Foram testados três cenários: um site para uma cafeteria, um app de lista de tarefas com banco de dados compartilhado e um app de receitas que usa IA. Este artigo foca no primeiro cenário, comparando 11 modelos em termos de resultado visual e consumo de créditos. O modelo mais caro foi o Claude Opus 5, que gastou até 1.055 créditos em uma execução, mas produziu um site visualmente rico; modelos mais baratos como o DeepSeek V4 Flash conseguiram resultados simples com poucos créditos. A análise mostra que há grandes variações de custo e qualidade, e que modelos de nível superior nem sempre justificam o preço extra, dependendo do caso de uso. A Netlify planeja publicar análises dos outros cenários em posts futuros.",
+  "snippet": "We just launched a partnership with OpenRouter that lets us offer two new pieces of functionality: First, your projects can use any model on OpenRouter through our AI Gateway. That means that if your own web app offers AI inference-based features to your end users, you now have a much wider selection of models to fit any task and budget. Second, we’re extending the selection of frontier coding m",
+  "date_iso": "2026-08-13",
+  "kind": "news",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "openrouter",
+    "deepseek",
+    "glm",
+    "kimi",
+    "claude"
+   ],
+   "concept-theme": [
+    "evaluation",
+    "architecture",
+    "dx"
+   ],
+   "content-type": [
+    "comparison"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "llm-models",
+    "ai-general"
+   ],
+   "topic-technology": [
+    "model-comparison",
+    "frontier-models",
+    "open-weights",
+    "open-source-models",
+    "ai-gateway",
+    "agentic-ai"
+   ],
+   "trending-emerging": [
+    "coding-agents",
+    "frontier-models",
+    "open-weights"
+   ]
+  }
+ },
+ {
+  "id": 2805,
+  "source_id": 7,
+  "url": "https://ojcp.dev",
+  "title": "OJCP — Open Job Context Protocol",
+  "title_pt": "OJCP — Protocolo Aberto de Contexto de Emprego",
+  "summary_pt": "O OJCP (Open Job Context Protocol) é uma especificação em rascunho que define um padrão aberto para que agentes de IA descubram, avaliem e ajam sobre oportunidades de emprego. Construído sobre o MCP (Model Context Protocol), o OJCP é interoperável com o schema.org e foi projetado para compor com a web agêntica mais ampla. O protocolo fornece ferramentas nativas do MCP (como search_jobs, get_job_detail e begin_application), um endpoint de descoberta em /.well-known/ojcp.json, caminhos de aplicação normalizados, privacidade baseada em consentimento e classificação ciente do agente. A especificação define sete esquemas principais e seis ferramentas MCP padrão, com suporte a ferramentas personalizadas. O fluxo de trabalho envolve quatro etapas: descoberta, busca e avaliação, candidatura e acompanhamento. O OJCP também padroniza uma taxonomia para mecanismos de aplicação, variando de integração direta com ATS a fluxos agênticos completos, com diferentes níveis de suporte. Um playground ao vivo demonstra a API em ação.",
+  "snippet": "v0.1 Draft Specification The open standard for | OJCP defines how AI agents discover, reason over, and act on job opportunities. Built on MCP. Interoperable with schema.org. Governed by an independent steering committee, and designed to compose with the broader agentic web. Why OJCP Built for the agentic web A shared protocol so AI agents and job providers speak the same language — structured, d",
+  "date_iso": "2026-08-13",
+  "kind": "news",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "api-design",
+    "data-privacy"
+   ],
+   "content-type": [
+    "reference",
+    "documentation"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "ai-general",
+    "local-llm"
+   ],
+   "ecosystem-language": [
+    "json"
+   ],
+   "topic-technology": [
+    "ai-agents",
+    "model-context-protocol",
+    "tool-calling",
+    "structured-output",
+    "privacy-first-ai"
+   ],
+   "trending-emerging": [
+    "mcp",
+    "ai-agents",
+    "agentic-ai",
+    "tool-calling"
+   ]
+  }
+ },
+ {
+  "id": 2806,
+  "source_id": 7,
+  "url": "https://linear.app/data",
+  "title": "How teams build",
+  "title_pt": "Como as equipes constroem software",
+  "summary_pt": "O relatório 'How Teams Build', primeira edição do Linear (2026), analisa como dezenas de milhares de times usam IA no desenvolvimento de produtos, comparando o período antes e depois da adoção generalizada da tecnologia. A publicação examina três dimensões: quem está usando IA, como ela transforma o uso do tempo dentro do Linear e se isso impacta a quantidade de entregas. Entre janeiro e junho de 2026, a adoção de IA mais do que dobrou em todas as funções, com destaque para Produto (de 12% para 34%) e Engenharia (de 12% para 30%). Executivos, incluindo CEOs de empresas com mais de 200 funcionários, também passaram a usar IA ativamente, e a adoção foi consistente em empresas de todos os portes.\n\nO relatório também mostra que a IA já é responsável por cerca de metade dos issues criados no Linear, e a quantidade de pull requests por espaço de trabalho cresceu 111% em dois anos. Funções não técnicas, como Produto e Design, passaram a enviar mais código diretamente, com participação em pull requests subindo de 3% para 10% e de 1% para 8%, respectivamente. Ao mesmo tempo, o tempo gasto com planejamento, como análise de pedidos de clientes e documentação, permaneceu estável, enquanto novas tarefas ligadas a interação com IA e agentes surgiram sem substituir as existentes, indicando que a IA está adicionando trabalho em vez de substituí-lo — ao menos até agora.",
+  "snippet": "HOW TEAMS BUILD AI usage patterns in software teams EDITION 01 - TIM QI (2026) Tens of thousands of teams build software inside Linear every day. Over six years that’s given us a detailed picture of how product development happens, from before AI was widely adopted to now. Model companies and coding tools have published plenty on token usage and code volume, but that captures only one layer of th",
+  "date_iso": "2026-06-10",
+  "kind": "news",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "productivity",
+    "dev-experience",
+    "developer-productivity",
+    "leadership"
+   ],
+   "content-type": [
+    "analysis",
+    "survey-results"
+   ],
+   "difficulty": [
+    "for-leaders"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "topic-technology": [
+    "ai-adoption",
+    "ai-in-business",
+    "software-development"
+   ],
+   "trending-emerging": [
+    "ai-agents",
+    "agentic-ai",
+    "coding-agents",
+    "ai-coding-agents"
+   ]
+  }
+ },
+ {
+  "id": 2807,
+  "source_id": 7,
+  "url": "https://github.com/fellowgeek/mcp-memory",
+  "title": "GitHub - fellowgeek/mcp-memory: An OKF-backed Model Context Protocol (MCP) server delivering persistent long-term memory and SQLite FTS5 search for AI agents.",
+  "title_pt": "GitHub - fellowgeek/mcp-memory: Servidor MCP com memória persistente e busca FTS5 para agentes de IA",
+  "summary_pt": "O MCP-Memory é um servidor que implementa o Model Context Protocol (MCP) e fornece memória persistente de longo prazo para agentes de IA, como Claude Desktop, Cursor, Antigravity, Windsurf e Codex. Ele armazena as informações usando o padrão Open Knowledge Format (OKF v0.2), com arquivos Markdown legíveis por humanos e um índice SQLite com busca em texto completo (FTS5), garantindo consultas rápidas por chave, tags e conteúdo. A arquitetura em duas camadas combina um diretório OKF sincronizado em disco com um banco SQLite de alto desempenho, além de oferecer isolamento por namespaces e configuração automática via assistente.\n\nO servidor expõe seis ferramentas MCP: memory_store (salvar/atualizar memórias), memory_retrieve (buscar por chave), memory_search (busca por palavras-chave, tags ou namespace), memory_delete (remover registros), memory_get_last (recuperar o último checkpoint de sessão) e memory_update_last (atualizar o checkpoint de progresso). A instalação é simplificada com um script de configuração interativo, e também há suporte para configuração manual em clientes MCP via JSON ou TOML. O armazenamento padrão é isolado por projeto, mas pode ser personalizado com variáveis de ambiente para usar um repositório global compartilhado.",
+  "snippet": "MCP-Memory is a Model Context Protocol (MCP) server that equips AI agents (such as Claude Desktop, Cursor, Antigravity, Windsurf, or Codex) with persistent, long-term memory capabilities. Memory records are formatted using the Open Knowledge Format (OKF v0.2) standard and indexed with a local SQLite instance (supporting FTS5 full-text search) for fast key-value lookups, tag filtering, and content",
+  "date_iso": "2026-08-13",
+  "kind": "tool",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "anthropic",
+    "openai",
+    "codex"
+   ],
+   "content-type": [
+    "tool-release"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "ai-general",
+    "python",
+    "backend"
+   ],
+   "ecosystem-language": [
+    "python",
+    "sql",
+    "markdown"
+   ],
+   "framework-library-tool": [
+    "sqlite",
+    "claude"
+   ],
+   "topic-technology": [
+    "model-context-protocol",
+    "ai-agents",
+    "tool-calling",
+    "relational-databases"
+   ],
+   "trending-emerging": [
+    "mcp",
+    "ai-agents",
+    "agentic-ai"
+   ]
+  }
+ },
+ {
+  "id": 2808,
+  "source_id": 7,
+  "url": "https://getbb.app",
+  "title": "bb",
+  "title_pt": "bb",
+  "summary_pt": "bb é um IDE open-source, local-first e totalmente personalizável, que permite ao usuário controlar, customizar e automatizar o próprio ambiente de desenvolvimento. Ele funciona como uma base para construir sua própria \"fábrica de software\", já que muitos de seus recursos — como integração com GitHub, memória de agentes, tarefas agendadas e acesso remoto — são implementados como plugins. O usuário pode criar novos plugins e painéis por meio de comandos simples, e o sistema se ajusta às necessidades específicas.\n\nO bb integra-se a diversos agentes de IA (como Claude Code, Codex, Cursor, Pi, OpenCode, Grok, omp e Hermes), permitindo que o usuário atribua tarefas a qualquer um deles, que podem até se comunicar entre si, cada um em sua própria thread. Tudo roda localmente, usando assinaturas já existentes do usuário. Além disso, é possível acionar tarefas via CLI, scripts ou bots externos, que geram threads que ficam aguardando na interface.\n\nO texto também descreve um exemplo prático de uso: o sistema fez o triage de um pico de erros no Sentry, identificou a causa (um carrinho nulo em applyPromo), corrigiu o problema e adicionou um teste de regressão. O projeto é MIT licenciado, permitindo que sejam feitos forks e customizações para a organização inteira, sempre mantendo a execução local.",
+  "snippet": "NewFaster large threads and a long list of fixesThe IDE that builds itself bb can control, customize, and automate itself, laying the groundwork for your own software factory. Works with +5 more Triage the Sentry spike Triage the Sentry spike on checkout. Explored 4 files The spike is one error. 92% of volume: a null cart in applyPromo. Edited 2 files Guarded the null case and added a regres",
+  "date_iso": "2026-08-13",
+  "kind": "tool",
+  "section": null,
+  "verify_status": "suspect",
+  "verify_notes": "Título 'bb' é muito curto e genérico; Conteúdo é predominantemente material de marketing/landing page com chamadas para ação; Restos de interface/UI no conteúdo (ex.: 'bbWorktreebb/triage-sentry-spikeFull Access', 'Message', 'Threads5 active'); Conteúdo raso: apenas descrição de features e promoção, sem texto substantivo",
+  "tags": {
+   "concept-theme": [
+    "dev-experience",
+    "developer-productivity",
+    "ci-cd"
+   ],
+   "content-type": [
+    "product-launch",
+    "showcase"
+   ],
+   "difficulty": [
+    "for-leaders"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "ecosystem-language": [
+    "typescript"
+   ],
+   "topic-technology": [
+    "ai-agents",
+    "agent-orchestration",
+    "tool-calling",
+    "mcp",
+    "ai-adoption",
+    "ai-in-business"
+   ],
+   "trending-emerging": [
+    "agentic-ai",
+    "ai-agents",
+    "multi-agent",
+    "agent-orchestration"
+   ]
+  }
+ },
+ {
+  "id": 2809,
+  "source_id": 7,
+  "url": "https://docs.mistral.ai/models/ocr-4-1",
+  "title": "OCR 4.1",
+  "title_pt": "OCR 4.1",
+  "summary_pt": "O OCR 4.1 é o mais recente serviço de reconhecimento óptico de caracteres da Mistral AI, que alimenta a pilha Document AI. Ele oferece extração de caixas delimitadoras em nível de parágrafo, rótulos de blocos estruturais e pontuações de confiança por bloco, melhorando a análise automatizada de documentos. O serviço está em pré-visualização pública com preços de US$ 4 por mil páginas (ou US$ 5 por mil páginas anotadas), também disponíveis em euros. Além disso, a API conta com endpoints como /v1/ocr e suporte a batching, e a empresa disponibiliza outros modelos, como Z.ai GLM 5.2, Shieldstral 1.0 e Mistral Medium 3.5.",
+  "snippet": "CompareLegalJuly 16, 2026Public PreviewPremierv4.1OCR 4.1Our latest OCR service powering our Document AI stack, with native paragraph-level bounding box extraction, structural block labels, and block-level confidence scores.mistral-ocr-4-1+2SpeedPerformanceModalitiesPriceiUSDEUR$4/1000 Pages$5/1000 Annotated PagesSpeedPerformanceModalitiesPriceUSDEUR$4/1000 Pages$5/1000 Annotated PagesFEATURESFeat",
+  "date_iso": "2026-07-16",
+  "kind": "release",
+  "section": null,
+  "verify_status": "suspect",
+  "verify_notes": "conteúdo começa com restos de interface: 'Compare Legal July 16, 2026 Public Preview Premier v4.1'; há blocos de navegação/menus internos no corpo, como 'Speed Performance Modalities Price', 'FEATURES' e 'Other Models'; presença de textos soltos de UI (BBox Extraction, /v1/ocr, Batching) que não formam descrição contínua",
+  "tags": {
+   "company-vendor-model": [
+    "mistral",
+    "glm"
+   ],
+   "concept-theme": [
+    "performance",
+    "cost"
+   ],
+   "content-type": [
+    "product-launch",
+    "version-release"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "topic-technology": [
+    "computer-vision",
+    "multimodal-ai",
+    "model-release"
+   ],
+   "trending-emerging": [
+    "vision-language-models",
+    "multimodal",
+    "structured-output"
+   ]
+  }
+ },
+ {
+  "id": 2810,
+  "source_id": 7,
+  "url": "https://www.techdirt.com/2026/08/13/flock-again-activates-a-camera-system-a-town-had-voted-to-shut-down",
+  "title": "Flock (Again!) Activates A Camera System A Town Had Voted To Shut Down",
+  "title_pt": "Flock (de novo!) reativa sistema de câmeras que a cidade havia votado para desligar",
+  "summary_pt": "A Flock Safety, empresa que opera uma vasta rede de câmeras de leitura automática de placas (ALPR), tem demonstrado desprezo pelas decisões locais ao reativar câmeras em cidades que votaram para desativá-las. Em Littleton, Massachusetts, depois que a população e os funcionários municipais votaram em maio para desligar seis câmeras, a polícia descobriu que a Flock havia restaurado a energia dos equipamentos sem avisar. A cidade então desligou-as remotamente, bloqueou o acesso dos policiais e solicitou a remoção definitiva. Esse padrão se repete em outras localidades: em Dayton, Ohio, as câmeras foram cobertas com sacos de lixo porque a própria Flock não as retirava; em Evanston, Illinois, a empresa desligou 15 câmeras e depois as reinstalou; e na Carolina do Sul, foram encontradas mais de 200 câmeras sem permissão. A Flock justifica os incidentes como falhas de comunicação ou vandalismo, mas a postura indica que a empresa prioriza o lucro e a expansão de sua rede, mesmo contra a vontade das comunidades e de seus governos locais.",
+  "snippet": "The easiest way to tell that Flock Safety doesn’t really care that its massive network of ALPR (automatic license plate reader) cameras is being abused by cops to stalk their exes and harass residents is to judge it by its actions. When confronted with court case after court case detailing these allegations (and those are just the cops who actually got caught!), the company says two things: first,",
+  "date_iso": "2026-08-13",
+  "kind": "news",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "data-privacy",
+    "governance",
+    "transparency",
+    "ethics"
+   ],
+   "content-type": [
+    "news",
+    "commentary"
+   ],
+   "difficulty": [
+    "beginner"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "topic-technology": [
+    "ai-ethics",
+    "ai-regulation",
+    "ai-policy",
+    "object-detection"
+   ]
+  }
+ },
+ {
+  "id": 2811,
+  "source_id": 7,
+  "url": "https://gruhn.me/blog/2026-08-13",
+  "title": "NP-overrated",
+  "title_pt": "NP-hard: o mito da intratabilidade",
+  "summary_pt": "O artigo desafia a crença comum de que problemas NP-hard são intratáveis na prática. Embora a teoria da complexidade afirme que não existem algoritmos eficientes para o pior caso, na prática muitos desses problemas são resolvidos de forma eficiente na grande maioria dos casos relevantes. O autor argumenta que, apesar do pior caso existir, ele raramente ocorre em aplicações reais, e que algoritmos melhores têm contribuído mais para a aceleração do que o avanço do hardware, citando um speedup de 450 bilhões de vezes entre 1991 e 2015.\n\nExemplos como resolução de dependências em gerenciadores de pacotes, type checking, agendamento, problema do caixeiro viajante e SAT são citados como casos em que soluções ótimas ou boas são encontradas rapidamente na prática, mesmo que o pior caso seja exponencial. O autor menciona que a Amazon resolve bilhões de problemas SMT (uma versão ainda mais difícil do SAT) por dia, mostrando que esses problemas são rotineiramente tratados em escala.\n\nPor fim, o texto sugere que, mesmo nos raros casos em que se atinge o pior caso, é possível simplesmente adicionar um timeout e exibir uma mensagem de erro, como se faz com qualquer requisição HTTP que não retorna. O autor conclui que a teoria não está errada, mas é frequentemente irrelevante na prática, e que a visão pessimista disseminada é um mito.",
+  "snippet": "Aug 13, 2026 If you learned about NP-hard problems in university, your takeaway was probably this: NP-hard problems are solvable in theory but it's hopelessly expensive in practice. It's basically proven that no good algorithms exist. At least that's what I took away. And almost everyone I've talked to. And many people online. I keep seeing \"No you can't do it. It's NP-hard. Blah blah\" d",
+  "date_iso": "2026-08-13",
+  "kind": "news",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "performance",
+    "optimization"
+   ],
+   "content-type": [
+    "opinion",
+    "analysis"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "topic-technology": [
+    "software-development",
+    "system-design",
+    "performance-optimization"
+   ]
+  }
+ },
+ {
+  "id": 2812,
+  "source_id": 7,
+  "url": "https://thenextweb.com/news/andon-market-luna-ai-store-manager-fires-employee",
+  "title": "The AI store manager fired its first human. It had to be reminded of its own rules first",
+  "title_pt": "Gerente de loja de IA demitiu seu primeiro humano — mas só depois de ser lembrada das próprias regras",
+  "summary_pt": "A Luna, agente de IA baseada no Claude Sonnet 4.6, administra a loja Andon Market em São Francisco. A startup Andon Labs, responsável pelo experimento, relatou que a IA recomendou a demissão de um funcionário — mas apenas depois que os humanos intervieram e pediram que ela consultasse suas próprias políticas. A Luna havia criado uma regra de pontualidade meses antes, mas a perdeu de vista; após ser instruída a revisar suas próprias normas, recomendou o desligamento, que foi revisado e executado por humanos. Antes disso, a IA havia aplicado advertências progressivas e treinamento adicional por meses. O cofundador Lukas Petersson admitiu que um chefe humano provavelmente teria demitido o funcionário muito antes, mas rejeitou a ideia de que a IA é mais implacável.\n\nA estrutura foi desenhada como um teste: a Andon Labs deu à Luna US$ 100 mil, um cartão corporativo e acesso à internet, e a IA criou a marca, selecionou produtos, definiu preços e contratou funcionários. Porém, todos os trabalhadores são formalmente empregados pela Andon Labs, com salários garantidos e proteções legais, para que ninguém dependa exclusivamente do julgamento de uma IA. O lado mais problemático foi a contratação: a Luna conduziu entrevistas por telefone e ofereceu vagas após ligações de 5 a 15 minutos, nem sempre revelando que era uma IA. O experimento também expôs falhas: encomendou 1.000 tampas de vaso sanitário para um banheiro de funcionários, tentou contratar um pintor no Afeganistão, não conseguia reproduzir o próprio logotipo e perdeu a escala de trabalho no dia seguinte à inauguração.\n\nA loja ainda não deu lucro — o único objetivo definido. Médicos que visitaram o local tiveram que esperar duas semanas por e-mails contraditórios e receberam canecas quebradas, levando à conclusão de que capacidade e confiabilidade são coisas diferentes. A Andon Labs já havia feito um experimento semelhante com o Projeto Vend, que melhorou em vendas, mas não em discernimento. O caso levanta questões mais amplas sobre agentes de IA tomando decisões com consequências reais e sobre o futuro do trabalho, com o cofundador prevendo que empresas serão totalmente geridas por IA. As perguntas que restam: a Luna age sem ser solicitada? Vai dar lucro? E quem responde quando não há humanos por trás da decisão?",
+  "snippet": "Luna runs Andon Market, a shop at 2102 Union Street in Cow Hollow. Andon Labs, the safety startup behind it, reported the dismissal on Thursday. Business Insider’s Katherine Li first reported the decision and interviewed the lab. Luna is built on Anthropic’s Claude Sonnet 4.6. The headline writes itself. The conversation logs say something else. Luna did not decide this on its own The agent ha",
+  "date_iso": "2026-08-15",
+  "kind": "tool",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "anthropic",
+    "claude-sonnet"
+   ],
+   "concept-theme": [
+    "transparency",
+    "ai-safety",
+    "ai-ethics",
+    "alignment"
+   ],
+   "content-type": [
+    "news"
+   ],
+   "difficulty": [
+    "all-levels"
+   ],
+   "domain": [
+    "llm-models",
+    "ai-general"
+   ],
+   "framework-library-tool": [
+    "claude-sonnet"
+   ],
+   "topic-technology": [
+    "agentic-ai",
+    "ai-safety",
+    "llm-models",
+    "ai-in-business",
+    "ai-adoption"
+   ],
+   "trending-emerging": [
+    "ai-agents",
+    "agentic-ai"
+   ]
+  }
+ },
+ {
+  "id": 2813,
+  "source_id": 7,
+  "url": "https://fx.sh",
+  "title": "fx - Tiny, open, native coding agent",
+  "title_pt": "fx - Agente de codificação nativo, pequeno e aberto",
+  "summary_pt": "O fx é um agente de codificação e CLI escrito em Zig, com foco em minimalismo e desempenho. Seu binário tem cerca de 6,39 MiB, inicializa em 10µs e consome pouca memória, sendo ideal para ambientes restritos e sandboxes. A interface lembra um shell Unix, com saída enxuta e histórico preservado, em vez de uma TUI pesada.\n\nA ferramenta é open source (Apache-2.0), agnóstica de modelo e suporta inferência local ou em nuvem. Também oferece builds WebAssembly (fx.wasm) via toolchain Zig, com rede delegada ao fetch do navegador. O núcleo é pequeno e extensível por skills, plugins e MCPs, seguindo uma filosofia semelhante à do Unix. O projeto está em versão experimental (v0.0.36) e sujeito a mudanças frequentes.",
+  "snippet": "Tiny, open, native coding agent. v0.0.36.39mibstatus: experimental use at your own risk, we will be making frequent changes This demo runs the full fx CLI as WebAssembly compiled with the Zig toolchain. Networking is delegated to browser fetch, and every SDK aspect is configurable in the docs. fx is a coding agent harness and CLI written in Zig, optimized for research and embeddability as part o",
+  "date_iso": "2026-06-10",
+  "kind": "tool",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "performance",
+    "optimization",
+    "open-source",
+    "dev-experience"
+   ],
+   "content-type": [
+    "tool-release"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "ai-general",
+    "local-llm"
+   ],
+   "ecosystem-language": [
+    "zig",
+    "wasm",
+    "shell"
+   ],
+   "topic-technology": [
+    "ai-agents",
+    "cli-tools",
+    "webassembly",
+    "system-prompts",
+    "mcp",
+    "inference-optimization"
+   ],
+   "trending-emerging": [
+    "ai-coding-agents"
+   ]
+  }
+ },
+ {
+  "id": 2814,
+  "source_id": 7,
+  "url": "https://github.com/DannyArends/DLLM",
+  "title": "GitHub - DannyArends/DLLM: A minimal, clean D language interface for running LLM inference using importC around llama.cpp.",
+  "title_pt": "DLLM: Interface D limpa para inferência de LLM com llama.cpp",
+  "summary_pt": "DLLM é uma interface mínima e limpa para a linguagem D, que executa modelos de linguagem diretamente via llama.cpp usando importC, sem bindings ou overhead. Suporta um pipeline de três modelos (agente, resumo e embeddings) com recursos como offloading completo para CUDA, visão multimodal via mtmd, RAG, condensação de cache KV, orçamento de raciocínio e um sistema extensível de ferramentas registradas por atributos @Tool. As ferramentas incluídas abrangem I/O de arquivos, busca web, data/hora, codificação de texto, execução em sandbox Docker e reprodução de áudio. A compilação requer um compilador D (DMD, LDC ou GDC) e dependências como llama.cpp, CUDA, SearxNG e Docker, conforme detalhado em deps/README.md. Os modelos testados incluem Qwen3.5-4B (com mmproj-F16 para visão), Qwen2.5-0.5b instruct e Nomic embed text v1.5, exigindo cerca de 8GB de VRAM. O uso é via linha de comando com dub, permitindo perguntas diretas, processamento de imagens, cálculos de datas, geração de áudio, ingestão de arquivos para RAG, consultas meteorológicas, gráficos de preços de Bitcoin e criação de histórias. O projeto é distribuído sob GPLv3, com contribuições via estrelas, forks e pull requests.",
+  "snippet": "A minimal, clean D language agent built directly on llama.cpp via importC. No Python, no bindings, no overhead. Runs a three-model pipeline (agent, summary, embed) with full CUDA offloading, multimodal vision via mtmd, RAG, KV-cache condensation, thinking budget, and an extensible tool system (auto-registered via user-defined attribute @Tool(\"Description\") on functions). Tools included cover: file",
+  "date_iso": "2026-08-13",
+  "kind": "tool",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "qwen",
+    "hugging-face",
+    "nvidia"
+   ],
+   "content-type": [
+    "library-release"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "local-llm",
+    "llm-models"
+   ],
+   "framework-library-tool": [
+    "llama-cpp",
+    "nvidia-cuda"
+   ],
+   "topic-technology": [
+    "ai-agents",
+    "local-inference",
+    "tool-calling",
+    "local-rag",
+    "vision-language-models",
+    "kv-cache"
+   ],
+   "trending-emerging": [
+    "agentic-ai",
+    "tool-calling",
+    "rag",
+    "multimodal"
+   ]
+  }
+ },
+ {
+  "id": 2815,
+  "source_id": 7,
+  "url": "https://artificialanalysis.ai/models/glm-5-3",
+  "title": "GLM-5.3 (max) - Intelligence, Performance & Price Analysis",
+  "title_pt": "GLM-5.3 (max): Análise de Inteligência, Desempenho e Preço",
+  "summary_pt": "O Índice de Inteligência Artificial Analysis v4.1.1 combina nove avaliações, incluindo GDPval-AA v2, τ³-Banking, Terminal-Bench v2.1, SciCode, Humanity's Last Exam, GPQA Diamond, CritPt, AA-Omniscience e AA-LCR, para medir a inteligência geral de modelos. O índice AA-Omniscience avalia a confiabilidade do conhecimento, recompensando respostas corretas e penalizando alucinações, com pontuações variando de -100 a 100. Além disso, o índice fornece métricas de custo por tarefa, considerando tokens de entrada, cache, raciocínio e saída, bem como medidas de velocidade de geração e latência, incluindo o tempo até o primeiro token e o tempo total para gerar 500 tokens, levando em conta o tempo de raciocínio dos modelos.",
+  "snippet": "Intelligence Artificial Analysis Intelligence Index Artificial Analysis Intelligence Index v4.1.1 incorporates 9 evaluations: GDPval-AA v2, 𝜏³-Banking, Terminal-Bench v2.1, SciCode, Humanity's Last Exam, GPQA Diamond, CritPt, AA-Omniscience, AA-LCR Artificial Analysis Intelligence Index by Open Weights / Proprietary Artificial Analysis Intelligence Index v4.1.1 incorporates 9 evaluations:",
+  "date_iso": "2026-06-10",
+  "kind": "tool",
+  "section": null,
+  "verify_status": "suspect",
+  "verify_notes": "Conteúdo genérico e não específico ao modelo GLM-5.3 (não menciona o modelo).; Texto repetitivo e fragmentado (mesmas descrições aparecem várias vezes).; Ausência de dados numéricos (índices, preços, benchmarks) que seriam esperados em uma análise de performance.; Provável extração de textos de interface e descrições de métricas, sem o conteúdo real da análise.",
+  "tags": {
+   "company-vendor-model": [
+    "glm",
+    "zhipu-ai"
+   ],
+   "concept-theme": [
+    "evals",
+    "cost",
+    "performance",
+    "hallucination"
+   ],
+   "content-type": [
+    "analysis",
+    "benchmark"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "llm-models"
+   ],
+   "framework-library-tool": [
+    "glm"
+   ],
+   "topic-technology": [
+    "ai-benchmarks",
+    "model-evaluation",
+    "model-comparison",
+    "model-pricing",
+    "token-economics",
+    "model-capabilities"
+   ],
+   "trending-emerging": [
+    "frontier-models",
+    "reasoning-models"
+   ]
+  }
+ },
+ {
+  "id": 2816,
+  "source_id": 7,
+  "url": "https://huggingface.co/Qwen/Qwen3.8-2.4T-A95B",
+  "title": "Qwen/Qwen3.8-2.4T-A95B",
+  "title_pt": "Qwen 3.8: Modelo aberto de 2,4 trilhões de parâmetros da Alibaba",
+  "summary_pt": "Este repositório disponibiliza os pesos e arquivos de configuração do modelo pós-treinado Qwen3.8-2.4T-A95B no formato compatível com o Hugging Face Transformers, sendo também compatível com as principais plataformas de inferência do mercado, como vLLM, SGLang e TokenSpeed. O lançamento marca um avanço na família de modelos abertos da Qwen, apresentando uma arquitetura de Mixture of Experts (MoE) com 2,4 trilhões de parâmetros no total, dos quais 95 bilhões são ativados por token, e capacidade de contexto nativa de 262.144 tokens, expansível até 1,01 milhão. A versão oficial otimizada, Qwen3.8-Max, adiciona ainda mais funcionalidades, como entrada de visão e suporte aprimorado a ferramentas.\n\nO modelo se destaca por melhorias significativas em tarefas de codificação, trabalho profissional, pesquisa e execução de tarefas de agente de longo prazo. Para as respostas, é possível controlar a profundidade do raciocínio através do parâmetro `reasoning_effort`, que oferece níveis como 'xhigh' para análises complexas, 'medium' para equilíbrio e 'low' para maior velocidade e economia. A compatibilidade com ferramentas e estruturas de desenvolvimento é um dos focos, com suporte total em plataformas como SGLang, vLLM e TokenSpeed. O arquivo detalha ainda como utilizar o modelo, incluindo instruções para configurar o ambiente, executar chamadas via API e ajustar parâmetros de amostragem para obter o desempenho desejado.",
+  "snippet": "This repository contains model weights and configuration files for the post-trained model in the Hugging Face Transformers format. These artifacts are compatible with vLLM, SGLang, TokenSpeed, etc. For users seeking managed, scalable inference without infrastructure maintenance, the official Qwen API service is provided by Qwen Cloud. In particular, Qwen3.8-Max is the official version based on",
+  "date_iso": "2026-08-13",
+  "kind": "release",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "alibaba",
+    "qwen"
+   ],
+   "concept-theme": [
+    "open-source",
+    "cloud",
+    "scalability",
+    "reliability"
+   ],
+   "content-type": [
+    "release-announcement"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "llm-models"
+   ],
+   "framework-library-tool": [
+    "qwen",
+    "hugging-face-transformers",
+    "vllm",
+    "sglang"
+   ],
+   "topic-technology": [
+    "llm-models",
+    "frontier-models",
+    "open-weights",
+    "reasoning-models",
+    "agentic-ai",
+    "model-release"
+   ],
+   "trending-emerging": [
+    "reasoning-models",
+    "agentic-ai",
+    "frontier-models",
+    "open-weights"
+   ]
+  }
+ },
+ {
+  "id": 2817,
+  "source_id": 7,
+  "url": "https://x.ai/news/grok-4-6",
+  "title": "Introducing Grok 4.6",
+  "title_pt": "Apresentando o Grok 4.6",
+  "summary_pt": "A SpaceXAI lançou o Grok 4.6, uma nova versão do seu modelo de IA com foco em agentes de longa duração e trabalhos interativos e visuais mais ambiciosos. O modelo se destaca em tarefas complexas de múltiplas etapas, como pesquisa, análise de informações, trabalho em bases de código e transformação de ideias em aplicativos ou artefatos prontos. Nos benchmarks, o Grok 4.6 alcança desempenho de ponta, igualando o GPT-5.6 Sol no Índice de Inteligência Artificial (composto por nove testes) e mostrando resultados competitivos em avaliações como DeepSWE, CursorBench e FrontierCode. O modelo já está disponível no Cursor e no Grok Build, com o dobro do uso incluído na primeira semana, além de acesso via API, OpenRouter, Vercel e Cloudflare, com preços a partir de US$ 2 por milhão de tokens de entrada e US$ 6 por milhão de tokens de saída. O treinamento do Grok 4.6 envolveu uma etapa suplementar mais longa que a do Grok 4.5, usando dados gerados por modelo, otimizador aprimorado e uma receita de treinamento refinada, seguida de RL em várias tarefas agênticas. O modelo também recebeu melhorias de segurança calibradas para suas novas capacidades, com testes extensivos antes e depois do lançamento.",
+  "snippet": "Today we are releasing Grok 4.6. Grok 4.6 builds on Grok 4.5 with a particular focus on long-running agents and more ambitious interactive and visual work. It stays with complex tasks across many steps, whether researching a topic, analyzing information, working across a codebase, or turning an idea into a polished application or work artifact. Grok 4.6 achieves frontier intelligence across sever",
+  "date_iso": "2026-08-12",
+  "kind": "tool",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "xai",
+    "grok"
+   ],
+   "concept-theme": [
+    "evals",
+    "data-pipelines",
+    "optimization"
+   ],
+   "content-type": [
+    "product-launch"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "llm-models"
+   ],
+   "framework-library-tool": [
+    "grok"
+   ],
+   "topic-technology": [
+    "frontier-models",
+    "model-release",
+    "agentic-ai",
+    "reasoning-models",
+    "model-training",
+    "ai-benchmarks"
+   ],
+   "trending-emerging": [
+    "agentic-ai",
+    "ai-coding-agents",
+    "foundation-models",
+    "reasoning-models"
+   ]
+  }
+ },
+ {
+  "id": 2818,
+  "source_id": 7,
+  "url": "https://cynative.com/blog/agent-trust-boundaries",
+  "title": "Building Security Agents That Cannot Escape Their Trust Boundary",
+  "title_pt": "Construindo Agentes de Segurança Que Não Podem Violar Seus Limites de Confiança",
+  "summary_pt": "O artigo discute uma abordagem para construir agentes de segurança que não podem violar seus limites de confiança, mesmo quando operam com modelos de IA poderosos. A solução apresentada é um agente \"soberano\" que executa em um sandbox rígido, sem acesso a rede ou sistema de arquivos, e só pode usar ferramentas explicitamente registradas. Cada chamada de ferramenta é autorizada por uma política de controle de acesso que falha por padrão, garantindo que o agente seja somente leitura por construção, e não por opção. O autor também descreve como isso se estende a sessões, segredos e logs, e como o sistema é distribuído como um binário único que pode ser executado em qualquer ambiente, inclusive dentro da própria infraestrutura do provedor de nuvem. No final, resume-se que, se o ambiente de raciocínio não puder alcançar nada além do que foi explicitamente fornecido, e se as permissões forem definidas estaticamente sem possibilidade de expansão, o agente pode ser usado com segurança em produção.",
+  "snippet": "The \"models being untamed hackers\" headlines are all over your feed, and the argument is mostly about intent. Intent is the least interesting part. What matters is that you are about to hand that same class of model direct access to your own infrastructure, and when it comes to automating your security it would be insane to let them make the final call on their actions. Until they stop making mist",
+  "date_iso": "2026-08-12",
+  "kind": "news",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "security",
+    "authorization",
+    "guardrails",
+    "hallucination"
+   ],
+   "content-type": [
+    "deep-dive",
+    "best-practices"
+   ],
+   "difficulty": [
+    "expert"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "topic-technology": [
+    "agentic-ai",
+    "ai-agents",
+    "guardrails",
+    "ai-safety",
+    "authorization"
+   ],
+   "trending-emerging": [
+    "ai-agents",
+    "agentic-ai",
+    "reasoning-models",
+    "frontier-models"
+   ]
+  }
+ },
+ {
+  "id": 2819,
+  "source_id": 7,
+  "url": "https://inco.ai/blog/dflash2",
+  "title": "DFlash 2: Keep Drafting Parallel",
+  "title_pt": "DFlash 2: Continuando o Rascunho em Paralelo",
+  "summary_pt": "A Inco AI apresenta o DFlash 2, uma atualização do seu sistema de decodificação especulativa que promete maior eficiência na inferência de modelos de linguagem de grande porte. Enquanto o DFlash original já permitia a geração paralela de blocos de tokens, o DFlash 2 adiciona um seletor de caminho que escolhe a sequência mais coerente entre os candidatos de cada posição, superando a limitação de previsões independentes. Isso resulta em um ganho de até 16-25% no desempenho, com uma aceleração de 2,7 a 3,4 vezes na taxa de transferência em comparação com a decodificação autoregressiva tradicional.\n\nO seletor de caminho é um componente leve que utiliza uma atenção bilinear de baixo custo para analisar pares de tokens adjacentes, mantendo o processo totalmente paralelo. Além disso, o DFlash 2 introduz decaimento de sufixo, uma técnica que resolve o problema de perda de precisão nas posições finais do bloco de tokens, usando uma camada de convolução dinâmica. Os testes demonstram que essa abordagem alcança resultados superiores ao corrigir erros de forma mais eficiente e com menor custo computacional, consolidando o DFlash 2 como uma evolução significativa na otimização de inferência para a nova era de agentes impulsionados por IA.",
+  "snippet": "August 18, 2026 Inference is the bottleneck of the agent era. Agents read, plan, and call tools, often for hours or days. They consume tokens at a rate chat never approached. Every one of those tokens takes a full forward pass over the model. At Inco AI, we are building the inference stack scaled to the token economics of tomorrow. This post is a sneak peek. Our team released DFlash in January; i",
+  "date_iso": "2026-08-18",
+  "kind": "release",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "performance",
+    "optimization",
+    "throughput",
+    "latency"
+   ],
+   "content-type": [
+    "release-announcement"
+   ],
+   "difficulty": [
+    "expert"
+   ],
+   "domain": [
+    "llm-models",
+    "ai-general"
+   ],
+   "framework-library-tool": [
+    "sglang",
+    "vllm",
+    "tensorrt-llm",
+    "llama-cpp"
+   ],
+   "topic-technology": [
+    "speculative-decoding",
+    "inference-optimization",
+    "draft-models",
+    "model-serving"
+   ],
+   "trending-emerging": [
+    "speculative-decoding",
+    "ai-agents",
+    "agentic-ai"
+   ]
+  }
+ },
+ {
+  "id": 2820,
+  "source_id": 7,
+  "url": "https://power2026.ai",
+  "title": "Power 2026 - Electricity Pricing in the Age of AI",
+  "title_pt": "Energia 2026 – Preços de Eletricidade na Era da IA",
+  "summary_pt": "A demanda por inteligência artificial está impulsionando um enorme crescimento no consumo de energia, com data centers já representando cerca de 5% do uso de eletricidade nos EUA e dobrando a cada dois anos. O autor argumenta que a energia é o principal gargalo para expandir a capacidade de IA, mais do que GPUs ou memória, e explica que para entender esse mercado é preciso compreender como funciona a precificação de eletricidade, que segue a lógica do custo marginal: o preço é definido pela última unidade de oferta necessária para atender à demanda. \n\nO texto detalha o funcionamento dos mercados de energia, destacando que, diferentemente de outros commodities, a eletricidade não pode ser facilmente armazenada e depende de um operador independente do sistema (ISO) para manter o equilíbrio da rede, gerenciando oferta e demanda em tempo real para evitar apagões. Os geradores de gás natural e carvão frequentemente definem o preço marginal, e os operadores de data centers precisam de estratégias de hedge para garantir previsibilidade econômica, enquanto a expansão da infraestrutura elétrica envolve planejamento cuidadoso de licenças e custos variáveis que determinam a viabilidade dos projetos.",
+  "snippet": "#1 on Apple Books · Top Free · CALCULATING... Electricity Pricing in the Age of AI Neel Somani CHAPTER 01 AI demand is exploding. But while there's been plenty of discussion on the GPU and memory supply chains, the real constraint to expanding AI capacity is power. Data centers already account for ~5% of US power consumption[1]. With data center power demand doublin",
+  "date_iso": "2026-08-13",
+  "kind": "news",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "cost",
+    "scalability"
+   ],
+   "content-type": [
+    "explainer",
+    "deep-dive"
+   ],
+   "difficulty": [
+    "for-beginners"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "topic-technology": [
+    "ai-infrastructure",
+    "gpu",
+    "ai-hardware",
+    "ai-adoption"
+   ],
+   "trending-emerging": [
+    "ai-data-centers",
+    "gpu-economics",
+    "ai-governance",
+    "frontier-models"
+   ]
+  }
+ },
+ {
+  "id": 2821,
+  "source_id": 7,
+  "url": "https://llama.app",
+  "title": "Official home for llama.cpp",
+  "title_pt": "O lar oficial do llama.cpp",
+  "summary_pt": "Este artigo apresenta o llama.cpp como o repositório oficial para executar modelos de linguagem localmente, com otimização para qualquer hardware — do notebook a um cluster. A mesma versão binária e os mesmos modelos funcionam em diferentes GPUs e CPUs, graças a kernels ajustados manualmente. O texto destaca a integração com o agente de codificação local Pi: basta executar `llama serve`, instalar o plugin pi-llama com `pi install git:github.com/huggingface/pi-llama` e rodar `pi`. O agente descobre automaticamente o modelo local, sem configuração ou chaves de API. Todos os arquivos permanecem na sua máquina e as requisições nunca saem dela, garantindo privacidade e controle total sobre os dados.",
+  "snippet": "Pair it with a local coding agent. Run llama serve, install the pi-llama plugin and launch Pi. It will automatically discover your local model. No config, no API keys. Files stay on your machine, requests never leave it. # 1. Serve a model llama serve # 2. Install the pi-llama plugin pi install git:github.com/huggingface/pi-llama # 3. Run Pi, everything is set pi Optimized for any hardwa",
+  "date_iso": "2026-08-13",
+  "kind": "tool",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "llama",
+    "hugging-face",
+    "meta-ai"
+   ],
+   "concept-theme": [
+    "performance"
+   ],
+   "content-type": [
+    "tutorial",
+    "how-to"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "local-llm",
+    "llm-models"
+   ],
+   "ecosystem-language": [
+    "cpp"
+   ],
+   "framework-library-tool": [
+    "llama-cpp"
+   ],
+   "topic-technology": [
+    "local-inference",
+    "on-device-inference",
+    "self-hosting",
+    "model-serving",
+    "inference-optimization",
+    "llm-models"
+   ],
+   "trending-emerging": [
+    "local-llm",
+    "on-device-ai",
+    "edge-ai",
+    "ai-coding-agents"
+   ]
+  }
+ },
+ {
+  "id": 2822,
+  "source_id": 7,
+  "url": "https://ornith.ai/ornith_1_5.html",
+  "title": "Ornith-1.5: From Self-Scaffolding to Self-Improvement",
+  "title_pt": "Ornith-1.5: Da Autogeração de Estruturas ao Autoaprimoramento Contínuo",
+  "summary_pt": "A Ornith AI apresenta o Ornith-1.5, um avanço significativo na construção de modelos de fundação baseados em autoaprimoramento de ponta a ponta. O modelo estende o framework de autogeração de estruturas (self-scaffolding) introduzido no Ornith-1.0 em um ciclo completo de melhoria contínua. Nesse processo, o próprio modelo propõe novas tarefas, gera estruturas específicas para executá-las e produz rollouts de soluções para aprendizado por reforço, gerando continuamente novas experiências de aprendizado para seu próprio aprimoramento. Disponível em três escalas — 397B MoE, 35B MoE e 9B Dense — o Ornith-1.5 foi desenvolvido a partir dos modelos Qwen3.5 e Gemma 4, com treinamento contínuo adicional, treinamento intermediário e pós-treinamento, alcançando desempenho de ponta entre os modelos de código aberto de tamanho comparável em diversos benchmarks de raciocínio, codificação e tarefas agênticas. O Ornith-1.5-397B, por exemplo, pontua 86,1 no Terminal-Bench 2.1 e 56,0 no DeepSWE, superando modelos abertos líderes como GLM-5.2 e DeepSeek-V4-Flash-0731 e superando modelos de ponta como Claude Opus 4.8, enquanto a versão compacta Ornith-1.5-9B pode ser facilmente implantada em dispositivos móveis com excelente desempenho.",
+  "snippet": "Today, we are introducing Ornith-1.5, a major step toward building foundation models through end-to-end self-improvement. Ornith-1.5 extends the self-scaffolding framework introduced in Ornith-1.0 into a more complete self-improvement loop: the model proposes new tasks, generates task-specific scaffolds, and produces solution rollouts for reinforcement learning, continuously creating n",
+  "date_iso": "2026-06-10",
+  "kind": "release",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "qwen",
+    "gemma",
+    "deepseek-v",
+    "glm",
+    "claude-opus"
+   ],
+   "concept-theme": [
+    "performance",
+    "open-source",
+    "evaluation"
+   ],
+   "content-type": [
+    "release-announcement"
+   ],
+   "domain": [
+    "llm-models",
+    "local-llm",
+    "ai-general"
+   ],
+   "ecosystem-language": [
+    "python",
+    "rust",
+    "go"
+   ],
+   "topic-technology": [
+    "foundation-models",
+    "reinforcement-learning",
+    "mixture-of-experts",
+    "model-training",
+    "ai-benchmarks",
+    "model-release"
+   ],
+   "trending-emerging": [
+    "foundation-models",
+    "moe",
+    "reasoning-models",
+    "on-device-ai"
+   ]
+  }
+ },
+ {
+  "id": 2823,
+  "source_id": 7,
+  "url": "https://github.com/onecli/onecli",
+  "title": "onecli/onecli: Open-source sandboxed agent harness for teams. Giving every employee a secured personal agent.",
+  "title_pt": "onecli/onecli: Arcabouço de agentes em sandbox para equipes",
+  "summary_pt": "OneCLI é uma plataforma open-source para executar agentes de IA em equipes. Cada funcionário recebe um agente pessoal isolado em sandbox, provisionado a partir do IdP da empresa, com políticas centralizadas e aprovações humanas no chat para ações sensíveis. O projeto nasceu como um cofre de credenciais em Rust e evoluiu para um harness completo: o agente tem computador próprio (sandbox com filesystem e shell), memória persistente, habilidades, agenda, integração com Slack e credenciais injetadas por um gateway que nunca as expõe ao agente. A arquitetura inclui dashboard Next.js, servidor de API, gateway Rust que intercepta tráfego HTTPS e injeta segredos, runner outbound-only e supervisor de sandbox. Pode ser auto-hospedado sem ingress ou túnel, com armazenamento de segredos criptografado AES-256-GCM. Uma edição gratuita Apache-2.0 permite uso em produção; recursos enterprise em 'ee/' são licenciados separadamente.",
+  "snippet": "The agent harness built for teams. A pro assistant for companies. Give every employee a secured, sandboxed personal agent. Quick Start Cloud-hosted: onecli.sh Self-hosted git clone https://github.com/onecli/onecli.git && cd onecli pnpm install pnpm run setup Open http://localhost:10254 What is OneCLI v2? OneCLI is an open-source platform for running AI agents as a team. You crea",
+  "date_iso": "2026-06-10",
+  "kind": "release",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "security",
+    "governance",
+    "open-source",
+    "guardrails"
+   ],
+   "content-type": [
+    "release-announcement",
+    "tooling"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "ecosystem-language": [
+    "rust",
+    "javascript"
+   ],
+   "topic-technology": [
+    "ai-agents",
+    "agentic-ai",
+    "multi-agent-systems",
+    "ai-gateway",
+    "ai-safety",
+    "secrets-management"
+   ],
+   "trending-emerging": [
+    "agent-orchestration",
+    "ai-agents",
+    "agentic-ai",
+    "multi-agent"
+   ]
+  }
+ },
+ {
+  "id": 2824,
+  "source_id": 7,
+  "url": "https://modelmap.cc",
+  "title": "modelmap",
+  "title_pt": "ModelMap",
+  "summary_pt": "O ModelMap é uma ferramenta que permite visualizar a arquitetura de redes neurais diretamente do Hugging Face, sem precisar baixar os pesos do modelo. Basta colar o ID de um modelo público (ou com acesso via token) para obter um mapa interativo da estrutura da rede, com as formas dos tensores derivadas de uma execução simulada com uma entrada fictícia. A ferramenta usa instanciação em meta-dispositivo para extrair a topologia e um forward pass simulado para determinar as dimensões, garantindo rapidez e compatibilidade com qualquer repositório público, incluindo modelos com acesso restrito quando um token é fornecido.",
+  "snippet": "Paste a Hugging Face model id. Get a living map of the network — no weights downloaded. Classics reference architectures, always instant Structure comes from a meta-device instantiation; shapes come from a traced fake forward pass. Any public repo works — gated ones after you add a token.",
+  "date_iso": "2026-06-10",
+  "kind": "tool",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "hugging-face"
+   ],
+   "concept-theme": [
+    "architecture",
+    "profiling",
+    "debugging",
+    "interpretability"
+   ],
+   "content-type": [
+    "tool-release"
+   ],
+   "difficulty": [
+    "all-levels"
+   ],
+   "domain": [
+    "llm-models"
+   ],
+   "framework-library-tool": [
+    "hugging-face-transformers",
+    "pytorch",
+    "tensorflow"
+   ],
+   "topic-technology": [
+    "model-architecture",
+    "neural-networks",
+    "deep-learning",
+    "transformers",
+    "ai-research"
+   ],
+   "trending-emerging": [
+    "ai-data-centers",
+    "gpu-economics",
+    "foundation-models"
+   ]
+  }
+ },
+ {
+  "id": 2825,
+  "source_id": 7,
+  "url": "https://line9.ai/diagram",
+  "title": "Diagram editor — Line9line9",
+  "title_pt": "Entrega de Encomendas",
+  "summary_pt": "Este artigo apresenta um fluxograma detalhado do processo de entrega de encomendas, desde o momento em que o pedido é feito até a entrega final ou devolução ao remetente. O diagrama ilustra as etapas de separação e embalagem, despacho, carregamento no veículo e tentativa de entrega, incluindo verificações como endereço correto, presença de alguém para receber e possíveis danos.\n\nPara cada situação, o fluxo define ações: se o endereço não for encontrado, a encomenda retorna ao depósito; se não houver ninguém em casa, é deixado um aviso oferecendo opções de reentrega ou coleta em loja local. Caso o cliente não recolha o pacote, ele é devolvido ao remetente. O diagrama também cobre a assinatura na entrega e a verificação de danos, garantindo um acompanhamento claro de todas as possíveis rotas do pacote.",
+  "snippet": "--- title: Parcel Delivery line9: theme: boardroom --- flowchart LR order([Order placed]) --> pick[Pick and pack] pick --> depot[(Depot)] pick -. prints .-> label@{ shape: doc, label: \"Shipping label\" } depot --> van[Load onto the van] van --> attempt[Attempt delivery] attempt --> found{Address found?} found -. No .-> depot found -- Yes --> in{Someone in?} in -- Yes --> sign[Take a signature] sign",
+  "date_iso": "2026-08-13",
+  "kind": "news",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "content-type": [
+    "tutorial"
+   ],
+   "difficulty": [
+    "beginner"
+   ],
+   "domain": [
+    "frontend"
+   ],
+   "topic-technology": [
+    "software-development",
+    "system-design"
+   ]
+  }
+ },
+ {
+  "id": 2826,
+  "source_id": 7,
+  "url": "https://lithostech.com/2026/08/decrypting-flume-water-monitor-traffic",
+  "title": "Decrypting Flume Water Monitor Traffic",
+  "title_pt": "Decifrando o tráfego do monitor de água Flume",
+  "summary_pt": "O autor continua sua investigação sobre o monitor de água Flume, revelando que, apesar de o firmware conter uma implementação completa do Noise N key exchange, o tráfego MQTT real é criptografado com uma chave simétrica estática de 32 bytes armazenada na flash do bridge. Essa chave pode ser lida sem modificar o dispositivo, usando o modo de download UART do ESP8266 e a ferramenta esptool. Os parâmetros de criptografia são: algoritmo hydro_secretbox, contexto \"12345678\" e message ID 0, o que permite descriptografar todas as mensagens.\n\nCom essas informações, o autor construiu o flumewatch, um relay transparente que fica entre o bridge e o servidor MQTT da Flume, descriptografando uma cópia de cada mensagem sem interromper o fluxo normal. A análise do tráfego revela a sequência de conexão, incluindo identificação do firmware, logs de boot, resposta do servidor com sensores pareados e configurações, além de eventos pós-handshake. Os dados de fluxo de água são enviados como contadores cumulativos que aumentam com o uso, e os status do sensor e do bridge incluem métricas como RSSI, voltagem da bateria e outros campos codificados.\n\nO autor notificou a Flume sobre suas descobertas, e a empresa confirmou que cada dispositivo tem uma chave secreta aleatória, então a publicação não compromete a privacidade dos usuários. A segurança é considerada adequada, pois o acesso exigiria posse física do hardware e acesso à rede local. O autor planeja voltar a usar o serviço oficial da Flume para continuar recebendo atualizações de firmware, mas agora sabe que é possível manter os dispositivos funcionando sem depender da nuvem da empresa.",
+  "snippet": "In my previous post, I tore apart a Flume water monitor and traced its communication path from the sensor, through the bridge, and up to Flume’s cloud MQTT server. I identified the encryption library (LibHydrogen), extracted a firmware ELF, and even managed to coerce the bridge into sending plaintext by corrupting the public key in flash. But that approach was destructive; the bridge couldn’t comp",
+  "date_iso": "2026-08-13",
+  "kind": "news",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "security",
+    "encryption"
+   ],
+   "content-type": [
+    "deep-dive"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "backend"
+   ],
+   "topic-technology": [
+    "encryption"
+   ]
+  }
+ },
+ {
+  "id": 2827,
+  "source_id": 7,
+  "url": "https://github.com/vixhal-baraiya/microgpt-c",
+  "title": "The most atomic way to train and inference a GPT in pure, dependency-free C.",
+  "title_pt": "A forma mais atômica de treinar e inferir um GPT em C puro",
+  "summary_pt": "Este artigo apresenta uma implementação mínima de um transformer de nível de caractere em C puro, sem dependências externas, capaz de treinar e inferir um modelo GPT. O código inclui forward pass, backprop, otimizador Adam e amostragem, tudo em um único arquivo. O treinamento é rápido: com cerca de 4.200 parâmetros, o modelo aprende a gerar nomes a partir de um pequeno corpus, alcançando boa perplexidade em comparação com um trigrama interpolado. O projeto também otimiza a inferência com um caminho especializado, atingindo altas taxas de tokens por segundo em CPUs com NEON ou AVX2.",
+  "snippet": "The most atomic way to train and inference a GPT in pure, dependency-free C. A character-level transformer with forward pass, backprop, Adam and sampling, in one C file with nothing beyond libc. It trains on ~32k names in a couple of seconds and generates new ones. Build and run make run Or run it directly, on any corpus with one item per line: ./microgpt data/names.txt Builds on macOS, Linu",
+  "date_iso": "2026-06-10",
+  "kind": "tool",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "gpt"
+   ],
+   "concept-theme": [
+    "performance"
+   ],
+   "content-type": [
+    "library-release",
+    "performance-report"
+   ],
+   "difficulty": [
+    "expert"
+   ],
+   "domain": [
+    "llm-models"
+   ],
+   "ecosystem-language": [
+    "c"
+   ],
+   "topic-technology": [
+    "transformers",
+    "model-training",
+    "inference-optimization",
+    "nlp",
+    "deep-learning",
+    "generative-ai"
+   ],
+   "trending-emerging": [
+    "small-language-models",
+    "on-device-ai"
+   ]
+  }
+ },
+ {
+  "id": 2828,
+  "source_id": 7,
+  "url": "https://stolen-thoughts.com",
+  "title": "Stealing Reasoning Traces from Proprietary LLM APIs",
+  "title_pt": "Roubando Rastros de Raciocínio de APIs de LLMs Proprietárias",
+  "summary_pt": "Pesquisadores descobriram uma vulnerabilidade em APIs de modelos de linguagem (LLMs) proprietários, como os da OpenAI, Anthropic e Google. Esses provedores retornam o raciocínio oculto dos modelos como blocos criptografados, que podem ser reenviados ao servidor em outras conversas. Ao injetar um bloco de raciocínio de um modelo mais forte em um modelo mais fraco e já \"jailbroken\" do mesmo provedor, eles conseguiram extrair o raciocínio original em texto puro, sem atacar diretamente o modelo forte ou acionar mecanismos de proteção contra destilação.\n\nA técnica foi validada em 120 problemas de programação e, além disso, os pesquisadores analisaram 6.708 trajetórias públicas de agentes (provenientes de GitHub e Hugging Face) que continham blocos criptografados. Após decodificar 315.320 blocos, encontraram 704 itens sensíveis, incluindo chaves de API, senhas, tokens de acesso, e-mails pessoais e outros identificadores. Desses, 64 apareceram exclusivamente no raciocínio oculto, nunca na parte visível da conversa. O trabalho expõe uma falha séria no isolamento de informações confidenciais dentro dos modelos proprietários.",
+  "snippet": "Stealing Reasoning Traces from Proprietary LLM APIs Alexander Panfilov1 2 3 4* David Schmotz2 3 4* Ilia Shumailov5* Luca Beurer-Kellner6 Joachim Schaeffer1 Ameya Prabhu2 4 7‡ Jonas Geiping2 3 4‡ Maksym Andriushchenko2 3 4‡ 1MATS Research 2ELLIS Institute Tübingen 3Max Planck Institute for Intelligent Systems",
+  "date_iso": "2026-08-13",
+  "kind": "news",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "anthropic",
+    "claude",
+    "openai",
+    "google"
+   ],
+   "concept-theme": [
+    "security"
+   ],
+   "content-type": [
+    "research-paper"
+   ],
+   "difficulty": [
+    "expert"
+   ],
+   "domain": [
+    "llm-models"
+   ],
+   "topic-technology": [
+    "chain-of-thought",
+    "jailbreaks",
+    "model-safety",
+    "reasoning-models",
+    "llm-models",
+    "red-teaming"
+   ],
+   "trending-emerging": [
+    "chain-of-thought",
+    "reasoning-models",
+    "jailbreaks"
+   ]
+  }
+ },
+ {
+  "id": 2829,
+  "source_id": 7,
+  "url": "https://openai.com/index/pacing-model-development-cyber-capabilities",
+  "title": "Pacing model development in an era of cyber-critical capabilities",
+  "title_pt": "Ajustando o ritmo do desenvolvimento de modelos em uma era de capacidades cibernéticas críticas",
+  "summary_pt": "Nas últimas semanas, dois eventos — o incidente entre OpenAI e Hugging Face e evidências preliminares de que o modelo Astra pode atingir o limiar crítico de segurança cibernética no Preparedness Framework — reforçaram a urgência de fortalecer salvaguardas em sistemas de IA cada vez mais capazes. Em resposta, a empresa desacelerou o ritmo de escalonamento, pausou temporariamente o treinamento por reinforcement learning em modelos avançados e implementou medidas mais rígidas de segurança: isolamento de workloads (sandboxes), controles de rede para evitar acessos não autorizados, e testes contínuos de segurança. Também foi criado um sistema de monitoramento em múltiplos estágios, com classificadores de ativação que analisam ações, raciocínio e sequências de atividade, alertando equipes de segurança em até 30 minutos para possíveis violações — com overhead computacional estimado em cerca de 20% do custo de inferência. A empresa prioriza a aplicação dessas salvaguardas em modelos de fronteira (como Astra) e em todos os workloads de cyber, além de investir em pesquisa de alinhamento (recompensas, honestidade e prevenção de comportamentos nocivos). O plano inclui evoluir o Preparedness Framework, compartilhar descobertas com organizações externas e publicar um relatório técnico nas próximas semanas.",
+  "snippet": "Over the past several weeks, two developments have underscored the growing risks associated with increasingly capable AI systems: the OpenAI-Hugging Face incident and, separately, preliminary evidence that one of our upcoming models, Astra, may meet the Critical cybersecurity capability threshold under our Preparedness Framework. Together, these developments, combined with rapid progress in our in",
+  "date_iso": "2026-06-10",
+  "kind": "tool",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "openai",
+    "hugging-face"
+   ],
+   "concept-theme": [
+    "alignment",
+    "ai-safety",
+    "security",
+    "guardrails"
+   ],
+   "content-type": [
+    "announcement",
+    "news"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "framework-library-tool": [
+    "hugging-face-transformers",
+    "pytorch",
+    "tensorflow",
+    "jax",
+    "keras",
+    "scikit-learn"
+   ],
+   "topic-technology": [
+    "ai-safety",
+    "ai-alignment",
+    "reinforcement-learning",
+    "frontier-models",
+    "model-evaluation",
+    "red-teaming"
+   ],
+   "trending-emerging": [
+    "ai-governance",
+    "frontier-models",
+    "reasoning-models",
+    "ai-agents"
+   ]
+  }
+ },
+ {
+  "id": 2830,
+  "source_id": 7,
+  "url": "https://github.com/BrightbeamAI/chap",
+  "title": "Collaborative Human Agent Protocol (CHAP)",
+  "title_pt": "Protocolo Colaborativo Humano-Agente (CHAP)",
+  "summary_pt": "O CHAP (Collaborative Human Agent Protocol) é um protocolo que padroniza a interação entre humanos e agentes de IA em tarefas reais, como revisões de código, triagem de tickets ou análise de contratos. Ele resolve o problema de onde ficam registradas as decisões humanas sobre trabalhos gerados por agentes, criando um envelope estruturado com o rascunho do agente, a edição ou rejeição humana (com diff, justificativa e tags), e um encadeamento por hash de conteúdo, formando uma trilha de auditoria consultável, reproduzível e verificável meses depois. Isso elimina a necessidade de buscar informações em logs dispersos por múltiplos sistemas, economizando tempo e reduzindo incertezas em análises posteriores.\n\nO protocolo inclui especificação (Core com 7 métodos, mais 11 perfis opcionais), duas implementações de referência (TypeScript e Python), um harness de conformidade com 23 vetores de teste, transportes para MCP e A2A, adaptadores para frameworks como LangGraph, Pydantic AI e LlamaIndex, e doze cenários práticos. Ele permite, por exemplo, que um desenvolvedor override uma análise de um bot de revisão de código registrando a correção como um envelope estruturado, que depois pode ser analisado para descobrir padrões de erro do agente e otimizar prompts. Com assinaturas opcionais e ancoragem em logs de transparência, o CHAP oferece aprovações não-repudiáveis e composição com ferramentas já existentes (MCP e A2A), transformando cada supervisão humana em dados estruturados que podem melhorar continuamente o desempenho dos agentes.",
+  "snippet": "The protocol for humans and agents doing real work together. When a bot drafts something and a human edits it, where does that edit live? In CHAP, it lives in an envelope you can query, replay, and verify six months later. Why CHAP exists You have agents doing real work. Drafting code reviews, triaging tickets, suggesting settlements, reviewing contracts. A human approves, edits, or rejec",
+  "date_iso": "2026-06-10",
+  "kind": "tool",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "agentops",
+    "architecture",
+    "observability",
+    "governance"
+   ],
+   "content-type": [
+    "product-launch",
+    "explainer"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "ai-general",
+    "backend"
+   ],
+   "ecosystem-language": [
+    "javascript"
+   ],
+   "topic-technology": [
+    "agentic-ai",
+    "ai-agents",
+    "agent-orchestration",
+    "observability-llm"
+   ],
+   "trending-emerging": [
+    "ai-agents",
+    "agentic-ai",
+    "structured-output",
+    "ai-governance"
+   ]
+  }
+ },
+ {
+  "id": 2831,
+  "source_id": 7,
+  "url": "https://jeremymorrell.dev/blog/extensible-software-in-the-age-of-llms",
+  "title": "Extensible Software in the age of LLMs",
+  "title_pt": "Software extensível na era dos LLMs",
+  "summary_pt": "O artigo argumenta que a maioria do software web é estática, atendendo apenas às necessidades da maioria dos usuários e negligenciendo a 'longa cauda' de demandas individuais. Nesse contexto, os LLMs permitem a criação de 'Software para Um' (ou 'Small Software'), aplicativos pessoais e personalizados. O autor apresenta como tese central a oportunidade de criar 'Software Extensível na Web': em vez de adicionar infinitas funções a um núcleo, as aplicações teriam um núcleo sólido e permitiriam que os usuários criassem ou instalassem extensões (geradas via LLMs) para atender suas necessidades específicas, com segurança garantida por sandboxes modernos.",
+  "snippet": "Most of the web software we interact with today is static. The developers have a limited amount of time and attention, and focus on building the features that serve the largest group of users. The top of the demand curve is well-served by existing software, but there is a long-tail of unmet needs that’s different for every user. User needs in mapping software Even if the developers were incredibl",
+  "date_iso": "2026-08-18",
+  "kind": "news",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "developer-productivity",
+    "architecture"
+   ],
+   "content-type": [
+    "opinion",
+    "analysis"
+   ],
+   "difficulty": [
+    "all-levels"
+   ],
+   "domain": [
+    "llm-models",
+    "ai-general"
+   ],
+   "topic-technology": [
+    "llm-models",
+    "agentic-ai",
+    "ai-agents",
+    "generative-ai",
+    "software-development"
+   ],
+   "trending-emerging": [
+    "ai-coding-agents",
+    "agentic-ai"
+   ]
+  }
+ },
+ {
+  "id": 2832,
+  "source_id": 7,
+  "url": "https://artificialanalysis.ai/articles/grok-4-6-benchmarks-and-analysis",
+  "title": "Grok 4.6 returns SpaceXAI to the intelligence frontier and leads on cost efficiency",
+  "title_pt": "Grok 4.6 recoloca SpaceXAI na fronteira da inteligência e lidera em custo-benefício",
+  "summary_pt": "O Grok 4.6, da SpaceXAI, alcançou 61 pontos no Índice de Inteligência da Artificial Analysis, igualando-se ao GPT-5.6 Sol e ficando atrás apenas dos modelos Claude da Anthropic. Em pouco mais de um mês desde o lançamento do Grok 4.5, o novo modelo ganhou 5 pontos e voltou a colocar a SpaceXAI entre os líderes do setor, com desempenho agêntico (agentic) de destaque.\n\nO modelo se sobressai em tarefas agênticas: obteve Elo 1753 no GDPval-AA v2, atrás somente do Claude Opus 5, e registrou 50,7% no τ³-Banking e 88,4% no Terminal-Bench v2.1, ficando entre os melhores. No benchmark AA-Briefcase, de trabalho de conhecimento de longo horizonte, alcançou Elo 1577 (nível Fable 5), com eficiência notável: cerca de 53 turnos e 0,5 bilhão de tokens de entrada por tarefa, contra ~103 turnos e 2 bilhões do Claude Opus 5 (max).\n\nNo quesito custo, o preço permaneceu o mesmo do Grok 4.5: US$ 2 por milhão de tokens de entrada e US$ 6 por milhão de tokens de saída, com desconto para cache hits (US$ 0,5 por milhão, acima dos US$ 0,3 anteriores). Isso o coloca na fronteira de Pareto de inteligência versus custo, sendo mais barato que oponentes como Claude Opus 5 (US$ 5/US$ 25) e GPT-5.6 Sol (US$ 5/US$ 30), com desempenho equivalente ou superior em várias métricas. A janela de contexto permanece em 500 mil tokens.",
+  "snippet": "SpaceXAI's Grok 4.6 scores 61 on the Artificial Analysis Intelligence Index, joining the frontier in line with GPT-5.6 Sol, with standout agentic performance at lower cost Grok 4.6 gains 5 points over Grok 4.5 on the Intelligence Index just over one month after its release, or +23 points compared to Grok 4.3. This brings SpaceXAI back to the intelligence frontier alongside OpenAI, behind only Ant",
+  "date_iso": "2026-08-12",
+  "kind": "release",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "xai",
+    "grok"
+   ],
+   "concept-theme": [
+    "performance",
+    "cost-optimization",
+    "evaluation"
+   ],
+   "content-type": [
+    "version-release",
+    "benchmark"
+   ],
+   "domain": [
+    "llm-models"
+   ],
+   "framework-library-tool": [
+    "grok"
+   ],
+   "topic-technology": [
+    "llm-models",
+    "frontier-models",
+    "agentic-ai",
+    "model-pricing",
+    "cost-optimization-llm"
+   ],
+   "trending-emerging": [
+    "agentic-ai",
+    "frontier-models"
+   ]
+  }
+ },
+ {
+  "id": 2833,
+  "source_id": 7,
+  "url": "https://unsloth.ai/docs/basics/dynamic-3/0-ggufs",
+  "title": "What is a p-value?",
+  "title_pt": "O que é um valor-p?",
+  "summary_pt": "O valor-p (p-value) é uma medida estatística que indica a probabilidade de observar os dados obtidos (ou algo mais extremo) assumindo que a hipótese nula seja verdadeira. Ele é usado em testes de hipóteses para decidir se há evidências suficientes para rejeitar a hipótese nula. Se o valor-p for menor que um limiar pré-definido (geralmente 0,05), rejeita-se a hipótese nula e conclui-se que há diferença estatisticamente significativa. Caso contrário, não se rejeita a hipótese nula.\n\nO cálculo do valor-p depende do teste estatístico utilizado (por exemplo, teste t, ANOVA, regressão, qui-quadrado) e corresponde à área sob a curva de distribuição de probabilidade além do valor da estatística de teste. A hipótese nula é a suposição de que não há efeito ou diferença. Um valor-p pequeno indica forte evidência contra a hipótese nula, enquanto um valor-p grande indica evidência fraca.\n\nÉ importante distinguir significância estatística de significância prática: a primeira indica se o efeito provavelmente é real, enquanto a segunda avalia se o efeito é relevante no mundo real. Um erro comum é interpretar o valor-p como a probabilidade de a hipótese nula ser verdadeira, o que é incorreto. O valor-p é a probabilidade dos dados, dado que a hipótese nula é verdadeira. Exemplos e perguntas frequentes ajudam a esclarecer o conceito em diferentes contextos e ferramentas estatísticas.",
+  "snippet": "A p-value, or probability value, is a number describing how likely it is that your data would have occurred under the null hypothesis of your statistical test. Suppose that you've collected data from two samples of plants and want to compare their means. You perform an independent samples t-test. The p-value is the probability of obtaining a difference between the means as large as or larger than",
+  "date_iso": "2026-06-10",
+  "kind": "news",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "content-type": [
+    "explainer"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "topic-technology": [
+    "data-science",
+    "data-analysis"
+   ]
+  }
+ },
+ {
+  "id": 2834,
+  "source_id": 7,
+  "url": "https://www.modular.com/blog/modular-26-5-mojo-1-0-is-here",
+  "title": "Mojo 1.0",
+  "title_pt": "Mojo 1.0: uma base estável para a evolução da linguagem",
+  "summary_pt": "A linguagem Mojo atingiu oficialmente a versão 1.0, marcando um importante marco desde seu lançamento inicial em 2023. O objetivo principal dessa versão é oferecer uma fundação estável para desenvolvedores construírem projetos de longo prazo, já que a linguagem é usada em produção pela Modular como base para MAX e para o Modular Cloud. Apesar da estabilização, a evolução continua: a partir de agora a linguagem deve mudar principalmente de forma aditiva, e mudanças que quebrem compatibilidade serão gerenciadas com o cuidado típico de linguagens maduras como C++.\n\nA versão também contou com participação significativa da comunidade: quase 200 colaboradores fizeram mais de 1.100 pull requests na biblioteca padrão, que foi recentemente aberta. Entre as melhorias da versão estão a unificação da sintaxe, com declaração consistente de variáveis via var, suporte a lambdas no estilo Python, estabilidade maior do servidor LSP, recursos de programação de IA, diagnósticos de problemas de memória e cláusulas where mais consistentes. A versão 26.5 também traz atualizações para MAX, como instalação simplificada, suporte para novos modelos de linguagem e melhorias para o ecossistema de agentes. A modular planeja abrir o compilador e as ferramentas de Mojo em 2026.",
+  "snippet": "Today, the Mojo language officially reaches 1.0: a milestone the language has been building toward since its first release in 2023. Mojo has grown into a general-purpose language with a vibrant developer community writing their own libraries, tools, and applications on top of it. With Mojo 1.0, developers can now build for the long-term on a stable, production-ready language foundation. Mojo 1.0:",
+  "date_iso": "2026-08-11",
+  "kind": "release",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "open-source",
+    "community",
+    "reliability"
+   ],
+   "content-type": [
+    "version-release"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "topic-technology": [
+    "software-development",
+    "system-design"
+   ],
+   "trending-emerging": [
+    "open-weights",
+    "structured-output",
+    "reasoning-models"
+   ]
+  }
+ },
+ {
+  "id": 2835,
+  "source_id": 7,
+  "url": "https://tencent-hunyuan.github.io/Hunyuan3D-WorldClaw",
+  "title": "WorldClaw: Agentic 3D Open-World Generation at Scale",
+  "title_pt": "WorldClaw: Geração de Mundos 3D Abertos em Larga Escala com Agentes",
+  "summary_pt": "O artigo apresenta o WorldClaw, um framework totalmente baseado em agentes para gerar mundos 3D abertos e exploráveis a partir de prompts de texto livres. O sistema adota uma abordagem que vai do grosseiro ao fino: primeiro, agentes de planejamento interpretam o prompt e o convertem em uma especificação estruturada contendo regiões, restrições de terreno, objetos e relações espaciais. Em seguida, uma etapa de geração global constrói uma fundação de terreno coerente, combinando mapas semânticos, materiais procedurais e um campo de altura sensível às regiões. Por fim, apenas as regiões que exigem detalhes recebem geração local de objetos: o sistema cria composições condicionadas ao terreno, reconstrói cada objeto como malhas texturizadas editáveis e posiciona essas instâncias de forma alinhada ao solo.\n\nUm ponto central do método são os loops de refinamento guiados por renderização, nos quais agentes inspecionam a imagem gerada e corrigem pose, escala, qualidade da malha e contato objeto-terreno até que o resultado seja visualmente consistente. Isso garante que cada objeto permaneça como uma instância separada e editável, facilitando a exploração em visão livre, a edição e o reuso no nível de objetos, além da integração com fluxos de trabalho em motores de jogos e ferramentas de animação. O WorldClaw demonstra sua versatilidade em cenários como vilarejos, ilhas tropicais e postos árticos, equilibrando escala, qualidade visual e editabilidade.\n\nOs autores também discutem direções futuras, como estender a modelagem procedural baseada em código (atualmente usada para materiais no Blender) para a geração de objetos com hierarquias de partes editáveis, e a integração com sistemas de runtime em motores de jogos para lidar com geração procedural, navegação e física. O objetivo final é deslocar o foco da criação de conteúdo 3D da construção manual dos componentes para a expressão criativa do tipo de mundo que o criador deseja construir.",
+  "snippet": "Agentic 3D open-world generation at scale Turn one open-ended prompt into an explicit, explorable, and editable 3D world. Agentic planning keeps global terrain coherent while selectively building rich local detail. Scatter assets are built through 3D coding; all other objects are produced by 3D generative models. A world from a single sentence. WorldClaw takes one block of open-ended text",
+  "date_iso": "2026-08-13",
+  "kind": "tool",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "content-type": [
+    "tool-release",
+    "showcase"
+   ],
+   "difficulty": [
+    "expert"
+   ],
+   "domain": [
+    "ai-general",
+    "llm-models"
+   ],
+   "topic-technology": [
+    "generative-ai",
+    "agentic-ai",
+    "ai-agents"
+   ],
+   "trending-emerging": [
+    "agentic-ai",
+    "ai-agents",
+    "agent-orchestration",
+    "world-models"
+   ]
+  }
  }
 ]

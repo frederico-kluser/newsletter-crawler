@@ -123861,5 +123861,673 @@
     "world-models"
    ]
   }
+ },
+ {
+  "id": 2836,
+  "source_id": 6,
+  "url": "https://aiweekly.co/issues/what-ai-models-are-actually-coming-in-the-next-six-months",
+  "title": "What AI models are actually coming in the next six months?",
+  "title_pt": "Quais modelos de IA chegam nos próximos seis meses?",
+  "summary_pt": "A análise da newsletter AI Weekly faz um panorama do que pode ser lançado em IA nos próximos seis meses, baseado em vazamentos, testes e declarações públicas. No circuito dos grandes laboratórios, OpenAI tem o Astra em espera por causa de uma arquitetura de segurança ainda não concluída; Meta promete o Watermelon até o fim do ano, dentro de sua reafirmação como fronteira; Google enfrenta atrasos no Gemini 3.5 Pro e ainda treina o Gemini 4; e Anthropic deve liberar o Fable 5.1, mantendo um modelo interno mais forte sob controles restritos. Há também especulações em torno de um modelo \"não censurado\" da Qwen e um vazamento do Fable 5.1 ganhando tração no mercado.\n\nNo campo dos modelos abertos, a aposta principal é a chegada de um modelo da MiniMax com 2,7 trilhões de parâmetros possivelmente ainda no terceiro trimestre, além de um modelo da Z.ai que pode rivalizar com Fable antes do fim do ano e com preço público muito menor. Já a IA física tem cronogramas mais concretos: Nvidia prevê Cosmos 3 e GR00T N2, e a Genesis quer levar o Eno para clientes até dezembro. O texto defende que a disputa dos próximos meses não será apenas entre o melhor modelo em um ranking, mas três corridas: a de capacidade segura de implantação de modelos, a dos modelos abertos viáveis economicamente, e a dos modelos prováveis antes em ambientes reais. As equipes interessadas deveriam se preparar para pelo menos três migrações de modelo até janeiro, e o atraso do Astra indica que segurança, não apenas poder de treinamento, pode ser o gargalo do próximo salto de IA.",
+  "snippet": "In the Wild The audience has already front-run the release calendar. See the latest full movement in In the Wild. A Fable 5.1 leak video is pulling 1,678 views an hour. The rumor roundup also promises a Gemini update and an \"uncensored\" Qwen model, which is a neat snapshot of how model speculation now gets packaged. Canva entered Photo & Video at No. 3. Whatever wins the model race will increa",
+  "date_iso": "2026-08-20",
+  "kind": "tool",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "openai",
+    "google",
+    "meta-ai",
+    "gemini",
+    "qwen"
+   ],
+   "concept-theme": [
+    "security"
+   ],
+   "content-type": [
+    "analysis",
+    "deep-dive"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "ai-general",
+    "llm-models"
+   ],
+   "framework-library-tool": [
+    "gemini",
+    "qwen"
+   ],
+   "topic-technology": [
+    "frontier-models",
+    "model-release",
+    "model-comparison",
+    "model-capabilities",
+    "agentic-ai",
+    "ai-safety"
+   ],
+   "trending-emerging": [
+    "frontier-models",
+    "agentic-ai"
+   ]
+  }
+ },
+ {
+  "id": 2837,
+  "source_id": 7,
+  "url": "https://www.modular.com/blog/modcon-announcements",
+  "title": "ModCon 2026: Open source, open cloud, open silicon",
+  "title_pt": "ModCon 2026: código aberto, nuvem aberta, silício aberto",
+  "summary_pt": "Na ModCon 2026, a Modular apresentou sua plataforma como pronta para produção, processando bilhões de tokens por minuto em implantações empresariais reais. O destaque foi o Mojo 1.0, agora totalmente open source sob licença Apache 2.0, com suporte nativo para Windows em colaboração com a Microsoft. Além disso, a Modular Cloud foi lançada publicamente, já atendendo clientes como a MiniMax, que utiliza a plataforma em escala de bilhões de tokens por minuto com o modelo M3.\n\nA plataforma agora suporta aceleradores personalizados além de CPUs e GPUs, incluindo AWS Trainium, Google TPUs e os aceleradores Qualcomm Cloud AI 100 Ultra e Qualcomm Dragonfly. A empresa também está abrindo o MAX, removendo restrições de dispositivo na licença e planejando um programa de alianças para que fornecedores de hardware, provedores de nuvem e operadores de data centers possam contribuir com a plataforma. O objetivo é estabelecer uma fundação aberta para computação heterogênea, permitindo que modelos sejam escritos uma vez e executados em qualquer arquitetura de silício.",
+  "snippet": "Four and a half years ago, Modular made a bet: AI would not run on one kind of silicon forever, and the software stack would need to be rearchitected for a world of heterogeneous hardware and increasingly complex AI workloads. At the ModCon keynote this morning, we showed what that bet has become. The Modular Platform is now production-ready, serving billions of tokens per minute and powering real",
+  "date_iso": "2026-08-18",
+  "kind": "release",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "aws",
+    "google",
+    "microsoft",
+    "minimax"
+   ],
+   "concept-theme": [
+    "open-source",
+    "architecture",
+    "performance",
+    "scalability"
+   ],
+   "content-type": [
+    "release-announcement"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "topic-technology": [
+    "ai-accelerators",
+    "ai-infrastructure",
+    "model-serving"
+   ],
+   "trending-emerging": [
+    "ai-data-centers"
+   ]
+  }
+ },
+ {
+  "id": 2838,
+  "source_id": 7,
+  "url": "https://www.modular.com/blog/mojo-open-source",
+  "title": "Mojo🔥 is now open source!",
+  "title_pt": "Mojo🔥 agora é open source!",
+  "summary_pt": "A linguagem de programação Mojo, desenvolvida pela Modular, agora é totalmente open source sob a licença Apache 2.0, com exceções do LLVM. O código-fonte do compilador, das ferramentas e de tudo o que é necessário para construir a linguagem foi disponibilizado no repositório oficial da Modular no GitHub. Mojo é uma linguagem de propósito geral criada para aproveitar GPUs, aceleradores de IA e computação avançada, combinando pesquisas recentes em compiladores e linguagens de programação. Recentemente, a linguagem atingiu a versão 1.0, com estabilidade de código-fonte, e agora a empresa decidiu abrir todo o compilador e a toolchain.\n\nA escolha pela Apache 2.0 foi intencional por ser uma das licenças mais permissivas para linguagens de programação e compiladores, permitindo ampla flexibilidade de uso, inclusive na distribuição de binários compilados com Mojo graças às extensões LLVM. A Modular destaca que manteve o design da linguagem em times pequenos e bem integrados, mas contou com feedback da comunidade para evitar bolhas. A biblioteca padrão e milhares de linhas de código já foram abertas antes; agora, o compilador também é open source.\n\nPara construir o compilador a partir do código-fonte, basta clonar o repositório e executar um comando Bazel, como './bazelw run --config=build-mojo KGEN:mojo -- run hello.mojo'. Quem não quiser compilar tudo do zero pode usar a configuração 'prebuilt-mojo' para baixar a distribuição binária mais recente. Por enquanto, a Modular ainda não aceita contribuições externas para o compilador e as ferramentas, mas planeja aceitá-las até o final do ano. A comunidade pode enviar perguntas e compartilhar projetos pelo fórum oficial.",
+  "snippet": "We are happy to announce that the Mojo🔥 language is now fully open source under the Apache 2.0 license (with LLVM exceptions)! The source code for the Mojo compiler, tooling, and everything else you need to build the language are now available in our modular GitHub repository. The Mojo language is a bold bet: a novel general purpose programming language that goes further than older ones. Mojo inte",
+  "date_iso": "2026-08-18",
+  "kind": "release",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "open-source",
+    "licensing",
+    "community"
+   ],
+   "content-type": [
+    "release-announcement"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "topic-technology": [
+    "ai-infrastructure"
+   ]
+  }
+ },
+ {
+  "id": 2839,
+  "source_id": 7,
+  "url": "https://openrouter.ai/blog/announcements/openrouter-is-joining-stripe",
+  "title": "OpenRouter is Joining Stripe",
+  "title_pt": "OpenRouter se junta à Stripe",
+  "summary_pt": "A OpenRouter, maior marketplace e gateway para modelos de IA, anunciou sua integração com a Stripe, a principal plataforma de infraestrutura financeira do mundo. A decisão visa acelerar a missão da OpenRouter de tornar a inteligência multimodal acessível e neutra, sem comprometer sua independência. A empresa continuará operando com o mesmo nome, produto e roteiro, garantindo que integrações atuais permaneçam inalteradas e que as decisões de roteamento sigam priorizando o melhor para o usuário.\n\nCom 10 trilhões de tokens processados diariamente e mais de 10 milhões de desenvolvedores, a OpenRouter vê na Stripe um parceiro estratégico para expandir sua rede de clientes, melhorar o combate a fraudes e oferecer suporte em escala. A união — descrita como \"Stripe para LLMs\" — combina culturas focadas em qualidade, escala e compromisso com construtores, permitindo que a OpenRouter avance mais rápido em um ecossistema de IA pós-AGI. A transação está sujeita a condições de fechamento usuais e deve ser concluída nas próximas semanas.",
+  "snippet": "Today, we are excited to announce that we are joining forces with Stripe, to power the next wave of GDP growth globally. OpenRouter is the first and largest model marketplace and gateway. We are the best way to discover and use any AI model, with one interface, broad provider choice, model-agnostic observability, cost management, and routing that improves price, performance, and uptime. We now pr",
+  "date_iso": "2026-08-19",
+  "kind": "news",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "openrouter"
+   ],
+   "concept-theme": [
+    "observability",
+    "performance",
+    "reliability",
+    "cost-optimization"
+   ],
+   "content-type": [
+    "acquisition-news"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "llm-models",
+    "ai-general"
+   ],
+   "topic-technology": [
+    "ai-gateway",
+    "model-routing",
+    "ai-infrastructure",
+    "inference-optimization",
+    "cost-optimization-llm",
+    "observability-llm"
+   ]
+  }
+ },
+ {
+  "id": 2840,
+  "source_id": 7,
+  "url": "https://cursor.com/blog/git-at-any-scale",
+  "title": "Git at any scale",
+  "title_pt": "Git em qualquer escala",
+  "summary_pt": "Hospedar repositórios Git em grande escala é um desafio que vem do próprio design da ferramenta. Projetado por Linus Torvalds para o fluxo de trabalho descentralizado do Linux, o Git se tornou padrão na indústria, mas quase todo mundo usa uma hospedagem centralizada. Como todas as cópias de um repositório são equivalentes, o servidor acaba lidando com packfiles — o formato binário usado na transferência e no armazenamento de objetos Git. Para escalar de verdade, as opções são, em essência, distribuir o filesystem, distribuir os packfiles ou distribuir o próprio Git, e cada tentativa tem um custo técnico alto.\n\nDistribuir o Git no nível de objetos foi tentado com abordagens como o JGit, que usava uma tabela hash distribuída, mas a estrutura de grafo acíclico (DAG) do Git exige muitos acessos sequenciais e o protocolo padrão ainda depende de packfiles, o que inviabilizou o clone em larga escala. O GitHub tentou primeiro distribuir o filesystem com tecnologias como NFS, GFS e DRBD, mas os padrões de leitura dos packfiles são essencialmente buscas aleatórias, o que não funciona bem em sistemas de arquivos remotos. A solução que se consolidou foi o Spokes, criado por volta de 2013: guardar cópias completas de cada repositório como Git normal em discos NVMe locais e replicá-las com consistência forte, usando um protocolo de consenso do tipo 3PC (three-phase commit). Assim, um push só é aceito quando a maioria dos nós confirma — algo necessário porque o próprio cliente Git lida muito mal com leituras inconsistentes, especialmente em pipelines de CI.",
+  "snippet": "Hosting Git repositories at scale is a nightmare. When Linus Torvalds designed the first version of the information manager from hell (that's actually the tagline for Git, look it up), he had a very specific use case in mind: his own. He wanted to replace BitKeeper, the distributed version control system that was being used to develop the Linux Kernel. Of course, the replacement had to be distribu",
+  "date_iso": "2026-08-18",
+  "kind": "news",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "scalability",
+    "reliability",
+    "performance",
+    "architecture"
+   ],
+   "content-type": [
+    "deep-dive"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "backend"
+   ],
+   "topic-technology": [
+    "software-development",
+    "system-design"
+   ]
+  }
+ },
+ {
+  "id": 2841,
+  "source_id": 7,
+  "url": "https://simedw.com/2026/08/20/midi-autocomplete",
+  "title": "Training a 125M-parameter Model to Autocomplete Piano",
+  "title_pt": "Treinando um modelo de 125 milhões de parâmetros para autocompletar piano",
+  "summary_pt": "O autor descreve o desenvolvimento de um sistema de autocompletar piano em tempo real, usando um transformer de 125 milhões de parâmetros que roda em um iPhone (~108 notas/segundo). O projeto, chamado RollTab, conecta um piano MIDI ao celular e gera continuações musicais a partir de um trecho tocado pelo usuário, funcionando como um 'Copilot' para piano. As maiores melhorias vieram de três fatores: uma representação MIDI eficiente, limpeza agressiva do dataset e pós-treinamento com DPO (Direct Preference Optimization).\n\nO autor testou várias representações de tokenização de MIDI, optando por uma estrutura onde cada nota é representada por um único token com cinco campos (evento, afinação, delta de tempo, duração e velocidade), evitando a deriva de notas e reduzindo o número de passos de geração. O dataset final, com centenas de milhares de arquivos MIDI (300 milhões de eventos), passou por rigorosos scripts de limpeza, filtragem e deduplicação. O treinamento usou cross-entropy com múltiplas saídas, augmentação de dados (transposição, variação de tempo, jitter de duração/velocidade) e agendamento amostral que, apesar de aumentar a loss, melhorou a qualidade das continuações.\n\nA avaliação contou com métricas automáticas e comparadores por preferência (via Gemini), que geraram um dataset para DPO. O pós-treinamento com DPO tornou as continuações mais coerentes e musicalmente boas, com 69% de preferência sobre o modelo base. O autor conclui que a limpeza dos dados foi mais importante que o volume, e que a representação correta reduz drasticamente o custo computacional.",
+  "snippet": "TL;DR: I trained a 125M-parameter transformer to autocomplete piano performances in real time (~108 notes/sec on an iPhone 15). The biggest improvements came from finding the right MIDI representation, cleaning the training data aggressively, and adding DPO post-training. Almost a year ago, I started tinkering with an idea: connect my MIDI piano to my phone, play something, and have AI autocompl",
+  "date_iso": "2026-08-20",
+  "kind": "news",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "latency",
+    "throughput",
+    "data-engineering",
+    "optimization"
+   ],
+   "content-type": [
+    "project-spotlight",
+    "show-and-tell"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "llm-models",
+    "ai-general"
+   ],
+   "topic-technology": [
+    "ai-music",
+    "model-training",
+    "transformers",
+    "dpo",
+    "tokenization",
+    "on-device-inference"
+   ],
+   "trending-emerging": [
+    "on-device-ai",
+    "dpo",
+    "small-language-models",
+    "edge-ai"
+   ]
+  }
+ },
+ {
+  "id": 2842,
+  "source_id": 7,
+  "url": "https://www.mikekasberg.com/blog/2026/08/19/hacking-with-claude-on-a-27-smart-watch.html",
+  "title": "Hacking with Claude on a $27 Smart Watch",
+  "title_pt": "Hackeando com Claude em um smartwatch de US$ 27",
+  "summary_pt": "O autor usou o Claude (um assistente de IA) para desenvolver um mostrador de relógio personalizado para o PineTime, um smartwatch de baixo custo (US$ 27) com firmware de código aberto. Inspirado por tweets de Steve Ruiz e Levelsio, ele clonou o repositório InfiniSim, que simula o PineTime, e pediu ao Claude para criar um mostrador baseado em uma foto de um Apple Watch. Apesar de a primeira versão ter problemas de posicionamento de texto, ele iterou com feedback específico e usou uma imagem de fundo estática para otimizar o desempenho, já que a tela do relógio não suporta atualizações rápidas. O projeto foi concluído em algumas horas e o código foi publicado no GitHub, incluindo um AGENTS.md com instruções úteis para outros desenvolvedores. O autor destacou a facilidade de trabalhar com IA em um projeto de baixo risco e o prazer de criar algo funcional para um dispositivo real.",
+  "snippet": "The Pine Time is a $27 smart watch that runs open source firmware. I’ve had one sitting in the back of a drawer for a year or two. When I saw @steveruizok’s Tweet about hacking on ESP32 devices with Claude, I found some inspiration to pull my PineTime out of the drawer and see what Claude might be capable of! if you know what a \"coding agent\" is then go buy this or something very similar (not spo",
+  "date_iso": "2026-08-20",
+  "kind": "tool",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "claude",
+    "anthropic",
+    "moonshot-ai",
+    "deepseek"
+   ],
+   "concept-theme": [
+    "open-source",
+    "dev-experience",
+    "developer-productivity"
+   ],
+   "content-type": [
+    "tutorial",
+    "show-and-tell"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "llm-models",
+    "ai-general"
+   ],
+   "ecosystem-language": [
+    "cpp"
+   ],
+   "framework-library-tool": [
+    "claude",
+    "kimi",
+    "deepseek-v"
+   ],
+   "topic-technology": [
+    "ai-agents",
+    "agent-orchestration",
+    "code-models",
+    "software-development",
+    "open-weights",
+    "multimodal-ai"
+   ],
+   "trending-emerging": [
+    "ai-coding-agents",
+    "agent-orchestration",
+    "open-weights",
+    "multi-agent"
+   ]
+  }
+ },
+ {
+  "id": 2843,
+  "source_id": 7,
+  "url": "https://openai.com/index/introducing-ai-futures",
+  "title": "Introducing AI Futures",
+  "title_pt": "Apresentando o Futuro da IA",
+  "summary_pt": "A OpenAI lança o AI Futures, blog da nova equipe Strategic Futures. A equipe busca responder como a sociedade livre deve ser reestruturada para preservar direitos individuais e autonomia diante do surgimento de IAs transformadoras. O ponto central é que a IA pode concentrar poder radicalmente: no passado, Estados dependiam de trabalho humano para manter exércitos, polícia e coletar impostos, mas sistemas autônomos e inteligência de máquinas podem permitir que o Estado exerça força e arrecada recursos sem apoio político dos cidadãos. Essa quebra de barganha histórica é um risco estrutural que ameaça a agência individual e a democracia.",
+  "snippet": "“Will it be sufficient… to trust these parchment barriers against the encroaching spirit of power?” —James Madison, Federalist No. 48 It is our pleasure to launch AI Futures, the blog of OpenAI’s new Strategic Futures team. We are a small team with the collective goal of answering one overarching question: how should free society be restructured to preserve individual rights and agency while accom",
+  "date_iso": "2026-06-10",
+  "kind": "tool",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "openai"
+   ],
+   "concept-theme": [
+    "ai-safety",
+    "ai-ethics",
+    "governance"
+   ],
+   "content-type": [
+    "product-launch",
+    "announcement"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "topic-technology": [
+    "ai-safety",
+    "ai-policy",
+    "ai-alignment",
+    "ai-ethics"
+   ],
+   "trending-emerging": [
+    "ai-governance"
+   ]
+  }
+ },
+ {
+  "id": 2844,
+  "source_id": 7,
+  "url": "https://github.com/zachahn/vomit",
+  "title": "Clean up Claude 5's token vomit with a separate LLM. Save your tokens, Claude 5 is hopeless",
+  "title_pt": "Limpe o 'vômito de tokens' do Claude 5 com um LLM separado",
+  "summary_pt": "Vomit é uma ferramenta que usa um LLM local para traduzir a saída verbosa e cheia de tokens do Claude 5 em um texto mais claro e conciso. Totalmente local, sem telemetria ou dependências externas, ela ajuda a economizar seus tokens, já que o Claude 5 tende a gerar respostas excessivamente longas. O projeto é simples de instalar via `go install` e pode ser configurado com um comando `init`. Funciona com Llama.app, Ollama e qualquer coisa que suporte a API da OpenAI, sendo recomendado o uso do Llama.app com o modelo GPT-OSS 20B para quem ainda não tem um LLM local configurado.\n\nA ferramenta oferece modos de uso não invasivos, como `vomit list` para ver sessões, `vomit tail` para acompanhar e traduzir tokens de uma sessão específica, e `vomit scrub` para substituir a saída do Claude via hooks. No entanto, há limitações: o LLM local só vê o que o Claude tenta comunicar, sem acesso a arquivos ou ações, o que pode causar alucinações. Além disso, é lento, foi criado de forma informal (vibe-coded), testado apenas em Mac, e há risco de perder mensagens originais — por isso, é possível usar ferramentas como AgentsView para recuperá-las.",
+  "snippet": "Vomit converts Claude's token vomit into English by piping it through a local LLM. It's fully local (no telemetry) and has no external dependencies. I wrote a small blog post about this project: https://zachahn.com/posts/1787191554 Disclaimer: The local LLM can only see what Claude tries to communicate (no access to any actions or files), so it hallucinates a bit It's pretty slow This is tota",
+  "date_iso": "2026-06-10",
+  "kind": "tool",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "claude",
+    "anthropic",
+    "openai",
+    "llama",
+    "gpt-oss"
+   ],
+   "concept-theme": [
+    "hallucination",
+    "cost-optimization"
+   ],
+   "content-type": [
+    "tool-release"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "llm-models",
+    "local-llm",
+    "ai-general"
+   ],
+   "ecosystem-language": [
+    "go"
+   ],
+   "framework-library-tool": [
+    "claude",
+    "ollama",
+    "gpt-oss"
+   ],
+   "topic-technology": [
+    "llm-models",
+    "local-inference",
+    "token-counting",
+    "inference-optimization",
+    "privacy-first-ai"
+   ],
+   "trending-emerging": [
+    "local-llm",
+    "ai-coding-agents",
+    "vibe-coding",
+    "open-weights"
+   ]
+  }
+ },
+ {
+  "id": 2845,
+  "source_id": 7,
+  "url": "https://github.com/truefoundry/trueforge",
+  "title": "TrueForge",
+  "title_pt": "TrueForge",
+  "summary_pt": "TrueForge é um harness de agentes open-source que fornece a camada de runtime para transformar um LLM em um agente funcional. Ele gerencia o loop de execução do agente — chamadas de modelo, ferramentas MCP, skills, sandboxing, aprovações, gerenciamento de contexto e estado de sessão — e expõe tudo por meio de uma interface de chat, uma API HTTP com SDK TypeScript e um SDK de UI embutível. A ferramenta resolve as dificuldades de executar um agente em produção, oferecendo recursos como configuração inicial via catálogos, suporte a qualquer provedor de modelo (OpenAI, Anthropic, Google Gemini, etc.), integração com servidores MCP remotos, sandbox isolado para execução de código, checkpoints humanos para aprovação e perguntas, e técnicas de engenharia de contexto (subagentes, carregamento diferido de ferramentas, Code Mode, compactação).",
+  "snippet": "The open-source agent harness - the runtime layer that turns an LLM into a working agent TrueForge runs the agent execution loop for you - model calls, MCP tools, skills, sandboxing, approvals, context management, and session state - and exposes it three ways: a chat UI, an HTTP API with a TypeScript SDK, and an embeddable UI SDK. Why TrueForge? Building an ag",
+  "date_iso": "2026-06-10",
+  "kind": "tool",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "openai",
+    "anthropic",
+    "google"
+   ],
+   "concept-theme": [
+    "agentops",
+    "context-engineering",
+    "guardrails",
+    "security"
+   ],
+   "content-type": [
+    "tool-release"
+   ],
+   "difficulty": [
+    "for-beginners"
+   ],
+   "domain": [
+    "ai-general",
+    "llm-models"
+   ],
+   "ecosystem-language": [
+    "typescript",
+    "nodejs",
+    "yaml"
+   ],
+   "topic-technology": [
+    "ai-agents",
+    "agentic-ai",
+    "mcp",
+    "tool-calling",
+    "context-engineering",
+    "agent-orchestration"
+   ],
+   "trending-emerging": [
+    "ai-agents",
+    "agentic-ai",
+    "mcp",
+    "agent-orchestration"
+   ]
+  }
+ },
+ {
+  "id": 2846,
+  "source_id": 7,
+  "url": "https://www.tomshardware.com/tech-industry/data-centers/protesters-haul-a-guillotine-to-city-council-meeting-about-a-potential-ai-data-center-company-rep-cornered-by-protestors-it-no-longer-felt-safe-to-stay-developer-escorted-out-by-police",
+  "title": "Protesters haul a guillotine to city council meeting about a potential AI data center, company rep cornered by protestors &mdash; &lsquo; it no longer felt safe to stay,&rsquo; developer escorted out by police",
+  "title_pt": "Protesto com guilhotina marca audiência sobre data center da Verrus em Salem",
+  "summary_pt": "Oregon, aliás a ação dos andamentos, tem uma das primeiras leis que garantem que grandes consumidores de energia, como data centers, sejam os maiores contribuidores por custos de reforço na rede elétrica. Isso permitiria que a Portland General Electric, maior provedora de energia do estado, aumentasse em 30% as contas de usuários que consomem mais de 20 MW, reduzindo em cerca de 1,3% as tarifas residenciais. Mesmo assim, muitos moradores de pequenas cidades seguem contra a instalação de data centers em suas regiões. O projeto da Verrus ainda precisa passar por processo de licenciamento extenso, incluindo estudos técnicos, condicionantes e contratos exequíveis, antes de receber qualquer aval definitivo.",
+  "snippet": "The Salem City Council convened a public meeting last July 27, where it discussed the proposed $5.1 billion Oakline at Mill Creek data center by Verrus. As the people converged on the meeting site, a TikTok user spotted a guillotine towed by a bike outside of the venue, signaling the people’s discontent with the project. According to NewsData, the consultation lasted for more than six hours as sev",
+  "date_iso": "2026-08-07",
+  "kind": "news",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "community",
+    "governance",
+    "regulation"
+   ],
+   "content-type": [
+    "news"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "topic-technology": [
+    "ai-infrastructure",
+    "ai-regulation",
+    "ai-policy"
+   ],
+   "trending-emerging": [
+    "ai-governance",
+    "ai-data-centers"
+   ]
+  }
+ },
+ {
+  "id": 2847,
+  "source_id": 7,
+  "url": "https://www.danielvaughn.dev/posts/huzzah",
+  "title": "Huzzah",
+  "title_pt": "Huzzah: um editor experimental para codificar com IA",
+  "summary_pt": "O artigo, escrito em agosto de 2026, reflete sobre o cansaço de um engenheiro de software após a empolgação inicial com agentes de codificação baseados em IA. Embora esses agentes tenham eliminado a necessidade de escrever código manualmente, o autor passou a sentir desconforto com o modelo baseado em longas instruções em inglês. Ele aponta problemas como a ausência de um registro confiável da intenção humana, a natureza imperativa e transitória dos prompts e a ineficiência de usar linguagem natural, que é cheia de elementos sociais e repetições.\n\nPara resolver isso, o autor apresenta o Huzzah, um editor experimental que propõe uma nova abordagem: em vez de prompts longos e imperativos, o programador escreve pseudocódigo declarativo e persistente em um arquivo. O Huzzah gera o código real automaticamente e, ao editar o pseudocódigo, usa as diferenças (diffs) como instrução para o modelo de linguagem. O artigo mostra exemplos como fizz buzz, carrinho de compras e lista de tarefas, destacando benefícios como concisão, legibilidade, uso do pseudocódigo como documentação e possibilidade de criar código agnóstico de linguagem.\n\nPor fim, o autor reconhece limitações: a abordagem pode não funcionar bem em escala, é mais adequada para projetos novos, exige conhecimento técnico do domínio e pode ter dificuldades com dependências entre arquivos e recursos de LSP. O Huzzah ainda está em estágio experimental, com código-fonte disponível para quem quiser testar.",
+  "snippet": "August 2026 A new experimental way to code with AI If you’re a software engineer like me, the first few months of 2026 were incredible. Coding agents suddenly became good enough that we no longer needed to manually write code. But if you’re like me, then sometime later you hit a wall. The honeymoon period ended, and the novelty wore off. No more dopamine hits. It’s August, and I feel utte",
+  "date_iso": "2026-06-10",
+  "kind": "tool",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "dev-experience",
+    "developer-productivity",
+    "prompt-engineering"
+   ],
+   "content-type": [
+    "tool-release"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "llm-models",
+    "ai-general"
+   ],
+   "topic-technology": [
+    "ai-agents",
+    "llm-models",
+    "prompt-engineering",
+    "software-development",
+    "agentic-ai"
+   ],
+   "trending-emerging": [
+    "ai-coding-agents",
+    "agentic-ai",
+    "structured-output"
+   ]
+  }
+ },
+ {
+  "id": 2848,
+  "source_id": 7,
+  "url": "https://franciscotrindade.me/blog/the-kids-are-really-alright",
+  "title": "The Kids Are Really Alright",
+  "title_pt": "Os juniores estão realmente bem",
+  "summary_pt": "O argumento comum é que a IA eliminou o valor do engenheiro júnior, pois o trabalho de executar tarefas agora é feito por IA. Porém, o autor contra-argumenta com um exemplo real: uma funcionalidade que não era priorizada foi atribuída a um estagiário, que a liderou usando IA. O estagiário teve que entender o problema, negociar trade-offs e tomar decisões técnicas. Isso mostra que a IA não substitui a necessidade de gerenciar complexidade e tomar decisões. Engenheiros juniores ainda adicionam capacidade às equipes, e a IA torna o treinamento mais barato. Portanto, a IA aumentou o valor dos juniores, não o diminuiu. As organizações precisam de julgamento técnico, e os juniores são essenciais para o futuro.",
+  "snippet": "AI didn't erase the junior's value. It increased it. “AI ate the junior’s marginal value”. This is the feedback I got from the last post on this topic. According to this argument, the work of a junior engineer goes something like this: There is a need for a solution. Someone more experienced (a senior engineer) plans it and designs it. The senior engineer breaks down the work in multiple smal",
+  "date_iso": "2026-08-18",
+  "kind": "news",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "developer-productivity",
+    "careers",
+    "leadership"
+   ],
+   "content-type": [
+    "opinion",
+    "analysis"
+   ],
+   "difficulty": [
+    "beginner"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "topic-technology": [
+    "ai-jobs",
+    "software-development",
+    "ai-adoption",
+    "generative-ai"
+   ]
+  }
+ },
+ {
+  "id": 2849,
+  "source_id": 7,
+  "url": "https://dontpastetheai.com",
+  "title": "Don't paste the AI, please.",
+  "title_pt": "Não cole a resposta da IA, por favor",
+  "summary_pt": "O artigo critica o hábito de copiar e colar respostas geradas por chatbots quando alguém faz uma pergunta. Embora pareça rápido e útil, isso não agrega valor: quem perguntou também teria acesso à mesma resposta genérica e quer ouvir a sua visão, o seu contexto e o seu julgamento.\n\nA sugestão é usar a IA como apoio para rascunhar, mas sempre ler, interpretar e escrever uma resposta com as próprias palavras. Se algo fizer sentido, cite a parte útil e explique o porquê. Se não tiver o que acrescentar, admita isso ou simplesmente fique em silêncio. O texto também menciona que a página pode ser enviada para quem comete esse erro, e oferece uma versão mais agressiva para quem prefere ser mais direto.",
+  "snippet": "Don't paste the AI, please. When someone asks you something, they want your answer. Not a wall of ChatGPT text. A short answer from a human will always be worth more than one from a robot, even if the robot is right. What happened Someone asked you an honest question. You dumped it into a chatbot, copied the answer, and sent it back. It felt fast. It felt helpful. It wasn't. It mig",
+  "date_iso": "2026-06-10",
+  "kind": "news",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "ai-ethics",
+    "responsible-ai"
+   ],
+   "content-type": [
+    "opinion"
+   ],
+   "domain": [
+    "llm-models"
+   ],
+   "topic-technology": [
+    "llm-models",
+    "generative-ai",
+    "ai-ethics"
+   ]
+  }
+ },
+ {
+  "id": 2850,
+  "source_id": 7,
+  "url": "https://arxiv.org/abs/2608.00146",
+  "title": "DiffusionGemma Technical Report",
+  "title_pt": "Relatório Técnico do DiffusionGemma",
+  "summary_pt": "O DiffusionGemma é um modelo de linguagem experimental de pesos abertos que utiliza difusão discreta para gerar texto em alta velocidade, refinando blocos de 256 tokens em paralelo, em vez de decodificar um token por vez como nos modelos autorregressivos (AR). Ele é obtido por fine-tuning do modelo Gemma 4 (mixture-of-experts) com 3,8B de parâmetros ativos e 25,2B no total, usando menos de 10% do orçamento de treinamento original. O treinamento ocorre em duas etapas: first, supervised fine-tuning para ensinar denoising bidirecional; second, combinação de reinforcement learning com sampler distillation para melhorar a qualidade da geração e a eficiência da inferência.",
+  "snippet": "Authors:DiffusionGemma Team: Adrien Ali Taïga, James Assiene, Daniele Calandriello, Rahma Chaabouni, João Gante, Tamara von Glehn, Nate Keating, Chris Knutsen, Martin Kukla, Tianlin Liu, Ivan Lobov, Ofir Nabati, João Gabriel Oliveira, Nicolas Perez-Nieves, Nastasia Prutianova, Bobak Shahriari, Jean Tarbouriech, Pavel Tyletski, Çağlar Ünlü, Cindy Wu, Glenn Cameron, Jerome Connor, Sertan Girgin, Maa",
+  "date_iso": "2026-07-31",
+  "kind": "news",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "google"
+   ],
+   "concept-theme": [
+    "throughput",
+    "latency",
+    "parallelism",
+    "architecture"
+   ],
+   "content-type": [
+    "research-paper"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "llm-models"
+   ],
+   "topic-technology": [
+    "diffusion-models",
+    "llm-models",
+    "moe",
+    "fine-tuning",
+    "inference-optimization",
+    "model-distillation"
+   ],
+   "trending-emerging": [
+    "moe",
+    "distillation",
+    "open-weights"
+   ]
+  }
  }
 ]

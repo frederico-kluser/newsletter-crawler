@@ -1,22 +1,22 @@
 {
  "schemaVersion": 1,
- "generatedAt": "2026-08-20T12:17:50.801Z",
+ "generatedAt": "2026-08-21T18:22:49.436Z",
  "documentation": "/api/v1/README.md",
  "schema": "/api/v1/schema.json",
  "totals": {
-  "articles": 2835,
-  "summaries": 2835,
-  "classified": 2835,
+  "articles": 2850,
+  "summaries": 2850,
+  "classified": 2850,
   "byKind": {
-   "news": 1390,
-   "tool": 472,
-   "release": 973,
+   "news": 1397,
+   "tool": 478,
+   "release": 975,
    "unknown": 0
   }
  },
  "dates": {
   "min": "2026-01-06",
-  "max": "2026-08-19"
+  "max": "2026-08-20"
  },
  "sources": [
   {
@@ -47,12 +47,12 @@
   {
    "id": 6,
    "name": "AI Weekly",
-   "count": 170
+   "count": 171
   },
   {
    "id": 7,
    "name": "llmnews.ai",
-   "count": 82
+   "count": 96
   }
  ],
  "facets": [
@@ -65,7 +65,7 @@
     },
     {
      "tag": "backend",
-     "count": 842
+     "count": 843
     },
     {
      "tag": "nodejs",
@@ -77,15 +77,15 @@
     },
     {
      "tag": "ai-general",
-     "count": 426
+     "count": 438
     },
     {
      "tag": "llm-models",
-     "count": 203
+     "count": 212
     },
     {
      "tag": "local-llm",
-     "count": 36
+     "count": 37
     },
     {
      "tag": "python",
@@ -106,19 +106,19 @@
     },
     {
      "tag": "deep-dive",
-     "count": 341
+     "count": 343
     },
     {
      "tag": "release-announcement",
-     "count": 277
+     "count": 279
     },
     {
      "tag": "tool-release",
-     "count": 254
+     "count": 257
     },
     {
      "tag": "analysis",
-     "count": 243
+     "count": 245
     },
     {
      "tag": "explainer",
@@ -126,15 +126,15 @@
     },
     {
      "tag": "tutorial",
-     "count": 150
+     "count": 151
     },
     {
      "tag": "opinion",
-     "count": 133
+     "count": 135
     },
     {
      "tag": "announcement",
-     "count": 123
+     "count": 124
     },
     {
      "tag": "newsletter-roundup",
@@ -146,7 +146,7 @@
     },
     {
      "tag": "news",
-     "count": 100
+     "count": 101
     },
     {
      "tag": "getting-started",
@@ -154,11 +154,11 @@
     },
     {
      "tag": "project-spotlight",
-     "count": 73
+     "count": 74
     },
     {
      "tag": "product-launch",
-     "count": 71
+     "count": 72
     },
     {
      "tag": "guide",
@@ -201,6 +201,10 @@
      "count": 36
     },
     {
+     "tag": "show-and-tell",
+     "count": 32
+    },
+    {
      "tag": "migration-guide",
      "count": 31
     },
@@ -210,10 +214,6 @@
     },
     {
      "tag": "documentation",
-     "count": 30
-    },
-    {
-     "tag": "show-and-tell",
      "count": 30
     },
     {
@@ -265,12 +265,12 @@
      "count": 13
     },
     {
-     "tag": "funding-news",
+     "tag": "acquisition-news",
      "count": 12
     },
     {
-     "tag": "acquisition-news",
-     "count": 11
+     "tag": "funding-news",
+     "count": 12
     },
     {
      "tag": "anti-patterns",
@@ -330,7 +330,7 @@
     },
     {
      "tag": "research-paper",
-     "count": 4
+     "count": 5
     },
     {
      "tag": "upgrade-guide",
@@ -407,7 +407,7 @@
     },
     {
      "tag": "software-development",
-     "count": 287
+     "count": 291
     },
     {
      "tag": "performance-optimization",
@@ -423,7 +423,7 @@
     },
     {
      "tag": "ai-agents",
-     "count": 173
+     "count": 176
     },
     {
      "tag": "component-libraries",
@@ -446,11 +446,11 @@
      "count": 111
     },
     {
-     "tag": "accessibility",
-     "count": 103
+     "tag": "agentic-ai",
+     "count": 106
     },
     {
-     "tag": "agentic-ai",
+     "tag": "accessibility",
      "count": 103
     },
     {
@@ -470,6 +470,10 @@
      "count": 90
     },
     {
+     "tag": "ai-adoption",
+     "count": 89
+    },
+    {
      "tag": "bundling",
      "count": 89
     },
@@ -478,16 +482,12 @@
      "count": 89
     },
     {
-     "tag": "ai-adoption",
-     "count": 88
-    },
-    {
      "tag": "llm-models",
-     "count": 83
+     "count": 87
     },
     {
      "tag": "generative-ai",
-     "count": 81
+     "count": 83
     },
     {
      "tag": "ssr",
@@ -498,24 +498,24 @@
      "count": 72
     },
     {
-     "tag": "dom",
+     "tag": "ai-safety",
      "count": 67
     },
     {
-     "tag": "ai-safety",
-     "count": 65
+     "tag": "dom",
+     "count": 67
     },
     {
      "tag": "security-node",
      "count": 64
     },
     {
-     "tag": "animations",
+     "tag": "ai-regulation",
      "count": 62
     },
     {
-     "tag": "ai-regulation",
-     "count": 61
+     "tag": "animations",
+     "count": 62
     },
     {
      "tag": "npm-security",
@@ -523,7 +523,11 @@
     },
     {
      "tag": "ai-policy",
-     "count": 58
+     "count": 60
+    },
+    {
+     "tag": "ai-ethics",
+     "count": 55
     },
     {
      "tag": "database-access",
@@ -540,10 +544,6 @@
     {
      "tag": "webassembly",
      "count": 55
-    },
-    {
-     "tag": "ai-ethics",
-     "count": 53
     },
     {
      "tag": "esm",
@@ -570,15 +570,19 @@
      "count": 49
     },
     {
+     "tag": "mcp",
+     "count": 49
+    },
+    {
      "tag": "vue",
      "count": 49
     },
     {
-     "tag": "mcp",
-     "count": 48
+     "tag": "frontier-models",
+     "count": 46
     },
     {
-     "tag": "frontier-models",
+     "tag": "ai-infrastructure",
      "count": 45
     },
     {
@@ -596,10 +600,6 @@
     {
      "tag": "ci-cd",
      "count": 42
-    },
-    {
-     "tag": "ai-infrastructure",
-     "count": 41
     },
     {
      "tag": "data-visualization",
@@ -650,15 +650,15 @@
      "count": 34
     },
     {
+     "tag": "tool-calling",
+     "count": 34
+    },
+    {
      "tag": "ai-funding",
      "count": 33
     },
     {
      "tag": "computer-vision",
-     "count": 33
-    },
-    {
-     "tag": "tool-calling",
      "count": 33
     },
     {
@@ -668,6 +668,10 @@
     {
      "tag": "edge-runtime",
      "count": 32
+    },
+    {
+     "tag": "system-design",
+     "count": 31
     },
     {
      "tag": "webgl",
@@ -683,10 +687,6 @@
     },
     {
      "tag": "spa",
-     "count": 30
-    },
-    {
-     "tag": "system-design",
      "count": 30
     },
     {
@@ -719,6 +719,10 @@
     },
     {
      "tag": "open-weights",
+     "count": 24
+    },
+    {
+     "tag": "code-models",
      "count": 23
     },
     {
@@ -731,10 +735,6 @@
     },
     {
      "tag": "async-await",
-     "count": 22
-    },
-    {
-     "tag": "code-models",
      "count": 22
     },
     {
@@ -818,6 +818,14 @@
      "count": 19
     },
     {
+     "tag": "model-release",
+     "count": 19
+    },
+    {
+     "tag": "on-device-inference",
+     "count": 19
+    },
+    {
      "tag": "orm",
      "count": 19
     },
@@ -838,24 +846,20 @@
      "count": 19
     },
     {
-     "tag": "design-tokens",
+     "tag": "agent-orchestration",
      "count": 18
     },
     {
-     "tag": "model-release",
+     "tag": "ai-alignment",
+     "count": 18
+    },
+    {
+     "tag": "design-tokens",
      "count": 18
     },
     {
      "tag": "native-addons",
      "count": 18
-    },
-    {
-     "tag": "on-device-inference",
-     "count": 18
-    },
-    {
-     "tag": "ai-alignment",
-     "count": 17
     },
     {
      "tag": "component-testing",
@@ -882,8 +886,16 @@
      "count": 17
     },
     {
-     "tag": "agent-orchestration",
-     "count": 16
+     "tag": "inference-optimization",
+     "count": 17
+    },
+    {
+     "tag": "multimodal-ai",
+     "count": 17
+    },
+    {
+     "tag": "prompt-engineering",
+     "count": 17
     },
     {
      "tag": "docker",
@@ -903,14 +915,6 @@
     },
     {
      "tag": "machine-learning",
-     "count": 16
-    },
-    {
-     "tag": "multimodal-ai",
-     "count": 16
-    },
-    {
-     "tag": "prompt-engineering",
      "count": 16
     },
     {
@@ -982,10 +986,6 @@
      "count": 14
     },
     {
-     "tag": "inference-optimization",
-     "count": 14
-    },
-    {
      "tag": "multi-agent-systems",
      "count": 14
     },
@@ -1046,6 +1046,10 @@
      "count": 13
     },
     {
+     "tag": "transformers",
+     "count": 13
+    },
+    {
      "tag": "ai-startups",
      "count": 12
     },
@@ -1058,6 +1062,22 @@
      "count": 12
     },
     {
+     "tag": "local-inference",
+     "count": 12
+    },
+    {
+     "tag": "model-capabilities",
+     "count": 12
+    },
+    {
+     "tag": "model-comparison",
+     "count": 12
+    },
+    {
+     "tag": "model-training",
+     "count": 12
+    },
+    {
      "tag": "quantization",
      "count": 12
     },
@@ -1067,10 +1087,6 @@
     },
     {
      "tag": "serialization",
-     "count": 12
-    },
-    {
-     "tag": "transformers",
      "count": 12
     },
     {
@@ -1090,23 +1106,11 @@
      "count": 11
     },
     {
+     "tag": "ai-jobs",
+     "count": 11
+    },
+    {
      "tag": "deep-learning",
-     "count": 11
-    },
-    {
-     "tag": "local-inference",
-     "count": 11
-    },
-    {
-     "tag": "model-capabilities",
-     "count": 11
-    },
-    {
-     "tag": "model-comparison",
-     "count": 11
-    },
-    {
-     "tag": "model-training",
      "count": 11
     },
     {
@@ -1120,10 +1124,6 @@
     {
      "tag": "vector-database",
      "count": 11
-    },
-    {
-     "tag": "ai-jobs",
-     "count": 10
     },
     {
      "tag": "code-splitting",
@@ -1302,6 +1302,10 @@
      "count": 7
     },
     {
+     "tag": "diffusion-models",
+     "count": 7
+    },
+    {
      "tag": "graph-databases",
      "count": 7
     },
@@ -1315,6 +1319,10 @@
     },
     {
      "tag": "mixture-of-experts",
+     "count": 7
+    },
+    {
+     "tag": "model-routing",
      "count": 7
     },
     {
@@ -1338,7 +1346,15 @@
      "count": 7
     },
     {
+     "tag": "ai-gateway",
+     "count": 6
+    },
+    {
      "tag": "containers",
+     "count": 6
+    },
+    {
+     "tag": "context-engineering",
      "count": 6
     },
     {
@@ -1350,15 +1366,15 @@
      "count": 6
     },
     {
-     "tag": "diffusion-models",
-     "count": 6
-    },
-    {
      "tag": "image-generation",
      "count": 6
     },
     {
-     "tag": "model-routing",
+     "tag": "model-distillation",
+     "count": 6
+    },
+    {
+     "tag": "model-serving",
      "count": 6
     },
     {
@@ -1398,10 +1414,6 @@
      "count": 5
     },
     {
-     "tag": "ai-gateway",
-     "count": 5
-    },
-    {
      "tag": "attention-mechanism",
      "count": 5
     },
@@ -1410,7 +1422,7 @@
      "count": 5
     },
     {
-     "tag": "context-engineering",
+     "tag": "cost-optimization-llm",
      "count": 5
     },
     {
@@ -1438,19 +1450,15 @@
      "count": 5
     },
     {
-     "tag": "model-distillation",
-     "count": 5
-    },
-    {
-     "tag": "model-serving",
-     "count": 5
-    },
-    {
      "tag": "mpa",
      "count": 5
     },
     {
      "tag": "oauth",
+     "count": 5
+    },
+    {
+     "tag": "privacy-first-ai",
      "count": 5
     },
     {
@@ -1506,11 +1514,11 @@
      "count": 4
     },
     {
-     "tag": "cost-optimization-llm",
+     "tag": "file-uploads",
      "count": 4
     },
     {
-     "tag": "file-uploads",
+     "tag": "fine-tuning",
      "count": 4
     },
     {
@@ -1554,7 +1562,15 @@
      "count": 4
     },
     {
+     "tag": "moe",
+     "count": 4
+    },
+    {
      "tag": "numerical-computing",
+     "count": 4
+    },
+    {
+     "tag": "observability-llm",
      "count": 4
     },
     {
@@ -1567,10 +1583,6 @@
     },
     {
      "tag": "packaging",
-     "count": 4
-    },
-    {
-     "tag": "privacy-first-ai",
      "count": 4
     },
     {
@@ -1610,10 +1622,6 @@
      "count": 3
     },
     {
-     "tag": "fine-tuning",
-     "count": 3
-    },
-    {
      "tag": "higher-order-components",
      "count": 3
     },
@@ -1634,15 +1642,7 @@
      "count": 3
     },
     {
-     "tag": "moe",
-     "count": 3
-    },
-    {
      "tag": "oauth2",
-     "count": 3
-    },
-    {
-     "tag": "observability-llm",
      "count": 3
     },
     {
@@ -1670,6 +1670,14 @@
      "count": 3
     },
     {
+     "tag": "token-counting",
+     "count": 3
+    },
+    {
+     "tag": "tokenization",
+     "count": 3
+    },
+    {
      "tag": "useref",
      "count": 3
     },
@@ -1680,6 +1688,10 @@
     {
      "tag": "webhooks",
      "count": 3
+    },
+    {
+     "tag": "ai-music",
+     "count": 2
     },
     {
      "tag": "anomaly-detection",
@@ -1699,6 +1711,10 @@
     },
     {
      "tag": "cpu-inference",
+     "count": 2
+    },
+    {
+     "tag": "dpo",
      "count": 2
     },
     {
@@ -1778,23 +1794,15 @@
      "count": 2
     },
     {
-     "tag": "token-counting",
-     "count": 2
-    },
-    {
-     "tag": "tokenization",
-     "count": 2
-    },
-    {
      "tag": "usememo",
      "count": 2
     },
     {
-     "tag": "ai-art",
+     "tag": "ai-accelerators",
      "count": 1
     },
     {
-     "tag": "ai-music",
+     "tag": "ai-art",
      "count": 1
     },
     {
@@ -1831,10 +1839,6 @@
     },
     {
      "tag": "domain-driven-design",
-     "count": 1
-    },
-    {
-     "tag": "dpo",
      "count": 1
     },
     {
@@ -1972,15 +1976,15 @@
    "tags": [
     {
      "tag": "intermediate",
-     "count": 1197
+     "count": 1203
     },
     {
      "tag": "advanced",
-     "count": 560
+     "count": 564
     },
     {
      "tag": "for-practitioners",
-     "count": 427
+     "count": 428
     },
     {
      "tag": "all-levels",
@@ -1988,7 +1992,7 @@
     },
     {
      "tag": "beginner",
-     "count": 183
+     "count": 184
     },
     {
      "tag": "expert",
@@ -1996,7 +2000,7 @@
     },
     {
      "tag": "for-beginners",
-     "count": 33
+     "count": 34
     },
     {
      "tag": "for-leaders",
@@ -2021,11 +2025,11 @@
     },
     {
      "tag": "nodejs",
-     "count": 675
+     "count": 676
     },
     {
      "tag": "typescript",
-     "count": 558
+     "count": 559
     },
     {
      "tag": "sql",
@@ -2061,7 +2065,7 @@
     },
     {
      "tag": "go",
-     "count": 31
+     "count": 32
     },
     {
      "tag": "c",
@@ -2069,7 +2073,7 @@
     },
     {
      "tag": "cpp",
-     "count": 17
+     "count": 18
     },
     {
      "tag": "zig",
@@ -2100,15 +2104,15 @@
      "count": 8
     },
     {
+     "tag": "yaml",
+     "count": 8
+    },
+    {
      "tag": "php",
      "count": 7
     },
     {
      "tag": "shell",
-     "count": 7
-    },
-    {
-     "tag": "yaml",
      "count": 7
     },
     {
@@ -2158,23 +2162,23 @@
    "tags": [
     {
      "tag": "anthropic",
-     "count": 126
+     "count": 129
     },
     {
      "tag": "google",
-     "count": 123
+     "count": 127
     },
     {
      "tag": "openai",
-     "count": 95
+     "count": 99
     },
     {
      "tag": "claude",
-     "count": 94
+     "count": 96
     },
     {
      "tag": "microsoft",
-     "count": 90
+     "count": 91
     },
     {
      "tag": "github",
@@ -2190,11 +2194,11 @@
     },
     {
      "tag": "aws",
-     "count": 45
+     "count": 46
     },
     {
      "tag": "gemini",
-     "count": 43
+     "count": 44
     },
     {
      "tag": "gpt",
@@ -2206,18 +2210,18 @@
     },
     {
      "tag": "meta-ai",
-     "count": 32
+     "count": 33
     },
     {
      "tag": "apple",
      "count": 26
     },
     {
-     "tag": "amazon",
-     "count": 23
+     "tag": "deepseek",
+     "count": 24
     },
     {
-     "tag": "deepseek",
+     "tag": "amazon",
      "count": 23
     },
     {
@@ -2230,7 +2234,7 @@
     },
     {
      "tag": "qwen",
-     "count": 20
+     "count": 21
     },
     {
      "tag": "hugging-face",
@@ -2257,6 +2261,10 @@
      "count": 9
     },
     {
+     "tag": "moonshot-ai",
+     "count": 9
+    },
+    {
      "tag": "gemma",
      "count": 8
     },
@@ -2269,19 +2277,19 @@
      "count": 8
     },
     {
-     "tag": "moonshot-ai",
-     "count": 8
+     "tag": "llama",
+     "count": 6
     },
     {
      "tag": "claude-sonnet",
      "count": 5
     },
     {
-     "tag": "llama",
-     "count": 5
+     "tag": "ibm",
+     "count": 4
     },
     {
-     "tag": "ibm",
+     "tag": "minimax",
      "count": 4
     },
     {
@@ -2301,11 +2309,15 @@
      "count": 3
     },
     {
+     "tag": "gpt-oss",
+     "count": 3
+    },
+    {
      "tag": "litellm",
      "count": 3
     },
     {
-     "tag": "minimax",
+     "tag": "openrouter",
      "count": 3
     },
     {
@@ -2318,14 +2330,6 @@
     },
     {
      "tag": "cohere",
-     "count": 2
-    },
-    {
-     "tag": "gpt-oss",
-     "count": 2
-    },
-    {
-     "tag": "openrouter",
      "count": 2
     },
     {
@@ -2427,7 +2431,7 @@
     },
     {
      "tag": "claude",
-     "count": 53
+     "count": 55
     },
     {
      "tag": "pnpm",
@@ -2467,7 +2471,7 @@
     },
     {
      "tag": "gemini",
-     "count": 30
+     "count": 31
     },
     {
      "tag": "cloudflare-workers",
@@ -2538,15 +2542,15 @@
      "count": 14
     },
     {
+     "tag": "qwen",
+     "count": 14
+    },
+    {
      "tag": "babel",
      "count": 13
     },
     {
      "tag": "claude-opus",
-     "count": 13
-    },
-    {
-     "tag": "qwen",
      "count": 13
     },
     {
@@ -2610,6 +2614,10 @@
      "count": 9
     },
     {
+     "tag": "deepseek-v",
+     "count": 9
+    },
+    {
      "tag": "drizzle",
      "count": 9
     },
@@ -2620,10 +2628,6 @@
     {
      "tag": "playwright",
      "count": 9
-    },
-    {
-     "tag": "deepseek-v",
-     "count": 8
     },
     {
      "tag": "gcp",
@@ -2710,6 +2714,10 @@
      "count": 5
     },
     {
+     "tag": "kimi",
+     "count": 5
+    },
+    {
      "tag": "lighthouse",
      "count": 5
     },
@@ -2755,10 +2763,6 @@
     },
     {
      "tag": "huggingface-hub",
-     "count": 4
-    },
-    {
-     "tag": "kimi",
      "count": 4
     },
     {
@@ -2831,6 +2835,10 @@
     },
     {
      "tag": "mongoose",
+     "count": 3
+    },
+    {
+     "tag": "ollama",
      "count": 3
     },
     {
@@ -2931,10 +2939,6 @@
     },
     {
      "tag": "nodemon",
-     "count": 2
-    },
-    {
-     "tag": "ollama",
      "count": 2
     },
     {
@@ -3051,6 +3055,10 @@
     },
     {
      "tag": "fiber",
+     "count": 1
+    },
+    {
+     "tag": "gpt-oss",
      "count": 1
     },
     {
@@ -3212,27 +3220,27 @@
    "tags": [
     {
      "tag": "performance",
-     "count": 847
+     "count": 850
     },
     {
      "tag": "dev-experience",
-     "count": 684
+     "count": 686
     },
     {
      "tag": "open-source",
-     "count": 391
+     "count": 394
     },
     {
      "tag": "architecture",
-     "count": 373
+     "count": 376
     },
     {
      "tag": "security",
-     "count": 371
+     "count": 373
     },
     {
      "tag": "optimization",
-     "count": 353
+     "count": 354
     },
     {
      "tag": "ui",
@@ -3240,11 +3248,11 @@
     },
     {
      "tag": "developer-productivity",
-     "count": 287
+     "count": 290
     },
     {
      "tag": "reliability",
-     "count": 259
+     "count": 261
     },
     {
      "tag": "api-design",
@@ -3263,16 +3271,16 @@
      "count": 154
     },
     {
+     "tag": "scalability",
+     "count": 136
+    },
+    {
      "tag": "testing",
      "count": 135
     },
     {
-     "tag": "scalability",
-     "count": 134
-    },
-    {
      "tag": "community",
-     "count": 130
+     "count": 132
     },
     {
      "tag": "design-patterns",
@@ -3280,7 +3288,7 @@
     },
     {
      "tag": "governance",
-     "count": 99
+     "count": 101
     },
     {
      "tag": "state-management",
@@ -3312,7 +3320,7 @@
     },
     {
      "tag": "data-engineering",
-     "count": 67
+     "count": 68
     },
     {
      "tag": "concurrency",
@@ -3340,15 +3348,15 @@
     },
     {
      "tag": "cost-optimization",
-     "count": 54
+     "count": 56
     },
     {
      "tag": "latency",
-     "count": 53
+     "count": 55
     },
     {
      "tag": "observability",
-     "count": 53
+     "count": 54
     },
     {
      "tag": "ai-regulation",
@@ -3357,6 +3365,10 @@
     {
      "tag": "availability",
      "count": 49
+    },
+    {
+     "tag": "ai-safety",
+     "count": 48
     },
     {
      "tag": "data-privacy",
@@ -3371,12 +3383,8 @@
      "count": 48
     },
     {
-     "tag": "ai-safety",
-     "count": 47
-    },
-    {
      "tag": "ai-ethics",
-     "count": 44
+     "count": 46
     },
     {
      "tag": "clean-code",
@@ -3403,27 +3411,27 @@
      "count": 36
     },
     {
+     "tag": "parallelism",
+     "count": 36
+    },
+    {
      "tag": "dx",
      "count": 35
     },
     {
-     "tag": "parallelism",
-     "count": 35
-    },
-    {
      "tag": "agentops",
-     "count": 32
+     "count": 33
     },
     {
      "tag": "profiling",
      "count": 32
     },
     {
-     "tag": "edge-computing",
-     "count": 31
+     "tag": "responsible-ai",
+     "count": 32
     },
     {
-     "tag": "responsible-ai",
+     "tag": "edge-computing",
      "count": 31
     },
     {
@@ -3439,15 +3447,19 @@
      "count": 28
     },
     {
+     "tag": "context-engineering",
+     "count": 25
+    },
+    {
      "tag": "data-pipelines",
      "count": 25
     },
     {
-     "tag": "context-engineering",
-     "count": 24
+     "tag": "devops",
+     "count": 23
     },
     {
-     "tag": "devops",
+     "tag": "guardrails",
      "count": 23
     },
     {
@@ -3459,12 +3471,12 @@
      "count": 22
     },
     {
-     "tag": "guardrails",
-     "count": 22
-    },
-    {
      "tag": "web-vitals",
      "count": 21
+    },
+    {
+     "tag": "licensing",
+     "count": 20
     },
     {
      "tag": "orchestration",
@@ -3475,8 +3487,8 @@
      "count": 20
     },
     {
-     "tag": "licensing",
-     "count": 19
+     "tag": "throughput",
+     "count": 20
     },
     {
      "tag": "platform-engineering",
@@ -3487,19 +3499,15 @@
      "count": 18
     },
     {
-     "tag": "throughput",
-     "count": 18
-    },
-    {
      "tag": "containers",
      "count": 17
     },
     {
-     "tag": "e2e-testing",
-     "count": 16
+     "tag": "hallucination",
+     "count": 17
     },
     {
-     "tag": "hallucination",
+     "tag": "e2e-testing",
      "count": 16
     },
     {
@@ -3512,6 +3520,14 @@
     },
     {
      "tag": "prompt-engineering",
+     "count": 16
+    },
+    {
+     "tag": "careers",
+     "count": 15
+    },
+    {
+     "tag": "regulation",
      "count": 15
     },
     {
@@ -3523,19 +3539,11 @@
      "count": 14
     },
     {
-     "tag": "careers",
-     "count": 14
-    },
-    {
      "tag": "eu-ai-act",
      "count": 14
     },
     {
      "tag": "logging",
-     "count": 14
-    },
-    {
-     "tag": "regulation",
      "count": 14
     },
     {
@@ -3551,6 +3559,10 @@
      "count": 11
     },
     {
+     "tag": "leadership",
+     "count": 11
+    },
+    {
      "tag": "metrics",
      "count": 11
     },
@@ -3560,10 +3572,6 @@
     },
     {
      "tag": "interpretability",
-     "count": 10
-    },
-    {
-     "tag": "leadership",
      "count": 10
     },
     {
@@ -3637,31 +3645,35 @@
    "tags": [
     {
      "tag": "ai-agents",
-     "count": 164
+     "count": 165
     },
     {
      "tag": "ai-coding-agents",
-     "count": 161
+     "count": 164
     },
     {
      "tag": "agentic-ai",
-     "count": 138
+     "count": 141
     },
     {
      "tag": "ai-governance",
-     "count": 108
+     "count": 110
     },
     {
      "tag": "frontier-models",
-     "count": 67
+     "count": 68
     },
     {
      "tag": "mcp",
-     "count": 55
+     "count": 56
     },
     {
      "tag": "tool-calling",
      "count": 39
+    },
+    {
+     "tag": "on-device-ai",
+     "count": 38
     },
     {
      "tag": "reasoning-models",
@@ -3672,32 +3684,28 @@
      "count": 37
     },
     {
-     "tag": "on-device-ai",
-     "count": 37
-    },
-    {
      "tag": "vibe-coding",
-     "count": 34
+     "count": 35
     },
     {
      "tag": "open-weights",
-     "count": 31
+     "count": 34
     },
     {
      "tag": "agent-orchestration",
-     "count": 29
+     "count": 31
     },
     {
      "tag": "multi-agent",
-     "count": 29
+     "count": 30
+    },
+    {
+     "tag": "ai-data-centers",
+     "count": 27
     },
     {
      "tag": "gpu-economics",
      "count": 26
-    },
-    {
-     "tag": "ai-data-centers",
-     "count": 25
     },
     {
      "tag": "foundation-models",
@@ -3717,11 +3725,11 @@
     },
     {
      "tag": "edge-ai",
-     "count": 17
+     "count": 18
     },
     {
      "tag": "local-llm",
-     "count": 17
+     "count": 18
     },
     {
      "tag": "vector-search",
@@ -3748,19 +3756,19 @@
      "count": 14
     },
     {
+     "tag": "structured-output",
+     "count": 14
+    },
+    {
      "tag": "ai-search",
      "count": 13
     },
     {
-     "tag": "structured-output",
+     "tag": "moe",
      "count": 13
     },
     {
      "tag": "browser-agents",
-     "count": 12
-    },
-    {
-     "tag": "moe",
      "count": 12
     },
     {
@@ -3769,7 +3777,7 @@
     },
     {
      "tag": "small-language-models",
-     "count": 11
+     "count": 12
     },
     {
      "tag": "chain-of-thought",
@@ -3792,12 +3800,12 @@
      "count": 7
     },
     {
-     "tag": "voice-agents",
+     "tag": "distillation",
      "count": 6
     },
     {
-     "tag": "distillation",
-     "count": 5
+     "tag": "voice-agents",
+     "count": 6
     },
     {
      "tag": "jailbreaks",
@@ -3820,6 +3828,10 @@
      "count": 4
     },
     {
+     "tag": "dpo",
+     "count": 2
+    },
+    {
      "tag": "function-calling",
      "count": 2
     },
@@ -3829,10 +3841,6 @@
     },
     {
      "tag": "constitutional-ai",
-     "count": 1
-    },
-    {
-     "tag": "dpo",
      "count": 1
     },
     {
@@ -127707,6 +127715,674 @@
      "ai-agents",
      "agent-orchestration",
      "world-models"
+    ]
+   }
+  },
+  {
+   "id": 2836,
+   "url": "https://aiweekly.co/issues/what-ai-models-are-actually-coming-in-the-next-six-months",
+   "sourceId": 6,
+   "sourceName": "AI Weekly",
+   "title": "What AI models are actually coming in the next six months?",
+   "titlePt": "Quais modelos de IA chegam nos próximos seis meses?",
+   "summaryPt": "A análise da newsletter AI Weekly faz um panorama do que pode ser lançado em IA nos próximos seis meses, baseado em vazamentos, testes e declarações públicas. No circuito dos grandes laboratórios, OpenAI tem o Astra em espera por causa de uma arquitetura de segurança ainda não concluída; Meta promete o Watermelon até o fim do ano, dentro de sua reafirmação como fronteira; Google enfrenta atrasos no Gemini 3.5 Pro e ainda treina o Gemini 4; e Anthropic deve liberar o Fable 5.1, mantendo um modelo interno mais forte sob controles restritos. Há também especulações em torno de um modelo \"não censurado\" da Qwen e um vazamento do Fable 5.1 ganhando tração no mercado.\n\nNo campo dos modelos abertos, a aposta principal é a chegada de um modelo da MiniMax com 2,7 trilhões de parâmetros possivelmente ainda no terceiro trimestre, além de um modelo da Z.ai que pode rivalizar com Fable antes do fim do ano e com preço público muito menor. Já a IA física tem cronogramas mais concretos: Nvidia prevê Cosmos 3 e GR00T N2, e a Genesis quer levar o Eno para clientes até dezembro. O texto defende que a disputa dos próximos meses não será apenas entre o melhor modelo em um ranking, mas três corridas: a de capacidade segura de implantação de modelos, a dos modelos abertos viáveis economicamente, e a dos modelos prováveis antes em ambientes reais. As equipes interessadas deveriam se preparar para pelo menos três migrações de modelo até janeiro, e o atraso do Astra indica que segurança, não apenas poder de treinamento, pode ser o gargalo do próximo salto de IA.",
+   "snippet": "In the Wild The audience has already front-run the release calendar. See the latest full movement in In the Wild. A Fable 5.1 leak video is pulling 1,678 views an hour. The rumor roundup also promises a Gemini update and an \"uncensored\" Qwen model, which is a neat snapshot of how model speculation now gets packaged. Canva entered Photo & Video at No. 3. Whatever wins the model race will increa",
+   "kind": "tool",
+   "section": null,
+   "date": "2026-08-20",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "openai",
+     "google",
+     "meta-ai",
+     "gemini",
+     "qwen"
+    ],
+    "concept-theme": [
+     "security"
+    ],
+    "content-type": [
+     "analysis",
+     "deep-dive"
+    ],
+    "difficulty": [
+     "intermediate"
+    ],
+    "domain": [
+     "ai-general",
+     "llm-models"
+    ],
+    "framework-library-tool": [
+     "gemini",
+     "qwen"
+    ],
+    "topic-technology": [
+     "frontier-models",
+     "model-release",
+     "model-comparison",
+     "model-capabilities",
+     "agentic-ai",
+     "ai-safety"
+    ],
+    "trending-emerging": [
+     "frontier-models",
+     "agentic-ai"
+    ]
+   }
+  },
+  {
+   "id": 2837,
+   "url": "https://www.modular.com/blog/modcon-announcements",
+   "sourceId": 7,
+   "sourceName": "llmnews.ai",
+   "title": "ModCon 2026: Open source, open cloud, open silicon",
+   "titlePt": "ModCon 2026: código aberto, nuvem aberta, silício aberto",
+   "summaryPt": "Na ModCon 2026, a Modular apresentou sua plataforma como pronta para produção, processando bilhões de tokens por minuto em implantações empresariais reais. O destaque foi o Mojo 1.0, agora totalmente open source sob licença Apache 2.0, com suporte nativo para Windows em colaboração com a Microsoft. Além disso, a Modular Cloud foi lançada publicamente, já atendendo clientes como a MiniMax, que utiliza a plataforma em escala de bilhões de tokens por minuto com o modelo M3.\n\nA plataforma agora suporta aceleradores personalizados além de CPUs e GPUs, incluindo AWS Trainium, Google TPUs e os aceleradores Qualcomm Cloud AI 100 Ultra e Qualcomm Dragonfly. A empresa também está abrindo o MAX, removendo restrições de dispositivo na licença e planejando um programa de alianças para que fornecedores de hardware, provedores de nuvem e operadores de data centers possam contribuir com a plataforma. O objetivo é estabelecer uma fundação aberta para computação heterogênea, permitindo que modelos sejam escritos uma vez e executados em qualquer arquitetura de silício.",
+   "snippet": "Four and a half years ago, Modular made a bet: AI would not run on one kind of silicon forever, and the software stack would need to be rearchitected for a world of heterogeneous hardware and increasingly complex AI workloads. At the ModCon keynote this morning, we showed what that bet has become. The Modular Platform is now production-ready, serving billions of tokens per minute and powering real",
+   "kind": "release",
+   "section": null,
+   "date": "2026-08-18",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "aws",
+     "google",
+     "microsoft",
+     "minimax"
+    ],
+    "concept-theme": [
+     "open-source",
+     "architecture",
+     "performance",
+     "scalability"
+    ],
+    "content-type": [
+     "release-announcement"
+    ],
+    "difficulty": [
+     "for-practitioners"
+    ],
+    "domain": [
+     "ai-general"
+    ],
+    "topic-technology": [
+     "ai-accelerators",
+     "ai-infrastructure",
+     "model-serving"
+    ],
+    "trending-emerging": [
+     "ai-data-centers"
+    ]
+   }
+  },
+  {
+   "id": 2838,
+   "url": "https://www.modular.com/blog/mojo-open-source",
+   "sourceId": 7,
+   "sourceName": "llmnews.ai",
+   "title": "Mojo🔥 is now open source!",
+   "titlePt": "Mojo🔥 agora é open source!",
+   "summaryPt": "A linguagem de programação Mojo, desenvolvida pela Modular, agora é totalmente open source sob a licença Apache 2.0, com exceções do LLVM. O código-fonte do compilador, das ferramentas e de tudo o que é necessário para construir a linguagem foi disponibilizado no repositório oficial da Modular no GitHub. Mojo é uma linguagem de propósito geral criada para aproveitar GPUs, aceleradores de IA e computação avançada, combinando pesquisas recentes em compiladores e linguagens de programação. Recentemente, a linguagem atingiu a versão 1.0, com estabilidade de código-fonte, e agora a empresa decidiu abrir todo o compilador e a toolchain.\n\nA escolha pela Apache 2.0 foi intencional por ser uma das licenças mais permissivas para linguagens de programação e compiladores, permitindo ampla flexibilidade de uso, inclusive na distribuição de binários compilados com Mojo graças às extensões LLVM. A Modular destaca que manteve o design da linguagem em times pequenos e bem integrados, mas contou com feedback da comunidade para evitar bolhas. A biblioteca padrão e milhares de linhas de código já foram abertas antes; agora, o compilador também é open source.\n\nPara construir o compilador a partir do código-fonte, basta clonar o repositório e executar um comando Bazel, como './bazelw run --config=build-mojo KGEN:mojo -- run hello.mojo'. Quem não quiser compilar tudo do zero pode usar a configuração 'prebuilt-mojo' para baixar a distribuição binária mais recente. Por enquanto, a Modular ainda não aceita contribuições externas para o compilador e as ferramentas, mas planeja aceitá-las até o final do ano. A comunidade pode enviar perguntas e compartilhar projetos pelo fórum oficial.",
+   "snippet": "We are happy to announce that the Mojo🔥 language is now fully open source under the Apache 2.0 license (with LLVM exceptions)! The source code for the Mojo compiler, tooling, and everything else you need to build the language are now available in our modular GitHub repository. The Mojo language is a bold bet: a novel general purpose programming language that goes further than older ones. Mojo inte",
+   "kind": "release",
+   "section": null,
+   "date": "2026-08-18",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "open-source",
+     "licensing",
+     "community"
+    ],
+    "content-type": [
+     "release-announcement"
+    ],
+    "difficulty": [
+     "intermediate"
+    ],
+    "domain": [
+     "ai-general"
+    ],
+    "topic-technology": [
+     "ai-infrastructure"
+    ]
+   }
+  },
+  {
+   "id": 2839,
+   "url": "https://openrouter.ai/blog/announcements/openrouter-is-joining-stripe",
+   "sourceId": 7,
+   "sourceName": "llmnews.ai",
+   "title": "OpenRouter is Joining Stripe",
+   "titlePt": "OpenRouter se junta à Stripe",
+   "summaryPt": "A OpenRouter, maior marketplace e gateway para modelos de IA, anunciou sua integração com a Stripe, a principal plataforma de infraestrutura financeira do mundo. A decisão visa acelerar a missão da OpenRouter de tornar a inteligência multimodal acessível e neutra, sem comprometer sua independência. A empresa continuará operando com o mesmo nome, produto e roteiro, garantindo que integrações atuais permaneçam inalteradas e que as decisões de roteamento sigam priorizando o melhor para o usuário.\n\nCom 10 trilhões de tokens processados diariamente e mais de 10 milhões de desenvolvedores, a OpenRouter vê na Stripe um parceiro estratégico para expandir sua rede de clientes, melhorar o combate a fraudes e oferecer suporte em escala. A união — descrita como \"Stripe para LLMs\" — combina culturas focadas em qualidade, escala e compromisso com construtores, permitindo que a OpenRouter avance mais rápido em um ecossistema de IA pós-AGI. A transação está sujeita a condições de fechamento usuais e deve ser concluída nas próximas semanas.",
+   "snippet": "Today, we are excited to announce that we are joining forces with Stripe, to power the next wave of GDP growth globally. OpenRouter is the first and largest model marketplace and gateway. We are the best way to discover and use any AI model, with one interface, broad provider choice, model-agnostic observability, cost management, and routing that improves price, performance, and uptime. We now pr",
+   "kind": "news",
+   "section": null,
+   "date": "2026-08-19",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "openrouter"
+    ],
+    "concept-theme": [
+     "observability",
+     "performance",
+     "reliability",
+     "cost-optimization"
+    ],
+    "content-type": [
+     "acquisition-news"
+    ],
+    "difficulty": [
+     "intermediate"
+    ],
+    "domain": [
+     "llm-models",
+     "ai-general"
+    ],
+    "topic-technology": [
+     "ai-gateway",
+     "model-routing",
+     "ai-infrastructure",
+     "inference-optimization",
+     "cost-optimization-llm",
+     "observability-llm"
+    ]
+   }
+  },
+  {
+   "id": 2840,
+   "url": "https://cursor.com/blog/git-at-any-scale",
+   "sourceId": 7,
+   "sourceName": "llmnews.ai",
+   "title": "Git at any scale",
+   "titlePt": "Git em qualquer escala",
+   "summaryPt": "Hospedar repositórios Git em grande escala é um desafio que vem do próprio design da ferramenta. Projetado por Linus Torvalds para o fluxo de trabalho descentralizado do Linux, o Git se tornou padrão na indústria, mas quase todo mundo usa uma hospedagem centralizada. Como todas as cópias de um repositório são equivalentes, o servidor acaba lidando com packfiles — o formato binário usado na transferência e no armazenamento de objetos Git. Para escalar de verdade, as opções são, em essência, distribuir o filesystem, distribuir os packfiles ou distribuir o próprio Git, e cada tentativa tem um custo técnico alto.\n\nDistribuir o Git no nível de objetos foi tentado com abordagens como o JGit, que usava uma tabela hash distribuída, mas a estrutura de grafo acíclico (DAG) do Git exige muitos acessos sequenciais e o protocolo padrão ainda depende de packfiles, o que inviabilizou o clone em larga escala. O GitHub tentou primeiro distribuir o filesystem com tecnologias como NFS, GFS e DRBD, mas os padrões de leitura dos packfiles são essencialmente buscas aleatórias, o que não funciona bem em sistemas de arquivos remotos. A solução que se consolidou foi o Spokes, criado por volta de 2013: guardar cópias completas de cada repositório como Git normal em discos NVMe locais e replicá-las com consistência forte, usando um protocolo de consenso do tipo 3PC (three-phase commit). Assim, um push só é aceito quando a maioria dos nós confirma — algo necessário porque o próprio cliente Git lida muito mal com leituras inconsistentes, especialmente em pipelines de CI.",
+   "snippet": "Hosting Git repositories at scale is a nightmare. When Linus Torvalds designed the first version of the information manager from hell (that's actually the tagline for Git, look it up), he had a very specific use case in mind: his own. He wanted to replace BitKeeper, the distributed version control system that was being used to develop the Linux Kernel. Of course, the replacement had to be distribu",
+   "kind": "news",
+   "section": null,
+   "date": "2026-08-18",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "scalability",
+     "reliability",
+     "performance",
+     "architecture"
+    ],
+    "content-type": [
+     "deep-dive"
+    ],
+    "difficulty": [
+     "advanced"
+    ],
+    "domain": [
+     "backend"
+    ],
+    "topic-technology": [
+     "software-development",
+     "system-design"
+    ]
+   }
+  },
+  {
+   "id": 2841,
+   "url": "https://simedw.com/2026/08/20/midi-autocomplete",
+   "sourceId": 7,
+   "sourceName": "llmnews.ai",
+   "title": "Training a 125M-parameter Model to Autocomplete Piano",
+   "titlePt": "Treinando um modelo de 125 milhões de parâmetros para autocompletar piano",
+   "summaryPt": "O autor descreve o desenvolvimento de um sistema de autocompletar piano em tempo real, usando um transformer de 125 milhões de parâmetros que roda em um iPhone (~108 notas/segundo). O projeto, chamado RollTab, conecta um piano MIDI ao celular e gera continuações musicais a partir de um trecho tocado pelo usuário, funcionando como um 'Copilot' para piano. As maiores melhorias vieram de três fatores: uma representação MIDI eficiente, limpeza agressiva do dataset e pós-treinamento com DPO (Direct Preference Optimization).\n\nO autor testou várias representações de tokenização de MIDI, optando por uma estrutura onde cada nota é representada por um único token com cinco campos (evento, afinação, delta de tempo, duração e velocidade), evitando a deriva de notas e reduzindo o número de passos de geração. O dataset final, com centenas de milhares de arquivos MIDI (300 milhões de eventos), passou por rigorosos scripts de limpeza, filtragem e deduplicação. O treinamento usou cross-entropy com múltiplas saídas, augmentação de dados (transposição, variação de tempo, jitter de duração/velocidade) e agendamento amostral que, apesar de aumentar a loss, melhorou a qualidade das continuações.\n\nA avaliação contou com métricas automáticas e comparadores por preferência (via Gemini), que geraram um dataset para DPO. O pós-treinamento com DPO tornou as continuações mais coerentes e musicalmente boas, com 69% de preferência sobre o modelo base. O autor conclui que a limpeza dos dados foi mais importante que o volume, e que a representação correta reduz drasticamente o custo computacional.",
+   "snippet": "TL;DR: I trained a 125M-parameter transformer to autocomplete piano performances in real time (~108 notes/sec on an iPhone 15). The biggest improvements came from finding the right MIDI representation, cleaning the training data aggressively, and adding DPO post-training. Almost a year ago, I started tinkering with an idea: connect my MIDI piano to my phone, play something, and have AI autocompl",
+   "kind": "news",
+   "section": null,
+   "date": "2026-08-20",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "latency",
+     "throughput",
+     "data-engineering",
+     "optimization"
+    ],
+    "content-type": [
+     "project-spotlight",
+     "show-and-tell"
+    ],
+    "difficulty": [
+     "intermediate"
+    ],
+    "domain": [
+     "llm-models",
+     "ai-general"
+    ],
+    "topic-technology": [
+     "ai-music",
+     "model-training",
+     "transformers",
+     "dpo",
+     "tokenization",
+     "on-device-inference"
+    ],
+    "trending-emerging": [
+     "on-device-ai",
+     "dpo",
+     "small-language-models",
+     "edge-ai"
+    ]
+   }
+  },
+  {
+   "id": 2842,
+   "url": "https://www.mikekasberg.com/blog/2026/08/19/hacking-with-claude-on-a-27-smart-watch.html",
+   "sourceId": 7,
+   "sourceName": "llmnews.ai",
+   "title": "Hacking with Claude on a $27 Smart Watch",
+   "titlePt": "Hackeando com Claude em um smartwatch de US$ 27",
+   "summaryPt": "O autor usou o Claude (um assistente de IA) para desenvolver um mostrador de relógio personalizado para o PineTime, um smartwatch de baixo custo (US$ 27) com firmware de código aberto. Inspirado por tweets de Steve Ruiz e Levelsio, ele clonou o repositório InfiniSim, que simula o PineTime, e pediu ao Claude para criar um mostrador baseado em uma foto de um Apple Watch. Apesar de a primeira versão ter problemas de posicionamento de texto, ele iterou com feedback específico e usou uma imagem de fundo estática para otimizar o desempenho, já que a tela do relógio não suporta atualizações rápidas. O projeto foi concluído em algumas horas e o código foi publicado no GitHub, incluindo um AGENTS.md com instruções úteis para outros desenvolvedores. O autor destacou a facilidade de trabalhar com IA em um projeto de baixo risco e o prazer de criar algo funcional para um dispositivo real.",
+   "snippet": "The Pine Time is a $27 smart watch that runs open source firmware. I’ve had one sitting in the back of a drawer for a year or two. When I saw @steveruizok’s Tweet about hacking on ESP32 devices with Claude, I found some inspiration to pull my PineTime out of the drawer and see what Claude might be capable of! if you know what a \"coding agent\" is then go buy this or something very similar (not spo",
+   "kind": "tool",
+   "section": null,
+   "date": "2026-08-20",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "claude",
+     "anthropic",
+     "moonshot-ai",
+     "deepseek"
+    ],
+    "concept-theme": [
+     "open-source",
+     "dev-experience",
+     "developer-productivity"
+    ],
+    "content-type": [
+     "tutorial",
+     "show-and-tell"
+    ],
+    "difficulty": [
+     "intermediate"
+    ],
+    "domain": [
+     "llm-models",
+     "ai-general"
+    ],
+    "ecosystem-language": [
+     "cpp"
+    ],
+    "framework-library-tool": [
+     "claude",
+     "kimi",
+     "deepseek-v"
+    ],
+    "topic-technology": [
+     "ai-agents",
+     "agent-orchestration",
+     "code-models",
+     "software-development",
+     "open-weights",
+     "multimodal-ai"
+    ],
+    "trending-emerging": [
+     "ai-coding-agents",
+     "agent-orchestration",
+     "open-weights",
+     "multi-agent"
+    ]
+   }
+  },
+  {
+   "id": 2843,
+   "url": "https://openai.com/index/introducing-ai-futures",
+   "sourceId": 7,
+   "sourceName": "llmnews.ai",
+   "title": "Introducing AI Futures",
+   "titlePt": "Apresentando o Futuro da IA",
+   "summaryPt": "A OpenAI lança o AI Futures, blog da nova equipe Strategic Futures. A equipe busca responder como a sociedade livre deve ser reestruturada para preservar direitos individuais e autonomia diante do surgimento de IAs transformadoras. O ponto central é que a IA pode concentrar poder radicalmente: no passado, Estados dependiam de trabalho humano para manter exércitos, polícia e coletar impostos, mas sistemas autônomos e inteligência de máquinas podem permitir que o Estado exerça força e arrecada recursos sem apoio político dos cidadãos. Essa quebra de barganha histórica é um risco estrutural que ameaça a agência individual e a democracia.",
+   "snippet": "“Will it be sufficient… to trust these parchment barriers against the encroaching spirit of power?” —James Madison, Federalist No. 48 It is our pleasure to launch AI Futures, the blog of OpenAI’s new Strategic Futures team. We are a small team with the collective goal of answering one overarching question: how should free society be restructured to preserve individual rights and agency while accom",
+   "kind": "tool",
+   "section": null,
+   "date": "2026-06-10",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "openai"
+    ],
+    "concept-theme": [
+     "ai-safety",
+     "ai-ethics",
+     "governance"
+    ],
+    "content-type": [
+     "product-launch",
+     "announcement"
+    ],
+    "difficulty": [
+     "advanced"
+    ],
+    "domain": [
+     "ai-general"
+    ],
+    "topic-technology": [
+     "ai-safety",
+     "ai-policy",
+     "ai-alignment",
+     "ai-ethics"
+    ],
+    "trending-emerging": [
+     "ai-governance"
+    ]
+   }
+  },
+  {
+   "id": 2844,
+   "url": "https://github.com/zachahn/vomit",
+   "sourceId": 7,
+   "sourceName": "llmnews.ai",
+   "title": "Clean up Claude 5's token vomit with a separate LLM. Save your tokens, Claude 5 is hopeless",
+   "titlePt": "Limpe o 'vômito de tokens' do Claude 5 com um LLM separado",
+   "summaryPt": "Vomit é uma ferramenta que usa um LLM local para traduzir a saída verbosa e cheia de tokens do Claude 5 em um texto mais claro e conciso. Totalmente local, sem telemetria ou dependências externas, ela ajuda a economizar seus tokens, já que o Claude 5 tende a gerar respostas excessivamente longas. O projeto é simples de instalar via `go install` e pode ser configurado com um comando `init`. Funciona com Llama.app, Ollama e qualquer coisa que suporte a API da OpenAI, sendo recomendado o uso do Llama.app com o modelo GPT-OSS 20B para quem ainda não tem um LLM local configurado.\n\nA ferramenta oferece modos de uso não invasivos, como `vomit list` para ver sessões, `vomit tail` para acompanhar e traduzir tokens de uma sessão específica, e `vomit scrub` para substituir a saída do Claude via hooks. No entanto, há limitações: o LLM local só vê o que o Claude tenta comunicar, sem acesso a arquivos ou ações, o que pode causar alucinações. Além disso, é lento, foi criado de forma informal (vibe-coded), testado apenas em Mac, e há risco de perder mensagens originais — por isso, é possível usar ferramentas como AgentsView para recuperá-las.",
+   "snippet": "Vomit converts Claude's token vomit into English by piping it through a local LLM. It's fully local (no telemetry) and has no external dependencies. I wrote a small blog post about this project: https://zachahn.com/posts/1787191554 Disclaimer: The local LLM can only see what Claude tries to communicate (no access to any actions or files), so it hallucinates a bit It's pretty slow This is tota",
+   "kind": "tool",
+   "section": null,
+   "date": "2026-06-10",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "claude",
+     "anthropic",
+     "openai",
+     "llama",
+     "gpt-oss"
+    ],
+    "concept-theme": [
+     "hallucination",
+     "cost-optimization"
+    ],
+    "content-type": [
+     "tool-release"
+    ],
+    "difficulty": [
+     "intermediate"
+    ],
+    "domain": [
+     "llm-models",
+     "local-llm",
+     "ai-general"
+    ],
+    "ecosystem-language": [
+     "go"
+    ],
+    "framework-library-tool": [
+     "claude",
+     "ollama",
+     "gpt-oss"
+    ],
+    "topic-technology": [
+     "llm-models",
+     "local-inference",
+     "token-counting",
+     "inference-optimization",
+     "privacy-first-ai"
+    ],
+    "trending-emerging": [
+     "local-llm",
+     "ai-coding-agents",
+     "vibe-coding",
+     "open-weights"
+    ]
+   }
+  },
+  {
+   "id": 2845,
+   "url": "https://github.com/truefoundry/trueforge",
+   "sourceId": 7,
+   "sourceName": "llmnews.ai",
+   "title": "TrueForge",
+   "titlePt": "TrueForge",
+   "summaryPt": "TrueForge é um harness de agentes open-source que fornece a camada de runtime para transformar um LLM em um agente funcional. Ele gerencia o loop de execução do agente — chamadas de modelo, ferramentas MCP, skills, sandboxing, aprovações, gerenciamento de contexto e estado de sessão — e expõe tudo por meio de uma interface de chat, uma API HTTP com SDK TypeScript e um SDK de UI embutível. A ferramenta resolve as dificuldades de executar um agente em produção, oferecendo recursos como configuração inicial via catálogos, suporte a qualquer provedor de modelo (OpenAI, Anthropic, Google Gemini, etc.), integração com servidores MCP remotos, sandbox isolado para execução de código, checkpoints humanos para aprovação e perguntas, e técnicas de engenharia de contexto (subagentes, carregamento diferido de ferramentas, Code Mode, compactação).",
+   "snippet": "The open-source agent harness - the runtime layer that turns an LLM into a working agent TrueForge runs the agent execution loop for you - model calls, MCP tools, skills, sandboxing, approvals, context management, and session state - and exposes it three ways: a chat UI, an HTTP API with a TypeScript SDK, and an embeddable UI SDK. Why TrueForge? Building an ag",
+   "kind": "tool",
+   "section": null,
+   "date": "2026-06-10",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "openai",
+     "anthropic",
+     "google"
+    ],
+    "concept-theme": [
+     "agentops",
+     "context-engineering",
+     "guardrails",
+     "security"
+    ],
+    "content-type": [
+     "tool-release"
+    ],
+    "difficulty": [
+     "for-beginners"
+    ],
+    "domain": [
+     "ai-general",
+     "llm-models"
+    ],
+    "ecosystem-language": [
+     "typescript",
+     "nodejs",
+     "yaml"
+    ],
+    "topic-technology": [
+     "ai-agents",
+     "agentic-ai",
+     "mcp",
+     "tool-calling",
+     "context-engineering",
+     "agent-orchestration"
+    ],
+    "trending-emerging": [
+     "ai-agents",
+     "agentic-ai",
+     "mcp",
+     "agent-orchestration"
+    ]
+   }
+  },
+  {
+   "id": 2846,
+   "url": "https://www.tomshardware.com/tech-industry/data-centers/protesters-haul-a-guillotine-to-city-council-meeting-about-a-potential-ai-data-center-company-rep-cornered-by-protestors-it-no-longer-felt-safe-to-stay-developer-escorted-out-by-police",
+   "sourceId": 7,
+   "sourceName": "llmnews.ai",
+   "title": "Protesters haul a guillotine to city council meeting about a potential AI data center, company rep cornered by protestors &mdash; &lsquo; it no longer felt safe to stay,&rsquo; developer escorted out by police",
+   "titlePt": "Protesto com guilhotina marca audiência sobre data center da Verrus em Salem",
+   "summaryPt": "Oregon, aliás a ação dos andamentos, tem uma das primeiras leis que garantem que grandes consumidores de energia, como data centers, sejam os maiores contribuidores por custos de reforço na rede elétrica. Isso permitiria que a Portland General Electric, maior provedora de energia do estado, aumentasse em 30% as contas de usuários que consomem mais de 20 MW, reduzindo em cerca de 1,3% as tarifas residenciais. Mesmo assim, muitos moradores de pequenas cidades seguem contra a instalação de data centers em suas regiões. O projeto da Verrus ainda precisa passar por processo de licenciamento extenso, incluindo estudos técnicos, condicionantes e contratos exequíveis, antes de receber qualquer aval definitivo.",
+   "snippet": "The Salem City Council convened a public meeting last July 27, where it discussed the proposed $5.1 billion Oakline at Mill Creek data center by Verrus. As the people converged on the meeting site, a TikTok user spotted a guillotine towed by a bike outside of the venue, signaling the people’s discontent with the project. According to NewsData, the consultation lasted for more than six hours as sev",
+   "kind": "news",
+   "section": null,
+   "date": "2026-08-07",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "community",
+     "governance",
+     "regulation"
+    ],
+    "content-type": [
+     "news"
+    ],
+    "domain": [
+     "ai-general"
+    ],
+    "topic-technology": [
+     "ai-infrastructure",
+     "ai-regulation",
+     "ai-policy"
+    ],
+    "trending-emerging": [
+     "ai-governance",
+     "ai-data-centers"
+    ]
+   }
+  },
+  {
+   "id": 2847,
+   "url": "https://www.danielvaughn.dev/posts/huzzah",
+   "sourceId": 7,
+   "sourceName": "llmnews.ai",
+   "title": "Huzzah",
+   "titlePt": "Huzzah: um editor experimental para codificar com IA",
+   "summaryPt": "O artigo, escrito em agosto de 2026, reflete sobre o cansaço de um engenheiro de software após a empolgação inicial com agentes de codificação baseados em IA. Embora esses agentes tenham eliminado a necessidade de escrever código manualmente, o autor passou a sentir desconforto com o modelo baseado em longas instruções em inglês. Ele aponta problemas como a ausência de um registro confiável da intenção humana, a natureza imperativa e transitória dos prompts e a ineficiência de usar linguagem natural, que é cheia de elementos sociais e repetições.\n\nPara resolver isso, o autor apresenta o Huzzah, um editor experimental que propõe uma nova abordagem: em vez de prompts longos e imperativos, o programador escreve pseudocódigo declarativo e persistente em um arquivo. O Huzzah gera o código real automaticamente e, ao editar o pseudocódigo, usa as diferenças (diffs) como instrução para o modelo de linguagem. O artigo mostra exemplos como fizz buzz, carrinho de compras e lista de tarefas, destacando benefícios como concisão, legibilidade, uso do pseudocódigo como documentação e possibilidade de criar código agnóstico de linguagem.\n\nPor fim, o autor reconhece limitações: a abordagem pode não funcionar bem em escala, é mais adequada para projetos novos, exige conhecimento técnico do domínio e pode ter dificuldades com dependências entre arquivos e recursos de LSP. O Huzzah ainda está em estágio experimental, com código-fonte disponível para quem quiser testar.",
+   "snippet": "August 2026 A new experimental way to code with AI If you’re a software engineer like me, the first few months of 2026 were incredible. Coding agents suddenly became good enough that we no longer needed to manually write code. But if you’re like me, then sometime later you hit a wall. The honeymoon period ended, and the novelty wore off. No more dopamine hits. It’s August, and I feel utte",
+   "kind": "tool",
+   "section": null,
+   "date": "2026-06-10",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "dev-experience",
+     "developer-productivity",
+     "prompt-engineering"
+    ],
+    "content-type": [
+     "tool-release"
+    ],
+    "difficulty": [
+     "advanced"
+    ],
+    "domain": [
+     "llm-models",
+     "ai-general"
+    ],
+    "topic-technology": [
+     "ai-agents",
+     "llm-models",
+     "prompt-engineering",
+     "software-development",
+     "agentic-ai"
+    ],
+    "trending-emerging": [
+     "ai-coding-agents",
+     "agentic-ai",
+     "structured-output"
+    ]
+   }
+  },
+  {
+   "id": 2848,
+   "url": "https://franciscotrindade.me/blog/the-kids-are-really-alright",
+   "sourceId": 7,
+   "sourceName": "llmnews.ai",
+   "title": "The Kids Are Really Alright",
+   "titlePt": "Os juniores estão realmente bem",
+   "summaryPt": "O argumento comum é que a IA eliminou o valor do engenheiro júnior, pois o trabalho de executar tarefas agora é feito por IA. Porém, o autor contra-argumenta com um exemplo real: uma funcionalidade que não era priorizada foi atribuída a um estagiário, que a liderou usando IA. O estagiário teve que entender o problema, negociar trade-offs e tomar decisões técnicas. Isso mostra que a IA não substitui a necessidade de gerenciar complexidade e tomar decisões. Engenheiros juniores ainda adicionam capacidade às equipes, e a IA torna o treinamento mais barato. Portanto, a IA aumentou o valor dos juniores, não o diminuiu. As organizações precisam de julgamento técnico, e os juniores são essenciais para o futuro.",
+   "snippet": "AI didn't erase the junior's value. It increased it. “AI ate the junior’s marginal value”. This is the feedback I got from the last post on this topic. According to this argument, the work of a junior engineer goes something like this: There is a need for a solution. Someone more experienced (a senior engineer) plans it and designs it. The senior engineer breaks down the work in multiple smal",
+   "kind": "news",
+   "section": null,
+   "date": "2026-08-18",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "developer-productivity",
+     "careers",
+     "leadership"
+    ],
+    "content-type": [
+     "opinion",
+     "analysis"
+    ],
+    "difficulty": [
+     "beginner"
+    ],
+    "domain": [
+     "ai-general"
+    ],
+    "topic-technology": [
+     "ai-jobs",
+     "software-development",
+     "ai-adoption",
+     "generative-ai"
+    ]
+   }
+  },
+  {
+   "id": 2849,
+   "url": "https://dontpastetheai.com",
+   "sourceId": 7,
+   "sourceName": "llmnews.ai",
+   "title": "Don't paste the AI, please.",
+   "titlePt": "Não cole a resposta da IA, por favor",
+   "summaryPt": "O artigo critica o hábito de copiar e colar respostas geradas por chatbots quando alguém faz uma pergunta. Embora pareça rápido e útil, isso não agrega valor: quem perguntou também teria acesso à mesma resposta genérica e quer ouvir a sua visão, o seu contexto e o seu julgamento.\n\nA sugestão é usar a IA como apoio para rascunhar, mas sempre ler, interpretar e escrever uma resposta com as próprias palavras. Se algo fizer sentido, cite a parte útil e explique o porquê. Se não tiver o que acrescentar, admita isso ou simplesmente fique em silêncio. O texto também menciona que a página pode ser enviada para quem comete esse erro, e oferece uma versão mais agressiva para quem prefere ser mais direto.",
+   "snippet": "Don't paste the AI, please. When someone asks you something, they want your answer. Not a wall of ChatGPT text. A short answer from a human will always be worth more than one from a robot, even if the robot is right. What happened Someone asked you an honest question. You dumped it into a chatbot, copied the answer, and sent it back. It felt fast. It felt helpful. It wasn't. It mig",
+   "kind": "news",
+   "section": null,
+   "date": "2026-06-10",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "ai-ethics",
+     "responsible-ai"
+    ],
+    "content-type": [
+     "opinion"
+    ],
+    "domain": [
+     "llm-models"
+    ],
+    "topic-technology": [
+     "llm-models",
+     "generative-ai",
+     "ai-ethics"
+    ]
+   }
+  },
+  {
+   "id": 2850,
+   "url": "https://arxiv.org/abs/2608.00146",
+   "sourceId": 7,
+   "sourceName": "llmnews.ai",
+   "title": "DiffusionGemma Technical Report",
+   "titlePt": "Relatório Técnico do DiffusionGemma",
+   "summaryPt": "O DiffusionGemma é um modelo de linguagem experimental de pesos abertos que utiliza difusão discreta para gerar texto em alta velocidade, refinando blocos de 256 tokens em paralelo, em vez de decodificar um token por vez como nos modelos autorregressivos (AR). Ele é obtido por fine-tuning do modelo Gemma 4 (mixture-of-experts) com 3,8B de parâmetros ativos e 25,2B no total, usando menos de 10% do orçamento de treinamento original. O treinamento ocorre em duas etapas: first, supervised fine-tuning para ensinar denoising bidirecional; second, combinação de reinforcement learning com sampler distillation para melhorar a qualidade da geração e a eficiência da inferência.",
+   "snippet": "Authors:DiffusionGemma Team: Adrien Ali Taïga, James Assiene, Daniele Calandriello, Rahma Chaabouni, João Gante, Tamara von Glehn, Nate Keating, Chris Knutsen, Martin Kukla, Tianlin Liu, Ivan Lobov, Ofir Nabati, João Gabriel Oliveira, Nicolas Perez-Nieves, Nastasia Prutianova, Bobak Shahriari, Jean Tarbouriech, Pavel Tyletski, Çağlar Ünlü, Cindy Wu, Glenn Cameron, Jerome Connor, Sertan Girgin, Maa",
+   "kind": "news",
+   "section": null,
+   "date": "2026-07-31",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "google"
+    ],
+    "concept-theme": [
+     "throughput",
+     "latency",
+     "parallelism",
+     "architecture"
+    ],
+    "content-type": [
+     "research-paper"
+    ],
+    "difficulty": [
+     "advanced"
+    ],
+    "domain": [
+     "llm-models"
+    ],
+    "topic-technology": [
+     "diffusion-models",
+     "llm-models",
+     "moe",
+     "fine-tuning",
+     "inference-optimization",
+     "model-distillation"
+    ],
+    "trending-emerging": [
+     "moe",
+     "distillation",
+     "open-weights"
     ]
    }
   }

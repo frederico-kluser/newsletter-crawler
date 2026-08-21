@@ -10,7 +10,7 @@ import {
   BUDGET_USD, MAX_PARALLEL, RAM_MAX_PCT,
   AGGRESSIVE_DEFAULT, DEFAULT_SINCE, MIN_CRAWL_DATE, VERIFY_AFTER_CRAWL, VERIFY_STREAMING, JOB_TIMEOUT_MS, JOB_HARD_TIMEOUT_MS,
   CLASSIFY_STREAMING, SUMMARIZE_STREAMING, CURATE_JOBS, ROUNDUP_TIMEOUT_MS, COST_LOG_INTERVAL_MS,
-  defaultParallel, loadSources, addSourceToConfig, removeSourceFromConfig, setRuntimeKey,
+  ENRICH_MAX_ATTEMPTS, defaultParallel, loadSources, addSourceToConfig, removeSourceFromConfig, setRuntimeKey,
 } from './config.js';
 import {
   initGovernor, stopGovernor, setProfile, jobsCapacity, getTelemetry,
@@ -339,8 +339,15 @@ async function crawlRun(flags) {
     }
     // "Enriquecer depois": re-ativa jobs de itens que ficaram só com o blurb (needs_enrich=1),
     // inclusive os cortados por deadline num run anterior — o dado ganha o corpo do alvo agora.
-    const re = stmts.requeueNeedsEnrichForSource.run(src.id);
+    // Teto por alvo (ENRICH_MAX_ATTEMPTS): a falha do run anterior conta UMA tentativa; quem
+    // estourou o teto mantém o blurb (fail-open) e não re-falha esta run.
+    if (ENRICH_MAX_ATTEMPTS > 0) stmts.bumpFailedEnrichAttempts.run(src.id);
+    const re = stmts.requeueNeedsEnrichForSource.run(src.id, ENRICH_MAX_ATTEMPTS > 0 ? ENRICH_MAX_ATTEMPTS : Number.MAX_SAFE_INTEGER);
     if (re.changes) log(`enriquecer: ${re.changes} item(ns) só-blurb re-enfileirado(s) p/ pegar o corpo do alvo`);
+    if (ENRICH_MAX_ATTEMPTS > 0) {
+      const capped = stmts.countEnrichAtCapForSource.get(src.id, ENRICH_MAX_ATTEMPTS).c;
+      if (capped) log(`enriquecer: ${capped} item(ns) no teto de tentativas (${ENRICH_MAX_ATTEMPTS}) — mantidos com o blurb do agregador`);
+    }
   }
 
   // Agressivo é o DEFAULT (CRAWLER_AGGRESSIVE=false ou --no-aggressive desligam por completo;

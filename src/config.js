@@ -359,6 +359,12 @@ export const JOB_HARD_TIMEOUT_MS = Number(
 // default (a curadoria já é limitada por LLM_TIMEOUT_MS/orçamento; cortar no meio joga fora fan-out).
 export const CURATE_JOBS = envIntOr0('CURATE_JOBS');
 export const ROUNDUP_TIMEOUT_MS = Number(process.env.ROUNDUP_TIMEOUT_MS || 0);
+// Teto de tentativas de ENRIQUECIMENTO por alvo (em RODADAS de crawl): um alvo que falhou N
+// runs seguidas p/ entregar o corpo para de ser re-enfileirado — o item curado fica com o
+// blurb do agregador (fail-open: o registro continua válido) em vez de a run inteira
+// re-falhar os mesmos alvos mortos (domínio NXDOMAIN, PDF sem handler, ...) a cada execução.
+// 0 desliga o teto (comportamento antigo: re-tentar sempre).
+export const ENRICH_MAX_ATTEMPTS = Number(process.env.ENRICH_MAX_ATTEMPTS || 3);
 
 // ---- paralelismo global + orçamento (governor/budget) ----
 // Teto GLOBAL de operações simultâneas (--parallel). Deriva dos núcleos como proxy do porte

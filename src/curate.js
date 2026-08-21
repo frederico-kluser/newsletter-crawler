@@ -11,7 +11,7 @@ import {
 import { curateRoundupItems, curateLeftoverLinks } from './llm.js';
 import { logEvent } from './events.js';
 import { normalizeUrl, hostOf, parseDate, clampFutureDate, sha256, warn, debug } from './util.js';
-import { CURATE_CHUNK_CHARS } from './config.js';
+import { CURATE_CHUNK_CHARS, ENRICH_MAX_ATTEMPTS } from './config.js';
 
 // Backstop DETERMINÍSTICO de patrocínio/vaga: o rótulo do LLM é clampado p/ 'news' quando
 // desconhecido (fail-open p/ salvar), então marcas explícitas de anúncio pago forçam o kind
@@ -329,10 +329,14 @@ export async function curateRoundup({ html, url, source, runId = null, depth = 0
       } else {
         dup++;
         logEvent({ ...ev, url: it.url, stage: 'item', status: 'dup', detail: { issue: url } });
-        // Registro antigo ainda sem corpo (run anterior falhou)? Re-ativa o job de enriquecimento.
+        // Registro antigo ainda sem corpo (run anterior falhou)? Re-ativa o job de enriquecimento
+        // — exceto quem estourou o teto de tentativas (alvo morto/PDF: mantém o blurb, fail-open).
         const prev = stmts.getArticleFullByUrl.get(it.url);
-        if (prev?.needs_enrich) stmts.requeueUrl.run(it.url);
-        else continue; // já completo: nem re-enfileira
+        if (prev?.needs_enrich && (ENRICH_MAX_ATTEMPTS <= 0 || (prev.enrich_attempts || 0) < ENRICH_MAX_ATTEMPTS)) {
+          stmts.requeueUrl.run(it.url);
+        } else {
+          continue; // já completo ou no teto: nem re-enfileira
+        }
       }
       if (stmts.enqueue.run(it.url, 'article', url, source?.id ?? null, depth + 1, issueDate || null).changes > 0) enqueued++;
     }

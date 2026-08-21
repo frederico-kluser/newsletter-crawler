@@ -15,6 +15,7 @@ import {
   TTS_MODEL, TTS_VOICE, TTS_FORMAT,
 } from './config.js';
 import { getFacets, TOOL_CONTENT_TYPES } from './taxonomy.js';
+import { redactSecrets } from './redact.js';
 import { log } from './util.js';
 
 // Média REAL de custo por chamada do estágio (>=3 amostras cobradas), senão null — o cliente cai
@@ -100,13 +101,16 @@ export function buildWebSnapshot() {
   const articles = stmts.webExportArticles.all().map((a) => ({
     ...a,
     // o substr do SQL não normaliza whitespace; espelha o snippet() da busca (search.js)
-    snippet: String(a.snippet || '').replace(/\s+/g, ' ').trim(),
+    title: redactSecrets(a.title),
+    snippet: redactSecrets(String(a.snippet || '').replace(/\s+/g, ' ').trim()),
     tags: tagsByArticle.get(a.id) || {},
   }));
 
   // Chaves inteiras-string serializam em ordem numérica ASC no stringify (determinístico).
+  // Corpos passam pela redação de segredos: um artigo pode carregar um token no texto e o GitHub
+  // Push Protection rejeitaria o push do snapshot inteiro (ver src/redact.js).
   const contents = {};
-  for (const r of stmts.webExportContents.all()) contents[r.id] = r.content;
+  for (const r of stmts.webExportContents.all()) contents[r.id] = redactSecrets(r.content);
 
   return { meta, articles, contents };
 }

@@ -10,6 +10,7 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { stmts } from './db.js';
 import { getFacets } from './taxonomy.js';
+import { redactSecrets } from './redact.js';
 import { log } from './util.js';
 
 // Ordem canônica das facetas (taxonomy.json); fail-open p/ a ordem do banco — o export nunca pode
@@ -57,10 +58,10 @@ export function buildPublicApi() {
       url: a.url,
       sourceId: a.source_id,
       sourceName: sourceName.get(a.source_id) || null,
-      title: a.title,
-      titlePt: a.title_pt,
-      summaryPt: a.summary_pt,
-      snippet: String(a.snippet || '').replace(/\s+/g, ' ').trim(),
+      title: redactSecrets(a.title),
+      titlePt: redactSecrets(a.title_pt),
+      summaryPt: redactSecrets(a.summary_pt),
+      snippet: redactSecrets(String(a.snippet || '').replace(/\s+/g, ' ').trim()),
       kind,
       section: a.section,
       date: a.date_iso,

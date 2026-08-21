@@ -629,6 +629,15 @@ async function processArticle(job, source, opts) {
     logEvent({ ...ev, stage: 'fetch', status: 'fail', detail: { error: e.message, enrich: Boolean(enriching) } });
     throw e;
   }
+  // Alvo não-HTML (PDF/binário): o corpo NUNCA virá do alvo — não é falha transitória. Item
+  // curado mantém o blurb do agregador (needs_enrich=0: não re-enfileira em run nenhuma);
+  // avulso é ignorado como sem-conteúdo (frontier vira done, sem ruído de erro no feed).
+  if (fetched.pdf) {
+    if (enriching) return keepAggregatorVersion(enriching, ev, 'pdf-target');
+    warn(`alvo não é HTML (PDF/binário), sem conteúdo: ${url}`);
+    logEvent({ ...ev, stage: 'article', status: 'skip', detail: { reason: 'pdf-target' } });
+    return;
+  }
   const html = fetched.html;
   const finalUrl = fetched.url || url;
   logEvent({ ...ev, stage: 'fetch', status: 'ok', detail: { rendered: fetched.rendered === true } });

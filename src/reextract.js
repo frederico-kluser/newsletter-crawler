@@ -149,6 +149,8 @@ async function reextractOne(row, { fs }) {
     warn(`reextract: ${reason} — mantendo ficha atual: ${row.url.slice(0, 60)}`);
     return { status: full.issue_url ? 'kept-blurb' : 'skip' };
   };
+  // Alvo não-HTML (PDF/binário): a ficha atual é mantida (mesma regra dos guards abaixo).
+  if (fetched.pdf) return keepCurrent('pdf-target');
   const extractedTitle = art?.title || fallbackTitle(html) || row.title;
   if (isErrorPage(extractedTitle, content)) return keepCurrent('error-page', { title: extractedTitle });
   if (!content || content.length < 50) return { status: 'no-content' };

@@ -207,6 +207,11 @@ ensureColumn('articles', 'needs_enrich', 'needs_enrich INTEGER DEFAULT 0');
 ensureColumn('articles', 'cleaned', 'cleaned INTEGER DEFAULT 0');
 ensureColumn('articles', 'verify_status', 'verify_status TEXT');
 ensureColumn('articles', 'verify_notes', 'verify_notes TEXT');
+// - enrich_attempts: nº de RODADAS de crawl em que o alvo falhou p/ enriquecer (bump no início
+//   do crawl seguinte). Teto ENRICH_MAX_ATTEMPTS: o item para de ser re-enfileirado e fica com
+//   o blurb do agregador (fail-open) — alvos mortos (domínio NXDOMAIN, PDF sem handler) não
+//   re-falham a run inteira a cada execução.
+ensureColumn('articles', 'enrich_attempts', 'enrich_attempts INTEGER DEFAULT 0');
 // Seletor de DATA da listagem derivado por IA lendo a página real (CSS e/ou regex), por
 // template de weekly — usado pelo piso --since quando o layout não expõe <time datetime>.
 ensureColumn('selectors', 'date_selector', 'date_selector TEXT');
@@ -630,10 +635,23 @@ export const stmts = {
   ),
   // "Enriquecer depois": no início do crawl, re-ativa os jobs de artigos que ficaram só com o
   // blurb (needs_enrich=1) — inclui os cortados por deadline no run anterior. Escopo por fonte.
+  // Teto por alvo: quem falhou ENRICH_MAX_ATTEMPTS rodadas seguidas para de ser re-enfileirado
+  // (bump conta a rodada FALHADA do run anterior; o requeue só re-ativa quem ainda tem tentativa).
+  bumpFailedEnrichAttempts: db.prepare(
+    `UPDATE articles SET enrich_attempts = enrich_attempts + 1
+      WHERE needs_enrich = 1 AND source_id = ?
+        AND url IN (SELECT url FROM frontier WHERE kind = 'article' AND state = 'failed')`,
+  ),
   requeueNeedsEnrichForSource: db.prepare(
     `UPDATE frontier SET state = 'pending', retries = 0
       WHERE kind = 'article' AND state IN ('done', 'failed')
-        AND url IN (SELECT url FROM articles WHERE needs_enrich = 1 AND source_id = ?)`,
+        AND url IN (SELECT url FROM articles
+                     WHERE needs_enrich = 1 AND source_id = ? AND enrich_attempts < ?)`,
+  ),
+  countEnrichAtCapForSource: db.prepare(
+    `SELECT COUNT(*) AS c FROM articles
+      WHERE needs_enrich = 1 AND source_id = ? AND enrich_attempts >= ?
+        AND url IN (SELECT url FROM frontier WHERE kind = 'article' AND state = 'failed')`,
   ),
 
   // events (trace por item: cada estágio grava o que fez/decidiu; `ncrawl inspect` lê daqui)

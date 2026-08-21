@@ -178,6 +178,21 @@ export async function checkRobots(url) {
   }
 }
 
+// ---- alvos PDF (nunca viram HTML) ----
+// O Chromium inicia um DOWNLOAD na navegação p/ um PDF e o page.goto rejeita com
+// "Download is starting" — o alvo não vira página nunca. Detectar ANTES (extensão .pdf) e no
+// erro do goto (PDF servido sem extensão) evita job-falhar + re-tentar para sempre: o item
+// curado mantém o blurb do agregador (keepAggregatorVersion) e o avulso é ignorado como
+// sem-conteúdo. Exportados p/ teste.
+export function isPdfUrl(url) {
+  try {
+    return /\.pdf(\?|#|$)/i.test(new URL(String(url)).pathname);
+  } catch {
+    return false;
+  }
+}
+export const isDownloadError = (e) => /download is starting/i.test(String(e?.message || ''));
+
 // ---- fetch estático ----
 // Host limiter por FORA (politeness é invariante, não escala com a máquina); a lane fetch do
 // governador por dentro limita o total de requests simultâneos na máquina inteira.
@@ -206,7 +221,13 @@ export async function fetchStatic(url, { aggressive = false, clock = null, signa
             signal: signal || undefined, // abort do job cancela o request em voo
           });
           recordOk(host);
-          return { html: res.body, status: res.statusCode, url: res.url, rendered: false };
+          return {
+            html: res.body,
+            status: res.statusCode,
+            url: res.url,
+            rendered: false,
+            contentType: res.headers['content-type'] || '',
+          };
         } catch (e) {
           // Abort do job não é falha do host: não conta no circuit breaker.
           if (signal?.aborted) throw abortErrorOf(signal);
@@ -314,6 +335,13 @@ export async function fetchRendered(url, {
       } catch (e) {
         // Abort do job não é falha do host: não conta no circuit breaker.
         if (signal?.aborted) throw abortErrorOf(signal);
+        // A navegação disparou um DOWNLOAD (PDF/binário servido sem extensão .pdf) em vez de
+        // página: o host respondeu normal — não conta no breaker e não é falha transitória.
+        // O job mantém o blurb (marker pdf) em vez de re-tentar para sempre.
+        if (isDownloadError(e)) {
+          log(`download em vez de navegação (${profile}): ${url.slice(0, 80)} -> sem HTML`);
+          return { html: null, pdf: true, status: 200, url };
+        }
         recordError(host);
         throw e;
       } finally {
@@ -543,6 +571,10 @@ export async function fetchSmart(url, {
   const host = hostOf(url);
   if (!breaker.canRequest(host)) throw new Error(`circuit breaker aberto para host ${host}`);
 
+  // PDF nunca vira HTML: nem static (baixar o binário à toa), nem browser (a navegação dispara
+  // download e o goto falha). Sinaliza cedo p/ o job manter o blurb — sem gastar fetch/browser.
+  if (isPdfUrl(url)) return { html: null, pdf: true, status: 200, url };
+
   if (forceRender || needsJs.get(host)) {
     return fetchRendered(url, { profile, aggressive, clock, signal, sinceDate });
   }
@@ -553,6 +585,12 @@ export async function fetchSmart(url, {
   } catch (e) {
     if (signal?.aborted) throw abortErrorOf(signal); // job morto: sem fallback p/ Playwright
     warn(`estático falhou (${url}): ${e.message}; tentando Playwright`);
+  }
+  // PDF/binário servido SEM extensão .pdf (content-type no HEAD/GET): idem acima. Antes do
+  // looksEmpty (que sobre binário daria "precisa JS" e mandaria p/ o browser à toa).
+  if (/application\/pdf/i.test(staticRes?.contentType || '')) {
+    log(`alvo responde application/pdf (sem HTML): ${url.slice(0, 80)}`);
+    return { html: null, pdf: true, status: staticRes.status, url: staticRes.url };
   }
   if (staticRes && !looksEmpty(staticRes.html)) return staticRes;
 

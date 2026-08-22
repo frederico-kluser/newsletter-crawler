@@ -4,7 +4,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  diffIsOnlyVolatile, readSnapshotStamp, splitDirtyPaths, planDeploy, fmtElapsed,
+  diffIsOnlyVolatile, readSnapshotStamp, splitDirtyPaths, planDeploy, fmtElapsed, isGithubHttpsRemote,
 } from '../src/deploy.js';
 import { deployOutcome } from '../src/ui/runLines.js';
 
@@ -152,4 +152,13 @@ test('deployOutcome: cada status vira um Alert próprio (nada cai no "Concluído
 
   assert.equal(deployOutcome(null), null);
   assert.equal(deployOutcome({}), null);
+});
+
+test('isGithubHttpsRemote: só remote HTTPS de github.com precisa do gh', () => {
+  assert.equal(isGithubHttpsRemote('https://github.com/frederico-kluser/newsletter-crawler.git'), true);
+  assert.equal(isGithubHttpsRemote('http://github.com/a/b.git'), true);
+  assert.equal(isGithubHttpsRemote('https://gitlab.com/a/b.git'), false);   // outro host
+  assert.equal(isGithubHttpsRemote('git@github.com:a/b.git'), false);       // SSH: não precisa do helper
+  assert.equal(isGithubHttpsRemote(''), false);                             // fail-open
+  assert.equal(isGithubHttpsRemote(null), false);
 });

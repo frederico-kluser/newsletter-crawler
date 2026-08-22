@@ -12,6 +12,7 @@
 // errado é caro (branch errada, remoto à frente, repo sem git): esses ABORTAM antes de tocar no git.
 import { execFileSync } from 'node:child_process';
 import path from 'node:path';
+import { existsSync, readFileSync as fsReadFileSync, writeFileSync as fsWriteFileSync } from 'node:fs';
 import got from 'got';
 import {
   ROOT, SITE_URL, SITE_META_PATH, DEPLOY_BRANCH, DEPLOY_WAIT_MS, DEPLOY_POLL_MS,
@@ -160,6 +161,52 @@ function changedIgnoringVolatile(rel) {
   return !diffIsOnlyVolatile(diff);
 }
 
+// Redação anterior do helper de credencial: o push do deploy via menu falhava com
+// "Invalid username or token. Password authentication is not supported for Git operations."
+// quando o git usava um token ESTÁTICO expirado do ~/.git-credentials (store) em vez da
+// credencial viva do `gh` CLI. Este helper garante, antes do push, que github.com autentique via
+// `gh auth git-credential` (token atual ✓) e saneia o store p/ não mandar token velho. Fail-open:
+// se o gh não estiver disponível, segue e o push mostra o erro com hint acionável.
+// Detecção pura (testável): o remote é HTTPS de github.com? (o único caso que precisa do gh).
+export function isGithubHttpsRemote(url) {
+  const s = String(url || '');
+  return /github\.com/i.test(s) && /^https?:\/\//i.test(s);
+}
+
+function ensureGithubGitAuth(remoteUrl) {
+  const url = String(remoteUrl || '');
+  const github = isGithubHttpsRemote(url);
+  const hinted = [];
+  if (!github) return { gh: false, github: false, hinted };
+  let ghBin = null;
+  try { ghBin = execFileSync('which', ['gh'], { encoding: 'utf8' }).trim(); } catch {}
+  if (!ghBin) {
+    hinted.push("gh CLI não encontrado — instale (github.com/cli) e rode `gh auth login`; ou sete o remote com um PAT de escopo repo: `git remote set-url origin https://<USUARIO>:<PAT>@github.com/<org>/<repo>.git`.");
+    return { gh: false, github: true, hinted };
+  }
+  // 1) Garante o helper do gh p/ github.com (idempotente).
+  try {
+    execFileSync('git', ['config', '--global', 'credential.https://github.com.helper', `!${ghBin} auth git-credential`], { stdio: 'pipe' });
+  } catch {}
+  // 2) Saneia o store: remove a linha github.com (token estático pode estar expirado e, listado
+  //    antes do helper do gh, o git o usaria e o GitHub respondería "Invalid username or token").
+  const home = process.env.HOME || process.env.USERPROFILE;
+  if (home) {
+    const credFile = path.join(home, '.git-credentials');
+    try {
+      if (existsSync(credFile)) {
+        const raw = fsReadFileSync(credFile, 'utf8');
+        const hadGithub = raw.split('\n').some((l) => /@github\.com$/.test(l.trim()));
+        if (hadGithub) {
+          fsWriteFileSync(credFile, raw.split('\n').filter((l) => !/@github\.com$/.test(l.trim())).join('\n'));
+          hinted.push('token github.com antigo removido de ~/.git-credentials — o deploy usa a credencial do `gh`.');
+        }
+      }
+    } catch {}
+  }
+  return { gh: true, github: true, hinted };
+}
+
 function preflight() {
   const top = git(['rev-parse', '--show-toplevel'], { allowFail: true });
   if (!top) throw new DeployError('isto não é um repositório git — o deploy publica via git push.');
@@ -180,7 +227,9 @@ function preflight() {
       'git remote add origin <url-do-repo>',
     );
   }
-  return { branch };
+  const remoteUrl = git(['remote', 'get-url', 'origin'], { allowFail: true });
+  for (const h of ensureGithubGitAuth(remoteUrl).hinted) warn(h);
+  return { branch, remoteUrl };
 }
 
 // Conta os commits só-nossos e só-do-remoto. Precisa de `git fetch`: fail-open (offline → o push
@@ -359,7 +408,19 @@ export async function runDeploy(flags = {}) {
   // 7. Push. --no-verify: o hook pre-push refaria ESTE MESMO export e abortaria o push (por design
   //    dele, p/ o commit novo não ficar de fora) — aqui o snapshot já está commitado.
   log(`enviando para origin/${branch}…`);
-  git(['push', '--no-verify', 'origin', `HEAD:refs/heads/${branch}`]);
+  try {
+    git(['push', '--no-verify', 'origin', `HEAD:refs/heads/${branch}`]);
+  } catch (e) {
+    // Falha de AUTENTICAÇÃO é a causa nº1 do deploy no menu: dá hint acionável em vez do erro cru.
+    const msg = String(e?.message || e);
+    if (/(Invalid username or token|Password authentication|Authentication failed|Could not read|could not read Username|401|403|auth)/i.test(msg)) {
+      throw new DeployError(
+        'o push falhou por AUTENTICAÇÃO do GitHub — o deploy não consegue publicar sem credencial válida.',
+        'rode `gh auth login` (confirma github.com, protocolo https) e tente de novo; ou use um PAT de escopo repo: `git remote set-url origin https://<USUARIO>:<PAT>@github.com/…git`. É esperado: o GitHub não aceita senha de conta para push.',
+      );
+    }
+    throw e;
+  }
   const sha = git(['rev-parse', 'HEAD']);
   log(`push concluído ✓ commit ${sha.slice(0, 7)} na ${branch}.`);
 

@@ -124529,5 +124529,755 @@
     "open-weights"
    ]
   }
+ },
+ {
+  "id": 2851,
+  "source_id": 7,
+  "url": "https://matklad.github.io/2026/08/21/rust-glancer.html",
+  "title": "Rust Glancer",
+  "title_pt": "Rust Glancer",
+  "summary_pt": "O artigo apresenta o Rust Glancer, um servidor LSP para Rust que consome cerca de duas ordens de grandeza a menos de memória RAM que o rust-analyzer, e o autor o considera incrível. O texto discute as diferenças arquitetônicas entre as duas ferramentas, começando pela representação da árvore sintática: enquanto o rust-analyzer usa a biblioteca rowan, que é boa para parsing incremental e refatorações, o autor argumenta que a maioria dos casos de uso (como analisar milhares de dependências) não exige essa complexidade, sugerindo que uma estrutura mais simples baseada em listas seria suficiente.\n\nO autor também comenta sobre o suporte a proc macros e build scripts, que são pontos problemáticos no rust-analyzer. Ele sugere uma abordagem alternativa, como a do Sorbet, onde não se executa o meta-programming diretamente, mas se define uma interface de plugin para simular efeitos. Além disso, questiona a sincronização de dados no LSP e menciona problemas com o file watching. Por fim, a ideia central é que o rust-analyzer deveria usar um modelo similar ao do IntelliJ, com múltiplos backends: para arquivos abertos no editor, para o restante do projeto (usando stubs) e para dependências (usando arquivos .rmeta do rustc). Ele defende que essa abordagem 'glance' seria mais eficiente e compacta, deixando o parsing detalhado apenas para o código que o usuário está realmente editando.",
+  "snippet": "Aug 21, 2026 Rust Glancer, a functional LSP server for Rust which uses two orders of magnitude less RAM, is incredibly cool. Go check it out! This post started as a comment on lobste.rs, but I figured it out that it’s better to publish it somewhat more prominently. Don’t expect polished writing though! Some thoughts: rust-analyzer uses row",
+  "date_iso": "2026-08-21",
+  "kind": "news",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "performance",
+    "optimization",
+    "dx"
+   ],
+   "content-type": [
+    "opinion",
+    "commentary"
+   ],
+   "difficulty": [
+    "expert"
+   ],
+   "domain": [
+    "backend"
+   ],
+   "ecosystem-language": [
+    "rust"
+   ],
+   "topic-technology": [
+    "software-development",
+    "system-design",
+    "performance-optimization"
+   ]
+  }
+ },
+ {
+  "id": 2852,
+  "source_id": 7,
+  "url": "https://blog.jakesaunders.dev/building-an-almost-fully-self-hosted-sandboxed-agentic-software-factory",
+  "title": "Building an (almost) fully self-hosted, sandboxed, agentic software factory",
+  "title_pt": "Construindo uma fábrica de software agêntica, quase totalmente auto-hospedada e isolada",
+  "summary_pt": "O artigo descreve como criar um ambiente de desenvolvimento agêntico e remoto, totalmente isolado em um servidor doméstico dedicado. O autor queria dar uma única instrução a um LLM e deixá-lo conduzir todo o ciclo de desenvolvimento: pesquisar as tecnologias, planejar, escrever código e testes, versionar no Git, rodar CI, provisionar Postgres e fazer deploy em produção com HTTPS — tudo sem intervenção humana adicional. O experimento funcionou: a partir de um prompt, o agente criou um repositório, desenvolveu um aplicativo de controle de calorias com SvelteKit, Drizzle, Postgres e Tailwind, corrigiu os testes até a CI ficar verde e implantou o sistema em uma URL HTTPS acessível apenas pela rede privada.\n\nA arquitetura usa uma máquina sacrificável (um i7 de 2021 comprado no eBay) sem entrada externa pela internet, protegida por Tailscale, Pi-hole e Coolify como PaaS. O stack inclui Forgejo com runners para Git e CI, Hermes como assistente pessoal estilo OpenClaw usando Codex, Firecrawl para scraping e integrações via Telegram. Para gerar certificados SSL sem expor registros DNS públicos, o autor usa DNS-01 com a API da Porkbun e Let's Encrypt, criando certificados válidos para subdomínios internos que só funcionam dentro do tailnet.\n\nO autor destaca que a solução não é inocente: o agente ainda pode apagar o servidor, vazar credenciais ou fazer requisições externas. O ganho é que a falha é contida em uma máquina dedicada, com baixo custo de recuperação. Como próximos passos, ele sugere colocar o servidor em uma VLAN separada, restringir credenciais ao mínimo possível e rotacionar chaves conforme o agente for usado.",
+  "snippet": "tl;dr: It worked! From one prompt it created a repo, wrote the application and tests, got CI green, provisioned Postgres and deployed the finished app behind HTTPS without another message from me.If you just wanna see the outcome you can find a demo video at the bottom LLMs got fun again! Maybe they always were and I was just stuck in the trough of disillusionment. Lately, whenever I need a littl",
+  "date_iso": "2026-08-21",
+  "kind": "tool",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "openai",
+    "codex",
+    "claude"
+   ],
+   "concept-theme": [
+    "devops",
+    "platform-engineering",
+    "ci-cd",
+    "containers"
+   ],
+   "content-type": [
+    "case-study",
+    "deep-dive"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "llm-models",
+    "ai-general"
+   ],
+   "framework-library-tool": [
+    "docker",
+    "postgresql",
+    "claude",
+    "prometheus",
+    "grafana"
+   ],
+   "topic-technology": [
+    "agentic-ai",
+    "ai-agents",
+    "llm-models",
+    "self-hosting",
+    "ci-cd",
+    "deployment"
+   ],
+   "trending-emerging": [
+    "agentic-ai",
+    "ai-agents",
+    "ai-coding-agents"
+   ]
+  }
+ },
+ {
+  "id": 2853,
+  "source_id": 7,
+  "url": "https://claude.com/blog/bringing-claude-mythos-5-to-more-defenders",
+  "title": "Bringing the cybersecurity capabilities of Claude Mythos 5 to more defenders",
+  "title_pt": "Ampliando o acesso às capacidades de cibersegurança do Claude Mythos 5",
+  "summary_pt": "A Anthropic anunciou novas medidas para levar as capacidades de defesa cibernética do modelo Claude Mythos 5 a mais organizações. O modelo agora está integrado ao Claude Security, permitindo que clientes Enterprise usem seus recursos para identificar vulnerabilidades e sugerir correções em seus códigos. Além disso, a empresa está trabalhando com parceiros para incorporar o Claude Mythos 5 em ferramentas de segurança já utilizadas por defensores, garantindo que eles obtenham resultados úteis sem acesso direto ao modelo, reduzindo riscos de uso indevido.\n\nPara reforçar a segurança do ecossistema de software livre, a Anthropic lançou o Defender Advantage Fund (0xDAF), um fundo de US$ 35 milhões em créditos para organizações que atuam na correção de vulnerabilidades em projetos de código aberto, automação de varredura e correção, e desenvolvimento de abordagens inovadoras de segurança. Também está expandindo o Cyber Verification Program, que oferece a defensores verificados acesso a capacidades de uso duplo com menos restrições, incluindo futuramente o acesso a modelos da classe Mythos.\n\nEssas iniciativas fazem parte dos esforços contínuos da empresa para disponibilizar modelos avançados de IA de forma segura, equilibrando a proteção contra usos maliciosos com a capacitação de defensores legítimos. A integração do Mythos 5 em ferramentas já existentes, como o Claude Security, permite que equipes de segurança usem essa tecnologia sem expor o modelo diretamente, mantendo salvaguardas adequadas. A empresa promete mais detalhes nas próximas semanas sobre os primeiros beneficiários do fundo e sobre a expansão do programa de verificação.",
+  "snippet": "We're sharing an update on our efforts to help more teams use frontier capabilities for cyber defense. Claude Mythos 5 is now available in Claude Security, and coming soon to partners' cyber defense tools. We're also launching a $35M fund to help secure open-source software and sharing plans to expand our Cyber Verification Program. In April, we launched Project Glasswing to put our most capable f",
+  "date_iso": "2026-08-21",
+  "kind": "tool",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "claude",
+    "anthropic"
+   ],
+   "concept-theme": [
+    "security",
+    "accessibility",
+    "open-source"
+   ],
+   "content-type": [
+    "news",
+    "product-launch"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "ai-general",
+    "llm-models"
+   ],
+   "framework-library-tool": [
+    "claude"
+   ],
+   "topic-technology": [
+    "ai-safety",
+    "frontier-models",
+    "model-safety",
+    "ai-policy"
+   ],
+   "trending-emerging": [
+    "frontier-models"
+   ]
+  }
+ },
+ {
+  "id": 2854,
+  "source_id": 7,
+  "url": "https://cymerys.com/w/im-becoming-ai-blind",
+  "title": "I'm becoming AI-blind - Rafal Cymerys",
+  "title_pt": "Estou ficando cego para IA — Rafal Cymerys",
+  "summary_pt": "O autor relata que, ultimamente, tem tido dificuldade em se concentrar ao ler documentos de trabalho: mesmo lendo, não consegue processar o conteúdo e acaba precisando pedir esclarecimentos sobre pontos que já foram abordados. Ao refletir, percebeu que todos esses documentos tinham uma forte marca de geração por IA. Ele cita exemplos como um documento de design claramente copiado do Claude, um deck de marketing de 20 páginas que mistura estratégia razoável com jargão técnico sem sentido, e um documento de requisitos que descreve algo simples de forma prolixa e com um raciocínio interno típico de um LLM.",
+  "snippet": "AI AI AI Recently I've been catching myself having these little moments at work, when I'm trying to read a document someone has sent me and my brain somehow refuses to analyze it. It feels like I'm reading it, but I'm unable to focus on its content. I end up getting dragged into an endless back and forth with the sender, asking questions about things that have been covered in what they've alread",
+  "date_iso": "2026-06-10",
+  "kind": "tool",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "claude"
+   ],
+   "content-type": [
+    "opinion",
+    "commentary"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "llm-models",
+    "ai-general"
+   ],
+   "framework-library-tool": [
+    "claude"
+   ],
+   "topic-technology": [
+    "generative-ai",
+    "llm-models",
+    "ai-adoption"
+   ]
+  }
+ },
+ {
+  "id": 2855,
+  "source_id": 7,
+  "url": "https://techcrunch.com/2026/08/21/nvidia-just-showed-that-the-harness-not-the-ai-model-is-now-the-real-hero",
+  "title": "Nvidia just showed that the harness, not the AI model, is now the real hero",
+  "title_pt": "Nvidia mostra que o harness, não o modelo de IA, é o verdadeiro herói",
+  "summary_pt": "Pesquisa da Nvidia indica que, para tarefas de longo prazo, o harness — a camada de software que envolve o modelo e gerencia memória, ferramentas e regras — é mais decisivo que o próprio modelo. Com um harness personalizado, incluindo um componente \"supervisor\", os pesquisadores fizeram o Claude Opus 5 atingir 100% no benchmark ARC-AGI-3, enquanto sem o harness o mesmo modelo marcou apenas 30%. O supervisor age como um CEO, orientando o agente quando ele se desvia ou explora caminhos sem saída.\n\nO estudo reforça evidências de que a escolha do modelo é apenas parte do desempenho em sistemas agênticos. Pesquisas anteriores da Microsoft mostraram que todos os modelos cometem erros em tarefas longas; a OpenAI também melhorou pontuações apenas ajustando o harness. A Databricks demonstrou que o harness pode dobrar custos. A Nvidia defende harnesses abertos, que permitem aos usuários controlar mais variáveis para melhorar precisão e segurança, em contraste com abordagens mais fechadas.",
+  "snippet": "Nvidia published some interesting new research on Friday suggesting it’s the harness, more than the underlying model, that is far more important when asking an AI to do long-horizon tasks. A harness is the software wrapper around an AI model — the tools, memory management, and rules that turn a raw model into something that can act on its own. The TL;DR: Simply by using a custom harness tweaked t",
+  "date_iso": "2026-08-21",
+  "kind": "news",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "nvidia",
+    "claude-opus"
+   ],
+   "concept-theme": [
+    "agentops",
+    "context-engineering",
+    "llmops",
+    "architecture"
+   ],
+   "content-type": [
+    "news",
+    "analysis"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "llm-models",
+    "ai-general"
+   ],
+   "topic-technology": [
+    "agentic-ai",
+    "ai-agents",
+    "ai-benchmarks",
+    "model-evaluation",
+    "frontier-models",
+    "reasoning-models"
+   ],
+   "trending-emerging": [
+    "agentic-ai",
+    "ai-agents",
+    "agent-orchestration"
+   ]
+  }
+ },
+ {
+  "id": 2856,
+  "source_id": 7,
+  "url": "https://annas-archive.gl/blog/physical-destruction.html",
+  "title": "AI companies destroy physical books — let’s scan rare books before it’s too late",
+  "title_pt": "Empresas de IA estão destruindo livros físicos — vamos digitalizar livros raros antes que seja tarde demais",
+  "summary_pt": "Um voluntário do Anna's Archive, em artigo traduzido do chinês, alerta que empresas de inteligência artificial estão comprando, digitalizando e destruindo milhões de livros físicos para treinar seus modelos. O caso mais conhecido é o \"Projeto Panama\", da Anthropic, que gastou dezenas de milhões de dólares na digitalização de livros usados para treinar o Claude, destruindo os originais em seguida. A prática evita riscos legais e impede que concorrentes tenham acesso ao mesmo conteúdo, concentrando o conhecimento humano em servidores privados.}{\n\nO texto critica a contradição dessas empresas: elas prometem democratizar o conhecimento enquanto eliminam os suportes físicos mais importantes da cultura. Para enfrentar esse cenário, o Anna's Archive pede ajuda de voluntários no mundo todo para digitalizar livros, artigos de jornal, revistas, obras raras e outros materiais de bibliotecas e arquivos, fazendo uploads para bibliotecas clandestinas como forma de preservação. Pequenos contribuidores ganham reconhecimento e associação vitalícia ao acervo, e grandes digitalizações podem ter custos pagos.\n\nO texto termina com um alerta: desde 2025, mais da metade do conteúdo novo publicado na internet é gerado por IA, o que torna difícil distinguir produção humana de conteúdo sintético. Para os autores, a única esperança de preservar a história e o conhecimento é agir rápido, digitalizando e disponibilizando publicamente essas obras antes que as empresas de IA monopolizem ou apaguem esse legado.",
+  "snippet": "A guest post by Anna’s Archive volunteer “u” (translated from Chinese). TL;DR: AI companies are secretly buying, scanning, and destroying millions of physical books to train their models, permanently locking human knowledge inside private corporate servers. Anna’s Archive is urgently calling on volunteers worldwide to scan and upload books before this cultural heritage disappears forever. Seve",
+  "date_iso": "2026-08-05",
+  "kind": "tool",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "anthropic",
+    "claude"
+   ],
+   "concept-theme": [
+    "ai-ethics",
+    "ethics"
+   ],
+   "content-type": [
+    "opinion",
+    "news"
+   ],
+   "difficulty": [
+    "all-levels"
+   ],
+   "domain": [
+    "ai-general",
+    "llm-models"
+   ],
+   "framework-library-tool": [
+    "claude"
+   ],
+   "topic-technology": [
+    "ai-ethics",
+    "ai-regulation",
+    "datasets"
+   ],
+   "trending-emerging": [
+    "ai-governance"
+   ]
+  }
+ },
+ {
+  "id": 2857,
+  "source_id": 7,
+  "url": "https://www.ams.org/journals/notices/202608/noti3386/noti3386.html",
+  "title": "A Call for Action: The “Leiden Declaration on Artificial Intelligence and Mathematics”",
+  "title_pt": "Um Chamado à Ação: A Declaração de Leiden sobre Inteligência Artificial e Matemática",
+  "summary_pt": "O artigo apresenta a “Declaração de Leiden sobre Inteligência Artificial e Matemática”, publicada em 2 de junho de 2026 e elaborada a partir de um workshop realizado na Universidade de Leiden. O texto surge como um chamado à ação diante dos impactos da IA na pesquisa matemática, defendendo que a comunidade matemática participe ativamente das mudanças em vez de apenas reagir a elas.\n\nA declaração lista valores centrais da matemática que precisam ser preservados — como a confiabilidade das provas, a atribuição de autoria, a transparência, a avaliação criteriosa e a compreensão humana — e aponta ameaças trazidas pela IA: argumentos plausíveis porém incorretos, uso indevido de materiais publicados sem citação adequada, distorção de incentivos acadêmicos e divulgação de resultados por canais informais antes da avaliação da comunidade. O texto também traz recomendações para matemáticos, instituições, governos e empresas de IA.\n\nEndossada pela União Matemática Internacional, a declaração recebeu apoio de dois medalhistas Fields com visões distintas: Peter Scholze, que enfatiza a importância da compreensão humana e evita o uso de IA; e Terence Tao, que reconhece o potencial transformador da tecnologia, mas alerta para os riscos do uso irresponsável. O artigo inclui ainda o texto integral da declaração, disponível em leidendeclaration.ai.",
+  "snippet": "A Call for Action: The “Leiden Declaration on Artificial Intelligence and Mathematics” Siobhan Roberts Introduction The idea for the “Leiden Declaration on Artificial Intelligence and Mathematics”—published on June 2, 2026—first took shape one year before over pints at a pub near Cambridge University. It was during a workshop at the Isaac Newton Institute for Mathematical Sci",
+  "date_iso": "2026-06-02",
+  "kind": "news",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "ethics",
+    "ai-ethics",
+    "transparency",
+    "responsible-ai"
+   ],
+   "content-type": [
+    "project-spotlight",
+    "announcement"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "topic-technology": [
+    "ai-research",
+    "ai-ethics",
+    "ai-policy"
+   ],
+   "trending-emerging": [
+    "ai-governance"
+   ]
+  }
+ },
+ {
+  "id": 2858,
+  "source_id": 7,
+  "url": "https://blog.cloudflare.com/the-agent-access-model",
+  "title": "The Agent Access Model",
+  "title_pt": "O Modelo de Acesso para Agentes (AAM)",
+  "summary_pt": "O artigo propõe o Modelo de Acesso para Agentes (AAM), uma nova estrutura de segurança para gerenciar agentes de software que operam em nome de humanos, em contraste com o modelo de acesso criado para humanos, como o BeyondCorp. O AAM parte do princípio de que a autorização deve ser avaliada a cada ação, não confiando implicitamente na execução da tarefa. O modelo se baseia em cinco princípios: credenciais de curta duração e vinculadas, aplicação de políticas no harness e na rede (não em prompts), supervisão humana excepcional, revisão de concessões baseada em evidências e estado de capacidade que se move em uma única direção (via Trust Ratchet).\n\nO modelo aborda as diferenças cruciais entre agentes e humanos, como a efemeridade (agentes são de curta duração), velocidade de máquina (controles humanos são lentos demais), a falta de confiabilidade dos prompts como perímetro (podem ser manipulados) e a composição de autoridade em múltiplas etapas. O AAM implementa cinco princípios que incluem credenciais de curta duração, enforcement no harness e na rede (não em prompts), supervisão humana excepcional, revisão de concessões baseada em evidências e o 'Trust Ratchet' para reduzir capacidades.\n\nA arquitetura de referência inclui quatro controles ativos: o Agente Identity Broker (que emite credenciais de curta duração e vinculadas), a Access Engine com escopo de tarefa (que avalia cada ação), a camada de mediação (harness e rede) e o Trust Ratchet. Dois sistemas de apoio complementam: o Agent Activity Log e o Grant Review Loop. O artigo também apresenta um exemplo concreto, explorando as diferenças entre controles de agente único e o desafio mais complexo de controle de acesso multiplayer (múltiplos agentes operando em conjunto).",
+  "snippet": "For the last twelve years, enterprise security has moved away from trusting the network. BeyondCorp made the case that a request's origin, inside the corporate perimeter or on the open Internet, should not decide whether it is allowed. Identity and device health should. That model won: it now underpins much of Zero Trust. Google’s BeyondCorp assumed a specific principal: a human at a device, actin",
+  "date_iso": "2026-08-05",
+  "kind": "news",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "security",
+    "authorization",
+    "architecture"
+   ],
+   "content-type": [
+    "analysis",
+    "deep-dive"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "topic-technology": [
+    "ai-agents",
+    "authorization",
+    "ai-safety",
+    "agentic-ai"
+   ],
+   "trending-emerging": [
+    "ai-agents",
+    "agentic-ai",
+    "multi-agent"
+   ]
+  }
+ },
+ {
+  "id": 2859,
+  "source_id": 7,
+  "url": "https://api-docs.deepseek.com/guides/vision",
+  "title": "Vision",
+  "title_pt": "Visão: Entrada de Imagens no Modelo deepseek-v4-flash-vision-exp",
+  "summary_pt": "Este artigo descreve como usar o modelo deepseek-v4-flash-vision-exp, que aceita imagens além de texto, permitindo que o usuário peça descrições de figuras, leitura de texto de capturas de tela, análise de gráficos e outras tarefas visuais. Os formatos suportados são JPEG, PNG, GIF e WebP, detectados pelo conteúdo real do arquivo, não pelo nome ou tipo MIME declarado.\n\nHá três maneiras de enviar uma imagem ao modelo via API compatível com OpenAI: (1) incorporar a imagem codificada em base64 diretamente como uma URL data:; (2) fornecer uma URL externa pública (até 8192 caracteres, arquivo de até 32 MiB, com download em até 60 segundos); e (3) referenciar um arquivo enviado via Files API usando o file_id, ideal para imagens reutilizadas ou maiores que 32 MiB (até 64 MiB por imagem). Também é possível usar um bloco file com file_data para enviar base64 inline.\n\nO artigo detalha o campo opcional detail (low, high, original, auto) para controlar o processamento da imagem, além de explicar quando usar a Files API (para evitar limites de tamanho ou re-upload). Imagens são convertidas em tokens com base nas dimensões: há um teto de 384 tokens por imagem, com redimensionamento automático (imagens menores que ~384×384 são ampliadas; as maiores são reduzidas para o equivalente a 800×800). Há também seções sobre o uso via Anthropic API (com blocos image base64, url ou file) e via Responses API (com partes input_image), mantendo as mesmas restrições e limites, como o suporte a imagens apenas em mensagens do usuário e a rejeição de imagens em mensagens de sistema ou assistente.",
+  "snippet": "The deepseek-v4-flash-vision-exp model accepts images alongside text, so you can ask the model to describe pictures, read text from screenshots, analyze charts, and more. Supported image formats: JPEG, PNG, GIF, and WebP. The format is detected from the actual file content, not from the file name or the declared MIME type. Sending Images​ There are three ways to provide an image to the model. A",
+  "date_iso": "2026-06-10",
+  "kind": "tool",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "deepseek",
+    "deepseek-v"
+   ],
+   "content-type": [
+    "how-to"
+   ],
+   "difficulty": [
+    "beginner"
+   ],
+   "domain": [
+    "llm-models",
+    "ai-general"
+   ],
+   "ecosystem-language": [
+    "python",
+    "bash"
+   ],
+   "framework-library-tool": [
+    "deepseek-v"
+   ],
+   "topic-technology": [
+    "computer-vision",
+    "vision-language-models",
+    "multimodal-models",
+    "openai-compatible-api"
+   ],
+   "trending-emerging": [
+    "vision-language-models",
+    "multimodal"
+   ]
+  }
+ },
+ {
+  "id": 2860,
+  "source_id": 7,
+  "url": "https://github.com/adnanakil/nobuzz/blob/main/README.md",
+  "title": "nobuzz",
+  "title_pt": "nobuzz: skill de Claude Code para remover o estilo clickbait",
+  "summary_pt": "O artigo apresenta o nobuzz, uma skill para Claude Code chamada /debuzz, que reescreve as respostas do Claude em inglês direto e sem rodeios. A motivação é que o Claude produz textos com exagero, expressões da cultura de clickbait e estrutura de TED talk, mesmo quando a tarefa é só explicar correção de um bug. Em vez de tentar corrigir isso com prompts, a skill envia a resposta do Claude para o Gemini, por meio do Antigravity CLI (agy), que devolve uma versão simples e técnica, com os arquivos, trechos de código e fatos preservados nos modos apropriados.\n\nA skill aceita diferentes modos: colleague, para engenheiros; manager, para líderes técnicos; e director, para executivos. Você também pode indicar o texto a ser traduzido ou usar a resposta anterior do Claude como entrada. A instalação é feita copiando o repositório para ~/.claude/skills e exige que o Antigravity CLI esteja instalado e conectado. Se houver erro no agy, o Claude exibe a mensagem original e se oferece para reescrever quando \"por conta própria\", deixando claro que a tradução principal é sempre a versão deza da ferramenta externa.",
+  "snippet": "Obviously it's common knowledge by now that Anthropic has solely trained claude on old Buzzfeed articles (explaining its love for 90s nostalgia). So Claude and I built a Claude Code skill (/debuzz) that takes Claude's last response and runs it through the Antigravity CLI (agy) to translate it from talking like a millennial clickbait to regular English. We're thinking of calling it \"Claudette\" but",
+  "date_iso": "2026-06-10",
+  "kind": "tool",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "anthropic",
+    "gemini"
+   ],
+   "concept-theme": [
+    "dev-experience",
+    "developer-productivity"
+   ],
+   "content-type": [
+    "tooling",
+    "explainer"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "llm-models",
+    "ai-general"
+   ],
+   "framework-library-tool": [
+    "claude",
+    "gemini"
+   ],
+   "topic-technology": [
+    "llm-models",
+    "generative-ai"
+   ],
+   "trending-emerging": [
+    "ai-agents",
+    "agentic-ai"
+   ]
+  }
+ },
+ {
+  "id": 2861,
+  "source_id": 7,
+  "url": "https://joinoasis.com",
+  "title": "Where humans and agents come to work.",
+  "title_pt": "Onde humanos e agentes trabalham juntos",
+  "summary_pt": "O artigo apresenta uma nova plataforma de IA multiplayer que permite que humanos e agentes de IA trabalhem juntos em salas de bate-papo. Nessas salas, é possível acionar agentes com menções diretas, pedir pesquisas e até mesmo convocar pessoas da equipe, criando um espaço integrado de colaboração em tempo real. A proposta inclui edição compartilhada de documentos, planilhas e código, com humanos e agentes atuando lado a lado no mesmo arquivo. Também é possível criar frotas de agentes especializados em minutos, que aprendem a cada execução e podem ser compartilhados com o time, conectando-se aos serviços e aplicativos usados no dia a dia.",
+  "snippet": "Where humans and agents come to work.Multiplayer AI, the way you’ve always wanted.OasisI mapped the launch room. @Research can you pull the strongest customer proof points?ResearchFound 3 wins: faster onboarding, fewer handoffs, and cleaner customer follow-up.MayaLet's lead with onboarding speed. @Writer draft the hook around that.@ an agent or someone on your teamWork with agents in roomsA room i",
+  "date_iso": "2026-06-10",
+  "kind": "tool",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "team-management",
+    "productivity"
+   ],
+   "content-type": [
+    "product-launch"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "topic-technology": [
+    "ai-agents",
+    "multi-agent-systems",
+    "agent-orchestration",
+    "agentic-ai",
+    "ai-in-business",
+    "ai-adoption"
+   ],
+   "trending-emerging": [
+    "multi-agent",
+    "ai-agents",
+    "agentic-ai"
+   ]
+  }
+ },
+ {
+  "id": 2862,
+  "source_id": 7,
+  "url": "https://nari-labs.com/blog/qwen3-tts-speed-cost-frontier",
+  "title": "PUSHING THE SPEED-COST FRONTIER FOR QWEN3-TTS",
+  "title_pt": "Avançando na Fronteira Custo-Velocidade do QWEN3-TTS",
+  "summary_pt": "O artigo aborda os avanços no modelo de síntese de voz QWEN3-TTS, focando em melhorar o equilíbrio entre velocidade de geração e custo computacional. A discussão destaca técnicas para reduzir o overhead de inferência sem sacrificar a qualidade do áudio, permitindo que o modelo seja mais eficiente em ambientes com recursos limitados. O texto provavelmente explora otimizações de arquitetura, estratégias de compressão e ajustes de pipeline, visando tornar o QWEN3-TTS mais acessível e prático para aplicações em tempo real. Embora não sejam fornecidos detalhes específicos no resumo, a ênfase está em ampliar a aplicabilidade do modelo em cenários onde desempenho e custo são críticos.",
+  "snippet": "Extract the title, body text, and publication date from the provided content.",
+  "date_iso": "2026-06-10",
+  "kind": "release",
+  "section": null,
+  "verify_status": "junk",
+  "verify_notes": "Conteúdo é apenas uma instrução de extração, não o texto real do artigo; Conteúdo não condiz com o título; não há corpo de texto ou data de publicação",
+  "tags": {
+   "company-vendor-model": [
+    "qwen"
+   ],
+   "concept-theme": [
+    "performance",
+    "cost-optimization"
+   ],
+   "content-type": [
+    "release-announcement",
+    "benchmark"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "llm-models",
+    "ai-general"
+   ],
+   "framework-library-tool": [
+    "qwen"
+   ],
+   "topic-technology": [
+    "text-to-speech",
+    "llm-models",
+    "inference-optimization",
+    "model-capabilities",
+    "generative-ai"
+   ]
+  }
+ },
+ {
+  "id": 2863,
+  "source_id": 7,
+  "url": "https://ozbrain.com",
+  "title": "A hosted knowledge base agents read and write",
+  "title_pt": "Base de conhecimento hospedada que agentes de IA leem e escrevem",
+  "summary_pt": "O artigo apresenta o OzBrain, uma base de conhecimento hospedada que funciona como um \"cérebro compartilhado\" para agentes de IA como Claude, ChatGPT e Cursor. Em vez de cada ferramenta manter memórias e contextos separados, o OzBrain centraliza projetos, decisões e pesquisas em artigos estruturados e interligados, permitindo que qualquer agente leia e escreva na mesma fonte de verdade. Isso elimina o trabalho manual de copiar e colar contexto entre ferramentas e evita que versões diferentes de um mesmo documento se percam em drives, e-mails e downloads.",
+  "snippet": "The brain layer The brain behind every agent. One shared brain that Claude, ChatGPT, Cursor, and every AI can read and write. It structures what you know so agents read only what they need, and means you never explain yourself twice. You keep moving context between agents by hand. Copy a brief into Claude. Paste it into ChatGPT. Drop the same .md into Cursor. Update o",
+  "date_iso": "2026-06-10",
+  "kind": "tool",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "claude",
+    "gpt",
+    "openai",
+    "anthropic"
+   ],
+   "concept-theme": [
+    "context-engineering"
+   ],
+   "content-type": [
+    "product-launch",
+    "showcase"
+   ],
+   "difficulty": [
+    "beginner"
+   ],
+   "domain": [
+    "ai-general",
+    "llm-models"
+   ],
+   "ecosystem-language": [
+    "markdown"
+   ],
+   "topic-technology": [
+    "ai-agents",
+    "rag",
+    "context-engineering"
+   ],
+   "trending-emerging": [
+    "ai-agents",
+    "agentic-ai",
+    "multi-agent"
+   ]
+  }
+ },
+ {
+  "id": 2864,
+  "source_id": 7,
+  "url": "https://notactuallytreyanastasio.github.io/shoehorn",
+  "title": "shoehorn — make any language model fit your machine",
+  "title_pt": "shoehorn — faça qualquer modelo de linguagem caber na sua máquina",
+  "summary_pt": "O shoehorn é uma ferramenta que ajusta modelos de linguagem para caberem na memória disponível do seu hardware. Em vez de depender de quantizações predefinidas que podem desperdiçar espaço ou não funcionar, ele calcula a partir da memória real, subtrai o necessário para a inferência e resolve uma atribuição de precisão mista por tensor, usando quase todo o orçamento (até 99,99%). Isso permite rodar modelos maiores com qualidade superior, sem estourar a memória.\n\nA ferramenta também oferece uma interface web local que mede o hardware, busca modelos populares no Hugging Face e mostra o ajuste em um 'trena', além de indicar a perplexidade do resultado. A instalação é simples via Homebrew ou compilando a partir do código, e o backend de inferência é o llama.cpp. Depois de configurado, basta escolher um modelo e conversar.",
+  "snippet": "Make any language model fit the memory you actually have. Preset quantizations ignore your hardware: pick one that fits and you either waste hundreds of megabytes of quality headroom or find out at load time it didn't fit after all. shoehorn starts from the memory you actually have, subtracts what inference itself needs, and solves a per-tensor mixed-precision assignment",
+  "date_iso": "2026-06-10",
+  "kind": "tool",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "alibaba",
+    "hugging-face"
+   ],
+   "concept-theme": [
+    "optimization",
+    "performance"
+   ],
+   "content-type": [
+    "tool-release"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "local-llm",
+    "llm-models"
+   ],
+   "framework-library-tool": [
+    "llama-cpp",
+    "huggingface-hub"
+   ],
+   "topic-technology": [
+    "quantization",
+    "local-inference",
+    "llm-models",
+    "model-compression",
+    "inference-optimization",
+    "model-serving"
+   ],
+   "trending-emerging": [
+    "quantization",
+    "local-llm",
+    "on-device-ai",
+    "edge-ai"
+   ]
+  }
+ },
+ {
+  "id": 2865,
+  "source_id": 7,
+  "url": "https://www.liquid.ai/blog/lfm2.5-dspark",
+  "title": "LFM2.5-DSpark: Up to 3.2x Faster Inference from H100 to MacBook",
+  "title_pt": "LFM2.5-DSpark: Inferência até 3,2x Mais Rápida do H100 ao MacBook",
+  "summary_pt": "A Liquid AI lançou os primeiros modelos de rascunho DSpark para sua família LFM2.5 (versões 1.2B, 2.6B e 8B-A1B), aplicando decodificação especulativa para acelerar a inferência sem comprometer a qualidade. A técnica usa um modelo menor para gerar tokens candidatos que são verificados em lote pelo modelo principal, resultando em ganhos de até 3,18x em GPUs H100 e 2,87x em dispositivos como MacBooks, com suporte nativo a llama.cpp e SGLang.\n\nOs modelos de rascunho têm cerca de 300 milhões de parâmetros cada, adicionando pouco custo de memória. Em vez de otimizar a perda de validação, os pesquisadores priorizaram a taxa de aceitação dos tokens, o que se mostrou mais eficaz. A abordagem beneficia especialmente fluxos de agente com chamadas de função, reduzindo a latência em 57% em dispositivos de borda. No entanto, ganhos menores no M4 Max com o modelo 8B-A1B indicam gargalos de otimização ainda a explorar nesse tipo de modelo de larga escala.",
+  "snippet": "Today, we release DSpark [1] draft model checkpoints for three models from our LFM2.5 family: LFM2.5-1.2B-Instruct, the recently released LFM2.5-2.6B, and LFM2.5-8B-A1B. These add a speculative decoding path that trades a minimal memory increase for a large decoding speedup without changing output quality. The draft models reach up to 3.18 throughput improvement on a GPU and up to 2.87x on-device.",
+  "date_iso": "2026-08-20",
+  "kind": "release",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "performance",
+    "optimization",
+    "latency",
+    "throughput"
+   ],
+   "content-type": [
+    "release-announcement"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "llm-models",
+    "local-llm"
+   ],
+   "framework-library-tool": [
+    "sglang",
+    "llama-cpp"
+   ],
+   "topic-technology": [
+    "speculative-decoding",
+    "draft-models",
+    "inference-optimization",
+    "model-release"
+   ],
+   "trending-emerging": [
+    "speculative-decoding"
+   ]
+  }
+ },
+ {
+  "id": 2866,
+  "source_id": 7,
+  "url": "https://github.com/proliferate-ai/proliferate",
+  "title": "The open-source AI IDE for Claude Code, Codex, OpenCode, and more. Run agents in parallel, locally or in the cloud, and build reusable workflows.",
+  "title_pt": "Proliferate: o IDE de IA open source para agentes de codificação paralelos",
+  "summary_pt": "O Proliferate é um IDE de IA open source que permite executar agentes de codificação como Claude Code, Codex, OpenCode, Cursor e Grok em paralelo, no mesmo workspace. Cada tarefa recebe uma git worktree isolada, com branch, terminal, conversa e estado de revisão próprios. Entre os recursos estão harnesses nativos para vários agentes, execução paralela, subagentes que delegam escopo a agentes filhos e retomam os resultados, integrações com MCPs, skills, Computer Use, Browser Use e ferramentas personalizadas, além de workflows recorrentes ou acionados por eventos, como revisões noturnas e triagem de alertas.\n\nA plataforma de controle pode ser totalmente auto-hospedada: o deploy é documentado para Docker, AWS, GCP, Azure, Kubernetes e ambientes air-gapped, incluindo uma opção simples com Docker Compose envolvendo Caddy, Postgres e a API. Também é possível executar o app desktop a partir do código-fonte usando Rust, Node.js 22+ e pnpm, com perfis de desenvolvimento para quando múltiplas worktrees rodam ao mesmo tempo. O projeto é distribuído sob licença AGPL-3.0 e possui comunidade ativa no Discord.",
+  "snippet": "The open-source AI IDE Run Claude Code, Codex, OpenCode, Grok, and any other coding agent in parallel, in one workspace. Each task gets an isolated git worktree for its branch, terminal, conversation, and review state. Download for macOS • Documentation • Changelog • Discord Features 🤖 Native harnesses - Claude Code, Codex, OpenCode, Cursor, Grok, and mo",
+  "date_iso": "2026-06-10",
+  "kind": "tool",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "anthropic",
+    "microsoft",
+    "amazon",
+    "aws",
+    "azure-ai"
+   ],
+   "concept-theme": [
+    "open-source",
+    "developer-productivity"
+   ],
+   "content-type": [
+    "product-launch"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "ai-general",
+    "llm-models"
+   ],
+   "ecosystem-language": [
+    "rust",
+    "nodejs",
+    "python"
+   ],
+   "framework-library-tool": [
+    "claude",
+    "grok",
+    "docker",
+    "kubernetes",
+    "aws",
+    "nodejs"
+   ],
+   "topic-technology": [
+    "ai-agents",
+    "agent-orchestration",
+    "multi-agent-systems",
+    "agentic-ai",
+    "mcp"
+   ],
+   "trending-emerging": [
+    "ai-agents",
+    "multi-agent",
+    "tool-calling",
+    "mcp"
+   ]
+  }
  }
 ]

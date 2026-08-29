@@ -7,7 +7,7 @@ import { stmts, wipeAll, removeSource } from './db.js';
 import {
   ROOT, EXPORT_DIR, DB_PATH, CONCURRENCY, MAX_RETRIES, HAS_LLM, CLASSIFY_AFTER_CRAWL, SUMMARIZE_AFTER_CRAWL,
   SEARCH_MODE_A_CONFIRM, OPENROUTER_API_KEY, DEEPSEEK_API_KEY, LLM_PROVIDER, providerInfo, ENV_PATH,
-  BUDGET_USD, MAX_PARALLEL, RAM_MAX_PCT,
+  BUDGET_USD, MAX_PARALLEL, RAM_MAX_PCT, RAM_FREE_TARGET_PCT, CPU_FREE_TARGET_PCT,
   AGGRESSIVE_DEFAULT, DEFAULT_SINCE, MIN_CRAWL_DATE, VERIFY_AFTER_CRAWL, VERIFY_STREAMING, JOB_TIMEOUT_MS, JOB_HARD_TIMEOUT_MS,
   CLASSIFY_STREAMING, SUMMARIZE_STREAMING, CURATE_JOBS, ROUNDUP_TIMEOUT_MS, COST_LOG_INTERVAL_MS,
   ENRICH_MAX_ATTEMPTS, defaultParallel, loadSources, addSourceToConfig, removeSourceFromConfig, setRuntimeKey,
@@ -153,9 +153,28 @@ async function runWithLimits({ command, flags = {}, profile }, fn) {
     errorLog(`--parallel inválido (inteiro >= 1): ${flags.parallel}`);
     process.exit(1);
   }
+  // Metas de % livre (memória/CPU) como flor por-run — sobrepõem as do .env/padrão p/ esta run.
+  const pct = (name, fallback) => {
+    const v = flags[name];
+    if (v == null) return fallback;
+    const n = Number(v);
+    if (!Number.isFinite(n) || n <= 0 || n >= 100) {
+      errorLog(`--${name} inválido (0..100): ${v}`);
+      process.exit(1);
+    }
+    return n;
+  };
+  const ramFreeTargetPct = pct('ram-free-pct', RAM_FREE_TARGET_PCT);
+  const cpuFreeTargetPct = pct('cpu-free-pct', CPU_FREE_TARGET_PCT);
   // Freio de emergência do governador: RAM crítica sustentada -> recicla o browser (o getter
   // lazy de fetch.js relança sozinho no próximo render).
-  initGovernor({ parallel, profile, onEmergencyBrake: () => void closeBrowser().catch(() => {}) });
+  initGovernor({
+    parallel,
+    profile,
+    ramFreeTargetPct,
+    cpuFreeTargetPct,
+    onEmergencyBrake: () => void closeBrowser().catch(() => {}),
+  });
   beginRun({ command, budgetUsd, args: flags });
   let failed = false;
   try {
@@ -1164,8 +1183,26 @@ export function cmdLimits(rest, flags) {
       upsertEnvVar('RAM_MAX_PCT', String(v));
       n++;
     }
+    if (flags['ram-free-pct'] != null) {
+      const v = Number(flags['ram-free-pct']);
+      if (!Number.isFinite(v) || v <= 0 || v >= 100) {
+        errorLog(`--ram-free-pct inválido (0..100): ${flags['ram-free-pct']}`);
+        process.exit(1);
+      }
+      upsertEnvVar('RAM_FREE_TARGET_PCT', String(v));
+      n++;
+    }
+    if (flags['cpu-free-pct'] != null) {
+      const v = Number(flags['cpu-free-pct']);
+      if (!Number.isFinite(v) || v <= 0 || v >= 100) {
+        errorLog(`--cpu-free-pct inválido (0..100): ${flags['cpu-free-pct']}`);
+        process.exit(1);
+      }
+      upsertEnvVar('CPU_FREE_TARGET_PCT', String(v));
+      n++;
+    }
     if (!n) {
-      errorLog('uso: ncrawl limits set [--budget USD] [--parallel N] [--ram-max-pct P]');
+      errorLog('uso: ncrawl limits set [--budget USD] [--parallel N] [--ram-max-pct P] [--ram-free-pct P] [--cpu-free-pct P]');
       process.exit(1);
     }
     log(`limites salvos em ${ENV_PATH} (valem p/ os próximos runs; flags por-run têm precedência)`);
@@ -1179,6 +1216,8 @@ export function cmdLimits(rest, flags) {
   log(`parallel:    ${N} (${origem('MAX_PARALLEL')}; auto = núcleos clamp 4..64 = ${defaultParallel()})`);
   log(`budget:      ${BUDGET_USD > 0 ? `US$ ${BUDGET_USD.toFixed(2)}/run` : 'ilimitado'} (${origem('BUDGET_USD')})`);
   log(`ram-max-pct: ${RAM_MAX_PCT}% (${origem('RAM_MAX_PCT')})`);
+  log(`ram-free:    >=${RAM_FREE_TARGET_PCT}% livre (${origem('RAM_FREE_TARGET_PCT')})`);
+  log(`cpu-free:    >=${CPU_FREE_TARGET_PCT}% ocioso (${origem('CPU_FREE_TARGET_PCT')})`);
   log(
     `lanes (perfil crawl):    llm=${Math.ceil(N * 0.6)} fetch=${Math.ceil(N / 4)} render<=${Math.ceil(N / 4)} (RAM manda)`,
   );
@@ -1197,7 +1236,7 @@ export function cmdLimits(rest, flags) {
   } catch {
     /* ledger vazio/DB antigo: os limites acima já foram mostrados */
   }
-  log('uso: ncrawl limits set [--budget USD] [--parallel N] [--ram-max-pct P]');
+  log('uso: ncrawl limits set [--budget USD] [--parallel N] [--ram-max-pct P] [--ram-free-pct P] [--cpu-free-pct P]');
 }
 
 // Sobe o buscador web local (React zero-build, filtros sobre a base) e fica no ar até

@@ -1,16 +1,21 @@
 {
  "schemaVersion": 1,
- "generatedAt": "2026-08-24T12:18:23.446Z",
+ "generatedAt": "2026-08-29T13:39:58.693Z",
  "totals": {
-  "articles": 0,
-  "summaries": 0,
-  "classified": 0
+  "articles": 851,
+  "summaries": 82,
+  "classified": 72
  },
  "cost": {
-  "totalUsd": 0,
-  "totalCalls": 0
+  "totalUsd": 0.52749574268,
+  "totalCalls": 1349
  },
  "sources": [
+  {
+   "id": 2,
+   "name": "JavaScript Weekly",
+   "count": 851
+  },
   {
    "id": 3,
    "name": "Frontend Focus",
@@ -19,11 +24,6 @@
   {
    "id": 6,
    "name": "Golang Weekly",
-   "count": 0
-  },
-  {
-   "id": 2,
-   "name": "JavaScript Weekly",
    "count": 0
   },
   {
@@ -42,10 +42,1048 @@
    "count": 0
   }
  ],
- "facets": [],
+ "facets": [
+  {
+   "name": "domain",
+   "tags": [
+    {
+     "tag": "frontend",
+     "count": 45
+    },
+    {
+     "tag": "nodejs",
+     "count": 18
+    },
+    {
+     "tag": "backend",
+     "count": 14
+    },
+    {
+     "tag": "ai-general",
+     "count": 10
+    },
+    {
+     "tag": "reactjs",
+     "count": 8
+    },
+    {
+     "tag": "llm-models",
+     "count": 2
+    },
+    {
+     "tag": "python",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "name": "content-type",
+   "tags": [
+    {
+     "tag": "release-announcement",
+     "count": 24
+    },
+    {
+     "tag": "guide",
+     "count": 10
+    },
+    {
+     "tag": "tutorial",
+     "count": 9
+    },
+    {
+     "tag": "version-release",
+     "count": 8
+    },
+    {
+     "tag": "analysis",
+     "count": 6
+    },
+    {
+     "tag": "deep-dive",
+     "count": 6
+    },
+    {
+     "tag": "tooling",
+     "count": 6
+    },
+    {
+     "tag": "news",
+     "count": 5
+    },
+    {
+     "tag": "tool-release",
+     "count": 4
+    },
+    {
+     "tag": "library-release",
+     "count": 2
+    },
+    {
+     "tag": "product-launch",
+     "count": 2
+    },
+    {
+     "tag": "api-reference",
+     "count": 1
+    },
+    {
+     "tag": "case-study",
+     "count": 1
+    },
+    {
+     "tag": "commentary",
+     "count": 1
+    },
+    {
+     "tag": "comparison",
+     "count": 1
+    },
+    {
+     "tag": "curated-list",
+     "count": 1
+    },
+    {
+     "tag": "demo",
+     "count": 1
+    },
+    {
+     "tag": "documentation",
+     "count": 1
+    },
+    {
+     "tag": "explainer",
+     "count": 1
+    },
+    {
+     "tag": "how-to",
+     "count": 1
+    },
+    {
+     "tag": "migration-guide",
+     "count": 1
+    },
+    {
+     "tag": "opinion",
+     "count": 1
+    },
+    {
+     "tag": "security-advisory",
+     "count": 1
+    },
+    {
+     "tag": "success-story",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "name": "topic-technology",
+   "tags": [
+    {
+     "tag": "javascript",
+     "count": 39
+    },
+    {
+     "tag": "typescript",
+     "count": 20
+    },
+    {
+     "tag": "react",
+     "count": 13
+    },
+    {
+     "tag": "web-development",
+     "count": 13
+    },
+    {
+     "tag": "nodejs",
+     "count": 12
+    },
+    {
+     "tag": "performance-optimization",
+     "count": 12
+    },
+    {
+     "tag": "software-development",
+     "count": 12
+    },
+    {
+     "tag": "ai-agents",
+     "count": 8
+    },
+    {
+     "tag": "agentic-ai",
+     "count": 7
+    },
+    {
+     "tag": "mcp",
+     "count": 5
+    },
+    {
+     "tag": "bundling",
+     "count": 4
+    },
+    {
+     "tag": "css",
+     "count": 4
+    },
+    {
+     "tag": "html",
+     "count": 4
+    },
+    {
+     "tag": "package-management",
+     "count": 4
+    },
+    {
+     "tag": "system-design",
+     "count": 4
+    },
+    {
+     "tag": "vue",
+     "count": 4
+    },
+    {
+     "tag": "web-performance",
+     "count": 4
+    },
+    {
+     "tag": "browser-compatibility",
+     "count": 3
+    },
+    {
+     "tag": "component-libraries",
+     "count": 3
+    },
+    {
+     "tag": "dom",
+     "count": 3
+    },
+    {
+     "tag": "edge-runtime",
+     "count": 3
+    },
+    {
+     "tag": "esm",
+     "count": 3
+    },
+    {
+     "tag": "security-node",
+     "count": 3
+    },
+    {
+     "tag": "serialization",
+     "count": 3
+    },
+    {
+     "tag": "web-apis",
+     "count": 3
+    },
+    {
+     "tag": "web-standards",
+     "count": 3
+    },
+    {
+     "tag": "webassembly",
+     "count": 3
+    },
+    {
+     "tag": "authorization",
+     "count": 2
+    },
+    {
+     "tag": "automation",
+     "count": 2
+    },
+    {
+     "tag": "canvas",
+     "count": 2
+    },
+    {
+     "tag": "design-systems",
+     "count": 2
+    },
+    {
+     "tag": "distributed-systems",
+     "count": 2
+    },
+    {
+     "tag": "edge-ai",
+     "count": 2
+    },
+    {
+     "tag": "hydration",
+     "count": 2
+    },
+    {
+     "tag": "llm-models",
+     "count": 2
+    },
+    {
+     "tag": "modules",
+     "count": 2
+    },
+    {
+     "tag": "multi-agent-systems",
+     "count": 2
+    },
+    {
+     "tag": "react-19",
+     "count": 2
+    },
+    {
+     "tag": "react-hooks",
+     "count": 2
+    },
+    {
+     "tag": "ssg",
+     "count": 2
+    },
+    {
+     "tag": "state-management",
+     "count": 2
+    },
+    {
+     "tag": "supply-chain-security",
+     "count": 2
+    },
+    {
+     "tag": "tool-calling",
+     "count": 2
+    },
+    {
+     "tag": "tree-shaking",
+     "count": 2
+    },
+    {
+     "tag": "accessibility",
+     "count": 1
+    },
+    {
+     "tag": "ai-benchmarks",
+     "count": 1
+    },
+    {
+     "tag": "ai-gateway",
+     "count": 1
+    },
+    {
+     "tag": "ai-hardware",
+     "count": 1
+    },
+    {
+     "tag": "ai-infrastructure",
+     "count": 1
+    },
+    {
+     "tag": "ai-policy",
+     "count": 1
+    },
+    {
+     "tag": "authentication",
+     "count": 1
+    },
+    {
+     "tag": "background-jobs",
+     "count": 1
+    },
+    {
+     "tag": "caching",
+     "count": 1
+    },
+    {
+     "tag": "ci-cd",
+     "count": 1
+    },
+    {
+     "tag": "commonjs",
+     "count": 1
+    },
+    {
+     "tag": "concurrency",
+     "count": 1
+    },
+    {
+     "tag": "cron-jobs",
+     "count": 1
+    },
+    {
+     "tag": "css-variables",
+     "count": 1
+    },
+    {
+     "tag": "data-modeling",
+     "count": 1
+    },
+    {
+     "tag": "data-validation",
+     "count": 1
+    },
+    {
+     "tag": "data-visualization",
+     "count": 1
+    },
+    {
+     "tag": "dependency-management",
+     "count": 1
+    },
+    {
+     "tag": "deployment",
+     "count": 1
+    },
+    {
+     "tag": "evals",
+     "count": 1
+    },
+    {
+     "tag": "event-driven-architecture",
+     "count": 1
+    },
+    {
+     "tag": "fetch-api",
+     "count": 1
+    },
+    {
+     "tag": "forms",
+     "count": 1
+    },
+    {
+     "tag": "jsx",
+     "count": 1
+    },
+    {
+     "tag": "lazy-loading",
+     "count": 1
+    },
+    {
+     "tag": "load-balancing",
+     "count": 1
+    },
+    {
+     "tag": "machine-learning",
+     "count": 1
+    },
+    {
+     "tag": "middleware",
+     "count": 1
+    },
+    {
+     "tag": "monorepos",
+     "count": 1
+    },
+    {
+     "tag": "mpa",
+     "count": 1
+    },
+    {
+     "tag": "node-versions",
+     "count": 1
+    },
+    {
+     "tag": "npm-scripts",
+     "count": 1
+    },
+    {
+     "tag": "npm-security",
+     "count": 1
+    },
+    {
+     "tag": "oauth",
+     "count": 1
+    },
+    {
+     "tag": "observability",
+     "count": 1
+    },
+    {
+     "tag": "oidc",
+     "count": 1
+    },
+    {
+     "tag": "on-device-inference",
+     "count": 1
+    },
+    {
+     "tag": "polyfills",
+     "count": 1
+    },
+    {
+     "tag": "react-18",
+     "count": 1
+    },
+    {
+     "tag": "reconciliation",
+     "count": 1
+    },
+    {
+     "tag": "relational-databases",
+     "count": 1
+    },
+    {
+     "tag": "responsive-design",
+     "count": 1
+    },
+    {
+     "tag": "routing",
+     "count": 1
+    },
+    {
+     "tag": "self-hosting",
+     "count": 1
+    },
+    {
+     "tag": "serverless",
+     "count": 1
+    },
+    {
+     "tag": "spa",
+     "count": 1
+    },
+    {
+     "tag": "ssr",
+     "count": 1
+    },
+    {
+     "tag": "streaming-ssr",
+     "count": 1
+    },
+    {
+     "tag": "task-queues",
+     "count": 1
+    },
+    {
+     "tag": "theming",
+     "count": 1
+    },
+    {
+     "tag": "unit-testing",
+     "count": 1
+    },
+    {
+     "tag": "virtual-dom",
+     "count": 1
+    },
+    {
+     "tag": "webgpu",
+     "count": 1
+    },
+    {
+     "tag": "webhooks",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "name": "difficulty",
+   "tags": [
+    {
+     "tag": "intermediate",
+     "count": 35
+    },
+    {
+     "tag": "advanced",
+     "count": 11
+    },
+    {
+     "tag": "beginner",
+     "count": 4
+    },
+    {
+     "tag": "for-practitioners",
+     "count": 4
+    },
+    {
+     "tag": "expert",
+     "count": 3
+    },
+    {
+     "tag": "all-levels",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "name": "ecosystem-language",
+   "tags": [
+    {
+     "tag": "javascript",
+     "count": 46
+    },
+    {
+     "tag": "typescript",
+     "count": 22
+    },
+    {
+     "tag": "nodejs",
+     "count": 10
+    },
+    {
+     "tag": "html",
+     "count": 5
+    },
+    {
+     "tag": "json",
+     "count": 3
+    },
+    {
+     "tag": "python",
+     "count": 3
+    },
+    {
+     "tag": "rust",
+     "count": 3
+    },
+    {
+     "tag": "css",
+     "count": 2
+    },
+    {
+     "tag": "go",
+     "count": 2
+    },
+    {
+     "tag": "markdown",
+     "count": 2
+    },
+    {
+     "tag": "wasm",
+     "count": 2
+    },
+    {
+     "tag": "bash",
+     "count": 1
+    },
+    {
+     "tag": "shell",
+     "count": 1
+    },
+    {
+     "tag": "sql",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "name": "company-vendor-model",
+   "tags": [
+    {
+     "tag": "github",
+     "count": 3
+    },
+    {
+     "tag": "google",
+     "count": 3
+    },
+    {
+     "tag": "vercel",
+     "count": 3
+    },
+    {
+     "tag": "anthropic",
+     "count": 2
+    },
+    {
+     "tag": "openai",
+     "count": 2
+    },
+    {
+     "tag": "claude",
+     "count": 1
+    },
+    {
+     "tag": "cloudflare",
+     "count": 1
+    },
+    {
+     "tag": "deepseek",
+     "count": 1
+    },
+    {
+     "tag": "gpt",
+     "count": 1
+    },
+    {
+     "tag": "xai",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "name": "framework-library-tool",
+   "tags": [
+    {
+     "tag": "nodejs",
+     "count": 11
+    },
+    {
+     "tag": "react",
+     "count": 10
+    },
+    {
+     "tag": "npm",
+     "count": 6
+    },
+    {
+     "tag": "nextjs",
+     "count": 5
+    },
+    {
+     "tag": "vite",
+     "count": 3
+    },
+    {
+     "tag": "bun",
+     "count": 2
+    },
+    {
+     "tag": "deno",
+     "count": 2
+    },
+    {
+     "tag": "eslint",
+     "count": 2
+    },
+    {
+     "tag": "storybook",
+     "count": 2
+    },
+    {
+     "tag": "tailwind",
+     "count": 2
+    },
+    {
+     "tag": "three-js",
+     "count": 2
+    },
+    {
+     "tag": "angular",
+     "count": 1
+    },
+    {
+     "tag": "cloudflare-workers",
+     "count": 1
+    },
+    {
+     "tag": "framer-motion",
+     "count": 1
+    },
+    {
+     "tag": "github-actions",
+     "count": 1
+    },
+    {
+     "tag": "gsap",
+     "count": 1
+    },
+    {
+     "tag": "hono",
+     "count": 1
+    },
+    {
+     "tag": "jest",
+     "count": 1
+    },
+    {
+     "tag": "langchain",
+     "count": 1
+    },
+    {
+     "tag": "material-ui",
+     "count": 1
+    },
+    {
+     "tag": "nitro",
+     "count": 1
+    },
+    {
+     "tag": "playwright",
+     "count": 1
+    },
+    {
+     "tag": "pnpm",
+     "count": 1
+    },
+    {
+     "tag": "postgresql",
+     "count": 1
+    },
+    {
+     "tag": "preact",
+     "count": 1
+    },
+    {
+     "tag": "qwik",
+     "count": 1
+    },
+    {
+     "tag": "rolldown",
+     "count": 1
+    },
+    {
+     "tag": "socket-io",
+     "count": 1
+    },
+    {
+     "tag": "svelte",
+     "count": 1
+    },
+    {
+     "tag": "tensorflow",
+     "count": 1
+    },
+    {
+     "tag": "vitest",
+     "count": 1
+    },
+    {
+     "tag": "yarn",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "name": "concept-theme",
+   "tags": [
+    {
+     "tag": "performance",
+     "count": 26
+    },
+    {
+     "tag": "optimization",
+     "count": 13
+    },
+    {
+     "tag": "dev-experience",
+     "count": 11
+    },
+    {
+     "tag": "architecture",
+     "count": 10
+    },
+    {
+     "tag": "security",
+     "count": 10
+    },
+    {
+     "tag": "developer-productivity",
+     "count": 6
+    },
+    {
+     "tag": "open-source",
+     "count": 6
+    },
+    {
+     "tag": "api-design",
+     "count": 5
+    },
+    {
+     "tag": "dx",
+     "count": 5
+    },
+    {
+     "tag": "reliability",
+     "count": 5
+    },
+    {
+     "tag": "community",
+     "count": 3
+    },
+    {
+     "tag": "design-patterns",
+     "count": 3
+    },
+    {
+     "tag": "scalability",
+     "count": 3
+    },
+    {
+     "tag": "state-management",
+     "count": 3
+    },
+    {
+     "tag": "static-analysis",
+     "count": 3
+    },
+    {
+     "tag": "accessibility",
+     "count": 2
+    },
+    {
+     "tag": "async",
+     "count": 2
+    },
+    {
+     "tag": "authentication",
+     "count": 2
+    },
+    {
+     "tag": "authorization",
+     "count": 2
+    },
+    {
+     "tag": "latency",
+     "count": 2
+    },
+    {
+     "tag": "refactoring",
+     "count": 2
+    },
+    {
+     "tag": "technical-debt",
+     "count": 2
+    },
+    {
+     "tag": "type-safety",
+     "count": 2
+    },
+    {
+     "tag": "ux",
+     "count": 2
+    },
+    {
+     "tag": "a11y",
+     "count": 1
+    },
+    {
+     "tag": "ci-cd",
+     "count": 1
+    },
+    {
+     "tag": "concurrency",
+     "count": 1
+    },
+    {
+     "tag": "cost",
+     "count": 1
+    },
+    {
+     "tag": "cost-optimization",
+     "count": 1
+    },
+    {
+     "tag": "debugging",
+     "count": 1
+    },
+    {
+     "tag": "design-systems",
+     "count": 1
+    },
+    {
+     "tag": "devops",
+     "count": 1
+    },
+    {
+     "tag": "error-handling",
+     "count": 1
+    },
+    {
+     "tag": "evaluation",
+     "count": 1
+    },
+    {
+     "tag": "governance",
+     "count": 1
+    },
+    {
+     "tag": "monitoring",
+     "count": 1
+    },
+    {
+     "tag": "observability",
+     "count": 1
+    },
+    {
+     "tag": "orchestration",
+     "count": 1
+    },
+    {
+     "tag": "privacy",
+     "count": 1
+    },
+    {
+     "tag": "productivity",
+     "count": 1
+    },
+    {
+     "tag": "sast",
+     "count": 1
+    },
+    {
+     "tag": "seo",
+     "count": 1
+    },
+    {
+     "tag": "testing",
+     "count": 1
+    },
+    {
+     "tag": "ui",
+     "count": 1
+    },
+    {
+     "tag": "web-vitals",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "name": "trending-emerging",
+   "tags": [
+    {
+     "tag": "ai-agents",
+     "count": 9
+    },
+    {
+     "tag": "agentic-ai",
+     "count": 7
+    },
+    {
+     "tag": "mcp",
+     "count": 6
+    },
+    {
+     "tag": "coding-agents",
+     "count": 2
+    },
+    {
+     "tag": "multi-agent",
+     "count": 2
+    },
+    {
+     "tag": "agent-orchestration",
+     "count": 1
+    },
+    {
+     "tag": "ai-coding-agents",
+     "count": 1
+    },
+    {
+     "tag": "ai-governance",
+     "count": 1
+    },
+    {
+     "tag": "browser-agents",
+     "count": 1
+    },
+    {
+     "tag": "copilots",
+     "count": 1
+    },
+    {
+     "tag": "tool-calling",
+     "count": 1
+    },
+    {
+     "tag": "vibe-coding",
+     "count": 1
+    }
+   ]
+  }
+ ],
  "dates": {
-  "min": null,
-  "max": null
+  "min": "2026-01-20",
+  "max": "2026-08-25"
  },
  "toolContentTypes": [
   "tool-release",

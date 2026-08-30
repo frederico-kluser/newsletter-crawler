@@ -157,6 +157,11 @@ try {
       if (cmd === 'crawl') {
         await cmdCrawl(flags);
         db.close();
+        // Backstop duro contra zumbi de teardown (ex.: chrome filho órfão com pipes segura
+        // o event loop — o nodo fica vivo "para sempre" sem o extrato ser o fim). Timer
+        // unref'd: se o processo já saiu naturalmente, ele nunca dispara; se algo segurar,
+        // força a saída 150ms depois. Tudo do run já está commitado (writes síncronas).
+        setTimeout(() => process.exit(0), 150);
       } else if (cmd === 'status') {
         printStatus();
         db.close();

@@ -317,3 +317,42 @@ com `discovered_date = publishDate` (parâmetro 6 do `enqueue`, como o Substack)
 (784 KB) → 1.329 links datados → o piso `--since 2026-01-01` corta exatamente nos 308 e a parada
 known-url evita re-trabalho. Alternativa simples (menos elegante): ingerir `sitemap.xml`
 (1.328 URLs, robots permitido) sem datas por item.
+
+---
+
+## 10. Implementado: atalho JSON (`src/therundown.js`)
+
+> Esta seção documenta o que MUDOU no crawler com a implementação — o resto da análise acima
+> permanece como a evidência original. Merge 2026-08-30.
+
+**O que foi adicionado** (espelho do atalho Substack, zero mudança em outras fontes):
+
+- `src/therundown.js` (`isRundown` + `rundownArchive`), integrado em `src/crawl.js` `processListing`
+  ANTES do caminho HTML, com o MESMO estilo do bloco substack (try/catch → warn e cai no HTML,
+  `dateSeen`/`floorHit`/`enqueue` com `discovered_date = publishDate` do payload, log
+  `rundown: N artigos (M novos) de <host>`).
+- **Única diferença vs. Substack:** o atalho só age quando `opts.aggressive !== false`. Motivo:
+  `robots.txt` **DISALLOWA `/api/`** — o probe e o índice só rodam no default agressivo do crawler
+  (que ignora robots); em modo educado (`--no-aggressive`) o crawler nunca toca o endpoint e segue
+  o fluxo HTML normal (os 8 cards).
+- `rundownArchive` faz **1 GET** em `{origin}/api/articles-index` (índice completo, ~1.329 itens,
+  sem paginação) e devolve `[{url: origin + '/articles/' + slug, published_at: publishDate}]` —
+  **sem filtrar por data** (o chamador filtra, igual ao Substack). Itens sem `slug`/`publishDate`
+  válidos são descartados; array vazio/parse falho → `[]` (fail-open p/ o HTML). Timeout curto
+  (20s), retry limitado (2), `throwHttpErrors: false`, UA de `USER_AGENT` (config.js), `got`
+  (regra do repo: nunca axios).
+- `isRundown` faz o probe **cacheado por host** (Map por processo, como o `needsJs`): 200 + array
+  JSON com ≥1 item `{slug, publishDate}` → `true`; erro/timeout → `false` (fail-open).
+- Testes: `test/therundown.archive.test.js` (deteção por payload, fallbacks fail-safe, item sem
+  `publishDate` ignorado, cache por host; wire de `processListing` com `mock.module` provando o
+  `discovered_date` na frontier, o piso `--since` no chamador e o gate do modo educado).
+
+**Efeito no comportamento da fonte** (com o atalho ativo, default agressivo):
+
+- 1ª coleta com `--since 2026-01-01`: o índice chega inteiro numa request (784 KB), o piso corta
+  exatamente nos ~308 artigos desde 2026-01-01 e todos são enfileirados como `kind=article`
+  (semântica listing) com a data do payload (que também alimenta o `%` do progresso rumo ao piso).
+- Runs seguintes: o índice é re-baixado, mas `enqueue` é INSERT OR IGNORE por URL e a parada
+  known-url/`added===0` segue valendo — só o novo entra (log `rundown: N artigos (M novos)`).
+- Modo educado: comportamento exatamente como ANTES da implementação (8 cards via HTML, sem datas
+  na listagem — descrito nas seções 4–7), pois o endpoint disallowed nunca é consultado.

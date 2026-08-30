@@ -1,4 +1,5 @@
 // Busca de HTML: estático (got), renderizado (Playwright), e decisão automática (fetchSmart).
+import { execFileSync } from 'node:child_process';
 import got from 'got';
 import { chromium } from 'playwright';
 import robotsParser from 'robots-parser';
@@ -262,12 +263,33 @@ async function getBrowser() {
   if (!_browser) _browser = await chromium.launch({ headless: true, args: CHROMIUM_ARGS });
   return _browser;
 }
+// Esta versão do Playwright NÃO tem browser.process() (TypeError em runtime) e o close()
+// às vezes resolve sem derrubar o processo do headless-shell — um filho órfão com pipes
+// abertos segura o event loop do node (zumbi pós-extrato, observado em vários runs). A
+// rede de segurança é varre a tabela de processos e SIGKILLa os filhos DIRETOS do nosso
+// pid que pareçam Chromium. No-op se nada existir.
+function killBrowserChildren() {
+  try {
+    const out = execFileSync('ps', ['-axo', 'pid=,ppid=,comm='], { encoding: 'utf8', timeout: 5000 });
+    for (const line of out.split('\n')) {
+      const m = line.trim().match(/^(\d+)\s+(\d+)\s+(.+)$/);
+      if (m && Number(m[2]) === process.pid && /chrome-headless-shell|chromium/i.test(m[3])) {
+        try {
+          process.kill(Number(m[1]), 'SIGKILL');
+        } catch {
+          /* filho já saiu entre o ps e o kill */
+        }
+      }
+    }
+  } catch {
+    /* ps indisponível: o close() gracioso é o bastante */
+  }
+}
+
 // Fecha o Chromium SEM pendurar o processo: um page.goto abortado (deadline) pode deixar o
 // browser ocupado e o close() do Playwright nunca resolver — isso segurava o node vivo
 // (chrome filho + pipes) depois do extrato do run. Cede 10s ao close() gracioso e, em
-// QUALQUER desfecho, MATA o processo do browser: no macOS o close() do headless-shell às
-// vezes resolve sem derrubar o processo filho (zombie segurando o event loop do node —
-// observado no run #6: extrato ok, node vivo 8+ min, chrome órfão com pipes abertos).
+// QUALQUER desfecho, mata os processos filhos do Chromium (killBrowserChildren).
 export async function closeBrowser() {
   if (_browser) {
     const closing = _browser.close().catch(() => {});
@@ -275,15 +297,9 @@ export async function closeBrowser() {
       closing,
       new Promise((resolve) => setTimeout(() => resolve('timeout'), 10_000)),
     ]);
-    // Kill de segurança SEMPRE (no-op se o processo já morreu): garante que nenhum filho
-    // do Chromium sobreviva ao teardown, mesmo quando o close() "resolve" sem matá-lo.
-    try {
-      _browser.process()?.kill('SIGKILL');
-    } catch {
-      /* processo já saiu: kill é no-op */
-    }
+    killBrowserChildren();
     if (settled === 'timeout') {
-      warn('browser: close() pendurou — processo do Chromium morto (SIGKILL)');
+      warn('browser: close() pendurou — processos do Chromium mortos (SIGKILL)');
     }
     _browser = null;
   }

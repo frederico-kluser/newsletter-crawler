@@ -9,6 +9,8 @@ function fresh() {
   return {
     active: false,
     sinceMs: null,
+    startedAt: null, // início da run (p/ ritmo/ETA da linha de progresso)
+    jobsBase: null, // fronteira pós-seed { done, failed } — base do "jobs concluídos na run"
     stages: {}, // nome -> nº de operações NESTA fase agora (fetch/render/limpeza/curadoria/…)
     counts: {}, // acumulados: salvos/enriquecidos/blurb/estouros/itensCurados/verificados/…
     sources: new Map(), // id -> { name, oldestMs, floorHit, listingDone }
@@ -21,6 +23,12 @@ export function progressReset({ sinceDate = null } = {}) {
   Object.assign(st, fresh());
   st.active = true;
   st.sinceMs = sinceDate instanceof Date ? sinceDate.getTime() : null;
+  st.startedAt = Date.now();
+}
+
+/** Base da fronteira DEPOIS do seed (listagens + requeues): delta de done+failed = jobs da run. */
+export function progressJobsBase(done, failed) {
+  st.jobsBase = { done: Number(done) || 0, failed: Number(failed) || 0 };
 }
 
 export function stageEnter(name) {
@@ -98,6 +106,8 @@ export function progressSnapshot(nowMs = Date.now()) {
   return {
     active: st.active,
     since: st.sinceMs != null ? new Date(st.sinceMs).toISOString().slice(0, 10) : null,
+    startedAt: st.startedAt,
+    jobsBase: st.jobsBase,
     stages: { ...st.stages },
     counts: { ...st.counts },
     sources,

@@ -31,7 +31,7 @@ import { closeParsePool } from './parse-pool.js';
 import { logEvent, flushEvents } from './events.js';
 import { createJobClock } from './deadline.js';
 import {
-  progressReset, progressSnapshot, sourceSeen, sourceListingDone, bump, inStage,
+  progressReset, progressSnapshot, sourceSeen, sourceListingDone, bump, inStage, progressJobsBase,
 } from './progress.js';
 import { runEventsReset, emitRunEvent, runEventsSnapshot } from './run-events.js';
 import { startWebServer } from './web.js';
@@ -88,6 +88,20 @@ function cliProgressLine() {
     `artigos +${novos}${c.mantidosBlurb ? ` (+${c.mantidosBlurb} blurb)` : ''}`,
     `fila ${f.pending}p/${f.in_progress}a/${f.done}d/${f.failed}x`,
   ];
+  // Ritmo + ETA: jobs concluídos na run (delta de done+failed sobre a base pós-seed) ÷
+  // minutos decorridos = taxa; fila restante (pending + em voo) ÷ taxa = "falta ~T min".
+  if (p.jobsBase && p.startedAt) {
+    const elapsedMin = Math.max((Date.now() - p.startedAt) / 60_000, 0.2);
+    const doneJobs = Math.max(
+      0, f.done - p.jobsBase.done + f.failed - p.jobsBase.failed,
+    );
+    const rate = doneJobs / elapsedMin;
+    const remaining = f.pending + f.in_progress;
+    if (doneJobs > 0) parts.push(`ritmo ~${rate.toFixed(1)} jobs/min`);
+    if (remaining > 0) {
+      parts.push(rate > 0 ? `falta ~${Math.max(1, Math.ceil(remaining / rate))} min` : 'falta ~?');
+    }
+  }
   if (c.itensCurados) parts.push(`curados +${c.itensCurados}`);
   if (c.classificados || c.resumidos || c.verificados) {
     parts.push(`pós ${c.verificados || 0}v/${c.resumidos || 0}r/${c.classificados || 0}c`);
@@ -555,6 +569,12 @@ async function crawlRun(flags) {
   costTimer.unref?.();
 
   emitRunEvent({ phase: 'discovery', kind: 'phase-start', detail: 'Descoberta' });
+  // Base da fila PÓS-seed: o delta de done+failed daqui p/ frente = jobs concluídos na run
+  // (alimenta o ritmo/ETA da linha de progresso; o seed re-flipou done->pending antes).
+  {
+    const fb = Object.fromEntries(stmts.countFrontierByState.all().map((r) => [r.state, r.c]));
+    progressJobsBase(fb.done || 0, fb.failed || 0);
+  }
   for (;;) {
     // Artigos: limitados pela capacity de fetch+render (+ --max-articles).
     while (processedArticles < maxArticles && !shouldStop() && inflight.size < capacity()) {

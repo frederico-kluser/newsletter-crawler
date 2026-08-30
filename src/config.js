@@ -611,6 +611,16 @@ export const SEARCH_WEB_DEEP_CONCURRENCY = Number(process.env.SEARCH_WEB_DEEP_CO
 export const SEARCH_UI_CONCURRENCY_DEFAULT = Number(process.env.SEARCH_UI_CONCURRENCY_DEFAULT || 8);
 export const SEARCH_UI_CONCURRENCY_CEILING = Number(process.env.SEARCH_UI_CONCURRENCY_CEILING || 24);
 
+// ---- export web (snapshot estático do webapp, `ncrawl export --format web`) ----
+// Alvo de bytes de cada contents.partN.json em MB. O GitHub REJEITA blobs > 100 MB no push
+// (GH001) e o contents.json único passou disso no acervo cheio — o export fatia o mapa id→content
+// em partes determinísticas bem abaixo do limite (default 85 deixa folga). Um artigo isolado pode
+// estourar o alvo e vai sozinho numa parte; acima do teto duro (95 MB) o export FALHA (fail-closed,
+// ver export-web.js). Env malformado/NaN/não-positivo cai no default — um NaN aqui devolveria o
+// particionamento inteiro para um arquivo gigante sem aviso.
+const PART = Number(process.env.EXPORT_WEB_PART_MB || 85);
+export const EXPORT_WEB_PART_MB = Number.isFinite(PART) && PART > 0 ? PART : 85;
+
 // ---- deploy do site (ncrawl deploy) ----
 // Site em produção: a Vercel publica o que está commitado em DEPLOY_BRANCH (Git integration, Root
 // Directory webapp/). O deploy CONFIRMA a publicação lendo o snapshot NO AR (SITE_URL + META_PATH)

@@ -141,11 +141,6 @@ function git(args, { allowFail = false } = {}) {
   }
 }
 
-// Diff vazio (0) = sem mudança. `git diff --quiet` sai 1 quando há diff, então allowFail distingue.
-function hasDiffVsHead(paths) {
-  return git(['diff', '--quiet', 'HEAD', '--', ...paths], { allowFail: true }) === null;
-}
-
 // Conteúdo de um arquivo no HEAD (null se não existe lá — primeiro commit do snapshot).
 function showHead(rel) {
   return git(['show', `HEAD:${rel}`], { allowFail: true });
@@ -327,9 +322,21 @@ export async function runDeploy(flags = {}) {
   const web = exportWebSnapshot({ outDir: path.join(ROOT, DATA_REL) });
   const api = exportPublicApi({ outDir: path.join(ROOT, API_REL) });
 
-  // 3. Mudança REAL = dados diferentes do HEAD, ignorando o generatedAt volátil.
-  const dataFiles = [`${DATA_REL}/articles.json`, `${DATA_REL}/contents.json`];
-  let dataChanged = hasDiffVsHead(dataFiles);
+  // 3. Mudança REAL = algo no dir de dados difere do HEAD, ignorando o generatedAt volátil.
+  //    `git diff` NÃO enxerga arquivo novo não-rastreado e o export criou/removeu arquivos
+  //    (a 1ª rodada pós-partição gera contents.partN.json do zero e rmSync o contents.json
+  //    antigo) — por isso o sinal é o status PORCELAIN do dir inteiro: qualquer entrada que não
+  //    seja só meta/corpus modificados = dado novo (parte nova, articles mudado, arquivo
+  //    removido). O que sobra em meta/corpus (o bump do generatedAt) é tratado em seguida.
+  const dataStatus = (git(['status', '--porcelain', '--', DATA_REL, API_REL], { allowFail: true }) || '')
+    .split('\n')
+    .map((l) => l.trim())
+    .filter(Boolean);
+  // " M path" / "?? path" / " D path" → o caminho começa após 2 chars de status + espaço.
+  const changedPaths = dataStatus
+    .map((l) => l.replace(/^..?\s/, '').replace(/^"|"$/g, ''))
+    .filter((f) => f !== META_REL && f !== CORPUS_REL);
+  let dataChanged = changedPaths.length > 0;
   if (!dataChanged) dataChanged = VOLATILE_REL.some(changedIgnoringVolatile);
 
   // 4. Divergência com o remoto: remoto à frente = push rejeitado. Aborta ANTES do commit.

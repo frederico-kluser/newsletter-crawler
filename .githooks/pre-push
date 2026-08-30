@@ -56,10 +56,16 @@ if [ -n "$total_novo" ] && [ -n "$total_head" ] && [ "$total_novo" -lt "$total_h
   exit 0
 fi
 
-# Mudança real = articles/contents diferentes de HEAD, ou meta.json ignorando o generatedAt
-# (indent 1 do export = um campo por linha, então o grep -v tira só essa linha).
+# Mudança real = qualquer coisa no dir de dados além do bump do generatedAt de meta/corpus.
+# `git diff` não enxerga arquivo NOVO não-rastreado, e o export partiçãou o contents.json único
+# (que passou de 100 MB, rejeitado pelo GitHub) em contents.partN.json: a 1ª rodada pós-partição
+# CRIA as partes do zero e REMOVE o arquivo antigo — tudo isso é mudança real. O status porcelain
+# do dir inteiro decide: uma entrada que não seja só meta.json/corpus.json modificados = dado
+# novo; o que sobra em meta/corpus (o bump do generatedAt) é comparado ignorando essa linha.
 real_change=0
-if ! git diff --quiet HEAD -- "$DATA_DIR/articles.json" "$DATA_DIR/contents.json" 2>/dev/null; then
+statuses=$(git status --porcelain -- "$DATA_DIR" "$API_DIR")
+resto=$(printf '%s\n' "$statuses" | grep -vF "$META" | grep -vF "$CORPUS" || true)
+if [ -n "$resto" ]; then
   real_change=1
 elif ! diff -q <(git show "HEAD:$META" 2>/dev/null | grep -v '"generatedAt"') \
   <(grep -v '"generatedAt"' "$META") >/dev/null 2>&1; then

@@ -10,7 +10,16 @@ export function telemetryLine(tele) {
   const parts = [];
   const g = tele.governor;
   if (g?.ram?.totalBytes) {
-    parts.push(`RAM ${g.ram.usedPct}%${g.ram.state !== 'ok' ? ` (${g.ram.state})` : ''}`);
+    const r = g.ram;
+    // RAM: mostra % livre vs alvo (foco do governador em % livre, não absoluto).
+    let ramLine = `RAM ${r.usedPct}%`;
+    if (r.freePct != null && r.freeTargetPct != null) ramLine += ` (livre ${r.freePct}%/≥${r.freeTargetPct}%)`;
+    ramLine += r.state !== 'ok' ? ` (${r.state})` : '';
+    parts.push(ramLine);
+    const c = g.cpu;
+    if (c?.freePct != null) {
+      parts.push(`CPU livre ${c.freePct}%/≥${c.freeTargetPct}%`);
+    }
     const l = g.lanes;
     parts.push(
       `llm ${l.llm.active}/${l.llm.capacity} fetch ${l.fetch.active}/${l.fetch.capacity} ` +

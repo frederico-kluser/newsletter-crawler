@@ -11,14 +11,19 @@ import {
 
 const GIB = 1024 ** 3;
 
-// total 32 GiB + RAM_MAX_PCT 80 -> piso de MemAvailable = 6.4 GiB; growCut = 6.4 + 3.2 = 9.6 GiB.
-// HERMÉTICO: o init() fixa ramMaxPct/ramHysteresisPct (os 80/10 do config.js) em vez de herdar o
-// .env global do usuário (~/.newsletter-crawler/.env). Com RAM_MAX_PCT=90 (piso 3.2 / growCut
-// 6.4) o EMA fica "ok" um tick a mais — render 5->6->7 em vez de 5->6 antes da pressão — e os
-// asserts abaixo, calibrados para 80/10, quebram.
-function makeEnv({ totalGiB = 32, availGiB = 20 } = {}) {
+// total 32 GiB, RAM_FREE_TARGET_PCT 20 (default=100-80) -> alvo de RAM livre 20% = 6.4 GiB;
+// histérese 10 -> só cresce acima de 30% livre (9.6 GiB). CPU injetada fixa em 80% livre
+// (> alvo 40) para o teste não depender da carga real da máquina; os testes sinalizam pressão
+// de CPU abaixando env.cpuFree.
+// HERMÉTICO: o init() fixa ramMaxPct/ramHysteresisPct/ramFreeTargetPct/cpuFreeTargetPct (os
+// 80/10/20/40 do config.js) em vez de herdar o .env global do usuário (~/.newsletter-crawler/
+// .env). Com RAM_MAX_PCT=90 (alvos 10) o EMA ficaria "ok" um tick a mais e os asserts abaixo,
+// calibrados p/ 80/20/40, quebram.
+function makeEnv({ totalGiB = 32, availGiB = 20, cpuFreeGiB = 80 } = {}) {
   const env = { now: 100_000, total: totalGiB * GIB, avail: availGiB * GIB };
+  env.cpuFree = cpuFreeGiB;
   env.readMem = () => ({ totalBytes: env.total, availableBytes: env.avail });
+  env.readCpu = () => env.cpuFree;
   env.clock = () => env.now;
   env.tick = (n = 1) => {
     for (let i = 0; i < n; i++) {
@@ -34,11 +39,14 @@ function init(env, opts = {}) {
     parallel: 32,
     profile: 'crawl',
     readMem: env.readMem,
+    readCpu: env.readCpu,
     now: env.clock,
     autoStart: false,
-    // Pina a geometria do AIMD (piso/growCut) — determinístico independente do .env da máquina.
+    // Pina a geometria do AIMD (pisos/alvos/histérese) — determinístico independente do .env da máquina.
     ramMaxPct: 80,
     ramHysteresisPct: 10,
+    ramFreeTargetPct: 20,
+    cpuFreeTargetPct: 40,
     ...opts,
   });
 }
@@ -64,27 +72,21 @@ test('folga sustentada: grow +1/tick no render após 3 ticks bons', () => {
   assert.equal(jobsCapacity(), 13);
 });
 
-test('pressão: shrink x0.5 no render, depois escalada p/ fetch; dwell segura o regrow', () => {
+test('pressão: shrink x0.5 no render até o piso, depois escalada p/ fetch; dwell segura o regrow', () => {
   const env = makeEnv({});
   init(env);
-  env.tick(5); // render cresce até 5 com folga
+  env.tick(5); // render cresce até 5 com folga (62.5% livre > 30% grow-below)
   assert.equal(getLane('render').concurrency, 5);
 
-  env.avail = 2 * GIB; // acima do freio (1.5 GiB), abaixo do piso (6.4 GiB) após o EMA assentar
-  // t1: EMA 11 GiB (ainda "ok" — o EMA suaviza), t2: 6.5 (hold), t3: 4.25 -> pressão.
-  env.tick(2);
-  assert.equal(getLane('render').concurrency, 6, 'EMA suaviza: 1 grow antes da pressão chegar');
-  env.tick(1);
-  assert.equal(getLane('render').concurrency, 3, 'pressão: render 6 -> 3');
-  env.tick(1);
-  assert.equal(getLane('render').concurrency, 1, 'pressão: render 3 -> 1 (piso)');
-  env.tick(3); // overTicks acumulando com render no piso (5º over-tick no total)
+  env.avail = 2 * GIB; // 6.25% livre < alvo 20% -> pressão assim que o EMA assenta (acima do freio 1.5)
+  env.tick(7); // EMA entra em pressão (tick ~3); render 5 -> 2 -> 1 (piso); overTick>=5 escala p/ fetch
+  assert.equal(getLane('render').concurrency, 1, 'pressão leva o render ao piso');
   assert.equal(getLane('fetch').concurrency, 4, 'pressão sustentada escala p/ fetch: 8 -> 4');
 
-  env.avail = 20 * GIB; // alivia
-  env.tick(3); // EMA recupera e entra em "ok", mas o dwell (10s desde o último shrink) segura
+  env.avail = 20 * GIB; // alivia p/ 62.5% livre
+  env.tick(4); // EMA recupera, mas o dwell (10s desde o último shrink) ainda segura o regrow
   assert.equal(getLane('render').concurrency, 1, 'dwell pós-shrink: ainda sem regrow');
-  env.tick(7);
+  env.tick(7); // >10s do último shrink -> volta a 'ok' e recresce
   assert.ok(getLane('fetch').concurrency > 4, 'passado o dwell, o fetch recresce +1/tick');
 });
 
@@ -137,6 +139,35 @@ test('llmCap persistido: lane parte do cap (clamp piso 3..perfil); setProfile n�
   setProfile('llm-only'); // alloc llm-only = 32; o cap calibrado 16 sobrevive
   assert.equal(getLane('llm').concurrency, 16, 'setProfile não ressuscita o teto calibrado');
   assert.equal(getCalibration().dirty, true);
+});
+
+test('CPU em HOLD: mesmo com RAM abundante, a pressão de CPU segura o crescimento', () => {
+  const env = makeEnv({ availGiB: 20 }); // 62.5% RAM livre: folga de RAM de sobra
+  init(env);
+  env.tick(5);
+  assert.equal(getLane('render').concurrency, 5, 'com CPU 80% ociosa, o render cresce livre');
+
+  env.cpuFree = 45; // entre alvo 40 e alvo+histerese 50: HOLD — CPU não cresce nem encolhe
+  env.tick(12); // EMA da CPU (50%) assenta em ~45 e entra na faixa de hold
+  const plateau = getLane('render').concurrency;
+  env.tick(4);
+  assert.equal(getLane('render').concurrency, plateau, 'CPU em HOLD: o render para de crescer apesar da RAM livre');
+  assert.equal(getTelemetry().cpu.freePct, 45);
+  assert.equal(getTelemetry().ram.freeTargetPct, 20);
+  assert.equal(getTelemetry().cpu.freeTargetPct, 40);
+
+  env.cpuFree = 80; // CPU alivia acima do alvo + histerese -> volta a crescer
+  env.tick(5);
+  assert.ok(getLane('render').concurrency > plateau, 'CPU de volta acima do alvo: retoma o crescimento');
+});
+
+test('CPU sem sinal (null): não segura — o controlador decide só por RAM até o 2º sample', () => {
+  const env = makeEnv({ availGiB: 20 });
+  env.readCpu = () => null; // simula janela de CPU ainda não disponível (1º sample)
+  init(env);
+  env.tick(5);
+  assert.equal(getLane('render').concurrency, 5, 'CPU null não bloqueia o growth guiado por RAM');
+  assert.equal(getTelemetry().cpu.freePct, null);
 });
 
 test('stageWindow: min(override>0, capacidade llm) e setProfile realoca', () => {

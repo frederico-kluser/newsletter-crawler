@@ -331,7 +331,8 @@ export const SUMMARIZE_STREAMING = process.env.SUMMARIZE_STREAMING !== 'false';
 // chamador degrada). worker_threads NÃO serviam: threads compartilham o processo, um segfault
 // derrubava tudo. Também libera paralelismo de CPU real.
 export const PARSE_WORKERS =
-  envIntOr0('PARSE_WORKERS') || Math.max(1, Math.min(4, os.availableParallelism() - 1));
+  envIntOr0('PARSE_WORKERS') ||
+  Math.max(1, Math.min(6, os.availableParallelism() >= 4 ? Math.round(os.availableParallelism() / 2) : 1));
 // Timeout por task de parse: um JSDOM travado não segura um worker p/ sempre (mata e respawna).
 export const PARSE_TIMEOUT_MS = Number(process.env.PARSE_TIMEOUT_MS || 30000);
 // Timeout de STARTUP do filho: se não mandar o handshake 'ready' nesse prazo (fork ok mas travou
@@ -370,7 +371,10 @@ export const ENRICH_MAX_ATTEMPTS = Number(process.env.ENRICH_MAX_ATTEMPTS || 3);
 // Teto GLOBAL de operações simultâneas (--parallel). Deriva dos núcleos como proxy do porte
 // da máquina (o trabalho é I/O-bound, não CPU-bound); clamp p/ ser útil de VPS a workstation.
 export function defaultParallel() {
-  return Math.min(64, Math.max(4, os.availableParallelism()));
+  // Proxy do porte da máquina (o trabalho é I/O-bound, não CPU-bound). O teto alto (128) existe
+  // porque as LANES param de crescer pelos ALVOS DE % LIVRE do governador, não por este número:
+  // em máquinas grandes sobra headroom e quem decide onde parar são RAM/CPU livres medidos.
+  return Math.min(128, Math.max(4, os.availableParallelism() * 2));
 }
 export const MAX_PARALLEL = envIntOr0('MAX_PARALLEL') || defaultParallel();
 // Teto CALIBRADO da lane llm (0 = sem teto prévio): o governador começa a lane neste valor
@@ -385,7 +389,18 @@ export const BUDGET_USD = Number(process.env.BUDGET_USD || 0);
 export const COST_LOG_INTERVAL_MS = Number(process.env.COST_LOG_INTERVAL_MS || 10000);
 // Teto de uso de RAM DO SISTEMA: o governador mantém MemAvailable >= max(total*(1-pct/100), 2 GiB).
 // É a RAM da máquina inteira (desktop incluso), não o RSS do processo — Chromium é filho externo.
+// RAM_MAX_PCT é o CEILING duro (nunca usa mais que 100-pct% de RAM); as LANES crescem
+// incrementalmente até os alvos de % livre abaixo.
 export const RAM_MAX_PCT = Number(process.env.RAM_MAX_PCT || 80);
+// ---- alvos de % LIVRE do sistema (o usuário define PORCENTAGEM livre, não número absoluto) ----
+// O governador cresce o paralelismo +1/tick ENQUANTO a memória livre e a CPU livre medidas
+// estiverem ACIMA destes alvos; para de crescer quando qualquer uma entra na faixa-alvo e
+// encolhe quando alguma cai abaixo. Default = 100 - RAM_MAX_PCT (mantém compat com o histórico).
+// É a RAM/CPU da máquina inteira (desktop incluso), não o RSS do processo.
+export const RAM_FREE_TARGET_PCT = Number(process.env.RAM_FREE_TARGET_PCT || (100 - RAM_MAX_PCT));
+// Alvo de CPU OCIOSA (tempo idle do /proc/stat) mínima: cresce enquanto sobrar CPU livre acima disso.
+export const CPU_FREE_TARGET_PCT = Number(process.env.CPU_FREE_TARGET_PCT || 40);
+// Faixa de guarda em volta dos alvos de % livre (histérese: não fica oscilando na borda).
 export const RAM_HYSTERESIS_PCT = Number(process.env.RAM_HYSTERESIS_PCT || 10);
 export const GOVERNOR_TICK_MS = Number(process.env.GOVERNOR_TICK_MS || 1000);
 // Estimativa de RAM de um render Chromium (contexto+página) p/ o ramp da lane render.

@@ -22,6 +22,7 @@ import { emitRunEvent } from './run-events.js';
 import { inStage, dateSeen, floorHit, bump } from './progress.js';
 import { abortErrorOf } from './deadline.js';
 import { isSubstack, substackArchive } from './substack.js';
+import { isRundown, rundownArchive } from './therundown.js';
 import {
   normalizeUrl, sha256, domainSig, hostOf, parseDate, clampFutureDate, log, warn, errorLog, debug,
 } from './util.js';
@@ -154,6 +155,37 @@ async function processListing(job, source, opts) {
       }
     } catch (e) {
       warn(`atalho substack falhou: ${e.message}`);
+    }
+  }
+
+  // Atalho The Rundown: o DOM de /articles só expõe os 8 artigos mais recentes (a paginação
+  // "1..167" é client-side, alimentada por UMA request ao índice JSON) — em modo agressivo
+  // (default) o atalho substitui o HTML por 1 GET /api/articles-index com o arquivo inteiro
+  // (~1.329 itens datados). robots.txt DISALLOWA /api/, então em modo educado cai no HTML
+  // normal (`opts.aggressive !== false` é a ÚNICA diferença frente ao bloco do Substack).
+  if (opts.aggressive !== false && (await isRundown(url))) {
+    try {
+      const posts = await rundownArchive(url, { sinceDate: opts.sinceDate ?? null });
+      if (posts.length) {
+        let n = 0;
+        let below = 0;
+        for (const p of posts) {
+          const d = parseDate(p.published_at);
+          if (d) dateSeen(source?.id, d); // alimenta o % rumo ao --since
+          if (opts.sinceDate && d && d < opts.sinceDate) {
+            below++; // piso: pula artigos mais antigos
+            continue;
+          }
+          // 6º parâmetro: discovered_date = p.published_at do payload (mesma herança
+          // autoritativa listagem->item que os links pareados e o atalho Substack ganham).
+          if (enqueue(p.url, childKind, url, source?.id, depth + 1, p.published_at)) n++;
+        }
+        if (opts.sinceDate && below > 0) floorHit(source?.id); // arquivo já passou do alvo
+        log(`rundown: ${posts.length} artigos (${n} novos) de ${hostOf(url)}`);
+        return;
+      }
+    } catch (e) {
+      warn(`atalho therundown falhou: ${e.message}`);
     }
   }
 

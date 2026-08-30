@@ -3,13 +3,17 @@
 // histerese. As lanes são instâncias p-limit redimensionadas AO VIVO (limit.concurrency = n):
 // grow acorda a fila na hora; shrink é NÃO-preemptivo (trabalho em voo termina; só novas
 // admissões esperam) — semântica pinada em test/governor.gate.test.js.
+// A lane llm tem AIMD PRÓPRIO, calibrado por falhas de API: 429 halva a lane E o TETO
+// (st.llmCap) — a recuperação +1/10s só sobe até o teto calibrado, então a lane CONVERGE no
+// nível sem 429 em vez de oscilar. O teto calibrado parte de GOVERNOR_LLM_CAP (persistido
+// pelo fim de run em NC_HOME/.env) e é re-persistido quando a calibração baixa mais.
 // Sem init explícito, as lanes ficam em defaults conservadores (≈ o comportamento antigo),
 // então eval/ e testes podem importar llm.js sem subir o laço.
 import { readFileSync } from 'node:fs';
 import os from 'node:os';
 import pLimit from 'p-limit';
 import {
-  MAX_PARALLEL, RAM_MAX_PCT, RAM_HYSTERESIS_PCT, GOVERNOR_TICK_MS, RENDER_EST_MB,
+  MAX_PARALLEL, RAM_MAX_PCT, RAM_HYSTERESIS_PCT, GOVERNOR_TICK_MS, RENDER_EST_MB, GOVERNOR_LLM_CAP,
 } from './config.js';
 import { debug, warn } from './util.js';
 
@@ -90,6 +94,10 @@ const st = {
   llmGrowAt: 0,
   expectedAt: 0,
   lagMs: 0,
+  // Teto CALIBRADO da lane llm (0 = ainda não calibrado; vale o teto do perfil). Só desce:
+  // reportRateLimit() o baixa junto com a lane; o grow +1/10s não passa dele.
+  llmCap: 0,
+  rateLimitEvents: 0,
 };
 
 function safeRead() {
@@ -102,11 +110,13 @@ function safeRead() {
 
 function computeAlloc(profile, n, ramRenderCap) {
   if (profile === 'crawl') {
-    // llm=0.6n (era 0.5): as lanes são p-limits INDEPENDENTES (llm = custo/API, RAM-independente;
-    // fetch/render = rede/RAM), então 0.6+0.25+0.25 = 1.1n é ok e não rouba fetch. Ajuda o fan-out
-    // por seção + o streaming pós-save. Salvaguardas de custo intactas (429 halving + orçamento).
+    // llm = n (a máquina INTEIRA na lane de API): fetch/render são lanes SEPARADAS (rede/RAM),
+    // então 1.0+0.25+0.25 = 1.5n operações I/O-bound cabe num event loop de n núcleos sem
+    // roubar nada. O teto de API é quem manda no llm — e é EXATAMENTE o que a calibração por
+    // 429 encontra (reportRateLimit baixa st.llmCap; o grow +1/10s não passa do calibrado).
+    // Salvaguardas de custo intactas (orçamento + penalty window compartilhada).
     return {
-      llm: Math.max(FLOORS.llm, Math.ceil(n * 0.6)),
+      llm: Math.max(FLOORS.llm, n),
       fetch: Math.max(FLOORS.fetch, Math.ceil(n * 0.25)),
       render: Math.max(FLOORS.render, Math.min(Math.ceil(n * 0.25), ramRenderCap)),
     };
@@ -121,7 +131,10 @@ function applyProfile() {
   const usable = Math.max(0, avail - st.floorBytes);
   const ramRenderCap = Math.max(1, Math.min(Math.floor((usable * 0.5) / st.renderEstBytes) || 1, 64));
   st.alloc = computeAlloc(st.profile, st.parallel, ramRenderCap);
-  lanes.llm.concurrency = st.alloc.llm;
+  // O teto calibrado da lane llm sobrevive ao perfil (crawl -> llm-only) e é re-clampado ao
+  // teto do perfil atual: nunca sobe sozinho acima do que a API suportou.
+  st.llmCap = st.llmCap > 0 ? Math.max(FLOORS.llm, Math.min(st.llmCap, st.alloc.llm)) : st.alloc.llm;
+  lanes.llm.concurrency = st.llmCap;
   lanes.fetch.concurrency = st.alloc.fetch;
   // Slew de partida: render começa pequeno e o AIMD cresce +1/tick com folga de RAM — evita
   // admitir N contextos Chromium de uma vez antes da 1ª amostra sentir o impacto deles.
@@ -199,9 +212,10 @@ export function governorTick(now = st.now()) {
   }
 
   // Lane llm é independente da RAM: só recua com 429 (reportRateLimit) e recupera +1 por
-  // janela limpa de 10s até o teto do perfil.
+  // janela limpa de 10s — mas NUNCA acima do TETO CALIBRADO (st.llmCap): é o limite aprendido
+  // por falhas de API, a convergência do AIMD em vez da oscilação.
   if (
-    lanes.llm.concurrency < st.alloc.llm &&
+    lanes.llm.concurrency < st.llmCap &&
     now - st.lastRateLimitAt >= 10_000 &&
     now - st.llmGrowAt >= 10_000
   ) {
@@ -241,7 +255,8 @@ function startLoop() {
 /**
  * (Re)configura as lanes e liga o laço AIMD. Re-init é seguro (a TUI roda vários comandos no
  * mesmo processo). Opções injetáveis p/ teste: readMem, now, tickMs, autoStart:false (dirigir
- * com governorTick), ramMaxPct, ramHysteresisPct, renderEstMb, brakeBytes, onEmergencyBrake.
+ * com governorTick), ramMaxPct, ramHysteresisPct, renderEstMb, brakeBytes, onEmergencyBrake,
+ * llmCap (teto calibrado inicial; default = GOVERNOR_LLM_CAP do env / NC_HOME .env).
  */
 export function initGovernor(opts = {}) {
   stopGovernor();
@@ -271,12 +286,17 @@ export function initGovernor(opts = {}) {
   st.lastRateLimitAt = 0;
   st.llmGrowAt = 0;
   st.lagMs = 0;
+  st.rateLimitEvents = 0;
+  // Teto calibrado inicial: cap persistido (env/NC_HOME) ou teto do perfil; applyProfile clampa.
+  const cap = opts.llmCap != null ? Number(opts.llmCap) : GOVERNOR_LLM_CAP;
+  st.llmCap = Number.isFinite(cap) && cap > 0 ? Math.floor(cap) : 0;
 
   applyProfile();
   debug(
     `governor: init parallel=${st.parallel} profile=${st.profile} ` +
       `lanes llm=${lanes.llm.concurrency} fetch=${lanes.fetch.concurrency} render=${lanes.render.concurrency} ` +
-      `(alloc render=${st.alloc.render}) floor=${(st.floorBytes / GIB).toFixed(1)}GiB`,
+      `(alloc render=${st.alloc.render}) floor=${(st.floorBytes / GIB).toFixed(1)}GiB` +
+      (GOVERNOR_LLM_CAP > 0 ? ` cap calibrado llm=${GOVERNOR_LLM_CAP}` : ''),
   );
   if (opts.autoStart !== false) startLoop();
   return getTelemetry();
@@ -310,14 +330,33 @@ export function stageWindow(override) {
   return Math.max(1, Math.min(override > 0 ? override : Infinity, lanes.llm.concurrency));
 }
 
-/** Backpressure de 429 do provedor: multiplicativo na lane llm (recupera +1/10s no tick). */
+/**
+ * Backpressure de 429 do provedor: multiplicativo na lane llm E no TETO CALIBRADO (st.llmCap).
+ * A lane halva na hora (recupera +1/10s no tick); o teto desce junto e NÃO sobe mais nesta
+ * run — é a "calibração de um valor limite": converge no nível sem 429 e é persistido no
+ * fim do run (GOVERNOR_LLM_CAP) p/ os próximos partirem dele.
+ */
 export function reportRateLimit() {
   st.lastRateLimitAt = st.now();
+  st.rateLimitEvents += 1;
   const to = Math.max(FLOORS.llm, Math.ceil(lanes.llm.concurrency / 2));
   if (to < lanes.llm.concurrency) {
     warn(`governor: 429 do provedor — lane llm ${lanes.llm.concurrency} -> ${to}`);
     lanes.llm.concurrency = to;
   }
+  if (to < st.llmCap) {
+    warn(`governor: calibrando teto llm para ${to} (${st.rateLimitEvents}º 429; limite ${st.llmCap} -> ${to})`);
+    st.llmCap = to;
+  }
+}
+
+/** Calibração corrente da lane llm p/ persistir no fim do run (dirty = teto < teto do perfil). */
+export function getCalibration() {
+  return {
+    llmCap: st.llmCap,
+    rateLimitEvents: st.rateLimitEvents,
+    dirty: st.llmCap > 0 && st.llmCap < st.alloc.llm,
+  };
 }
 
 export function getTelemetry() {
@@ -341,5 +380,6 @@ export function getTelemetry() {
       cpu: laneInfo(lanes.cpu),
       jobs: { capacity: jobsCapacity() },
     },
+    calib: { llmCap: st.llmCap, rateLimitEvents: st.rateLimitEvents },
   };
 }

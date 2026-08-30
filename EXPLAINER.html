@@ -1,658 +1,1645 @@
-<!doctype html>
-<html lang="pt-BR" data-bs-theme="dark">
+<!DOCTYPE html>
+<html lang="pt-BR">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="color-scheme" content="dark">
-<title>EXPLAINER — logs + reset + captura total + fixes · de-para da execução</title>
-<link rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
-      integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
-      crossorigin="anonymous">
-<link rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"
-      integrity="sha384-CK2SzKma4jA5H/MXDUU7i1TqZlCFaD4T01vtyDFvPlD97JQyS+IsSh1nI2EFbpyk"
-      crossorigin="anonymous">
-<link rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github-dark.min.css"
-      integrity="sha384-wH75j6z1lH97ZOpMOInqhgKzFkAInZPPSPlZpYKYTOqsaizPvhQZmAtLcPKXpLyH"
-      crossorigin="anonymous">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="plannotator-theme" content="host">
+<title>Newsletter-crawler: de 8.056 a 13.701 artigos em uma coleta</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%235537eb'/%3E%3Ctext x='32' y='45' font-family='Georgia,serif' font-size='40' font-style='italic' fill='%23f6c445' text-anchor='middle'%3EN%3C/text%3E%3C/svg%3E">
 <style>
+  /* ============ THEME — tokens Plannotator ============ */
   :root {
-    --do-bg: #1a1a2e; --do-bg-soft: #16213e; --do-card: #1e1e38;
-    --do-accent: #00d4ff; --do-success: #00ff88; --do-warning: #ffaa00; --do-danger: #ff6b6b;
+    --background: oklch(0.97 0.005 260);
+    --foreground: oklch(0.18 0.02 260);
+    --card: oklch(1 0 0);
+    --card-foreground: oklch(0.18 0.02 260);
+    --muted: oklch(0.92 0.01 260);
+    --muted-foreground: oklch(0.40 0.02 260);
+    --primary: oklch(0.50 0.25 280);
+    --primary-foreground: oklch(1 0 0);
+    --secondary: oklch(0.50 0.18 180);
+    --accent: oklch(0.60 0.22 50);
+    --accent-foreground: oklch(0.18 0.02 260);
+    --destructive: oklch(0.50 0.25 25);
+    --success: oklch(0.45 0.20 150);
+    --warning: oklch(0.55 0.18 85);
+    --border: oklch(0.88 0.01 260);
+    --code-bg: oklch(0.92 0.01 260);
+    --ring: oklch(0.50 0.25 280);
+    --radius: 0.625rem;
+
+    --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, 'SF Mono', Consolas, monospace;
+    --font-display: ui-serif, Georgia, 'Times New Roman', serif;
+
+    --crit: #e8590c;
+    --shadow-card: 0 1px 2px color-mix(in oklab, var(--foreground) 8%, transparent), 0 8px 24px color-mix(in oklab, var(--foreground) 5%, transparent);
   }
-  [data-bs-theme="dark"] {
-    --bs-body-bg: var(--do-bg); --bs-body-color: #dcdce8;
-    --bs-secondary-color: #8b8ba7; --bs-border-color: #2e2e4a;
-    --bs-body-font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --background: oklch(0.15 0.02 260);
+      --foreground: oklch(0.90 0.01 260);
+      --card: oklch(0.22 0.02 260);
+      --card-foreground: oklch(0.90 0.01 260);
+      --muted: oklch(0.26 0.02 260);
+      --muted-foreground: oklch(0.72 0.02 260);
+      --primary: oklch(0.75 0.18 280);
+      --primary-foreground: oklch(0.15 0.02 260);
+      --accent: oklch(0.70 0.20 60);
+      --border: oklch(0.35 0.02 260);
+      --code-bg: oklch(0.26 0.02 260);
+      --destructive: oklch(0.65 0.20 25);
+      --success: oklch(0.72 0.17 150);
+      --warning: oklch(0.75 0.15 85);
+      --shadow-card: 0 1px 2px color-mix(in oklab, #000 30%, transparent), 0 10px 28px color-mix(in oklab, #000 40%, transparent);
+      --crit: #ff922b;
+    }
   }
-  body { background-image: radial-gradient(ellipse 80% 40% at 50% -10%, rgba(0,212,255,.07), transparent 60%); }
-  [id] { scroll-margin-top: 5rem; }
-  a { color: var(--do-accent); } a:hover { color: #4de0ff; }
-  .brand-accent, .stat-value { color: var(--do-accent); }
-  .navbar { border-bottom: 1px solid rgba(0,212,255,.25); }
-  .explainer-hero { background: linear-gradient(135deg, #16213e 0%, #1a1a2e 55%, #0f3460 100%); border: 1px solid var(--bs-border-color); box-shadow: inset 0 0 2.5rem rgba(0,212,255,.05); }
-  .pane-title { position: relative; padding-bottom: .5rem; }
-  .pane-title::after { content: ''; position: absolute; left: 0; bottom: 0; height: 2px; width: 4.5rem; border-radius: 2px; background: linear-gradient(90deg, var(--do-accent), transparent); }
-  .card { --bs-card-bg: var(--do-card); --bs-card-border-color: var(--bs-border-color); }
-  .card-header { background: linear-gradient(90deg, rgba(0,212,255,.10), rgba(0,212,255,0)); border-bottom: 1px solid var(--bs-border-color); }
-  .list-group-item { background-color: var(--do-card); }
-  .nav-tabs { border-bottom-color: var(--bs-border-color); }
-  .nav-tabs .nav-link { color: var(--bs-secondary-color); }
-  .nav-tabs .nav-link:hover { color: var(--bs-body-color); border-color: var(--bs-border-color) var(--bs-border-color) transparent; }
-  .nav-tabs .nav-link.active { color: var(--do-accent); font-weight: 600; background-color: transparent; border-color: var(--bs-border-color) var(--bs-border-color) var(--do-accent); }
-  .badge-accent  { background: rgba(0,212,255,.14);  color: var(--do-accent);  border: 1px solid rgba(0,212,255,.35); }
-  .badge-ok      { background: rgba(0,255,136,.12);  color: var(--do-success); border: 1px solid rgba(0,255,136,.35); }
-  .badge-warn    { background: rgba(255,170,0,.12);  color: var(--do-warning); border: 1px solid rgba(255,170,0,.35); }
-  .badge-danger  { background: rgba(255,107,107,.12); color: var(--do-danger); border: 1px solid rgba(255,107,107,.35); }
-  .badge-soft    { background: rgba(139,139,167,.12); color: var(--bs-secondary-color); border: 1px solid var(--bs-border-color); }
-  .diff-plus  { color: var(--do-success); font-variant-numeric: tabular-nums; }
-  .diff-minus { color: var(--do-danger); font-variant-numeric: tabular-nums; }
-  .depara-antes  { border-color: rgba(139,139,167,.45); }
-  .depara-depois { border-color: rgba(0,255,136,.35); }
-  .timeline { position: relative; }
-  .timeline-item { position: relative; padding-left: 1.4rem; border-left: 2px solid var(--bs-border-color); }
-  .timeline-item::before { content: ''; position: absolute; left: -.42rem; top: .3rem; width: .7rem; height: .7rem; border-radius: 50%; background: var(--do-accent); box-shadow: 0 0 .6rem rgba(0,212,255,.6); }
-  .timeline-item:last-child { border-left-color: transparent; }
-  pre { position: relative; margin-bottom: 1rem; }
-  pre code.hljs { padding-right: 4rem; border-radius: var(--bs-border-radius); font-size: .875rem; }
-  .copy-btn { position: absolute; top: .5rem; right: .5rem; opacity: .4; transition: opacity .15s; }
-  pre:hover .copy-btn, .copy-btn:focus-visible { opacity: 1; }
-  .tab-pane:focus-visible { outline: 0; box-shadow: 0 0 0 .2rem rgba(var(--bs-emphasis-color-rgb), .15); }
-  @media print {
-    .nav-tabs, .copy-btn, details, .explainer-hero { display: none !important; }
-    .tab-content > .tab-pane { display: block !important; opacity: 1 !important; page-break-inside: avoid; }
-    .tab-pane::before { content: attr(data-print-title); display: block; font-size: 1.25rem; font-weight: 600; margin: 1.5rem 0 .5rem; }
+
+  /* ============ RESET + BASE ============ */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background-color: var(--background);
+    background-image: radial-gradient(circle, color-mix(in oklab, var(--border) 65%, transparent) 1px, transparent 1px);
+    background-size: 26px 26px;
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection { background: color-mix(in oklab, var(--primary) 25%, transparent); }
+
+  /* ============ ANIMATION ============ */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate { animation: fadeUp 0.45s ease-out both; animation-delay: calc(var(--i, 0) * 0.06s); }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-delay: 0ms !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* ============ LAYOUT ============ */
+  .container {
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 56px 28px 80px;
+  }
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--primary);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .eyebrow::before {
+    content: "";
+    width: 26px;
+    height: 2px;
+    background: var(--primary);
+    display: inline-block;
+    border-radius: 2px;
+  }
+
+  h1 {
+    font-family: var(--font-display);
+    font-size: clamp(2.1rem, 5.2vw, 3.2rem);
+    font-weight: 600;
+    line-height: 1.12;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+    margin-bottom: 20px;
+  }
+
+  .answer-card {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-left: 4px solid var(--primary);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    font-size: 17px;
+    line-height: 1.7;
+    max-width: 78ch;
+    margin-bottom: 18px;
+    box-shadow: var(--shadow-card);
+  }
+  .answer-card strong { color: var(--primary); font-weight: 700; }
+  .answer-card code { font-family: var(--font-mono); font-size: 0.85em; background: var(--code-bg); padding: 1px 6px; border-radius: 5px; }
+
+  .meta-line {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--muted-foreground);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 18px;
+    margin-bottom: 40px;
+  }
+  .meta-line span { white-space: nowrap; }
+
+  /* ============ KPI STRIP ============ */
+  .kpis {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 14px;
+    margin-bottom: 56px;
+  }
+  .kpi {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 16px 14px;
+    box-shadow: var(--shadow-card);
+    min-width: 0;
+  }
+  .kpi--hero { border-color: var(--primary); background: color-mix(in oklab, var(--primary) 6%, var(--card)); }
+  .kpi .kpi-value {
+    font-family: var(--font-display);
+    font-size: 30px;
+    font-weight: 600;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+    margin-bottom: 6px;
+    text-wrap: balance;
+  }
+  .kpi--hero .kpi-value { color: var(--primary); }
+  .kpi--good .kpi-value { color: var(--success); }
+  .kpi--warm .kpi-value { color: var(--accent); }
+  .kpi--cool .kpi-value { color: var(--secondary); }
+  .kpi .kpi-label {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+    line-height: 1.45;
+  }
+
+  /* ============ SECTIONS ============ */
+  section { margin-bottom: 64px; }
+
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    margin-bottom: 10px;
+  }
+  .section-num {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--primary);
+    border: 1px solid var(--border);
+    background: var(--card);
+    border-radius: 8px;
+    padding: 2px 8px;
+    white-space: nowrap;
+  }
+  h2 {
+    font-family: var(--font-display);
+    font-size: clamp(1.4rem, 2.6vw, 1.75rem);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+  .section-lead {
+    color: var(--muted-foreground);
+    max-width: 72ch;
+    margin-bottom: 26px;
+    font-size: 15px;
+  }
+  .section-lead code {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+    background: var(--code-bg);
+    padding: 1px 6px;
+    border-radius: 5px;
+    color: var(--foreground);
+  }
+  .section-lead strong { color: var(--foreground); }
+
+  /* Inline term definitions at first appearance */
+  dfn {
+    font-style: normal;
+    font-weight: 600;
+    border-bottom: 1.5px dotted var(--primary);
+    cursor: help;
+  }
+
+  /* ============ CARDS ============ */
+  .ve-card {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    min-width: 0;
+    overflow-wrap: break-word;
+  }
+  .cards-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-top: 18px;
+  }
+  .cards-6 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-top: 18px;
+  }
+  .card-step {
+    display: flex;
+    gap: 12px;
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    box-shadow: var(--shadow-card);
+    min-width: 0;
+  }
+  .card-step .step-num {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--primary);
+    background: color-mix(in oklab, var(--primary) 10%, transparent);
+    border-radius: 7px;
+    padding: 2px 8px;
+    height: fit-content;
+    white-space: nowrap;
+  }
+  .card-step h3 {
+    font-size: 14.5px;
+    font-weight: 650;
+    margin-bottom: 4px;
+    letter-spacing: -0.01em;
+  }
+  .card-step p {
+    font-size: 13.5px;
+    color: var(--muted-foreground);
+    line-height: 1.6;
+  }
+  .card-step p code {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+    background: var(--code-bg);
+    padding: 0 5px;
+    border-radius: 4px;
+    color: var(--foreground);
+  }
+
+  /* ============ FIGURES ============ */
+  figure {
+    margin: 22px 0 10px;
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: calc(var(--radius) + 4px);
+    padding: 18px;
+    box-shadow: var(--shadow-card);
+    min-width: 0;
+  }
+  figcaption {
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--foreground);
+    border-top: 1px solid var(--border);
+    padding-top: 12px;
+    margin-top: 14px;
+  }
+  figcaption .claim {
+    display: block;
+    font-weight: 650;
+    margin-bottom: 2px;
+  }
+  figcaption .fig-note {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--muted-foreground);
+    margin-top: 6px;
+  }
+  .figure-legend {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    padding-top: 10px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--muted-foreground);
+  }
+  .legend-swatch { width: 14px; height: 14px; border-radius: 4px; flex: none; }
+  .legend-swatch--crit { background: var(--crit); }
+  .legend-swatch--dash {
+    background: transparent;
+    border: 2px dashed var(--muted-foreground);
+  }
+
+  /* ============ MERMAID CONTAINER ============ */
+  .diagram-shell { position: relative; }
+  .diagram-shell__hint {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--muted-foreground);
+    margin-bottom: 8px;
+  }
+  .mermaid-wrap {
+    position: relative;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 30px 22px;
+    overflow: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 300px;
+  }
+  .zoom-controls {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: flex;
+    gap: 2px;
+    z-index: 10;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 3px;
+  }
+  .zoom-controls button {
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: transparent;
+    color: var(--muted-foreground);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .zoom-controls button:hover { background: var(--muted); color: var(--foreground); }
+  .zoom-controls button:focus-visible { outline: 2px solid var(--ring); outline-offset: 1px; }
+  .mermaid-wrap { cursor: grab; }
+  .mermaid-wrap.is-panning { cursor: grabbing; user-select: none; }
+  .mermaid-viewport {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    min-height: 260px;
+  }
+  .mermaid-canvas { position: absolute; top: 0; left: 0; }
+  .zoom-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--muted-foreground);
+    padding: 0 6px;
+    white-space: nowrap;
+    align-self: center;
+  }
+
+  /* Mermaid SVG overrides */
+  .mermaid .nodeLabel { font-family: var(--font-sans) !important; font-size: 14.5px !important; }
+  .mermaid .edgeLabel { font-family: var(--font-mono) !important; font-size: 12px !important; }
+  .mermaid .node rect, .mermaid .node circle, .mermaid .node polygon { stroke-width: 1.6px !important; }
+
+  /* ============ TABLES (fontes) ============ */
+  .table-scroll { overflow-x: auto; margin-top: 20px; border: 1.5px solid var(--border); border-radius: var(--radius); background: var(--card); box-shadow: var(--shadow-card); }
+  table { width: 100%; border-collapse: collapse; min-width: 640px; }
+  thead th {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    text-align: left;
+    color: var(--muted-foreground);
+    padding: 12px 16px;
+    border-bottom: 1.5px solid var(--border);
+    background: var(--muted);
+  }
+  tbody td {
+    padding: 13px 16px;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+    vertical-align: top;
+    line-height: 1.55;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: color-mix(in oklab, var(--primary) 4%, transparent); }
+  td.num { font-variant-numeric: tabular-nums; font-weight: 650; white-space: nowrap; }
+  td code, td .mono { font-family: var(--font-mono); font-size: 0.88em; background: var(--code-bg); padding: 1px 5px; border-radius: 4px; }
+  tr.total-row td { border-top: 2px solid var(--border); font-weight: 700; background: color-mix(in oklab, var(--primary) 5%, var(--card)); }
+  .bar {
+    display: inline-block;
+    height: 8px;
+    border-radius: 4px;
+    background: var(--primary);
+    vertical-align: middle;
+    margin-right: 8px;
+  }
+  .bar--warm { background: var(--accent); }
+  .bar--cool { background: var(--secondary); }
+
+  /* ============ TIMELINE (ondas) ============ */
+  .timeline { position: relative; margin-top: 22px; padding-left: 26px; }
+  .timeline::before {
+    content: "";
+    position: absolute;
+    left: 7px;
+    top: 6px;
+    bottom: 6px;
+    width: 2px;
+    background: var(--border);
+  }
+  .wave { position: relative; margin-bottom: 16px; }
+  .wave::before {
+    content: "";
+    position: absolute;
+    left: -26px;
+    top: 18px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--card);
+    border: 2.5px solid var(--primary);
+  }
+  .wave--crit::before { border-color: var(--crit); }
+  .wave .wave-body {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    box-shadow: var(--shadow-card);
+  }
+  .wave--crit .wave-body { border-left: 4px solid var(--crit); }
+  .wave h3 {
+    font-size: 15px;
+    font-weight: 650;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .chip {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    color: var(--primary);
+    background: color-mix(in oklab, var(--primary) 10%, transparent);
+    border-radius: 20px;
+    padding: 2px 10px;
+    white-space: nowrap;
+  }
+  .chip--ok { color: var(--success); background: color-mix(in oklab, var(--success) 12%, transparent); }
+  .chip--warn { color: var(--accent); background: color-mix(in oklab, var(--accent) 12%, transparent); }
+  .wave p { font-size: 13.5px; color: var(--muted-foreground); line-height: 1.62; }
+  .wave p code { font-family: var(--font-mono); font-size: 0.86em; background: var(--code-bg); padding: 0 5px; border-radius: 4px; color: var(--foreground); }
+  .wave .problem { color: var(--destructive); font-weight: 600; }
+  .wave .fixed { color: var(--success); font-weight: 600; }
+
+  /* ============ CHIPS DE RESILIÊNCIA ============ */
+  .chip-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+  .stat-chip {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 14px;
+    box-shadow: var(--shadow-card);
+  }
+  .stat-chip .v { font-family: var(--font-display); font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .stat-chip .l { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted-foreground); }
+
+  /* ============ ONDE VER ============ */
+  .where-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 20px; }
+  .where-card h3 { font-size: 14px; margin-bottom: 8px; }
+  .where-card a, .where-card .path { font-family: var(--font-mono); font-size: 12.5px; color: var(--primary); text-decoration: none; word-break: break-all; }
+  .where-card a:hover { text-decoration: underline; }
+  .where-card p { font-size: 13px; color: var(--muted-foreground); margin-top: 8px; line-height: 1.6; }
+
+  /* ============ DETAILS (andaime dobrado) ============ */
+  .scaffold { margin-top: 40px; border-top: 1.5px dashed var(--border); padding-top: 26px; }
+  .scaffold > p.lead {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+    margin-bottom: 14px;
+  }
+  details {
+    background: var(--muted);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  details summary {
+    cursor: pointer;
+    padding: 14px 18px;
+    font-weight: 650;
+    font-size: 14px;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  details summary::-webkit-details-marker { display: none; }
+  details summary::before {
+    content: "▸";
+    font-family: var(--font-mono);
+    color: var(--primary);
+    transition: transform 0.15s ease;
+  }
+  details[open] summary::before { transform: rotate(90deg); }
+  details summary:focus-visible { outline: 2px solid var(--ring); outline-offset: -2px; }
+  details .body { padding: 4px 18px 18px; font-size: 14px; color: var(--muted-foreground); line-height: 1.7; }
+  details .body p { margin-bottom: 10px; }
+  details .body ol, details .body ul { padding-left: 20px; margin-bottom: 10px; }
+  details .body li { margin-bottom: 6px; }
+  details .body code {
+    font-family: var(--font-mono);
+    font-size: 0.86em;
+    background: var(--code-bg);
+    padding: 1px 6px;
+    border-radius: 4px;
+    color: var(--foreground);
+  }
+  details .body strong { color: var(--foreground); }
+
+  /* ============ FOOTER ============ */
+  footer {
+    border-top: 1.5px solid var(--border);
+    margin-top: 30px;
+    padding-top: 24px;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--muted-foreground);
+    line-height: 1.8;
+  }
+  footer code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; }
+
+  /* ============ RESPONSIVE ============ */
+  @media (max-width: 900px) {
+    .kpis { grid-template-columns: repeat(2, 1fr); }
+    .cards-3, .cards-6, .where-grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 640px) {
+    .container { padding: 32px 16px 56px; }
+    .kpis { grid-template-columns: 1fr 1fr; }
+    .kpi .kpi-value { font-size: 24px; }
+    .mermaid-wrap { padding: 24px 12px; }
   }
 </style>
 </head>
-<body class="bg-body">
+<body>
 
-<nav class="navbar navbar-expand-lg sticky-top bg-body-tertiary">
-  <div class="container">
-    <span class="navbar-brand fw-semibold"><i class="bi bi-diagram-3 brand-accent me-2"></i>deep-orchestrator <span class="text-body-secondary fw-normal">· EXPLAINER</span></span>
-    <span class="navbar-text small text-body-secondary d-none d-md-inline">v2.0 · 2026-08-14</span>
-  </div>
-</nav>
+<div class="container">
 
-<main class="container py-4" style="max-width: 62rem">
+  <!-- ============ HERO ============ -->
+  <header class="animate" style="--i:0">
+    <p class="eyebrow">Relatório de execução · newsletter-crawler</p>
+    <h1>De 8.056 a 13.701 artigos: o que uma coleta com 3 fontes novas e 192 tarefas em paralelo entregou</h1>
 
-  <header class="explainer-hero rounded-4 p-4 p-md-5 mb-4">
-    <span class="badge badge-accent mb-3"><i class="bi bi-clipboard-data me-1"></i>Relatório de execução</span>
-    <h1 class="display-6 fw-semibold text-white mb-2">Logs melhores → reset → captura TOTAL (7 fontes, 1 semana) → análise e correção de tudo</h1>
-    <p class="lead text-white-50 mb-3">Log persistente por run (acompanhamento real), limpeza dos dados, captura completa de 188 artigos em 7 fontes, 8 problemas encontrados e corrigidos com backfill dos dados reais.</p>
-    <div class="d-flex flex-wrap gap-2">
-      <span class="badge badge-accent">v2.0</span>
-      <span class="badge badge-soft"><i class="bi bi-calendar3 me-1"></i>2026-08-14</span>
-      <span class="badge badge-soft"><i class="bi bi-git-branch me-1"></i>main</span>
+    <div class="answer-card">
+      O <dfn title="programa que visita páginas web automaticamente e extrai conteúdo">crawler</dfn> — o
+      <em>newsletter-crawler</em> — rodou uma coleta desde <strong>2026-01-01</strong> com
+      <strong>concurrency 192</strong> (192 tarefas executadas ao mesmo tempo) e saiu de
+      <strong>8.056</strong> para <strong>13.701 artigos capturados</strong> (<strong>+5.645</strong>), somando
+      <strong>3 fontes novas</strong>: Superhuman (3.369), This Week in Rust (1.968) e The Rundown (308).
+      No caminho, resolveu <strong>4 problemas de código</strong> em 4 ondas com gate de testes verde, absorveu uma
+      <strong>queda de internet</strong> sem perder artigo nenhum e publicou tudo no site em <strong>21 segundos</strong>.
     </div>
+
+    <p class="meta-line">
+      <span>▸ coleta: 2026-08-30</span>
+      <span>▸ crawl run #14 (9 fontes)</span>
+      <span>▸ tag v3.0.0 = base imutável</span>
+      <span>▸ deploy final 23:42Z</span>
+    </p>
   </header>
 
-  <ul class="nav nav-tabs" id="doc-tabs" role="tablist">
-    <li class="nav-item" role="presentation">
-      <button class="nav-link active" id="tab-visao" data-bs-toggle="tab" data-bs-target="#pane-visao"
-              type="button" role="tab" aria-controls="pane-visao" aria-selected="true">
-        <i class="bi bi-eye me-1"></i>Visão geral
-      </button>
-    </li>
-    <li class="nav-item" role="presentation">
-      <button class="nav-link" id="tab-ondas" data-bs-toggle="tab" data-bs-target="#pane-ondas"
-              type="button" role="tab" aria-controls="pane-ondas" aria-selected="false">
-        <i class="bi bi-layers me-1"></i>Ondas
-      </button>
-    </li>
-    <li class="nav-item" role="presentation">
-      <button class="nav-link" id="tab-arquivos" data-bs-toggle="tab" data-bs-target="#pane-arquivos"
-              type="button" role="tab" aria-controls="pane-arquivos" aria-selected="false">
-        <i class="bi bi-files me-1"></i>Arquivos
-      </button>
-    </li>
-    <li class="nav-item" role="presentation">
-      <button class="nav-link" id="tab-depara" data-bs-toggle="tab" data-bs-target="#pane-depara"
-              type="button" role="tab" aria-controls="pane-depara" aria-selected="false">
-        <i class="bi bi-arrow-left-right me-1"></i>De-Para
-      </button>
-    </li>
-    <li class="nav-item" role="presentation">
-      <button class="nav-link" id="tab-decisoes" data-bs-toggle="tab" data-bs-target="#pane-decisoes"
-              type="button" role="tab" aria-controls="pane-decisoes" aria-selected="false">
-        <i class="bi bi-lightbulb me-1"></i>Decisões
-      </button>
-    </li>
-    <li class="nav-item" role="presentation">
-      <button class="nav-link" id="tab-timeline" data-bs-toggle="tab" data-bs-target="#pane-timeline"
-              type="button" role="tab" aria-controls="pane-timeline" aria-selected="false">
-        <i class="bi bi-clock-history me-1"></i>Timeline
-      </button>
-    </li>
-  </ul>
-
-  <div class="tab-content border border-top-0 rounded-bottom p-4" id="doc-tabs-content">
-
-    <!-- ══════════════ ABA 1 · VISÃO GERAL ══════════════ -->
-    <div class="tab-pane fade show active" id="pane-visao" role="tabpanel"
-         aria-labelledby="tab-visao" tabindex="0" data-print-title="Visão geral">
-      <h2 class="h4 pane-title">Resumo da execução</h2>
-      <p class="text-body-secondary">Tarefa: "limpe todos os dados e faça novamente com TODAS as fontes e 1 semana de tempo; antes melhore os logs para conseguir acompanhar tudo; faça, analise e arrume TODOS os problemas."</p>
-
-      <div class="alert alert-primary d-flex gap-2" role="alert">
-        <i class="bi bi-info-circle-fill flex-shrink-0"></i>
-        <div><strong>O que foi entregue:</strong> (1) logs persistentes por run com flush imediato + resumo periódico + <code>crawl --help</code> seguro; (2) reset completo dos dados; (3) captura TOTAL: 7 fontes, 1 semana, 188 artigos, US$ 0,8559, pipeline completo; (4) 8 problemas reais encontrados e CORRIGIDOS (guarda de idioma, guards de artigo, GitHub recovery, vocabulário, kind) com backfill dos dados reais e re-verificação 7/7 com evidência. Estado final: 186 artigos, ok=169/suspect=15/junk=2, 0 pendentes, US$ 1,34 total.</div>
-      </div>
-
-      <div class="row g-3">
-        <div class="col-6 col-lg-4">
-          <div class="card h-100 text-center">
-            <div class="card-body py-4">
-              <i class="bi bi-layers fs-3 stat-value"></i>
-              <div class="display-6 fw-bold stat-value">4</div>
-              <div class="text-body-secondary small">Ondas (8 worktrees)</div>
-            </div>
-          </div>
-        </div>
-        <div class="col-6 col-lg-4">
-          <div class="card h-100 text-center">
-            <div class="card-body py-4">
-              <i class="bi bi-robot fs-3 stat-value"></i>
-              <div class="display-6 fw-bold stat-value">12</div>
-              <div class="text-body-secondary small">Sub-agentes (3 revisões falharam por 402)</div>
-            </div>
-          </div>
-        </div>
-        <div class="col-6 col-lg-4">
-          <div class="card h-100 text-center">
-            <div class="card-body py-4">
-              <i class="bi bi-git-commit fs-3 stat-value"></i>
-              <div class="display-6 fw-bold stat-value">8</div>
-              <div class="text-body-secondary small">Commits squash + 1 final</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <h2 class="h4 pane-title mt-5">Números da execução</h2>
-      <div class="list-group list-group-flush">
-        <div class="list-group-item d-flex gap-3 align-items-start">
-          <i class="bi bi-file-earmark-diff fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>28 arquivos alterados</strong> — <span class="diff-plus">+3.822</span> / <span class="diff-minus">−96</span> linhas (10e8bec..HEAD).</div>
-        </div>
-        <div class="list-group-item d-flex gap-3 align-items-start">
-          <i class="bi bi-check2-circle fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>Testes:</strong> 546 → 574 (28 novos: log/help/summary, guards JSON+piso, idioma, GitHub recovery, kind, vocabulário).</div>
-        </div>
-        <div class="list-group-item d-flex gap-3 align-items-start">
-          <i class="bi bi-cash-stack fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>Custo total:</strong> US$ 1,3382 em 4.112 chamadas (captura US$ 0,8559 + re-verificação US$ 0,4823 — teto US$ 2 respeitado).</div>
-        </div>
-        <div class="list-group-item d-flex gap-3 align-items-start">
-          <i class="bi bi-database-check fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>Dados reais corrigidos:</strong> 11 resumos em chinês → PT-BR (guarda disparou 1× em produção); 2 abaixo-do-piso deletados; JSON cru restaurado; 3 release notes do GitHub recuperadas; 63 kinds derivados + 123 curados restaurados do backup; 186/186 re-classificados com vocabulário novo.</div>
-        </div>
-      </div>
+  <!-- ============ KPIs ============ -->
+  <div class="kpis animate" style="--i:1">
+    <div class="kpi kpi--hero">
+      <div class="kpi-value">13.701</div>
+      <div class="kpi-label">artigos no ar<br>(deploy final)</div>
     </div>
-
-    <!-- ══════════════ ABA 2 · ONDAS ══════════════ -->
-    <div class="tab-pane fade" id="pane-ondas" role="tabpanel"
-         aria-labelledby="tab-ondas" tabindex="0" data-print-title="Ondas executadas">
-      <h2 class="h4 pane-title">Ondas executadas</h2>
-      <p>Uma linha por worktree. Integração por squash-merge um a um, com gate (build + testes) entre merges. Todas as worktrees/branches desta execução foram removidas ao fim (arquivadas em refs/do-archive/).</p>
-
-      <div class="table-responsive">
-        <table class="table table-hover align-middle">
-          <thead>
-            <tr>
-              <th scope="col">Onda</th>
-              <th scope="col">Worktree</th>
-              <th scope="col">Tarefas</th>
-              <th scope="col" class="text-end">Commit</th>
-              <th scope="col">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><span class="badge badge-accent">Onda 1</span></td>
-              <td><code>onda1-logs-observabilidade</code></td>
-              <td>Log persistente por run (NC_HOME/logs + latest.log, flush writeSync), resumo periódico (fila/voo/vereditos/erros), crawl --help/--version seguros</td>
-              <td class="text-end"><code>eef2cd5</code></td>
-              <td><span class="badge badge-ok">Concluída</span></td>
-            </tr>
-            <tr>
-              <td><span class="badge badge-accent">Onda 2</span></td>
-              <td><code>onda2-reset-captura-total</code></td>
-              <td>RESET (pedido explícito) + captura TOTAL: 7 fontes, --since 2026-08-07, 188 artigos, US$ 0,8559; relatório docs/captura-total-2026-08-14.md com 8 achados</td>
-              <td class="text-end"><code>9285112</code></td>
-              <td><span class="badge badge-ok">Concluída</span></td>
-            </tr>
-            <tr>
-              <td><span class="badge badge-accent">Onda 3</span></td>
-              <td><code>onda1-idioma</code></td>
-              <td>Guarda de idioma do summarize: prompt reforçado + hasCjk/cjkRatio + 1 re-try + fail-open NULL (mata os 11 resumos em chinês)</td>
-              <td class="text-end"><code>8e07931</code></td>
-              <td><span class="badge badge-ok">Concluída</span></td>
-            </tr>
-            <tr>
-              <td><span class="badge badge-accent">Onda 3</span></td>
-              <td><code>onda1-guards-artigo</code></td>
-              <td>looksLikeJson (JSON cru nunca vira conteúdo) + guarda pós-hoc do piso em listings (below-since posthoc)</td>
-              <td class="text-end"><code>53dcc95</code></td>
-              <td><span class="badge badge-ok">Concluída</span></td>
-            </tr>
-            <tr>
-              <td><span class="badge badge-accent">Onda 3</span></td>
-              <td><code>onda1-reextract</code></td>
-              <td>Recovery de release notes p/ raiz de repo GitHub (raiz → /releases com marcadores) + guarda JSON no reextract</td>
-              <td class="text-end"><code>9794b29</code></td>
-              <td><span class="badge badge-ok">Concluída</span></td>
-            </tr>
-            <tr>
-              <td><span class="badge badge-accent">Onda 3</span></td>
-              <td><code>onda1-taxonomia</code></td>
-              <td>Vocabulário: llm-models/agentic-ai/model-provenance/software-development/system-design (version 2026-08-15)</td>
-              <td class="text-end"><code>0b867e0</code></td>
-              <td><span class="badge badge-ok">Concluída</span></td>
-            </tr>
-            <tr>
-              <td><span class="badge badge-accent">Onda 3</span></td>
-              <td><code>onda1-kind</code></td>
-              <td>Derivação determinística de kind das classifications (kindFromTags + setKindIfNull NULL-only)</td>
-              <td class="text-end"><code>b996191</code></td>
-              <td><span class="badge badge-ok">Concluída</span></td>
-            </tr>
-            <tr>
-              <td><span class="badge badge-ok">Onda 4</span></td>
-              <td><code>onda2-backfill-reverificacao</code></td>
-              <td>Backfill real: 11 chineses re-summarizados (guarda disparou 1× e convergiu), 2 below-floor deletados, JSON restaurado, GitHub recover, kind 0 NULL (123 curados restaurados do backup), re-classify 2026-08-15, reclean 10 suspects→ok; docs/reverificacao-total-2026-08-14.md</td>
-              <td class="text-end"><code>a24d630</code></td>
-              <td><span class="badge badge-ok">Concluída</span></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <h3 class="h6 mt-4 text-body-secondary">Nota de processo</h3>
-      <p class="text-body-secondary small">As 3 revisões adversariais da Onda 3 falharam por <code>402 Insufficient Balance</code> (saldo da API do CLI esgotado) — substituídas por gates completos (552→574 verdes) + inspeção direta dos diffs. A correção de um desvio de escopo do agente de backfill (re-conciliação de kinds que sobrescreveu curados) foi aplicada por instrução direta com evidência.</p>
-
-      <h3 class="h6 mt-4 text-body-secondary">Legenda de status</h3>
-      <div class="d-flex flex-wrap gap-2">
-        <span class="badge badge-ok">Concluída</span>
-        <span class="badge badge-warn">Fix / Parcial</span>
-        <span class="badge badge-danger">Bloqueada</span>
-      </div>
+    <div class="kpi kpi--good">
+      <div class="kpi-value">+5.645</div>
+      <div class="kpi-label">artigos novos<br>desde 2026-01-01</div>
     </div>
-
-    <!-- ══════════════ ABA 3 · ARQUIVOS ══════════════ -->
-    <div class="tab-pane fade" id="pane-arquivos" role="tabpanel"
-         aria-labelledby="tab-arquivos" tabindex="0" data-print-title="Arquivos modificados">
-      <h2 class="h4 pane-title">Arquivos modificados</h2>
-      <p>Diff stats da execução (10e8bec..HEAD): <span class="diff-plus">+3.822</span> / <span class="diff-minus">−96</span>, 28 arquivos.</p>
-
-      <div class="table-responsive">
-        <table class="table table-hover align-middle table-sm">
-          <thead>
-            <tr><th scope="col">Arquivo</th><th scope="col">Tipo</th><th scope="col" class="text-end">Diff</th></tr>
-          </thead>
-          <tbody>
-            <tr><td><code>docs/captura-total-2026-08-14.md</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+244</td></tr>
-            <tr><td><code>docs/reverificacao-total-2026-08-14.md</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+431</td></tr>
-            <tr><td><code>src/util.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+133</span> <span class="diff-minus">−6</span></td></tr>
-            <tr><td><code>src/index.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+155</span> <span class="diff-minus">−22</span></td></tr>
-            <tr><td><code>src/commands.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+63</span> <span class="diff-minus">−4</span></td></tr>
-            <tr><td><code>src/run-events.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end diff-plus">+6</td></tr>
-            <tr><td><code>src/llm.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+87</span> <span class="diff-minus">−16</span></td></tr>
-            <tr><td><code>src/config.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end diff-plus">+5</td></tr>
-            <tr><td><code>src/parse-core.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end diff-plus">+76</td></tr>
-            <tr><td><code>src/crawl.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+28</span> <span class="diff-minus">−2</span></td></tr>
-            <tr><td><code>src/clean.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+5</span> <span class="diff-minus">−1</span></td></tr>
-            <tr><td><code>src/reextract.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+84</span> <span class="diff-minus">−2</span></td></tr>
-            <tr><td><code>src/classify.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+34</span> <span class="diff-minus">−2</span></td></tr>
-            <tr><td><code>src/db.js</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end diff-plus">+4</td></tr>
-            <tr><td><code>config/taxonomy.json</code></td><td><span class="badge badge-accent">modificado</span></td><td class="text-end"><span class="diff-plus">+6</span> <span class="diff-minus">−1</span></td></tr>
-            <tr><td><code>test/log-file.test.js</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+79</td></tr>
-            <tr><td><code>test/log-file.cli.test.js</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+63</td></tr>
-            <tr><td><code>test/commands.help.test.js</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+71</td></tr>
-            <tr><td><code>test/commands.summary.test.js</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+75</td></tr>
-            <tr><td><code>test/summarize.language-guard.test.js</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+185</td></tr>
-            <tr><td><code>test/crawl.json-page.test.js</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+181</td></tr>
-            <tr><td><code>test/crawl.floor-posthoc.test.js</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+182</td></tr>
-            <tr><td><code>test/reextract.github.test.js</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+159</td></tr>
-            <tr><td><code>test/taxonomy.vocab.test.js</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+80</td></tr>
-            <tr><td><code>test/classify.kind.test.js</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+137</td></tr>
-            <tr><td><code>test/fixtures/github-bullmq-releases.html</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+1252</td></tr>
-            <tr><td><code>test/fixtures/github-bullmq-root.html</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+27</td></tr>
-            <tr><td><code>test/fixtures/json-page.html</code></td><td><span class="badge badge-ok">novo</span></td><td class="text-end diff-plus">+14</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <h2 class="h4 pane-title mt-4">Commits (squash)</h2>
-      <ul class="list-group list-group-flush">
-        <li class="list-group-item d-flex gap-3 align-items-start">
-          <span class="badge badge-soft font-monospace">a24d630</span>
-          <div><strong>Onda 4:</strong> backfill real + relatório de re-verificação (docs/reverificacao-total-2026-08-14.md)</div>
-        </li>
-        <li class="list-group-item d-flex gap-3 align-items-start">
-          <span class="badge badge-soft font-monospace">b996191</span>
-          <div><strong>Onda 3:</strong> kindFromTags + setKindIfNull (derivação determinística NULL-only)</div>
-        </li>
-        <li class="list-group-item d-flex gap-3 align-items-start">
-          <span class="badge badge-soft font-monospace">0b867e0</span>
-          <div><strong>Onda 3:</strong> vocabulário +5 termos (version 2026-08-15)</div>
-        </li>
-        <li class="list-group-item d-flex gap-3 align-items-start">
-          <span class="badge badge-soft font-monospace">9794b29</span>
-          <div><strong>Onda 3:</strong> recovery GitHub raiz→/releases + guarda JSON no reextract</div>
-        </li>
-        <li class="list-group-item d-flex gap-3 align-items-start">
-          <span class="badge badge-soft font-monospace">53dcc95</span>
-          <div><strong>Onda 3:</strong> looksLikeJson + guarda pós-hoc do piso</div>
-        </li>
-        <li class="list-group-item d-flex gap-3 align-items-start">
-          <span class="badge badge-soft font-monospace">8e07931</span>
-          <div><strong>Onda 3:</strong> guarda de idioma do summarize (hasCjk/cjkRatio + re-try)</div>
-        </li>
-        <li class="list-group-item d-flex gap-3 align-items-start">
-          <span class="badge badge-soft font-monospace">9285112</span>
-          <div><strong>Onda 2:</strong> reset + captura TOTAL (7 fontes, 188 artigos) + relatório com 8 achados</div>
-        </li>
-        <li class="list-group-item d-flex gap-3 align-items-start">
-          <span class="badge badge-soft font-monospace">eef2cd5</span>
-          <div><strong>Onda 1:</strong> log persistente por run + resumo periódico + crawl --help/--version</div>
-        </li>
-      </ul>
+    <div class="kpi kpi--warm">
+      <div class="kpi-value">3</div>
+      <div class="kpi-label">fontes novas<br>adicionadas</div>
     </div>
-
-    <!-- ══════════════ ABA 4 · DE-PARA ══════════════ -->
-    <div class="tab-pane fade" id="pane-depara" role="tabpanel"
-         aria-labelledby="tab-depara" tabindex="0" data-print-title="De-Para">
-      <h2 class="h4 pane-title">De-Para: o que mudou</h2>
-      <p>Comparação por frente da tarefa (antes × depois).</p>
-
-      <div class="row g-3 mb-4">
-        <div class="col-lg-6">
-          <div class="card h-100 depara-antes">
-            <div class="card-header"><i class="bi bi-arrow-left-circle me-1"></i><strong>Antes — logs</strong></div>
-            <div class="card-body">
-              <ul class="list-unstyled mb-0 d-grid gap-2">
-                <li><i class="bi bi-x-circle me-2 text-body-secondary"></i>Log só no stdout (pipe do npm BUFFERIZAVA — monitoramento cego por minutos)</li>
-                <li><i class="bi bi-x-circle me-2 text-body-secondary"></i>Sem arquivo persistente por run; resumo só de gasto parcial</li>
-                <li><i class="bi bi-x-circle me-2 text-body-secondary"></i><code>crawl --help</code> INICIAVA o crawl (acidente real de US$ 0,0147)</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-        <div class="col-lg-6">
-          <div class="card h-100 depara-depois">
-            <div class="card-header"><i class="bi bi-arrow-right-circle me-1"></i><strong>Depois — logs</strong></div>
-            <div class="card-body">
-              <ul class="list-unstyled mb-0 d-grid gap-2">
-                <li><i class="bi bi-check-circle me-2 text-body-secondary"></i>Log persistente em <code>NC_HOME/logs/</code> com <code>writeSync</code> (flush imediato) + <code>latest.log</code> — <code>tail -f</code> funciona de verdade</li>
-                <li><i class="bi bi-check-circle me-2 text-body-secondary"></i>Resumo periódico (fase/fila/voo/salvos/vereditos/erros) a cada ~10s</li>
-                <li><i class="bi bi-check-circle me-2 text-body-secondary"></i><code>--help</code>/<code>--version</code> seguros (exit 0, sem run/log/rede)</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="row g-3 mb-4">
-        <div class="col-lg-6">
-          <div class="card h-100 depara-antes">
-            <div class="card-header"><i class="bi bi-arrow-left-circle me-1"></i><strong>Antes — captura</strong></div>
-            <div class="card-body">
-              <ul class="list-unstyled mb-0 d-grid gap-2">
-                <li><i class="bi bi-x-circle me-2 text-body-secondary"></i>21 artigos de 1 fonte (execução anterior); dados antigos no banco</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-        <div class="col-lg-6">
-          <div class="card h-100 depara-depois">
-            <div class="card-header"><i class="bi bi-arrow-right-circle me-1"></i><strong>Depois — captura</strong></div>
-            <div class="card-body">
-              <ul class="list-unstyled mb-0 d-grid gap-2">
-                <li><i class="bi bi-check-circle me-2 text-body-secondary"></i>Reset completo + captura TOTAL: 7 fontes, 1 semana, 188 artigos, US$ 0,8559, pipeline completo, 0 pendentes</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="row g-3 mb-4">
-        <div class="col-lg-6">
-          <div class="card h-100 depara-antes">
-            <div class="card-header"><i class="bi bi-arrow-left-circle me-1"></i><strong>Antes — 8 problemas da captura</strong></div>
-            <div class="card-body">
-              <ul class="list-unstyled mb-0 d-grid gap-2">
-                <li><i class="bi bi-x-circle me-2 text-body-secondary"></i>11 resumos PT-BR em CHINÊS (5,8%)</li>
-                <li><i class="bi bi-x-circle me-2 text-body-secondary"></i>2 itens abaixo do piso salvos; JSON cru como conteúdo (react-dropzone)</li>
-                <li><i class="bi bi-x-circle me-2 text-body-secondary"></i>Release notes do GitHub com README/truncadas (raiz do repo)</li>
-                <li><i class="bi bi-x-circle me-2 text-body-secondary"></i>65 kind NULL (listings); vocabulário sem llm-models/agentic-ai</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-        <div class="col-lg-6">
-          <div class="card h-100 depara-depois">
-            <div class="card-header"><i class="bi bi-arrow-right-circle me-1"></i><strong>Depois — 8 problemas corrigidos</strong></div>
-            <div class="card-body">
-              <ul class="list-unstyled mb-0 d-grid gap-2">
-                <li><i class="bi bi-check-circle me-2 text-body-secondary"></i>Guarda de idioma (hasCjk + re-try + fail-open NULL) — 0 CJK no acervo; disparou 1× em produção</li>
-                <li><i class="bi bi-check-circle me-2 text-body-secondary"></i>looksLikeJson + guarda pós-hoc do piso; JSON restaurado para blurb → ok</li>
-                <li><i class="bi bi-check-circle me-2 text-body-secondary"></i>Recovery raiz→/releases com marcadores (3 fichas com notas reais)</li>
-                <li><i class="bi bi-check-circle me-2 text-body-secondary"></i>kindFromTags: 0 NULL (63 derivados + 123 curados restaurados do backup); vocabulário 2026-08-15 usado (llm-models 62×…)</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <h2 class="h4 pane-title">Impacto</h2>
-      <div class="list-group list-group-flush mb-4">
-        <div class="list-group-item d-flex gap-3 align-items-start">
-          <i class="bi bi-eye fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>Acompanhamento real</strong> — o usuário (e qualquer script) acompanha o crawl ao vivo com <code>tail -f ~/.newsletter-crawler/logs/latest.log</code>; o resumo mostra erros recentes com timestamp.</div>
-        </div>
-        <div class="list-group-item d-flex gap-3 align-items-start">
-          <i class="bi bi-shield-check fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>Guardas de qualidade</strong> — idioma (0 CJK), JSON (nunca vira conteúdo), piso (nada abaixo do --since), release notes reais do GitHub.</div>
-        </div>
-        <div class="list-group-item d-flex gap-3 align-items-start">
-          <i class="bi bi-collection fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>Acervo completo e limpo</strong> — 186 artigos de 7 fontes, kinds em 100% (0 NULL), vocabulário do domínio LLM/IA coberto.</div>
-        </div>
-        <div class="list-group-item d-flex gap-3 align-items-start">
-          <i class="bi bi-arrow-repeat fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>Segurança operacional</strong> — <code>crawl --help</code> nunca mais inicia crawl; backup <code>crawler.db.bak-2026-08-14</code> criado antes do backfill.</div>
-        </div>
-      </div>
+    <div class="kpi kpi--cool">
+      <div class="kpi-value">192</div>
+      <div class="kpi-label">concurrency<br>tarefas em paralelo</div>
     </div>
-
-    <!-- ══════════════ ABA 5 · DECISÕES ══════════════ -->
-    <div class="tab-pane fade" id="pane-decisoes" role="tabpanel"
-         aria-labelledby="tab-decisoes" tabindex="0" data-print-title="Decisões autônomas">
-      <h2 class="h4 pane-title">Premissas inferidas sem perguntar</h2>
-      <p>O orquestrador operou em autonomia total: nenhuma pergunta foi feita ao usuário. Toda premissa assumida fica registrada aqui.</p>
-
-      <ul class="list-group list-group-flush">
-        <li class="list-group-item d-flex gap-3 align-items-start">
-          <i class="bi bi-lightbulb fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>"1 semana" = --since 2026-08-07</strong> (7 dias até 14/08); tetos de segurança: BUDGET_USD=5 na captura, US$ 2 no backfill.</div>
-        </li>
-        <li class="list-group-item d-flex gap-3 align-items-start">
-          <i class="bi bi-lightbulb fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>Reset é destrutivo e foi pedido explicitamente</strong> — executado com evidência antes/depois (tudo zerado, fontes voltaram ao seed).</div>
-        </li>
-        <li class="list-group-item d-flex gap-3 align-items-start">
-          <i class="bi bi-lightbulb fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>Guarda de idioma com fail-open NULL</strong> — resposta CJK persistente vira NULL (retomável no próximo run), nunca persiste idioma errado; custo extra desprezível (só nos casos ruins).</div>
-        </li>
-        <li class="list-group-item d-flex gap-3 align-items-start">
-          <i class="bi bi-lightbulb fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>Curadoria é a autoridade do kind</strong> — a re-conciliação indevida do agente (70 flips sobre curados) foi revertida via backup; a derivação é NULL-only.</div>
-        </li>
-        <li class="list-group-item d-flex gap-3 align-items-start">
-          <i class="bi bi-lightbulb fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>Recovery GitHub cai na release MAIS RECENTE do repo</strong> (BullMQ 6.1 recebeu notas da 6.1.1) — conteúdo válido, verify ok, limitação documentada (R2).</div>
-        </li>
-        <li class="list-group-item d-flex gap-3 align-items-start">
-          <i class="bi bi-lightbulb fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>looksLikeJson duplicado por design</strong> (reextract leniente p/ JSON truncado; parse-core estrito p/ o crawl) — divergência documentada, unificação deferida.</div>
-        </li>
-        <li class="list-group-item d-flex gap-3 align-items-start">
-          <i class="bi bi-lightbulb fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>Predicado issue_url NÃO distingue listing de roundup</strong> (todo item carrega issue_url) — discriminante real: kind do backup / tipo da fonte (nota de modelo de dados).</div>
-        </li>
-        <li class="list-group-item d-flex gap-3 align-items-start">
-          <i class="bi bi-lightbulb fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>Revisões adversariais falharam por 402 (saldo)</strong> — substituídas por gates completos + inspeção direta; os fixes tinham 28 testes novos com wire/mocks.</div>
-        </li>
-        <li class="list-group-item d-flex gap-3 align-items-start">
-          <i class="bi bi-lightbulb fs-5 stat-value flex-shrink-0 mt-1"></i>
-          <div><strong>15 suspects remanescentes aceitos</strong> — rasos/blurb-only/kind contestável (reclean com passe forte já converteu 10; os 6 fora do limit não têm conteúdo recuperável).</div>
-        </li>
-      </ul>
+    <div class="kpi">
+      <div class="kpi-value">8.056</div>
+      <div class="kpi-label">base imutável<br>tag v3.0.0 (git)</div>
     </div>
-
-    <!-- ══════════════ ABA 6 · TIMELINE ══════════════ -->
-    <div class="tab-pane fade" id="pane-timeline" role="tabpanel"
-         aria-labelledby="tab-timeline" tabindex="0" data-print-title="Timeline">
-      <h2 class="h4 pane-title">Linha do tempo da execução</h2>
-      <p>2026-08-14 12:39 → 18:00 UTC (run 20260814-123910-1654592).</p>
-
-      <ol class="timeline list-unstyled mb-0">
-        <li class="timeline-item mb-4">
-          <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
-            <span class="badge badge-accent">Fase 0-2</span>
-            <strong>DELIMITAR + ANALYZE + PLAN</strong>
-          </div>
-          <p class="mb-0 text-body-secondary small">FASE 0; fontes (7), chaves, banco (21 artigos), R7 OK; plano: logs → reset+captura → análise → fixes → backfill.</p>
-        </li>
-        <li class="timeline-item mb-4">
-          <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
-            <span class="badge badge-accent">Onda 1</span>
-            <strong>LOGS</strong>
-          </div>
-          <p class="mb-0 text-body-secondary small">Log persistente (writeSync + latest.log), resumo periódico, --help/--version — NADA A REFUTAR na revisão; smoke confirmado.</p>
-        </li>
-        <li class="timeline-item mb-4">
-          <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
-            <span class="badge badge-accent">Onda 2</span>
-            <strong>RESET + CAPTURA TOTAL</strong>
-          </div>
-          <p class="mb-0 text-body-secondary small">Reset (tudo zerado); crawl 7 fontes/1 semana em 51 min: 188 artigos, US$ 0,8559; acompanhado pelo log novo (prova no relatório §8); 8 achados.</p>
-        </li>
-        <li class="timeline-item mb-4">
-          <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
-            <span class="badge badge-accent">Onda 3</span>
-            <strong>5 FIXES PARALELOS</strong>
-          </div>
-          <p class="mb-0 text-body-secondary small">Idioma (hasCjk), guards (JSON+piso), GitHub recovery, vocabulário 2026-08-15, kindFromTags — revisões falharam por 402 (saldo) → gates completos (574/574) + inspeção.</p>
-        </li>
-        <li class="timeline-item mb-4">
-          <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
-            <span class="badge badge-accent">Onda 4</span>
-            <strong>BACKFILL + RE-VERIFICAÇÃO</strong>
-          </div>
-          <p class="mb-0 text-body-secondary small">11 chineses re-summarizados (guarda disparou 1× em produção), 2 below-floor deletados, JSON restaurado, GitHub recover, kind 0 NULL (correção da re-conciliação indevida via backup), re-classify 2026-08-15, reclean 10 suspects→ok — 7/7 com evidência; US$ 0,48 (teto 2).</p>
-        </li>
-        <li class="timeline-item">
-          <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
-            <span class="badge badge-ok">Fase 4</span>
-            <strong>COMMIT-FINAL</strong>
-          </div>
-          <p class="mb-0 text-body-secondary small">Revisor declarou CONVERGÊNCIA (resíduos aceitos por design, sem pendência); gate final 574/574; EXPLAINER.html; commit final; sweep+verify; relatório.</p>
-        </li>
-      </ol>
-    </div>
-
   </div>
 
-  <footer class="text-body-secondary small border-top mt-5 pt-3">
-    Gerado por <strong>deep-orchestrator</strong> v2.0 · 2026-08-14 · branch main.
-    Documento de arquivo único — salve, abra com duplo clique ou imprima em PDF (todas as abas entram no papel).
+  <!-- ============ SEÇÃO 1 ============ -->
+  <section class="animate" style="--i:2">
+    <div class="section-head">
+      <span class="section-num">01</span>
+      <h2>O que aconteceu, em uma frase</h2>
+    </div>
+    <p class="section-lead">
+      O projeto tinha <strong>8.056 artigos</strong> congelados na
+      <dfn title="marcador permanente em um commit (ponto do histórico) que congela um estado; aqui, a base de dados">tag</dfn>
+      v3.0.0 — uma <dfn title="fotografia dos dados num instante que não muda mais; ponto de comparação e segurança">base imutável</dfn>.
+      Antes de qualquer mudança, essa base foi tagueada e enviada ao repositório. Depois vieram 3 fontes novas, 4 ondas de
+      código e uma coleta longa que terminou com o site público servindo <strong>13.701 artigos</strong> — os 5.645 novos
+      vêm exatamente dessas 3 fontes. Nenhum artigo foi perdido no caminho, nem durante a queda de internet.
+    </p>
+    <p class="section-lead">
+      As próximas seções respondem: <em>como o crawler funciona por dentro</em>, <em>o que cada fonte nova exigiu</em>,
+      <em>quais 4 problemas de código foram resolvidos</em>, <em>como a execução aguentou as falhas</em> e
+      <em>onde conferir os resultados</em>.
+    </p>
+  </section>
+
+  <!-- ============ SEÇÃO 2 ============ -->
+  <section class="animate" style="--i:3">
+    <div class="section-head">
+      <span class="section-num">02</span>
+      <h2>Como o crawler funciona: 6 estágios até o deploy</h2>
+    </div>
+    <p class="section-lead">
+      Antes de ler o diagrama, cinco termos. <dfn title="página de arquivo que lista as edições de uma newsletter">Listagens</dfn>
+      são as páginas de arquivo das fontes; cada edição de newsletter é uma
+      <dfn title="uma edição de newsletter, um boletim enviado">issue</dfn>. A
+      <dfn title="IA lê cada issue e separa os itens em notícia/ferramenta/release, guardando um resumo curto">curadoria por IA</dfn>
+      organiza os itens das issues; o <dfn title="re-leitura das issues para recuperar itens que a curadoria deixou passar">passe de cobertura</dfn>
+      re-cobre as lacunas que sobram. Cada item vira um
+      <dfn title="etapa que abre o link do item e extrai o corpo completo do artigo">enriquecimento</dfn> — se o link
+      falhar, fica o <dfn title="resumo curto que o próprio boletim já traz do link">blurb</dfn>. A qualificação roda em
+      <dfn title="processar item a item assim que disponível, sem esperar o lote inteiro">streaming</dfn>, e o resultado é
+      congelado num <dfn title="fotografia dos dados exportada como JSON para alimentar o site">snapshot</dfn>.
+    </p>
+
+    <figure>
+      <div class="diagram-shell" role="img" aria-label="Fluxo do crawler em seis estágios: listagens, issues, curadoria, passe de cobertura, artigos, snapshot e deploy">
+        <script type="text/plain" class="diagram-source">
+        flowchart TD
+            A["Listagens<br/>páginas de arquivo<br/>das fontes"] -->|"varrer e descobrir<br/>novas edições"| B["Issues<br/>edições de newsletters"]
+            B -->|"curar por seção<br/>1 agente de IA por seção"| C["Curadoria por IA<br/>notícia / ferramenta / release<br/>+ blurb"]:::crit
+            C -->|"re-cobrir lacunas"| D["Passe de cobertura<br/>recupera itens que<br/>a curadoria deixou passar"]:::crit
+            D -->|"apenas itens aceitos"| E["Artigos<br/>enriquecimento: abre<br/>o link e extrai o corpo"]:::crit
+            E -->|"em streaming,<br/>item a item"| F["Qualificação<br/>verificação ok/suspect/junk<br/>+ tags + resumo PT-BR"]
+            F -->|"congelar<br/>no snapshot"| G["Snapshot estático<br/>meta.json · articles.json<br/>contents.partN.json + API pública"]
+            G -->|"push na main"| H["Deploy Vercel<br/>site no ar"]
+            C -.->|"blurb preservado<br/>se o alvo falhar"| E
+            classDef crit stroke:#e8590c,stroke-width:3px
+            linkStyle 2,3 stroke:#e8590c,stroke-width:2.5px
+        </script>
+        <p class="diagram-shell__hint">Ctrl/Cmd + rolagem amplia · arraste para mover · dois cliques ajusta o zoom · ⤢ abre em tamanho real</p>
+        <div class="mermaid-wrap">
+          <div class="zoom-controls">
+            <button type="button" data-action="zoom-in" title="Ampliar">+</button>
+            <button type="button" data-action="zoom-out" title="Reduzir">−</button>
+            <button type="button" data-action="zoom-fit" title="Ajustar na tela">⟲</button>
+            <button type="button" data-action="zoom-one" title="Zoom 1:1">1:1</button>
+            <button type="button" data-action="zoom-expand" title="Abrir em tamanho real">⤢</button>
+            <span class="zoom-label">Carregando…</span>
+          </div>
+          <div class="mermaid-viewport">
+            <div class="mermaid mermaid-canvas"></div>
+          </div>
+        </div>
+      </div>
+      <figcaption>
+        <span class="claim">Figura 1 — Um artigo só chega ao site depois de 6 estágios, e a cadeia curadoria → passe de cobertura → enriquecimento é o que impede que itens se percam.</span>
+        <span class="fig-note">Setas com rótulo; a cadeia crítica está em laranja; a seta tracejada é o caminho fail-open (segue sem o corpo completo, mas não perde o item).</span>
+        <div class="figure-legend">
+          <div class="legend-item"><span class="legend-swatch legend-swatch--crit"></span> caminho crítico (garante zero perda)</div>
+          <div class="legend-item"><span class="legend-swatch legend-swatch--dash"></span> blurb preservado (segue sem o corpo completo)</div>
+        </div>
+      </figcaption>
+    </figure>
+
+    <p class="section-lead">
+      O caminho crítico é a cadeia <strong>curadoria → passe de cobertura → enriquecimento</strong>: é ela que garante
+      que nenhum item se perca — e ela aparece destacada em laranja na Figura 1.
+    </p>
+
+    <div class="cards-6">
+      <div class="card-step">
+        <span class="step-num">1</span>
+        <div>
+          <h3>Listagens</h3>
+          <p>Varre as páginas de arquivo de cada fonte e descobre quais edições existem — nada é assumido de memória.</p>
+        </div>
+      </div>
+      <div class="card-step">
+        <span class="step-num">2</span>
+        <div>
+          <h3>Issues → curadoria por IA</h3>
+          <p>Divide cada issue <em>por seção</em> e manda um agente de IA curar cada parte (notícia/ferramenta/release), com o blurb do agregador.</p>
+        </div>
+      </div>
+      <div class="card-step">
+        <span class="step-num">3</span>
+        <div>
+          <h3>Passe de cobertura</h3>
+          <p>Re-lê as issues procurando itens que escaparam da curadoria. Foi escalado na Onda 3 para salvar ~2.800 itens do This Week in Rust.</p>
+        </div>
+      </div>
+      <div class="card-step">
+        <span class="step-num">4</span>
+        <div>
+          <h3>Artigos: enriquecimento</h3>
+          <p>Abre o link de cada item e extrai o corpo completo. Alvo travado ou morto? Fica o blurb — item nunca é descartado.</p>
+        </div>
+      </div>
+      <div class="card-step">
+        <span class="step-num">5</span>
+        <div>
+          <h3>Qualificação em streaming</h3>
+          <p><dfn title="rotular cada artigo como ok, suspect ou junk (bom, suspeito, lixo)">Verificação</dfn>, tags e resumo PT-BR rodam item a item, logo após cada enriquecimento, sem esperar o lote.</p>
+        </div>
+      </div>
+      <div class="card-step">
+        <span class="step-num">6</span>
+        <div>
+          <h3>Snapshot + deploy Vercel</h3>
+          <p>Congela o acervo em JSON estático (<code>meta.json</code>, <code>articles.json</code>, <code>contents.partN.json</code> + API pública) e publica por push na main.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SEÇÃO 3 ============ -->
+  <section class="animate" style="--i:4">
+    <div class="section-head">
+      <span class="section-num">03</span>
+      <h2>As 3 fontes novas e o que cada uma exigiu</h2>
+    </div>
+    <p class="section-lead">
+      Antes de entrar para o crawler, cada fonte foi <strong>analisada por um sub-agente dedicado</strong>, com evidência
+      real do HTML e da API, registrada em <code>docs/sources/*.md</code>. O resultado da análise guiou como a fonte
+      seria coletada — e cada uma tinha uma armadilha diferente.
+    </p>
+
+    <figure>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Fonte</th>
+              <th>Tipo</th>
+              <th>Artigos desde 2026-01-01</th>
+              <th>Desafio-chave</th>
+              <th>Evidência da análise</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Superhuman</strong></td>
+              <td><code>index</code></td>
+              <td class="num"><span class="bar" style="width:170px"></span>3.369</td>
+              <td>Arquivo com paginação numérica; re-cadastrada quando a detecção automática de tipo errou para <code>listing</code>.</td>
+              <td>241 issues desde 2026-01-01; 100% SSR, sem anti-bot; data da listagem só via IA (<code>span.whitespace-nowrap</code>, fallbacks 0/10).</td>
+            </tr>
+            <tr>
+              <td><strong>This Week in Rust</strong></td>
+              <td><code>index</code></td>
+              <td class="num"><span class="bar bar--cool" style="width:100px"></span>1.968</td>
+              <td>Página única estática com centenas de entradas; curadoria por tamanho, sem seções — itens escapavam.</td>
+              <td>669 entradas <code>&lt;li&gt;</code> com <code>&lt;time&gt;</code>; 34 issues → ~1.900+ artigos; sem o fix, ~2.800 ficariam fora.</td>
+            </tr>
+            <tr>
+              <td><strong>The Rundown</strong></td>
+              <td><code>listing</code></td>
+              <td class="num"><span class="bar bar--warm" style="width:18px"></span>308</td>
+              <td>Paginação do DOM é client-side: a tela mostra só 8 cards; índice real escondido numa API JSON.</td>
+              <td><code>GET /api/articles-index</code> entrega 1.329 itens; 302/308 capturados já na 1ª passada; <code>robots.txt</code> bloqueia <code>/api/</code>.</td>
+            </tr>
+            <tr class="total-row">
+              <td>Total (novas)</td>
+              <td>—</td>
+              <td class="num">5.645</td>
+              <td colspan="2">Soma exata dos +5.645 artigos: as 3 fontes explicam todo o crescimento.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <figcaption>
+        <span class="claim">Figura 2 — As 3 fontes novas somam exatamente os +5.645 artigos: Superhuman 3.369, This Week in Rust 1.968 e The Rundown 308.</span>
+        <span class="fig-note">Total 8.056 + 5.645 = 13.701 — o número que o deploy final publicou.</span>
+      </figcaption>
+    </figure>
+
+    <p class="section-lead">
+      O caso mais instrutivo é o The Rundown. A listagem normal (raspar o HTML) encontrava só 8 cards — a paginação
+      roda em JavaScript no navegador e o resto fica invisível para o crawler. A Onda 2 criou um
+      <strong>atalho JSON</strong>: em vez de raspar, o crawler pede o índice diretamente da API do próprio site.
+    </p>
+
+    <figure>
+      <div class="diagram-shell" role="img" aria-label="Comparação dos dois caminhos de coleta do The Rundown: pelo DOM, oito cards; pela API JSON, 308 artigos">
+        <script type="text/plain" class="diagram-source">
+        flowchart TD
+            R["Listagem do<br/>The Rundown"] -->|"caminho padrão:<br/>raspar o HTML"| D1["DOM"]
+            R -->|"atalho novo: API JSON<br/>do próprio site"| J1["GET /api/articles-index"]
+            D1 -->|"paginação roda<br/>em JS no navegador"| D2["8 cards na tela"]
+            D2 -->|"o resto fica invisível<br/>ao crawler"| D3["quase nada<br/>capturado"]
+            J1:::crit -->|"índice real:<br/>1.329 itens"| J2["308 artigos desde 2026-01-01<br/>302 já na 1ª passada"]:::crit
+            J1 -.->|"robots.txt bloqueia /api/<br/>→ só em modo agressivo"| N["Atenção"]
+            classDef crit stroke:#e8590c,stroke-width:3px
+            linkStyle 4 stroke:#e8590c,stroke-width:2.5px
+        </script>
+        <p class="diagram-shell__hint">Ctrl/Cmd + rolagem amplia · arraste para mover · dois cliques ajusta o zoom · ⤢ abre em tamanho real</p>
+        <div class="mermaid-wrap">
+          <div class="zoom-controls">
+            <button type="button" data-action="zoom-in" title="Ampliar">+</button>
+            <button type="button" data-action="zoom-out" title="Reduzir">−</button>
+            <button type="button" data-action="zoom-fit" title="Ajustar na tela">⟲</button>
+            <button type="button" data-action="zoom-one" title="Zoom 1:1">1:1</button>
+            <button type="button" data-action="zoom-expand" title="Abrir em tamanho real">⤢</button>
+            <span class="zoom-label">Carregando…</span>
+          </div>
+          <div class="mermaid-viewport">
+            <div class="mermaid mermaid-canvas"></div>
+          </div>
+        </div>
+      </div>
+      <figcaption>
+        <span class="claim">Figura 3 — No The Rundown, o DOM escondia 8 cards; o atalho JSON entregou 308 artigos desde 2026-01-01, 302 já na primeira passada.</span>
+        <span class="fig-note">O atalho cruza o caminho crítico da fonte: sem ele, a fonte renderia quase nada.</span>
+      </figcaption>
+    </figure>
+
+    <p class="section-lead">
+      <code>robots.txt</code> (o arquivo do site que diz o que robôs podem acessar) bloqueia <code>/api/</code> — por isso o
+      atalho só vale com o <dfn title="modo do crawler que ignora robots.txt e usa User-Agent de navegador real">modo agressivo</dfn> ligado, que é o padrão deste crawler.
+    </p>
+  </section>
+
+  <!-- ============ SEÇÃO 4 ============ -->
+  <section class="animate" style="--i:5">
+    <div class="section-head">
+      <span class="section-num">04</span>
+      <h2>As 4 ondas de código: o problema que cada uma resolveu</h2>
+    </div>
+    <p class="section-lead">
+      Cada onda é um pacote de mudanças que só avançou depois de passar pelo
+      <dfn title="porta de qualidade: o código só é integrado com todos os testes verdes">gate de testes</dfn> —
+      de 590 testes no começo a 611 no final, sempre verdes. A primeira coisa feita foi
+      <strong>congelar a base</strong> com a tag v3.0.0, para que qualquer mudança pudesse ser comparada com um ponto de origem.
+    </p>
+
+    <figure>
+      <div class="diagram-shell" role="img" aria-label="Linha do tempo das quatro ondas de código com os gates de testes entre elas, terminando no deploy final">
+        <script type="text/plain" class="diagram-source">
+        flowchart TD
+            T0["Tag v3.0.0<br/>base imutável:<br/>8.056 artigos"] -->|"congela a base<br/>antes de mexer"| T1["Onda 1 — análises<br/>docs/sources/*.md<br/>3 sub-agentes"]
+            T1 -->|"gate 590/590"| T2["Onda 2 — atalho JSON<br/>do The Rundown<br/>11 testes novos"]
+            T2 -->|"gate 601/601"| T3["Onda 3 — passe de<br/>cobertura do TWIR<br/>5 testes novos"]
+            T3 -->|"gate 606/606"| T4["Onda 4 — fatiar o<br/>contents.json (GH001)<br/>2 partes de até 85 MB"]:::crit
+            T4 -->|"611 testes<br/>+ deploy final"| T5["13.701 artigos no ar<br/>em 21 segundos"]:::crit
+            classDef crit stroke:#e8590c,stroke-width:3px
+            linkStyle 4 stroke:#e8590c,stroke-width:2.5px
+        </script>
+        <p class="diagram-shell__hint">Ctrl/Cmd + rolagem amplia · arraste para mover · dois cliques ajusta o zoom · ⤢ abre em tamanho real</p>
+        <div class="mermaid-wrap">
+          <div class="zoom-controls">
+            <button type="button" data-action="zoom-in" title="Ampliar">+</button>
+            <button type="button" data-action="zoom-out" title="Reduzir">−</button>
+            <button type="button" data-action="zoom-fit" title="Ajustar na tela">⟲</button>
+            <button type="button" data-action="zoom-one" title="Zoom 1:1">1:1</button>
+            <button type="button" data-action="zoom-expand" title="Abrir em tamanho real">⤢</button>
+            <span class="zoom-label">Carregando…</span>
+          </div>
+          <div class="mermaid-viewport">
+            <div class="mermaid mermaid-canvas"></div>
+          </div>
+        </div>
+      </div>
+      <figcaption>
+        <span class="claim">Figura 4 — As 4 ondas avançaram em sequência, cada uma com gate de testes verde — 590 → 601 → 606 → 611 — até o deploy final em 21 segundos.</span>
+        <span class="fig-note">A Onda 4 (em laranja) destravou a publicação: sem ela, o push era rejeitado pelo GitHub.</span>
+      </figcaption>
+    </figure>
+
+    <div class="timeline">
+      <div class="wave">
+        <div class="wave-body">
+          <h3>Onda 1 — Análises documentadas <span class="chip">gate 590/590</span></h3>
+          <p><span class="problem">Problema:</span> ninguém sabia como coletar cada fonte nova sem quebrar o crawler.
+            <span class="fixed">Fix:</span> 3 sub-agentes analisaram Superhuman, The Rundown e This Week in Rust com
+            evidência real de HTML/API e registraram tudo em <code>docs/sources/*.md</code>. O problema do The Rundown
+            (DOM escondendo a paginação) foi descoberto aqui.</p>
+        </div>
+      </div>
+      <div class="wave">
+        <div class="wave-body">
+          <h3>Onda 2 — Atalho JSON do The Rundown <span class="chip">gate 601/601</span> <span class="chip chip--ok">+11 testes</span></h3>
+          <p><span class="problem">Problema:</span> o DOM mostrava 8 cards; a fonte renderia quase nada.
+            <span class="fixed">Fix:</span> <code>src/therundown.js</code> com <code>isRundown</code> +
+            <code>rundownArchive</code> e integração no crawl (modo agressivo, piso <code>--since</code>,
+            <code>discovered_date</code>). Resultado: <strong>302 dos 308 artigos já na 1ª passada</strong>.</p>
+        </div>
+      </div>
+      <div class="wave">
+        <div class="wave-body">
+          <h3>Onda 3 — Passe de cobertura do TWIR escalado <span class="chip">gate 606/606</span> <span class="chip chip--ok">+5 testes</span></h3>
+          <p><span class="problem">Problema:</span> no This Week in Rust, a curadoria deixava itens passarem —
+            sem o fix, <strong>~2.800 itens ficariam fora para sempre</strong>.
+            <span class="fixed">Fix:</span> <code>curate.js</code> ganhou teto por tiragem
+            (<code>coverageLeftoverCeiling</code>) e aceite de lista pura. O passe passou a rodar de verdade:
+            109 disparos, <strong>82 itens recuperados numa única edição</strong>.</p>
+        </div>
+      </div>
+      <div class="wave wave--crit">
+        <div class="wave-body">
+          <h3>Onda 4 — Fatiar o contents.json <span class="chip">611 testes</span> <span class="chip chip--warn">GH001</span></h3>
+          <p><span class="problem">Problema:</span> o <code>contents.json</code> único tinha
+            <strong>103,94 MB</strong> e o GitHub rejeita arquivos acima de <strong>100 MB</strong>
+            (<dfn title="erro do GitHub ao rejeitar arquivo acima de 100 MB">GH001</dfn>) — o push era bloqueado.
+            <span class="fixed">Fix:</span> exportar fatiado em <code>contents.partN.json</code> com
+            <code>EXPORT_WEB_PART_MB=85</code> e <dfn title="metadados que listam as partes do mapa id→conteúdo; =2 significa duas partes">contentsParts=2</dfn>,
+            com carregamento <dfn title="baixar a parte do conteúdo só quando um artigo é aberto">lazy</dfn>. Nada se perdeu.</p>
+        </div>
+      </div>
+    </div>
+
+    <figure>
+      <div class="diagram-shell" role="img" aria-label="Fluxo do problema GH001: arquivo de 103,94 MB rejeitado, fatiado em duas partes de até 85 MB, publicadas sem perda">
+        <script type="text/plain" class="diagram-source">
+        flowchart TD
+            P["contents.json único<br/>103,94 MB"] -->|"push para a main"| G["GitHub recusa<br/>limite de 100 MB (GH001)"]
+            G -->|"fix: exportar fatiado"| X["contents.part0.json<br/>+ contents.part1.json<br/>EXPORT_WEB_PART_MB=85"]:::crit
+            X -->|"meta.contentsParts = 2<br/>[{file, from, to}]"| M["Webapp sabe a parte<br/>de cada id"]
+            M -->|"loader lazy por parte<br/>só quando o artigo abre"| W["Nada se perde:<br/>13.701 artigos<br/>no ar em 21s"]:::crit
+            classDef crit stroke:#e8590c,stroke-width:3px
+            linkStyle 2 stroke:#e8590c,stroke-width:2.5px
+        </script>
+        <p class="diagram-shell__hint">Ctrl/Cmd + rolagem amplia · arraste para mover · dois cliques ajusta o zoom · ⤢ abre em tamanho real</p>
+        <div class="mermaid-wrap">
+          <div class="zoom-controls">
+            <button type="button" data-action="zoom-in" title="Ampliar">+</button>
+            <button type="button" data-action="zoom-out" title="Reduzir">−</button>
+            <button type="button" data-action="zoom-fit" title="Ajustar na tela">⟲</button>
+            <button type="button" data-action="zoom-one" title="Zoom 1:1">1:1</button>
+            <button type="button" data-action="zoom-expand" title="Abrir em tamanho real">⤢</button>
+            <span class="zoom-label">Carregando…</span>
+          </div>
+          <div class="mermaid-viewport">
+            <div class="mermaid mermaid-canvas"></div>
+          </div>
+        </div>
+      </div>
+      <figcaption>
+        <span class="claim">Figura 5 — O contents.json de 103,94 MB estourou o limite de 100 MB do GitHub; fatiado em 2 partes, publicou os 13.701 artigos sem perda.</span>
+        <span class="fig-note">O webapp baixa só a parte que contém o id do artigo aberto — o acervo inteiro continua disponível.</span>
+      </figcaption>
+    </figure>
+
+    <p class="section-lead">
+      Na revisão adversarial da Onda 4, o revisor apontou dois riscos e os dois foram fechados do lado seguro
+      (<dfn title="preferir travar a publicar dado errado">fail-closed</dfn>): lançar erro se um artigo individual passar de 95 MB
+      e sanitizar o ambiente de exportação. O resultado final: <strong>deploy em 21 segundos</strong>, com os
+      <code>contentsParts=2</code> no ar — e a tag v3.0.0 preservada como base imutável.
+    </p>
+  </section>
+
+  <!-- ============ SEÇÃO 5 ============ -->
+  <section class="animate" style="--i:6">
+    <div class="section-head">
+      <span class="section-num">05</span>
+      <h2>Resiliência: como a coleta aguentou a queda de internet</h2>
+    </div>
+    <p class="section-lead">
+      Durante a coleta, a internet caiu por ~2 minutos. O crawler registrou
+      <strong>288× <code>ERR_INTERNET_DISCONNECTED</code></strong> — e nenhum artigo foi perdido. O mecanismo por trás
+      disso é a <dfn title="tentar de novo depois de uma falha">retry</dfn>: todo job que falha volta para a fila
+      (<dfn title="devolver um job à fila para ser processado de novo">re-enfileirar</dfn>) até concluir.
+    </p>
+
+    <figure>
+      <div class="diagram-shell" role="img" aria-label="Laço de resiliência: 288 erros de internet re-enfileiram 809 jobs, com passe 2 automático e política de nunca aposentar item">
+        <script type="text/plain" class="diagram-source">
+        flowchart TD
+            Q["Fila de jobs<br/>~5.300 itens curados"] -->|"fetch em 192 vias"| C["Crawler em execução"]
+            C -->|"18:24–18:26Z:<br/>queda de internet"| E["288× ERR_INTERNET_DISCONNECTED"]
+            C -.->|"às vezes"| H["Hang no teardown<br/>sessão trava no encerramento"]
+            H -->|"auto-recuperação<br/>detecta e reinicia"| C
+            E -->|"jobs marcados<br/>para retry"| J["809 jobs<br/>com retries &gt; 0"]:::crit
+            J -->|"803 re-enfileirados<br/>no próprio run"| Q
+            J -->|"95 em needs_enrich<br/>→ passe 2 automático"| P2["Passe 2 automático"]
+            P2 -->|"processa de novo"| C
+            J -->|"falha é sempre re-processada<br/>ENRICH_MAX_ATTEMPTS=0"| R["Nenhum item é aposentado<br/>blurb preservado (fail-open)"]:::crit
+            R -->|"resultado"| Z["ZERO perda"]:::crit
+            classDef crit stroke:#e8590c,stroke-width:3px
+            linkStyle 5,9 stroke:#e8590c,stroke-width:2.5px
+        </script>
+        <p class="diagram-shell__hint">Ctrl/Cmd + rolagem amplia · arraste para mover · dois cliques ajusta o zoom · ⤢ abre em tamanho real</p>
+        <div class="mermaid-wrap">
+          <div class="zoom-controls">
+            <button type="button" data-action="zoom-in" title="Ampliar">+</button>
+            <button type="button" data-action="zoom-out" title="Reduzir">−</button>
+            <button type="button" data-action="zoom-fit" title="Ajustar na tela">⟲</button>
+            <button type="button" data-action="zoom-one" title="Zoom 1:1">1:1</button>
+            <button type="button" data-action="zoom-expand" title="Abrir em tamanho real">⤢</button>
+            <span class="zoom-label">Carregando…</span>
+          </div>
+          <div class="mermaid-viewport">
+            <div class="mermaid mermaid-canvas"></div>
+          </div>
+        </div>
+      </div>
+      <figcaption>
+        <span class="claim">Figura 6 — 288 erros de rede re-enfileiraram 809 jobs e o acervo fechou com zero perda.</span>
+        <span class="fig-note">O laço laranja é o coração da resiliência: falhou, volta para a fila. Nada é aposentado.</span>
+        <div class="figure-legend">
+          <div class="legend-item"><span class="legend-swatch legend-swatch--crit"></span> laço de resiliência (falha → refila)</div>
+        </div>
+      </figcaption>
+    </figure>
+
+    <p class="section-lead">
+      O laço de re-enfileiramento é o coração da resiliência: <strong>803 jobs voltaram para a fila no próprio run</strong> e
+      os 95 que ficaram em <code>needs_enrich</code> foram para um passe 2 automático. No fim, zero perda.
+    </p>
+
+    <div class="chip-row">
+      <div class="stat-chip"><span class="v">288×</span><span class="l">ERR_INTERNET_DISCONNECTED em ~2 min</span></div>
+      <div class="stat-chip"><span class="v">809</span><span class="l">jobs com retries &gt; 0</span></div>
+      <div class="stat-chip"><span class="v">803</span><span class="l">re-enfileirados no próprio run</span></div>
+      <div class="stat-chip"><span class="v">95</span><span class="l">em needs_enrich → passe 2 automático</span></div>
+      <div class="stat-chip"><span class="v">0</span><span class="l">artigos perdidos</span></div>
+    </div>
+
+    <div class="cards-3">
+      <div class="ve-card">
+        <h3 style="font-size:14.5px;margin-bottom:6px">Hang no teardown → auto-recuperação</h3>
+        <p style="font-size:13.5px;color:var(--muted-foreground)">
+          Se a sessão do navegador trava no
+          <dfn title="encerramento da sessão do navegador (hang = travou no encerramento)">teardown</dfn>, o crawler
+          detecta e reinicia sozinho — a coleta não morre com uma sessão travada.
+        </p>
+      </div>
+      <div class="ve-card">
+        <h3 style="font-size:14.5px;margin-bottom:6px">Falha vira re-processo, nunca aposenta</h3>
+        <p style="font-size:13.5px;color:var(--muted-foreground)">
+          Com <code>ENRICH_MAX_ATTEMPTS=0</code>, todo item em
+          <dfn title="estado “ainda precisa de enriquecimento” (sem corpo completo)">needs_enrich</dfn> volta a ser
+          processado na próxima run — mesmo domínio morto re-falha rápido e o item fica com o blurb, no padrão
+          <strong>fail-open</strong> (definido na Figura 1: preferir seguir sem dado a travar tudo).
+        </p>
+      </div>
+      <div class="ve-card">
+        <h3 style="font-size:14.5px;margin-bottom:6px">Base imutável (tag v3.0.0)</h3>
+        <p style="font-size:13.5px;color:var(--muted-foreground)">
+          Os 8.056 artigos originais ficaram congelados na tag. Qualquer comparação — e qualquer rollback — tem um
+          ponto de origem que não muda.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SEÇÃO 6 ============ -->
+  <section class="animate" style="--i:7">
+    <div class="section-head">
+      <span class="section-num">06</span>
+      <h2>Onde ver os resultados</h2>
+    </div>
+    <div class="where-grid">
+      <div class="ve-card where-card">
+        <h3>Site público</h3>
+        <a href="https://newsletter-crawler.vercel.app" target="_blank" rel="noopener">https://newsletter-crawler.vercel.app</a>
+        <p>13.701 artigos no ar após o deploy final de 23:42Z (21s, <code>contentsParts=2</code>, push <code>e9af6e0</code>, sync 0/0).</p>
+      </div>
+      <div class="ve-card where-card">
+        <h3>Logs da execução</h3>
+        <span class="path">~/.newsletter-crawler/logs</span>
+        <p>Trilha dos runs 14–18, eventos e re-enfileiramentos da coleta.</p>
+      </div>
+      <div class="ve-card where-card">
+        <h3>Análises das fontes</h3>
+        <span class="path">docs/sources/superhuman.ai.md<br>docs/sources/therundown.ai.md<br>docs/sources/this-week-in-rust.md</span>
+        <p>Evidência real de HTML/API que guiou as 3 integrações.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ DOBRADO (andaime) ============ -->
+  <div class="scaffold">
+    <p class="lead">Para quem quer o passo a passo (ou conferir no git) — tudo dobrado</p>
+
+    <details>
+      <summary>Exemplo resolvido: siga um artigo do começo ao fim</summary>
+      <div class="body">
+        <p>Pegue um link citado numa edição do This Week in Rust. O caminho que ele percorre:</p>
+        <ol>
+          <li><strong>Listagem:</strong> a página de arquivo do TWIR é varrida e a edição (issue) é descoberta.</li>
+          <li><strong>Curadoria por IA:</strong> a issue é dividida por tamanho e um agente de IA lê os itens, separa
+              notícia/ferramenta/release e guarda o blurb de cada link.</li>
+          <li><strong>Passe de cobertura:</strong> re-leitura procura links que a curadoria pulou — numa edição, 82 foram
+              recuperados assim. Sem o passe, cada um desses links ficaria fora para sempre.</li>
+          <li><strong>Enriquecimento:</strong> o crawler abre o link e extrai o corpo completo do artigo. Se o site
+              estiver fora do ar nesse momento (ex.: durante a queda de internet), o item é re-enfileirado e tenta de novo.
+              Se o domínio estiver morto de vez, o item fica com o blurb — nunca some.</li>
+          <li><strong>Qualificação:</strong> em streaming, o artigo recebe veredito (ok/suspect/junk), tags e resumo PT-BR.</li>
+          <li><strong>Snapshot + deploy:</strong> na exportação, o artigo entra em <code>articles.json</code> e o corpo
+              em <code>contents.partN.json</code>; o push na main publica tudo no site.</li>
+        </ol>
+      </div>
+    </details>
+
+    <details>
+      <summary>Por dentro da curadoria e do passe de cobertura</summary>
+      <div class="body">
+        <p>A curadoria roda <strong>por seção</strong>: em vez de uma IA lendo a issue inteira, cada seção
+        (News/Tools/Releases…) tem um agente próprio em paralelo (<code>splitIntoSections</code>). No TWIR a página é
+        única e estática, então a divisão é feita por <strong>tamanho</strong> (sem seções) — o que fazia itens escaparem.</p>
+        <p>O passe de cobertura recebeu dois reforços na Onda 3:</p>
+        <ul>
+          <li><code>coverageLeftoverCeiling</code> — teto por tiragem: <code>max(40, emitidos × 20)</code>, com cap em 600;</li>
+          <li><code>isRealRecoveredItem</code> — aceita “lista pura” (≥ 6 caracteres, fora de padrões genéricos de
+              âncora), para não recuperar lixo.</li>
+        </ul>
+        <p>Na prática: <strong>109 disparos</strong> do passe e <strong>82 itens recuperados numa única edição</strong>.
+        Sem o fix, os ~2.800 itens que o passe resgatou teriam ficado de fora para sempre.</p>
+        <p><em>Nota do revisor (não-bloqueante):</em> um teste de wire usa DNS real do TLD <code>.test</code> — risco de
+        flake documentado, aceito no gate.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>O mapa dos commits e dos gates (para conferir no git)</summary>
+      <div class="body">
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr><th>Passo</th><th>Commit / tag</th><th>O que entrou</th><th>Gate</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Base</td><td><code>3c8b22d</code> (tag <code>v3.0.0</code>)</td><td>Snapshot imutável com 8.056 artigos, pushado</td><td>—</td></tr>
+              <tr><td>Onda 1</td><td><code>fd8729a</code> · <code>78cb110</code> · <code>cc1a34c</code></td><td>Análises de Superhuman, The Rundown e TWIR</td><td>590/590</td></tr>
+              <tr><td>Onda 2</td><td><code>9c87dac</code></td><td><code>src/therundown.js</code> + integração no crawl + 11 testes</td><td>601/601</td></tr>
+              <tr><td>Onda 3</td><td><code>94c020c</code></td><td>Passe de cobertura <code>curate.js</code> + 5 testes</td><td>606/606</td></tr>
+              <tr><td>Onda 4</td><td><code>ce50d65</code></td><td>Fatia do <code>contents.json</code> + loader lazy + 2 fixes fail-closed</td><td>611 testes</td></tr>
+              <tr><td>Deploy</td><td><code>e9af6e0</code></td><td>13.701 artigos no ar em 21s (sync 0/0, tag preservada)</td><td>—</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Todos os gates rodaram em worktree efêmera com <code>npm ci</code>. Os dois fixes fail-closed do revisor
+        adversarial na Onda 4: lançar erro se um artigo individual exceder 95 MB e sanitização do ambiente de exportação.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>Números do runtime da coleta (run #14, 9 fontes)</summary>
+      <div class="body">
+        <ul>
+          <li>Início 16:46Z; <strong>curadoria 100%</strong> das issues (241 da Superhuman + 34 do TWIR); ~5.300 itens curados.</li>
+          <li>Custo parcial estimado: <strong>US$ 35+</strong> (extrato final no relatório da execução).</li>
+          <li>Queda de internet 18:24–18:26Z → 288× <code>ERR_INTERNET_DISCONNECTED</code>, 809 jobs com retries &gt; 0
+              (803 re-enfileirados no próprio run; 95 em <code>needs_enrich</code> → passe 2 automático).</li>
+          <li>Coleta convergida nos runs 14–18; ao final, 193 itens em <code>needs_enrich</code> (153 domínios mortos +
+              40 lentos), todos com blurb preservado — <strong>zero perda</strong>.</li>
+          <li>O reporter encerrou por no-progress após ~4,5 h de coleta contínua.</li>
+          <li>Deploy final 23:42Z em 21s, <code>contentsParts=2</code>, 13.701 artigos no ar.</li>
+        </ul>
+      </div>
+    </details>
+  </div>
+
+  <!-- ============ FOOTER ============ -->
+  <footer>
+    <p><strong>Validade:</strong> este documento descreve a execução de <strong>2026-08-30</strong> — crawl runs 14–18,
+    tag <code>v3.0.0</code> (base 8.056), deploy final 23:42Z (13.701 artigos, <code>contentsParts=2</code>).
+    Os números estão congelados nesta data.</p>
+    <p>Fonte primária: <code>.deep-orchestrator/run-20260830-132425-15326/explainer/fatos.md</code> ·
+    documento informativo gerado com os tokens de tema do Plannotator.</p>
   </footer>
 
-</main>
+</div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
-        crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"
-        integrity="sha384-RH2xi4eIQ/gjtbs9fUXM68sLSi99C7ZWBRX1vDrVv6GQXRibxXLbwO2NGZB74MbU"
-        crossorigin="anonymous"></script>
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+  import elkLayouts from 'https://cdn.jsdelivr.net/npm/@mermaid-js/layout-elk/dist/mermaid-layout-elk.esm.min.mjs';
 
-<script>
-(function () {
-  'use strict';
-  var sources = new WeakMap();
-  document.querySelectorAll('pre > code').forEach(function (code) {
-    sources.set(code, code.textContent.replace(/\n$/, ''));
+  const config = {
+    fitPadding: 28,
+    minHeight: 320,
+    maxHeightPx: 960,
+    maxHeightVh: 0.84,
+    maxInitialZoom: 1.8,
+    minZoom: 0.08,
+    maxZoom: 6.5,
+    zoomStep: 0.14,
+    readabilityFloor: 0.58
+  };
+
+  const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n));
+
+  let activeDrag = null;
+
+  addEventListener('mousemove', (e) => activeDrag?.onMove(e));
+  addEventListener('mouseup', () => {
+    activeDrag?.onEnd();
+    activeDrag = null;
   });
-  if (window.hljs) hljs.highlightAll();
-  function copyText(text) {
-    if (navigator.clipboard && window.isSecureContext) {
-      return navigator.clipboard.writeText(text).then(function () { return true; }, function () { return legacyCopy(text); });
+
+  const colorScheme = getComputedStyle(document.documentElement).colorScheme;
+  const isDark = colorScheme === 'dark'
+    || (colorScheme === 'normal'
+      && window.matchMedia('(prefers-color-scheme: dark)').matches);
+
+  const mermaidThemeVariables = isDark
+    ? {
+        darkMode: true,
+        primaryColor: '#1e242e',
+        primaryTextColor: '#dadee5',
+        primaryBorderColor: '#343b45',
+        lineColor: '#9da5b2',
+        secondaryColor: '#1e242e',
+        secondaryTextColor: '#dadee5',
+        tertiaryColor: '#1e242e',
+        tertiaryTextColor: '#dadee5',
+        background: '#070b14',
+      }
+    : {
+        primaryColor: '#5537eb',
+        primaryTextColor: '#ffffff',
+        primaryBorderColor: '#d4d8de',
+        lineColor: '#414853',
+        secondaryColor: '#e1e5eb',
+        secondaryTextColor: '#414853',
+        tertiaryColor: '#e1e5eb',
+        tertiaryTextColor: '#414853',
+        background: '#f3f5f9',
+      };
+
+  mermaid.registerLayoutLoaders(elkLayouts);
+  mermaid.initialize({
+    startOnLoad: false,
+    theme: 'base',
+    look: 'classic',
+    layout: 'elk',
+    themeVariables: {
+      ...mermaidThemeVariables,
+      fontFamily: "'Inter', system-ui, sans-serif",
+      fontSize: '14px',
     }
-    return Promise.resolve(legacyCopy(text));
-  }
-  function legacyCopy(text) {
-    var ta = document.createElement('textarea');
-    ta.value = text;
-    ta.setAttribute('readonly', '');
-    ta.style.cssText = 'position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;';
-    document.body.appendChild(ta);
-    ta.select();
-    ta.setSelectionRange(0, ta.value.length);
-    var ok = false;
-    try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
-    document.body.removeChild(ta);
-    return ok;
-  }
-  document.querySelectorAll('pre > code').forEach(function (code) {
-    var pre = code.parentElement;
-    var btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'btn btn-sm btn-outline-secondary copy-btn';
-    btn.innerHTML = '<i class="bi bi-clipboard"></i>';
-    btn.setAttribute('aria-label', 'Copiar código');
-    btn.addEventListener('click', function () {
-      copyText(sources.get(code) || code.textContent).then(function (ok) {
-        btn.innerHTML = ok ? '<i class="bi bi-check-lg"></i>' : '<i class="bi bi-x-lg"></i>';
-        btn.classList.toggle('btn-outline-success', ok);
-        btn.classList.toggle('btn-outline-danger', !ok);
-        btn.classList.remove('btn-outline-secondary');
-        setTimeout(function () {
-          btn.innerHTML = '<i class="bi bi-clipboard"></i>';
-          btn.className = 'btn btn-sm btn-outline-secondary copy-btn';
-        }, 1500);
-      });
-    });
-    pre.appendChild(btn);
   });
-  var tabs = document.querySelectorAll('[data-bs-toggle="tab"]');
-  if (!tabs.length) return;
-  function activateFromHash() {
-    var hash = window.location.hash;
-    if (!hash || hash.length < 2) return;
-    var target = document.querySelector(hash);
-    if (!target) return;
-    var pane = target.closest('.tab-pane') || (target.classList.contains('tab-pane') ? target : null);
-    if (!pane) return;
-    var trigger = document.querySelector('[data-bs-target="#' + CSS.escape(pane.id) + '"]');
-    if (trigger) bootstrap.Tab.getOrCreateInstance(trigger).show();
-    var scrollTo = target !== pane ? target : (trigger && trigger.closest('[role="tablist"]')) || pane;
-    requestAnimationFrame(function () { scrollTo.scrollIntoView({ block: 'start' }); });
-  }
-  tabs.forEach(function (t) {
-    t.addEventListener('shown.bs.tab', function (e) {
-      var id = (e.target.getAttribute('data-bs-target') || '').slice(1);
-      if (id) history.replaceState(null, '', '#' + id);
+
+  const rerenderers = [];
+
+  function initDiagram(shell) {
+    const wrap = shell.querySelector('.mermaid-wrap');
+    const viewport = shell.querySelector('.mermaid-viewport');
+    const canvas = shell.querySelector('.mermaid-canvas');
+    const source = shell.querySelector('.diagram-source');
+    const label = shell.querySelector('.zoom-label');
+
+    if (!wrap || !viewport || !canvas || !source || !label) {
+      console.error('initDiagram: elementos ausentes em', shell);
+      return;
+    }
+
+    let zoom = 1;
+    let fitMode = 'contain';
+    let panX = 0;
+    let panY = 0;
+    let svgW = 0;
+    let svgH = 0;
+
+    let sx = 0;
+    let sy = 0;
+    let spx = 0;
+    let spy = 0;
+
+    let touchDist = 0;
+    let touchCx = 0;
+    let touchCy = 0;
+
+    function constrainPan() {
+      const vpW = viewport.clientWidth;
+      const vpH = viewport.clientHeight;
+      const rW = svgW * zoom;
+      const rH = svgH * zoom;
+      const pad = config.fitPadding;
+      panX = (rW + pad * 2 <= vpW)
+        ? (vpW - rW) / 2
+        : clamp(panX, vpW - rW - pad, pad);
+      panY = (rH + pad * 2 <= vpH)
+        ? (vpH - rH) / 2
+        : clamp(panY, vpH - rH - pad, pad);
+    }
+
+    function applyTransform() {
+      const svg = canvas.querySelector('svg');
+      if (!svg || !svgW) return;
+      constrainPan();
+      svg.style.width = (svgW * zoom) + 'px';
+      svg.style.height = (svgH * zoom) + 'px';
+      canvas.style.transform = `translate(${panX}px, ${panY}px)`;
+      label.textContent = Math.round(zoom * 100) + '% — ' + fitMode;
+    }
+
+    function canPan() {
+      const rW = svgW * zoom;
+      const rH = svgH * zoom;
+      return rW + config.fitPadding * 2 > viewport.clientWidth
+          || rH + config.fitPadding * 2 > viewport.clientHeight;
+    }
+
+    function computeSmartFit() {
+      const vpW = viewport.clientWidth;
+      const vpH = viewport.clientHeight;
+      const aW = Math.max(80, vpW - config.fitPadding * 2);
+      const aH = Math.max(80, vpH - config.fitPadding * 2);
+      const contain = Math.min(aW / svgW, aH / svgH);
+
+      let z = contain;
+      let mode = 'contain';
+      if (contain < config.readabilityFloor) {
+        const chartR = svgH / svgW;
+        const vpR = vpH / Math.max(vpW, 1);
+        if (chartR >= vpR) {
+          z = aW / svgW;
+          mode = 'width-priority';
+        } else {
+          z = aH / svgH;
+          mode = 'height-priority';
+        }
+      }
+      return { zoom: clamp(z, config.minZoom, config.maxInitialZoom), mode };
+    }
+
+    function fitDiagram() {
+      if (!svgW) return;
+      const fit = computeSmartFit();
+      zoom = fit.zoom;
+      fitMode = fit.mode;
+      panX = (viewport.clientWidth - svgW * zoom) / 2;
+      panY = (viewport.clientHeight - svgH * zoom) / 2;
+      applyTransform();
+    }
+
+    function setOneToOne() {
+      zoom = clamp(1, config.minZoom, config.maxZoom);
+      fitMode = '1:1';
+      panX = (viewport.clientWidth - svgW * zoom) / 2;
+      panY = (viewport.clientHeight - svgH * zoom) / 2;
+      applyTransform();
+    }
+
+    function zoomAround(factor, cx, cy) {
+      const next = clamp(zoom * factor, config.minZoom, config.maxZoom);
+      const ratio = next / zoom;
+      panX = cx - ratio * (cx - panX);
+      panY = cy - ratio * (cy - panY);
+      zoom = next;
+      fitMode = 'custom';
+      applyTransform();
+    }
+
+    function readSvgNaturalSize(svg) {
+      let w = 0;
+      let h = 0;
+      if (svg.viewBox?.baseVal?.width > 0) {
+        w = svg.viewBox.baseVal.width;
+        h = svg.viewBox.baseVal.height;
+      }
+      if (!w) {
+        w = parseFloat(svg.getAttribute('width')) || 0;
+        h = parseFloat(svg.getAttribute('height')) || 0;
+      }
+      if (!w) {
+        const b = svg.getBBox();
+        w = b.width;
+        h = b.height;
+      }
+      if (!w) {
+        const r = svg.getBoundingClientRect();
+        w = r.width || 1000;
+        h = r.height || 700;
+      }
+      if (!svg.getAttribute('viewBox')) {
+        svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+      }
+      return { w, h };
+    }
+
+    function setAdaptiveHeight() {
+      if (!svgW) return;
+      const usableW = Math.max(280, wrap.getBoundingClientRect().width - 2);
+      const idealH = (svgH / svgW) * usableW + config.fitPadding * 2;
+      const maxVp = Math.floor(innerHeight * config.maxHeightVh);
+      const hardMax = Math.min(config.maxHeightPx, Math.max(config.minHeight + 40, maxVp));
+      wrap.style.height = Math.round(clamp(idealH, config.minHeight, hardMax)) + 'px';
+    }
+
+    function openInNewTab() {
+      const svg = canvas.querySelector('svg');
+      if (!svg) return;
+      const clone = svg.cloneNode(true);
+      clone.style.width = '';
+      clone.style.height = '';
+
+      const bg = getComputedStyle(document.documentElement)
+        .getPropertyValue('--background').trim() || (isDark ? '#070b14' : '#f3f5f9');
+
+      const html = `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Diagrama</title><style>
+      body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;
+      background:${bg};padding:40px;box-sizing:border-box}
+      svg{max-width:100%;max-height:90vh;height:auto}
+      </style></head><body>${clone.outerHTML}</body></html>`;
+
+      open(URL.createObjectURL(new Blob([html], { type: 'text/html' })), '_blank');
+    }
+
+    async function render() {
+      try {
+        const code = source.textContent.trim();
+        if (!code) {
+          label.textContent = 'Erro: fonte vazia';
+          return;
+        }
+        const id = 'diagram-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8);
+        const { svg } = await mermaid.render(id, code);
+        const parsed = new DOMParser().parseFromString(svg, 'text/html');
+        const parsedSvg = parsed.body.querySelector('svg');
+        if (!parsedSvg) {
+          label.textContent = 'Erro: SVG vazio';
+          return;
+        }
+        canvas.replaceChildren(document.adoptNode(parsedSvg));
+
+        const svgNode = canvas.querySelector('svg');
+        if (!svgNode) {
+          label.textContent = 'Erro: SVG vazio';
+          return;
+        }
+        svgNode.setAttribute('aria-label', shell.getAttribute('aria-label') || 'Diagrama');
+        svgNode.setAttribute('role', 'img');
+        svgNode.setAttribute('tabindex', '0');
+
+        const size = readSvgNaturalSize(svgNode);
+        svgW = size.w;
+        svgH = size.h;
+
+        svgNode.removeAttribute('width');
+        svgNode.removeAttribute('height');
+        svgNode.style.maxWidth = 'none';
+        svgNode.style.display = 'block';
+
+        setAdaptiveHeight();
+        fitDiagram();
+      } catch (err) {
+        console.error('Falha de render Mermaid:', err);
+        label.textContent = 'Erro: ' + (err.message || 'render falhou');
+      }
+    }
+
+    const actions = {
+      'zoom-in': () => zoomAround(1 + config.zoomStep, viewport.clientWidth / 2, viewport.clientHeight / 2),
+      'zoom-out': () => zoomAround(1 / (1 + config.zoomStep), viewport.clientWidth / 2, viewport.clientHeight / 2),
+      'zoom-fit': fitDiagram,
+      'zoom-one': setOneToOne,
+      'zoom-expand': openInNewTab
+    };
+
+    Object.entries(actions).forEach(([action, handler]) => {
+      wrap.querySelector(`[data-action="${action}"]`)?.addEventListener('click', handler);
     });
-  });
-  window.addEventListener('hashchange', activateFromHash);
-  activateFromHash();
-})();
+
+    viewport.addEventListener('dblclick', fitDiagram);
+
+    viewport.addEventListener('wheel', (e) => {
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+        const rect = viewport.getBoundingClientRect();
+        const factor = e.deltaY < 0 ? 1 + config.zoomStep : 1 / (1 + config.zoomStep);
+        zoomAround(factor, e.clientX - rect.left, e.clientY - rect.top);
+        return;
+      }
+      if (canPan()) {
+        e.preventDefault();
+        panX -= e.deltaX;
+        panY -= e.deltaY;
+        applyTransform();
+      }
+    }, { passive: false });
+
+    viewport.addEventListener('mousedown', (e) => {
+      if (e.target.closest('.zoom-controls') || !canPan()) return;
+      wrap.classList.add('is-panning');
+      sx = e.clientX;
+      sy = e.clientY;
+      spx = panX;
+      spy = panY;
+      e.preventDefault();
+
+      activeDrag = {
+        onMove: (ev) => {
+          panX = spx + (ev.clientX - sx);
+          panY = spy + (ev.clientY - sy);
+          applyTransform();
+        },
+        onEnd: () => {
+          wrap.classList.remove('is-panning');
+        }
+      };
+    });
+
+    viewport.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 1) {
+        sx = e.touches[0].clientX;
+        sy = e.touches[0].clientY;
+        spx = panX;
+        spy = panY;
+      } else if (e.touches.length === 2) {
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        touchDist = Math.sqrt(dx * dx + dy * dy);
+        const r = viewport.getBoundingClientRect();
+        touchCx = (e.touches[0].clientX + e.touches[1].clientX) / 2 - r.left;
+        touchCy = (e.touches[0].clientY + e.touches[1].clientY) / 2 - r.top;
+      }
+    }, { passive: true });
+
+    viewport.addEventListener('touchmove', (e) => {
+      if (e.touches.length === 1 && canPan()) {
+        if (touchDist > 0) {
+          sx = e.touches[0].clientX;
+          sy = e.touches[0].clientY;
+          spx = panX;
+          spy = panY;
+          touchDist = 0;
+        }
+        e.preventDefault();
+        panX = spx + (e.touches[0].clientX - sx);
+        panY = spy + (e.touches[0].clientY - sy);
+        applyTransform();
+      } else if (e.touches.length === 2 && touchDist > 0) {
+        e.preventDefault();
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        const d = Math.sqrt(dx * dx + dy * dy);
+        zoomAround(d / touchDist, touchCx, touchCy);
+        touchDist = d;
+      }
+    }, { passive: false });
+
+    new ResizeObserver(() => {
+      if (svgW) {
+        setAdaptiveHeight();
+        fitDiagram();
+      }
+    }).observe(wrap);
+
+    rerenderers.push(render);
+    render();
+  }
+
+  document.querySelectorAll('.diagram-shell').forEach(initDiagram);
+
+  window.rerenderDiagrams = () => Promise.all(rerenderers.map((render) => render()));
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => rerenderDiagrams());
 </script>
+
 </body>
 </html>

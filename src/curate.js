@@ -23,12 +23,34 @@ const SAVED_KINDS = new Set(['news', 'tool', 'release']);
 const GENERIC_ANCHOR_RE =
   /^(demo\.?|release notes?\.?|changelog|docs?|documentation|more info\.?|info|here|link|website|homepage|github|announcement|blog|details)$/i;
 
-/** Item recuperado pelo passe de cobertura só entra com blurb real e título não-genérico. */
+// Teto ABSOLUTO do passe de cobertura: o passe é UMA chamada de recall, nunca outra coleta do
+// arquivo — página com dezenas de milhares de links fica muito acima dele e é pulada (como antes).
+const COVERAGE_MAX_LEFT = 600;
+// Multiplicador do teto ESCALADO: calibrado pela evidência do TWIR (docs/sources/this-week-in-
+// rust.md §3) — ~239 links externos no corpo bruto e 15–40 itens emitidos → leftovers ~90–224;
+// emitted*20 cobre o pior caso (15 emitidos → teto 300 ≥ 224 leftovers) com margem p/ edições
+// maiores, e o piso de 40 preserva o comportamento antigo nas fontes pequenas.
+const COVERAGE_LEFT_MULT = 20;
+
+/** Teto do passe de cobertura dado o nº de itens que o 1º passe emitiu (puro/testável). */
+export function coverageLeftoverCeiling(emitted) {
+  return Math.min(COVERAGE_MAX_LEFT, Math.max(40, emitted * COVERAGE_LEFT_MULT));
+}
+
+/**
+ * Item recuperado pelo passe de cobertura só entra com TÍTULO próprio e não-genérico. Régua:
+ * - Título genérico (âncora de link secundário — demo, docs, "release notes", github…) → fora SEMPRE.
+ * - Com blurb real (>= 30 chars, o comentário do agregador — padrão do item de destaque): entra.
+ * - SEM blurb (item de LISTA PURA, ex.: TWIR `<li><a href>Title</a></li>` sem comentário): entra
+ *   se o título for específico (>= 6 chars e não-genérico) — na lista pura o título É o item.
+ * - Blurb presente porém raso (< 30): segue fora (comentário de passagem não qualifica o link).
+ */
 export function isRealRecoveredItem(it) {
   const title = (it.title || '').trim();
-  const blurb = (it.blurb || '').trim();
   if (GENERIC_ANCHOR_RE.test(title)) return false;
-  return blurb.length >= 30 && title.length >= 6;
+  if (title.length < 6) return false;
+  const blurb = (it.blurb || '').trim();
+  return blurb.length >= 30 || blurb.length === 0;
 }
 
 /** Divide o markdown em chunks de até `max` chars SEM cortar um item (quebra em linha vazia). */
@@ -229,7 +251,9 @@ export async function curateRoundup({ html, url, source, runId = null, depth = 0
   }
   let recovered = 0;
   const coverage = { recoveredUrls: [], filteredUrls: [], otherUrls: [] };
-  if (leftovers.length && leftovers.length <= 40) {
+  // Teto do passe: ESCALA com o que o 1º passe emitiu (mais emitido → menos leftover esperado;
+  // emissão ~zero de página grande não vira re-coleta) e NUNCA passa do teto absoluto COVERAGE_MAX_LEFT.
+  if (leftovers.length && leftovers.length <= coverageLeftoverCeiling(emitted.size)) {
     try {
       // Contexto do passe = HTML PODADO da página INTEIRA (não o corpo Readability): os blocos
       // que o Readability descartou — exatamente os dos itens omitidos — precisam estar visíveis,

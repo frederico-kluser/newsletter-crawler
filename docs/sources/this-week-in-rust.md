@@ -59,7 +59,27 @@ Edição real analisada: **666** (`/blog/2026/08/26/this-week-in-rust-666/`), 41
 
 Os headings do HTML viram markdown com âncora de link do TOC: `## [Crate of the Week](#crate-of-the-week)` e `### [](#approved-rfcs)[Approved RFCs](https://github.com/rust-lang/rfcs/commits/master)`. O `sectionTitleOf` de `src/curate.js` rejeita linhas com `](` (guard anti-heading-de-item) → **todos os headings do TWIR são rejeitados** → `marks.length < 2` → o `splitIntoSections` cai no fallback **por tamanho** (`chunkMarkdown`, teto `CURATE_CHUNK_CHARS`=24.000). Rodado contra a issue 666 real: **2 fatias `{section: null}`** (23.106 chars + 4.673 chars) e **nenhum agente "por seção"**. Consequências:
 - A curadoria **funciona** (o agente vê os headings no markdown e rotula `section` por julgamento próprio — "Official", "Crate of the Week"…), mas o fan-out esperado de "1 Flash por seção em paralelo" vira **2 agentes por issue** (2 chunks), não ~12 (MAX_SECTIONS).
-- **Passe de cobertura provavelmente NÃO roda:** o guard em `src/curate.js:232` é `if (leftovers.length && leftovers.length <= 40)`. Leftovers = links externos do corpo bruto (239) − emitidos pelos agentes. Um agente Flash emite tipicamente 40–150 itens por issue (o prompt fala em "15–25 itens típicos", mas TWIR tem MUITO mais links) → leftovers ≈ 90–200 → **> 40 → passe de cobertura ignorado**. Ou seja: o recall depende do(s) agente(s) de chunk; a rede de segurança determinística não engata no TWIR moderno. Vale acompanhar o trace `curate/coverage` no `ncrawl inspect` na primeira captura real (se aparecer `skipped`/ausente, é isso).
+- **Passe de cobertura NÃO rodava (RESOLVIDO na onda 3 — ver "Implementado: coverage" abaixo):** o guard era `if (leftovers.length && leftovers.length <= 40)` — leftovers = links externos do corpo bruto (239) − emitidos pelos agentes; com ~90–224 leftovers o passe era ignorado e a rede de segurança determinística nunca engatava no TWIR moderno.
+
+### ✅ Implementado: coverage (onda3 — 2026-08-30)
+
+Mudanças em `src/curate.js`:
+
+- **Guard escalado** (`coverageLeftoverCeiling`): o teto fixo `leftovers <= 40` virou
+  `Math.min(600, Math.max(40, emitted * 20))` — escala com o nº de itens que o 1º passe emitiu.
+  Com 239 links externos e 15–40 emitidos → leftovers ~90–224 ≤ teto (300–600) → o passe **dispara**
+  em toda a faixa (o fixo 40 nunca disparava: 224 > 40). O teto absoluto de **600** garante que o
+  passe nunca vira outra coleta do arquivo (página com dezenas de milhares de links fica muito
+  acima e é pulada, como antes); o piso de 40 preserva o comportamento das fontes pequenas.
+- **Item de lista pura aceito** (`isRealRecoveredItem`): antes exigia blurb ≥ 30 chars — e o TWIR
+  é ~96% lista pura (`<li><a href>Title</a></li>` sem comentário). Agora o item SEM blurb entra se
+  o título for específico (≥ 6 chars e fora de `GENERIC_ANCHOR_RE`); âncora genérica ("Demo.",
+  "Release notes", "GitHub"…), título curto e blurb presente porém raso continuam **fora**; os lints
+  de sponsor/job (`SPONSOR_RE`/`JOB_RE`) seguem intactos.
+- **Efeito esperado no TWIR:** o trace `curate/coverage` no `ncrawl inspect` passa a aparecer nas
+  edições com `recovered`/`filtered`/`secondary` reais; itens do "meio" que os agentes omitem
+  entram no acervo em vez de ficarem fora para sempre. Custo: +1 chamada Flash por issue quando o
+  passe dispara (o recall da rede determinística compensa folgadamente).
 
 ## 4. Mecanismo de DATA para o piso `--since 2026-01-01`
 
@@ -97,7 +117,7 @@ Os headings do HTML viram markdown com âncora de link do TOC: `## [Crate of the
 
 **Riscos no caminho mapeado:**
 1. **`splitIntoSections` chunk-by-size** (não por seção) — paralelismo menor e rótulo `section` por julgamento do LLM (não as seções reais do TWIR). Não é erro, mas difere do esperado pelo pipeline "por seção".
-2. **Coverage pass ≤ 40 leftovers** — provavelmente não engata no TWIR (239 links externos vs ~40–150 emitidos). Recall depende dos agentes de curadoria; conferir `curate/coverage` no inspect.
+2. **Coverage pass — RESOLVIDO na onda 3** (teto escalado com o volume emitido + item de lista pura aceito; ver "Implementado: coverage" no §3). Recall ainda depende primeiramente dos agentes, mas a rede determinística agora engata — conferir `curate/coverage` no inspect.
 3. **Volume da 1ª coleta** — ~3,4–8 mil jobs de artigo. Usar `--since` + `--max-articles`/`BUDGET_USD` (fábrica Cooperpress já ensina isso).
 4. **Alvos externos ruins/JS-gated** — meetup.com (72/issue!) e luma.com podem ser 403/challenge ou JS; o pipeline segura com kept-blurb, mas polui um pouco; Github é 105/issue e vai bem.
 5. **Itens antigos com links mortos** — irrelevante com `--since 2026-01-01` (as 34 issues são recentes); se um dia for coletar histórico completo, esperar mais kept-blurb.
@@ -115,7 +135,7 @@ Os headings do HTML viram markdown com âncora de link do TOC: `## [Crate of the
   npm run crawl -- --sources "This Week in Rust" --since 2026-01-01 --max-articles <N> [--budget <USD>]
   ```
   Esperado: 1 fetch do arquivo → 34 roundups → ~34 × 40–150 itens; depois o enriquecimento dos alvos nas próximas run (delta-only, `known-url` para).
-- **Riscos finais:** (a) curadoria em chunks, não por seção; (b) coverage pass desligado na prática; (c) volume ~3,4–8k jobs na 1ª vez; (d) meetup.com/luma como alvos fracos; (e) sem robots.txt (fail-open ok), sem anti-bot no site, 100% estático — **fonte muito saudável para o crawler**.
+- **Riscos finais:** (a) curadoria em chunks, não por seção; (b) ~~coverage pass desligado~~ **coverage pass agora roda** (onda 3 — §3); (c) volume ~3,4–8k jobs na 1ª vez; (d) meetup.com/luma como alvos fracos; (e) sem robots.txt (fail-open ok), sem anti-bot no site, 100% estático — **fonte muito saudável para o crawler**.
 
 ## Apêndice — como reproduzir a evidência
 

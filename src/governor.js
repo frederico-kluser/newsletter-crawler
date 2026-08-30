@@ -14,6 +14,7 @@ import os from 'node:os';
 import pLimit from 'p-limit';
 import {
   MAX_PARALLEL, RAM_MAX_PCT, RAM_HYSTERESIS_PCT, GOVERNOR_TICK_MS, RENDER_EST_MB, GOVERNOR_LLM_CAP,
+  RAM_FREE_TARGET_PCT, CPU_FREE_TARGET_PCT,
 } from './config.js';
 import { debug, warn } from './util.js';
 
@@ -21,9 +22,10 @@ const GIB = 1024 ** 3;
 // Pisos incondicionais (garantia de progresso): nenhuma lane chega a 0. llm=3 dá folga p/ o
 // fan-out por seção (curadoria) + o streaming de verify/summarize/classify nas máquinas menores.
 const FLOORS = { llm: 3, fetch: 1, render: 1, cpu: 1 };
-// A lane cpu limita parses SÍNCRONOS (JSDOM/Readability/prune) — o teto é fixo e baixo de
+// A lane cpu limita parses SÍNCRONOS (JSDOM/Readability/prune) — o teto é FIXO e baixo de
 // propósito: 32 núcleos não ajudam num event loop só; o que importa é o débito de latência.
-const CPU_CAP = 2;
+// (O parse ASSÍNCRONO roda no pool de workers PARSE_WORKERS, fora do event loop e sem esta lane.)
+const CPU_CAP = Number(process.env.CPU_CAP || 2);
 
 /** Extrai MemTotal/MemAvailable (kB -> bytes) do texto de /proc/meminfo. null se faltar. */
 export function parseMemInfo(text) {
@@ -57,6 +59,28 @@ export function readMemInfo() {
   return { totalBytes, availableBytes: os.freemem() };
 }
 
+// ---- CPU livre do sistema (% de tempo idle) ----
+// Lê a 1ª linha agregada do /proc/stat (`cpu ...`) e devolve o % de inatividade (idle/total)
+// na JANELA entre duas leituras (agregado ≠ amostra pontual — imune a spikes de 1 núcleo).
+// Sem leitura anterior devolve null (o controlador espera o 2º sample; até lá decide só por RAM).
+let cpuPrev = null; // { total, idle } da leitura anterior, module-level (persiste entre ticks)
+export function readCpuInfo() {
+  try {
+    const line = readFileSync('/proc/stat', 'utf8').split('\n')[0];
+    const parts = line.split(/\s+/).slice(1).map(Number);
+    if (parts.length < 7 || parts.some((n) => !Number.isFinite(n))) return null;
+    const idle = parts[3]; // campo idle
+    const total = parts.reduce((a, b) => a + b, 0); // user+nice+system+idle+iowait+irq+softirq+steal+guest+guest_nice
+    const dTotal = total - (cpuPrev?.total ?? total);
+    const dIdle = idle - (cpuPrev?.idle ?? idle);
+    cpuPrev = { total, idle };
+    if (dTotal <= 0) return null; // 1ª amostra ou relógio parado: sem janela válida
+    return Math.max(0, Math.min(100, (dIdle / dTotal) * 100));
+  } catch {
+    return null; // não-Linux ou /proc/stat malformado: fica sem sinal de CPU
+  }
+}
+
 // Lanes singleton: os módulos pegam a referência via getLane() a cada uso; init/setProfile
 // só REDIMENSIONAM (nunca recriam), então referências antigas continuam válidas.
 const lanes = {
@@ -74,10 +98,13 @@ const st = {
   alloc: { llm: 6, fetch: 3, render: 2 }, // tetos por lane do perfil ativo
   ramMaxPct: RAM_MAX_PCT,
   hysteresisPct: RAM_HYSTERESIS_PCT,
+  ramFreeTargetPct: RAM_FREE_TARGET_PCT,
+  cpuFreeTargetPct: CPU_FREE_TARGET_PCT,
   renderEstBytes: RENDER_EST_MB * 1024 * 1024,
   tickMs: GOVERNOR_TICK_MS,
   brakeBytes: 1.5 * GIB,
   readMem: readMemInfo,
+  readCpu: readCpuInfo,
   now: Date.now,
   onEmergencyBrake: null,
   totalBytes: 0,
@@ -85,6 +112,7 @@ const st = {
   emaAvail: null,
   floorBytes: 0,
   ramState: 'ok', // ok | hold | pressure | critical
+  cpuFreePct: null, // % CPU ociosa medida+suavizada (null até o 2º sample)
   overTicks: 0,
   goodTicks: 0,
   calmTicks: 0,
@@ -158,7 +186,29 @@ export function governorTick(now = st.now()) {
   st.lastAvail = mem.availableBytes;
   st.emaAvail = st.emaAvail == null ? mem.availableBytes : 0.5 * st.emaAvail + 0.5 * mem.availableBytes;
 
-  const growCut = st.floorBytes + st.totalBytes * (st.hysteresisPct / 100);
+  // CPU livre medida (% idle) — null até haver janela válida. Suaviza por EMA de 50%.
+  let cpuFree = null;
+  try {
+    cpuFree = st.readCpu();
+  } catch {
+    cpuFree = null;
+  }
+  if (cpuFree != null) {
+    st.cpuFreePct = st.cpuFreePct == null ? cpuFree : 0.5 * st.cpuFreePct + 0.5 * cpuFree;
+  }
+
+  // Métricas de "folga" em % do sistema. RAM = disponível/total; CPU = % idle.
+  const freeRamPct = st.totalBytes ? (Math.max(0, st.emaAvail) / st.totalBytes) * 100 : 0;
+  const freeCpuPct = st.cpuFreePct;
+
+  // Faixa-alvo com histérese: cresce só ACIMA de (alvo+guarda); encolhe quando alguma cai
+  // ABAIXO do alvo; entre as duas a resposta é "hold" (não cresce, não encolhe — evita
+  // oscilação na borda). CPU sem sinal (null) não pressiona nem segura — decide só por RAM.
+  const ramGrowBelow = st.ramFreeTargetPct + st.hysteresisPct;
+  const ramPressure = freeRamPct < st.ramFreeTargetPct;
+  const ramHold = freeRamPct < ramGrowBelow;
+  const cpuPressure = freeCpuPct != null && freeCpuPct < st.cpuFreeTargetPct;
+  const cpuHold = freeCpuPct != null && freeCpuPct < st.cpuFreeTargetPct + st.hysteresisPct;
 
   if (mem.availableBytes < st.brakeBytes) {
     // Freio de emergência (RAM crua, sem EMA — urgência não espera suavização): render vai
@@ -176,7 +226,7 @@ export function governorTick(now = st.now()) {
     }
     st.overTicks += 1;
     st.goodTicks = 0;
-  } else if (st.emaAvail < st.floorBytes) {
+  } else if (ramPressure || cpuPressure) {
     st.ramState = 'pressure';
     st.brakeSince = 0;
     st.overTicks += 1;
@@ -187,7 +237,7 @@ export function governorTick(now = st.now()) {
     } else if (st.overTicks >= 5 && lanes.fetch.concurrency > FLOORS.fetch) {
       shrinkLane('fetch', Math.max(FLOORS.fetch, Math.floor(lanes.fetch.concurrency / 2)), now);
     }
-  } else if (st.emaAvail < growCut) {
+  } else if (ramHold || cpuHold) {
     st.ramState = 'hold';
     st.brakeSince = 0;
     st.overTicks = 0;
@@ -211,10 +261,12 @@ export function governorTick(now = st.now()) {
     }
   }
 
-  // Lane llm é independente da RAM: só recua com 429 (reportRateLimit) e recupera +1 por
-  // janela limpa de 10s — mas NUNCA acima do TETO CALIBRADO (st.llmCap): é o limite aprendido
-  // por falhas de API, a convergência do AIMD em vez da oscilação.
+// Lane llm: cresce +1/10s somente no estado 'ok' (RAM e CPU livres acima dos alvos de % —
+  // pressão segura o crescimento) E NUNCA acima do TETO CALIBRADO (st.llmCap): o limite
+  // aprendido por falhas de API (429 halva lane E teto; converge no nível sem 429). Os dois
+  // gates são complementares: sistema manda no crescimento, a API manda no teto.
   if (
+    st.ramState === 'ok' &&
     lanes.llm.concurrency < st.llmCap &&
     now - st.lastRateLimitAt >= 10_000 &&
     now - st.llmGrowAt >= 10_000
@@ -264,10 +316,13 @@ export function initGovernor(opts = {}) {
   st.parallel = Number.isFinite(p) && p >= 1 ? Math.floor(p) : MAX_PARALLEL;
   st.profile = opts.profile || 'llm-only';
   st.readMem = opts.readMem || readMemInfo;
+  st.readCpu = opts.readCpu || readCpuInfo;
   st.now = opts.now || Date.now;
   st.tickMs = opts.tickMs ?? GOVERNOR_TICK_MS;
   st.ramMaxPct = opts.ramMaxPct ?? RAM_MAX_PCT;
   st.hysteresisPct = opts.ramHysteresisPct ?? RAM_HYSTERESIS_PCT;
+  st.ramFreeTargetPct = opts.ramFreeTargetPct ?? RAM_FREE_TARGET_PCT;
+  st.cpuFreeTargetPct = opts.cpuFreeTargetPct ?? CPU_FREE_TARGET_PCT;
   st.renderEstBytes = (opts.renderEstMb ?? RENDER_EST_MB) * 1024 * 1024;
   st.brakeBytes = opts.brakeBytes ?? 1.5 * GIB;
   st.onEmergencyBrake = opts.onEmergencyBrake || null;
@@ -278,6 +333,7 @@ export function initGovernor(opts = {}) {
   st.emaAvail = mem ? mem.availableBytes : null;
   st.floorBytes = Math.max(st.totalBytes * (1 - st.ramMaxPct / 100), 2 * GIB);
   st.ramState = 'ok';
+  st.cpuFreePct = null;
   st.overTicks = 0;
   st.goodTicks = 0;
   st.calmTicks = 0;
@@ -295,7 +351,7 @@ export function initGovernor(opts = {}) {
   debug(
     `governor: init parallel=${st.parallel} profile=${st.profile} ` +
       `lanes llm=${lanes.llm.concurrency} fetch=${lanes.fetch.concurrency} render=${lanes.render.concurrency} ` +
-      `(alloc render=${st.alloc.render}) floor=${(st.floorBytes / GIB).toFixed(1)}GiB` +
+      `(alloc render=${st.alloc.render}) targets RAM-livre>=${st.ramFreeTargetPct}% CPU-livre>=${st.cpuFreeTargetPct}%` +
       (GOVERNOR_LLM_CAP > 0 ? ` cap calibrado llm=${GOVERNOR_LLM_CAP}` : ''),
   );
   if (opts.autoStart !== false) startLoop();
@@ -369,8 +425,14 @@ export function getTelemetry() {
       totalBytes: st.totalBytes,
       availableBytes: st.lastAvail,
       usedPct,
+      freePct: st.totalBytes ? Math.round((Math.max(0, st.lastAvail) / st.totalBytes) * 100) : 0,
       maxPct: st.ramMaxPct,
+      freeTargetPct: st.ramFreeTargetPct,
       state: st.ramState,
+    },
+    cpu: {
+      freePct: st.cpuFreePct == null ? null : Math.round(st.cpuFreePct * 10) / 10,
+      freeTargetPct: st.cpuFreeTargetPct,
     },
     parallel: { max: st.parallel, profile: st.profile },
     lanes: {

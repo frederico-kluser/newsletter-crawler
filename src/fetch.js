@@ -262,9 +262,25 @@ async function getBrowser() {
   if (!_browser) _browser = await chromium.launch({ headless: true, args: CHROMIUM_ARGS });
   return _browser;
 }
+// Fecha o Chromium SEM pendurar o processo: um page.goto abortado (deadline) pode deixar o
+// browser ocupado e o close() do Playwright nunca resolver — isso segurava o node vivo
+// (chrome filho + pipes) depois do extrato do run. Cede 10s ao close() gracioso e então
+// MATA o processo do browser (falha na saída é melhor que zumbi segurando o run).
 export async function closeBrowser() {
   if (_browser) {
-    await _browser.close().catch(() => {});
+    const closing = _browser.close().catch(() => {});
+    const settled = await Promise.race([
+      closing,
+      new Promise((resolve) => setTimeout(() => resolve('timeout'), 10_000)),
+    ]);
+    if (settled === 'timeout') {
+      try {
+        _browser.process()?.kill('SIGKILL');
+        warn('browser: close() pendurou — processo do Chromium morto (SIGKILL)');
+      } catch (e) {
+        warn(`browser: close() pendurou e o kill falhou (${e.message})`);
+      }
+    }
     _browser = null;
   }
 }

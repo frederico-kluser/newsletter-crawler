@@ -35,16 +35,18 @@ de ajuda (**?**) na barra do topo reabre quando quiser. Toda string da UI vive e
 
 ## Pré-requisito: gerar os dados
 
-O site lê `webapp/public/data/{meta,articles,contents}.json`. Gere/atualize com o CLI (na raiz
-do repo) e **commite** o resultado:
+O site lê `webapp/public/data/{meta,articles}.json` + `contents.partN.json` — o mapa id→content é
+**fatiado em partes** (o arquivo único passou de 100 MB, limite que o GitHub rejeita no push; o
+cliente baixa só a parte que contém um artigo, via `meta.contentsParts`). Gere/atualize com o CLI
+(na raiz do repo) e **commite** o resultado:
 
 ```bash
 ncrawl export --format web        # ou: node src/index.js export --format web
 git add webapp/public/data && git commit -m "chore(webapp): atualiza snapshot do acervo"
 ```
 
-O export é idempotente: sem mudança na base, `articles.json`/`contents.json` saem byte-idênticos
-(só `meta.json` muda, no campo `generatedAt`) — o diff do git fica limpo.
+O export é idempotente: sem mudança na base, `articles.json`/`contents.partN.json` saem
+byte-idênticos (só `meta.json` muda, no campo `generatedAt`) — o diff do git fica limpo.
 
 ## Rodar localmente
 

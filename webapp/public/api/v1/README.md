@@ -75,7 +75,9 @@ mudam de tipo. Qualquer mudança incompatível sai numa nova versão de caminho 
 > `summaryPt` = `null` e `tags` = `{}` — o campo está **sempre presente**, nunca some.
 >
 > **Corpo completo:** não vai nesta API (peso). Fica no snapshot interno do site em
-> `/data/contents.json` (mapa `id → texto`), se você precisar do texto integral.
+> `/data/contents.partN.json` (mapa `id → texto`, fatiado em partes < 100 MB), se você precisar
+> do texto integral — o intervalo de ids de cada parte está em `meta.contentsParts`
+> (`[{file, from, to}]`, também em `/data/meta.json`).
 
 ## Exemplos
 

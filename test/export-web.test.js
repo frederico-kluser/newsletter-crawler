@@ -1,12 +1,13 @@
 // Testes do snapshot estático do webapp (`ncrawl export --format web`). NC_HOME aponta p/ um
 // diretório temporário ANTES dos imports dinâmicos (db.js resolve DB_PATH contra NC_HOME no
 // load), então o schema nasce vazio; semeamos via stmts e validamos os shapes, a tolerância a
-// nulls (backlog sem resumo/tags), a normalização de datas (iso_date + fallback extracted_at)
-// e o DETERMINISMO (2 exports sem mudança na base = bytes idênticos fora o generatedAt do meta).
-// Sem LLM/rede.
+// nulls (backlog sem resumo/tags), a normalização de datas (iso_date + fallback extracted_at),
+// a PARTIÇÃO do contents (meta.contentsParts, união íntegra, partes <= alvo, sem contents.json
+// no outDir) e o DETERMINISMO (2 exports sem mudança na base = bytes idênticos fora o
+// generatedAt do meta). Sem LLM/rede.
 import { test, after } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, rmSync, readFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, rmSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
@@ -144,14 +145,70 @@ test('export web: articles tolera nulls, normaliza datas e prefere blurb no snip
   const sem = articles.find((a) => a.id === semData);
   assert.equal(sem.date_iso, new Date().toISOString().slice(0, 10)); // fallback extracted_at (hoje)
   assert.equal(sem.snippet, '');
-  assert.ok(!('content' in full), 'articles.json não carrega o corpo (contents.json é lazy)');
+  assert.ok(!('content' in full), 'articles.json não carrega o corpo (contents.partN.json é lazy)');
 });
 
-test('export web: contents mapeia id→content com string vazia p/ content nulo', () => {
-  const { contents } = buildWebSnapshot();
-  assert.deepEqual(Object.keys(contents).map(Number), [completo, pendente, semData]);
-  assert.ok(contents[completo].includes('quebras'));
-  assert.equal(contents[semData], '');
+test('export web: base pequena => 1 parte; meta.contentsParts espelha as partes; união == id→content íntegro', () => {
+  const { meta, contentsParts } = buildWebSnapshot();
+  // Default (EXPORT_WEB_PART_MB = 85 MB) com 3 artigos minúsculos => UMA parte cobrindo todos os ids.
+  const min = Math.min(completo, pendente, semData);
+  const max = Math.max(completo, pendente, semData);
+  assert.deepEqual(
+    meta.contentsParts,
+    [{ file: 'contents.part0.json', from: min, to: max }],
+    'o meta expõe [file, from, to] de cada parte p/ o cliente localizar sem baixar tudo',
+  );
+  assert.equal(contentsParts.length, 1);
+  assert.deepEqual(
+    contentsParts.map(({ file, from, to }) => ({ file, from, to })),
+    meta.contentsParts,
+  );
+  // A união das partes == o map id→content que o contents.json único carregava (nada se perde).
+  const union = {};
+  for (const p of contentsParts) Object.assign(union, p.map);
+  assert.deepEqual(Object.keys(union).map(Number), [completo, pendente, semData]); // id ASC
+  assert.ok(union[completo].includes('quebras'));
+  assert.equal(union[semData], '');
+});
+
+test('export web: multipartes — sem contents.json no outDir e NENHUMA parte passa do alvo de bytes', () => {
+  // Alvo minúsculo p/ forçar várias partes com uma base pequena (0.0001 MB ≈ 104 bytes).
+  const partMb = 0.0001;
+  const targetBytes = Math.floor(partMb * 1024 * 1024);
+  const dir = path.join(NC_HOME_TMP, 'out-parts');
+  mkdirSync(dir, { recursive: true });
+  // Resíduo do export antigo (o arquivo único de 80-100 MB) e uma parte velha: o export novo
+  // TEM de remover o contents.json — nunca pode sobrar p/ o hook/deploy o commitarem de novo.
+  writeFileSync(path.join(dir, 'contents.json'), '{"999": "velho"}');
+  writeFileSync(path.join(dir, 'contents.part9.json'), '{"9": "velho"}');
+  const r = exportWebSnapshot({ outDir: dir, partMb });
+
+  assert.ok(!existsSync(path.join(dir, 'contents.json')), 'contents.json removido do outDir');
+  assert.ok(r.parts.length >= 2, `várias partes esperadas com alvo minúsculo (${r.parts.length})`);
+  assert.deepEqual(r.parts, JSON.parse(readFileSync(path.join(dir, 'meta.json'), 'utf8')).contentsParts);
+
+  // Cada parte: existe, fica DENTRO do alvo (o corte por estimativa nunca subestima o byte final)
+  // e carrega um map id→content íntegro; a união == o contents esperado, sem id repetido.
+  const expected = {
+    [completo]: 'Corpo   com\n\nespaços   e\nquebras para o snippet normalizar.',
+    [pendente]: 'Some outlets publish dates like June 18, 2026 in prose.',
+    [semData]: '',
+  };
+  const seen = new Map();
+  for (const p of r.parts) {
+    const raw = readFileSync(path.join(dir, p.file), 'utf8');
+    assert.ok(Buffer.byteLength(raw) <= targetBytes, `${p.file} <= alvo de ${targetBytes} bytes`);
+    const map = JSON.parse(raw);
+    // ids estritamente crescentes em cada parte (partição determinística em ordem de id)
+    const ids = Object.keys(map).map(Number);
+    assert.deepEqual(ids, [...ids].sort((a, b) => a - b));
+    for (const id of ids) {
+      assert.ok(!seen.has(id), `id ${id} não se repete entre partes`);
+      seen.set(id, map[id]);
+      assert.equal(map[id], expected[id], `conteúdo do id ${id} íntegro na parte`);
+    }
+  }
+  assert.deepEqual(Object.keys(expected).map(Number).sort((a, b) => a - b), [...seen.keys()].sort((a, b) => a - b));
 });
 
 test('export web: determinístico — 2 exports diferem só no generatedAt do meta', () => {
@@ -161,15 +218,18 @@ test('export web: determinístico — 2 exports diferem só no generatedAt do me
   const r2 = exportWebSnapshot({ outDir: dir2 });
   assert.equal(r1.articles, 3);
   assert.equal(r2.articles, 3);
-  for (const name of ['articles.json', 'contents.json']) {
+  assert.deepEqual(r1.parts, r2.parts, 'mesma base => mesmas partes (mesmos arquivos/from/to)');
+  const names = ['articles.json', ...r1.parts.map((p) => p.file)];
+  for (const name of names) {
     const a = readFileSync(path.join(dir1, name), 'utf8');
     const b = readFileSync(path.join(dir2, name), 'utf8');
     assert.equal(a, b, `${name} deve ser byte-idêntico entre exports sem mudança na base`);
     JSON.parse(a); // e parsear
   }
+  assert.ok(!existsSync(path.join(dir1, 'contents.json')), 'o export nunca deixa contents.json no outDir');
   const m1 = JSON.parse(readFileSync(path.join(dir1, 'meta.json'), 'utf8'));
   const m2 = JSON.parse(readFileSync(path.join(dir2, 'meta.json'), 'utf8'));
   delete m1.generatedAt;
   delete m2.generatedAt;
-  assert.deepEqual(m1, m2);
+  assert.deepEqual(m1, m2, 'meta idêntico fora o generatedAt (contentsParts inclusive)');
 });

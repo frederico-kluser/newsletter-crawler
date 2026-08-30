@@ -10,7 +10,7 @@ import http from 'node:http';
 import { render } from 'ink-testing-library';
 import { html } from '../src/ui/html.js';
 import App from '../src/ui/App.js';
-import { wait, selectMenuItem, keys } from './helpers/ink.js';
+import { wait, selectMenuItem, keys, typeText } from './helpers/ink.js';
 
 // Servidor que DESTRÓI o socket = erro de REDE real (o got lança, o probe devolve {ok:false,status:0}).
 const broken = http.createServer((req, res) => res.destroy());
@@ -52,8 +52,8 @@ async function openKeyScreen(stdin, lastFrame) {
   await wait(20);
   stdin.write(keys.ENTER);
   await wait(80); // monta o passo da chave (TextInput)
-  stdin.write('sk-ds-xyz');
-  await wait(30);
+  // typeText = caractere a caractere (um write da string inteira faz o submit ler valor vazio).
+  await typeText(stdin, 'sk-ds-xyz');
   stdin.write(keys.ENTER); // submete -> probe no servidor local
 }
 

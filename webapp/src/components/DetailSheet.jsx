@@ -10,7 +10,8 @@ import { effectiveKind } from '../lib/taxonomy.js';
  * Preview do artigo. Desktop: modal central (scale+fade). Mobile: bottom sheet com
  * DRAG-TO-DISMISS a partir do cabeçalho (useDragControls + dragListener=false — o corpo
  * continua rolando nativamente; arrastar tudo bloquearia o scroll via touch-action).
- * O corpo (content) é LAZY: baixa contents.json na 1ª abertura.
+ * O corpo (content) é LAZY POR PARTE: baixa só o contents.partN.json que contém o artigo
+ * (via meta.contentsParts), na 1ª abertura — nunca o contents inteiro.
  */
 export default function DetailSheet({ article: a, toolTypes, isMobile, onClose }) {
   const STR = useStrings();

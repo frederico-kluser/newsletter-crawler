@@ -373,6 +373,11 @@ export function defaultParallel() {
   return Math.min(64, Math.max(4, os.availableParallelism()));
 }
 export const MAX_PARALLEL = envIntOr0('MAX_PARALLEL') || defaultParallel();
+// Teto CALIBRADO da lane llm (0 = sem teto prévio): o governador começa a lane neste valor
+// (clamp piso 3..teto do perfil) e só o abaixa por falhas de API (429). Persistido em
+// NC_HOME/.env pela calibração automática do fim de run (editável por `ncrawl limits set
+// --llm-cap N`; 0 limpa). É o "valor limite" aprendido: converge p/ o nível sem 429.
+export const GOVERNOR_LLM_CAP = envIntOr0('GOVERNOR_LLM_CAP');
 // Orçamento por execução em USD (0 = ilimitado). O ledger grava o custo real SEMPRE.
 export const BUDGET_USD = Number(process.env.BUDGET_USD || 0);
 // Custo AO VIVO no CLI (npm run crawl): intervalo entre linhas de "gasto parcial" (lê o mesmo

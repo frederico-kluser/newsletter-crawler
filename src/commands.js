@@ -7,13 +7,13 @@ import { stmts, wipeAll, removeSource } from './db.js';
 import {
   ROOT, EXPORT_DIR, DB_PATH, CONCURRENCY, MAX_RETRIES, HAS_LLM, CLASSIFY_AFTER_CRAWL, SUMMARIZE_AFTER_CRAWL,
   SEARCH_MODE_A_CONFIRM, OPENROUTER_API_KEY, DEEPSEEK_API_KEY, LLM_PROVIDER, providerInfo, ENV_PATH,
-  BUDGET_USD, MAX_PARALLEL, RAM_MAX_PCT,
+  BUDGET_USD, MAX_PARALLEL, RAM_MAX_PCT, GOVERNOR_LLM_CAP,
   AGGRESSIVE_DEFAULT, DEFAULT_SINCE, MIN_CRAWL_DATE, VERIFY_AFTER_CRAWL, VERIFY_STREAMING, JOB_TIMEOUT_MS, JOB_HARD_TIMEOUT_MS,
   CLASSIFY_STREAMING, SUMMARIZE_STREAMING, CURATE_JOBS, ROUNDUP_TIMEOUT_MS, COST_LOG_INTERVAL_MS,
   ENRICH_MAX_ATTEMPTS, defaultParallel, loadSources, addSourceToConfig, removeSourceFromConfig, setRuntimeKey,
 } from './config.js';
 import {
-  initGovernor, stopGovernor, setProfile, jobsCapacity, getTelemetry,
+  initGovernor, stopGovernor, setProfile, jobsCapacity, getTelemetry, getCalibration,
 } from './governor.js';
 import { beginRun, endRun, shouldStop, getBudgetState } from './budget.js';
 import { processJob, enqueue, upsertSource } from './crawl.js';
@@ -139,6 +139,26 @@ export function buildCliSummary({
 }
 
 /**
+ * Calibração do teto da lane llm (AIMD por 429): se o run baixou o teto abaixo do teto do
+ * perfil, persiste em NC_HOME/.env (GOVERNOR_LLM_CAP) p/ os próximos runs partirem do valor
+ * limite calibrado — "diminuir até calibrar" vira estado, não recomeça do zero a cada run.
+ * Fail-open: erro de escrita nunca derruba o run (telemetria de calibração, não dado).
+ */
+function persistLlmCalibration() {
+  try {
+    const cal = getCalibration();
+    if (!cal.dirty || cal.llmCap < 1) return;
+    upsertEnvVar('GOVERNOR_LLM_CAP', String(cal.llmCap));
+    log(
+      `calibração: teto llm -> ${cal.llmCap} (${cal.rateLimitEvents} 429 nesta run); ` +
+        `GOVERNOR_LLM_CAP=${cal.llmCap} gravado em ${ENV_PATH} (vale p/ os próximos runs)`,
+    );
+  } catch (e) {
+    warn(`calibração: não foi possível gravar GOVERNOR_LLM_CAP (${e.message})`);
+  }
+}
+
+/**
  * Envelope de execução com limites: valida --budget/--parallel, sobe o governador no perfil
  * do comando e abre o run do ledger; endRun (extrato) e stopGovernor rodam SEMPRE (finally).
  */
@@ -166,6 +186,7 @@ async function runWithLimits({ command, flags = {}, profile }, fn) {
   } finally {
     flushEvents(); // grava o que sobrou no buffer de eventos (escritas em lote) antes de fechar
     endRun(failed ? 'failed' : undefined);
+    persistLlmCalibration(); // 429s calibraram o teto llm? grava p/ os próximos runs
     stopGovernor();
   }
 }
@@ -1164,8 +1185,17 @@ export function cmdLimits(rest, flags) {
       upsertEnvVar('RAM_MAX_PCT', String(v));
       n++;
     }
+    if (flags['llm-cap'] != null) {
+      const v = Number(flags['llm-cap']);
+      if (!Number.isInteger(v) || v < 0) {
+        errorLog(`--llm-cap inválido (inteiro >= 0; 0 = sem teto calibrado): ${flags['llm-cap']}`);
+        process.exit(1);
+      }
+      upsertEnvVar('GOVERNOR_LLM_CAP', String(v));
+      n++;
+    }
     if (!n) {
-      errorLog('uso: ncrawl limits set [--budget USD] [--parallel N] [--ram-max-pct P]');
+      errorLog('uso: ncrawl limits set [--budget USD] [--parallel N] [--ram-max-pct P] [--llm-cap N]');
       process.exit(1);
     }
     log(`limites salvos em ${ENV_PATH} (valem p/ os próximos runs; flags por-run têm precedência)`);
@@ -1180,9 +1210,13 @@ export function cmdLimits(rest, flags) {
   log(`budget:      ${BUDGET_USD > 0 ? `US$ ${BUDGET_USD.toFixed(2)}/run` : 'ilimitado'} (${origem('BUDGET_USD')})`);
   log(`ram-max-pct: ${RAM_MAX_PCT}% (${origem('RAM_MAX_PCT')})`);
   log(
-    `lanes (perfil crawl):    llm=${Math.ceil(N * 0.6)} fetch=${Math.ceil(N / 4)} render<=${Math.ceil(N / 4)} (RAM manda)`,
+    `lanes (perfil crawl):    llm=${N} fetch=${Math.ceil(N / 4)} render<=${Math.ceil(N / 4)} (RAM manda)`,
   );
   log(`lanes (perfil llm-only): llm=${N}`);
+  log(
+    `calibração llm: ${GOVERNOR_LLM_CAP > 0 ? `teto <= ${GOVERNOR_LLM_CAP} (${origem('GOVERNOR_LLM_CAP')})` : 'livre (perfil manda)'} — 429 no run baixa e recalibra; ` +
+      `limpe com "ncrawl limits set --llm-cap 0"`,
+  );
   try {
     const t = stmts.sumUsageTotal.get();
     log(`gasto all-time: US$ ${t.usd.toFixed(4)} em ${t.n} chamadas LLM`);
@@ -1197,7 +1231,7 @@ export function cmdLimits(rest, flags) {
   } catch {
     /* ledger vazio/DB antigo: os limites acima já foram mostrados */
   }
-  log('uso: ncrawl limits set [--budget USD] [--parallel N] [--ram-max-pct P]');
+  log('uso: ncrawl limits set [--budget USD] [--parallel N] [--ram-max-pct P] [--llm-cap N]');
 }
 
 // Sobe o buscador web local (React zero-build, filtros sobre a base) e fica no ar até

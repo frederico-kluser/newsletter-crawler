@@ -264,8 +264,10 @@ async function getBrowser() {
 }
 // Fecha o Chromium SEM pendurar o processo: um page.goto abortado (deadline) pode deixar o
 // browser ocupado e o close() do Playwright nunca resolver — isso segurava o node vivo
-// (chrome filho + pipes) depois do extrato do run. Cede 10s ao close() gracioso e então
-// MATA o processo do browser (falha na saída é melhor que zumbi segurando o run).
+// (chrome filho + pipes) depois do extrato do run. Cede 10s ao close() gracioso e, em
+// QUALQUER desfecho, MATA o processo do browser: no macOS o close() do headless-shell às
+// vezes resolve sem derrubar o processo filho (zombie segurando o event loop do node —
+// observado no run #6: extrato ok, node vivo 8+ min, chrome órfão com pipes abertos).
 export async function closeBrowser() {
   if (_browser) {
     const closing = _browser.close().catch(() => {});
@@ -273,13 +275,15 @@ export async function closeBrowser() {
       closing,
       new Promise((resolve) => setTimeout(() => resolve('timeout'), 10_000)),
     ]);
+    // Kill de segurança SEMPRE (no-op se o processo já morreu): garante que nenhum filho
+    // do Chromium sobreviva ao teardown, mesmo quando o close() "resolve" sem matá-lo.
+    try {
+      _browser.process()?.kill('SIGKILL');
+    } catch {
+      /* processo já saiu: kill é no-op */
+    }
     if (settled === 'timeout') {
-      try {
-        _browser.process()?.kill('SIGKILL');
-        warn('browser: close() pendurou — processo do Chromium morto (SIGKILL)');
-      } catch (e) {
-        warn(`browser: close() pendurou e o kill falhou (${e.message})`);
-      }
+      warn('browser: close() pendurou — processo do Chromium morto (SIGKILL)');
     }
     _browser = null;
   }

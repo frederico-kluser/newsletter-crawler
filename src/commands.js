@@ -88,18 +88,20 @@ function cliProgressLine() {
     `artigos +${novos}${c.mantidosBlurb ? ` (+${c.mantidosBlurb} blurb)` : ''}`,
     `fila ${f.pending}p/${f.in_progress}a/${f.done}d/${f.failed}x`,
   ];
-  // Ritmo + ETA: jobs concluídos na run (delta de done+failed sobre a base pós-seed) ÷
-  // minutos decorridos = taxa; fila restante (pending + em voo) ÷ taxa = "falta ~T min".
+  // Ritmo + ETA: jobs em estado terminal na run (delta de done+failed sobre a base pós-seed)
+  // + os EM VOO agora = "processados"; taxa = terminais ÷ minutos; fila restante (pending +
+  // em voo) ÷ taxa = "falta ~T min". O ritmo recalibra a cada linha (bursts de falhas rápidas
+  // sobem, caudas de deadline de 90s derrubam) — é estimativa, não promessa.
   if (p.jobsBase && p.startedAt) {
     const elapsedMin = Math.max((Date.now() - p.startedAt) / 60_000, 0.2);
-    const doneJobs = Math.max(
-      0, f.done - p.jobsBase.done + f.failed - p.jobsBase.failed,
-    );
-    const rate = doneJobs / elapsedMin;
+    const terminal = Math.max(0, f.done - p.jobsBase.done + f.failed - p.jobsBase.failed);
+    const processed = terminal + f.in_progress;
+    const rate = terminal / elapsedMin;
     const remaining = f.pending + f.in_progress;
-    if (doneJobs > 0) parts.push(`ritmo ~${rate.toFixed(1)} jobs/min`);
+    parts.push(`processados ~${processed}`);
+    if (terminal > 0) parts.push(`ritmo ~${rate.toFixed(1)} jobs/min`);
     if (remaining > 0) {
-      parts.push(rate > 0 ? `falta ~${Math.max(1, Math.ceil(remaining / rate))} min` : 'falta ~?');
+      parts.push(rate > 0.05 ? `falta ~${Math.max(1, Math.ceil(remaining / rate))} min` : 'falta ~?');
     }
   }
   if (c.itensCurados) parts.push(`curados +${c.itensCurados}`);

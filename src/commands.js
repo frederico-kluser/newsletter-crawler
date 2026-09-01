@@ -1,7 +1,8 @@
 // Implementação dos comandos (sem efeito colateral ao importar) — compartilhada entre a CLI
 // (src/index.js) e a UI (src/ui/). Os comandos logam por util log/warn/errorLog, então a UI
 // captura tudo via setLogSink. As contagens vêm de getStatus() (dado), reusado pela UI.
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { execSync } from 'node:child_process';
+import { mkdirSync, writeFileSync, rmSync, existsSync } from 'node:fs';
 import path from 'node:path';
 import { stmts, wipeAll, removeSource } from './db.js';
 import {
@@ -787,8 +788,46 @@ export function cmdRemove(rest, flags) {
   printStatus();
 }
 
+// Detecta se `root` é um repo git: o `.git` pode ser um ARQUIVO (git worktree) ou diretório
+// (clone comum). Fallback: `git rev-parse --is-inside-work-tree` com cwd=root, falha capturada.
+function isGitRepo(root) {
+  if (existsSync(path.join(root, '.git'))) return true;
+  try {
+    execSync('git rev-parse --is-inside-work-tree', { cwd: root, stdio: 'pipe' });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// Remove do git (índice + working tree) o snapshot do site COMMITADO. Fora de repo git (banco
+// standalone), apaga os diretórios direto no disco. NÃO commita: o commit/abort do pre-push e o
+// deploy cuidam do restante. Fail-open: o reset do banco já aconteceu — a remoção de arquivo
+// publicável nunca derruba o comando. Exportado p/ teste (padrão do repo).
+export function removeSiteSnapshot(root) {
+  const rel = ['webapp/public/data', 'webapp/public/api/v1'];
+  if (isGitRepo(root)) {
+    try {
+      execSync(`git rm -r --ignore-unmatch -- ${rel.join(' ')}`, {
+        cwd: root,
+        stdio: 'pipe',
+        env: { ...process.env, GIT_TERMINAL_PROMPT: '0' },
+      });
+      return { mode: 'git' };
+    } catch (e) {
+      const detail = String(e.stderr || e.message || '').trim();
+      warn(`git rm do snapshot falhou (${detail}) — reset segue; remova os arquivos manualmente se preciso.`);
+      return { mode: 'git', error: detail };
+    }
+  }
+  for (const r of rel) {
+    try { rmSync(path.join(root, r), { recursive: true, force: true }); } catch { /* fail-open */ }
+  }
+  return { mode: 'fs' };
+}
+
 // Limpa TODOS os dados (slate limpo). Destrutivo: exige --yes.
-export function cmdReset(flags) {
+export function cmdReset(flags, { root = ROOT } = {}) {
   if (flags.yes !== true) {
     errorLog(
       `reset APAGA TODOS OS DADOS de ${DB_PATH} (articles, frontier, pages, selectors, ` +
@@ -798,7 +837,12 @@ export function cmdReset(flags) {
     process.exit(1);
   }
   wipeAll();
+  removeSiteSnapshot(root);
   log(`reset: todos os dados apagados (${DB_PATH}).`);
+  log(
+    'snapshot do site removido do git (webapp/public/data + api/v1) — o próximo export/deploy ' +
+      'publicará o acervo vazio; colete de novo com npm run crawl.',
+  );
   printStatus();
 }
 

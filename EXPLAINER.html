@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="plannotator-theme" content="host">
-<title>Newsletter-crawler: de 8.056 a 13.701 artigos em uma coleta</title>
+<title>Newsletter-crawler: atualização incremental +57 sem recapturar, e o reset que apaga o snapshot</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%235537eb'/%3E%3Ctext x='32' y='45' font-family='Georgia,serif' font-size='40' font-style='italic' fill='%23f6c445' text-anchor='middle'%3EN%3C/text%3E%3C/svg%3E">
 <style>
   /* ============ THEME — tokens Plannotator ============ */
@@ -121,7 +121,7 @@
 
   h1 {
     font-family: var(--font-display);
-    font-size: clamp(2.1rem, 5.2vw, 3.2rem);
+    font-size: clamp(2.1rem, 5.2vw, 3.1rem);
     font-weight: 600;
     line-height: 1.12;
     letter-spacing: -0.015em;
@@ -254,12 +254,6 @@
     overflow-wrap: break-word;
   }
   .cards-3 {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 14px;
-    margin-top: 18px;
-  }
-  .cards-6 {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 14px;
@@ -429,44 +423,7 @@
   .mermaid .edgeLabel { font-family: var(--font-mono) !important; font-size: 12px !important; }
   .mermaid .node rect, .mermaid .node circle, .mermaid .node polygon { stroke-width: 1.6px !important; }
 
-  /* ============ TABLES (fontes) ============ */
-  .table-scroll { overflow-x: auto; margin-top: 20px; border: 1.5px solid var(--border); border-radius: var(--radius); background: var(--card); box-shadow: var(--shadow-card); }
-  table { width: 100%; border-collapse: collapse; min-width: 640px; }
-  thead th {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
-    text-align: left;
-    color: var(--muted-foreground);
-    padding: 12px 16px;
-    border-bottom: 1.5px solid var(--border);
-    background: var(--muted);
-  }
-  tbody td {
-    padding: 13px 16px;
-    border-bottom: 1px solid var(--border);
-    font-size: 14px;
-    vertical-align: top;
-    line-height: 1.55;
-  }
-  tbody tr:last-child td { border-bottom: none; }
-  tbody tr:hover { background: color-mix(in oklab, var(--primary) 4%, transparent); }
-  td.num { font-variant-numeric: tabular-nums; font-weight: 650; white-space: nowrap; }
-  td code, td .mono { font-family: var(--font-mono); font-size: 0.88em; background: var(--code-bg); padding: 1px 5px; border-radius: 4px; }
-  tr.total-row td { border-top: 2px solid var(--border); font-weight: 700; background: color-mix(in oklab, var(--primary) 5%, var(--card)); }
-  .bar {
-    display: inline-block;
-    height: 8px;
-    border-radius: 4px;
-    background: var(--primary);
-    vertical-align: middle;
-    margin-right: 8px;
-  }
-  .bar--warm { background: var(--accent); }
-  .bar--cool { background: var(--secondary); }
-
-  /* ============ TIMELINE (ondas) ============ */
+  /* ============ TIMELINE (runs) ============ */
   .timeline { position: relative; margin-top: 22px; padding-left: 26px; }
   .timeline::before {
     content: "";
@@ -522,8 +479,6 @@
   .chip--warn { color: var(--accent); background: color-mix(in oklab, var(--accent) 12%, transparent); }
   .wave p { font-size: 13.5px; color: var(--muted-foreground); line-height: 1.62; }
   .wave p code { font-family: var(--font-mono); font-size: 0.86em; background: var(--code-bg); padding: 0 5px; border-radius: 4px; color: var(--foreground); }
-  .wave .problem { color: var(--destructive); font-weight: 600; }
-  .wave .fixed { color: var(--success); font-weight: 600; }
 
   /* ============ CHIPS DE RESILIÊNCIA ============ */
   .chip-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
@@ -612,7 +567,7 @@
   /* ============ RESPONSIVE ============ */
   @media (max-width: 900px) {
     .kpis { grid-template-columns: repeat(2, 1fr); }
-    .cards-3, .cards-6, .where-grid { grid-template-columns: 1fr; }
+    .cards-3, .where-grid { grid-template-columns: 1fr; }
   }
   @media (max-width: 640px) {
     .container { padding: 32px 16px 56px; }
@@ -629,47 +584,48 @@
   <!-- ============ HERO ============ -->
   <header class="animate" style="--i:0">
     <p class="eyebrow">Relatório de execução · newsletter-crawler</p>
-    <h1>De 8.056 a 13.701 artigos: o que uma coleta com 3 fontes novas e 192 tarefas em paralelo entregou</h1>
+    <h1>Atualização incremental: +57 artigos sem recapturar, e o reset que agora apaga o snapshot</h1>
 
     <div class="answer-card">
-      O <dfn title="programa que visita páginas web automaticamente e extrai conteúdo">crawler</dfn> — o
-      <em>newsletter-crawler</em> — rodou uma coleta desde <strong>2026-01-01</strong> com
-      <strong>concurrency 192</strong> (192 tarefas executadas ao mesmo tempo) e saiu de
-      <strong>8.056</strong> para <strong>13.701 artigos capturados</strong> (<strong>+5.645</strong>), somando
-      <strong>3 fontes novas</strong>: Superhuman (3.369), This Week in Rust (1.968) e The Rundown (308).
-      No caminho, resolveu <strong>4 problemas de código</strong> em 4 ondas com gate de testes verde, absorveu uma
-      <strong>queda de internet</strong> sem perder artigo nenhum e publicou tudo no site em <strong>21 segundos</strong>.
+      O <dfn title="programa que visita páginas web automaticamente e extrai conteúdo">crawler</dfn> re-visitou as
+      <strong>9 fontes</strong> e aceitou <strong>apenas o novo</strong> — saiu de <strong>13.701</strong> para
+      <strong>13.758 artigos</strong> (<strong>+57</strong>), com o
+      <dfn title="fotografia do acervo exportada como JSON para alimentar o site">snapshot</dfn> commitado
+      (<code>99ddb45</code>) e no ar na Vercel em <strong>21 segundos</strong>. No código, o
+      <code>reset</code> agora <strong>apaga o snapshot do git</strong> junto com os dados — enquanto o arquivo
+      existisse, o guard fail-open do hook restauraria as notícias velhas. Agora o reset devolve o sistema ao
+      <strong>estado vazio de verdade</strong>.
     </div>
 
     <p class="meta-line">
-      <span>▸ coleta: 2026-08-30</span>
-      <span>▸ crawl run #14 (9 fontes)</span>
-      <span>▸ tag v3.0.0 = base imutável</span>
-      <span>▸ deploy final 23:42Z</span>
+      <span>▸ execução: 2026-09-01</span>
+      <span>▸ runs #19 / #20 (9 fontes)</span>
+      <span>▸ parallel 192</span>
+      <span>▸ commits c44109c + 99ddb45</span>
     </p>
   </header>
 
   <!-- ============ KPIs ============ -->
   <div class="kpis animate" style="--i:1">
     <div class="kpi kpi--hero">
-      <div class="kpi-value">13.701</div>
+      <div class="kpi-value">13.758</div>
       <div class="kpi-label">artigos no ar<br>(deploy final)</div>
     </div>
     <div class="kpi kpi--good">
-      <div class="kpi-value">+5.645</div>
-      <div class="kpi-label">artigos novos<br>desde 2026-01-01</div>
+      <div class="kpi-value">+57</div>
+      <div class="kpi-label">novos, sem<br>recapturar</div>
     </div>
     <div class="kpi kpi--warm">
-      <div class="kpi-value">3</div>
-      <div class="kpi-label">fontes novas<br>adicionadas</div>
+      <div class="kpi-value">9</div>
+      <div class="kpi-label">fontes<br>desde 2026-01-01</div>
     </div>
     <div class="kpi kpi--cool">
       <div class="kpi-value">192</div>
       <div class="kpi-label">concurrency<br>tarefas em paralelo</div>
     </div>
     <div class="kpi">
-      <div class="kpi-value">8.056</div>
-      <div class="kpi-label">base imutável<br>tag v3.0.0 (git)</div>
+      <div class="kpi-value">21s</div>
+      <div class="kpi-label">deploy final<br>Vercel (99ddb45)</div>
     </div>
   </div>
 
@@ -680,53 +636,77 @@
       <h2>O que aconteceu, em uma frase</h2>
     </div>
     <p class="section-lead">
-      O projeto tinha <strong>8.056 artigos</strong> congelados na
-      <dfn title="marcador permanente em um commit (ponto do histórico) que congela um estado; aqui, a base de dados">tag</dfn>
-      v3.0.0 — uma <dfn title="fotografia dos dados num instante que não muda mais; ponto de comparação e segurança">base imutável</dfn>.
-      Antes de qualquer mudança, essa base foi tagueada e enviada ao repositório. Depois vieram 3 fontes novas, 4 ondas de
-      código e uma coleta longa que terminou com o site público servindo <strong>13.701 artigos</strong> — os 5.645 novos
-      vêm exatamente dessas 3 fontes. Nenhum artigo foi perdido no caminho, nem durante a queda de internet.
+      O <dfn title="conjunto de artigos capturados e guardados no banco">acervo</dfn> tinha <strong>13.701 artigos</strong>.
+      Uma atualização <dfn title="atualização que acrescenta só o que mudou, sem refazer o que já existe">incremental</dfn>
+      — o <dfn title="só a diferença entre o que já existe e o que é novo">delta</dfn> — re-visitou as listagens das
+      9 fontes com <dfn title="número de tarefas executadas ao mesmo tempo">concurrency</dfn> 192 e trouxe
+      <strong>+57 artigos</strong>, fechando em <strong>13.758</strong>. O snapshot novo foi commitado
+      (<code>99ddb45</code>) e está no ar em <code>newsletter-crawler.vercel.app</code> após um deploy de
+      <strong>21 segundos</strong>.
     </p>
     <p class="section-lead">
-      As próximas seções respondem: <em>como o crawler funciona por dentro</em>, <em>o que cada fonte nova exigiu</em>,
-      <em>quais 4 problemas de código foram resolvidos</em>, <em>como a execução aguentou as falhas</em> e
-      <em>onde conferir os resultados</em>.
+      No meio do caminho, uma segunda tarefa mudou o <strong>código</strong> (commit <code>c44109c</code>): o
+      <code>reset</code> passou a apagar o snapshot do site do git. E a execução ainda absorveu um
+      <strong>hang no rabo de um run</strong> sem perder dados. As próximas seções respondem: <em>como a atualização
+      não recaptura</em>, <em>por que o reset precisava apagar o snapshot</em>, <em>como a execução aguentou as
+      falhas</em> e <em>onde conferir</em>.
     </p>
+
+    <div class="chip-row">
+      <div class="stat-chip"><span class="v">US$ 42,58</span><span class="l">gasto all-time de IA</span></div>
+      <div class="stat-chip"><span class="v">13.746</span><span class="l">classificação + resumos</span></div>
+      <div class="stat-chip"><span class="v">+12</span><span class="l">pendentes re-selecionáveis no próximo run</span></div>
+      <div class="stat-chip"><span class="v">100%</span><span class="l">verificação concluída</span></div>
+    </div>
   </section>
 
   <!-- ============ SEÇÃO 2 ============ -->
   <section class="animate" style="--i:3">
     <div class="section-head">
       <span class="section-num">02</span>
-      <h2>Como o crawler funciona: 6 estágios até o deploy</h2>
+      <h2>Como a atualização incremental não recaptura</h2>
     </div>
     <p class="section-lead">
-      Antes de ler o diagrama, cinco termos. <dfn title="página de arquivo que lista as edições de uma newsletter">Listagens</dfn>
-      são as páginas de arquivo das fontes; cada edição de newsletter é uma
-      <dfn title="uma edição de newsletter, um boletim enviado">issue</dfn>. A
-      <dfn title="IA lê cada issue e separa os itens em notícia/ferramenta/release, guardando um resumo curto">curadoria por IA</dfn>
-      organiza os itens das issues; o <dfn title="re-leitura das issues para recuperar itens que a curadoria deixou passar">passe de cobertura</dfn>
-      re-cobre as lacunas que sobram. Cada item vira um
-      <dfn title="etapa que abre o link do item e extrai o corpo completo do artigo">enriquecimento</dfn> — se o link
-      falhar, fica o <dfn title="resumo curto que o próprio boletim já traz do link">blurb</dfn>. A qualificação roda em
-      <dfn title="processar item a item assim que disponível, sem esperar o lote inteiro">streaming</dfn>, e o resultado é
-      congelado num <dfn title="fotografia dos dados exportada como JSON para alimentar o site">snapshot</dfn>.
+      Cada run <strong>re-visita as listagens inteiras</strong> — as
+      <dfn title="páginas de arquivo que listam as edições de uma newsletter">listagens</dfn> das 9 fontes são varridas
+      de novo. O que impede a recaptura é o filtro <strong>only-new</strong>
+      (<dfn title="filtro que aceita apenas URLs nunca capturadas antes">only-new</dfn>): três camadas descartam tudo
+      que já é conhecido.
     </p>
 
+    <div class="cards-3">
+      <div class="ve-card">
+        <h3 style="font-size:14.5px;margin-bottom:6px">1 · known-url</h3>
+        <p style="font-size:13.5px;color:var(--muted-foreground)">Cada link descoberto é comparado com o
+          <dfn title="conjunto de URLs já capturadas; qualquer URL presente nele é ignorada">known-url</dfn>. Se a URL
+          já existe no acervo, o item é descartado na hora — não é re-visitado nem re-enriquecido.</p>
+      </div>
+      <div class="ve-card">
+        <h3 style="font-size:14.5px;margin-bottom:6px">2 · INSERT OR IGNORE</h3>
+        <p style="font-size:13.5px;color:var(--muted-foreground)">No banco, a gravação usa
+          <dfn title="comando SQL que insere uma linha só se ela ainda não existe">INSERT OR IGNORE</dfn>: mesmo que um
+          link repetido chegue até a escrita, ele não duplica — a chave já existente o ignora.</p>
+      </div>
+      <div class="ve-card">
+        <h3 style="font-size:14.5px;margin-bottom:6px">3 · piso --since</h3>
+        <p style="font-size:13.5px;color:var(--muted-foreground)">O <dfn title="data mínima de coleta: nada anterior a ela é considerado">piso --since</dfn>
+          foi <code>2026-01-01</code>: qualquer issue mais antiga que o piso nem entra na varredura.</p>
+      </div>
+    </div>
+
     <figure>
-      <div class="diagram-shell" role="img" aria-label="Fluxo do crawler em seis estágios: listagens, issues, curadoria, passe de cobertura, artigos, snapshot e deploy">
+      <div class="diagram-shell" role="img" aria-label="Fluxo da atualização incremental: as 9 listagens são re-visitadas, mas só o que passa pelo filtro only-new (known-url, INSERT OR IGNORE, piso --since) entra como artigo novo">
         <script type="text/plain" class="diagram-source">
         flowchart TD
-            A["Listagens<br/>páginas de arquivo<br/>das fontes"] -->|"varrer e descobrir<br/>novas edições"| B["Issues<br/>edições de newsletters"]
-            B -->|"curar por seção<br/>1 agente de IA por seção"| C["Curadoria por IA<br/>notícia / ferramenta / release<br/>+ blurb"]:::crit
-            C -->|"re-cobrir lacunas"| D["Passe de cobertura<br/>recupera itens que<br/>a curadoria deixou passar"]:::crit
-            D -->|"apenas itens aceitos"| E["Artigos<br/>enriquecimento: abre<br/>o link e extrai o corpo"]:::crit
-            E -->|"em streaming,<br/>item a item"| F["Qualificação<br/>verificação ok/suspect/junk<br/>+ tags + resumo PT-BR"]
-            F -->|"congelar<br/>no snapshot"| G["Snapshot estático<br/>meta.json · articles.json<br/>contents.partN.json + API pública"]
-            G -->|"push na main"| H["Deploy Vercel<br/>site no ar"]
-            C -.->|"blurb preservado<br/>se o alvo falhar"| E
+            L["Listagens das 9 fontes<br/>re-visitadas a cada run"] -->|"varrer arquivo<br/>descobrir issues"| I["Issues (edições)<br/>novas e antigas"]
+            I -->|"curadoria por IA<br/>por seção + blurb"| C["Itens curados<br/>com blurb"]
+            C -->|"cada link vira<br/>um alvo"| K{"URL já conhecida?<br/>known-url"}
+            K -->|"SIM: já capturada"| S["descarta<br/>(não recaptura)"]
+            K -->|"NÃO: é nova"| F["INSERT OR IGNORE<br/>+ piso --since 2026-01-01"]:::crit
+            F -->|"entra no acervo"| R["+57 artigos novos<br/>13.701 → 13.758"]:::crit
+            S -.->|"acervo estável<br/>zero re-trabalho"| T["13.758 no total"]
+            R --> T
             classDef crit stroke:#e8590c,stroke-width:3px
-            linkStyle 2,3 stroke:#e8590c,stroke-width:2.5px
         </script>
         <p class="diagram-shell__hint">Ctrl/Cmd + rolagem amplia · arraste para mover · dois cliques ajusta o zoom · ⤢ abre em tamanho real</p>
         <div class="mermaid-wrap">
@@ -744,145 +724,49 @@
         </div>
       </div>
       <figcaption>
-        <span class="claim">Figura 1 — Um artigo só chega ao site depois de 6 estágios, e a cadeia curadoria → passe de cobertura → enriquecimento é o que impede que itens se percam.</span>
-        <span class="fig-note">Setas com rótulo; a cadeia crítica está em laranja; a seta tracejada é o caminho fail-open (segue sem o corpo completo, mas não perde o item).</span>
+        <span class="claim">Figura 1 — As 9 listagens são re-visitadas inteiras, mas só o que passa pelo filtro only-new (known-url + INSERT OR IGNORE + piso --since) entra: +57 artigos, sem recapturar nada.</span>
+        <span class="fig-note">O caminho crítico (em laranja) é o filtro: é ele que transforma “re-visitar tudo” em “trazer só o novo”.</span>
         <div class="figure-legend">
-          <div class="legend-item"><span class="legend-swatch legend-swatch--crit"></span> caminho crítico (garante zero perda)</div>
-          <div class="legend-item"><span class="legend-swatch legend-swatch--dash"></span> blurb preservado (segue sem o corpo completo)</div>
+          <div class="legend-item"><span class="legend-swatch legend-swatch--crit"></span> filtro only-new (não recaptura)</div>
+          <div class="legend-item"><span class="legend-swatch legend-swatch--dash"></span> caminho já conhecido (descarte)</div>
         </div>
       </figcaption>
     </figure>
 
     <p class="section-lead">
-      O caminho crítico é a cadeia <strong>curadoria → passe de cobertura → enriquecimento</strong>: é ela que garante
-      que nenhum item se perca — e ela aparece destacada em laranja na Figura 1.
+      O coração da atualização é o filtro <strong>only-new</strong>: é ele que faz “re-visitar tudo” valer a pena,
+      porque o trabalho só acontece nos 57 itens que realmente não existiam — e os dois runs (<code>#19</code> e
+      <code>#20</code>) drenaram a fila até sobrarem só alvos inacessíveis. As <strong>issues novas de segunda</strong>
+      foram capturadas e curadas (<strong>+54 curados</strong>), e a
+      <dfn title="IA lê cada issue e separa os itens em notícia/ferramenta/release com um resumo">curadoria por IA</dfn>
+      fez o resto.
     </p>
-
-    <div class="cards-6">
-      <div class="card-step">
-        <span class="step-num">1</span>
-        <div>
-          <h3>Listagens</h3>
-          <p>Varre as páginas de arquivo de cada fonte e descobre quais edições existem — nada é assumido de memória.</p>
-        </div>
-      </div>
-      <div class="card-step">
-        <span class="step-num">2</span>
-        <div>
-          <h3>Issues → curadoria por IA</h3>
-          <p>Divide cada issue <em>por seção</em> e manda um agente de IA curar cada parte (notícia/ferramenta/release), com o blurb do agregador.</p>
-        </div>
-      </div>
-      <div class="card-step">
-        <span class="step-num">3</span>
-        <div>
-          <h3>Passe de cobertura</h3>
-          <p>Re-lê as issues procurando itens que escaparam da curadoria. Foi escalado na Onda 3 para salvar ~2.800 itens do This Week in Rust.</p>
-        </div>
-      </div>
-      <div class="card-step">
-        <span class="step-num">4</span>
-        <div>
-          <h3>Artigos: enriquecimento</h3>
-          <p>Abre o link de cada item e extrai o corpo completo. Alvo travado ou morto? Fica o blurb — item nunca é descartado.</p>
-        </div>
-      </div>
-      <div class="card-step">
-        <span class="step-num">5</span>
-        <div>
-          <h3>Qualificação em streaming</h3>
-          <p><dfn title="rotular cada artigo como ok, suspect ou junk (bom, suspeito, lixo)">Verificação</dfn>, tags e resumo PT-BR rodam item a item, logo após cada enriquecimento, sem esperar o lote.</p>
-        </div>
-      </div>
-      <div class="card-step">
-        <span class="step-num">6</span>
-        <div>
-          <h3>Snapshot + deploy Vercel</h3>
-          <p>Congela o acervo em JSON estático (<code>meta.json</code>, <code>articles.json</code>, <code>contents.partN.json</code> + API pública) e publica por push na main.</p>
-        </div>
-      </div>
-    </div>
   </section>
 
   <!-- ============ SEÇÃO 3 ============ -->
   <section class="animate" style="--i:4">
     <div class="section-head">
       <span class="section-num">03</span>
-      <h2>As 3 fontes novas e o que cada uma exigiu</h2>
+      <h2>O requisito novo: reset apaga o snapshot do git</h2>
     </div>
     <p class="section-lead">
-      Antes de entrar para o crawler, cada fonte foi <strong>analisada por um sub-agente dedicado</strong>, com evidência
-      real do HTML e da API, registrada em <code>docs/sources/*.md</code>. O resultado da análise guiou como a fonte
-      seria coletada — e cada uma tinha uma armadilha diferente.
+      Antes, <code>npm run reset -- --yes</code> apagava só os <strong>dados</strong> do banco
+      (<dfn title="operação que apaga todos os dados do banco">wipeAll</dfn>). O problema: o snapshot
+      (<code>webapp/public/data</code> + <code>webapp/public/api/v1</code>) continuava <strong>commitado no git</strong>.
+      E, enquanto o arquivo existisse, o <dfn title="proteção que, diante de uma falha, segue em vez de travar">guard fail-open</dfn>
+      do hook/deploy restauraria as notícias velhas.
     </p>
 
     <figure>
-      <div class="table-scroll">
-        <table>
-          <thead>
-            <tr>
-              <th>Fonte</th>
-              <th>Tipo</th>
-              <th>Artigos desde 2026-01-01</th>
-              <th>Desafio-chave</th>
-              <th>Evidência da análise</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><strong>Superhuman</strong></td>
-              <td><code>index</code></td>
-              <td class="num"><span class="bar" style="width:170px"></span>3.369</td>
-              <td>Arquivo com paginação numérica; re-cadastrada quando a detecção automática de tipo errou para <code>listing</code>.</td>
-              <td>241 issues desde 2026-01-01; 100% SSR, sem anti-bot; data da listagem só via IA (<code>span.whitespace-nowrap</code>, fallbacks 0/10).</td>
-            </tr>
-            <tr>
-              <td><strong>This Week in Rust</strong></td>
-              <td><code>index</code></td>
-              <td class="num"><span class="bar bar--cool" style="width:100px"></span>1.968</td>
-              <td>Página única estática com centenas de entradas; curadoria por tamanho, sem seções — itens escapavam.</td>
-              <td>669 entradas <code>&lt;li&gt;</code> com <code>&lt;time&gt;</code>; 34 issues → ~1.900+ artigos; sem o fix, ~2.800 ficariam fora.</td>
-            </tr>
-            <tr>
-              <td><strong>The Rundown</strong></td>
-              <td><code>listing</code></td>
-              <td class="num"><span class="bar bar--warm" style="width:18px"></span>308</td>
-              <td>Paginação do DOM é client-side: a tela mostra só 8 cards; índice real escondido numa API JSON.</td>
-              <td><code>GET /api/articles-index</code> entrega 1.329 itens; 302/308 capturados já na 1ª passada; <code>robots.txt</code> bloqueia <code>/api/</code>.</td>
-            </tr>
-            <tr class="total-row">
-              <td>Total (novas)</td>
-              <td>—</td>
-              <td class="num">5.645</td>
-              <td colspan="2">Soma exata dos +5.645 artigos: as 3 fontes explicam todo o crescimento.</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <figcaption>
-        <span class="claim">Figura 2 — As 3 fontes novas somam exatamente os +5.645 artigos: Superhuman 3.369, This Week in Rust 1.968 e The Rundown 308.</span>
-        <span class="fig-note">Total 8.056 + 5.645 = 13.701 — o número que o deploy final publicou.</span>
-      </figcaption>
-    </figure>
-
-    <p class="section-lead">
-      O caso mais instrutivo é o The Rundown. A listagem normal (raspar o HTML) encontrava só 8 cards — a paginação
-      roda em JavaScript no navegador e o resto fica invisível para o crawler. A Onda 2 criou um
-      <strong>atalho JSON</strong>: em vez de raspar, o crawler pede o índice diretamente da API do próprio site.
-    </p>
-
-    <figure>
-      <div class="diagram-shell" role="img" aria-label="Comparação dos dois caminhos de coleta do The Rundown: pelo DOM, oito cards; pela API JSON, 308 artigos">
+      <div class="diagram-shell" role="img" aria-label="Fluxo do reset: wipeAll apaga o banco e git rm remove o snapshot do git e do disco; sem o git rm, o guard fail-open restauraria as notícias velhas">
         <script type="text/plain" class="diagram-source">
         flowchart TD
-            R["Listagem do<br/>The Rundown"] -->|"caminho padrão:<br/>raspar o HTML"| D1["DOM"]
-            R -->|"atalho novo: API JSON<br/>do próprio site"| J1["GET /api/articles-index"]
-            D1 -->|"paginação roda<br/>em JS no navegador"| D2["8 cards na tela"]
-            D2 -->|"o resto fica invisível<br/>ao crawler"| D3["quase nada<br/>capturado"]
-            J1:::crit -->|"índice real:<br/>1.329 itens"| J2["308 artigos desde 2026-01-01<br/>302 já na 1ª passada"]:::crit
-            J1 -.->|"robots.txt bloqueia /api/<br/>→ só em modo agressivo"| N["Atenção"]
+            R["npm run reset -- --yes"] -->|"passo 1"| W["wipeAll:<br/>apaga todos os dados<br/>do banco SQLite"]
+            W -->|"passo 2"| G["git rm do snapshot<br/>webapp/public/data<br/>+ webapp/public/api/v1"]:::crit
+            G -->|"resultado"| E["estado vazio DE VERDADE:<br/>sem dados E sem arquivo<br/>para o hook restaurar"]:::crit
+            G -.->|"se este passo faltasse"| BAD["o arquivo velho<br/>continuaria no git"]
+            BAD -->|"guard fail-open do hook<br/>restaura snapshot menor"| OLD["notícias velhas<br/>voltariam ao site"]
             classDef crit stroke:#e8590c,stroke-width:3px
-            linkStyle 4 stroke:#e8590c,stroke-width:2.5px
         </script>
         <p class="diagram-shell__hint">Ctrl/Cmd + rolagem amplia · arraste para mover · dois cliques ajusta o zoom · ⤢ abre em tamanho real</p>
         <div class="mermaid-wrap">
@@ -900,14 +784,24 @@
         </div>
       </div>
       <figcaption>
-        <span class="claim">Figura 3 — No The Rundown, o DOM escondia 8 cards; o atalho JSON entregou 308 artigos desde 2026-01-01, 302 já na primeira passada.</span>
-        <span class="fig-note">O atalho cruza o caminho crítico da fonte: sem ele, a fonte renderia quase nada.</span>
+        <span class="claim">Figura 2 — O reset agora apaga dados e snapshot do git juntos; sem o <code>git rm</code>, o guard fail-open do hook restauraria as notícias velhas enquanto o arquivo existisse.</span>
+        <span class="fig-note">O passo crítico (em laranja) é o <code>git rm</code>: é o que devolve o sistema ao estado vazio de verdade.</span>
+        <div class="figure-legend">
+          <div class="legend-item"><span class="legend-swatch legend-swatch--crit"></span> passo novo (git rm do snapshot)</div>
+          <div class="legend-item"><span class="legend-swatch legend-swatch--dash"></span> o que aconteceria sem ele</div>
+        </div>
       </figcaption>
     </figure>
 
     <p class="section-lead">
-      <code>robots.txt</code> (o arquivo do site que diz o que robôs podem acessar) bloqueia <code>/api/</code> — por isso o
-      atalho só vale com o <dfn title="modo do crawler que ignora robots.txt e usa User-Agent de navegador real">modo agressivo</dfn> ligado, que é o padrão deste crawler.
+      O commit <code>c44109c</code> implementa isso no <code>cmdReset</code>: depois do <code>wipeAll</code>, executa
+      <code>git rm -r --ignore-unmatch -- webapp/public/data webapp/public/api/v1</code>
+      (<dfn title="remove um arquivo do controle de versão e do disco ao mesmo tempo">git rm</dfn>). A detecção de repositório
+      git é por <code>.git</code> (diretório ou arquivo) + <code>rev-parse</code>; sem repositório, cai para
+      <code>fs.rmSync</code>; se o <code>git rm</code> falhar, avisa e segue (fail-open); e a recusa sem
+      <code>--yes</code> continua intacta. A suíte fechou em <strong>614/614</strong>, com 3 testes novos
+      (repo git scratch, sem git, recusa) e revisão adversarial <strong>APPROVE</strong> (2 apontamentos
+      não-bloqueantes).
     </p>
   </section>
 
@@ -915,26 +809,28 @@
   <section class="animate" style="--i:5">
     <div class="section-head">
       <span class="section-num">04</span>
-      <h2>As 4 ondas de código: o problema que cada uma resolveu</h2>
+      <h2>Resiliência: hang, kill, retomada — e zero perda</h2>
     </div>
     <p class="section-lead">
-      Cada onda é um pacote de mudanças que só avançou depois de passar pelo
-      <dfn title="porta de qualidade: o código só é integrado com todos os testes verdes">gate de testes</dfn> —
-      de 590 testes no começo a 611 no final, sempre verdes. A primeira coisa feita foi
-      <strong>congelar a base</strong> com a tag v3.0.0, para que qualquer mudança pudesse ser comparada com um ponto de origem.
+      No <strong>rabo do run #19</strong> (a fase de
+      <dfn title="rotular cada artigo como ok, suspect ou junk">verificação</dfn>, que roda em streaming ao fim da fila),
+      o processo travou. A saída foi <strong>matar o processo</strong> — os dados já estavam íntegros — e
+      <strong>relançar o passe #2</strong> (run #20), que converge por no-progress. Os 193 alvos que sobraram em
+      <dfn title="item que ainda não teve o corpo completo extraído">needs_enrich</dfn> são <strong>inacessíveis</strong>:
+      ficam com o <dfn title="resumo curto que o próprio boletim traz do link">blurb</dfn> preservado, sem perder o item.
     </p>
 
     <figure>
-      <div class="diagram-shell" role="img" aria-label="Linha do tempo das quatro ondas de código com os gates de testes entre elas, terminando no deploy final">
+      <div class="diagram-shell" role="img" aria-label="Laço de resiliência: o hang do run 19 é morto, o passe 2 (run 20) converge por no-progress, e os 193 alvos inacessíveis ficam com o blurb preservado">
         <script type="text/plain" class="diagram-source">
         flowchart TD
-            T0["Tag v3.0.0<br/>base imutável:<br/>8.056 artigos"] -->|"congela a base<br/>antes de mexer"| T1["Onda 1 — análises<br/>docs/sources/*.md<br/>3 sub-agentes"]
-            T1 -->|"gate 590/590"| T2["Onda 2 — atalho JSON<br/>do The Rundown<br/>11 testes novos"]
-            T2 -->|"gate 601/601"| T3["Onda 3 — passe de<br/>cobertura do TWIR<br/>5 testes novos"]
-            T3 -->|"gate 606/606"| T4["Onda 4 — fatiar o<br/>contents.json (GH001)<br/>2 partes de até 85 MB"]:::crit
-            T4 -->|"611 testes<br/>+ deploy final"| T5["13.701 artigos no ar<br/>em 21 segundos"]:::crit
+            R19["Run #19<br/>crawl incremental<br/>parallel 192"] -->|"fim da fila:<br/>verificação em streaming"| H["Hang no rabo<br/>do run"]:::crit
+            H -->|"reporter mata<br/>o processo"| K["kill<br/>(dados íntegros)"]
+            K -->|"re-rodar:<br/>resetInProgress + drenar"| R20["Run #20<br/>passe #2"]
+            R20 -->|"converge por<br/>no-progress"| D["fila drenada<br/>13.758 artigos"]
+            D -->|"sobram só"| N["193 needs_enrich<br/>alvos inacessíveis"]:::crit
+            N -->|"blurb preservado<br/>(fail-open)"| Z["zero perda"]:::crit
             classDef crit stroke:#e8590c,stroke-width:3px
-            linkStyle 4 stroke:#e8590c,stroke-width:2.5px
         </script>
         <p class="diagram-shell__hint">Ctrl/Cmd + rolagem amplia · arraste para mover · dois cliques ajusta o zoom · ⤢ abre em tamanho real</p>
         <div class="mermaid-wrap">
@@ -952,209 +848,44 @@
         </div>
       </div>
       <figcaption>
-        <span class="claim">Figura 4 — As 4 ondas avançaram em sequência, cada uma com gate de testes verde — 590 → 601 → 606 → 611 — até o deploy final em 21 segundos.</span>
-        <span class="fig-note">A Onda 4 (em laranja) destravou a publicação: sem ela, o push era rejeitado pelo GitHub.</span>
+        <span class="claim">Figura 3 — O hang do run #19 foi morto com os dados íntegros, o passe #2 (run #20) convergiu sozinho por no-progress, e os 193 alvos inacessíveis ficaram com o blurb: zero perda.</span>
+        <span class="fig-note">O caminho crítico (em laranja) é o fim do laço: a fila drena e o que não responde vira blurb, nunca descarte.</span>
+        <div class="figure-legend">
+          <div class="legend-item"><span class="legend-swatch legend-swatch--crit"></span> laço de resiliência (hang → kill → retomada)</div>
+        </div>
       </figcaption>
     </figure>
 
-    <div class="timeline">
-      <div class="wave">
-        <div class="wave-body">
-          <h3>Onda 1 — Análises documentadas <span class="chip">gate 590/590</span></h3>
-          <p><span class="problem">Problema:</span> ninguém sabia como coletar cada fonte nova sem quebrar o crawler.
-            <span class="fixed">Fix:</span> 3 sub-agentes analisaram Superhuman, The Rundown e This Week in Rust com
-            evidência real de HTML/API e registraram tudo em <code>docs/sources/*.md</code>. O problema do The Rundown
-            (DOM escondendo a paginação) foi descoberto aqui.</p>
-        </div>
-      </div>
-      <div class="wave">
-        <div class="wave-body">
-          <h3>Onda 2 — Atalho JSON do The Rundown <span class="chip">gate 601/601</span> <span class="chip chip--ok">+11 testes</span></h3>
-          <p><span class="problem">Problema:</span> o DOM mostrava 8 cards; a fonte renderia quase nada.
-            <span class="fixed">Fix:</span> <code>src/therundown.js</code> com <code>isRundown</code> +
-            <code>rundownArchive</code> e integração no crawl (modo agressivo, piso <code>--since</code>,
-            <code>discovered_date</code>). Resultado: <strong>302 dos 308 artigos já na 1ª passada</strong>.</p>
-        </div>
-      </div>
-      <div class="wave">
-        <div class="wave-body">
-          <h3>Onda 3 — Passe de cobertura do TWIR escalado <span class="chip">gate 606/606</span> <span class="chip chip--ok">+5 testes</span></h3>
-          <p><span class="problem">Problema:</span> no This Week in Rust, a curadoria deixava itens passarem —
-            sem o fix, <strong>~2.800 itens ficariam fora para sempre</strong>.
-            <span class="fixed">Fix:</span> <code>curate.js</code> ganhou teto por tiragem
-            (<code>coverageLeftoverCeiling</code>) e aceite de lista pura. O passe passou a rodar de verdade:
-            109 disparos, <strong>82 itens recuperados numa única edição</strong>.</p>
-        </div>
-      </div>
-      <div class="wave wave--crit">
-        <div class="wave-body">
-          <h3>Onda 4 — Fatiar o contents.json <span class="chip">611 testes</span> <span class="chip chip--warn">GH001</span></h3>
-          <p><span class="problem">Problema:</span> o <code>contents.json</code> único tinha
-            <strong>103,94 MB</strong> e o GitHub rejeita arquivos acima de <strong>100 MB</strong>
-            (<dfn title="erro do GitHub ao rejeitar arquivo acima de 100 MB">GH001</dfn>) — o push era bloqueado.
-            <span class="fixed">Fix:</span> exportar fatiado em <code>contents.partN.json</code> com
-            <code>EXPORT_WEB_PART_MB=85</code> e <dfn title="metadados que listam as partes do mapa id→conteúdo; =2 significa duas partes">contentsParts=2</dfn>,
-            com carregamento <dfn title="baixar a parte do conteúdo só quando um artigo é aberto">lazy</dfn>. Nada se perdeu.</p>
-        </div>
-      </div>
+    <div class="chip-row">
+      <div class="stat-chip"><span class="v">run #19</span><span class="l">hang na verificação → kill</span></div>
+      <div class="stat-chip"><span class="v">run #20</span><span class="l">passe #2 converge por no-progress</span></div>
+      <div class="stat-chip"><span class="v">193</span><span class="l">needs_enrich = alvos inacessíveis</span></div>
+      <div class="stat-chip"><span class="v">blurb</span><span class="l">preservado em todos</span></div>
+      <div class="stat-chip"><span class="v">0</span><span class="l">artigos perdidos</span></div>
     </div>
-
-    <figure>
-      <div class="diagram-shell" role="img" aria-label="Fluxo do problema GH001: arquivo de 103,94 MB rejeitado, fatiado em duas partes de até 85 MB, publicadas sem perda">
-        <script type="text/plain" class="diagram-source">
-        flowchart TD
-            P["contents.json único<br/>103,94 MB"] -->|"push para a main"| G["GitHub recusa<br/>limite de 100 MB (GH001)"]
-            G -->|"fix: exportar fatiado"| X["contents.part0.json<br/>+ contents.part1.json<br/>EXPORT_WEB_PART_MB=85"]:::crit
-            X -->|"meta.contentsParts = 2<br/>[{file, from, to}]"| M["Webapp sabe a parte<br/>de cada id"]
-            M -->|"loader lazy por parte<br/>só quando o artigo abre"| W["Nada se perde:<br/>13.701 artigos<br/>no ar em 21s"]:::crit
-            classDef crit stroke:#e8590c,stroke-width:3px
-            linkStyle 2 stroke:#e8590c,stroke-width:2.5px
-        </script>
-        <p class="diagram-shell__hint">Ctrl/Cmd + rolagem amplia · arraste para mover · dois cliques ajusta o zoom · ⤢ abre em tamanho real</p>
-        <div class="mermaid-wrap">
-          <div class="zoom-controls">
-            <button type="button" data-action="zoom-in" title="Ampliar">+</button>
-            <button type="button" data-action="zoom-out" title="Reduzir">−</button>
-            <button type="button" data-action="zoom-fit" title="Ajustar na tela">⟲</button>
-            <button type="button" data-action="zoom-one" title="Zoom 1:1">1:1</button>
-            <button type="button" data-action="zoom-expand" title="Abrir em tamanho real">⤢</button>
-            <span class="zoom-label">Carregando…</span>
-          </div>
-          <div class="mermaid-viewport">
-            <div class="mermaid mermaid-canvas"></div>
-          </div>
-        </div>
-      </div>
-      <figcaption>
-        <span class="claim">Figura 5 — O contents.json de 103,94 MB estourou o limite de 100 MB do GitHub; fatiado em 2 partes, publicou os 13.701 artigos sem perda.</span>
-        <span class="fig-note">O webapp baixa só a parte que contém o id do artigo aberto — o acervo inteiro continua disponível.</span>
-      </figcaption>
-    </figure>
-
-    <p class="section-lead">
-      Na revisão adversarial da Onda 4, o revisor apontou dois riscos e os dois foram fechados do lado seguro
-      (<dfn title="preferir travar a publicar dado errado">fail-closed</dfn>): lançar erro se um artigo individual passar de 95 MB
-      e sanitizar o ambiente de exportação. O resultado final: <strong>deploy em 21 segundos</strong>, com os
-      <code>contentsParts=2</code> no ar — e a tag v3.0.0 preservada como base imutável.
-    </p>
   </section>
 
   <!-- ============ SEÇÃO 5 ============ -->
   <section class="animate" style="--i:6">
     <div class="section-head">
       <span class="section-num">05</span>
-      <h2>Resiliência: como a coleta aguentou a queda de internet</h2>
-    </div>
-    <p class="section-lead">
-      Durante a coleta, a internet caiu por ~2 minutos. O crawler registrou
-      <strong>288× <code>ERR_INTERNET_DISCONNECTED</code></strong> — e nenhum artigo foi perdido. O mecanismo por trás
-      disso é a <dfn title="tentar de novo depois de uma falha">retry</dfn>: todo job que falha volta para a fila
-      (<dfn title="devolver um job à fila para ser processado de novo">re-enfileirar</dfn>) até concluir.
-    </p>
-
-    <figure>
-      <div class="diagram-shell" role="img" aria-label="Laço de resiliência: 288 erros de internet re-enfileiram 809 jobs, com passe 2 automático e política de nunca aposentar item">
-        <script type="text/plain" class="diagram-source">
-        flowchart TD
-            Q["Fila de jobs<br/>~5.300 itens curados"] -->|"fetch em 192 vias"| C["Crawler em execução"]
-            C -->|"18:24–18:26Z:<br/>queda de internet"| E["288× ERR_INTERNET_DISCONNECTED"]
-            C -.->|"às vezes"| H["Hang no teardown<br/>sessão trava no encerramento"]
-            H -->|"auto-recuperação<br/>detecta e reinicia"| C
-            E -->|"jobs marcados<br/>para retry"| J["809 jobs<br/>com retries &gt; 0"]:::crit
-            J -->|"803 re-enfileirados<br/>no próprio run"| Q
-            J -->|"95 em needs_enrich<br/>→ passe 2 automático"| P2["Passe 2 automático"]
-            P2 -->|"processa de novo"| C
-            J -->|"falha é sempre re-processada<br/>ENRICH_MAX_ATTEMPTS=0"| R["Nenhum item é aposentado<br/>blurb preservado (fail-open)"]:::crit
-            R -->|"resultado"| Z["ZERO perda"]:::crit
-            classDef crit stroke:#e8590c,stroke-width:3px
-            linkStyle 5,9 stroke:#e8590c,stroke-width:2.5px
-        </script>
-        <p class="diagram-shell__hint">Ctrl/Cmd + rolagem amplia · arraste para mover · dois cliques ajusta o zoom · ⤢ abre em tamanho real</p>
-        <div class="mermaid-wrap">
-          <div class="zoom-controls">
-            <button type="button" data-action="zoom-in" title="Ampliar">+</button>
-            <button type="button" data-action="zoom-out" title="Reduzir">−</button>
-            <button type="button" data-action="zoom-fit" title="Ajustar na tela">⟲</button>
-            <button type="button" data-action="zoom-one" title="Zoom 1:1">1:1</button>
-            <button type="button" data-action="zoom-expand" title="Abrir em tamanho real">⤢</button>
-            <span class="zoom-label">Carregando…</span>
-          </div>
-          <div class="mermaid-viewport">
-            <div class="mermaid mermaid-canvas"></div>
-          </div>
-        </div>
-      </div>
-      <figcaption>
-        <span class="claim">Figura 6 — 288 erros de rede re-enfileiraram 809 jobs e o acervo fechou com zero perda.</span>
-        <span class="fig-note">O laço laranja é o coração da resiliência: falhou, volta para a fila. Nada é aposentado.</span>
-        <div class="figure-legend">
-          <div class="legend-item"><span class="legend-swatch legend-swatch--crit"></span> laço de resiliência (falha → refila)</div>
-        </div>
-      </figcaption>
-    </figure>
-
-    <p class="section-lead">
-      O laço de re-enfileiramento é o coração da resiliência: <strong>803 jobs voltaram para a fila no próprio run</strong> e
-      os 95 que ficaram em <code>needs_enrich</code> foram para um passe 2 automático. No fim, zero perda.
-    </p>
-
-    <div class="chip-row">
-      <div class="stat-chip"><span class="v">288×</span><span class="l">ERR_INTERNET_DISCONNECTED em ~2 min</span></div>
-      <div class="stat-chip"><span class="v">809</span><span class="l">jobs com retries &gt; 0</span></div>
-      <div class="stat-chip"><span class="v">803</span><span class="l">re-enfileirados no próprio run</span></div>
-      <div class="stat-chip"><span class="v">95</span><span class="l">em needs_enrich → passe 2 automático</span></div>
-      <div class="stat-chip"><span class="v">0</span><span class="l">artigos perdidos</span></div>
-    </div>
-
-    <div class="cards-3">
-      <div class="ve-card">
-        <h3 style="font-size:14.5px;margin-bottom:6px">Hang no teardown → auto-recuperação</h3>
-        <p style="font-size:13.5px;color:var(--muted-foreground)">
-          Se a sessão do navegador trava no
-          <dfn title="encerramento da sessão do navegador (hang = travou no encerramento)">teardown</dfn>, o crawler
-          detecta e reinicia sozinho — a coleta não morre com uma sessão travada.
-        </p>
-      </div>
-      <div class="ve-card">
-        <h3 style="font-size:14.5px;margin-bottom:6px">Falha vira re-processo, nunca aposenta</h3>
-        <p style="font-size:13.5px;color:var(--muted-foreground)">
-          Com <code>ENRICH_MAX_ATTEMPTS=0</code>, todo item em
-          <dfn title="estado “ainda precisa de enriquecimento” (sem corpo completo)">needs_enrich</dfn> volta a ser
-          processado na próxima run — mesmo domínio morto re-falha rápido e o item fica com o blurb, no padrão
-          <strong>fail-open</strong> (definido na Figura 1: preferir seguir sem dado a travar tudo).
-        </p>
-      </div>
-      <div class="ve-card">
-        <h3 style="font-size:14.5px;margin-bottom:6px">Base imutável (tag v3.0.0)</h3>
-        <p style="font-size:13.5px;color:var(--muted-foreground)">
-          Os 8.056 artigos originais ficaram congelados na tag. Qualquer comparação — e qualquer rollback — tem um
-          ponto de origem que não muda.
-        </p>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ SEÇÃO 6 ============ -->
-  <section class="animate" style="--i:7">
-    <div class="section-head">
-      <span class="section-num">06</span>
       <h2>Onde ver os resultados</h2>
     </div>
     <div class="where-grid">
       <div class="ve-card where-card">
         <h3>Site público</h3>
         <a href="https://newsletter-crawler.vercel.app" target="_blank" rel="noopener">https://newsletter-crawler.vercel.app</a>
-        <p>13.701 artigos no ar após o deploy final de 23:42Z (21s, <code>contentsParts=2</code>, push <code>e9af6e0</code>, sync 0/0).</p>
+        <p>13.758 artigos no ar após o deploy de 21s (commit <code>99ddb45</code>, <code>contentsParts=2</code>, API pública atualizada).</p>
       </div>
       <div class="ve-card where-card">
         <h3>Logs da execução</h3>
         <span class="path">~/.newsletter-crawler/logs</span>
-        <p>Trilha dos runs 14–18, eventos e re-enfileiramentos da coleta.</p>
+        <p>Trilha dos runs #19 e #20 — hang, kill e retomada por no-progress.</p>
       </div>
       <div class="ve-card where-card">
-        <h3>Análises das fontes</h3>
-        <span class="path">docs/sources/superhuman.ai.md<br>docs/sources/therundown.ai.md<br>docs/sources/this-week-in-rust.md</span>
-        <p>Evidência real de HTML/API que guiou as 3 integrações.</p>
+        <h3>Commits</h3>
+        <span class="path">c44109c · 99ddb45</span>
+        <p><code>c44109c</code> = reset apaga o snapshot (git sync 0/0); <code>99ddb45</code> = deploy final com 13.758 artigos.</p>
       </div>
     </div>
   </section>
@@ -1164,79 +895,58 @@
     <p class="lead">Para quem quer o passo a passo (ou conferir no git) — tudo dobrado</p>
 
     <details>
-      <summary>Exemplo resolvido: siga um artigo do começo ao fim</summary>
+      <summary>Exemplo resolvido: siga uma issue nova do começo ao fim</summary>
       <div class="body">
-        <p>Pegue um link citado numa edição do This Week in Rust. O caminho que ele percorre:</p>
+        <p>Pegue uma edição de newsletter publicada depois de 2026-01-01 que ainda não está no acervo. O caminho:</p>
         <ol>
-          <li><strong>Listagem:</strong> a página de arquivo do TWIR é varrida e a edição (issue) é descoberta.</li>
-          <li><strong>Curadoria por IA:</strong> a issue é dividida por tamanho e um agente de IA lê os itens, separa
-              notícia/ferramenta/release e guarda o blurb de cada link.</li>
-          <li><strong>Passe de cobertura:</strong> re-leitura procura links que a curadoria pulou — numa edição, 82 foram
-              recuperados assim. Sem o passe, cada um desses links ficaria fora para sempre.</li>
-          <li><strong>Enriquecimento:</strong> o crawler abre o link e extrai o corpo completo do artigo. Se o site
-              estiver fora do ar nesse momento (ex.: durante a queda de internet), o item é re-enfileirado e tenta de novo.
-              Se o domínio estiver morto de vez, o item fica com o blurb — nunca some.</li>
-          <li><strong>Qualificação:</strong> em streaming, o artigo recebe veredito (ok/suspect/junk), tags e resumo PT-BR.</li>
-          <li><strong>Snapshot + deploy:</strong> na exportação, o artigo entra em <code>articles.json</code> e o corpo
-              em <code>contents.partN.json</code>; o push na main publica tudo no site.</li>
+          <li><strong>Listagem re-visitada:</strong> o run varre o arquivo da fonte e encontra a edição — junto com todas as antigas.</li>
+          <li><strong>Curadoria por IA:</strong> a issue é dividida por seção e um agente de IA separa os itens (notícia/ferramenta/release), guardando o blurb de cada link.</li>
+          <li><strong>Filtro only-new:</strong> cada link é comparado com o known-url. As URLs já capturadas são descartadas; as novas seguem.</li>
+          <li><strong>Gravação:</strong> a URL nova entra via <code>INSERT OR IGNORE</code> (sem duplicar), respeitando o piso <code>--since 2026-01-01</code>.</li>
+          <li><strong>Enriquecimento + qualificação:</strong> o crawler abre o link para extrair o corpo; se o alvo não responde, fica o blurb (fail-open). Depois vêm verificação, tags e resumo PT-BR em streaming.</li>
+          <li><strong>Snapshot + deploy:</strong> a exportação congela o acervo em JSON; o push na main publica — aqui, commit <code>99ddb45</code>, no ar em 21s.</li>
         </ol>
+        <p>No fim, só o que era <strong>novo</strong> entrou: +57 artigos, de 13.701 para 13.758.</p>
       </div>
     </details>
 
     <details>
-      <summary>Por dentro da curadoria e do passe de cobertura</summary>
+      <summary>Por que o guard fail-open restauraria as notícias velhas (o raciocínio do requisito novo)</summary>
       <div class="body">
-        <p>A curadoria roda <strong>por seção</strong>: em vez de uma IA lendo a issue inteira, cada seção
-        (News/Tools/Releases…) tem um agente próprio em paralelo (<code>splitIntoSections</code>). No TWIR a página é
-        única e estática, então a divisão é feita por <strong>tamanho</strong> (sem seções) — o que fazia itens escaparem.</p>
-        <p>O passe de cobertura recebeu dois reforços na Onda 3:</p>
-        <ul>
-          <li><code>coverageLeftoverCeiling</code> — teto por tiragem: <code>max(40, emitidos × 20)</code>, com cap em 600;</li>
-          <li><code>isRealRecoveredItem</code> — aceita “lista pura” (≥ 6 caracteres, fora de padrões genéricos de
-              âncora), para não recuperar lixo.</li>
-        </ul>
-        <p>Na prática: <strong>109 disparos</strong> do passe e <strong>82 itens recuperados numa única edição</strong>.
-        Sem o fix, os ~2.800 itens que o passe resgatou teriam ficado de fora para sempre.</p>
-        <p><em>Nota do revisor (não-bloqueante):</em> um teste de wire usa DNS real do TLD <code>.test</code> — risco de
-        flake documentado, aceito no gate.</p>
+        <p>O hook de pre-push do projeto re-exporta o snapshot do SQLite local e auto-commita se houver dado novo —
+        mas tem um <strong>guard fail-open</strong>: se o snapshot exportado for <strong>menor</strong> que o commitado
+        (como aconteceria numa máquina com o banco recém-resetado, que exportaria vazio), ele <strong>restaura o
+        snapshot antigo</strong> e segue sem commit.</p>
+        <p>Consequência antes do fix: você roda <code>reset</code> (banco vazio), mas o arquivo
+        <code>webapp/public/data</code> continua no git. No próximo push, o hook exporta vazio → é menor que o
+        commitado → <strong>restaura as notícias velhas</strong>. O reset “limpava” o banco, mas o site voltava ao
+        passado no push seguinte.</p>
+        <p>O fix (<code>c44109c</code>) quebra essa armadilha na raiz: além do <code>wipeAll</code>, o reset
+        <code>git rm</code> o snapshot. Sem arquivo no git, não há o que o guard restaurar — o estado vazio é vazio
+        de verdade, também para o site.</p>
       </div>
     </details>
 
     <details>
       <summary>O mapa dos commits e dos gates (para conferir no git)</summary>
       <div class="body">
-        <div class="table-scroll">
-          <table>
-            <thead>
-              <tr><th>Passo</th><th>Commit / tag</th><th>O que entrou</th><th>Gate</th></tr>
-            </thead>
-            <tbody>
-              <tr><td>Base</td><td><code>3c8b22d</code> (tag <code>v3.0.0</code>)</td><td>Snapshot imutável com 8.056 artigos, pushado</td><td>—</td></tr>
-              <tr><td>Onda 1</td><td><code>fd8729a</code> · <code>78cb110</code> · <code>cc1a34c</code></td><td>Análises de Superhuman, The Rundown e TWIR</td><td>590/590</td></tr>
-              <tr><td>Onda 2</td><td><code>9c87dac</code></td><td><code>src/therundown.js</code> + integração no crawl + 11 testes</td><td>601/601</td></tr>
-              <tr><td>Onda 3</td><td><code>94c020c</code></td><td>Passe de cobertura <code>curate.js</code> + 5 testes</td><td>606/606</td></tr>
-              <tr><td>Onda 4</td><td><code>ce50d65</code></td><td>Fatia do <code>contents.json</code> + loader lazy + 2 fixes fail-closed</td><td>611 testes</td></tr>
-              <tr><td>Deploy</td><td><code>e9af6e0</code></td><td>13.701 artigos no ar em 21s (sync 0/0, tag preservada)</td><td>—</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <p>Todos os gates rodaram em worktree efêmera com <code>npm ci</code>. Os dois fixes fail-closed do revisor
-        adversarial na Onda 4: lançar erro se um artigo individual exceder 95 MB e sanitização do ambiente de exportação.</p>
+        <ul>
+          <li><strong>Onda 1 (código)</strong> — commit <code>c44109c</code>: <code>cmdReset</code> apaga o snapshot após o <code>wipeAll</code> (<code>git rm -r --ignore-unmatch</code>), com detecção de repo por <code>.git</code> + <code>rev-parse</code>, fallback <code>fs.rmSync</code> e fail-open warn. 3 testes novos; suíte <strong>614/614</strong>; revisão adversarial <strong>APPROVE</strong>.</li>
+          <li><strong>Deploy final</strong> — commit <code>99ddb45</code>: 13.758 artigos no ar em 21s, <code>contentsParts=2</code>, API pública atualizada; git sync 0/0 (c44109c + 99ddb45).</li>
+        </ul>
+        <p>Os dois apontamentos não-bloqueantes da revisão: <code>execSync</code> usa shell com paths literais; e falta um caso de teste para <code>.git</code> como <em>arquivo</em> (não diretório).</p>
       </div>
     </details>
 
     <details>
-      <summary>Números do runtime da coleta (run #14, 9 fontes)</summary>
+      <summary>Números do runtime (runs #19 e #20, 9 fontes)</summary>
       <div class="body">
         <ul>
-          <li>Início 16:46Z; <strong>curadoria 100%</strong> das issues (241 da Superhuman + 34 do TWIR); ~5.300 itens curados.</li>
-          <li>Custo parcial estimado: <strong>US$ 35+</strong> (extrato final no relatório da execução).</li>
-          <li>Queda de internet 18:24–18:26Z → 288× <code>ERR_INTERNET_DISCONNECTED</code>, 809 jobs com retries &gt; 0
-              (803 re-enfileirados no próprio run; 95 em <code>needs_enrich</code> → passe 2 automático).</li>
-          <li>Coleta convergida nos runs 14–18; ao final, 193 itens em <code>needs_enrich</code> (153 domínios mortos +
-              40 lentos), todos com blurb preservado — <strong>zero perda</strong>.</li>
-          <li>O reporter encerrou por no-progress após ~4,5 h de coleta contínua.</li>
-          <li>Deploy final 23:42Z em 21s, <code>contentsParts=2</code>, 13.701 artigos no ar.</li>
+          <li>Crawl incremental <code>--since 2026-01-01</code>, parallel <strong>192</strong>, 9 fontes.</li>
+          <li><strong>+57 artigos</strong> novos (13.701 → 13.758); issues novas de segunda capturadas e curadas (<strong>+54 curados</strong>); fila drenada.</li>
+          <li><strong>193</strong> <code>needs_enrich</code> restantes = alvos inacessíveis, com blurb preservado (zero perda).</li>
+          <li>Hang de verificação no rabo do run #19 → processo morto (dados íntegros) → passe #2 (run #20) converge por no-progress.</li>
+          <li>Gasto all-time <strong>US$ 42,58</strong>; classificação/resumos <strong>13.746</strong> (+12 pendentes re-selecionáveis no próximo run); verificação <strong>100%</strong>.</li>
         </ul>
       </div>
     </details>
@@ -1244,10 +954,10 @@
 
   <!-- ============ FOOTER ============ -->
   <footer>
-    <p><strong>Validade:</strong> este documento descreve a execução de <strong>2026-08-30</strong> — crawl runs 14–18,
-    tag <code>v3.0.0</code> (base 8.056), deploy final 23:42Z (13.701 artigos, <code>contentsParts=2</code>).
-    Os números estão congelados nesta data.</p>
-    <p>Fonte primária: <code>.deep-orchestrator/run-20260830-132425-15326/explainer/fatos.md</code> ·
+    <p><strong>Validade:</strong> este documento descreve a execução de <strong>2026-09-01</strong> — atualização
+    incremental (runs #19/#20, 9 fontes, parallel 192), commits <code>c44109c</code> + <code>99ddb45</code>, deploy
+    final 21s (13.758 artigos). Os números estão congelados nesta data.</p>
+    <p>Fonte primária: <code>.deep-orchestrator/run-20260901-162234-73393/explainer/fatos.md</code> ·
     documento informativo gerado com os tokens de tema do Plannotator.</p>
   </footer>
 

@@ -943,7 +943,16 @@ function gitKnowsPath(root, rel) {
  * próprio commit. `git add -f` no marcador: um `.gitignore` local não pode calar a fronteira.
  * Fail-open (o banco já foi apagado; nada aqui pode derrubar o comando) — e mesmo sem commit o
  * marcador continua no working tree, onde `readWipeMarker` também lê.
- * Retorna { mode: 'git'|'fs', committed, commit?, paths, error? }. Exportado p/ teste.
+ *
+ * COMMIT QUE NÃO ACONTECE = STAGE DESFEITO (achado da validação 2026-09-05). Sem identidade do git
+ * (`user.email`/`user.name` ausentes) o commit falha e o fail-open seguia em frente deixando TUDO
+ * EM STAGE: `A .nc-wipe.json` + `D webapp/public/data/*`. O próximo `git commit -m "..."` do
+ * usuário — sobre outro assunto qualquer — varreria a remoção do acervo publicado junto, sem ele
+ * notar; publicada SEM a fronteira, ela é a destruição do incidente 7c24491 outra vez. Então o
+ * stage é DESFEITO (`git reset -- <paths>`, que não toca no working tree nem no que o usuário já
+ * tinha em staging fora desses caminhos) e o aviso diz exatamente como voltar. Desfazer, e não só
+ * avisar: um aviso no meio do log de um `reset` não impede um `git commit -a` dez minutos depois.
+ * Retorna { mode: 'git'|'fs', committed, commit?, paths, error?, unstaged? }. Exportado p/ teste.
  */
 export function commitWipeBoundary(root, {
   marker = true,
@@ -957,14 +966,41 @@ export function commitWipeBoundary(root, {
       encoding: 'utf8',
       env: { ...process.env, GIT_TERMINAL_PROMPT: '0' },
     });
+  // Tira do ÍNDICE só os caminhos da fronteira (o staging alheio do usuário fica intacto) e diz o
+  // que sobrou onde. `git reset` num repo sem NENHUM commit (HEAD não nascido) falha — ali não há
+  // histórico p/ ressuscitar nada, então o fail-open é inofensivo.
+  const desfazStage = (paths) => {
+    if (!paths.length) return false;
+    try {
+      git(`reset -q -- ${paths.join(' ')}`);
+      return true;
+    } catch (e) {
+      warn(`fronteira do wipe: não consegui desfazer o stage (${String(e.stderr || e.message).trim()}).`);
+      return false;
+    }
+  };
+  const avisaStageDesfeito = (motivo, paths, unstaged) => {
+    warn(
+      `fronteira do wipe NÃO commitada (${motivo}). ` +
+        (unstaged
+          ? 'O STAGE foi DESFEITO de propósito: a remoção do snapshot NÃO pode entrar de carona no seu próximo `git commit`. '
+          : 'ATENÇÃO: a remoção do snapshot continua EM STAGE — desfaça com ' +
+            `\`git reset -- ${paths.join(' ')}\` antes do seu próximo commit. `) +
+        `O acervo publicado continua no histórico do git; no disco esses arquivos foram removidos pelo reset — ` +
+        `para trazê-los de volta: \`git checkout -- ${SITE_SNAPSHOT_REL.join(' ')}\`. ` +
+        `O marcador está em ${path.join(root, WIPE_MARKER_FILE)} e vale LOCALMENTE (readWipeMarker lê o ` +
+        'working tree); para publicar a fronteira, commite o marcador JUNTO da remoção do snapshot — ' +
+        'senão um clone novo ressuscita o acervo apagado.',
+    );
+  };
   if (!marker) {
     // Sem marcador não há fronteira: commitar só a remoção do snapshot publicaria justamente o
-    // estado que o restore desfaz. É melhor deixar a remoção STAGED e dizer o porquê.
-    warn(
-      'marcador de wipe AUSENTE (não pôde ser gravado) — a remoção do snapshot ficou STAGED, sem ' +
-        `commit: publicar a remoção sem a fronteira faz o restore ressuscitar o acervo apagado.`,
-    );
-    return { mode: 'git', committed: false, paths: [], error: 'sem marcador' };
+    // estado que o restore desfaz. E deixar a remoção em stage é a mesma armadilha do commit que
+    // falha — o stage sai do caminho, o log explica.
+    const pendentes = SITE_SNAPSHOT_REL.filter((p) => gitKnowsPath(root, p));
+    const unstaged = desfazStage(pendentes);
+    avisaStageDesfeito('o marcador não pôde ser gravado — sem ele não há fronteira', pendentes, unstaged);
+    return { mode: 'git', committed: false, paths: [], error: 'sem marcador', unstaged };
   }
   try {
     git(`add -f -- ${WIPE_MARKER_FILE}`);
@@ -980,12 +1016,11 @@ export function commitWipeBoundary(root, {
     if (/nothing to commit|no changes added/i.test(detail)) {
       return { mode: 'git', committed: false, paths, error: 'nada a commitar' };
     }
-    warn(
-      `fronteira do wipe NÃO commitada (${detail.slice(0, 200)}) — o marcador está em ` +
-        `${path.join(root, WIPE_MARKER_FILE)} e vale LOCALMENTE; commite-o junto da remoção do ` +
-        'snapshot, senão um clone novo ressuscita o acervo apagado.',
-    );
-    return { mode: 'git', committed: false, paths, error: detail };
+    const unstaged = desfazStage(paths);
+    // O erro do git é multi-linha ("Author identity unknown\n\n*** Please tell me who you are…"):
+    // colapsar o whitespace antes de cortar em 200 faz caber a CAUSA, não só o cabeçalho.
+    avisaStageDesfeito(detail.replace(/\s+/g, ' ').slice(0, 200), paths, unstaged);
+    return { mode: 'git', committed: false, paths, error: detail, unstaged };
   }
   let commit = null;
   try {

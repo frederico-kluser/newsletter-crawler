@@ -118,7 +118,7 @@ test('comando FORA da allowlist (limits) não dispara o bootstrap', () => {
   assert.equal(artigosNoStatus(depois.out), 0, 'a base seguiu vazia depois do limits');
 });
 
-test('a allowlist do bootstrap é a acordada — e reset/purge/remove/key/add/deploy estão FORA', () => {
+test('a allowlist do bootstrap é a acordada — e reset/purge/remove/key/add/deploy/export estão FORA', () => {
   // Lida do FONTE (sem importar src/: importar cli-restore.js aqui abriria config/db).
   const src = readFileSync(path.join(REPO, 'src', 'cli-restore.js'), 'utf8');
   const m = src.match(/export const BOOTSTRAP_COMMANDS = new Set\(\[([^\]]*)\]\)/);
@@ -126,10 +126,10 @@ test('a allowlist do bootstrap é a acordada — e reset/purge/remove/key/add/de
   const cmds = m[1].split(',').map((s) => s.trim().replace(/^'|'$/g, '')).filter(Boolean);
   assert.deepEqual(
     [...cmds].sort(),
-    ['crawl', 'export', 'finish', 'menu', 'search', 'status', 'ui', 'web'],
+    ['crawl', 'finish', 'menu', 'search', 'status', 'ui', 'web'],
     'allowlist exata',
   );
-  for (const proibido of ['reset', 'clean', 'purge', 'remove', 'key', 'limits', 'add', 'deploy', 'inspect']) {
+  for (const proibido of ['reset', 'clean', 'purge', 'remove', 'key', 'limits', 'add', 'deploy', 'inspect', 'export']) {
     assert.ok(!cmds.includes(proibido), `${proibido} NUNCA pode disparar o bootstrap`);
   }
 });

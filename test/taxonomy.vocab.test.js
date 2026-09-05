@@ -4,9 +4,18 @@
 // agora têm casa no topic-technology (união de topics_by_domain + ai_engineering_cross.topics,
 // src/taxonomy.js:63-70; taxonomy.json v2026-08-15 — o bump vira prova na re-verificação da Onda 2).
 // Rode com: npm test.
-import { test } from 'node:test';
+import { test, after } from 'node:test';
 import assert from 'node:assert/strict';
-import { getFacets, validateFacetTags, taxonomyVersion } from '../src/taxonomy.js';
+import { mkdtempSync, rmSync } from 'node:fs';
+import path from 'node:path';
+import os from 'node:os';
+
+// NC_HOME temporário ANTES do import (taxonomy.js -> config.js): no load, config.js cria/semeia o
+// NC_HOME REAL do usuário e carrega o .env dele. Import dinâmico porque o `import`
+// estático é IÇADO — rodaria antes desta linha.
+process.env.NC_HOME = mkdtempSync(path.join(os.tmpdir(), 'nc-taxonomy-vocab-'));
+after(() => rmSync(process.env.NC_HOME, { recursive: true, force: true }));
+const { getFacets, validateFacetTags, taxonomyVersion } = await import('../src/taxonomy.js');
 
 test('getFacets: a união topic-technology contém os 5 termos novos (src/taxonomy.js:63-70)', () => {
   const topic = getFacets().find((f) => f.name === 'topic-technology');

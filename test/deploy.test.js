@@ -1,12 +1,21 @@
 // Deploy: os helpers PUROS (a regra de negócio do comando) sem git, sem rede e sem banco. O que
 // importa fixar aqui é a DECISÃO — quando publicar, quando republicar e quando não fazer nada —
 // porque é ela que separa "deu push" de "está no ar".
-import { test } from 'node:test';
+import { test, after } from 'node:test';
 import assert from 'node:assert/strict';
-import {
+import { mkdtempSync, rmSync } from 'node:fs';
+import path from 'node:path';
+import os from 'node:os';
+import { deployOutcome } from '../src/ui/runLines.js'; // puro (não alcança config/db)
+
+// NC_HOME temporário ANTES do import (deploy.js -> config.js): no load, config.js cria/semeia o
+// NC_HOME REAL do usuário e carrega o .env dele. Import dinâmico porque o `import`
+// estático é IÇADO — rodaria antes desta linha.
+process.env.NC_HOME = mkdtempSync(path.join(os.tmpdir(), 'nc-deploy-'));
+after(() => rmSync(process.env.NC_HOME, { recursive: true, force: true }));
+const {
   diffIsOnlyVolatile, readSnapshotStamp, splitDirtyPaths, planDeploy, fmtElapsed, isGithubHttpsRemote,
-} from '../src/deploy.js';
-import { deployOutcome } from '../src/ui/runLines.js';
+} = await import('../src/deploy.js');
 
 const META = (generatedAt, articles) =>
   JSON.stringify({ schemaVersion: 1, generatedAt, totals: { articles } }, null, 1) + '\n';

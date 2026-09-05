@@ -1,12 +1,30 @@
 // Garante que a interface Ink chega na tela de PUBLICAR e para na revisão do comando. NÃO confirma
 // a execução (isso faria export + commit + push + build real). Navegação por LABEL (helpers/ink.js).
-import { test } from 'node:test';
+import { test, after } from 'node:test';
 import assert from 'node:assert/strict';
+import { mkdtempSync, rmSync } from 'node:fs';
+import path from 'node:path';
+import os from 'node:os';
 import { render } from 'ink-testing-library';
-import { html } from '../src/ui/html.js';
-import App from '../src/ui/App.js';
 import { wait, selectMenuItem, keys } from './helpers/ink.js';
-import { DeployConfirm } from '../src/ui/screens.js';
+
+// NC_HOME temporário ANTES do import (App.js/screens.js -> commands.js -> db.js abre o DB no
+// load: com o NC_HOME real, `npm test` abriria o crawler.db do USUÁRIO em ESCRITA). Import
+// dinâmico porque o `import` estático é IÇADO — rodaria antes desta linha.
+process.env.NC_HOME = mkdtempSync(path.join(os.tmpdir(), 'nc-ui-deploy-'));
+const { html } = await import('../src/ui/html.js');
+const { default: App } = await import('../src/ui/App.js');
+const { DeployConfirm } = await import('../src/ui/screens.js');
+const { db } = await import('../src/db.js');
+
+after(() => {
+  // finally: um close() que lance não pode deixar o diretório temporário para trás.
+  try {
+    db.close();
+  } finally {
+    rmSync(process.env.NC_HOME, { recursive: true, force: true });
+  }
+});
 
 test('UI: o menu leva à tela de publicar, com os 3 modos', async () => {
   const { stdin, lastFrame, unmount } = render(html`<${App} />`);

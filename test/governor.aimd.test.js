@@ -2,12 +2,21 @@
 // ROTEIRIZADOS (nunca esgota RAM real): split por perfil, slew de partida do render,
 // grow +1/tick, shrink multiplicativo sob pressão, escalada p/ fetch, dwell pós-shrink,
 // freio de emergência (callback aos 30s) e backpressure de 429 na lane llm. npm test.
-import { test, afterEach } from 'node:test';
+import { test, after, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
-import {
+import { mkdtempSync, rmSync } from 'node:fs';
+import path from 'node:path';
+import os from 'node:os';
+
+// NC_HOME temporário ANTES do import (governor.js -> config.js): no load, config.js cria/semeia o
+// NC_HOME REAL do usuário e carrega o .env dele. Import dinâmico porque o `import`
+// estático é IÇADO — rodaria antes desta linha.
+process.env.NC_HOME = mkdtempSync(path.join(os.tmpdir(), 'nc-governor-aimd-'));
+after(() => rmSync(process.env.NC_HOME, { recursive: true, force: true }));
+const {
   initGovernor, stopGovernor, governorTick, getLane, jobsCapacity, stageWindow,
   reportRateLimit, setProfile, getTelemetry, getCalibration,
-} from '../src/governor.js';
+} = await import('../src/governor.js');
 
 const GIB = 1024 ** 3;
 

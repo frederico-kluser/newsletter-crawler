@@ -1,9 +1,18 @@
 // Guarda de texto puro no armazenamento (anti "HTML cru" nas fichas): converte SÓ quando a
 // string é markup HTML de verdade — nunca mexe em prosa/código com "<" solto (a < b, Array<T>,
 // um "<div>" citado só na abertura). Puro/testável — espelha o padrão de clean.sanityCleaned.
-import { test } from 'node:test';
+import { test, after } from 'node:test';
 import assert from 'node:assert/strict';
-import { ensurePlainText, looksLikeHtml } from '../src/clean.js';
+import { mkdtempSync, rmSync } from 'node:fs';
+import path from 'node:path';
+import os from 'node:os';
+
+// NC_HOME temporário ANTES do import (clean.js -> governor.js -> config.js): no load, config.js cria/semeia o
+// NC_HOME REAL do usuário e carrega o .env dele. Import dinâmico porque o `import`
+// estático é IÇADO — rodaria antes desta linha.
+process.env.NC_HOME = mkdtempSync(path.join(os.tmpdir(), 'nc-clean-plaintext-'));
+after(() => rmSync(process.env.NC_HOME, { recursive: true, force: true }));
+const { ensurePlainText, looksLikeHtml } = await import('../src/clean.js');
 
 test('ensurePlainText: HTML com tags vira texto', () => {
   assert.equal(ensurePlainText('<p>Hello <strong>world</strong></p>'), 'Hello world');

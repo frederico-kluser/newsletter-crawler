@@ -3,12 +3,30 @@
 // Coletar é o 1º item do menu, então navegar é só ENTER (evita depender de setas). Rode com: npm test.
 // A navegação é por POLLING (não waits fixos em ms): um ENTER que chega antes de a tela do passo
 // renderizar se perde — ou cai noutro item do menu — e derruba o teste em máquina carregada (flaky).
-import { test } from 'node:test';
+import { test, after } from 'node:test';
 import assert from 'node:assert/strict';
+import { mkdtempSync, rmSync } from 'node:fs';
+import path from 'node:path';
+import os from 'node:os';
 import { render } from 'ink-testing-library';
-import { html } from '../src/ui/html.js';
-import App from '../src/ui/App.js';
 import { waitForFrame, typeText } from './helpers/ink.js';
+
+// NC_HOME temporário ANTES do import (App.js -> commands.js -> db.js abre o DB no load: com o
+// NC_HOME real, `npm test` abriria o crawler.db do USUÁRIO em ESCRITA). Import dinâmico porque o
+// `import` estático é IÇADO — rodaria antes desta linha.
+process.env.NC_HOME = mkdtempSync(path.join(os.tmpdir(), 'nc-ui-crawl-input-'));
+const { html } = await import('../src/ui/html.js');
+const { default: App } = await import('../src/ui/App.js');
+const { db } = await import('../src/db.js');
+
+after(() => {
+  // finally: um close() que lance não pode deixar o diretório temporário para trás.
+  try {
+    db.close();
+  } finally {
+    rmSync(process.env.NC_HOME, { recursive: true, force: true });
+  }
+});
 
 const ENTER = '\r';
 

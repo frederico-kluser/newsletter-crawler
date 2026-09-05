@@ -4,13 +4,29 @@
 // sem crawl real (thunk injetado emite marcos direto). getStatus/getRunTelemetry leem o DB (só leitura).
 process.env.CRAWLER_LANG = '';
 
-import { test } from 'node:test';
+import { test, after } from 'node:test';
 import assert from 'node:assert/strict';
+import { mkdtempSync, rmSync } from 'node:fs';
+import path from 'node:path';
+import os from 'node:os';
 import { render } from 'ink-testing-library';
 
+// NC_HOME temporário ANTES do import (RunView.js -> commands.js -> db.js abre o DB no load: o
+// getStatus/getRunTelemetry leriam o crawler.db REAL do usuário).
+process.env.NC_HOME = mkdtempSync(path.join(os.tmpdir(), 'nc-ui-runview-'));
 const { html } = await import('../src/ui/html.js');
 const { RunView } = await import('../src/ui/RunView.js');
 const { emitRunEvent, runEventsReset } = await import('../src/run-events.js');
+const { db } = await import('../src/db.js');
+
+after(() => {
+  // finally: um close() que lance não pode deixar o diretório temporário para trás.
+  try {
+    db.close();
+  } finally {
+    rmSync(process.env.NC_HOME, { recursive: true, force: true });
+  }
+});
 
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 

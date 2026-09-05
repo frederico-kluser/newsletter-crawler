@@ -1,8 +1,17 @@
 // Eval do leitor de RAM do governador: parse de /proc/meminfo por fixture (MemAvailable é o
 // sinal certo — conta page cache recuperável) e sanidade do readMemInfo real. npm test.
-import { test } from 'node:test';
+import { test, after } from 'node:test';
 import assert from 'node:assert/strict';
-import { parseMemInfo, readMemInfo } from '../src/governor.js';
+import { mkdtempSync, rmSync } from 'node:fs';
+import path from 'node:path';
+import os from 'node:os';
+
+// NC_HOME temporário ANTES do import (governor.js -> config.js): no load, config.js cria/semeia o
+// NC_HOME REAL do usuário e carrega o .env dele. Import dinâmico porque o `import`
+// estático é IÇADO — rodaria antes desta linha.
+process.env.NC_HOME = mkdtempSync(path.join(os.tmpdir(), 'nc-governor-meminfo-'));
+after(() => rmSync(process.env.NC_HOME, { recursive: true, force: true }));
+const { parseMemInfo, readMemInfo } = await import('../src/governor.js');
 
 const FIXTURE = `MemTotal:       32756384 kB
 MemFree:         3467788 kB

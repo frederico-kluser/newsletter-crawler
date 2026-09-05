@@ -1,9 +1,18 @@
 // Politeness por host (fetch.js createHostGate): gap inter-request SERIALIZADO por host —
 // reserva de timeline — honrando o crawl-delay do robots (cap 30s) e no mínimo o jitter de
 // REQUEST_DELAY_MS. Clock/sleep injetados: os waits pedidos são inspecionados, não dormidos.
-import test from 'node:test';
+import test, { after } from 'node:test';
 import assert from 'node:assert/strict';
-import { createHostGate } from '../src/fetch.js';
+import { mkdtempSync, rmSync } from 'node:fs';
+import path from 'node:path';
+import os from 'node:os';
+
+// NC_HOME temporário ANTES do import (fetch.js -> config.js): no load, config.js cria/semeia o
+// NC_HOME REAL do usuário e carrega o .env dele. Import dinâmico porque o `import`
+// estático é IÇADO — rodaria antes desta linha.
+process.env.NC_HOME = mkdtempSync(path.join(os.tmpdir(), 'nc-fetch-hostgate-'));
+after(() => rmSync(process.env.NC_HOME, { recursive: true, force: true }));
+const { createHostGate } = await import('../src/fetch.js');
 
 function mk({ baseDelayMs = 1000 } = {}) {
   const clock = { t: 0 };

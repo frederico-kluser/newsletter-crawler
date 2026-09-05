@@ -4,7 +4,7 @@ import { load as loadVec } from 'sqlite-vec';
 import { mkdirSync } from 'node:fs';
 import path from 'node:path';
 import { DB_PATH, EMBED_DIM } from './config.js';
-import { parseDate, hostOf, warn } from './util.js';
+import { parseDate, hostOf, normalizeUrl, sha256, warn } from './util.js';
 
 mkdirSync(path.dirname(DB_PATH), { recursive: true });
 
@@ -327,6 +327,15 @@ if (VEC_OK) {
   `);
 }
 
+// UPDATE real do enriquecimento (ver stmts.enrichArticle logo abaixo, que é o wrapper com o
+// default de @run_id). Fica fora do literal porque o objeto não pode referenciar a si mesmo.
+const enrichArticleUpdate = db.prepare(
+  `UPDATE articles SET title = @title, content = @content, content_hash = @content_hash,
+      published_at = @published_at, content_source = @content_source, cleaned = @cleaned,
+      run_id = coalesce(@run_id, run_id), needs_enrich = 0
+    WHERE id = @id`,
+);
+
 export const stmts = {
   // sources
   upsertSource: db.prepare(
@@ -372,27 +381,44 @@ export const stmts = {
     `UPDATE articles SET published_at = @date
       WHERE issue_url = @url AND (published_at IS NULL OR published_at != @date)`,
   ),
-  // URL conhecida em QUALQUER conteúdo já capturado (articles/pages/frontier done) — base da
+  // URL conhecida em QUALQUER conteúdo já capturado (articles/pages/frontier) — base da
   // parada determinística de paginação: não depende do estado da frontier, que pode ter sido
   // limpa e transformar todo link em "novo" de novo.
+  // A semântica é "JÁ CONHEÇO esta URL, não preciso descobri-la de novo na listagem", então os
+  // QUATRO estados da frontier contam, não só 'done':
+  //   pending/in_progress = já está NA FILA desta run (será reivindicado por claimNext*);
+  //   failed              = esgotou MAX_RETRIES, foi abandonado de propósito.
+  // Nada se perde ao pular o enfileiramento deles: `enqueue` é INSERT OR IGNORE, ou seja, para
+  // uma URL que já tem linha na frontier (em QUALQUER estado) o enfileiramento já era no-op.
+  // O QUE MUDA, exatamente: uma página cujos links já foram DESCOBERTOS (frontier pending/failed)
+  // mas ainda não viraram `articles` passa a contar como território conhecido, e a paginação para
+  // ANTES de enfileirar — antes do upsertPage e do dateSeen/floorHit dessa página. Isto ANTECIPA
+  // uma parada que já existia: `crawlArchive` também para com `added === 0` (crawl.js), só que
+  // uma página depois e após o trabalho acima. Não é a diferença entre parar e caminhar o
+  // arquivo inteiro.
+  // A lista é explícita (e não "existe linha na frontier") p/ um estado NOVO no futuro não
+  // entrar aqui por acidente.
   isUrlKnown: db.prepare(`
     SELECT 1 FROM articles WHERE url = ?
     UNION ALL
     SELECT 1 FROM pages WHERE url = ?
     UNION ALL
-    SELECT 1 FROM frontier WHERE url = ? AND state = 'done'
+    SELECT 1 FROM frontier WHERE url = ? AND state IN ('done', 'failed', 'pending', 'in_progress')
     UNION ALL
     SELECT 1 FROM articles WHERE issue_url = ?
     LIMIT 1
   `),
   getArticleFullByUrl: db.prepare(`SELECT * FROM articles WHERE url = ?`),
   // Enriquecimento de item curado: preenche o corpo vindo do ALVO sem tocar kind/blurb/section.
-  enrichArticle: db.prepare(
-    `UPDATE articles SET title = @title, content = @content, content_hash = @content_hash,
-        published_at = @published_at, content_source = @content_source, cleaned = @cleaned,
-        needs_enrich = 0
-      WHERE id = @id`,
-  ),
+  // Marca d'água do delta no ENRIQUECIMENTO: um item cadastrado só com o blurb na run N e que
+  // ganhou o corpo na run N+1 continuava com run_id = N e sumia do escopo "apenas o novo"
+  // (`listRunArticlesForSearch`/`articlesByTagsForRun`, ancorados em maxArticleRunId). Passe
+  // `run_id` p/ carimbar a run corrente; sem o campo (chamadores antigos) o valor é preservado
+  // via coalesce, então a mudança é retrocompatível.
+  // O wrapper existe porque better-sqlite3 exige TODO parâmetro nomeado presente no objeto
+  // (`RangeError: Missing named parameter`): sem o default, `stmts.enrichArticle.run({...})`
+  // sem run_id quebraria na hora.
+  enrichArticle: { run: (params) => enrichArticleUpdate.run({ run_id: null, ...params }) },
   finishEnrich: db.prepare(`UPDATE articles SET needs_enrich = 0 WHERE id = ?`),
   // verificação pós-cadastro (veredito por artigo) + varredura idempotente (NULL-only)
   setVerify: db.prepare(
@@ -637,10 +663,20 @@ export const stmts = {
   // blurb (needs_enrich=1) — inclui os cortados por deadline no run anterior. Escopo por fonte.
   // Teto por alvo: quem falhou ENRICH_MAX_ATTEMPTS rodadas seguidas para de ser re-enfileirado
   // (bump conta a rodada FALHADA do run anterior; o requeue só re-ativa quem ainda tem tentativa).
+  // 'done' conta tanto quanto 'failed': o ramo de TIMEOUT do job grava frontier 'done' (o item
+  // fica com o blurb e re-enfileira depois — commands.js), e requeueNeedsEnrichForSource re-ativa
+  // done E failed zerando retries. Contando só 'failed', um alvo que SEMPRE estoura o deadline
+  // era re-enfileirado para sempre com enrich_attempts congelado em 0 — o teto nunca chegava.
+  // needs_enrich = 1 + job TERMINADO é, por construção, uma RODADA FALHADA: todo desfecho que
+  // decide manter o blurb de propósito (robots/pdf/raso/bloqueado/dup) passa por finishEnrich e
+  // zera needs_enrich; sucesso idem (enrichArticle). BUDGET_EXCEEDED devolve a 'pending' e um
+  // processo morto vira 'in_progress' -> resetInProgress o devolve a 'pending' ANTES daqui —
+  // nenhum dos dois conta tentativa.
   bumpFailedEnrichAttempts: db.prepare(
     `UPDATE articles SET enrich_attempts = enrich_attempts + 1
       WHERE needs_enrich = 1 AND source_id = ?
-        AND url IN (SELECT url FROM frontier WHERE kind = 'article' AND state = 'failed')`,
+        AND url IN (SELECT url FROM frontier
+                     WHERE kind = 'article' AND state IN ('done', 'failed'))`,
   ),
   requeueNeedsEnrichForSource: db.prepare(
     `UPDATE frontier SET state = 'pending', retries = 0
@@ -648,10 +684,13 @@ export const stmts = {
         AND url IN (SELECT url FROM articles
                      WHERE needs_enrich = 1 AND source_id = ? AND enrich_attempts < ?)`,
   ),
+  // Mesmo escopo do bump (done E failed): quem está no teto num job já terminado é exatamente
+  // quem PAROU de ser re-enfileirado e ficou com o blurb — é isso que a linha de log reporta.
   countEnrichAtCapForSource: db.prepare(
     `SELECT COUNT(*) AS c FROM articles
       WHERE needs_enrich = 1 AND source_id = ? AND enrich_attempts >= ?
-        AND url IN (SELECT url FROM frontier WHERE kind = 'article' AND state = 'failed')`,
+        AND url IN (SELECT url FROM frontier
+                     WHERE kind = 'article' AND state IN ('done', 'failed'))`,
   ),
 
   // events (trace por item: cada estágio grava o que fez/decidiu; `ncrawl inspect` lê daqui)
@@ -835,6 +874,57 @@ export const stmts = {
        LEFT JOIN sources s ON s.id = a.source_id
       WHERE a.id IN (SELECT value FROM json_each(@ids))`,
   ),
+  // ---- restore (repovoamento a partir de um snapshot exportado; ver as funções no fim) ----
+  // Artigo COMPLETO do snapshot: mesmas colunas do insertArticle + as que o snapshot carrega
+  // (title_pt/summary_pt/verify_*). INSERT OR IGNORE: respeita url UNIQUE e content_hash UNIQUE,
+  // então re-rodar o restore sobre o mesmo snapshot não duplica nem estoura constraint.
+  restoreArticle: db.prepare(
+    `INSERT OR IGNORE INTO articles
+       (source_id, url, title, title_pt, summary_pt, content, content_hash, published_at, run_id,
+        kind, issue_url, section, blurb, content_source, cleaned, needs_enrich,
+        verify_status, verify_notes)
+     VALUES (@source_id, @url, @title, @title_pt, @summary_pt, @content, @content_hash,
+        @published_at, @run_id, @kind, @issue_url, @section, @blurb, @content_source,
+        @cleaned, @needs_enrich, @verify_status, @verify_notes)`,
+  ),
+  // O snapshot expõe a fonte só pelo NOME (meta.sources = {id, name, count}; base_url não é
+  // exportada), e os ids dele são de OUTRA base — o remapeamento é por nome/base_url.
+  getSourceByName: db.prepare(`SELECT * FROM sources WHERE name = ?`),
+  getSourceByBaseUrl: db.prepare(`SELECT * FROM sources WHERE base_url = ?`),
+  insertSourceByName: db.prepare(
+    `INSERT INTO sources (name, base_url, type, max_index_pages)
+     VALUES (@name, @base_url, @type, NULL) RETURNING *`,
+  ),
+  // Só COMPLETA um cadastro que ainda não tinha base_url; nunca sobrescreve a fonte viva.
+  fillSourceBaseUrl: db.prepare(
+    `UPDATE sources SET base_url = @base_url WHERE id = @id AND base_url IS NULL`,
+  ),
+  // Marca a URL restaurada como resolvida na frontier — SÓ quando o job foi ABANDONADO
+  // ('failed': esgotou MAX_RETRIES). 'pending' e 'in_progress' são TRABALHO VIVO (enfileirado
+  // agora / reivindicado agora) e restore NUNCA rebaixa trabalho vivo: derrubar um 'pending'
+  // para 'done' cancelaria o enriquecimento que ainda ia rodar E, como 'done'+needs_enrich=1
+  // significa RODADA FALHADA (ver bumpFailedEnrichAttempts), cobraria uma das 3 tentativas de um
+  // job que nunca rodou. 'done' já é o estado-alvo (o UPDATE não casa; nada a re-escrever).
+  // failed -> done é neutro no fluxo de enriquecimento: bumpFailedEnrichAttempts,
+  // requeueNeedsEnrichForSource e countEnrichAtCapForSource tratam 'done' e 'failed' igual.
+  markFrontierDone: db.prepare(
+    `UPDATE frontier SET state = 'done' WHERE url = ? AND state = 'failed'`,
+  ),
+  // URL restaurada que NÃO tem linha na frontier: nasce direto em 'done' (o conteúdo já está em
+  // articles, não há o que buscar). INSERT OR IGNORE => se a linha existir, isto é no-op e quem
+  // decide é o markFrontierDone acima.
+  insertFrontierDone: db.prepare(
+    `INSERT OR IGNORE INTO frontier (url, kind, discovered_from, source_id, depth, discovered_date, state)
+     VALUES (?, ?, NULL, ?, 0, NULL, 'done')`,
+  ),
+  // Página de listagem/issue restaurada: INSERT OR IGNORE (e NÃO o upsertPage) p/ não zerar o
+  // html_hash/status de uma página que o crawler já visitou de verdade.
+  insertPageIfMissing: db.prepare(
+    `INSERT OR IGNORE INTO pages (source_id, url, html_hash, status, pagination_depth, fetched_at)
+     VALUES (@source_id, @url, NULL, @status, 0, datetime('now'))`,
+  ),
+  countArticleTags: db.prepare(`SELECT COUNT(*) c FROM article_tags`),
+  countFrontier: db.prepare(`SELECT COUNT(*) c FROM frontier`),
 };
 
 // Statements da busca vetorial: só quando o sqlite-vec carregou (senão referenciariam uma tabela
@@ -859,6 +949,10 @@ if (VEC_OK) {
 
 // Limpeza total (slate limpo). Ordem filho->pai porque foreign_keys=ON. VACUUM fora da
 // transação p/ recuperar espaço do arquivo/WAL. Opera no DB de DB_PATH (respeita o override).
+// BACKUP: nada aqui precisa mudar p/ o `reset` salvar a base antes de apagar — wipeAll é uma
+// função exportada SEM argumentos e o chamador (commands.js) roda o backup ANTES de invocá-la.
+// O material do backup também já está exposto: `db` (better-sqlite3 tem db.backup(destino)) e
+// DB_PATH (config.js). Ver src/backup.js.
 export function wipeAll() {
   const tables = [
     'searches',
@@ -930,4 +1024,269 @@ export function removeSource(sourceId) {
   });
   tx();
   return { source: src, counts };
+}
+
+
+// ---- restore: repovoamento do SQLite a partir de um snapshot exportado ----
+// A BASE DE REGISTRO passou a ser o snapshot versionado em git (webapp/public/data): um `reset`
+// acidental não pode mais significar "recomeçar do zero". Além das linhas de `articles`, o
+// restore repõe a frontier (markUrlDone) — e, quando o chamador tiver as URLs de issue (ver
+// LIMITAÇÃO abaixo), as `pages` (restorePage) — para o acervo voltar a casar em `isUrlKnown`, a
+// parada determinística de paginação.
+//
+// O QUE ISSO **NÃO** É. O `isUrlKnown` já não era a única defesa contra re-caminhar o arquivo:
+// `crawlArchive` para com `added === 0` (crawl.js) assim que uma página não rende link novo, e
+// `enqueue` é INSERT OR IGNORE. O ganho do restore é ANTECIPAR essa parada (antes do upsertPage
+// e do dateSeen/floorHit) e sobreviver a uma frontier apagada — não é a diferença entre "para" e
+// "caminha 600 issues".
+// LIMITAÇÃO ATUAL, medida: o snapshot exportado hoje NÃO carrega `issue_url`
+// (`webExportArticles` e `src/export-api.js` exportam `snippet`, nunca `issue_url`; no
+// `webapp/public/data/articles.json` commitado o campo não aparece nenhuma vez). Logo, HOJE, o
+// chamador do restore não tem com que alimentar `restorePage` nem o 4º ramo do `isUrlKnown`
+// (articles.issue_url): as issues NÃO viram território conhecido e podem ser re-curadas.
+// `restorePage` funciona (é testada), mas hoje NÃO RECEBE ENTRADA — só passa a ter efeito
+// quando o export incluir `issue_url` (mudança aditiva, pendente noutra onda).
+//
+// Todas as funções são IDEMPOTENTES (INSERT OR IGNORE em toda escrita) e nenhuma sobrescreve
+// dado vivo: restore repõe o que falta, não substitui o que já existe — a única escrita sobre
+// linha PRÉ-EXISTENTE é `markUrlDone` promovendo frontier 'failed' -> 'done' (ver a função).
+
+// Um `source_id` que não existe em `sources` violaria a FK e derrubaria o restore no meio
+// (`OR IGNORE` não cobre FK em SQLite). Pré-checagem determinística: null/ausente é legal (a FK
+// aceita NULL), id desconhecido é recusado ANTES do INSERT.
+function sourceExists(sourceId) {
+  if (sourceId === null || sourceId === undefined) return true;
+  return Boolean(stmts.getSourceById.get(sourceId));
+}
+
+/**
+ * Insere UM artigo completo vindo do snapshot. `row` traz os campos exportados por
+ * `webExportArticles` (title/title_pt/summary_pt/date_iso/kind/section/verify_status/
+ * verify_notes) mais `content` (texto puro, do map id->content de contents.json) e o
+ * `source_id` JÁ REMAPEADO p/ o id local (ver restoreSourceByName — os ids do snapshot são de
+ * outra base e não podem ser confiados).
+ * `date_iso` -> `published_at` (o snapshot já resolveu o coalesce published_at/extracted_at, e
+ * gravar em published_at preserva a data efetiva do card). `content_source = 'restore'`,
+ * `needs_enrich = 0` (o corpo já veio), `cleaned = 1` (foi limpo antes de ser exportado).
+ * O content_hash é o MESMO sha256(content) que crawl.js/curate.js gravam — é o que faz a dedup
+ * por conteúdo do próximo crawl reconhecer o material restaurado. Conteúdo VAZIO grava hash NULL
+ * (sha256('') é constante e colidiria no índice UNIQUE entre todos os artigos sem corpo).
+ *
+ * CONTRATO DO source_id (a linha é PULADA, nunca lançada): `articles.source_id` tem FK para
+ * `sources` e `OR IGNORE` NÃO cobre violação de FK em SQLite — um id inexistente lançava
+ * SQLITE_CONSTRAINT_FOREIGNKEY e derrubava o restore no MEIO, deixando a base pela metade (o
+ * pior desfecho possível num comando de recuperação). Agora um `source_id` que não existe em
+ * `sources` é detectado ANTES do INSERT (SELECT determinístico, mesmo veredito a cada chamada) e
+ * a linha é ignorada com `reason: 'bad-source'`; o chamador soma e reporta, o operador corrige o
+ * mapeamento e re-roda (restore é idempotente, então a 2ª passada preenche o que faltou).
+ * `source_id` null/ausente é LEGAL (a FK aceita NULL) e insere normalmente — artigo sem fonte
+ * atribuída, que é o que o snapshot produz quando a fonte não pôde ser remapeada.
+ *
+ * Retorna { inserted, id, reason }: reason 'url'/'hash' diz por que foi ignorado (linha já
+ * existente pela URL ou pelo conteúdo), com o `id` da linha que já estava lá; 'bad-source' =
+ * fonte inexistente; 'no-url' = linha sem URL.
+ */
+export function restoreArticle(row) {
+  const url = normalizeUrl(row?.url) || row?.url || null;
+  if (!url) return { inserted: false, id: null, reason: 'no-url' };
+  if (!sourceExists(row.source_id)) return { inserted: false, id: null, reason: 'bad-source' };
+  const content = typeof row.content === 'string' ? row.content : '';
+  const contentHash = content ? sha256(content) : null;
+  const res = stmts.restoreArticle.run({
+    source_id: row.source_id ?? null,
+    url,
+    title: row.title ?? url,
+    title_pt: row.title_pt ?? null,
+    summary_pt: row.summary_pt ?? null,
+    content,
+    content_hash: contentHash,
+    published_at: row.published_at ?? row.date_iso ?? null,
+    run_id: row.run_id ?? null,
+    kind: row.kind ?? null,
+    issue_url: row.issue_url ?? null,
+    section: row.section ?? null,
+    blurb: row.blurb ?? null,
+    content_source: 'restore',
+    cleaned: 1,
+    needs_enrich: 0,
+    verify_status: row.verify_status ?? null,
+    verify_notes: row.verify_notes ?? null,
+  });
+  if (res.changes > 0) return { inserted: true, id: Number(res.lastInsertRowid), reason: null };
+  const byUrl = stmts.getArticleByUrl.get(url);
+  if (byUrl) return { inserted: false, id: byUrl.id, reason: 'url' };
+  const byHash = contentHash ? stmts.getArticleByHash.get(contentHash) : null;
+  return { inserted: false, id: byHash?.id ?? null, reason: byHash ? 'hash' : 'ignored' };
+}
+
+/**
+ * Resolve (ou cria) a fonte local correspondente a uma fonte do snapshot e devolve o ID LOCAL,
+ * p/ o restore remapear `articles.source_id`. Ordem de casamento: base_url (quando o chamador a
+ * conhece, ex.: pelo sources.json) -> nome exato -> cria. NUNCA sobrescreve um cadastro
+ * existente (só completa um base_url ausente): a fonte viva é a autoridade.
+ * O snapshot não exporta base_url, então `baseUrl` costuma vir null e a fonte criada fica só
+ * como rótulo (o crawl é semeado pelo sources.json, não pela tabela `sources`).
+ * Retorna { id, created, source }.
+ */
+export function restoreSourceByName(name, baseUrl = null, type = null) {
+  const nm = String(name ?? '').trim();
+  const base = baseUrl ? normalizeUrl(baseUrl) || baseUrl : null;
+  if (base) {
+    const byUrl = stmts.getSourceByBaseUrl.get(base);
+    if (byUrl) return { id: byUrl.id, created: false, source: byUrl };
+  }
+  if (nm) {
+    const byName = stmts.getSourceByName.get(nm);
+    if (byName) {
+      if (base && !byName.base_url) stmts.fillSourceBaseUrl.run({ id: byName.id, base_url: base });
+      return { id: byName.id, created: false, source: stmts.getSourceById.get(byName.id) };
+    }
+  }
+  if (base) {
+    const row = stmts.upsertSource.get({
+      name: nm || hostOf(base) || base,
+      base_url: base,
+      type: type || 'listing',
+      max_index_pages: null,
+    });
+    return { id: row.id, created: true, source: row };
+  }
+  const row = stmts.insertSourceByName.get({ name: nm || null, base_url: null, type: type || 'listing' });
+  return { id: row.id, created: true, source: row };
+}
+
+/**
+ * Grava as tags do snapshot ({faceta: [tag, ...]}, o mesmo shape que classify.js persiste) no
+ * índice `article_tags`, com `rank` = posição dentro da faceta. INSERT OR IGNORE sobre a PK
+ * (article_id, facet, tag): idempotente e ADITIVO — nunca apaga tags existentes (ao contrário do
+ * classify, que faz delete+insert; ali a classificação nova é a autoridade, aqui não).
+ *
+ * `classifications` NÃO é escrita por padrão. O snapshot só carrega as tags: confidences,
+ * uncovered, domain_confidence, taxonomy_version e model_used não existem nele, e uma linha
+ * inventada seria indistinguível de uma classificação real. Sem a linha, as tags ficam válidas
+ * p/ busca/browse e `listArticlesNeedingClassification` re-seleciona o artigo — o próximo
+ * classify refaz a classificação COMPLETA (custa LLM, mas o dado fica íntegro).
+ * `markClassified: true` inverte o trade-off: grava a linha com `status = 'restored'` e
+ * `model_used = 'restore'` (rótulos EXPLÍCITOS, nunca 'done'/um modelo real) p/ o sweep não
+ * re-classificar o acervo restaurado inteiro.
+ * Mesmo assim só insere se ainda NÃO houver classificação — nunca rebaixa uma real.
+ * Retorna { tags, classification }.
+ */
+export function restoreTags(articleId, tagsByFacet, { markClassified = false } = {}) {
+  if (!articleId || !tagsByFacet || typeof tagsByFacet !== 'object') {
+    return { tags: 0, classification: false };
+  }
+  let tags = 0;
+  let classification = false;
+  const facets = {};
+  const tx = db.transaction(() => {
+    for (const [facet, list] of Object.entries(tagsByFacet)) {
+      if (!Array.isArray(list)) continue;
+      const clean = [];
+      for (const t of list) {
+        const tag = t == null ? '' : String(t);
+        if (!tag) continue;
+        tags += stmts.insertTag.run({ article_id: articleId, facet, tag, rank: clean.length }).changes;
+        clean.push(tag);
+      }
+      facets[facet] = clean;
+    }
+    if (markClassified && !stmts.getClassification.get(articleId)) {
+      stmts.upsertClassification.run({
+        article_id: articleId,
+        result_json: JSON.stringify({
+          facets,
+          confidences: {},
+          uncovered: [],
+          domain_confidence: null,
+          taxonomy_version: null,
+          status: 'restored',
+        }),
+        domain_confidence: null,
+        taxonomy_version: null,
+        model_used: 'restore',
+        status: 'restored',
+      });
+      classification = true;
+    }
+  });
+  tx();
+  return { tags, classification };
+}
+
+/**
+ * Registra na frontier, como RESOLVIDA ('done'), uma URL cujo conteúdo veio do snapshot. Faz a
+ * URL casar no 3º ramo do `isUrlKnown` mesmo quando a linha de `articles` não existe (ex.: o
+ * artigo foi ignorado por dedup de content_hash) — quando ela existe, o 1º ramo já casaria
+ * sozinho e esta função é só higiene da fila.
+ *
+ * NÃO REBAIXA TRABALHO VIVO. Só há dois desfechos de escrita:
+ *   - URL sem linha na frontier -> cria a linha JÁ em 'done';
+ *   - linha em 'failed' (job abandonado após MAX_RETRIES) -> vira 'done'.
+ * 'pending' (na fila desta run) e 'in_progress' (reivindicado agora, possivelmente por outro
+ * processo) ficam INTOCADOS: derrubá-los para 'done' cancelaria um enriquecimento que ainda ia
+ * rodar e, pior, cobraria uma tentativa fantasma — 'done' + needs_enrich=1 é contado como RODADA
+ * FALHADA por `bumpFailedEnrichAttempts`, então um restore por cima de uma base viva queimaria
+ * uma das ENRICH_MAX_ATTEMPTS de um job que nunca rodou. 'done' já é o alvo (no-op).
+ * O `failed -> done` é neutro nesse mesmo contador: bump/requeue/countAtCap tratam os dois igual.
+ *
+ * Retorna { url, created, marked } — `created` = a linha nasceu aqui (já em 'done'), `marked` =
+ * esta chamada mudou o estado de uma linha que já existia. Idempotente: a 2ª chamada devolve
+ * ambos false.
+ */
+export function markUrlDone(url, kind = 'article', sourceId = null) {
+  const n = normalizeUrl(url) || url || null;
+  if (!n) return { url: null, created: false, marked: false };
+  const ins = stmts.insertFrontierDone.run(n, kind || 'article', sourceId ?? null);
+  if (ins.changes > 0) return { url: n, created: true, marked: true };
+  return { url: n, created: false, marked: stmts.markFrontierDone.run(n).changes > 0 };
+}
+
+/**
+ * Registra a URL de uma listagem/issue restaurada em `pages` — o 2º ramo do `isUrlKnown`.
+ * INSERT OR IGNORE: uma página que o crawler já visitou de verdade mantém html_hash/status.
+ *
+ * O QUE ELA **NÃO** GARANTE. (1) Nada aqui impede uma issue de ser re-curada: a curadoria é
+ * decidida pelo job de roundup em crawl.js/curate.js, que não consulta `pages`; o efeito desta
+ * função é só fazer a URL contar como conhecida na varredura de links da paginação.
+ * (2) HOJE ela não é alimentada: o snapshot exportado não carrega `issue_url` (ver o cabeçalho
+ * do bloco), então o chamador do restore não tem de onde tirar as URLs de issue. A função só
+ * passa a ter efeito real quando o export incluir esse campo.
+ *
+ * `source_id` desconhecido é PULADO (mesmo contrato de restoreArticle: FK violada derrubaria o
+ * restore no meio); null é legal. Retorna true SÓ quando criou a linha — false = já existia ou
+ * fonte desconhecida.
+ */
+export function restorePage(url, sourceId = null) {
+  const n = normalizeUrl(url) || url || null;
+  if (!n || !sourceExists(sourceId)) return false;
+  return (
+    stmts.insertPageIfMissing.run({
+      source_id: sourceId ?? null,
+      url: n,
+      status: 'restored',
+    }).changes > 0
+  );
+}
+
+/** Total de artigos no acervo (relatório antes/depois do restore). */
+export function countArticles() {
+  return stmts.countArticles.get().c;
+}
+
+/**
+ * Fotografia das contagens que o restore reporta (antes/depois). Reusa os stmts de `stats` já
+ * existentes; `frontier` vem quebrada por estado (o que mostra quanto virou território conhecido).
+ */
+export function restoreCounts() {
+  const frontier = { total: stmts.countFrontier.get().c };
+  for (const r of stmts.countFrontierByState.all()) frontier[r.state] = r.c;
+  return {
+    articles: stmts.countArticles.get().c,
+    sources: stmts.countSources.get().c,
+    pages: stmts.countPages.get().c,
+    tags: stmts.countArticleTags.get().c,
+    classifications: stmts.countClassifications.get().c,
+    frontier,
+  };
 }

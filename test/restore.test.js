@@ -25,7 +25,11 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 
-process.env.NC_HOME = mkdtempSync(path.join(os.tmpdir(), 'nc-restore-'));
+// Nome PRÓPRIO para o NC_HOME isolado deste arquivo: qualquer restauração de env volta para ELE,
+// nunca para um valor possivelmente ausente (`process.env.NC_HOME = undefined` vira a string
+// "undefined" e o src/config.js cairia no default ~/.newsletter-crawler — o banco REAL).
+const NC_HOME_TMP = mkdtempSync(path.join(os.tmpdir(), 'nc-restore-'));
+process.env.NC_HOME = NC_HOME_TMP;
 const { db, stmts, wipeAll, countArticles, restoreArticle, restoreSourceByName } = await import('../src/db.js');
 const { setLogSink } = await import('../src/util.js');
 const {
@@ -34,7 +38,7 @@ const {
   looksLikeRawHtml, substanceLength,
 } = await import('../src/restore.js');
 
-const tmps = [process.env.NC_HOME];
+const tmps = [NC_HOME_TMP];
 after(() => {
   db.close();
   for (const d of tmps) rmSync(d, { recursive: true, force: true });
@@ -745,7 +749,7 @@ test('isUnderTest: só sinais de RUNNER contam (NODE_ENV=test e NC_HOME em /tmp 
   // NÃO era detectado) — errava dos dois lados.
   const ctx = process.env.NODE_TEST_CONTEXT;
   const argv = process.argv;
-  const home = process.env.NC_HOME;
+  const home = process.env.NC_HOME; // sempre o tmpdir deste arquivo; o `||` abaixo é o cinto extra
   const nodeEnv = process.env.NODE_ENV;
   try {
     delete process.env.NODE_TEST_CONTEXT;
@@ -764,7 +768,10 @@ test('isUnderTest: só sinais de RUNNER contam (NODE_ENV=test e NC_HOME em /tmp 
     else process.env.NODE_TEST_CONTEXT = ctx;
     if (nodeEnv === undefined) delete process.env.NODE_ENV;
     else process.env.NODE_ENV = nodeEnv;
-    process.env.NC_HOME = home;
+    // Restauração À PROVA DE undefined e válida TAMBÉM no caminho de exceção: se por qualquer
+    // motivo o valor salvo não existir, o env volta para o tmpdir ISOLADO deste arquivo — em
+    // nenhum caminho a suíte deixa NC_HOME falsy (= casa real do usuário).
+    process.env.NC_HOME = home || NC_HOME_TMP;
   }
 });
 

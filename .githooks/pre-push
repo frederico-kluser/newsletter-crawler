@@ -4,19 +4,39 @@
 # estiver commitado na main, mas manter os dados em dia em todo push evita surpresas.
 # Instalado por `npm install` (postinstall → git config core.hooksPath .githooks).
 #
-# Fail-open por design (o hook nunca pode travar trabalho legítimo):
+# Duas políticas DIFERENTES convivem aqui de propósito:
+#   • quanto ao PUSH, fail-open: o hook nunca pode travar trabalho legítimo (export falhou, node
+#     ausente, banco em outra máquina → avisa e o push segue);
+#   • quanto ao SNAPSHOT, fail-CLOSED: na dúvida NÃO commita. O dado publicado é a base de registro
+#     do acervo (o histórico do git) e não tem cópia — perder por acidente é irreversível.
+# A única exceção ao fail-open do push está no fim deste comentário.
+#
+# Ramos:
 #   • deleção de ref → não faz nada;
 #   • export falhou (máquina sem node/dependências) → avisa e o push segue;
-#   • snapshot novo MENOR que o commitado → restaura e o push segue SEM commit (máquina sem o
-#     banco real exporta um acervo vazio — jamais auto-publicar isso; pós-purge intencional,
-#     exporte e commite manualmente);
+#   • guard anti-encolhimento bloqueou → restaura a árvore e o push segue SEM commit;
 #   • só a linha volátil `generatedAt` do meta.json mudou → restaura e o push segue;
 #   • dado novo de verdade → commita webapp/public/data + webapp/public/api/v1 e ABORTA o push
 #     (um commit criado durante o push não entra nele): repita o `git push`.
 #
+# A DECISÃO do guard NÃO mora aqui: ela é a mesma função JS que o `ncrawl deploy` usa
+# (`src/snapshot-guard.js`, `evaluateSnapshotChange`), chamada por um `node -e` curto. A versão
+# anterior era bash e tinha dois furos que este arquivo existe para fechar:
+#   (a) `if [ -n "$total_novo" ] && [ -n "$total_head" ]` — falha de LEITURA DESLIGAVA o guard, e é
+#       justamente quando não se sabe o total que não se pode publicar. Agora total ilegível
+#       BLOQUEIA;
+#   (b) comparava só com `HEAD:meta.json` — um RATCHET: assim que um snapshot encolhido entrasse no
+#       HEAD, tudo que fosse >= a ele passaria para sempre. Agora o total NO AR entra na conta
+#       (best-effort, com timeout), e a base é o MAIOR total conhecido.
+# Opt-in explícito (hook não recebe flags): NC_ALLOW_SHRINK=1 libera encolher, NC_ALLOW_SHRINK=wipe
+# libera zerar. Na CLI é `--allow-shrink` / `--allow-shrink wipe`.
+#
+# ÚNICA exceção ao fail-open do push: se o snapshot que JÁ ESTÁ COMMITADO no HEAD apagaria o acervo
+# no ar e não há nada melhor p/ commitar, o push do ramo de publicação é ABORTADO — deixá-lo seguir
+# seria publicar a destruição, que é exatamente o incidente 7c24491.
+#
 # O mesmo `export --format web` regenera a API pública em webapp/public/api/v1/corpus.json — ela
-# viaja junto do snapshot em todos os ramos abaixo (encolheu → restaura; só generatedAt → restaura;
-# dado novo → commita), pelos MESMOS guards.
+# viaja junto do snapshot em todos os ramos abaixo, pelos MESMOS guards.
 set -u
 
 DATA_DIR="webapp/public/data"
@@ -24,13 +44,16 @@ API_DIR="webapp/public/api/v1"
 META="$DATA_DIR/meta.json"
 CORPUS="$API_DIR/corpus.json"
 ZERO="0000000000000000000000000000000000000000"
+DEPLOY_BRANCH="${NC_DEPLOY_BRANCH:-main}"
 
 # stdin do pre-push: "<local ref> <local sha> <remote ref> <remote sha>" por ref pushado.
-# Só pula deleção de ref (local_sha zerado).
+# Só pula deleção de ref (local_sha zerado). `push_deploy` marca o push que a Vercel publica.
 any_push=0
-while read -r _local_ref local_sha _remote_ref _remote_sha; do
+push_deploy=0
+while read -r _local_ref local_sha remote_ref _remote_sha; do
   if [ "$local_sha" != "$ZERO" ]; then
     any_push=1
+    case "$remote_ref" in "refs/heads/$DEPLOY_BRANCH") push_deploy=1 ;; esac
   fi
 done
 [ "$any_push" = "1" ] || exit 0
@@ -43,16 +66,141 @@ if ! node --env-file-if-exists=.env src/index.js export --format web; then
   exit 0
 fi
 
-# Totais p/ o guard anti-encolhimento (vazio se não der pra ler — aí o guard não se aplica).
-total_novo=$(node -p "require('./$META').totals.articles" 2>/dev/null)
-total_head=$(git show "HEAD:$META" 2>/dev/null | node -p "JSON.parse(require('node:fs').readFileSync(0,'utf8')).totals.articles" 2>/dev/null)
-case "$total_novo" in '' | *[!0-9]*) total_novo="" ;; esac
-case "$total_head" in '' | *[!0-9]*) total_head="" ;; esac
+# Desfaz na árvore TUDO o que o export escreveu (os diretórios inteiros: o export reescreve também
+# articles.json e os contents.partN.json) e remove os ÓRFÃOS que ele criou — restore/checkout não
+# apagam arquivo não-rastreado, e sem isso uma parte nova ficaria pronta p/ o próximo `git add`.
+#
+# A remoção é por NOME (só o que o export gera: meta/articles/contents[.partN]/corpus), NUNCA pelo
+# diretório: um `git clean -fd` nas duas pastas levaria junto qualquer arquivo do usuário guardado
+# ali — com `-d`, diretórios inteiros — em silêncio e sem volta. O que sumir, sai em log.
+restaura_snapshot() {
+  git restore -- "$DATA_DIR" "$API_DIR" 2>/dev/null ||
+    git checkout -- "$DATA_DIR" "$API_DIR" 2>/dev/null || true
+  # --exclude-standard respeita o .gitignore do usuário; --others só lista não-rastreados.
+  local orfaos
+  orfaos=$(git ls-files --others --exclude-standard -- "$DATA_DIR" "$API_DIR" 2>/dev/null |
+    grep -E "^($DATA_DIR/(meta|articles|contents)\.json|$DATA_DIR/contents\.part[0-9]+\.json|$API_DIR/corpus\.json)$" || true)
+  [ -n "$orfaos" ] || return 0
+  printf '%s\n' "$orfaos" | while IFS= read -r f; do
+    [ -n "$f" ] && echo "[pre-push] removendo arquivo novo do export: $f" >&2
+  done
+  printf '%s\n' "$orfaos" | tr '\n' '\0' | xargs -0 -r git clean -f -- 2>/dev/null || true
+}
 
-if [ -n "$total_novo" ] && [ -n "$total_head" ] && [ "$total_novo" -lt "$total_head" ]; then
-  git restore -- "$DATA_DIR" "$API_DIR" 2>/dev/null || git checkout -- "$DATA_DIR" "$API_DIR"
-  echo "[pre-push] aviso: snapshot novo tem MENOS artigos ($total_novo < $total_head) — máquina sem o banco real?" >&2
-  echo "[pre-push] nada foi commitado; se a redução é intencional (purge), rode e commite manualmente: ncrawl export --format web" >&2
+# ---- guard anti-encolhimento: a MESMA decisão do `ncrawl deploy` (src/snapshot-guard.js) ----
+# Saída (stdout, 5 campos): "<novo> <head> <no-ar> <acao-snapshot> <acao-push>", com "?" p/ total
+# desconhecido. As mensagens humanas saem em stderr. O script sai 0 mesmo bloqueando: quem decide o
+# destino do PUSH é o bash abaixo, a partir das duas ações.
+GUARD_JS=$(cat <<'GUARD_EOF'
+import { readFileSync, writeSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import {
+  evaluateSnapshotChange, articlesFromMeta, SHRINK_OPT_IN, WIPE_OPT_IN,
+} from "./src/snapshot-guard.js";
+
+const META = "webapp/public/data/meta.json";
+const optIn = process.env.NC_ALLOW_SHRINK;
+
+// Total do snapshot recém-exportado (o que seria commitado).
+let novo = null;
+try { novo = articlesFromMeta(readFileSync(META, "utf8")); } catch {}
+
+// Total já commitado no HEAD (o que o push publicaria se nada for commitado agora).
+let head = null;
+try {
+  head = articlesFromMeta(execFileSync("git", ["show", `HEAD:${META}`], {
+    encoding: "utf8", maxBuffer: 64 * 1024 * 1024, stdio: ["ignore", "pipe", "ignore"],
+  }));
+} catch {}
+
+// Total NO AR: é ele que quebra o ratchet de comparar só com o HEAD. Best-effort, com timeout —
+// um hook não pode ficar pendurado na rede. NC_HOOK_LIVE_MS=0 desliga a consulta.
+// O default do site é repetido aqui (em vez de importar src/config.js) de propósito: config.js
+// cria NC_HOME e carrega .env no import, e um hook não deve ter esse efeito colateral. Quem muda
+// o alvo passa NC_SITE_URL/NC_SITE_META_PATH no AMBIENTE do push (não pelo NC_HOME/.env).
+let live = null;
+const liveMs = Number(process.env.NC_HOOK_LIVE_MS ?? 4000);
+if (liveMs > 0) {
+  const base = (process.env.NC_SITE_URL || "https://newsletter-crawler.vercel.app").replace(/\/+$/, "");
+  const metaPath = process.env.NC_SITE_META_PATH || "/data/meta.json";
+  try {
+    const res = await fetch(`${base}${metaPath}?t=${Date.now()}`, {
+      signal: AbortSignal.timeout(liveMs), headers: { "cache-control": "no-cache" },
+    });
+    if (res.ok) live = articlesFromMeta(await res.text());
+  } catch {}
+}
+
+const snapshot = evaluateSnapshotChange({ novo, head, live, allowShrink: optIn });
+// O que o PUSH publica é o snapshot do HEAD, não o da árvore de trabalho.
+const push = evaluateSnapshotChange({ novo: head, head: null, live, allowShrink: optIn });
+
+// Escrita SÍNCRONA (fd 1/2): `process.stdout.write` p/ um pipe — e o hook captura a saída com
+// `$( )` — pode ser assíncrono, e o process.exit() logo abaixo truncaria o texto. EAGAIN = pipe
+// cheio, tenta de novo.
+const escreve = (fd, texto) => {
+  const buf = Buffer.from(texto);
+  let off = 0;
+  while (off < buf.length) {
+    try { off += writeSync(fd, buf, off); } catch (e) { if (e.code !== "EAGAIN") return; }
+  }
+};
+const n = (x) => (x == null ? "?" : String(x));
+const acaoPush = live == null ? "allow" : push.action; // sem o total do ar não há o que provar
+const say = (m) => escreve(2, `[pre-push] ${m}\n`);
+if (snapshot.action === "block") {
+  say(snapshot.message);
+  if (snapshot.hint) say(snapshot.hint);
+  say(`opt-in por ambiente: NC_ALLOW_SHRINK=1 (encolher) / NC_ALLOW_SHRINK=wipe (zerar) — na CLI, "${SHRINK_OPT_IN}" / "${WIPE_OPT_IN}".`);
+} else if (snapshot.override) {
+  say(`ATENCAO override (NC_ALLOW_SHRINK): ${snapshot.message}`);
+  say("ATENCAO o historico do git e a base de registro do acervo: isto nao se desfaz pelo site.");
+}
+escreve(1, [n(novo), n(head), n(live), snapshot.action, acaoPush].join(" ") + "\n");
+
+// SAI AGORA que o veredito está escrito. Sem isto o processo ainda ficava ~6,5s pendurado quando o
+// site não responde ao SYN (firewall/VPN, situação comum): o AbortSignal.timeout rejeita a promessa
+// em 4s mas NÃO fecha o socket de connect pendente do undici, cujo connectTimeout é 10s — e o hook
+// espera este processo (`guard_out=$(node …)`), então o custo era pago em TODO push. Medido: 10,6s
+// → ~4,1s. A consulta ao ar NÃO é pulada em branch de trabalho de propósito: é ela que evita o
+// ratchet (um snapshot encolhido no HEAD virar licença) também fora do ramo de publicação.
+process.exit(0);
+GUARD_EOF
+)
+
+if ! guard_out=$(node --input-type=module -e "$GUARD_JS"); then
+  guard_out=""
+  echo "[pre-push] aviso: o guard anti-encolhimento não rodou — o snapshot NÃO será commitado." >&2
+fi
+# Saída malformada/ausente = desconhecido: bloqueia o COMMIT do snapshot (fail-safe p/ o dado) e
+# deixa o push seguir (fail-open p/ o trabalho).
+[ "$(printf '%s\n' "$guard_out" | wc -w | tr -d ' ')" = "5" ] || guard_out="? ? ? block allow"
+# `set -f` é obrigatório: o campo "?" (total desconhecido) é um GLOB — sem isso o shell o trocaria
+# por um arquivo de nome de 1 caractere do repo e o guard leria lixo.
+set -f
+set -- $guard_out
+set +f
+total_novo="$1"; total_head="$2"; total_live="$3"; acao_snapshot="$4"; acao_push="$5"
+[ "$total_novo" = "?" ] && total_novo=""
+[ "$total_head" = "?" ] && total_head=""
+[ "$total_live" = "?" ] && total_live=""
+
+# Única saída != 0 que não é "commitei, repita o push": o snapshot COMMITADO apagaria o acervo no
+# ar e não temos nada melhor p/ commitar — deixar o push seguir publicaria a destruição.
+aborta_se_head_apaga_o_ar() {
+  [ "$acao_push" = "block" ] || return 0
+  [ "$push_deploy" = "1" ] || return 0
+  echo "" >&2
+  echo "[pre-push] PUSH ABORTADO: o snapshot COMMITADO no HEAD (${total_head:-?} artigos) destruiria o acervo publicado (${total_live:-?} no ar)." >&2
+  echo "[pre-push] corrija o commit antes de publicar: re-exporte com o banco COMPLETO e commite por cima, ou 'git revert' o commit que encolheu o snapshot." >&2
+  echo "[pre-push] se a redução é MESMO deliberada: NC_ALLOW_SHRINK=wipe git push" >&2
+  exit 1
+}
+
+if [ "$acao_snapshot" = "block" ]; then
+  restaura_snapshot
+  echo "[pre-push] nada foi commitado; o push segue com o snapshot que já está no repositório." >&2
+  aborta_se_head_apaga_o_ar
   exit 0
 fi
 
@@ -76,7 +224,8 @@ elif ! diff -q <(git show "HEAD:$CORPUS" 2>/dev/null | grep -v '"generatedAt"') 
 fi
 
 if [ "$real_change" = "0" ]; then
-  git restore -- "$META" "$CORPUS" 2>/dev/null || git checkout -- "$META" "$CORPUS"
+  restaura_snapshot
+  aborta_se_head_apaga_o_ar
   echo "[pre-push] snapshot já em dia (${total_head:-?} artigos) — push segue."
   exit 0
 fi

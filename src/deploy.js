@@ -4,12 +4,23 @@
 // da Vercel é ler o snapshot SERVIDO (SITE_URL + SITE_META_PATH) e ver o `generatedAt` do HEAD
 // pós-push aparecer lá. Sem isso, um build quebrado passa por "deploy ✓".
 //
-// Ordem: preflight (git/branch/remoto) → export → mudança real → ahead/behind → estado do site no
-// ar → decisão → commit → push (--no-verify: o hook pre-push faria o MESMO export de novo e
-// abortaria o push) → polling até publicar.
+// Ordem: preflight (git/branch/remoto) → ahead/behind (remoto à frente ABORTA aqui, antes de
+// qualquer escrita na árvore) → estado do HEAD + do site no ar → export (com o GUARD
+// anti-encolhimento armado) → mudança real → decisão → commit → push (--no-verify: o hook pre-push
+// faria o MESMO export de novo e abortaria o push) → polling até publicar.
+//
+// O ahead/behind vem ANTES do export de propósito: "repo atrasado" é o caso mais comum do fluxo
+// multi-máquina e o diagnóstico dele ("git pull --rebase") tem de chegar primeiro. Com o export na
+// frente, um repo atrasado levava o bloqueio do guard ("o snapshot novo tem MENOS artigos que o já
+// publicado") — fail-safe, mas culpando a base local, que estava correta.
 //
 // Fail-open onde o custo de errar é baixo (fetch/rede/leitura do site), fail-closed onde publicar
 // errado é caro (branch errada, remoto à frente, repo sem git): esses ABORTAM antes de tocar no git.
+//
+// O guard anti-encolhimento (`src/snapshot-guard.js`) é o ponto em que essa política se inverte de
+// vez: publicar um snapshot menor que o acervo NO AR destrói a base de registro (o histórico do
+// git), então ele é fail-SAFE — na dúvida, bloqueia. Ele existe por causa de 2026-08-24 (commit
+// 7c24491): 0 artigos publicados por cima de 2866. O deploy tinha os dois números e só os logava.
 import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 import { existsSync, readFileSync as fsReadFileSync, writeFileSync as fsWriteFileSync } from 'node:fs';
@@ -19,6 +30,7 @@ import {
 } from './config.js';
 import { exportWebSnapshot } from './export-web.js';
 import { exportPublicApi } from './export-api.js';
+import { evaluateSnapshotChange } from './snapshot-guard.js';
 import { log, warn } from './util.js';
 
 // Caminhos (relativos ao repo) que o deploy é dono de commitar.
@@ -28,6 +40,24 @@ const META_REL = `${DATA_REL}/meta.json`;
 const CORPUS_REL = `${API_REL}/corpus.json`;
 // Só estes dois carregam o campo volátil `generatedAt` (o resto do diff é dado de verdade).
 const VOLATILE_REL = [META_REL, CORPUS_REL];
+// TUDO o que o export escreve na árvore. O export reescreve também `articles.json` e os
+// `contents.partN.json`, então desfazer só os dois voláteis deixava o snapshot ESVAZIADO no
+// working tree — pronto p/ o próximo `git add` levá-lo ao commit com o guard "funcionando".
+const SNAPSHOT_REL = [DATA_REL, API_REL];
+// Os arquivos que o export ESCREVE, e só eles: meta/articles/corpus, mais a família variável
+// `contents.partN.json` (o export cria e remove partes conforme o acervo cresce; `contents.json`
+// é o arquivo único de antes da partição, que ele apaga). É esta lista — e não "tudo o que estiver
+// nos diretórios" — que define o que o deploy pode remover da árvore de trabalho.
+const rxEscape = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const EXPORT_ARTIFACT_RE = new RegExp(
+  `^(?:${rxEscape(DATA_REL)}/(?:meta\\.json|articles\\.json|contents\\.json|contents\\.part\\d+\\.json)` +
+    `|${rxEscape(API_REL)}/corpus\\.json)$`,
+);
+
+/** Este caminho (relativo ao repo) é um arquivo que o export gera? Pura: os testes fixam a lista. */
+export function isExportArtifact(rel) {
+  return EXPORT_ARTIFACT_RE.test(String(rel || '').trim().replace(/^"|"$/g, ''));
+}
 
 // Erro de deploy com mensagem já pronta p/ o usuário (o CLI/TUI só imprime `.message` + `.hint`).
 export class DeployError extends Error {
@@ -111,6 +141,61 @@ export function planDeploy({ dataChanged, codeChanged, ahead, live, localStamp, 
   return { publish: false, refresh: false, reason: siteKnown ? 'up-to-date' : 'no-change' };
 }
 
+/**
+ * Hint EXTRA do bloqueio: o snapshot já COMMITADO no HEAD também está abaixo do que o site serve.
+ * Aí re-exportar não basta — os commits pendentes, sozinhos, encolheriam o acervo, e o conserto é
+ * no commit (revert / commitar por cima com o banco completo).
+ *
+ * Isto substitui um guard de etapa `push` que existia logo antes do `git push` e era INALCANÇÁVEL:
+ * chegar lá exigia "nada novo p/ commitar" (⇒ o snapshot exportado é igual ao do HEAD) e o guard do
+ * export já tinha exigido novo >= max(head, live) (⇒ head >= live), então ele SEMPRE liberava. O
+ * diagnóstico que ele carregava, porém, é real — e cabe aqui, onde os três números existem e o
+ * bloqueio de fato acontece.
+ */
+function hintHeadAbaixoDoAr({ head, live }) {
+  if (head == null || live == null || head >= live) return null;
+  return (
+    `ATENÇÃO: o snapshot que JÁ ESTÁ COMMITADO no HEAD tem ${head} artigo(s) e o site serve ${live} — ` +
+    `mesmo sem commitar nada agora, publicar os commits pendentes encolheria o acervo. Re-exporte ` +
+    `com o banco COMPLETO e commite por cima, ou desfaça o commit que encolheu o snapshot ` +
+    `(\`git revert <sha>\`) antes de publicar.`
+  );
+}
+
+/**
+ * Guard anti-encolhimento NO CAMINHO DO DEPLOY: aplica a decisão pura de `snapshot-guard.js` e a
+ * converte no vocabulário do comando (DeployError com `.message`/`.hint`, que o CLI e a TUI já
+ * imprimem). PURA fora do `restore`/`warn` — é ela que os testes fixam.
+ *
+ * Por que existe: em 2026-08-24 (commit 7c24491) o deploy publicou 0 artigos por cima de 2866. Os
+ * dois números estavam na mão dele ("export web: 0 artigos" / "site no ar: 2866 artigos") e só
+ * viravam log — nunca chegavam a uma decisão. Aqui eles decidem.
+ *
+ * @param {number|null} o.novo   total do snapshot que seria publicado
+ * @param {number|null} o.head   total commitado no HEAD (null = desconhecido)
+ * @param {number|null} o.live   total servido pelo site no ar (null = desconhecido)
+ * @param {boolean|string} o.allowShrink  opt-in do usuário (`--allow-shrink` / `--allow-shrink wipe`)
+ * @param {Function|null} o.restore  chamado ANTES de abortar (devolve a árvore ao estado do HEAD)
+ * @returns {object} o veredito (allow); lança DeployError quando bloqueia
+ */
+export function guardSnapshot({ novo, head, live, allowShrink, restore = null } = {}) {
+  const v = evaluateSnapshotChange({ novo, head, live, allowShrink });
+  if (v.action === 'block') {
+    // Restaura ANTES de abortar: o export já reescreveu os JSONs da árvore e um snapshot esvaziado
+    // esperando o próximo `git add` é exatamente como o dado se perde com o guard "ativo".
+    if (restore) restore();
+    // `v.counts` já vem normalizado (string do hook, número, null) — usa ele, não os brutos.
+    const extra = hintHeadAbaixoDoAr(v.counts);
+    throw new DeployError(v.message, [v.hint, extra].filter(Boolean).join(' ') || null);
+  }
+  if (v.override) {
+    // Único caminho que apaga acervo publicado DE PROPÓSITO — não pode passar despercebido.
+    warn(`ATENÇÃO — ${v.message}`);
+    warn('ATENÇÃO — o histórico do git é a base de registro do acervo: isto não se desfaz pelo site.');
+  }
+  return v;
+}
+
 export function fmtElapsed(ms) {
   const s = Math.max(0, Math.round(ms / 1000));
   if (s < 60) return `${s}s`;
@@ -142,15 +227,16 @@ function git(args, { allowFail = false } = {}) {
 }
 
 // Conteúdo de um arquivo no HEAD (null se não existe lá — primeiro commit do snapshot).
-function showHead(rel) {
-  return git(['show', `HEAD:${rel}`], { allowFail: true });
+// `run` é o executor de git (o real, ou a costura de teste — ver runDeploy).
+function showHead(run, rel) {
+  return run(['show', `HEAD:${rel}`], { allowFail: true });
 }
 
 // Mudança real num arquivo que carrega o `generatedAt`: ausente no HEAD = mudança; diff vazio =
 // igual; senão pergunta ao diff se sobrou algo além do campo volátil.
-function changedIgnoringVolatile(rel) {
-  if (git(['cat-file', '-e', `HEAD:${rel}`], { allowFail: true }) === null) return true;
-  const diff = git(['diff', '-U0', 'HEAD', '--', rel], { allowFail: true });
+function changedIgnoringVolatile(run, rel) {
+  if (run(['cat-file', '-e', `HEAD:${rel}`], { allowFail: true }) === null) return true;
+  const diff = run(['diff', '-U0', 'HEAD', '--', rel], { allowFail: true });
   if (diff === null) return true; // não deu p/ comparar: assume mudança (melhor republicar que sumir)
   if (diff === '') return false;
   return !diffIsOnlyVolatile(diff);
@@ -202,11 +288,11 @@ function ensureGithubGitAuth(remoteUrl) {
   return { gh: true, github: true, hinted };
 }
 
-function preflight() {
-  const top = git(['rev-parse', '--show-toplevel'], { allowFail: true });
+function preflight(run) {
+  const top = run(['rev-parse', '--show-toplevel'], { allowFail: true });
   if (!top) throw new DeployError('isto não é um repositório git — o deploy publica via git push.');
 
-  const branch = git(['rev-parse', '--abbrev-ref', 'HEAD']);
+  const branch = run(['rev-parse', '--abbrev-ref', 'HEAD']);
   if (branch !== DEPLOY_BRANCH) {
     throw new DeployError(
       `o deploy publica a branch "${DEPLOY_BRANCH}", mas você está em "${branch}".`,
@@ -215,27 +301,27 @@ function preflight() {
     );
   }
 
-  const remotes = (git(['remote'], { allowFail: true }) || '').split('\n').filter(Boolean);
+  const remotes = (run(['remote'], { allowFail: true }) || '').split('\n').filter(Boolean);
   if (!remotes.includes('origin')) {
     throw new DeployError(
       'nenhum remoto "origin" configurado — a Vercel publica a partir do push.',
       'git remote add origin <url-do-repo>',
     );
   }
-  const remoteUrl = git(['remote', 'get-url', 'origin'], { allowFail: true });
+  const remoteUrl = run(['remote', 'get-url', 'origin'], { allowFail: true });
   for (const h of ensureGithubGitAuth(remoteUrl).hinted) warn(h);
   return { branch, remoteUrl };
 }
 
 // Conta os commits só-nossos e só-do-remoto. Precisa de `git fetch`: fail-open (offline → o push
 // falha depois com mensagem clara, não vale abortar aqui).
-function divergence() {
-  const fetched = git(['fetch', '--quiet', 'origin', DEPLOY_BRANCH], { allowFail: true }) !== null;
+function divergence(run) {
+  const fetched = run(['fetch', '--quiet', 'origin', DEPLOY_BRANCH], { allowFail: true }) !== null;
   if (!fetched) {
     warn('não deu para consultar o origin (offline?) — seguindo com o estado local.');
     return { ahead: 0, behind: 0, known: false };
   }
-  const counts = git(['rev-list', '--left-right', '--count', `origin/${DEPLOY_BRANCH}...HEAD`], {
+  const counts = run(['rev-list', '--left-right', '--count', `origin/${DEPLOY_BRANCH}...HEAD`], {
     allowFail: true,
   });
   const [behind, ahead] = String(counts || '0\t0').split(/\s+/).map((n) => Number(n) || 0);
@@ -291,19 +377,33 @@ async function waitForPublish(expected, { waitMs = DEPLOY_WAIT_MS, pollMs = DEPL
  * Publica o site de ponta a ponta. Retorna um resultado TIPADO (a TUI e o CLI formatam):
  *   { status: 'live'|'pushed'|'timeout'|'up-to-date'|'dry-run', ... }
  * Lança DeployError nas condições que abortam antes de mexer no git.
- * flags: { force, 'no-wait', 'dry-run', 'include-code', timeout }
+ * flags: { force, 'no-wait', 'dry-run', 'include-code', 'allow-shrink', timeout }
+ *
+ * `deps` é COSTURA DE TESTE (git/export/site injetáveis): a orquestração — inclusive o guard
+ * anti-encolhimento — precisa ser exercitável de ponta a ponta sem tocar num repositório real,
+ * porque o bug que ela existe p/ evitar (7c24491) só aparece na SEQUÊNCIA das etapas.
  */
-export async function runDeploy(flags = {}) {
+export async function runDeploy(flags = {}, deps = {}) {
+  const {
+    git: run = git,
+    exportWeb = exportWebSnapshot,
+    exportApi = exportPublicApi,
+    fetchLive = fetchLiveStamp,
+  } = deps;
   const force = flags.force === true || flags.force === 'true';
   const noWait = flags['no-wait'] === true || flags['no-wait'] === 'true';
   const dryRun = flags['dry-run'] === true || flags['dry-run'] === 'true';
   const includeCode = flags['include-code'] === true || flags['include-code'] === 'true';
+  // Opt-in do guard anti-encolhimento. Repassado CRU (o guard normaliza): `--allow-shrink` chega
+  // como `true` e `--allow-shrink wipe` como a string 'wipe'. A forma com `=` NÃO existe — o
+  // parseFlags de index.js não quebra em `=` (viraria a flag literal "allow-shrink=wipe").
+  const allowShrink = flags['allow-shrink'];
   const waitMs = Number(flags.timeout) > 0 ? Number(flags.timeout) * 1000 : DEPLOY_WAIT_MS;
 
-  const { branch } = preflight();
+  const { branch } = preflight(run);
 
   // 1. Código pendente: nunca entra por acidente. Sem --include-code, só avisa.
-  const dirty = splitDirtyPaths(git(['status', '--porcelain'], { allowFail: true }) || '');
+  const dirty = splitDirtyPaths(run(['status', '--porcelain'], { allowFail: true }) || '');
   if (dirty.code.length) {
     const lista = dirty.code.slice(0, 10).map((f) => `   ${f}`).join('\n');
     const resto = dirty.code.length > 10 ? `\n   … +${dirty.code.length - 10}` : '';
@@ -317,18 +417,65 @@ export async function runDeploy(flags = {}) {
     }
   }
 
-  // 2. Export (é o mesmo que o hook pre-push faz; sempre bate o generatedAt).
-  log('exportando o snapshot do webapp a partir do banco local…');
-  const web = exportWebSnapshot({ outDir: path.join(ROOT, DATA_REL) });
-  const api = exportPublicApi({ outDir: path.join(ROOT, API_REL) });
+  // 2. Divergência com o remoto ANTES de tocar na árvore: remoto à frente = push rejeitado, e o
+  //    conselho é `git pull --rebase`. Vem aqui (e não depois do export) porque "repo atrasado" é o
+  //    caso mais comum do fluxo multi-máquina: com o export na frente, o usuário levava o bloqueio
+  //    do guard ("o snapshot novo tem MENOS artigos que o já publicado"), que culpa a base local —
+  //    correta — em vez de mandar sincronizar. Abortando aqui, nada foi escrito: nem restore é
+  //    preciso.
+  const { ahead, behind } = divergence(run);
+  if (behind > 0) {
+    throw new DeployError(
+      `o origin/${branch} está ${behind} commit(s) à frente — o push seria rejeitado.`,
+      `rode "git pull --rebase origin ${branch}" e tente de novo. Enquanto o repo está atrasado, ` +
+        'o snapshot local pode ser MENOR que o publicado sem que a sua base tenha problema algum.',
+    );
+  }
 
-  // 3. Mudança REAL = algo no dir de dados difere do HEAD, ignorando o generatedAt volátil.
+  // 3. BASE DE COMPARAÇÃO do guard, lida ANTES do export: o total commitado no HEAD e o total que
+  //    o site serve. Ler o site aqui (e não lá embaixo, só p/ decidir se ele está atrasado) é o
+  //    que ARMA o guard anti-encolhimento — em 7c24491 esse número já era conhecido e só virava
+  //    log. `localStamp` sai do HEAD (não da árvore): o export vai bumpar o generatedAt dela.
+  const localStamp = readSnapshotStamp(showHead(run, META_REL));
+  const live = await fetchLive();
+  if (live) log(`site no ar: ${live.articles ?? '?'} artigos (${live.generatedAt})`);
+  else warn(`não deu para ler ${SITE_URL}${SITE_META_PATH} — sigo sem comparar com o que está no ar.`);
+
+  // 4. Export (é o mesmo que o hook pre-push faz; sempre bate o generatedAt), com o guard ARMADO.
+  //    `live` + `allowShrink` seguem junto p/ o export: na versão COM guard interno (branch irmã
+  //    `onda2-export-guard`) são eles que o deixam recusar sozinho — o que protege também quem roda
+  //    `ncrawl export` fora do deploy. A `exportWebSnapshot` de hoje IGNORA os dois (options extras
+  //    não atrapalham), então quem garante o bloqueio agora é o SEGUNDO CERCO logo abaixo, com os
+  //    três números na mão. Se o export recusar, o erro TIPADO (`SnapshotShrinkError` / `.verdict`)
+  //    vira DeployError aqui.
+  log('exportando o snapshot do webapp a partir do banco local…');
+  let web;
+  try {
+    web = exportWeb({ outDir: path.join(ROOT, DATA_REL), allowShrink, live });
+  } catch (e) {
+    // O export pode ter escrito parte dos arquivos antes de recusar: a árvore volta ao HEAD.
+    restoreSnapshot(run);
+    if (e?.verdict || e?.name === 'SnapshotShrinkError') throw new DeployError(e.message, e.hint);
+    throw e;
+  }
+  const api = exportApi({ outDir: path.join(ROOT, API_REL) });
+  // Segundo cerco, no caminho do DEPLOY: a MESMA regra, decidida aqui com os três números na mão.
+  // Não depende do guard interno do export (que serve ao `ncrawl export` e ao hook).
+  guardSnapshot({
+    novo: web?.articles,
+    head: localStamp?.articles ?? null,
+    live: live?.articles ?? null,
+    allowShrink,
+    restore: () => restoreSnapshot(run),
+  });
+
+  // 5. Mudança REAL = algo no dir de dados difere do HEAD, ignorando o generatedAt volátil.
   //    `git diff` NÃO enxerga arquivo novo não-rastreado e o export criou/removeu arquivos
   //    (a 1ª rodada pós-partição gera contents.partN.json do zero e rmSync o contents.json
   //    antigo) — por isso o sinal é o status PORCELAIN do dir inteiro: qualquer entrada que não
   //    seja só meta/corpus modificados = dado novo (parte nova, articles mudado, arquivo
   //    removido). O que sobra em meta/corpus (o bump do generatedAt) é tratado em seguida.
-  const dataStatus = (git(['status', '--porcelain', '--', DATA_REL, API_REL], { allowFail: true }) || '')
+  const dataStatus = (run(['status', '--porcelain', '--', DATA_REL, API_REL], { allowFail: true }) || '')
     .split('\n')
     .map((l) => l.trim())
     .filter(Boolean);
@@ -337,35 +484,17 @@ export async function runDeploy(flags = {}) {
     .map((l) => l.replace(/^..?\s/, '').replace(/^"|"$/g, ''))
     .filter((f) => f !== META_REL && f !== CORPUS_REL);
   let dataChanged = changedPaths.length > 0;
-  if (!dataChanged) dataChanged = VOLATILE_REL.some(changedIgnoringVolatile);
+  if (!dataChanged) dataChanged = VOLATILE_REL.some((rel) => changedIgnoringVolatile(run, rel));
 
-  // 4. Divergência com o remoto: remoto à frente = push rejeitado. Aborta ANTES do commit.
-  const { ahead, behind } = divergence();
-  if (behind > 0) {
-    // Só desfaz o bump de generatedAt se NÃO houver dado novo — com dado novo, restaurar o meta
-    // deixaria a árvore incoerente (articles.json novo × meta.json velho).
-    if (!dataChanged) restoreVolatile();
-    throw new DeployError(
-      `o origin/${branch} está ${behind} commit(s) à frente — o push seria rejeitado.`,
-      `rode "git pull --rebase origin ${branch}" e tente de novo.`,
-    );
-  }
-
-  // 5. Estado do site NO AR + decisão.
-  // Referência = o snapshot do HEAD (o que a main manda o site servir), NÃO o da árvore de
-  // trabalho: o export acabou de bumpar o generatedAt ali, então comparar com ele daria "site
+  // 6. Decisão. A referência é o snapshot do HEAD (`localStamp`, lido no passo 3), NÃO o da árvore
+  // de trabalho: o export acabou de bumpar o generatedAt ali, então comparar com ele daria "site
   // atrasado" em toda run — republicação infinita.
-  const localStamp = readSnapshotStamp(showHead(META_REL));
-  const live = await fetchLiveStamp();
-  if (live) log(`site no ar: ${live.articles ?? '?'} artigos (${live.generatedAt})`);
-  else warn(`não deu para ler ${SITE_URL}${SITE_META_PATH} — sigo sem comparar com o que está no ar.`);
-
   const codeChanged = includeCode && dirty.code.length > 0;
   const plan = planDeploy({ dataChanged, codeChanged, ahead, live, localStamp, force });
 
   if (!plan.publish) {
-    // Deixa a árvore como estava: o export bumpou o generatedAt de meta/corpus sem nada a publicar.
-    restoreVolatile();
+    // Deixa a árvore como estava: o export reescreveu o snapshot sem nada a publicar.
+    restoreSnapshot(run);
     log(`snapshot já em dia (${web.articles ?? localStamp?.articles ?? '?'} artigos) — nada a publicar.`);
     log('dica: `ncrawl deploy --force` republica de qualquer forma (força um build novo na Vercel).');
     return { status: 'up-to-date', reason: plan.reason, live, articles: web.articles, ahead };
@@ -387,11 +516,11 @@ export async function runDeploy(flags = {}) {
     log(`  push:   origin ${branch}${ahead ? ` (${ahead} commit(s) local(is) pendente(s))` : ''}`);
     log(`  espera: ${noWait ? 'não (--no-wait)' : `até ${fmtElapsed(waitMs)} pelo site no ar`}`);
     // Sem dado novo, um --dry-run não deixa rastro (o export só bumpou o generatedAt).
-    if (!dataChanged) restoreVolatile();
+    if (!dataChanged) restoreSnapshot(run);
     return { status: 'dry-run', ...alvo };
   }
 
-  // 6. Commit. `plan.refresh` (force/site atrasado) publica o snapshot recém-gerado: o generatedAt
+  // 7. Commit. `plan.refresh` (force/site atrasado) publica o snapshot recém-gerado: o generatedAt
   //    novo é justamente o que faz a Vercel ver dado novo e o polling ter um alvo verificável.
   if (alvo.commit) {
     const paths = [DATA_REL, API_REL, ...alvo.code];
@@ -403,20 +532,20 @@ export async function runDeploy(flags = {}) {
       `${assunto}\n\n${web.articles} artigos` +
       `${alvo.code.length ? ` + ${alvo.code.length} arquivo(s) de código` : ''}` +
       ` — publicado por \`ncrawl deploy\` (motivo: ${plan.reason}).`;
-    git(['add', '--', ...paths]);
-    git(['commit', '--no-verify', '-m', msg, '--', ...paths]);
-    log(`commit criado: ${git(['rev-parse', '--short', 'HEAD'])} — ${web.articles} artigos.`);
+    run(['add', '--', ...paths]);
+    run(['commit', '--no-verify', '-m', msg, '--', ...paths]);
+    log(`commit criado: ${run(['rev-parse', '--short', 'HEAD'])} — ${web.articles} artigos.`);
   } else {
-    // Só push: o export bumpou meta/corpus na árvore sem nada a publicar neles — limpa o ruído.
-    restoreVolatile();
+    // Só push: o export reescreveu o snapshot na árvore sem nada a publicar — limpa o ruído.
+    restoreSnapshot(run);
     log(`nada novo a commitar; publicando ${ahead} commit(s) local(is) pendente(s).`);
   }
 
-  // 7. Push. --no-verify: o hook pre-push refaria ESTE MESMO export e abortaria o push (por design
+  // 8. Push. --no-verify: o hook pre-push refaria ESTE MESMO export e abortaria o push (por design
   //    dele, p/ o commit novo não ficar de fora) — aqui o snapshot já está commitado.
   log(`enviando para origin/${branch}…`);
   try {
-    git(['push', '--no-verify', 'origin', `HEAD:refs/heads/${branch}`]);
+    run(['push', '--no-verify', 'origin', `HEAD:refs/heads/${branch}`]);
   } catch (e) {
     // Falha de AUTENTICAÇÃO é a causa nº1 do deploy no menu: dá hint acionável em vez do erro cru.
     const msg = String(e?.message || e);
@@ -428,12 +557,12 @@ export async function runDeploy(flags = {}) {
     }
     throw e;
   }
-  const sha = git(['rev-parse', 'HEAD']);
+  const sha = run(['rev-parse', 'HEAD']);
   log(`push concluído ✓ commit ${sha.slice(0, 7)} na ${branch}.`);
 
-  // 8. O alvo do polling é o generatedAt DO HEAD (o que a Vercel vai construir) — não o da árvore
-  //    de trabalho, que pode ter sido bumpado sem commit.
-  const headStamp = readSnapshotStamp(showHead(META_REL));
+  // 9. O alvo do polling é o generatedAt DO HEAD (o que a Vercel vai construir) — não o da árvore
+  //     de trabalho, que pode ter sido bumpado sem commit.
+  const headStamp = readSnapshotStamp(showHead(run, META_REL));
   if (noWait) {
     log(`--no-wait: a Vercel publica em ~1-2min. Confira: ${SITE_URL}`);
     return { status: 'pushed', sha, url: SITE_URL, articles: web.articles, expected: headStamp?.generatedAt || null, reason: plan.reason };
@@ -465,10 +594,50 @@ const MOTIVO = {
   'site-behind': 'o site no ar está atrasado em relação ao snapshot local',
 };
 
-// Desfaz o bump de `generatedAt` quando não há nada a publicar (mesma política do hook pre-push):
-// o comando não pode deixar ruído na árvore de trabalho.
-function restoreVolatile() {
-  if (git(['restore', '--', ...VOLATILE_REL], { allowFail: true }) === null) {
-    git(['checkout', '--', ...VOLATILE_REL], { allowFail: true });
+/**
+ * Devolve a árvore de trabalho ao estado do HEAD quando o deploy não vai publicar o que exportou
+ * (nada a fazer, --dry-run, remoto à frente, ou o guard anti-encolhimento bloqueando).
+ *
+ * Restaura os DIRETÓRIOS INTEIROS — a mesma política do hook (`git restore -- "$DATA_DIR"
+ * "$API_DIR"`) — e não só os dois arquivos voláteis. A versão antiga (`restoreVolatile`, só
+ * meta.json + corpus.json) tinha um buraco de verdade: o export reescreve TAMBÉM `articles.json` e
+ * os `contents.partN.json`, então todo abandono depois do export deixava esses arquivos já
+ * ESVAZIADOS na árvore — o dado saía pela porta dos fundos no `git add` seguinte, com o guard
+ * "funcionando".
+ *
+ * A remoção fecha o outro lado: `restore`/`checkout` não removem arquivo NOVO não-rastreado, e o
+ * export cria partes conforme o acervo cresce. Sem ela, um bloqueio deixaria partes órfãs na
+ * árvore (git status sujo, prontas p/ o próximo add) — ver `cleanExportOrphans`.
+ */
+export function restoreSnapshot(run = git) {
+  if (run(['restore', '--', ...SNAPSHOT_REL], { allowFail: true }) === null) {
+    run(['checkout', '--', ...SNAPSHOT_REL], { allowFail: true });
   }
+  return cleanExportOrphans(run);
+}
+
+/**
+ * Remove da árvore os ÓRFÃOS DO EXPORT: os arquivos que o export acabou de criar e que o `restore`
+ * não desfaz por serem não-rastreados (tipicamente uma `contents.partN.json` nova). Devolve a lista
+ * removida — e a DIZ em log, porque sumiço silencioso de arquivo não existe neste módulo.
+ *
+ * Escopo por NOME (`isExportArtifact`), nunca por diretório. Aqui morava um
+ * `git clean -fdq -- <dirs>`, que varria os dois diretórios INTEIROS: qualquer arquivo do usuário
+ * guardado ali (um `ANOTACOES.md`, um `backup-manual/` — e com `-d` o diretório inteiro) sumia
+ * junto, em silêncio (`-q`) e sem volta, num módulo cujo propósito é justamente não perder dado. O
+ * deploy é dono do que o export escreve; do resto que estiver na pasta, não.
+ */
+function cleanExportOrphans(run) {
+  // `ls-files --others` só lista NÃO-RASTREADOS; `--exclude-standard` respeita o .gitignore do
+  // usuário (o `clean` sem -x fazia o mesmo). Nada rastreado pode ser tocado por aqui.
+  const listed = run(['ls-files', '--others', '--exclude-standard', '--', ...SNAPSHOT_REL], { allowFail: true });
+  const orfaos = String(listed || '')
+    .split('\n')
+    .map((l) => l.trim())
+    .filter((l) => l && isExportArtifact(l));
+  if (!orfaos.length) return [];
+  // Caminhos EXATOS (nunca um diretório): `-f` sem `-d` não remove pasta nem por acidente.
+  run(['clean', '-f', '--', ...orfaos], { allowFail: true });
+  log(`árvore restaurada: ${orfaos.length} arquivo(s) novo(s) do export removido(s) — ${orfaos.join(', ')}.`);
+  return orfaos;
 }

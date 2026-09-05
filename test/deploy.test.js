@@ -15,6 +15,7 @@ process.env.NC_HOME = mkdtempSync(path.join(os.tmpdir(), 'nc-deploy-'));
 after(() => rmSync(process.env.NC_HOME, { recursive: true, force: true }));
 const {
   diffIsOnlyVolatile, readSnapshotStamp, splitDirtyPaths, planDeploy, fmtElapsed, isGithubHttpsRemote,
+  isExportArtifact,
 } = await import('../src/deploy.js');
 
 const META = (generatedAt, articles) =>
@@ -170,4 +171,29 @@ test('isGithubHttpsRemote: só remote HTTPS de github.com precisa do gh', () => 
   assert.equal(isGithubHttpsRemote('git@github.com:a/b.git'), false);       // SSH: não precisa do helper
   assert.equal(isGithubHttpsRemote(''), false);                             // fail-open
   assert.equal(isGithubHttpsRemote(null), false);
+});
+
+test('isExportArtifact: reconhece o que o EXPORT escreve — e mais nada', () => {
+  // É esta lista que autoriza o deploy a remover um arquivo da árvore. O que não está aqui é de
+  // outra pessoa: um `git clean` no diretório levava junto rascunho e backup do usuário.
+  for (const rel of [
+    'webapp/public/data/meta.json',
+    'webapp/public/data/articles.json',
+    'webapp/public/data/contents.json',      // o arquivo único de antes da partição
+    'webapp/public/data/contents.part0.json',
+    'webapp/public/data/contents.part12.json',
+    'webapp/public/api/v1/corpus.json',
+  ]) assert.equal(isExportArtifact(rel), true, rel);
+
+  for (const rel of [
+    'webapp/public/data/ANOTACOES.md',
+    'webapp/public/data/backup-manual/articles-2026-08-24.json',
+    'webapp/public/data/contents.part0.json.bak',
+    'webapp/public/data/meta.json.orig',
+    'webapp/public/data/sub/meta.json',
+    'webapp/public/api/v1/README.md',        // rastreado no repo: o deploy não é dono dele
+    'webapp/public/api/v1/schema.json',
+    'outra/pasta/meta.json',
+    '', null, undefined,
+  ]) assert.equal(isExportArtifact(rel), false, String(rel));
 });

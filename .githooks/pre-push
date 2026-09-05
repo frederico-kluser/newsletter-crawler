@@ -13,8 +13,11 @@
 #
 # Ramos:
 #   • deleção de ref → não faz nada;
-#   • export falhou (máquina sem node/dependências) → avisa e o push segue;
-#   • guard anti-encolhimento bloqueou → restaura a árvore e o push segue SEM commit;
+#   • o export NÃO RODOU (máquina sem node/dependências) → avisa, restaura a árvore, NÃO commita e
+#     segue para o guard (a checagem HEAD×ar abaixo não depende do export e continua valendo);
+#   • o guard anti-encolhimento bloqueou o EXPORT (base local vazia/incompleta: o guard vive DENTRO
+#     do exportWebSnapshot) → diz que foi o GUARD, não o ambiente, e o push segue SEM commit;
+#   • guard anti-encolhimento bloqueou o COMMIT do snapshot → restaura a árvore e o push segue SEM commit;
 #   • só a linha volátil `generatedAt` do meta.json mudou → restaura e o push segue;
 #   • dado novo de verdade → commita webapp/public/data + webapp/public/api/v1 e ABORTA o push
 #     (um commit criado durante o push não entra nele): repita o `git push`.
@@ -29,7 +32,8 @@
 #       HEAD, tudo que fosse >= a ele passaria para sempre. Agora o total NO AR entra na conta
 #       (best-effort, com timeout), e a base é o MAIOR total conhecido.
 # Opt-in explícito (hook não recebe flags): NC_ALLOW_SHRINK=1 libera encolher, NC_ALLOW_SHRINK=wipe
-# libera zerar. Na CLI é `--allow-shrink` / `--allow-shrink wipe`.
+# libera zerar. Na CLI é `--allow-shrink` / `--allow-shrink wipe` — e o hook REPASSA o opt-in ao
+# export, que tem o MESMO guard dentro (senão o export bloquearia antes e o opt-in não teria efeito).
 #
 # ÚNICA exceção ao fail-open do push: se o snapshot que JÁ ESTÁ COMMITADO no HEAD apagaria o acervo
 # no ar e não há nada melhor p/ commitar, o push do ramo de publicação é ABORTADO — deixá-lo seguir
@@ -60,12 +64,6 @@ done
 
 cd "$(git rev-parse --show-toplevel)" || exit 0
 
-echo "[pre-push] re-exportando o snapshot do webapp a partir do banco local…"
-if ! node --env-file-if-exists=.env src/index.js export --format web; then
-  echo "[pre-push] aviso: export falhou (sem banco/node aqui?) — push segue com o snapshot commitado." >&2
-  exit 0
-fi
-
 # Desfaz na árvore TUDO o que o export escreveu (os diretórios inteiros: o export reescreve também
 # articles.json e os contents.partN.json) e remove os ÓRFÃOS que ele criou — restore/checkout não
 # apagam arquivo não-rastreado, e sem isso uma parte nova ficaria pronta p/ o próximo `git add`.
@@ -86,6 +84,56 @@ restaura_snapshot() {
   done
   printf '%s\n' "$orfaos" | tr '\n' '\0' | xargs -0 -r git clean -f -- 2>/dev/null || true
 }
+
+# ---- o export (e a distinção entre "o guard bloqueou" e "o export não rodou aqui") ----
+# O opt-in do AMBIENTE vira flag da CLI: o guard mora DENTRO do exportWebSnapshot (src/export-web.js,
+# `assertSnapshotAllowed`), então sem repassar `--allow-shrink` o export bloquearia antes de escrever
+# e o `NC_ALLOW_SHRINK` documentado aqui nunca teria efeito sobre o COMMIT do snapshot. A forma é com
+# ESPAÇO (`--allow-shrink wipe`): o parseFlags de src/index.js NÃO quebra em `=`.
+export_flags=()
+case "${NC_ALLOW_SHRINK:-}" in
+  '') ;;
+  wipe) export_flags=(--allow-shrink wipe) ;;
+  *) export_flags=(--allow-shrink) ;;
+esac
+
+# A saída do export é ESPELHADA (tee) e guardada: é ela que distingue os dois motivos de falha.
+# Sem isso o hook culpava o ambiente ("sem banco/node aqui?") quando quem tinha barrado era o guard
+# anti-encolhimento — e o usuário ia procurar o problema no lugar errado. O marcador é o NOME da
+# exceção (`SnapshotShrinkError`, src/export-web.js), que o catch de topo do src/index.js imprime
+# com stack em stderr junto da mensagem e da hint do guard.
+echo "[pre-push] re-exportando o snapshot do webapp a partir do banco local…"
+export_log=$(mktemp "${TMPDIR:-/tmp}/nc-pre-push-export.XXXXXX" 2>/dev/null || echo "")
+if [ -n "$export_log" ]; then
+  node --env-file-if-exists=.env src/index.js export --format web ${export_flags[@]+"${export_flags[@]}"} 2>&1 | tee "$export_log"
+  export_rc=${PIPESTATUS[0]}
+else
+  node --env-file-if-exists=.env src/index.js export --format web ${export_flags[@]+"${export_flags[@]}"}
+  export_rc=$?
+fi
+
+export_ok=1
+if [ "$export_rc" != "0" ]; then
+  export_ok=0
+  if [ -n "$export_log" ] && grep -q 'SnapshotShrinkError' "$export_log"; then
+    echo "" >&2
+    echo "[pre-push] o GUARD ANTI-ENCOLHIMENTO bloqueou o export (mensagem e hint do guard logo acima): o snapshot recém-gerado encolheria/apagaria o acervo já publicado." >&2
+    echo "[pre-push] NÃO é falha de ambiente — o export rodou; o banco local é que está vazio/incompleto (banco em outra máquina, NC_HOME diferente, reset/purge recente)." >&2
+    echo "[pre-push] recupere o acervo com 'ncrawl restore' e repita o push; se a redução é MESMO deliberada: NC_ALLOW_SHRINK=1 git push (encolher) / NC_ALLOW_SHRINK=wipe git push (zerar)." >&2
+  else
+    echo "[pre-push] aviso: o export NÃO RODOU aqui (sem node/banco/dependências nesta máquina?) — push segue com o snapshot commitado." >&2
+  fi
+  # Fail-CLOSED quanto ao SNAPSHOT: nada é commitado, e o que o export tenha deixado pela metade na
+  # árvore volta ao estado do HEAD (o guard bloqueia antes do 1º byte, mas uma falha DEPOIS dele —
+  # ex.: a API pública — deixaria arquivo modificado pronto p/ um `git add` distraído).
+  restaura_snapshot
+  # NÃO sai aqui: o export falhar não pode desligar a ÚNICA exceção ao fail-open (abortar o push
+  # quando o snapshot JÁ COMMITADO apagaria o acervo no ar). Essa checagem não depende do export —
+  # ela compara o HEAD com o site — e é justamente depois de um `reset` (que commita a remoção do
+  # snapshot) que o export falha e o push publicaria a destruição. O guard abaixo roda sobre a
+  # árvore restaurada = o snapshot do HEAD, então nada novo é commitado (real_change fica 0).
+fi
+rm -f "$export_log"
 
 # ---- guard anti-encolhimento: a MESMA decisão do `ncrawl deploy` (src/snapshot-guard.js) ----
 # Saída (stdout, 5 campos): "<novo> <head> <no-ar> <acao-snapshot> <acao-push>", com "?" p/ total
@@ -211,9 +259,12 @@ fi
 # do dir inteiro decide: uma entrada que não seja só meta.json/corpus.json modificados = dado
 # novo; o que sobra em meta/corpus (o bump do generatedAt) é comparado ignorando essa linha.
 real_change=0
-statuses=$(git status --porcelain -- "$DATA_DIR" "$API_DIR")
+# Export que não rodou não gera dado novo p/ commitar — a árvore já voltou ao HEAD acima.
+statuses=$([ "$export_ok" = "1" ] && git status --porcelain -- "$DATA_DIR" "$API_DIR" || true)
 resto=$(printf '%s\n' "$statuses" | grep -vF "$META" | grep -vF "$CORPUS" || true)
-if [ -n "$resto" ]; then
+if [ "$export_ok" != "1" ]; then
+  real_change=0
+elif [ -n "$resto" ]; then
   real_change=1
 elif ! diff -q <(git show "HEAD:$META" 2>/dev/null | grep -v '"generatedAt"') \
   <(grep -v '"generatedAt"' "$META") >/dev/null 2>&1; then
@@ -226,7 +277,11 @@ fi
 if [ "$real_change" = "0" ]; then
   restaura_snapshot
   aborta_se_head_apaga_o_ar
-  echo "[pre-push] snapshot já em dia (${total_head:-?} artigos) — push segue."
+  if [ "$export_ok" = "1" ]; then
+    echo "[pre-push] snapshot já em dia (${total_head:-?} artigos) — push segue."
+  else
+    echo "[pre-push] nada a commitar (o export não rodou) — push segue com o snapshot do repositório (${total_head:-?} artigos)."
+  fi
   exit 0
 fi
 

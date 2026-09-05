@@ -1107,22 +1107,27 @@ export function removeSource(sourceId) {
 // ---- restore: repovoamento do SQLite a partir de um snapshot exportado ----
 // A BASE DE REGISTRO passou a ser o snapshot versionado em git (webapp/public/data): um `reset`
 // acidental não pode mais significar "recomeçar do zero". Além das linhas de `articles`, o
-// restore repõe a frontier (markUrlDone) — e, quando o chamador tiver as URLs de issue (ver
-// LIMITAÇÃO abaixo), as `pages` (restorePage) — para o acervo voltar a casar em `isUrlKnown`, a
-// parada determinística de paginação.
+// restore repõe a frontier (markUrlDone) e as `pages` das issues (restorePage) — para o acervo
+// voltar a casar em `isUrlKnown`, a parada determinística de paginação.
 //
 // O QUE ISSO **NÃO** É. O `isUrlKnown` já não era a única defesa contra re-caminhar o arquivo:
 // `crawlArchive` para com `added === 0` (crawl.js) assim que uma página não rende link novo, e
 // `enqueue` é INSERT OR IGNORE. O ganho do restore é ANTECIPAR essa parada (antes do upsertPage
 // e do dateSeen/floorHit) e sobreviver a uma frontier apagada — não é a diferença entre "para" e
 // "caminha 600 issues".
-// LIMITAÇÃO ATUAL, medida: o snapshot exportado hoje NÃO carrega `issue_url`
-// (`webExportArticles` e `src/export-api.js` exportam `snippet`, nunca `issue_url`; no
-// `webapp/public/data/articles.json` commitado o campo não aparece nenhuma vez). Logo, HOJE, o
-// chamador do restore não tem com que alimentar `restorePage` nem o 4º ramo do `isUrlKnown`
-// (articles.issue_url): as issues NÃO viram território conhecido e podem ser re-curadas.
-// `restorePage` funciona (é testada), mas hoje NÃO RECEBE ENTRADA — só passa a ter efeito
-// quando o export incluir `issue_url` (mudança aditiva, pendente noutra onda).
+//
+// `issue_url` NO SNAPSHOT: o CÓDIGO está completo desde 7ab2080 — `stmts.webExportArticles`
+// seleciona `a.issue_url, a.blurb`, `src/export-web.js` os grava em articles.json,
+// `src/export-api.js` os publica como `issueUrl`/`blurb` na API v1, e `src/restore.js` alimenta
+// com eles o `restorePage` (mapa issue_url -> source_id) e o 4º ramo do `isUrlKnown`.
+// O QUE FALTA É DADO, NÃO CÓDIGO: o `webapp/public/data/articles.json` COMMITADO hoje foi gerado
+// pelo exportador ANTIGO (`grep -c '"issue_url"'` = 0 em 13.758 artigos), e os `issue_url`
+// históricos morreram junto com o banco antigo. Efeito MEDIDO numa restauração real: pós-restore
+// o `isUrlKnown` reconhece 100% das 15.502 URLs de ARTIGO e 0 de 747 URLs de ISSUE — a 1ª coleta
+// re-percorre e re-cura por IA ~745 issues (a fase mais cara). MITIGAÇÃO da 1ª coleta pós-restore:
+// rode com `--since <data recente>` (o piso de data para a paginação do índice antes de descer no
+// arquivo antigo) e/ou `--max-pages 1`. O buraco se fecha sozinho: todo export novo já carrega
+// `issue_url`, então cada crawl+deploy devolve a proveniência das issues ao snapshot.
 //
 // Todas as funções são IDEMPOTENTES (INSERT OR IGNORE em toda escrita) e nenhuma sobrescreve
 // dado vivo: restore repõe o que falta, não substitui o que já existe — a única escrita sobre
@@ -1349,9 +1354,11 @@ export function markUrlDone(url, kind = 'article', sourceId = null) {
  * O QUE ELA **NÃO** GARANTE. (1) Nada aqui impede uma issue de ser re-curada: a curadoria é
  * decidida pelo job de roundup em crawl.js/curate.js, que não consulta `pages`; o efeito desta
  * função é só fazer a URL contar como conhecida na varredura de links da paginação.
- * (2) HOJE ela não é alimentada: o snapshot exportado não carrega `issue_url` (ver o cabeçalho
- * do bloco), então o chamador do restore não tem de onde tirar as URLs de issue. A função só
- * passa a ter efeito real quando o export incluir esse campo.
+ * (2) Ela só rende o que o snapshot trouxer: o export JÁ carrega `issue_url` (src/export-web.js) e
+ * o src/restore.js a chama uma vez por issue distinta, mas o `articles.json` COMMITADO hoje foi
+ * gerado pelo exportador antigo e não tem o campo — restaurar dele repõe 0 `pages` (ver o
+ * cabeçalho do bloco: 747 issues ficaram desconhecidas na restauração real). Cada crawl+deploy
+ * novo devolve a proveniência ao snapshot.
  *
  * `source_id` desconhecido é PULADO (mesmo contrato de restoreArticle: FK violada derrubaria o
  * restore no meio); null é legal. Retorna true SÓ quando criou a linha — false = já existia ou

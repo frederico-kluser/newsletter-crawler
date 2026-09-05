@@ -80,9 +80,18 @@ function realPath(p) {
  *   - `deploy`: publica o que está no banco. Restaurar por baixo de um deploy transformaria um
  *     comando de publicação num comando de escrita no acervo, sem o usuário pedir;
  *   - `inspect`/`reclean`/`reextract`: auditoria/reprocessamento de uma run que ACABOU de rodar;
- *     base vazia ali é diagnóstico, não acidente.
+ *     base vazia ali é diagnóstico, não acidente;
+ *   - `export`: ESTEVE aqui e SAIU (medido em validação, 2026-09-05). O `.githooks/pre-push` roda
+ *     `node src/index.js export --format web` a CADA push, então `export` na allowlist fazia de
+ *     TODO `git push` com a base vazia um gatilho de restauração completa (~21s, 15.502 artigos
+ *     reescritos no banco do usuário) SEM aviso prévio e sem ninguém ter pedido — aconteceu de
+ *     verdade, num clone, contra o banco real. A razão original ("senão o hook exporta um snapshot
+ *     vazio") MORREU: o guard anti-encolhimento passou a viver DENTRO do `exportWebSnapshot`
+ *     (src/export-web.js, `assertSnapshotAllowed`), que BLOQUEIA o export vazio antes do 1º byte —
+ *     a proteção não depende mais de o bootstrap encher a base por baixo do hook. Quem quer o
+ *     acervo de volta pede: `ncrawl restore` (ou qualquer comando de leitura da allowlist).
  */
-export const BOOTSTRAP_COMMANDS = new Set(['crawl', 'finish', 'search', 'web', 'export', 'ui', 'menu', 'status']);
+export const BOOTSTRAP_COMMANDS = new Set(['crawl', 'finish', 'search', 'web', 'ui', 'menu', 'status']);
 
 /** O comando pede bootstrap? (puro — é a regra que os testes fixam) */
 export function shouldBootstrap(cmd) {

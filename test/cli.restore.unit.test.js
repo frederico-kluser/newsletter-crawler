@@ -26,14 +26,19 @@ function tmpdir(prefix) {
   return d;
 }
 
-test('shouldBootstrap: só a allowlist, e nada de reset/purge/key/deploy', () => {
-  for (const c of ['crawl', 'finish', 'search', 'web', 'export', 'ui', 'menu', 'status']) {
+test('shouldBootstrap: só a allowlist, e nada de reset/purge/key/deploy/EXPORT', () => {
+  for (const c of ['crawl', 'finish', 'search', 'web', 'ui', 'menu', 'status']) {
     assert.equal(shouldBootstrap(c), true, c);
     assert.ok(BOOTSTRAP_COMMANDS.has(c));
   }
   for (const c of ['reset', 'clean', 'purge', 'remove', 'key', 'limits', 'add', 'deploy', 'inspect', 'restore', 'backup']) {
     assert.equal(shouldBootstrap(c), false, c);
   }
+  // `export` SAIU da allowlist: o .githooks/pre-push roda `export --format web` a cada push, e um
+  // bootstrap ali reescreveria o banco do usuário em TODO `git push` com a base vazia, calado. Quem
+  // impede o snapshot vazio agora é o guard DENTRO do exportWebSnapshot, não o bootstrap.
+  assert.equal(shouldBootstrap('export'), false, 'export NÃO pode disparar restauração (é o que o pre-push roda)');
+  assert.ok(!BOOTSTRAP_COMMANDS.has('export'));
   assert.equal(shouldBootstrap(undefined), false, 'sem comando (ajuda) não dispara');
   assert.equal(shouldBootstrap(''), false);
 });

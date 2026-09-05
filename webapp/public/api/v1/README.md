@@ -83,7 +83,10 @@ mudam de tipo. Qualquer mudança incompatível sai numa nova versão de caminho 
 > **Corpo completo:** não vai nesta API (peso). Fica no snapshot interno do site em
 > `/data/contents.partN.json` (mapa `id → texto`, fatiado em partes < 100 MB), se você precisar
 > do texto integral — o intervalo de ids de cada parte está em `meta.contentsParts`
-> (`[{file, from, to}]`, também em `/data/meta.json`).
+> (`[{file, from, to}]`, também em `/data/meta.json`). ⚠️ O arquivo único `/data/contents.json`
+> **não existe mais** (passou de 100 MB, o limite de blob do GitHub): comece sempre por
+> `meta.contentsParts` e leia as partes que ele listar — hoje `contents.part0.json` +
+> `contents.part1.json`, amanhã quantas forem necessárias.
 
 ## Exemplos
 

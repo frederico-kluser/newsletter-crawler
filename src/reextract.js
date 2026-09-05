@@ -27,6 +27,30 @@ const REEXTRACT_CONCURRENCY = 3;
 // (ou --limit grande). Sem isso, uma migração acidental reescreve o corpus inteiro.
 export const REEXTRACT_DEFAULT_LIMIT = 20;
 
+// Guard de ENCOLHIMENTO. O reextract é sobrescrita de conteúdo BOM já salvo, e a única rejeição
+// por tamanho era `< 50 chars` — um piso ABSOLUTO que não olha o que já existe. Um alvo que
+// mudou de layout, foi para trás de paywall, virou SPA ou passou a responder um stub devolve
+// 300 caracteres de moldura: passa folgado nos 50 e substitui PERMANENTEMENTE um artigo de
+// 40.000. Comparar com o corpo ATUAL é o único sinal que pega esse caso (o restore aprendeu a
+// mesma lição ao medir 916 artigos cujo corpo NOVO era pior que o antigo).
+export const REEXTRACT_MIN_KEEP_RATIO = 0.5;
+// Abaixo disto o corpo atual não é "corpo bom" e o guard não opina: fichas quase vazias (blurb
+// curto, extração antiga capenga) DEVEM poder ser substituídas por qualquer coisa melhor.
+export const REEXTRACT_SHRINK_FLOOR = 200;
+
+/**
+ * O novo corpo encolheu a ponto de não poder substituir o atual? Puro/exportado p/ teste.
+ * (Comprimento cru, não "substância": aqui o alvo é o stub grosseiro, não a disputa fina entre
+ * duas extrações boas — essa fica com o restore.)
+ */
+export function isShrinkRejected(currentLen, nextLen, ratio = REEXTRACT_MIN_KEEP_RATIO) {
+  const cur = Number(currentLen);
+  const next = Number(nextLen);
+  if (!Number.isFinite(cur) || cur < REEXTRACT_SHRINK_FLOOR) return false;
+  if (!Number.isFinite(next)) return false;
+  return next < cur * ratio;
+}
+
 // Réplica da guarda do crawl (crawl.js isErrorPage — função privada daquele módulo): o
 // reextract é o ÚNICO outro caminho que sobrescreve conteúdo salvo, então aplica a MESMA
 // detecção. Página de erro (404/500/parqueada) vem com 200 e corpo grande — o título
@@ -205,6 +229,17 @@ async function reextractOne(row, { fs }) {
   // Guarda JSON (captura 2026-08-14 — react-dropzone salvou o JSON cru do site como texto):
   // página que É JSON nunca é artigo; a ficha atual é mantida, JSON nunca é gravado.
   if (looksLikeJson(content)) return keepCurrent('json-page', { chars: content.length });
+
+  // Guard de ENCOLHIMENTO (ver isShrinkRejected): corpo bom NUNCA é trocado por um stub que só
+  // passou no piso absoluto de 50 chars. A ficha atual fica como está e o motivo vai p/ os events.
+  const currentLen = String(full.content || '').length;
+  if (isShrinkRejected(currentLen, content.length)) {
+    warn(
+      `reextract: alvo devolveu ${content.length} chars contra ${currentLen} já salvos ` +
+        `(< ${Math.round(REEXTRACT_MIN_KEEP_RATIO * 100)}%) — corpo bom PRESERVADO: ${row.url.slice(0, 60)}`,
+    );
+    return keepCurrent('shrink', { was: currentLen, now: content.length, ratio: REEXTRACT_MIN_KEEP_RATIO });
+  }
 
   // 4) Persiste via enrichArticle (não toca kind/blurb/section; needs_enrich já é 0).
   const hash = sha256(content);

@@ -1,7 +1,9 @@
-// `npm run reset -- --yes` (cmdReset): depois do wipeAll, APAGA do git (ou do disco, fora de
-// repo) o snapshot do site COMMITADO (webapp/public/data + webapp/public/api/v1) — senão o guard
-// fail-open do pre-push/deploy ("snapshot menor que o commitado → restaura") manteria o JSON
-// velho no ar e o sistema "sempre usaria" o arquivo. NC_HOME temporário ANTES do import
+// `npm run reset -- --yes --confirm <nº de artigos>` (cmdReset): depois do wipeAll, APAGA do git
+// (ou do disco, fora de repo) o snapshot do site COMMITADO (webapp/public/data +
+// webapp/public/api/v1) — senão o guard fail-open do pre-push/deploy ("snapshot menor que o
+// commitado → restaura") manteria o JSON velho no ar e o sistema "sempre usaria" o arquivo.
+// A confirmação FORTE (--confirm) e a rede de backup/marcador vivem em test/destrutivo.*.test.js;
+// aqui o foco continua sendo a remoção do snapshot. NC_HOME temporário ANTES do import
 // (commands.js -> db.js); repo git scratch p/ o caminho git, dir sem .git p/ o caminho fs.
 import { test, after } from 'node:test';
 import assert from 'node:assert/strict';
@@ -93,8 +95,9 @@ test('reset --yes num repo git: banco zerado + snapshot fora do índice e do dis
   const out = removeSiteSnapshot(repo);
   assert.equal(out.mode, 'git', 'caminho git detectado');
 
-  // Integração completa (mesmo caminho do CLI): wipeAll + remoção do snapshot.
-  cmdReset({ yes: true }, { root: repo });
+  // Integração completa (mesmo caminho do CLI): wipeAll + remoção do snapshot. A confirmação
+  // forte pede o NÚMERO DE ARTIGOS que serão perdidos (--yes sozinho não apaga mais nada).
+  cmdReset({ yes: true, confirm: String(stmts.countArticles.get().c) }, { root: repo });
 
   assert.equal(stmts.countArticles.get().c, 0, 'banco zerado');
   assert.ok(!existsSync(path.join(repo, 'webapp', 'public', 'data', 'meta.json')), 'meta.json removido do disco');
@@ -119,7 +122,7 @@ test('reset --yes fora de repo git: apaga os arquivos do disco (fail-open) e zer
   const out = removeSiteSnapshot(dir);
   assert.equal(out.mode, 'fs', 'caminho sem git detectado');
 
-  cmdReset({ yes: true }, { root: dir });
+  cmdReset({ yes: true, confirm: String(stmts.countArticles.get().c) }, { root: dir });
 
   assert.equal(stmts.countArticles.get().c, 0, 'banco zerado');
   assert.ok(!existsSync(path.join(dir, 'webapp', 'public', 'data', 'meta.json')), 'meta.json removido');
@@ -146,6 +149,6 @@ test('reset sem --yes recusa (errorLog de confirmação + exit 1)', () => {
   assert.equal(exitCode, 1, 'process.exit(1)');
   assert.ok(
     logs.some((l) => l.level === 'error' && l.text.includes('Confirme com:  npm run reset -- --yes')),
-    'errorLog pede a confirmação com --yes',
+    'errorLog pede a confirmação com --yes (+ --confirm quando há artigos a perder)',
   );
 });

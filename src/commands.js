@@ -4,8 +4,11 @@
 import { execSync } from 'node:child_process';
 import { mkdirSync, writeFileSync, rmSync, existsSync } from 'node:fs';
 import path from 'node:path';
-import { stmts, wipeAll, removeSource } from './db.js';
+import { stmts, wipeAll, removeSource, purgeSource } from './db.js';
+import { createBackup, pruneBackups, latestBackup } from './backup.js';
+import { writeWipeMarker, WIPE_MARKER_FILE, DATA_DIR_REL } from './restore.js';
 import {
+  BACKUP_BEFORE_DESTRUCTIVE, BACKUP_DIR,
   ROOT, EXPORT_DIR, DB_PATH, CONCURRENCY, MAX_RETRIES, HAS_LLM, CLASSIFY_AFTER_CRAWL, SUMMARIZE_AFTER_CRAWL,
   SEARCH_MODE_A_CONFIRM, OPENROUTER_API_KEY, DEEPSEEK_API_KEY, LLM_PROVIDER, providerInfo, ENV_PATH,
   BUDGET_USD, MAX_PARALLEL, RAM_MAX_PCT, GOVERNOR_LLM_CAP, RAM_FREE_TARGET_PCT, CPU_FREE_TARGET_PCT,
@@ -744,11 +747,87 @@ export async function redetectSourceType(sourceId) {
   return { source: updated, detection };
 }
 
+// ---------------- destruição REVERSÍVEL (backup obrigatório + fronteira do wipe) ----------------
+// O acervo do usuário já foi apagado DUAS vezes por um `reset` disparado sem querer na TUI (o de
+// 2026-09-01 levou 3249 artigos e US$ 11,99 em 37.278 chamadas, 1min45 depois de a coleta
+// terminar). Daqui em diante NENHUMA operação destrutiva roda sem uma cópia consistente do banco.
+
+// O snapshot do site publicável: os dois diretórios que o `reset` remove do git e que entram no
+// MESMO commit do marcador de wipe (ver commitWipeBoundary).
+const SITE_SNAPSHOT_REL = [DATA_DIR_REL, 'webapp/public/api/v1'];
+
+/** Há QUALQUER dado no banco? Fail-SAFE: em erro responde "sim" (na dúvida, exige o backup). */
+function dbHasAnyData() {
+  try {
+    return Boolean(stmts.hasAnyData.get().x);
+  } catch (e) {
+    warn(`backup: não consegui checar se o banco tem dados (${e.message}) — assumindo que TEM.`);
+    return true;
+  }
+}
+
+/**
+ * Backup OBRIGATÓRIO antes de uma operação destrutiva (reset/purge/remove/finish --force).
+ *
+ * `createBackup` é fail-open de propósito: devolve null e NÃO aborta nada sozinho. Só que null
+ * tem DOIS significados — "falhei" (ilegível, disco cheio, permissão, nome esgotado) e "não
+ * havia o que copiar" (banco sem dado nenhum). A distinção é feita AQUI, ANTES: com dado no
+ * banco, um null é FALHA e a destruição é ABORTADA (o oposto do que aconteceu em produção);
+ * com o banco vazio nem se chama o backup e a operação segue.
+ *
+ * A retenção (`pruneBackups`) roda DEPOIS do backup, nunca antes — podar primeiro poderia apagar
+ * a última cópia boa justo antes de descobrir que a nova falhou. `[]` é resultado legítimo dela
+ * (config perigosa: BACKUP_DIR no diretório do banco vivo), não erro.
+ *
+ * Retorna { ok, backup, reason }: reason 'created' | 'empty' | 'disabled' | 'failed'.
+ * ok:false SÓ em 'failed' — quem chama ABORTA.
+ */
+export function backupBeforeDestructive(reason, { required = BACKUP_BEFORE_DESTRUCTIVE, dir = BACKUP_DIR } = {}) {
+  if (!required) {
+    warn(
+      `BACKUP_BEFORE_DESTRUCTIVE=false — "${reason}" vai apagar SEM rede de proteção ` +
+        '(nenhuma cópia será criada). É o único jeito de perder dado de novo, e é explícito.',
+    );
+    return { ok: true, backup: null, reason: 'disabled' };
+  }
+  if (!dbHasAnyData()) {
+    log(`backup (${reason}): banco sem dado nenhum — não havia o que copiar; a operação segue.`);
+    return { ok: true, backup: null, reason: 'empty' };
+  }
+  const backup = createBackup({ reason, dir });
+  if (!backup) {
+    errorLog(
+      `backup (${reason}) FALHOU e o banco TEM dados — a operação foi ABORTADA e NADA foi apagado. ` +
+        `Verifique espaço/permissão em ${dir} (BACKUP_DIR) e tente de novo. Para destruir mesmo ` +
+        'assim, sem rede: BACKUP_BEFORE_DESTRUCTIVE=false.',
+    );
+    return { ok: false, backup: null, reason: 'failed' };
+  }
+  try {
+    pruneBackups({ dir }); // DEPOIS do backup, nunca antes
+  } catch (e) {
+    warn(`backup: retenção falhou (${e.message}) — a cópia nova está a salvo; só sobrou lixo antigo.`);
+  }
+  log(
+    `BACKUP FEITO ANTES DE APAGAR: ${backup.path} — ${backup.articles ?? '?'} artigo(s). ` +
+      `Para voltar: feche o ncrawl e copie por cima do banco (cp "${backup.path}" "${DB_PATH}").`,
+  );
+  return { ok: true, backup, reason: 'created' };
+}
+
 /**
  * Remoção COMPLETA por id (dados + descadastro do sources.json). Usado pela CLI (cmdRemove) e pela
- * TUI (tela Gerenciar fontes). Retorna { source, counts } ou { error }.
+ * TUI (tela Gerenciar fontes). Faz BACKUP antes (falhou = nada é apagado).
+ * Retorna { source, counts, backup } ou { error }.
  */
 export function removeSourceById(sourceId) {
+  const src = stmts.getSourceById.get(sourceId);
+  if (!src) return { error: `fonte ${sourceId} não encontrada` };
+  const label = slugify(src.name || hostOf(src.base_url) || String(sourceId));
+  const guard = backupBeforeDestructive(`remove-${label}`);
+  if (!guard.ok) {
+    return { error: `backup falhou — remoção de "${src.name || src.base_url}" ABORTADA (nada foi apagado).` };
+  }
   const out = removeSource(sourceId); // transação no db.js (dados + linha sources)
   if (!out) return { error: `fonte ${sourceId} não encontrada` };
   // Descadastra do sources.json (NC_HOME) p/ não voltar no próximo crawl (o seed re-semeia do JSON).
@@ -757,7 +836,7 @@ export function removeSourceById(sourceId) {
   } catch (e) {
     warn(`sources.json: falha ao remover a fonte (${e.message})`);
   }
-  return out;
+  return { ...out, backup: guard.backup };
 }
 
 // Remove uma fonte DE VEZ: descadastra (sources.json + linha `sources`) e apaga TODO o conteúdo
@@ -779,11 +858,16 @@ export function cmdRemove(rest, flags) {
     errorLog(`Confirme com:  ncrawl remove ${JSON.stringify(rest[0])} --yes`);
     process.exit(1);
   }
-  const { counts } = removeSourceById(source.id);
+  const { counts, error: removeError, backup } = removeSourceById(source.id);
+  if (removeError) {
+    errorLog(`remove: ${removeError}`);
+    process.exit(1);
+  }
   log(
     `fonte "${source.name || source.base_url}" removida: ` +
       Object.entries(counts).map(([k, n]) => `${k}=${n}`).join(' ') +
-      ' — descadastrada do sources.json.',
+      ' — descadastrada do sources.json.' +
+      (backup ? ` Backup de antes: ${backup.path} (${backup.articles ?? '?'} artigos).` : ''),
   );
   printStatus();
 }
@@ -805,7 +889,7 @@ function isGitRepo(root) {
 // deploy cuidam do restante. Fail-open: o reset do banco já aconteceu — a remoção de arquivo
 // publicável nunca derruba o comando. Exportado p/ teste (padrão do repo).
 export function removeSiteSnapshot(root) {
-  const rel = ['webapp/public/data', 'webapp/public/api/v1'];
+  const rel = SITE_SNAPSHOT_REL;
   if (isGitRepo(root)) {
     try {
       execSync(`git rm -r --ignore-unmatch -- ${rel.join(' ')}`, {
@@ -826,24 +910,207 @@ export function removeSiteSnapshot(root) {
   return { mode: 'fs' };
 }
 
-// Limpa TODOS os dados (slate limpo). Destrutivo: exige --yes.
-export function cmdReset(flags, { root = ROOT } = {}) {
-  if (flags.yes !== true) {
-    errorLog(
-      `reset APAGA TODOS OS DADOS de ${DB_PATH} (articles, frontier, pages, selectors, ` +
-        'classifications, article_tags, classification_uncovered, sources, runs, llm_usage).',
+// Caminho conhecido pelo git (rastreado OU com mudança pendente)? `git commit -- <pathspec>` com
+// um caminho que o git nunca viu ABORTA o commit inteiro ("did not match any file(s) known to
+// git") — a fronteira do wipe deixaria de ser publicada por causa de um diretório ausente.
+function gitKnowsPath(root, rel) {
+  const run = (args) => {
+    try {
+      return execSync(`git ${args} -- ${rel}`, {
+        cwd: root,
+        stdio: 'pipe',
+        encoding: 'utf8',
+        env: { ...process.env, GIT_TERMINAL_PROMPT: '0' },
+      }).trim();
+    } catch {
+      return '';
+    }
+  };
+  return Boolean(run('ls-files') || run('status --porcelain'));
+}
+
+/**
+ * Commita a FRONTEIRA do wipe: o marcador `.nc-wipe.json` e a remoção do snapshot no MESMO
+ * commit.
+ *
+ * Por que o mesmo commit: `git rm` NÃO apaga o histórico, e o restore (src/restore.js) lê o
+ * histórico. Sem uma fronteira PUBLICADA, o próximo clone/restore RESSUSCITA exatamente o que o
+ * reset acabou de apagar — o `reset` fica quebrado. O marcador é a fronteira; se ele ficar fora
+ * do commit da remoção, a fronteira não viaja com o repo.
+ *
+ * Pathspec explícito no `git commit`: o que o usuário tiver em staging NÃO entra de carona.
+ * `--no-verify`: um hook de pre-commit que re-exportasse o snapshot desfaria a remoção dentro do
+ * próprio commit. `git add -f` no marcador: um `.gitignore` local não pode calar a fronteira.
+ * Fail-open (o banco já foi apagado; nada aqui pode derrubar o comando) — e mesmo sem commit o
+ * marcador continua no working tree, onde `readWipeMarker` também lê.
+ * Retorna { mode: 'git'|'fs', committed, commit?, paths, error? }. Exportado p/ teste.
+ */
+export function commitWipeBoundary(root, {
+  marker = true,
+  message = 'chore(reset): fronteira do wipe (.nc-wipe.json + snapshot removido)',
+} = {}) {
+  if (!isGitRepo(root)) return { mode: 'fs', committed: false, paths: [] };
+  const git = (args) =>
+    execSync(`git ${args}`, {
+      cwd: root,
+      stdio: 'pipe',
+      encoding: 'utf8',
+      env: { ...process.env, GIT_TERMINAL_PROMPT: '0' },
+    });
+  if (!marker) {
+    // Sem marcador não há fronteira: commitar só a remoção do snapshot publicaria justamente o
+    // estado que o restore desfaz. É melhor deixar a remoção STAGED e dizer o porquê.
+    warn(
+      'marcador de wipe AUSENTE (não pôde ser gravado) — a remoção do snapshot ficou STAGED, sem ' +
+        `commit: publicar a remoção sem a fronteira faz o restore ressuscitar o acervo apagado.`,
     );
-    errorLog('Confirme com:  npm run reset -- --yes');
+    return { mode: 'git', committed: false, paths: [], error: 'sem marcador' };
+  }
+  try {
+    git(`add -f -- ${WIPE_MARKER_FILE}`);
+  } catch (e) {
+    warn(`marcador de wipe: git add falhou (${String(e.stderr || e.message).trim()}).`);
+  }
+  const paths = [WIPE_MARKER_FILE, ...SITE_SNAPSHOT_REL].filter((p) => gitKnowsPath(root, p));
+  if (!paths.length) return { mode: 'git', committed: false, paths, error: 'nada conhecido pelo git' };
+  try {
+    git(`commit --no-verify -m ${JSON.stringify(message)} -- ${paths.join(' ')}`);
+  } catch (e) {
+    const detail = String(e.stdout || e.stderr || e.message || '').trim();
+    if (/nothing to commit|no changes added/i.test(detail)) {
+      return { mode: 'git', committed: false, paths, error: 'nada a commitar' };
+    }
+    warn(
+      `fronteira do wipe NÃO commitada (${detail.slice(0, 200)}) — o marcador está em ` +
+        `${path.join(root, WIPE_MARKER_FILE)} e vale LOCALMENTE; commite-o junto da remoção do ` +
+        'snapshot, senão um clone novo ressuscita o acervo apagado.',
+    );
+    return { mode: 'git', committed: false, paths, error: detail };
+  }
+  let commit = null;
+  try {
+    commit = git('rev-parse HEAD').trim();
+  } catch {
+    /* informativo */
+  }
+  return { mode: 'git', committed: true, commit, paths };
+}
+
+/**
+ * O que o reset vai destruir, como DADO (a TUI mostra a MESMA conta do CLI, sem re-implementar).
+ * Inclui o gasto de LLM acumulado (tabela llm_usage) porque é a parte que NÃO volta com um
+ * re-crawl: recoletar custa dinheiro de novo.
+ */
+export function getResetImpact() {
+  const s = getStatus();
+  let last = null;
+  try {
+    last = latestBackup();
+  } catch {
+    last = null; // listagem de backups é telemetria: nunca derruba o aviso
+  }
+  return {
+    dbPath: DB_PATH,
+    articles: s.articles,
+    sources: s.sources,
+    pages: s.pages,
+    classified: s.classified,
+    summaries: s.summaries,
+    spendUsd: s.spend.totalUsd,
+    calls: s.spend.calls,
+    backupDir: BACKUP_DIR,
+    lastBackup: last ? { path: last.path, articles: last.articles, at: last.mtime.toISOString() } : null,
+  };
+}
+
+/** As linhas do aviso do reset (CLI e TUI mostram as MESMAS). Puro. */
+export function resetImpactLines(impact = getResetImpact()) {
+  const lines = [
+    `reset APAGA TODOS OS DADOS de ${impact.dbPath}:`,
+    `  ${impact.articles} artigo(s) · ${impact.sources} fonte(s) · ${impact.pages} página(s) · ` +
+      `${impact.classified} classificação(ões) · ${impact.summaries} resumo(s)`,
+    `  US$ ${impact.spendUsd.toFixed(2)} de LLM em ${impact.calls} chamada(s) — recoletar custa esse dinheiro DE NOVO.`,
+    `  backup automático (antes de apagar) em ${impact.backupDir}`,
+  ];
+  if (impact.lastBackup) {
+    lines.push(`  última cópia existente: ${impact.lastBackup.path} (${impact.lastBackup.articles ?? '?'} artigos, ${impact.lastBackup.at})`);
+  }
+  return lines;
+}
+
+/**
+ * Confirmação FORTE do reset. `--yes` sozinho é reflexo — e foi exatamente um reflexo (descer
+ * demais no menu e dar dois Enter) que apagou o acervo duas vezes. Para apagar N artigos é
+ * preciso DIGITAR N: um número que só aparece na tela de aviso, que ninguém decora e que muda a
+ * cada coleta. Separador de milhar/espaço é aceito (3.249 == 3 249 == 3249).
+ * Base VAZIA (0 artigos) dispensa o desafio: não há o que perder.
+ * Puro e exportado — a tela da TUI consome este MESMO cheque.
+ * Retorna { ok, expected, given, reason: 'empty'|'missing'|'mismatch'|'match' }.
+ */
+export function checkResetConfirmation(answer, impact = getResetImpact()) {
+  const expected = String(impact.articles);
+  const given = answer === true || answer == null ? '' : String(answer).trim();
+  if (impact.articles === 0) return { ok: true, expected, given, reason: 'empty' };
+  if (!given) return { ok: false, expected, given, reason: 'missing' };
+  const normalized = given.replace(/[.\s_,]/g, '');
+  if (normalized !== expected) return { ok: false, expected, given, reason: 'mismatch' };
+  return { ok: true, expected, given, reason: 'match' };
+}
+
+// Limpa TODOS os dados (slate limpo). Destrutivo: exige --yes E `--confirm <nº de artigos>`,
+// tira BACKUP antes (falhou = aborta) e publica a FRONTEIRA do wipe (marcador + remoção do
+// snapshot no mesmo commit) — sem ela o restore ressuscitaria o acervo recém-apagado.
+export function cmdReset(flags = {}, { root = ROOT } = {}) {
+  const impact = getResetImpact();
+  const check = checkResetConfirmation(flags.confirm, impact);
+  if (flags.yes !== true || !check.ok) {
+    for (const line of resetImpactLines(impact)) errorLog(line);
+    if (check.reason === 'mismatch') {
+      errorLog(`confirmação NÃO confere: você digitou "${check.given}" e o esperado é ${check.expected} (o número de artigos que serão perdidos).`);
+    }
+    errorLog(
+      `Confirme com:  npm run reset -- --yes${impact.articles > 0 ? ` --confirm ${check.expected}` : ''}`,
+    );
     process.exit(1);
   }
+
+  // 1) BACKUP antes de qualquer destruição — wipeAll() roda VACUUM e não deixa nem resíduo forense.
+  const guard = backupBeforeDestructive('reset');
+  if (!guard.ok) {
+    errorLog('reset ABORTADO: sem backup não se apaga o acervo. NADA foi apagado.');
+    process.exit(1);
+  }
+
+  // 2) MARCADOR de wipe ANTES do wipe: a contagem é a de ANTES, e o `snapshotAt` que vira a
+  // fronteira é lido do snapshot ainda commitado no HEAD (depois do `git rm` ele some).
+  const marker = writeWipeMarker({ root, reason: 'reset', articles: impact.articles });
+
+  // 3) destruição
   wipeAll();
-  removeSiteSnapshot(root);
+  const snapshot = removeSiteSnapshot(root);
+
+  // 4) fronteira PUBLICADA: marcador + remoção do snapshot no MESMO commit
+  const boundary = commitWipeBoundary(root, { marker });
+
   log(`reset: todos os dados apagados (${DB_PATH}).`);
+  if (guard.backup) {
+    log(
+      `o acervo de antes está em ${guard.backup.path} (${guard.backup.articles ?? '?'} artigos) — ` +
+        `para voltar: cp "${guard.backup.path}" "${DB_PATH}".`,
+    );
+  }
   log(
     'snapshot do site removido do git (webapp/public/data + api/v1) — o próximo export/deploy ' +
       'publicará o acervo vazio; colete de novo com npm run crawl.',
   );
+  if (marker) {
+    log(
+      `marcador de wipe gravado (${marker.file}): o restore NÃO vai ressuscitar o acervo apagado` +
+        (boundary.committed ? ` — commitado junto da remoção do snapshot (${String(boundary.commit).slice(0, 8)}).` : '.'),
+    );
+  }
   printStatus();
+  return { impact, backup: guard.backup, marker, snapshot, boundary };
 }
 
 // Agrupa as tags do artigo por faceta (preservando a ordem de rank), para o export.
@@ -934,12 +1201,36 @@ export function cmdExport(flags) {
 // pular um sweep. O orçamento (shouldStop) para e devolve os pendentes, então dá p/ limitar o gasto
 // por execução e retomar depois. Espelha o bloco pós-crawl (crawlRun) num comando avulso.
 export async function cmdFinish(flags) {
+  const force = flags.force === true;
+  // `--force` é DESTRUIÇÃO disfarçada de re-processamento: ele re-roda o acervo INTEIRO (o
+  // default de --limit é Infinity) e, no caminho do classify, APAGA as tags já gravadas
+  // (deleteTagsForArticle) além de sobrescrever resumos e vereditos. Se algum sweep parar no
+  // meio (orçamento, 429, Ctrl+C), o que foi apagado NÃO volta sozinho. Por isso: --yes + backup,
+  // como em qualquer destruição. É verificado ANTES do cheque de chave — recusar um flag
+  // destrutivo não depende de ter LLM configurado.
+  if (force && flags.yes !== true) {
+    errorLog(
+      'finish --force RE-PROCESSA o acervo INTEIRO por LLM e APAGA as tags/classificações, os ' +
+        'resumos e os vereditos já gravados (interromper no meio deixa o buraco). Isso custa dinheiro.',
+    );
+    errorLog(
+      `Confirme com:  ncrawl finish --force --yes${flags.limit ? ` --limit ${flags.limit}` : ''}` +
+        '   (sem --force o finish só completa os PENDENTES, sem apagar nada)',
+    );
+    process.exit(1);
+  }
   if (!HAS_LLM) {
     errorLog(`${providerInfo().keyVar} ausente — finalizar os pendentes requer o caminho LLM.`);
     process.exit(1);
   }
   const limit = flags.limit ? Number(flags.limit) : Infinity;
-  const force = flags.force === true;
+  if (force) {
+    const guard = backupBeforeDestructive('finish-force');
+    if (!guard.ok) {
+      errorLog('finish --force ABORTADO: sem backup não se apaga classificação/resumo/veredito. NADA foi tocado.');
+      process.exit(1);
+    }
+  }
   await runWithLimits({ command: 'finish', flags, profile: 'llm-only' }, () => {
     const tasks = [];
     if (flags['no-verify'] !== true) {
@@ -967,6 +1258,16 @@ export async function cmdReextract(flags) {
   const all = flags.all === true;
   const limit = all ? Infinity : (flags.limit ? Number(flags.limit) : REEXTRACT_DEFAULT_LIMIT);
   const urlFilter = typeof flags.url === 'string' && flags.url.trim() ? flags.url.trim() : null;
+  // `--all` reescreve o CORPO de todo o acervo: é sobrescrita em massa, não "reprocessamento"
+  // inócuo. Backup antes (o guard de encolhimento do reextract.js protege ficha a ficha; a cópia
+  // protege o conjunto). O default limitado (REEXTRACT_DEFAULT_LIMIT) segue sem cerimônia.
+  if (all) {
+    const guard = backupBeforeDestructive('reextract-all');
+    if (!guard.ok) {
+      errorLog('reextract --all ABORTADO: sem backup não se reescreve o corpo do acervo inteiro. NADA foi tocado.');
+      process.exit(1);
+    }
+  }
   await runWithLimits({ command: 'reextract', flags, profile: 'llm-only' }, () =>
     reextractTargets({ urlFilter, limit }));
   printStatus();
@@ -1015,20 +1316,19 @@ export function cmdPurge(rest, flags) {
     errorLog(`Confirme com:  ncrawl purge ${JSON.stringify(rest[0])} --yes${flags.selectors ? ' --selectors' : ''}`);
     process.exit(1);
   }
-  const counts = {
-    articles: stmts.deleteArticlesBySource.run(source.id).changes,
-    pages: stmts.deletePagesBySource.run(source.id).changes,
-    frontier: stmts.deleteFrontierBySource.run(source.id).changes,
-    events: stmts.deleteEventsBySource.run(source.id).changes,
-  };
-  if (flags.selectors === true) {
-    const host = hostOf(source.base_url);
-    counts.selectors = host ? stmts.deleteSelectorsLike.run(`${host}:%`).changes : 0;
+  const guard = backupBeforeDestructive(`purge-${slugify(source.name || hostOf(source.base_url) || String(source.id))}`);
+  if (!guard.ok) {
+    errorLog('purge ABORTADO: sem backup não se apagam os dados da fonte. NADA foi apagado.');
+    process.exit(1);
   }
+  // Transacional (db.js): antes eram 4 `.run()` soltos e uma falha no meio deixava a fonte
+  // pela metade (artigos apagados, frontier intacta) — "apague e refaça" deixava de ser reprodutível.
+  const counts = purgeSource(source.id, { selectors: flags.selectors === true });
   log(
     `purge de "${source.name || source.base_url}": ` +
       Object.entries(counts).map(([k, n]) => `${k}=${n}`).join(' ') +
-      ' apagados (a fonte segue cadastrada — o próximo crawl refaz tudo).',
+      ' apagados (a fonte segue cadastrada — o próximo crawl refaz tudo).' +
+      (guard.backup ? ` Backup de antes: ${guard.backup.path} (${guard.backup.articles ?? '?'} artigos).` : ''),
   );
   printStatus();
 }

@@ -1,11 +1,16 @@
 // SourcesView (Gerenciar fontes na TUI): lista navegável com trocar tipo (Enter), re-detectar por
-// IA (`d`, assíncrono), remover (`r` arma + `r`/Enter confirma) e Esc/b volta. Componente puro:
+// IA (`d`, assíncrono), remover (`r` abre a confirmação DIGITADA) e Esc/b volta. Componente puro:
 // entradas e efeitos por props (spies, sem DB). npm test.
+//
+// A remoção apaga TODO o acervo da fonte: `r` `r` (dois toques, zero digitação) era fricção de
+// menos para isso. Agora `r` pede o NÚMERO de artigos da fonte — o mesmo desafio do reset; só a
+// fonte SEM artigo nenhum segue no Enter seco (não há o que perder nela).
 process.env.CRAWLER_LANG = ''; // asserts em PT
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { render } from 'ink-testing-library';
+import { typeText, waitForFrame } from './helpers/ink.js';
 
 const { html } = await import('../src/ui/html.js');
 const { SourcesView } = await import('../src/ui/SourcesView.js');
@@ -24,6 +29,7 @@ function mount(over = {}) {
   const calls = { toggle: [], redetect: [], remove: [], done: [] };
   const r = render(
     html`<${SourcesView}
+      confirmCheck=${over.confirmCheck}
       sources=${over.sources ?? SOURCES.map((s) => ({ ...s }))}
       onToggleType=${(s, type) => {
         calls.toggle.push([s.id, type]);
@@ -79,19 +85,74 @@ test('d re-detecta (assíncrono), chama onRedetect e mostra a nota do resultado'
   unmount();
 });
 
-test('r arma a confirmação e o 2º r remove a fonte (some da lista)', async () => {
+test('r NÃO basta mais: pede o nº de artigos, recusa o errado e some com o certo', async () => {
   const { stdin, lastFrame, calls, unmount } = mount();
   await wait(20);
   stdin.write('r');
+  const armed = await waitForFrame(lastFrame, (f) => f.includes('digite o número'));
+  assert.ok(armed.includes('Remover'));
+  assert.ok(armed.includes('Node Weekly'));
+  assert.ok(/\(120\)/.test(armed), `o desafio mostra os 120 artigos em jogo\n${armed}`);
+
+  stdin.write('r'); // o gesto ANTIGO (2º r) agora é só um caractere no campo
+  await wait(40);
+  assert.equal(calls.remove.length, 0, 'r r não pode mais remover');
+  stdin.write('\r'); // e o Enter com "r" digitado é RECUSADO
+  const bad = await waitForFrame(lastFrame, (f) => f.includes('NÃO confere'));
+  assert.equal(calls.remove.length, 0, 'valor errado não remove');
+  assert.ok(bad.includes('NÃO confere'));
+
+  // A tentativa recusada LIMPA o campo (o TextInput é uncontrolled: sem remontar, digitar "120"
+  // em cima do "r" viraria "r120" e o usuário nunca acertaria).
+  await typeText(stdin, '120');
+  stdin.write('\r');
+  await waitForFrame(lastFrame, (f) => f.includes('removida'));
+  assert.deepEqual(calls.remove, [1], 'a 2ª tentativa, certa, remove');
+  unmount();
+
+  // ---- número certo ----
+  const ok = mount();
   await wait(20);
-  assert.ok(lastFrame().includes('Remover'));
-  assert.ok(lastFrame().includes('Node Weekly'));
-  assert.equal(calls.remove.length, 0); // 1º toque só arma
+  ok.stdin.write('r');
+  await waitForFrame(ok.lastFrame, (f) => f.includes('digite o número'));
+  await typeText(ok.stdin, '120');
+  ok.stdin.write('\r');
+  await waitForFrame(ok.lastFrame, (f) => f.includes('removida'));
+  assert.deepEqual(ok.calls.remove, [1]);
+  assert.ok(ok.lastFrame().includes('1 fonte(s)')); // era 2, agora 1
+  ok.unmount();
+});
+
+test('fonte SEM artigos segue no Enter seco (nada a perder)', async () => {
+  const { stdin, lastFrame, calls, unmount } = mount({
+    sources: [{ id: 9, name: 'Vazia', base_url: 'https://vazia.test/', type: 'listing', articles: 0 }],
+  });
+  await wait(20);
   stdin.write('r');
+  await waitForFrame(lastFrame, (f) => f.includes('Enter confirma'));
+  assert.ok(lastFrame().includes('não tem artigo nenhum'));
+  stdin.write(ENTER);
+  await wait(40);
+  assert.deepEqual(calls.remove, [9]);
+  unmount();
+});
+
+test('o desafio usa o confirmCheck injetado (o MESMO do reset)', async () => {
+  const seen = [];
+  const { stdin, lastFrame, calls, unmount } = mount({
+    confirmCheck: (answer, n) => {
+      seen.push([answer, n]);
+      return { ok: String(answer).replace(/[.\s]/g, '') === String(n), given: answer, expected: String(n) };
+    },
+  });
   await wait(20);
+  stdin.write('r');
+  await waitForFrame(lastFrame, (f) => f.includes('digite o número'));
+  await typeText(stdin, '1.20'); // separador de milhar é aceito pelo cheque do reset
+  stdin.write('\r');
+  await waitForFrame(lastFrame, (f) => f.includes('removida'));
+  assert.deepEqual(seen, [['1.20', 120]]);
   assert.deepEqual(calls.remove, [1]);
-  assert.ok(lastFrame().includes('1 fonte(s)')); // era 2, agora 1
-  assert.ok(lastFrame().includes('removida'));
   unmount();
 });
 

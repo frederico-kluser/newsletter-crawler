@@ -6,17 +6,18 @@ import { Box, Text, useInput } from 'ink';
 import { Select, MultiSelect, TextInput, Alert, StatusMessage, Spinner } from '@inkjs/ui';
 import { html } from './html.js';
 import { t } from './i18n.js';
-import { colors } from './theme.js';
+import { colors, glyphs } from './theme.js';
 import { Panel, FooterHints } from './widgets.js';
 import { buildCommandPreview } from './commandPreview.js';
+import { safeStatus } from './status.js';
 import {
   loadSources, HAS_LLM, BUDGET_USD, MAX_PARALLEL, RAM_MAX_PCT, ENV_PATH, stageModel,
-  LLM_PROVIDER, providerInfo, setRuntimeKey,
+  LLM_PROVIDER, providerInfo, setRuntimeKey, MIN_CRAWL_DATE,
 } from '../config.js';
 import { upsertEnvVar, probeProviderKey, providerInfoFor } from '../keys.js';
 import { estimateStageCallUsd } from '../budget.js';
 import { parseDate } from '../util.js';
-import { getStatus, getSearchScope } from '../commands.js';
+import { getSearchScope, getResetImpact, resetImpactLines, checkResetConfirmation } from '../commands.js';
 import { startWebServer, openBrowser } from '../web.js';
 
 const yesNo = () => [
@@ -32,7 +33,7 @@ const parseIntFlag = (val) => {
 
 // Tela de revisão reusável: o comando equivalente ganha um CARD com borda (o momento "contrato" —
 // artefato copiável; uma das DUAS únicas superfícies com borda do app) e o Select confirma abaixo.
-function Review({ sub, flags, rest = [], onRun, onBack }) {
+export function Review({ sub, flags, rest = [], onRun, onBack }) {
   return html`<${Box} flexDirection="column">
     <${Panel} title=${t('review')} marginY=${1}>
       <${Text} color=${colors.accent}>${buildCommandPreview(sub, flags, rest)}</${Text}>
@@ -56,10 +57,14 @@ function Field({ label, error, hint, children }) {
   </${Box}>`;
 }
 
+// O menu principal NÃO tem mais o "Limpar tudo". Ele ficava na PENÚLTIMA linha, colado no "Sair":
+// descer até o fim e dar dois Enter apagava o acervo — foi o que aconteceu em produção duas vezes
+// (25/08 e 01/09, 7s depois de a TUI abrir). Agora o destrutivo mora um nível abaixo, dentro de
+// "Backup e recuperação" (junto do que DESFAZ um erro), a 4 linhas do "Sair".
 export function Menu({ onSelect }) {
   // Anota Coletar (fila = ainda NÃO baixado) e Finalizar (sem tags/resumo = já salvo) com o quanto
   // falta — as duas contagens que respondem "termine de onde parou". O suffix some quando é zero.
-  const s = getStatus();
+  const s = safeStatus();
   const crawlSuffix = s.frontier.pending > 0 ? ` — ${s.frontier.pending} ${t('queued')}` : '';
   const finishSuffix =
     s.pendingClassif > 0 || s.pendingSummary > 0
@@ -75,10 +80,10 @@ export function Menu({ onSelect }) {
     { label: t('menuFinish') + finishSuffix, value: 'finish' },
     { label: t('menuAdd'), value: 'add' },
     { label: t('menuSources'), value: 'sources' },
+    { label: t('menuMaintenance'), value: 'maintenance' },
     { label: t('menuLimits'), value: 'limits' },
     { label: t('menuKey'), value: 'key' },
     { label: t('menuDeploy'), value: 'deploy' },
-    { label: t('menuReset'), value: 'reset' },
     { label: t('menuQuit'), value: 'quit' },
   ];
   return html`<${Box} flexDirection="column">
@@ -91,12 +96,32 @@ export function Menu({ onSelect }) {
   </${Box}>`;
 }
 
+// Submenu de manutenção: backup, recuperação e — só aqui — o reset. As duas primeiras linhas
+// DESFAZEM perda de dado; a terceira causa, e é a única do app que carrega o glifo de perigo (⚠)
+// e o número de artigos em jogo no próprio label (cor é canal redundante: com NO_COLOR o glifo
+// continua lá). "← Voltar" fecha a lista, então descer demais aqui nunca cai no destrutivo.
+export function MaintenanceMenu({ onSelect, onBack }) {
+  const s = safeStatus();
+  const options = [
+    { label: t('maintBackup'), value: 'backup' },
+    { label: t('maintRestore'), value: 'restore' },
+    { label: `${glyphs.warn} ${t('menuReset')} — ${t('resetDanger', { n: s.articles })}`, value: 'reset' },
+    { label: t('back'), value: 'back' },
+  ];
+  return html`<${Box} flexDirection="column">
+    <${StatusMessage} variant="info">${t('maintenanceDesc')}</${StatusMessage}>
+    <${Box} marginTop=${1} flexDirection="column">
+      <${Select} options=${options} onChange=${(v) => (v === 'back' ? onBack() : onSelect(v))} />
+    </${Box}>
+  </${Box}>`;
+}
+
 export function StatusScreen({ status: initial, onBack }) {
   // Auto-refresh: a tela re-lê as contagens sozinha enquanto aberta (era um snapshot morto —
   // um crawl rodando em outro processo não aparecia). getStatus é só COUNTs, barato a 1s.
   const [status, setStatus] = useState(initial);
   useEffect(() => {
-    const id = setInterval(() => setStatus(getStatus()), 1000);
+    const id = setInterval(() => setStatus(safeStatus()), 1000);
     id.unref?.(); // poll de contagens nunca segura o processo (nem o node --test)
     return () => clearInterval(id);
   }, []);
@@ -185,15 +210,30 @@ export function CrawlConfig({ onRun, onBack }) {
     />`;
   }
   if (step === 'since') {
-    return html`<${Field} label=${t('sincePrompt')} error=${err}>
+    return html`<${Field} label=${t('sincePrompt')} hint=${t('sinceHint', { floor: MIN_CRAWL_DATE })} error=${err}>
       <${TextInput} key=${step} placeholder="2026-06-25" onSubmit=${(val) => {
         const v = val.trim();
         if (v && !parseDate(v)) return setErr(t('sinceInvalid'));
         setErr(null);
-        if (v) set({ since: v });
+        if (!v) return setStep('sincefloor'); // vazio ABAIXA o piso: avisa antes de seguir
+        set({ since: v });
         setStep('maxpages');
       }} />
     </${Field}>`;
+  }
+  if (step === 'sincefloor') {
+    // Campo vazio não é "sem mudança": o piso cai para MIN_CRAWL_DATE, que costuma ser MAIS AMPLO
+    // que o --since da coleta anterior. O walk desce mais fundo no arquivo e a curadoria por IA
+    // roda em issues antigas (tempo + US$). O passo existe só para isso ficar dito.
+    return html`<${Box} flexDirection="column">
+      <${StatusMessage} variant="warning">${t('sinceFloorWarn', { floor: MIN_CRAWL_DATE })}</${StatusMessage}>
+      <${Box} marginTop=${1}>
+        <${Select} options=${[
+          { label: t('sinceFloorPick'), value: 'pick' },
+          { label: t('sinceFloorKeep', { floor: MIN_CRAWL_DATE }), value: 'keep' },
+        ]} onChange=${(v) => setStep(v === 'pick' ? 'since' : 'maxpages')} />
+      </${Box}>
+    </${Box}>`;
   }
   if (step === 'maxpages') {
     return html`<${Field} label=${t('maxPagesPrompt')} error=${err}>
@@ -325,7 +365,7 @@ export function FinishConfig({ onRun, onBack }) {
 export function SearchConfig({ onRun, onBack, initial = null }) {
   const [step, setStep] = useState(() => {
     if (!initial) return 'query';
-    if (initial.mode === 'B') return getStatus().classified === 0 ? 'noclass' : 'review';
+    if (initial.mode === 'B') return safeStatus().classified === 0 ? 'noclass' : 'review';
     return 'confirmA';
   });
   const [flags, setFlags] = useState(() =>
@@ -370,7 +410,7 @@ export function SearchConfig({ onRun, onBack, initial = null }) {
         { label: t('searchModeB'), value: 'B' },
       ]} onChange=${(v) => {
         setFlags((f) => ({ ...f, mode: v }));
-        if (v === 'B') return setStep(getStatus().classified === 0 ? 'noclass' : 'review');
+        if (v === 'B') return setStep(safeStatus().classified === 0 ? 'noclass' : 'review');
         setStep('confirmA'); // modo A sempre confirma (e seta --yes p/ não ser recusado)
       }} />
     </${Field}>`;
@@ -636,7 +676,23 @@ export function KeyConfig({ onBack }) {
 // direto do menu. O painel de execução espera a publicação e mostra o desfecho (deployOutcome).
 export function DeployConfirm({ onRun, onBack }) {
   const [flags, setFlags] = useState(null);
+  const [step, setStep] = useState('mode'); // mode | shrink (confirmação do opt-in)
   if (flags) return html`<${Review} sub="deploy" flags=${flags} onRun=${onRun} onBack=${() => setFlags(null)} />`;
+  if (step === 'shrink') {
+    // `--allow-shrink` (encolhimento INTENCIONAL, ex.: depois de remover uma fonte) é o único
+    // opt-in do guard que cabe na TUI: ele NÃO libera zerar o site — a perda catastrófica exige
+    // `--allow-shrink wipe`, que segue exclusivo da CLI (é a última barreira contra publicar o
+    // vazio, e uma linha de menu que apaga o site público é o erro que estamos consertando).
+    return html`<${Box} flexDirection="column">
+      <${Alert} variant="warning">${t('deployShrinkWarn')}</${Alert}>
+      <${Box} marginTop=${1}>
+        <${Select} options=${yesNo()} onChange=${(v) => {
+          if (v !== 'yes') return setStep('mode');
+          setFlags({ 'allow-shrink': true });
+        }} />
+      </${Box}>
+    </${Box}>`;
+  }
   return html`<${Box} flexDirection="column">
     <${StatusMessage} variant="info">${t('deployDesc')}</${StatusMessage}>
     <${Box} marginTop=${1} flexDirection="column">
@@ -646,12 +702,14 @@ export function DeployConfirm({ onRun, onBack }) {
           { label: t('deployModePublish'), value: 'publish' },
           { label: t('deployModeForce'), value: 'force' },
           { label: t('deployModeDry'), value: 'dry' },
+          { label: `${glyphs.warn} ${t('deployModeShrink')}`, value: 'shrink' },
           { label: t('back'), value: 'back' },
         ]}
         onChange=${(v) => {
           if (v === 'back') return onBack();
           if (v === 'force') return setFlags({ force: true });
           if (v === 'dry') return setFlags({ 'dry-run': true });
+          if (v === 'shrink') return setStep('shrink');
           return setFlags({});
         }}
       />
@@ -659,16 +717,63 @@ export function DeployConfirm({ onRun, onBack }) {
   </${Box}>`;
 }
 
+/**
+ * Tela do RESET. A versão antiga era um Select de duas opções que emitia `{yes:true}` — dois
+ * Enter e o acervo sumia. Agora a tela mostra a MESMA conta do CLI (`resetImpactLines`, incluindo
+ * o US$ de LLM que não volta) e exige DIGITAR o número de artigos (`checkResetConfirmation`, o
+ * mesmo cheque que o `cmdReset` refaz do outro lado — sem isso ele RECUSA a chamada).
+ * Base vazia (0 artigos) dispensa o desafio: não há o que perder.
+ */
 export function ResetConfirm({ onRun, onBack }) {
+  const [impact] = useState(() => getResetImpact()); // congelado no mount: é o número do desafio
+  const [step, setStep] = useState('warn');
+  const [err, setErr] = useState(null);
+  // `tries` entra na `key` do TextInput: uma tentativa errada REMONTA o campo vazio. O TextInput
+  // é UNCONTROLLED — sem isso o texto recusado fica no buffer e a 2ª tentativa vira "993".
+  const [tries, setTries] = useState(0);
+  const empty = impact.articles === 0;
+
+  if (step === 'type') {
+    return html`<${Field}
+      label=${t('resetTypePrompt', { n: impact.articles })}
+      hint=${t('resetTypeHint')}
+      error=${err}
+    >
+      <${TextInput} key=${`${step}-${tries}`} placeholder=${String(impact.articles)} onSubmit=${(val) => {
+        const raw = String(val).trim();
+        if (!raw) return onBack(); // vazio = desistir (sem tecla secreta: é o caminho de saída)
+        const check = checkResetConfirmation(raw, impact);
+        if (!check.ok) {
+          setTries((n) => n + 1); // remonta o campo vazio p/ a próxima tentativa
+          return setErr(t('resetTypeMismatch', { given: check.given, expected: check.expected }));
+        }
+        onRun({ sub: 'reset', flags: { yes: true, confirm: check.given } });
+      }} />
+    </${Field}>`;
+  }
+
   return html`<${Box} flexDirection="column">
     <${Alert} variant="error">${t('resetWarn')}</${Alert}>
+    <${Box} flexDirection="column" marginY=${1}>
+      <${Text} bold>${t('resetImpactTitle')}</${Text}>
+      ${resetImpactLines(impact).map((line, i) =>
+        html`<${Text} key=${i} color=${colors.warn} wrap="truncate-end">${line}</${Text}>`)}
+    </${Box}>
+    <${StatusMessage} variant="warning">${t('resetSiteWarn')}</${StatusMessage}>
+    <${Box} marginTop=${1}><${Text} dimColor>${t('resetBackupNote')}</${Text}></${Box}>
+    ${empty ? html`<${Box}><${Text} dimColor>${t('resetEmptyBase')}</${Text}></${Box}>` : null}
     <${Box} marginTop=${1}>
       <${Select}
         options=${[
           { label: t('resetCancel'), value: 'cancel' },
-          { label: t('resetGo'), value: 'go' },
+          { label: empty ? t('resetGo') : t('resetContinue'), value: 'go' },
         ]}
-        onChange=${(v) => (v === 'go' ? onRun({ sub: 'reset', flags: { yes: true } }) : onBack())}
+        onChange=${(v) => {
+          if (v !== 'go') return onBack();
+          // Base vazia: o cmdReset aceita só `--yes` (checkResetConfirmation devolve ok/'empty').
+          if (empty) return onRun({ sub: 'reset', flags: { yes: true } });
+          setStep('type');
+        }}
       />
     </${Box}>
   </${Box}>`;

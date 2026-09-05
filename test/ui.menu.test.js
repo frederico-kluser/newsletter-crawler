@@ -48,9 +48,11 @@ after(() => {
 test('UI: o menu lista as ações principais (PT)', () => {
   const { lastFrame, unmount } = render(html`<${App} />`);
   const frame = lastFrame() || '';
+  // "Limpar tudo" NÃO está mais aqui: mudou para o submenu "Backup e recuperação" (ver
+  // test/ui.destructive.test.js — ele era a penúltima linha, colada no "Sair").
   for (const label of [
     'newsletter-crawler', 'Coletar', 'Buscar', 'Status', 'Exportar', 'Finalizar',
-    'Adicionar', 'Limites', 'Chave', 'Limpar',
+    'Adicionar', 'Limites', 'Chave', 'Backup e recuperação',
   ]) {
     assert.ok(frame.includes(label), `o menu deve conter "${label}"\n--- frame ---\n${frame}`);
   }

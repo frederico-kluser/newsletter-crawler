@@ -1,7 +1,8 @@
 // i18n mínimo do chrome da UI: PT (default) / EN via CRAWLER_LANG=en. Os logs do crawl seguem PT.
 export const lang = /^en/i.test(process.env.CRAWLER_LANG || '') ? 'en' : 'pt';
 
-const DICT = {
+// Exportado p/ o teste de PARIDADE de chaves (toda string nova entra nos DOIS idiomas).
+export const DICT = {
   pt: {
     title: 'newsletter-crawler',
     subtitle: 'menu guiado — as flags continuam funcionando direto',
@@ -56,7 +57,7 @@ const DICT = {
     on: 'LIGADO',
     off: 'desligado',
     noneVal: '—',
-    minSinceVal: '2026-01-01 (piso mínimo)',
+    minSinceVal: '2026-01-01 (piso mínimo — o mais amplo)',
     noLimitVal: 'sem limite',
     scopePrompt: 'O que trazer?',
     scopeNew: 'Apenas o novo (última execução)',
@@ -82,7 +83,6 @@ const DICT = {
     menuSources: 'Gerenciar fontes',
     srcCount: 'fonte(s)',
     srcEmpty: 'Nenhuma fonte cadastrada (use "Adicionar fonte").',
-    srcRemoveArm: 'Remover "{name}"? Apaga {n} artigo(s) e descadastra. r/Enter confirma · Esc cancela',
     srcDetecting: 'detectando tipo…',
     srcTypeChanged: 'tipo alterado para {type}',
     srcRedetected: 're-detectado: {type} — {reason}',
@@ -159,6 +159,78 @@ const DICT = {
     keyInvalid: 'Chave inválida (a API do {name} recusou). Confira e tente de novo.',
     keyProbeFail: 'Não deu para validar (sem rede?): {msg}',
     keySaved: 'Chave salva em {file} — vale já para as próximas execuções.',
+    // --- manutenção: backup, recuperação e (isolado aqui dentro) o reset ---
+    menuMaintenance: 'Backup e recuperação',
+    maintenanceDesc: 'Cópias de segurança, recuperação do acervo e — só aqui dentro, longe do "Sair" — a limpeza total.',
+    maintBackup: 'Backups do acervo (criar/listar)',
+    maintRestore: 'Recuperar o acervo',
+    resetDanger: 'APAGA os {n} artigo(s)',
+    resetImpactTitle: 'O que será perdido:',
+    resetSiteWarn:
+      'O reset também REMOVE e COMMITA o snapshot do site (webapp/public/data + api/v1) e grava o ' +
+      'marcador .nc-wipe.json — a fronteira que impede o restore de ressuscitar o acervo apagado.',
+    resetBackupNote: 'Um backup do banco é feito ANTES de apagar; se ele falhar, nada é apagado.',
+    resetContinue: 'Entendi — quero apagar (ainda vou ter que digitar o número)',
+    resetTypePrompt: 'Digite o número de artigos que serão perdidos ({n}) para confirmar:',
+    resetTypeHint: 'Vazio + Enter cancela e volta ao menu.',
+    resetTypeMismatch: 'NÃO confere: você digitou "{given}" e o esperado é {expected}. Nada foi apagado.',
+    resetEmptyBase: 'A base já está vazia (0 artigos) — não há acervo a perder.',
+    cancel: 'Cancelar',
+    // --- fontes: remoção com confirmação digitada ---
+    srcRemoveTypePrompt: 'Remover "{name}": digite o número de artigos que serão apagados ({n}) para confirmar:',
+    srcRemoveMismatch: 'NÃO confere: "{given}" ≠ {expected}. A fonte NÃO foi removida.',
+    srcRemoveEmptyArm: 'Remover "{name}"? Ela não tem artigo nenhum. Enter confirma · Esc cancela',
+    srcRemoveBackupNote: 'Um backup do banco é feito antes de remover.',
+    // --- backups ---
+    menuBackup: 'Backups do acervo',
+    backupCreate: 'Fazer backup agora',
+    backupCount: '{n} cópia(s) em {dir}',
+    backupEmpty: 'Nenhum backup ainda em {dir}.',
+    backupCreated: 'backup criado: {name} — {n} artigo(s)',
+    backupNothing: 'O banco não tem dado nenhum — não havia o que copiar.',
+    backupFailed: 'Backup NÃO criado (espaço/permissão em {dir}?) — veja o log.',
+    backupUnreadable: 'ILEGÍVEL',
+    backupMore: '… e mais {n} cópia(s)',
+    // --- recuperação ---
+    menuRestore: 'Recuperar acervo',
+    restoreOrigin: 'De onde recuperar?',
+    restoreFromGit: 'Do histórico do git (snapshots publicados do site)',
+    restoreFromFile: 'De um arquivo de backup (cópia do banco)',
+    restoreSlowWarn: 'A varredura do histórico leva ~10s e é SÍNCRONA: a tela fica parada nesse tempo — não é travamento.',
+    restoreLiveWarn:
+      'A base NÃO está vazia ({n} artigo(s)): o restore REPÕE o que está no snapshot (não sincroniza) ' +
+      'e pode reaproveitar ids. Um backup é feito antes.',
+    restoreNoGit: '{root} não é um repositório git — sem histórico não há o que restaurar. Use um arquivo de backup.',
+    restoreDry: 'Simular primeiro (--dry-run, não escreve nada)',
+    restoreGo: 'Restaurar de verdade',
+    restorePickFile: 'Qual cópia repor?',
+    restoreLatest: 'Mais recente — volta ao ESTADO ANTERIOR: {name} ({n} artigo(s))',
+    restoreBest: 'Acervo mais COMPLETO — mais artigos: {name} ({n} artigo(s))',
+    restoreSameNote: 'As duas apontam para a MESMA cópia agora.',
+    restoreDiffNote: 'A mais recente e a mais completa são cópias DIFERENTES — escolha o que você quer.',
+    restoreOther: 'Escolher outra cópia da lista',
+    restoreNoBackups: 'Nenhum backup em {dir} — faça um em "Backups do acervo".',
+    restoreFileConfirm: 'Repor {name} ({n} artigo(s)) por cima do banco atual ({cur} artigo(s))?',
+    restoreFileNote: 'O banco ATUAL vira backup antes de ser substituído.',
+    restoreFileGo: 'Repor esta cópia',
+    restoreWorking: 'repondo o banco…',
+    restoreDone: 'Banco reposto de {name} — {n} artigo(s).',
+    restoreRestart: 'A conexão com o banco foi FECHADA nesta sessão — feche e reabra o ncrawl para usar a base nova.',
+    restoreQuit: 'Sair (obrigatório)',
+    restoreFailed: 'Falha ao repor: {msg}',
+    // --- coleta: piso do --since ---
+    sinceHint: 'Vazio = piso {floor} — o MAIS AMPLO possível.',
+    sinceFloorWarn:
+      'Sem data, o piso vira {floor} — MAIS AMPLO que o de uma coleta anterior com data mais recente: ' +
+      'o crawler desce mais fundo no arquivo e cura issues antigas por IA (tempo e US$).',
+    sinceFloorPick: 'Informar uma data',
+    sinceFloorKeep: 'Seguir sem data (piso {floor})',
+    // --- deploy: opt-in do guard anti-encolhimento ---
+    deployModeShrink: 'Publicar com o acervo MENOR que o no ar (--allow-shrink)',
+    deployShrinkWarn:
+      '--allow-shrink libera publicar um snapshot MENOR que o já no ar — use só quando a redução é ' +
+      'INTENCIONAL (depois de remover/purgar uma fonte). Zerar o site continua exigindo a CLI ' +
+      '(--allow-shrink wipe). Confirmar?',
     summaries: 'resumos',
     sources: 'fontes',
     pages: 'páginas',
@@ -259,7 +331,7 @@ const DICT = {
     on: 'ON',
     off: 'off',
     noneVal: '—',
-    minSinceVal: '2026-01-01 (min floor)',
+    minSinceVal: '2026-01-01 (min floor — the widest)',
     noLimitVal: 'unlimited',
     scopePrompt: 'What to bring?',
     scopeNew: 'Only new (last run)',
@@ -285,7 +357,6 @@ const DICT = {
     menuSources: 'Manage sources',
     srcCount: 'source(s)',
     srcEmpty: 'No sources yet (use "Add source").',
-    srcRemoveArm: 'Remove "{name}"? Deletes {n} article(s) and unregisters. r/Enter confirms · Esc cancels',
     srcDetecting: 'detecting type…',
     srcTypeChanged: 'type changed to {type}',
     srcRedetected: 're-detected: {type} — {reason}',
@@ -362,6 +433,78 @@ const DICT = {
     keyInvalid: 'Invalid key ({name} API refused it). Check and try again.',
     keyProbeFail: 'Could not validate (no network?): {msg}',
     keySaved: 'Key saved to {file} — applies to the next runs.',
+    // --- maintenance: backup, recovery and (walled in here) the reset ---
+    menuMaintenance: 'Backup & recovery',
+    maintenanceDesc: 'Safety copies, archive recovery and — in here only, far from "Quit" — the full wipe.',
+    maintBackup: 'Archive backups (create/list)',
+    maintRestore: 'Recover the archive',
+    resetDanger: 'DELETES the {n} article(s)',
+    resetImpactTitle: 'What will be lost:',
+    resetSiteWarn:
+      'The reset also REMOVES and COMMITS the site snapshot (webapp/public/data + api/v1) and writes ' +
+      'the .nc-wipe.json marker — the boundary that stops the restore from resurrecting the wiped archive.',
+    resetBackupNote: 'A database backup is taken BEFORE wiping; if it fails, nothing is deleted.',
+    resetContinue: 'I understand — wipe it (I will still have to type the number)',
+    resetTypePrompt: 'Type the number of articles that will be lost ({n}) to confirm:',
+    resetTypeHint: 'Empty + Enter cancels and goes back to the menu.',
+    resetTypeMismatch: 'MISMATCH: you typed "{given}" and the expected value is {expected}. Nothing was deleted.',
+    resetEmptyBase: 'The database is already empty (0 articles) — there is no archive to lose.',
+    cancel: 'Cancel',
+    // --- sources: removal with a typed confirmation ---
+    srcRemoveTypePrompt: 'Removing "{name}": type the number of articles that will be deleted ({n}) to confirm:',
+    srcRemoveMismatch: 'MISMATCH: "{given}" != {expected}. The source was NOT removed.',
+    srcRemoveEmptyArm: 'Remove "{name}"? It has no articles at all. Enter confirms · Esc cancels',
+    srcRemoveBackupNote: 'A database backup is taken before removing.',
+    // --- backups ---
+    menuBackup: 'Archive backups',
+    backupCreate: 'Back up now',
+    backupCount: '{n} copy(ies) in {dir}',
+    backupEmpty: 'No backups yet in {dir}.',
+    backupCreated: 'backup created: {name} — {n} article(s)',
+    backupNothing: 'The database has no data at all — there was nothing to copy.',
+    backupFailed: 'Backup NOT created (disk space/permission in {dir}?) — check the log.',
+    backupUnreadable: 'UNREADABLE',
+    backupMore: '… and {n} more copy(ies)',
+    // --- recovery ---
+    menuRestore: 'Recover archive',
+    restoreOrigin: 'Recover from where?',
+    restoreFromGit: 'From the git history (published site snapshots)',
+    restoreFromFile: 'From a backup file (database copy)',
+    restoreSlowWarn: 'Scanning the history takes ~10s and is SYNCHRONOUS: the screen freezes for that long — it is not a hang.',
+    restoreLiveWarn:
+      'The database is NOT empty ({n} article(s)): the restore REPLACES what the snapshot holds (it does ' +
+      'not sync) and may reuse ids. A backup is taken first.',
+    restoreNoGit: '{root} is not a git repository — with no history there is nothing to restore. Use a backup file.',
+    restoreDry: 'Dry run first (--dry-run, writes nothing)',
+    restoreGo: 'Restore for real',
+    restorePickFile: 'Which copy to restore?',
+    restoreLatest: 'Most recent — back to the PREVIOUS STATE: {name} ({n} article(s))',
+    restoreBest: 'FULLEST archive — most articles: {name} ({n} article(s))',
+    restoreSameNote: 'Both point at the SAME copy right now.',
+    restoreDiffNote: 'The most recent and the fullest are DIFFERENT copies — pick the one you want.',
+    restoreOther: 'Pick another copy from the list',
+    restoreNoBackups: 'No backups in {dir} — make one under "Archive backups".',
+    restoreFileConfirm: 'Restore {name} ({n} article(s)) over the current database ({cur} article(s))?',
+    restoreFileNote: 'The CURRENT database is backed up before being replaced.',
+    restoreFileGo: 'Restore this copy',
+    restoreWorking: 'restoring the database…',
+    restoreDone: 'Database restored from {name} — {n} article(s).',
+    restoreRestart: 'The database connection was CLOSED in this session — quit and reopen ncrawl to use the new database.',
+    restoreQuit: 'Quit (required)',
+    restoreFailed: 'Restore failed: {msg}',
+    // --- crawl: the --since floor ---
+    sinceHint: 'Empty = floor {floor} — the WIDEST possible.',
+    sinceFloorWarn:
+      'With no date the floor becomes {floor} — WIDER than a previous crawl with a more recent date: ' +
+      'the crawler digs deeper into the archive and curates old issues with AI (time and US$).',
+    sinceFloorPick: 'Enter a date',
+    sinceFloorKeep: 'Continue with no date (floor {floor})',
+    // --- deploy: anti-shrink guard opt-in ---
+    deployModeShrink: 'Publish with the archive SMALLER than the live one (--allow-shrink)',
+    deployShrinkWarn:
+      '--allow-shrink allows publishing a snapshot SMALLER than the live one — use it only when the ' +
+      'reduction is INTENTIONAL (after removing/purging a source). Zeroing the site still requires the ' +
+      'CLI (--allow-shrink wipe). Confirm?',
     summaries: 'summaries',
     sources: 'sources',
     pages: 'pages',

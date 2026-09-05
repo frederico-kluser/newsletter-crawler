@@ -1,13 +1,19 @@
 // Detecção de tipo da fonte: as funções PURAS (sinais + heurística) que embasam a decisão da IA e
 // servem de fallback quando a IA não está disponível/falha. Sem rede/LLM. npm test.
-import { test } from 'node:test';
+import { test, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import { fileURLToPath } from 'node:url';
-import { gatherTypeSignals, heuristicType } from '../src/detect-type.js';
+
+// NC_HOME temporário ANTES do import (detect-type.js -> fetch.js -> config.js): no load,
+// config.js cria/semeia o NC_HOME REAL do usuário e carrega o .env dele. Import dinâmico
+// porque o `import` estático é IÇADO — rodaria antes desta linha.
+process.env.NC_HOME = mkdtempSync(path.join(os.tmpdir(), 'nc-detect-type-'));
+after(() => rmSync(process.env.NC_HOME, { recursive: true, force: true }));
+const { gatherTypeSignals, heuristicType } = await import('../src/detect-type.js');
 
 const issueLinks = (host, n, base = 430) =>
   Array.from({ length: n }, (_, i) => ({ url: `https://${host}/issues/${base - i}`, title: `Issue ${base - i}` }));

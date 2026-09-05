@@ -2,14 +2,22 @@
 // linha entre blocos) da captura 2026-08-14. Usa a página REAL da release do Vitest 5.0 RC
 // (fixture trimada — reproduz exatamente o textContent do Readability da página inteira) e o
 // README do NodeBB (lista aninhada real). Sem rede, sem LLM.
-import { test } from 'node:test';
+import { test, after } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readFileSync, mkdtempSync, rmSync } from 'node:fs';
+import path from 'node:path';
+import os from 'node:os';
 import { JSDOM } from 'jsdom';
 import { Readability } from '@mozilla/readability';
-import {
+
+// NC_HOME temporário ANTES do import (clean.js -> governor.js -> config.js): no load, config.js cria/semeia o
+// NC_HOME REAL do usuário e carrega o .env dele. Import dinâmico porque o `import`
+// estático é IÇADO — rodaria antes desta linha.
+process.env.NC_HOME = mkdtempSync(path.join(os.tmpdir(), 'nc-parse-github-'));
+after(() => rmSync(process.env.NC_HOME, { recursive: true, force: true }));
+const {
   blockTextFromHtml, htmlBlockText, githubReleaseText, isGithubUrl,
-} from '../src/clean.js';
+} = await import('../src/clean.js');
 
 const VITEST_URL = 'https://github.com/vitest-dev/vitest/releases/tag/v5.0.0-rc.1';
 const VITEST_FIXTURE = new URL('../test/fixtures/vitest-release.html', import.meta.url);

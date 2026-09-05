@@ -1,8 +1,17 @@
 // Sanidade da limpeza por IA (anti-alucinação/truncamento) + aplicação de junk_spans
 // (remoção local verbatim — a IA só aponta a sujeira, nunca reescreve o texto).
-import { test } from 'node:test';
+import { test, after } from 'node:test';
 import assert from 'node:assert/strict';
-import { sanityCheckCleaned, applyJunkSpans } from '../src/clean.js';
+import { mkdtempSync, rmSync } from 'node:fs';
+import path from 'node:path';
+import os from 'node:os';
+
+// NC_HOME temporário ANTES do import (clean.js -> governor.js -> config.js): no load, config.js cria/semeia o
+// NC_HOME REAL do usuário e carrega o .env dele. Import dinâmico porque o `import`
+// estático é IÇADO — rodaria antes desta linha.
+process.env.NC_HOME = mkdtempSync(path.join(os.tmpdir(), 'nc-clean-sanity-'));
+after(() => rmSync(process.env.NC_HOME, { recursive: true, force: true }));
+const { sanityCheckCleaned, applyJunkSpans } = await import('../src/clean.js');
 
 test('applyJunkSpans: remove todas as ocorrências exatas; ignora span não encontrado', () => {
   const orig = 'MENU Home Docs\n' + 'Texto real do artigo. '.repeat(30) + '\nMENU Home Docs\nSubscribe now!';

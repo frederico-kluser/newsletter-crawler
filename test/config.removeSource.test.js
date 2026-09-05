@@ -3,10 +3,16 @@
 // TEMP (não toca no real); upsert/remoção por URL normalizada; idempotente. npm test.
 import { test, after } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync, rmSync } from 'node:fs';
+import { readFileSync, mkdtempSync, rmSync } from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
-import { addSourceToConfig, removeSourceFromConfig } from '../src/config.js';
+
+// NC_HOME temporário ANTES do import (config.js): no load, config.js cria/semeia o
+// NC_HOME REAL do usuário e carrega o .env dele. Import dinâmico porque o `import`
+// estático é IÇADO — rodaria antes desta linha.
+process.env.NC_HOME = mkdtempSync(path.join(os.tmpdir(), 'nc-rmsource-home-'));
+after(() => rmSync(process.env.NC_HOME, { recursive: true, force: true }));
+const { addSourceToConfig, removeSourceFromConfig } = await import('../src/config.js');
 
 const tmp = path.join(os.tmpdir(), `nc-rmsources-${process.pid}.json`);
 after(() => rmSync(tmp, { force: true }));

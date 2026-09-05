@@ -1,9 +1,18 @@
 // Circuit breaker por host (fetch.js createBreaker): closed -> open após N falhas ->
 // half-open após cooldown (1 probe única) -> fecha no ok / reabre dobrando o cooldown.
 // Clock injetado — nada de sleep real.
-import test from 'node:test';
+import test, { after } from 'node:test';
 import assert from 'node:assert/strict';
-import { createBreaker } from '../src/fetch.js';
+import { mkdtempSync, rmSync } from 'node:fs';
+import path from 'node:path';
+import os from 'node:os';
+
+// NC_HOME temporário ANTES do import (fetch.js -> config.js): no load, config.js cria/semeia o
+// NC_HOME REAL do usuário e carrega o .env dele. Import dinâmico porque o `import`
+// estático é IÇADO — rodaria antes desta linha.
+process.env.NC_HOME = mkdtempSync(path.join(os.tmpdir(), 'nc-fetch-breaker-'));
+after(() => rmSync(process.env.NC_HOME, { recursive: true, force: true }));
+const { createBreaker } = await import('../src/fetch.js');
 
 const H = 'exemplo.com';
 

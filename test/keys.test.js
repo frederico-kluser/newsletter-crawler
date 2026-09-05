@@ -5,13 +5,19 @@
 // (sem rede). Usa arquivo TEMP; não toca no NC_HOME real. npm test.
 import { test, after } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync, writeFileSync, rmSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdtempSync, rmSync } from 'node:fs';
 import http from 'node:http';
 import path from 'node:path';
 import os from 'node:os';
-import {
+
+// NC_HOME temporário ANTES do import (keys.js -> config.js): no load, config.js cria/semeia o
+// NC_HOME REAL do usuário e carrega o .env dele. Import dinâmico porque o `import`
+// estático é IÇADO — rodaria antes desta linha.
+process.env.NC_HOME = mkdtempSync(path.join(os.tmpdir(), 'nc-keys-home-'));
+after(() => rmSync(process.env.NC_HOME, { recursive: true, force: true }));
+const {
   upsertEnvVar, maskKey, probeDeepSeekKey, probeProviderKey, providerInfoFor,
-} from '../src/keys.js';
+} = await import('../src/keys.js');
 
 const tmp = path.join(os.tmpdir(), `nc-env-${process.pid}.env`);
 after(() => rmSync(tmp, { force: true }));

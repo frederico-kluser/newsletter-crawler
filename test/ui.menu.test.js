@@ -2,15 +2,23 @@
 // do menu. (O idioma vem de CRAWLER_LANG no load do módulo; o EN é checado em subprocesso.)
 // A tela Chave LLM é exercitada por DIAGNÓSTICO do probe (sem rede vs chave recusada): o baseURL
 // da DeepSeek é lido do ENV em call-time, então servidores locais simulam os dois casos — mesmo
-// seam do test/keys.test.js. Nenhum caso chega ao `upsertEnvVar` (falha antes), então o NC_HOME
-// real NÃO é tocado.
+// seam do test/keys.test.js. Nenhum caso chega ao `upsertEnvVar` (falha antes).
 import { test, after } from 'node:test';
 import assert from 'node:assert/strict';
 import http from 'node:http';
+import { mkdtempSync, rmSync } from 'node:fs';
+import path from 'node:path';
+import os from 'node:os';
 import { render } from 'ink-testing-library';
-import { html } from '../src/ui/html.js';
-import App from '../src/ui/App.js';
 import { wait, selectMenuItem, keys, typeText } from './helpers/ink.js';
+
+// NC_HOME temporário ANTES do import (App.js -> commands.js -> db.js abre o DB no load: com o
+// NC_HOME real, `npm test` abriria o crawler.db do USUÁRIO em ESCRITA). Import dinâmico porque o
+// `import` estático é IÇADO — rodaria antes desta linha.
+process.env.NC_HOME = mkdtempSync(path.join(os.tmpdir(), 'nc-ui-menu-'));
+const { html } = await import('../src/ui/html.js');
+const { default: App } = await import('../src/ui/App.js');
+const { db } = await import('../src/db.js');
 
 // Servidor que DESTRÓI o socket = erro de REDE real (o got lança, o probe devolve {ok:false,status:0}).
 const broken = http.createServer((req, res) => res.destroy());
@@ -27,8 +35,14 @@ const ORIG_DS_BASE = process.env.DEEPSEEK_BASE_URL; // restaurar no fim (máquin
 after(() => {
   if (ORIG_DS_BASE === undefined) delete process.env.DEEPSEEK_BASE_URL;
   else process.env.DEEPSEEK_BASE_URL = ORIG_DS_BASE;
-  broken.close(); // idempotente
-  refuser.close();
+  // finally: um close() que lance não pode deixar o diretório temporário para trás.
+  try {
+    broken.close(); // idempotente
+    refuser.close();
+    db.close();
+  } finally {
+    rmSync(process.env.NC_HOME, { recursive: true, force: true });
+  }
 });
 
 test('UI: o menu lista as ações principais (PT)', () => {

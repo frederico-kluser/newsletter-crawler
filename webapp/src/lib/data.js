@@ -22,11 +22,26 @@ async function fetchJson(path) {
 }
 
 export const loadMeta = memo(() => fetchJson('/data/meta.json'));
+
+// O snapshot NÃO manda o mesmo texto duas vezes: quando o artigo tem `blurb` (a descrição do
+// próprio agregador), o `snippet` É o prefixo dele e vem `null` — mandar os dois custava ~2 MiB no
+// articles.json do acervo atual, que é COMMITADO no repo. Aqui o snippet volta a existir, derivado
+// pela MESMA regra do export (substr 400 + whitespace normalizado, src/export-web.js
+// `snippetFromBlurb`), ANTES de qualquer consumidor (card, busca IA, palheiro textual). Snapshot
+// antigo — com snippet preenchido — passa direto: a mudança é retrocompatível na leitura.
+// `snippet: ''` (artigo sem blurb E sem corpo) é um valor legítimo, não um "faltando".
+const SNIPPET_CHARS = 400;
+export function hydrateSnippet(a) {
+  if (a.snippet != null) return a;
+  a.snippet = String(a.blurb || '').slice(0, SNIPPET_CHARS).replace(/\s+/g, ' ').trim();
+  return a;
+}
+
 // Pré-computa o "palheiro" da busca textual (fold NFD) UMA vez no load: a 1ª digitação já filtra
 // sem construir ~600 haystacks na hora (a busca offline é síncrona; isto remove o hitch inicial).
 export const loadArticles = memo(async () => {
   const rows = await fetchJson('/data/articles.json');
-  for (const a of rows) a._search = buildHaystack(a);
+  for (const a of rows) a._search = buildHaystack(hydrateSnippet(a));
   return rows;
 });
 

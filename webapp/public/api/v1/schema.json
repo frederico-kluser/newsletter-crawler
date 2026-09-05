@@ -86,6 +86,8 @@
           "titlePt": { "type": ["string", "null"], "description": "Título PT-BR; null se ainda não resumido." },
           "summaryPt": { "type": ["string", "null"], "description": "Resumo PT-BR; null se ainda não resumido." },
           "snippet": { "type": "string", "description": "Preview ~400 chars, sem HTML." },
+          "issueUrl": { "type": ["string", "null"], "description": "URL da issue/edição da newsletter de onde o item foi curado; null quando o artigo não veio de uma issue. ADITIVO: ausente em snapshots gerados antes de 2026-09." },
+          "blurb": { "type": ["string", "null"], "description": "Descrição CRUA do próprio agregador sobre o item (não normalizada), truncada em 4000 chars; null quando o artigo não veio de uma curadoria. ADITIVO: ausente em snapshots gerados antes de 2026-09." },
           "kind": { "type": ["string", "null"], "enum": ["news", "tool", "release", null] },
           "section": { "type": ["string", "null"] },
           "date": { "type": "string", "description": "YYYY-MM-DD (publicação, ou coleta se a fonte não datar)." },

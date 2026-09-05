@@ -579,9 +579,14 @@ export const stmts = {
   // ASC (determinístico — diff de git append-only). date_iso é pré-computado aqui (o cliente
   // nunca porta parseDate; filtro de período no browser vira comparação de string YYYY-MM-DD) e
   // o snippet usa 400 chars (paridade com o content_head(400) da busca soft; o card corta visual).
+  // issue_url + blurb viajam AQUI (e não numa varredura por fonte, como já foi): um artigo com
+  // source_id NULO — exatamente o que um restore do snapshot produz quando a fonte não pôde ser
+  // remapeada — não aparece em nenhum `listArticlesBySource` e sairia SEM a proveniência que o
+  // ciclo restore→re-export existe para preservar. Uma query só, todo artigo, sem exceção.
   webExportArticles: db.prepare(
     `SELECT a.id, a.source_id, a.url, a.title, a.title_pt, a.summary_pt,
             substr(coalesce(a.blurb, a.content, ''), 1, 400) AS snippet,
+            a.issue_url, a.blurb,
             coalesce(iso_date(a.published_at), date(a.extracted_at)) AS date_iso,
             a.kind, a.section, a.verify_status, a.verify_notes
        FROM articles a

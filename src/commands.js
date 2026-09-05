@@ -886,7 +886,12 @@ export function cmdExport(flags) {
   if (flags.format === 'web') {
     if (flags.all === true) warn('--all é ignorado no formato web (o snapshot é sempre o acervo completo).');
     const outDir = flags.out ? path.resolve(String(flags.out)) : path.join(ROOT, 'webapp', 'public', 'data');
-    exportWebSnapshot({ outDir });
+    // Opt-in do guard anti-encolhimento (src/snapshot-guard.js). SEM este repasse o bloqueio não
+    // teria saída pela CLI: a mensagem manda repetir com `--allow-shrink [wipe]`, o parseFlags de
+    // index.js entrega `flags['allow-shrink']` (true, ou a string 'wipe' na forma com ESPAÇO) — e
+    // ele parava aqui, então seguir a hint levava ao MESMO bloqueio, para sempre, depois de
+    // qualquer redução intencional (`ncrawl remove <fonte>`/`purge`). É o fio que faltava.
+    exportWebSnapshot({ outDir, allowShrink: flags['allow-shrink'] });
     // API pública dedicada e versionada (webapp/public/api/v1/corpus.json) — regenerada no MESMO
     // export que o pre-push roda. Só no destino default: um --out pontual não deve cuspir a API
     // pública noutro lugar (o snapshot web ainda respeita o --out p/ exports de inspeção).
@@ -1440,8 +1445,13 @@ export async function cmdDeploy(flags) {
     }
   } catch (e) {
     errorLog(e instanceof DeployError ? e.message : `deploy falhou: ${e.message}`);
-    if (e instanceof DeployError && e.hint) log(e.hint);
-    else if (!(e instanceof DeployError)) log('o export já foi feito — corrija o problema e rode `ncrawl deploy` de novo.');
+    // `.hint` é a saída acionável e vem tanto do DeployError quanto do SnapshotShrinkError
+    // (export-web.js) — sempre que existir, ela é a última linha útil p/ o usuário.
+    // A linha genérica NÃO pode mais afirmar "o export já foi feito": o guard anti-encolhimento
+    // BLOQUEIA o export antes de escrever um byte, e nesse caso a frase era simplesmente falsa.
+    // O que é verdade em qualquer falha: o deploy re-exporta do zero na próxima tentativa.
+    if (e?.hint) log(e.hint);
+    else if (!(e instanceof DeployError)) log('nada foi publicado — corrija o problema e rode `ncrawl deploy` de novo (o export é refeito do zero a cada tentativa).');
     process.exit(1);
   }
 }

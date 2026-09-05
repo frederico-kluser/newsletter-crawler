@@ -125,7 +125,8 @@ test('export web: meta.search.models reflete o provider ATIVO (deepseek direto =
   }
 });
 
-test('export web: articles tolera nulls, normaliza datas e prefere blurb no snippet', () => {
+test('export web: articles tolera nulls, normaliza datas e manda blurb OU snippet (nunca os dois)', async () => {
+  const { snippetFromBlurb } = await import('../src/export-web.js');
   const { articles } = buildWebSnapshot();
   assert.deepEqual(articles.map((a) => a.id), [completo, pendente, semData]); // id ASC
 
@@ -133,7 +134,11 @@ test('export web: articles tolera nulls, normaliza datas e prefere blurb no snip
   assert.equal(full.kind, 'release');
   assert.equal(full.title_pt, 'Vitest 3 lançado');
   assert.equal(full.date_iso, '2026-06-20');
-  assert.equal(full.snippet, 'Blurb do agregador com whitespace.'); // blurb > content, whitespace normalizado
+  // Artigo COM blurb: o snippet do SQL é o prefixo DELE — vai o blurb (cru, fonte da verdade) e o
+  // snippet vem null (o mesmo texto não viaja duas vezes; o leitor deriva, webapp/src/lib/data.js).
+  assert.equal(full.blurb, 'Blurb  do\nagregador com whitespace.');
+  assert.equal(full.snippet, null);
+  assert.equal(snippetFromBlurb(full.blurb), 'Blurb do agregador com whitespace.'); // = o snippet de antes
   assert.deepEqual(full.tags, { 'content-type': ['tool-release'], domain: ['nodejs'] });
 
   const pend = articles.find((a) => a.id === pendente);
@@ -144,6 +149,8 @@ test('export web: articles tolera nulls, normaliza datas e prefere blurb no snip
 
   const sem = articles.find((a) => a.id === semData);
   assert.equal(sem.date_iso, new Date().toISOString().slice(0, 10)); // fallback extracted_at (hoje)
+  // SEM blurb: o snippet segue vindo (derivado do content) e `''` é valor legítimo, não "faltando".
+  assert.equal(sem.blurb, null);
   assert.equal(sem.snippet, '');
   assert.ok(!('content' in full), 'articles.json não carrega o corpo (contents.partN.json é lazy)');
 });

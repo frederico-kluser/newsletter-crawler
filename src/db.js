@@ -892,6 +892,28 @@ export const stmts = {
         @published_at, @run_id, @kind, @issue_url, @section, @blurb, @content_source,
         @cleaned, @needs_enrich, @verify_status, @verify_notes)`,
   ),
+  // MESMA linha, com o id que o chamador ESCOLHEU (`local_id`, ver restoreArticle — nunca o
+  // `id` cru do snapshot). `articles.id` é `INTEGER PRIMARY KEY` (alias
+  // de rowid, SEM AUTOINCREMENT), então um id explícito é legal e o próximo id implícito passa a
+  // ser max(id)+1 — repor os ids do snapshot não "gasta" nem embaralha a numeração futura.
+  // Por que preservar o id: ele é o identificador que o site no ar serve, que a API pública v1
+  // promete como estável e que o histórico de buscas re-hidrata (searches.hits_json). Um restore
+  // que renumerasse tudo transformaria todo hit salvo em "artigo sumido".
+  restoreArticleWithId: db.prepare(
+    `INSERT OR IGNORE INTO articles
+       (id, source_id, url, title, title_pt, summary_pt, content, content_hash, published_at,
+        run_id, kind, issue_url, section, blurb, content_source, cleaned, needs_enrich,
+        verify_status, verify_notes)
+     VALUES (@id, @source_id, @url, @title, @title_pt, @summary_pt, @content, @content_hash,
+        @published_at, @run_id, @kind, @issue_url, @section, @blurb, @content_source,
+        @cleaned, @needs_enrich, @verify_status, @verify_notes)`,
+  ),
+  // Pré-checagem do `local_id` (ver restoreArticle): `INSERT OR IGNORE` engoliria a colisão de
+  // PK em silêncio e o chamador acharia que foi dedup por URL.
+  getArticleUrlById: db.prepare(`SELECT id, url FROM articles WHERE id = ?`),
+  // Piso para alocar ids NOVOS às URLs que só existem em snapshots antigos (ids de snapshot
+  // antigo NÃO podem ser reusados: cada wipe reiniciou o rowid em 1 e eles colidem).
+  maxArticleId: db.prepare(`SELECT COALESCE(MAX(id), 0) AS m FROM articles`),
   // O snapshot expõe a fonte só pelo NOME (meta.sources = {id, name, count}; base_url não é
   // exportada), e os ids dele são de OUTRA base — o remapeamento é por nome/base_url.
   getSourceByName: db.prepare(`SELECT * FROM sources WHERE name = ?`),
@@ -1087,17 +1109,40 @@ function sourceExists(sourceId) {
  * `source_id` null/ausente é LEGAL (a FK aceita NULL) e insere normalmente — artigo sem fonte
  * atribuída, que é o que o snapshot produz quando a fonte não pôde ser remapeada.
  *
+ * `local_id` (opcional, ADITIVO — omitir mantém o comportamento antigo de deixar o SQLite
+ * numerar): o id que o CHAMADOR decidiu usar nesta base. NÃO é o `row.id` do snapshot, que
+ * continua IGNORADO de propósito — os ids do snapshot não são estáveis no histórico (cada wipe
+ * reiniciou o rowid em 1) e confiar neles cegamente misturaria artigos. Quem preserva ids é
+ * quem já resolveu a identidade por URL e sabe qual snapshot é autoritativo (src/restore.js);
+ * o campo separado torna isso uma decisão EXPLÍCITA, nunca um efeito colateral de repassar a
+ * linha do snapshot.
+ * A colisão é checada ANTES do INSERT: `local_id` já ocupado por OUTRA URL devolve
+ * `reason:'id-taken'` sem escrever nada (o `INSERT OR IGNORE` engoliria a violação de PK e o
+ * chamador acharia que tinha sido dedup por URL); ocupado pela MESMA URL é a 2ª passada
+ * idempotente ('url').
+ *
  * Retorna { inserted, id, reason }: reason 'url'/'hash' diz por que foi ignorado (linha já
  * existente pela URL ou pelo conteúdo), com o `id` da linha que já estava lá; 'bad-source' =
- * fonte inexistente; 'no-url' = linha sem URL.
+ * fonte inexistente; 'id-taken' = `local_id` já é de outra URL; 'no-url' = linha sem URL.
  */
 export function restoreArticle(row) {
   const url = normalizeUrl(row?.url) || row?.url || null;
   if (!url) return { inserted: false, id: null, reason: 'no-url' };
   if (!sourceExists(row.source_id)) return { inserted: false, id: null, reason: 'bad-source' };
+  const wantId = Number.isInteger(row?.local_id) && row.local_id > 0 ? row.local_id : null;
+  if (wantId !== null) {
+    const taken = stmts.getArticleUrlById.get(wantId);
+    if (taken) {
+      return taken.url === url
+        ? { inserted: false, id: taken.id, reason: 'url' }
+        : { inserted: false, id: null, reason: 'id-taken' };
+    }
+  }
   const content = typeof row.content === 'string' ? row.content : '';
   const contentHash = content ? sha256(content) : null;
-  const res = stmts.restoreArticle.run({
+  const stmt = wantId !== null ? stmts.restoreArticleWithId : stmts.restoreArticle;
+  const res = stmt.run({
+    ...(wantId !== null ? { id: wantId } : {}),
     source_id: row.source_id ?? null,
     url,
     title: row.title ?? url,

@@ -319,6 +319,21 @@ export const RESPECT_ROBOTS = process.env.CRAWLER_RESPECT_ROBOTS !== 'false';
 // real. Desligue por run com --no-aggressive ou globalmente com CRAWLER_AGGRESSIVE=false.
 // isBlockedPage e o circuit breaker seguem valendo — agressivo nunca salva página de desafio.
 export const AGGRESSIVE_DEFAULT = process.env.CRAWLER_AGGRESSIVE !== 'false';
+// ---- restore automático do acervo (a base de registro é o snapshot versionado em git) ----
+// Base VAZIA + snapshot no histórico do git => o acervo volta sozinho, em vez de o crawler
+// recomeçar do zero (~600 issues por fonte, horas e dólares de LLM). Vale para quem CLONA o
+// repo, não só para quem apagou a base por engano. Nunca dispara com a base cheia nem sob a
+// suíte de testes (ver src/restore.js). Desligue com CRAWLER_AUTO_RESTORE=false ou --no-restore.
+export const AUTO_RESTORE = process.env.CRAWLER_AUTO_RESTORE !== 'false';
+// Qual corpo vence quando o MESMO artigo aparece em vários snapshots do histórico:
+//   best    (DEFAULT) maior SUBSTÂNCIA (espaços colapsados), rejeitando candidato que é HTML
+//           cru; empate fica com o mais novo. Medido: 'first' deixava 916 corpos maiores para
+//           trás (1.224.751 caracteres), e nos maiores o corpo NOVO é que era o lixo (só o
+//           título, a moldura do GitHub, o blurb do agregador).
+//   first   o corpo do snapshot mais NOVO que tiver um (mais rápido; política anterior).
+//   longest o maior em bytes, sem sanidade nenhuma (auditoria/comparação).
+const BODY_POLICY_IN = String(process.env.CRAWLER_RESTORE_BODY_POLICY || 'best').toLowerCase();
+export const RESTORE_BODY_POLICY = ['best', 'first', 'longest'].includes(BODY_POLICY_IN) ? BODY_POLICY_IN : 'best';
 // ---- piso mínimo de coleta (data dura) ----
 // Nenhuma coleta desce abaixo desta data: um --since anterior é clampado (com aviso) em
 // commands.js; sem flag e sem CRAWLER_SINCE, ele vira o default. O arquivo de um índice

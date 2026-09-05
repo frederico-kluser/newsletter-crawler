@@ -744,6 +744,27 @@ export const stmts = {
   deleteEventsBySource: db.prepare(`DELETE FROM events WHERE source_id = ?`),
   deleteSelectorsLike: db.prepare(`DELETE FROM selectors WHERE template_sig LIKE ?`),
 
+  // "há QUALQUER dado aqui?" numa pergunta só (EXISTS = O(1) por tabela; COUNT varreria tudo).
+  // Serve a UM propósito: o guard de backup das operações destrutivas precisa distinguir o
+  // `createBackup() === null` LEGÍTIMO ("banco vazio, não havia o que copiar" — pode seguir) da
+  // FALHA de backup (disco cheio/permissão — ABORTA a destruição). A lista de tabelas é a MESMA
+  // do DATA_TABLES do src/backup.js: "0 artigos" não é "0 dados" (selectors e llm_usage saíram
+  // de chamadas de IA que custaram dinheiro).
+  hasAnyData: db.prepare(
+    `SELECT (EXISTS(SELECT 1 FROM articles)
+          OR EXISTS(SELECT 1 FROM sources)
+          OR EXISTS(SELECT 1 FROM pages)
+          OR EXISTS(SELECT 1 FROM selectors)
+          OR EXISTS(SELECT 1 FROM frontier)
+          OR EXISTS(SELECT 1 FROM runs)
+          OR EXISTS(SELECT 1 FROM classifications)
+          OR EXISTS(SELECT 1 FROM article_tags)
+          OR EXISTS(SELECT 1 FROM classification_uncovered)
+          OR EXISTS(SELECT 1 FROM llm_usage)
+          OR EXISTS(SELECT 1 FROM events)
+          OR EXISTS(SELECT 1 FROM searches)) AS x`,
+  ),
+
   // remoção COMPLETA de uma fonte (descadastra de vez, além do purge): ids dos artigos p/ decidir
   // quais buscas ficaram órfãs; a linha `sources` em si (apagada por ÚLTIMO — FK dos articles).
   listSourceArticleIds: db.prepare(`SELECT id FROM articles WHERE source_id = ?`),
@@ -1000,6 +1021,35 @@ export function wipeAll() {
   });
   tx();
   db.exec('VACUUM');
+}
+
+/**
+ * PURGE dos dados de UMA fonte — a fonte CONTINUA cadastrada (é o que difere do removeSource).
+ * Apaga articles (+ cascatas de FK/trigger p/ classifications/article_tags/
+ * classification_uncovered/FTS/vec), pages, frontier, events e, com `selectors:true`, o cache de
+ * seletores do host.
+ * TUDO numa transação: eram quatro `.run()` SOLTOS no commands.js e uma falha no meio (disco
+ * cheio, SQLITE_BUSY, FK) deixava a fonte pela METADE — artigos apagados e frontier intacta, por
+ * exemplo, que é o pior estado possível ("apague e refaça" deixa de ser reprodutível). O
+ * `removeSource` logo abaixo já era transacional; o purge agora tem a mesma garantia.
+ * Retorna as contagens apagadas, ou null se a fonte não existe. Um erro no meio faz ROLLBACK e
+ * PROPAGA (nada foi apagado) — quem chama decide o que dizer ao usuário.
+ */
+export function purgeSource(sourceId, { selectors = false } = {}) {
+  const src = stmts.getSourceById.get(sourceId);
+  if (!src) return null;
+  // selectors são por HOST (template_sig "host:…"): resolvido FORA da transação (leitura pura).
+  const host = selectors ? hostOf(src.base_url) : null;
+  const counts = {};
+  const tx = db.transaction(() => {
+    counts.articles = stmts.deleteArticlesBySource.run(sourceId).changes;
+    counts.pages = stmts.deletePagesBySource.run(sourceId).changes;
+    counts.frontier = stmts.deleteFrontierBySource.run(sourceId).changes;
+    counts.events = stmts.deleteEventsBySource.run(sourceId).changes;
+    if (selectors) counts.selectors = host ? stmts.deleteSelectorsLike.run(`${host}:%`).changes : 0;
+  });
+  tx();
+  return counts;
 }
 
 /**

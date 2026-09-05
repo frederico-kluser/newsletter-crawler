@@ -3,7 +3,7 @@ import { readFileSync, existsSync, writeFileSync, mkdirSync, copyFileSync } from
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import os from 'node:os';
-import { normalizeUrl } from './util.js'; // util é puro (não importa config) -> sem ciclo
+import { normalizeUrl, warn } from './util.js'; // util é puro (não importa config) -> sem ciclo
 
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -270,6 +270,37 @@ export const DB_PATH = process.env.DB_PATH
 
 // Destino dos exports (`ncrawl export`). Também em NC_HOME, longe do repo.
 export const EXPORT_DIR = path.join(NC_HOME, 'export');
+
+// ---- backup automático do banco (cinto de segurança das operações destrutivas) ----
+// O banco do usuário JÁ foi apagado duas vezes por um `reset` disparado sem querer na TUI (logs
+// ui-2026-08-25T22-01-44 e ui-2026-09-01T03-16-20; o de 01/09 levou 3249 artigos e ~US$ 12 de LLM
+// 1min45 depois de a coleta terminar). Regra do usuário: "nunca recomece do zero" — reset/purge/
+// remove passam a tirar uma cópia CONSISTENTE (VACUUM INTO) antes de agir (src/backup.js).
+// `BACKUP_DIR` relativo resolve contra NC_HOME; absoluto vale como é (mesma regra do DB_PATH).
+// O diretório é criado SOB DEMANDA por backup.js — nunca no import.
+export const BACKUP_DIR = process.env.BACKUP_DIR
+  ? path.resolve(NC_HOME, process.env.BACKUP_DIR)
+  : path.join(NC_HOME, 'backups');
+// Quantas cópias a retenção mantém. A poda NUNCA apaga a mais recente NEM a com mais artigos.
+// Valor inválido no .env ('abc', '-5', '0', ' ') NÃO pode degradar a retenção: cai no DEFAULT com
+// aviso, nunca em 1 — num módulo cuja tese é "a retenção não pode virar mais uma forma de perder
+// dado", um typo derrubando 10 -> 1 em silêncio seria a mesma armadilha de novo. Mesmo padrão do
+// `envIntOr0` (inteiro > 0, senão o default), com o aviso que aquele helper não dá.
+export const BACKUP_KEEP_DEFAULT = 10;
+export const BACKUP_KEEP = (() => {
+  const raw = process.env.BACKUP_KEEP;
+  if (raw === undefined || raw === '') return BACKUP_KEEP_DEFAULT;
+  const n = Number(raw);
+  if (Number.isFinite(n) && n >= 1) return Math.floor(n);
+  warn(`BACKUP_KEEP inválido (${JSON.stringify(raw)}) — usando o default ${BACKUP_KEEP_DEFAULT}.`);
+  return BACKUP_KEEP_DEFAULT;
+})();
+// Backup antes de toda operação destrutiva (reset/purge/remove). =false volta ao comportamento
+// antigo (destrói sem rede) — é o único jeito de perder dado de novo, e é explícito.
+export const BACKUP_BEFORE_DESTRUCTIVE = process.env.BACKUP_BEFORE_DESTRUCTIVE !== 'false';
+// Intervalo MÍNIMO entre backups PERIÓDICOS (o de operação destrutiva ignora isto e sempre copia):
+// sem ele, um backup por minuto encheria o disco de cópias quase idênticas. Default 1h.
+export const BACKUP_MIN_INTERVAL_MS = Number(process.env.BACKUP_MIN_INTERVAL_MS || 3600000);
 
 // Overrides finos por estágio: 0/ausente = delega ao governador; setado = teto duro
 // (o efetivo vira min(override, lane)). Inteiro > 0, senão 0.

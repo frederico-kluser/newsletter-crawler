@@ -4,7 +4,7 @@
 // snapshot antigo sem contentsParts). Sem rede: fetch global é stubado.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { findPartForId, getContent } from '../src/lib/data.js';
+import { findPartForId, getContent, hydrateSnippet } from '../src/lib/data.js';
 
 test('findPartForId: localiza a parte cujo intervalo from..to contém o id', () => {
   const parts = [
@@ -80,4 +80,27 @@ test('getContent: snapshot antigo SEM contentsParts => corpo vazio (fail-open)',
   } finally {
     fake.restore();
   }
+});
+// ---- snippet derivado do blurb (o snapshot não manda o mesmo texto duas vezes) ----
+// O export manda `blurb` OU `snippet`: quando o artigo tem blurb (a descrição do agregador), o
+// snippet É o prefixo dele e vem `null` — mandar os dois custava ~2 MiB no articles.json commitado.
+// Esta é a ÚNICA fronteira de dados do site, então é aqui que o snippet volta a existir, pela MESMA
+// regra do export (substr 400 + whitespace normalizado), antes de card/busca/palheiro.
+test('hydrateSnippet: deriva o snippet do blurb quando ele vem null (regra do export)', () => {
+  const curado = hydrateSnippet({ id: 1, snippet: null, blurb: 'Blurb  do\nagregador com whitespace.' });
+  assert.equal(curado.snippet, 'Blurb do agregador com whitespace.');
+
+  // corta em 400 chars, como o substr do SQL
+  const longo = hydrateSnippet({ id: 2, snippet: null, blurb: 'y'.repeat(1000) });
+  assert.equal(longo.snippet.length, 400);
+
+  // sem blurb E sem snippet: string vazia, nunca null/undefined (o card faz `|| ''`, a busca não)
+  assert.equal(hydrateSnippet({ id: 3, snippet: null, blurb: null }).snippet, '');
+});
+
+test('hydrateSnippet: snapshot ANTIGO (snippet preenchido) passa intacto — retrocompatível', () => {
+  const antigo = { id: 4, snippet: 'preview antigo', blurb: 'blurb que NÃO deve sobrescrever' };
+  assert.equal(hydrateSnippet(antigo).snippet, 'preview antigo');
+  // `''` é valor legítimo (artigo sem blurb e sem corpo), não um "faltando" p/ derivar
+  assert.equal(hydrateSnippet({ id: 5, snippet: '', blurb: 'ignorado' }).snippet, '');
 });

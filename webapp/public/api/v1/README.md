@@ -15,8 +15,9 @@ serviço consumir — é um contrato **estável e versionado**.
 
 - **Método:** `GET`. **CORS:** liberado para qualquer origem (`Access-Control-Allow-Origin: *`) —
   dá para chamar direto do navegador em qualquer domínio.
-- **Tamanho:** ~5 MB não comprimido (a Vercel serve com gzip/brotli, ~1 MB na rede). **Não** inclui
-  o corpo completo dos artigos, só metadados + resumos + tags.
+- **Tamanho:** ~28 MB não comprimido no acervo atual (a Vercel serve com gzip/brotli, uma fração
+  disso na rede) e cresce com o acervo. **Não** inclui o corpo completo dos artigos, só metadados +
+  resumos + tags.
 - **Atualização:** regenerado **a cada deploy** (todo push na `main` re-exporta o acervo). Veja
   `generatedAt` no topo do arquivo para saber a validade do snapshot.
 - **Cache:** `s-maxage=3600` na CDN (invalidada automaticamente a cada novo deploy).
@@ -62,6 +63,8 @@ mudam de tipo. Qualquer mudança incompatível sai numa nova versão de caminho 
 | `titlePt` | string \| null | Título em PT-BR (`null` se ainda não resumido). |
 | `summaryPt` | string \| null | **Resumo em PT-BR** (`null` se ainda não resumido). |
 | `snippet` | string | Trecho de preview (~400 caracteres, sem HTML). |
+| `issueUrl` | string \| null | URL da **issue/edição** da newsletter de onde o item foi curado (`null` se o artigo não veio de uma issue). |
+| `blurb` | string \| null | Descrição **crua do próprio agregador** sobre o item, como saiu na newsletter (`null` quando não há), truncada em 4000 caracteres. Diferente do `snippet`, que é um preview normalizado e cortado em ~400. |
 | `kind` | string \| null | `"news"`, `"tool"` (techs/ferramentas), `"release"` ou `null`. |
 | `section` | string \| null | Seção da newsletter de origem (ex.: `"Tools"`), quando houver. |
 | `date` | string | Data de publicação `YYYY-MM-DD` (cai na data de coleta se a fonte não datar). |
@@ -73,6 +76,9 @@ mudam de tipo. Qualquer mudança incompatível sai numa nova versão de caminho 
 >
 > **Campos podem ser `null`:** artigos recém-coletados ainda sem resumo/tags trazem `titlePt`,
 > `summaryPt` = `null` e `tags` = `{}` — o campo está **sempre presente**, nunca some.
+>
+> **`issueUrl`/`blurb` são aditivos (desde 2026-09):** snapshots gerados antes disso não têm as duas
+> chaves. Por isso elas não entram no `required` do `schema.json` — leia com `a.blurb ?? null`.
 >
 > **Corpo completo:** não vai nesta API (peso). Fica no snapshot interno do site em
 > `/data/contents.partN.json` (mapa `id → texto`, fatiado em partes < 100 MB), se você precisar

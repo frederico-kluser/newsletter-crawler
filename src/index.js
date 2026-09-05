@@ -8,7 +8,7 @@ import path from 'node:path';
 import { db } from './db.js';
 import { closeBrowser } from './fetch.js';
 import { closeParsePool } from './parse-pool.js';
-import { openLogFile, log, errorLog } from './util.js';
+import { openLogFile, log, warn, errorLog } from './util.js';
 import { providerInfo, ROOT } from './config.js';
 import {
   printStatus, cmdCrawl, cmdAdd, cmdRemove, cmdReset, cmdExport, cmdSearch, cmdKey,
@@ -16,6 +16,7 @@ import {
   cmdLimits,
   cmdReclean, cmdInspect, cmdPurge, cmdFinish, cmdDeploy, cmdReextract,
 } from './commands.js';
+import { bootstrapFromCli, cmdBackup, cmdRestore } from './cli-restore.js';
 
 function parseFlags(argv) {
   const flags = {};
@@ -82,16 +83,47 @@ function printHelp() {
       '                          até zerar o acervo do site. Sem eles o guard anti-encolhimento bloqueia.',
       '  node src/index.js finish [--budget USD] [--parallel N] [--limit N] [--no-verify|--no-classify|--no-summarize]',
       '                          termina os PENDENTES (verify+classify+summarize) SEM novo crawl; use --budget p/ limitar e retomar',
+      '                          --force --yes: RE-PROCESSA o acervo INTEIRO por LLM e APAGA tags/',
+      '                          classificações/resumos/vereditos antes (destrutivo e caro — o --yes',
+      '                          é obrigatório junto do --force; faz BACKUP antes)',
       '  node src/index.js search <consulta> [--mode A|B] [--limit N] [--yes] [--all] [--budget USD] [--parallel N]',
       '  node src/index.js web [--port N] [--no-open]   buscador web (React) com filtros da base',
       `  node src/index.js key set <CHAVE> [--provider openrouter|deepseek] | key test [--provider …]`,
       `                          valida/salva a chave LLM (${providerInfo().name}; em ~/.newsletter-crawler/.env)`,
       '  node src/index.js limits [show | set --budget USD --parallel N --ram-max-pct P --ram-free-pct P --cpu-free-pct P]   limites persistentes',
       '  node src/index.js deploy [--force] [--no-wait] [--dry-run] [--include-code] [--timeout S]',
+      '                          [--allow-shrink [wipe]]',
       '                          publica o site: exporta o snapshot, commita, dá push na main e ESPERA',
       '                          a Vercel publicar (confere o snapshot no ar). --force republica sem',
-      '                          dado novo; --no-wait volta no push; --include-code leva o código junto',
-      '  node src/index.js reset --yes     APAGA TODOS OS DADOS (slate limpo)',
+      '                          dado novo; --no-wait volta no push; --include-code leva o código junto;',
+      '                          --allow-shrink publica um snapshot MENOR que o no ar (redução',
+      '                          INTENCIONAL) e --allow-shrink wipe libera até zerar o site',
+      '',
+      'RECUPERAÇÃO (o acervo mora no git: webapp/public/data é a base de registro, não o SQLite local)',
+      '  node src/index.js restore [--dry-run] [--limit N] [--ref <ref>] [--since <data>]',
+      '                          [--body-policy best|first|longest] [--no-marker] [--yes]',
+      '                          RECONSTRÓI o acervo a partir do HISTÓRICO DO GIT (a união de todos os',
+      '                          snapshots commitados é maior que qualquer um isolado). --dry-run só',
+      '                          mostra o que faria; --no-marker ignora a fronteira do wipe (é a',
+      '                          escotilha de quem deu `reset` sem querer e QUER o acervo de volta);',
+      '                          sobre base NÃO-vazia exige --yes e faz BACKUP antes.',
+      '  node src/index.js backup [list | restore <arquivo|latest|best> --yes]',
+      '                          cópia CONSISTENTE do banco (VACUUM INTO) em NC_HOME/backups; `list`',
+      '                          mostra nº de artigos/tamanho/data; `restore` fecha a conexão, apaga',
+      '                          o .db E os sidecars -wal/-shm (um -wal sobrevivente reaplicaria o',
+      '                          banco velho por cima) e copia a cópia escolhida no lugar.',
+      '  BOOTSTRAP: com a base VAZIA, crawl/finish/search/web/export/status/ui já restauram sozinhos',
+      '  do git no início do comando — um clone novo do repositório vem com os dados. Desligue com',
+      '  --no-restore ou CRAWLER_AUTO_RESTORE=false.',
+      '',
+      '  node src/index.js reset --yes --confirm <nº de artigos>   APAGA TODOS OS DADOS (slate limpo)',
+      '                          o número a digitar é o de ARTIGOS que serão perdidos (sai no aviso);',
+      '                          faz BACKUP antes E MEXE NO REPOSITÓRIO GIT em ROOT (o diretório do',
+      '                          CÓDIGO, não o cwd): remove e COMMITA webapp/public/data + api/v1 (o',
+      '                          snapshot do site) e grava .nc-wipe.json — rodar isto de dentro do repo',
+      '                          altera o git do projeto e o site publica o acervo vazio no próximo',
+      '                          deploy. Para voltar: ncrawl backup restore latest --yes, ou',
+      '                          ncrawl restore --no-marker --yes.',
       '',
       'Global: instale com `npm run link` e use `ncrawl <comando>` de qualquer lugar (dados em NC_HOME=~/.newsletter-crawler).',
       'Flags globais: --no-input (nunca abre a UI). --help/-h (ajuda) e --version/-V (versão) valem em qualquer comando.',
@@ -105,7 +137,7 @@ function printHelp() {
 // Comandos que abrem o log persistente do processo e fazem dispatch (o resto é erro de uso).
 const KNOWN_COMMANDS = new Set([
   'crawl', 'status', 'inspect', 'reclean', 'reextract', 'purge', 'add', 'remove', 'export',
-  'finish', 'search', 'web', 'key', 'limits', 'deploy', 'reset', 'clean',
+  'finish', 'search', 'web', 'key', 'limits', 'deploy', 'reset', 'clean', 'restore', 'backup',
 ]);
 
 // ---------------- entrypoint ----------------
@@ -138,6 +170,10 @@ try {
     // Log persistente também no menu: as runs da TUI ficam em NC_HOME/logs/ui-*.log (sem
     // anúncio — o feed da UI já mostra o log ao vivo).
     openLogFile({ command: 'ui' });
+    // BOOTSTRAP antes do render: a TUI mostra o status já no primeiro quadro, então uma base
+    // vazia precisa ter voltado ANTES — senão a tela abre com "0 artigos" e o usuário manda
+    // coletar tudo de novo. Este caminho NÃO passa por commands.js, por isso o gancho é aqui.
+    bootstrapFromCli('ui', flags);
     // Import dinâmico: o caminho CLI nunca carrega ink/react. launchUI() é dona do teardown.
     const { launchUI } = await import('./ui/index.js');
     await launchUI();
@@ -149,7 +185,7 @@ try {
     } else if (!KNOWN_COMMANDS.has(cmd)) {
       errorLog(
         `comando desconhecido: ${cmd} ` +
-          '(use: crawl | status | inspect | reclean | reextract | purge | add | remove | export | finish | search | web | key | limits | deploy | reset | ui)',
+          '(use: crawl | status | inspect | reclean | reextract | purge | add | remove | export | finish | search | web | key | limits | deploy | restore | backup | reset | ui)',
       );
       process.exit(1);
     } else {
@@ -158,6 +194,12 @@ try {
       // imediato — `tail -f` acompanha ao vivo mesmo com o stdout do npm buferizado num pipe.
       const logFile = openLogFile({ command: cmd });
       if (logFile) log(`log do run: ${logFile}`);
+      // BOOTSTRAP: ponto ÚNICO de decisão (a allowlist e as condições vivem em cli-restore.js;
+      // aqui só há a chamada). Base vazia + snapshot no histórico do git ⇒ o acervo volta antes
+      // do comando rodar — "nunca recomece do zero". NUNCA fiado em printStatus() (o cmdReset o
+      // chama no fim: o restore desfaria o reset no mesmo processo) nem em reset/key/limits/
+      // add/remove/deploy. Depois do openLogFile p/ o relato do restore entrar no log da run.
+      bootstrapFromCli(cmd, flags);
       if (cmd === 'crawl') {
         await cmdCrawl(flags);
         db.close();
@@ -208,7 +250,21 @@ try {
       } else if (cmd === 'deploy') {
         await cmdDeploy(flags);
         db.close();
+      } else if (cmd === 'restore') {
+        cmdRestore(flags);
+        db.close();
+      } else if (cmd === 'backup') {
+        const out = cmdBackup(rest, flags);
+        if (!out?.closed) db.close(); // `backup restore` já fechou a conexão p/ trocar o arquivo
       } else if (cmd === 'reset' || cmd === 'clean') {
+        // GUARD (o gesto é barato demais para o estrago): o reset age sobre ROOT — a raiz do
+        // CÓDIGO, não o cwd. Rodado de dentro do repositório ele remove E COMMITA o snapshot do
+        // site. Dizer isso ANTES da confirmação é o que transforma um reflexo em decisão.
+        warn(
+          `reset também MEXE NO REPOSITÓRIO GIT em ${ROOT} (a raiz do CÓDIGO, não o diretório atual): ` +
+            'remove e COMMITA webapp/public/data + webapp/public/api/v1 e grava .nc-wipe.json — o site ' +
+            'publicará o acervo VAZIO no próximo deploy. Para desfazer: ncrawl backup restore latest --yes.',
+        );
         cmdReset(flags);
         db.close();
       }

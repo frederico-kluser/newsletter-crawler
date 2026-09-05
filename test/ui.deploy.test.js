@@ -26,14 +26,14 @@ after(() => {
   }
 });
 
-test('UI: o menu leva à tela de publicar, com os 3 modos', async () => {
+test('UI: o menu leva à tela de publicar, com os modos de publicação', async () => {
   const { stdin, lastFrame, unmount } = render(html`<${App} />`);
   await wait(80);
   assert.ok((lastFrame() || '').includes('Publicar'), 'o menu deve oferecer Publicar no site');
 
   await selectMenuItem(stdin, lastFrame, 'Publicar');
   const frame = lastFrame() || '';
-  for (const label of ['Como publicar', 'Republicar', 'Simular']) {
+  for (const label of ['Como publicar', 'Republicar', 'Simular', 'MENOR']) {
     assert.ok(frame.includes(label), `a tela deve oferecer "${label}"\n--- frame ---\n${frame}`);
   }
   unmount();
@@ -54,6 +54,46 @@ test('UI: escolher um modo cai na REVISÃO com o comando equivalente (sem execut
   stdin.write(keys.ENTER); // confirma na revisão
   await wait(30);
   assert.deepEqual(ran, { sub: 'deploy', flags: {}, rest: [] });
+  unmount();
+});
+
+test('UI: o opt-in --allow-shrink exige uma confirmação explícita antes da revisão', async () => {
+  let ran = null;
+  const { stdin, lastFrame, unmount } = render(
+    html`<${DeployConfirm} onRun=${(spec) => { ran = spec; }} onBack=${() => {}} />`,
+  );
+  await wait(30);
+  for (let i = 0; i < 3; i++) { // 4ª opção: publicar com o acervo MENOR
+    stdin.write(keys.DOWN);
+    await wait(20);
+  }
+  stdin.write(keys.ENTER);
+  await wait(40);
+  let frame = lastFrame() || '';
+  assert.ok(frame.includes('--allow-shrink'), `a tela explica o opt-in\n${frame}`);
+  assert.ok(frame.includes('wipe'), `e diz que ZERAR o site continua só na CLI\n${frame}`);
+  assert.ok(!frame.includes('npm run deploy'), 'a confirmação vem ANTES da revisão');
+
+  stdin.write(keys.DOWN); // "Não" é a 2ª: primeiro conferimos que ela volta ao modo
+  await wait(20);
+  stdin.write(keys.ENTER);
+  await wait(40);
+  assert.ok((lastFrame() || '').includes('Como publicar'), 'recusar volta à escolha do modo');
+
+  for (let i = 0; i < 3; i++) {
+    stdin.write(keys.DOWN);
+    await wait(20);
+  }
+  stdin.write(keys.ENTER);
+  await wait(40);
+  stdin.write(keys.ENTER); // "Sim"
+  await wait(40);
+  frame = lastFrame() || '';
+  assert.ok(frame.includes('--allow-shrink'), `a revisão mostra a flag\n${frame}`);
+  assert.equal(ran, null, 'a revisão não dispara sozinha');
+  stdin.write(keys.ENTER);
+  await wait(40);
+  assert.deepEqual(ran, { sub: 'deploy', flags: { 'allow-shrink': true }, rest: [] });
   unmount();
 });
 

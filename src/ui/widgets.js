@@ -36,7 +36,12 @@ const HEADER_KEY = {
   summarize: 'menuSummarize',
   finish: 'menuFinish',
   add: 'menuAdd',
+  sources: 'menuSources',
   limits: 'menuLimits',
+  deploy: 'menuDeploy',
+  maintenance: 'menuMaintenance',
+  backup: 'menuBackup',
+  restore: 'menuRestore',
   reset: 'menuReset',
 };
 export function Header({ screen }) {

@@ -2,7 +2,7 @@ import FilterPanel from './FilterPanel.jsx';
 import { useStrings } from '../i18n.jsx';
 
 /** Filtros persistentes do desktop (≥900px). No mobile o mesmo painel vive no FilterDrawer. */
-export default function Sidebar({ meta, filters, dispatch, facetCounts, mix, onMixChange }) {
+export default function Sidebar({ meta, filters, dispatch, facetCounts }) {
   const STR = useStrings();
   return (
     <aside className="sidebar" aria-label={STR.filters}>
@@ -11,8 +11,6 @@ export default function Sidebar({ meta, filters, dispatch, facetCounts, mix, onM
         filters={filters}
         dispatch={dispatch}
         facetCounts={facetCounts}
-        mix={mix}
-        onMixChange={onMixChange}
       />
     </aside>
   );

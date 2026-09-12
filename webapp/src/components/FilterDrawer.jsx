@@ -8,7 +8,7 @@ import { useStrings } from '../i18n.jsx';
  * Drawer inferior de filtros (mobile <900px): entra por baixo com spring, fecha por backdrop,
  * Esc ou ARRASTO para baixo (offset > 120px ou flick > 800px/s — só transform, sem thrash).
  */
-export default function FilterDrawer({ open, onClose, meta, filters, dispatch, facetCounts, mix, onMixChange }) {
+export default function FilterDrawer({ open, onClose, meta, filters, dispatch, facetCounts }) {
   const STR = useStrings();
   useEffect(() => {
     if (!open) return undefined;

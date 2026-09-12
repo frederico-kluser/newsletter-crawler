@@ -35,7 +35,7 @@ import { searchText } from './lib/textSearch.js';
 import { useStrings } from './i18n.jsx';
 import Tutorial from './components/Tutorial.jsx';
 import { PlayerProvider } from './player.jsx';
-import { getMixSources, setMixSources, getTutorialSeen, setTutorialSeen } from './lib/storage.js';
+import { getTutorialSeen, setTutorialSeen } from './lib/storage.js';
 import './styles/app.css';
 
 function filtersReducer(state, action) {
@@ -74,12 +74,9 @@ export default function App() {
   const [detailId, setDetailId] = useState(null);
   const [strict, setStrict] = useState(false); // AMPLO por padrão: mostra 'direct' + 'similar' (Estrito é opt-in)
   const [drawerOpen, setDrawerOpen] = useState(false);
-  // rodízio de fontes dentro de cada data (ligado por padrão; a escolha persiste entre visitas)
-  const [mix, setMix] = useState(getMixSources);
-  const onMixChange = useCallback((on) => {
-    setMix(on);
-    setMixSources(on);
-  }, []);
+  // EXIBIÇÃO POR DATA: a lista é sempre data DESC com as fontes MISTURADAS dentro de cada data
+  // (rodízio) — nunca agrupada por provider. O antigo toggle "misturar fontes" foi removido: com
+  // ele desligado (e persistido no navegador) o site saía em blocos de uma fonte só.
   const [historyOpen, setHistoryOpen] = useState(false);
   const [textInput, setTextInput] = useState('');
   const textQuery = useDebouncedValue(textInput, 180);
@@ -144,7 +141,7 @@ export default function App() {
     (id) => meta?.sources.find((s) => s.id === id)?.name || '',
     [meta],
   );
-  const sortOpts = useMemo(() => ({ mix, sourceName }), [mix, sourceName]);
+  const sortOpts = useMemo(() => ({ mix: true, sourceName }), [sourceName]);
   // Browse = filtros estruturados (sidebar) + busca textual LOCAL (o "search sem inteligência").
   const filtered = useMemo(
     () => (articles ? sortForDisplay(searchText(applyFilters(articles, filters, toolTypes), textQuery), sortOpts) : []),
@@ -195,13 +192,13 @@ export default function App() {
   }, [ai.phase, aiActive, filters.kind]);
 
   // IA: durante o streaming os cards ficam na ORDEM DE CHEGADA (reordenar ao vivo faria o card
-  // que o usuário está lendo pular de lugar); ao TERMINAR, o resultado congelado é reordenado por
-  // data + rodízio de fontes. Com o toggle desligado, a IA mantém a ordem por relevância.
+  // que o usuário está lendo pular de lugar); ao TERMINAR, o resultado congelado também é exibido
+  // por DATA com as fontes misturadas (mesma regra da lista — requisito de exibição do site).
   const aiOrdered = useMemo(() => {
     if (!aiShown) return null;
     const list = aiShown.map((x) => x.article);
-    return aiActive && mix ? sortForDisplay(list, sortOpts) : list;
-  }, [aiShown, aiActive, mix, sortOpts]);
+    return aiActive ? sortForDisplay(list, sortOpts) : list;
+  }, [aiShown, aiActive, sortOpts]);
   const displayItems = aiOrdered ?? filtered;
   // Itens do player de áudio: a lista EXIBIDA (na ordem da tela) reduzida ao que o TTS narra
   // (id + título p/ rótulo + summary_pt como conteúdo). Itens sem resumo são pulados no player.
@@ -289,8 +286,6 @@ export default function App() {
               filters={filters}
               dispatch={dispatch}
               facetCounts={facetCounts}
-              mix={mix}
-              onMixChange={onMixChange}
             />
           )}
           <section className="content">
@@ -410,8 +405,6 @@ export default function App() {
           filters={filters}
           dispatch={dispatch}
           facetCounts={facetCounts}
-          mix={mix}
-          onMixChange={onMixChange}
         />
       )}
 

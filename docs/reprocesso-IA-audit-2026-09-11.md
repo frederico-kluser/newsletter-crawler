@@ -113,7 +113,36 @@ SELECT count(*) FROM articles a WHERE NOT EXISTS
 SELECT stage, count(*), printf('%.4f', avg(cost_usd)) FROM llm_usage GROUP BY stage;
 ```
 
-## 8. Referências
+## 8. Mitigações implementadas (2026-09-11/12)
+
+| Furo | Correção | Evidência |
+|---|---|---|
+| Furo 1 (kept-blurb fora do streaming) | `keepAggregatorVersion` (`src/crawl.js`) devolve `{ verifyUrl }` em todos os caminhos — a ficha entra no `streamPostSave` da PRÓPRIA run | teste `test/kept-blurb.stream.test.js`; o item morto não espera mais o sweep |
+| Furo 3 (sweep não escopado) | `listArticles*ForRun` + `runId` em `verifyPending/classifyPending/summarizePending`; pós-crawl usa a run atual (`--sweep-all` volta ao global; `finish` continua global) | E2E real: `pós-crawl: escopo run 3 — pendentes de outras runs ficam p/ o finish` + `verify: nada a verificar` (antes drenaria 453/637/661 pendentes globais), custo US$ 0 |
+| Pedido do usuário: cursor por fonte | `sources.cursor_date` (data do item mais novo capturado, `MAX(iso_date(published_at))`) + `src/cursor.js` (`resolveSourceFloor`: `--since-source` > `--since` > cursor > derivado > mínimo; clamp de mínimo e de data futura) + avanço só-após-listagem-OK + reset no `purge` + flags `--since-source`/`--reset-cursor` + `status`/TUI mostram o cursor | E2E real (Postgres Weekly): run 1 `piso … 2026-09-09 (derivado)` → run 2 `piso … 2026-09-09 (cursor)` com **US$ 0**; `--since-source` → `(flag-fonte)`; `--since` → `(flag)`; `--reset-cursor` → volta a `(derivado)` |
+| Furo 2 (`ENRICH_MAX_ATTEMPTS=0`) | **não alterado** — decisão do usuário; reativar o teto (3) segue como um toggle de env | pendente de decisão |
+
+Arquivos: `src/cursor.js` (novo), `src/db.js`, `src/commands.js`, `src/crawl.js`, `src/verify.js`, `src/classify.js`, `src/summarize.js`, `src/index.js` (help), `src/ui/{SourcesView,App,i18n,screens}.js` (cursor na tela Gerenciar fontes + `c` reseta), `AGENTS.md`. Testes: `test/cursor.test.js`, `test/db.cursor.test.js`, `test/sweep-scope.test.js`, `test/kept-blurb.stream.test.js`, `test/cursor.pending.test.js`.
+
+### 8.1 Correções vindas da revisão adversarial (relatório completo em `docs/auditoria-reprocesso/revisao-cursor.md`)
+
+| Achado | Gravidade | Correção aplicada | Verificação |
+|---|---|---|---|
+| **BUG-1** — piso (cursor/derivado) podia ultrapassar backlog `pending` de uma captura PARCIAL (`--max-articles`, budget, Ctrl+C, deadline): o roundup era pulado por `below-since` e marcado `done` → **perda permanente** (enqueue é OR IGNORE e `isUrlKnown` conta frontier em qualquer estado) | Crítica | `stmts.oldestUnfinishedForSource` + `applyPendingCeiling` (`src/cursor.js`): o piso nunca passa do trabalho inacabado; pendência SEM data derruba para o piso mínimo; o teto vale também com flag explícita (rebaixar = varrer mais; o alternativo é perder) | sandbox com job pendente sintético: `piso … 2026-08-01 (cursor · limitado por pendências)` + `test/cursor.pending.test.js` (7 testes) |
+| **BUG-2** — ficha enriquecida nesta run mas criada em run antiga ficava invisível ao sweep escopado (o `enrichArticle` não carimbava `run_id`) | Alta | `crawl.js` passa `run_id: opts.runId` (era o intento documentado no próprio `db.js`: delta da busca + sweep) | `test/sweep-scope.test.js` |
+| **BUG-3** — `test/ui.crawl-since.test.js` assertava o texto ANTIGO do campo `--since` | Média (CI) | teste atualizado para a semântica de cursor por fonte | suíte completa |
+| **MENOR-6** — item com data-bomba (2027) deixava a fonte sem piso por fonte para SEMPRE | Média | `maxPublishedForSource` ignora data futura (`<= date('now')`) | `test/db.cursor.test.js` (data futura ignorada) |
+| **MENOR-1** — guarda de futuro descartava `--since` explícito de "hoje" em fuso à frente do UTC | Baixa | guarda de futuro vale só para valor automático (`cursor`/`derivado`) | `test/cursor.test.js` |
+| **CONFUSÃO-2** — log dizia que `CRAWLER_SINCE` era o piso global (virou fallback) | Baixa | log agora distingue `--since (flag): vence TODAS` de `--since de fallback: vale só p/ fonte sem cursor` | E2E |
+| **MENOR-3** — `--since-source` sem match sumia em silêncio | Baixa | `warn` por nome não casado (mesma regra do `--sources`) | E2E |
+| **MENOR-5** — TUI/progresso diziam "piso mínimo" e o % global ignorava o piso por fonte | Baixa | strings atualizadas; o alvo do progresso passa a ser o piso MAIS ANTIGO entre as fontes | smoke + suíte |
+
+**Caveats documentados (não são bugs, mas enganam):**
+- `--reset-cursor` sozinho é quase no-op: o cursor é, por construção, o mesmo `MAX(published_at)` que o derivado devolve — a recuperação de verdade é `--since <data antiga>` (a flag vence o cursor).
+- Pós-restore, o derivado pode subir por data sintética (`date_iso` = `extracted_at` vira `published_at` em `db.js`): mantenha a 1ª coleta pós-restore com `--since` recente (já documentado em AGENTS.md).
+- `ENRICH_MAX_ATTEMPTS=0` (decisão do usuário) mantém alvos mortos em re-tentativa perpétua — é o único vazamento medido que segue de pé, e é um toggle de env.
+
+## 9. Referências
 
 - Relatórios completos dos subagents: `docs/auditoria-reprocesso/sa1-dedup-novidade.md` · `sa2-curadoria-enrich.md` · `sa3-sweeps-pendentes.md` · `sa4-paginacao-refresh.md` · `sa5-run1-forensics.md`.
 - Log da validação: `/tmp/nc-validate.log` · log do run: `~/.newsletter-crawler/logs/crawl-2026-09-11T16-32-40-948Z-67410.log`.

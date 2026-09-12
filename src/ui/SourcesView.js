@@ -25,7 +25,7 @@ const defaultConfirmCheck = (answer, expected) => {
   return { ok: given.replace(/[.\s_,]/g, '') === String(expected), given, expected: String(expected) };
 };
 
-export function SourcesView({ sources: initial, onToggleType, onRedetect, onRemove, onDone, confirmCheck }) {
+export function SourcesView({ sources: initial, onToggleType, onRedetect, onRemove, onResetCursor, onDone, confirmCheck }) {
   const [items, setItems] = useState(initial || []);
   const [nav, setNav] = useState({ selected: 0, offset: 0 });
   const [mode, setMode] = useState('list'); // list | armed (0 artigos) | confirm (digitado) | busy
@@ -115,6 +115,19 @@ export function SourcesView({ sources: initial, onToggleType, onRedetect, onRemo
       return;
     }
 
+    if (input === 'c') {
+      // Cursor de captura: piso da próxima coleta desta fonte. Reset = a próxima coleta volta a
+      // decidir pelo derivado (MAX do que já temos) / piso mínimo.
+      const s = cur;
+      if (!s) return;
+      if (!s.cursor_date) return setNote(t('srcCursorNone'));
+      const res = onResetCursor?.(s);
+      if (res?.error) return setErr(res.error);
+      setItems((list) => list.map((x) => (x.id === s.id ? { ...x, cursor_date: null } : x)));
+      setNote(t('srcCursorReset', { name: s.name || s.base_url }));
+      return;
+    }
+
     if (input === 'r') {
       if (!cur) return;
       setErr(null);
@@ -181,7 +194,8 @@ export function SourcesView({ sources: initial, onToggleType, onRedetect, onRemo
         const idx = nav.offset + i;
         const sel = idx === nav.selected;
         const label = s.name || s.base_url;
-        const meta = `    ${s.base_url} · ${s.articles ?? 0} ${t('articles')}`;
+        const cursor = s.cursor_date ? ` · ${t('srcCursor')}=${s.cursor_date}` : '';
+        const meta = `    ${s.base_url} · ${s.articles ?? 0} ${t('articles')}${cursor}`;
         return html`<${Box} key=${s.id} flexDirection="column">
           <${Box}>
             <${Text} wrap="truncate-end" inverse=${sel}>
@@ -196,6 +210,7 @@ export function SourcesView({ sources: initial, onToggleType, onRedetect, onRemo
     <${FooterHints} inline hints=${[
       { k: 'Enter', label: t('hint_toggleType') },
       { k: 'd', label: t('hint_redetect') },
+      { k: 'c', label: t('hint_resetCursor') },
       { k: 'r', label: t('hint_removeSource') },
       { k: 'Esc/b', label: t('hint_back') },
       { k: 'q', label: t('hint_quit') },

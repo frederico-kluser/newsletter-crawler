@@ -23,17 +23,21 @@ export async function summarizeArticleRow(a) {
   return { title_pt, summary_pt };
 }
 
-/** Resume os artigos sem summary_pt (ou todos, com force). Retorna { summarized, total }. */
-export async function summarizePending({ limit = Infinity, force = false } = {}) {
+/** Resume os artigos sem summary_pt (ou todos, com force). `runId` escopa o sweep às fichas DESTA
+ *  run (pós-crawl); sem ele varre o pendente global (usado pelo `finish`).
+ *  Retorna { summarized, total }. */
+export async function summarizePending({ limit = Infinity, force = false, runId = null } = {}) {
   const lim = Number.isFinite(limit) ? limit : -1; // SQLite: LIMIT -1 = sem limite
   const rows = force
     ? stmts.listArticlesForResummarize.all(lim)
-    : stmts.listArticlesNeedingSummary.all(lim);
+    : runId != null
+      ? stmts.listArticlesNeedingSummaryForRun.all(runId, lim)
+      : stmts.listArticlesNeedingSummary.all(lim);
   if (!rows.length) {
     log('summarize: nada a resumir.');
     return { summarized: 0, total: 0 };
   }
-  log(`summarize: ${rows.length} artigo(s) — PT-BR, force=${force}.`);
+  log(`summarize: ${rows.length} artigo(s)${runId != null ? ` (run ${runId})` : ''} — PT-BR, force=${force}.`);
 
   // Janela = min(override de env, capacidade atual da lane llm do governador).
   const gate = pLimit(stageWindow(SUMMARIZE_CONCURRENCY));

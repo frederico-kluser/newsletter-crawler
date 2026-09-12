@@ -222,9 +222,9 @@ export function CrawlConfig({ onRun, onBack }) {
     </${Field}>`;
   }
   if (step === 'sincefloor') {
-    // Campo vazio não é "sem mudança": o piso cai para MIN_CRAWL_DATE, que costuma ser MAIS AMPLO
-    // que o --since da coleta anterior. O walk desce mais fundo no arquivo e a curadoria por IA
-    // roda em issues antigas (tempo + US$). O passo existe só para isso ficar dito.
+    // Campo vazio NÃO é "sem piso": cada fonte passa a usar o próprio CURSOR de captura (a data do
+    // item mais novo já capturado dela) e só cai no derivado/MIN_CRAWL_DATE quando ainda não tem
+    // cursor (fonte nova, pós-purge, pós-restore). O passo existe para a semântica ficar dita.
     return html`<${Box} flexDirection="column">
       <${StatusMessage} variant="warning">${t('sinceFloorWarn', { floor: MIN_CRAWL_DATE })}</${StatusMessage}>
       <${Box} marginTop=${1}>

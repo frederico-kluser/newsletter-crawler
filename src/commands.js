@@ -21,6 +21,7 @@ import {
 } from './governor.js';
 import { beginRun, endRun, shouldStop, getBudgetState } from './budget.js';
 import { processJob, enqueue, upsertSource } from './crawl.js';
+import { parseSinceSourceFlag, resolveSourceFloor, applyPendingCeiling } from './cursor.js';
 import { detectSourceType } from './detect-type.js';
 import { exportWebSnapshot } from './export-web.js';
 import { exportPublicApi } from './export-api.js';
@@ -293,6 +294,13 @@ export function printStatus() {
     `frontier:  pending=${s.frontier.pending} in_progress=${s.frontier.in_progress} ` +
       `done=${s.frontier.done} failed=${s.frontier.failed}`,
   );
+  // Cursor de captura por fonte (piso da próxima coleta daquela fonte).
+  const cursors = stmts.listSources.all().filter((x) => x.cursor_date);
+  log(
+    cursors.length
+      ? `cursores:  ${cursors.map((x) => `${x.name || x.base_url}=${x.cursor_date}`).join(' · ')}`
+      : 'cursores:  (nenhum — a próxima coleta usa --since/piso mínimo)',
+  );
 }
 
 // `--sources "A,B"`: lista por vírgula (o checkbox de fontes da TUI emite isto). Cada item casa
@@ -359,9 +367,46 @@ async function crawlRun(flags) {
   }
   const origem =
     typeof flags.since === 'string' ? 'flag' : process.env.CRAWLER_SINCE ? 'CRAWLER_SINCE' : 'piso mínimo';
-  log(`--since ativo (${origem}): piso ${sinceDate.toISOString()}`);
+  log(
+    typeof flags.since === 'string'
+      ? `--since (flag): ${sinceDate.toISOString()} — vence o cursor de TODAS as fontes`
+      : `--since de fallback (${origem}): ${sinceDate.toISOString()} — vale só p/ fonte sem cursor/derivado`,
+  );
   progressReset({ sinceDate });
   runEventsReset(); // zera o feed de MARCOS do painel (o ring é global ao processo, como o progresso)
+
+  // ---- Cursor de captura POR FONTE (src/cursor.js) -------------------------------
+  // Cada fonte guarda a data do item mais novo já capturado; a coleta seguinte repete esse piso
+  // (confia na captura passada) em vez de varrer de novo. `--since` explícito vence o cursor (run
+  // de recuperação); `--since-source "Nome=AAAA-MM-DD"` força UMA fonte; `--reset-cursor [fonte]`
+  // zera o cursor (vazio = todas), e o `purge` zera automaticamente.
+  const explicitSinceFlag = typeof flags.since === 'string' ? sinceDate : null;
+  const sinceOverrides = parseSinceSourceFlag(flags['since-source']);
+  const overridesUsados = new Set();
+  if (typeof flags['since-source'] === 'string' && !sinceOverrides.size) {
+    warn('--since-source sem par válido (use "Nome=AAAA-MM-DD[,Outro=...]") — ignorado');
+  }
+  if (flags['reset-cursor'] !== undefined) {
+    const alvo = typeof flags['reset-cursor'] === 'string' ? flags['reset-cursor'].trim() : '';
+    if (!alvo) {
+      const n = stmts.resetAllSourceCursors.run().changes;
+      log(`cursor: ${n} fonte(s) resetada(s) (--reset-cursor sem alvo = todas)`);
+    } else {
+      const rows = stmts.listSources.all().filter(
+        (s) =>
+          (s.name || '').toLowerCase() === alvo.toLowerCase() ||
+          (s.base_url || '').toLowerCase().includes(alvo.toLowerCase()) ||
+          (s.name || '').toLowerCase().includes(alvo.toLowerCase()),
+      );
+      if (!rows.length) warn(`--reset-cursor: nenhuma fonte casa com "${alvo}"`);
+      for (const r of rows) {
+        stmts.resetSourceCursor.run(r.id);
+        log(`cursor: ${r.name || r.base_url} resetado`);
+      }
+    }
+  }
+  // Piso efetivo por source_id, resolvido no seed (cursor + derivado) e lido no dispatch.
+  const floorBySource = new Map();
 
   // Re-crawl incremental: por padrão re-visita as listagens das fontes a cada execução (só enfileira
   // o novo; a dedup de artigo impede re-baixar o existente). `--no-refresh` desliga a re-visita.
@@ -391,6 +436,36 @@ async function crawlRun(flags) {
     }
     const src = upsertSource(s);
     sourceSeen(src.id, src.name || s.name || hostOf(s.url)); // painel: fontes x/y + % por data
+    // Piso efetivo DESTA fonte: override (--since-source) > --since global > cursor > derivado
+    // (MAX do que já temos dela, cobre pós-restore sem cursor) > piso mínimo. Uma flag/cursor mais
+    // NOVO é mais restritivo e vence.
+    const override = sinceOverrides.get((src.name || s.name || '').toLowerCase()) ?? null;
+    if (override) overridesUsados.add((src.name || s.name || '').toLowerCase());
+    const derivado = stmts.maxPublishedForSource.get(src.id)?.d ?? null;
+    let { date: floorDate, origem: floorOrigem } = resolveSourceFloor({
+      explicitSince: explicitSinceFlag,
+      override,
+      cursor: src.cursor_date ?? null,
+      derived: derivado,
+      minDate,
+      maxDate: new Date(), // cursor/derivado no FUTURO = scrape errado; nunca deixa pular o intervalo
+    });
+    // TRABALHO INACABADO manda: o piso nunca passa por cima de backlog pending/in_progress da fonte.
+    // Sem isso, uma captura parcial (`--max-articles`, budget, Ctrl+C, deadline) deixaria roundups
+    // abaixo do piso, marcados `done` no skip — e o `enqueue`/`isUrlKnown` nunca os trariam de volta.
+    // Job pendente SEM data não prova cobertura → a fonte cai no piso mínimo. O teto vale também
+    // quando o piso veio de flag explícita: rebaixar varre mais; o alternativo seria perder o backlog.
+    const pend = stmts.oldestUnfinishedForSource.get(src.id) ?? { d: null, undated: 0 };
+    const capped = applyPendingCeiling(
+      { date: floorDate, origem: floorOrigem },
+      { oldest: pend.d ?? null, undated: pend.undated ?? 0 },
+      { minDate },
+    );
+    floorDate = capped.date;
+    floorOrigem = capped.origem;
+    const sufixo = capped.limitadoPor === 'backlog' ? ' · limitado por pendências' : '';
+    if (floorDate) floorBySource.set(src.id, floorDate);
+    log(`piso ${src.name || s.url}: ${floorDate ? floorDate.toISOString().slice(0, 10) : '—'} (${floorOrigem}${sufixo})`);
     const seeded = enqueue(s.url, 'listing', null, src.id, 0);
     if (seeded) log(`seed: ${s.url} (type=${src.type})`);
     else if (!noRefresh) {
@@ -408,6 +483,22 @@ async function crawlRun(flags) {
       const capped = stmts.countEnrichAtCapForSource.get(src.id, ENRICH_MAX_ATTEMPTS).c;
       if (capped) log(`enriquecer: ${capped} item(ns) no teto de tentativas (${ENRICH_MAX_ATTEMPTS}) — mantidos com o blurb do agregador`);
     }
+  }
+
+  // --since-source que não casou com NENHUMA fonte selecionada não pode sumir em silêncio (nome
+  // errado, URL em vez de nome): avisa como o --sources faz.
+  for (const nome of sinceOverrides.keys()) {
+    if (!overridesUsados.has(nome)) {
+      warn(`--since-source: nenhuma fonte selecionada casa com "${nome}"`);
+    }
+  }
+  // Progresso por DATA: com piso POR FONTE não existe um alvo único — usa o MAIS ANTIGO (a fonte
+  // mais atrasada é quem define quanto ainda falta andar). Só re-ancora se ele for mais antigo que
+  // o piso de fallback, senão a barra regride sem motivo.
+  const pisoMaisAntigo = [...floorBySource.values()].sort((a, b) => a - b)[0] ?? null;
+  if (pisoMaisAntigo && pisoMaisAntigo < sinceDate) {
+    debug(`progresso: alvo por data ajustado p/ o piso mais antigo (${pisoMaisAntigo.toISOString().slice(0, 10)})`);
+    progressReset({ sinceDate: pisoMaisAntigo });
   }
 
   // Agressivo é o DEFAULT (CRAWLER_AGGRESSIVE=false ou --no-aggressive desligam por completo;
@@ -494,10 +585,28 @@ async function crawlRun(flags) {
   // fila (lanes/politeness) e fases LLM ficam de fora (têm timeouts/orçamento próprios). Ao
   // estourar, o job é ABORTADO de verdade (AbortSignal) — sem zumbi segurando lane (a causa da
   // cascata de 100% de estouros). JOB_HARD_TIMEOUT_MS é o teto DURO de parede (rede de segurança).
+  // Cursor da fonte: avança para o item mais novo que ela JÁ tem (só avança; roda apenas quando a
+  // listagem terminou bem — falha/timeout não passam por aqui, então a janela não é perdida).
+  const advanceCursorFor = (sourceId) => {
+    const max = stmts.maxPublishedForSource.get(sourceId)?.d ?? null;
+    if (!max) return;
+    // Data futura = scrape errado: NÃO grava (senão a próxima coleta pularia o intervalo até lá).
+    if (parseDate(max) > new Date()) {
+      warn(`cursor: ${max} no futuro para a fonte ${sourceId} — ignorado`);
+      return;
+    }
+    if (stmts.advanceSourceCursor.run({ id: sourceId, date: max }).changes) {
+      debug(`cursor: fonte ${sourceId} -> ${max}`);
+    }
+  };
+
   const dispatch = (job, set, deadline) => {
     const p = (async () => {
       const clock = job.kind === 'article' && deadline > 0 ? createJobClock(deadline) : null;
-      const jobOpts = clock ? { ...opts, clock, signal: clock.signal } : opts;
+      // Piso POR FONTE (cursor): o job usa o piso da fonte dele; sem entrada no mapa (fonte fora
+      // do seed desta run) cai no --since global.
+      const base = { ...opts, sinceDate: floorBySource.get(job.source_id) ?? opts.sinceDate };
+      const jobOpts = clock ? { ...base, clock, signal: clock.signal } : base;
       try {
         const work = processJob(job, jobOpts);
         const res = await (clock
@@ -509,6 +618,7 @@ async function crawlRun(flags) {
         if (job.kind === 'listing') sourceListingDone(job.source_id); // fonte: descoberta concluída
         stmts.finish.run('done', job.url);
         if (res?.verifyUrl) streamPostSave(res.verifyUrl); // salvou/enriqueceu -> pós-processa já
+        if (job.kind === 'listing' && job.source_id) advanceCursorFor(job.source_id); // cursor da fonte
       } catch (e) {
         if (e?.code === 'BUDGET_EXCEEDED') {
           // Orçamento: devolve à fila SEM consumir retry — retomável no próximo run. O loop
@@ -636,18 +746,23 @@ async function crawlRun(flags) {
 
   // Hooks pós-crawl EM PARALELO (verify, classify e summarize são independentes — todos só
   // leem articles e escrevem colunas/tabelas próprias); o perfil llm-only dá o teto à lane llm.
+  // ESCOPO: por padrão só as fichas DESTA run (run_id) — uma run de data já coberta não drena o
+  // backlog de runs anteriores (isso era ~⅓ do custo medido em docs/reprocesso-IA-audit-2026-09-11.md);
+  // o pendente global fica para o `finish --budget` explícito. `--sweep-all` restaura o antigo.
+  const sweepRunId = flags['sweep-all'] === true ? null : runId;
   const post = [];
   if (VERIFY_AFTER_CRAWL && HAS_LLM && flags['no-verify'] !== true && !shouldStop()) {
-    post.push(verifyPending({}).catch((e) => errorLog(`verify pós-crawl falhou: ${e.message}`)));
+    post.push(verifyPending({ runId: sweepRunId }).catch((e) => errorLog(`verify pós-crawl falhou: ${e.message}`)));
   }
   if (CLASSIFY_AFTER_CRAWL && HAS_LLM && flags['no-classify'] !== true && !shouldStop()) {
-    post.push(classifyPending({}).catch((e) => errorLog(`classify pós-crawl falhou: ${e.message}`)));
+    post.push(classifyPending({ runId: sweepRunId }).catch((e) => errorLog(`classify pós-crawl falhou: ${e.message}`)));
   }
   if (SUMMARIZE_AFTER_CRAWL && HAS_LLM && flags['no-summarize'] !== true && !shouldStop()) {
-    post.push(summarizePending({}).catch((e) => errorLog(`summarize pós-crawl falhou: ${e.message}`)));
+    post.push(summarizePending({ runId: sweepRunId }).catch((e) => errorLog(`summarize pós-crawl falhou: ${e.message}`)));
   }
   if (post.length) {
     setProfile('llm-only');
+    log(`pós-crawl: escopo ${sweepRunId != null ? `run ${sweepRunId}` : 'global (--sweep-all ou sem run)'} — pendentes de outras runs ficam p/ o finish`);
     emitRunEvent({ phase: 'post', kind: 'phase-start', detail: 'Pós-processamento' });
     await Promise.all(post);
   } else if (shouldStop()) {
@@ -702,15 +817,25 @@ export async function cmdAdd(rest, flags) {
 
 // ---- gestão de fontes (tela "Gerenciar fontes" da TUI + CLI) ----
 
-/** Fontes + contagem de artigos (DADO p/ a TUI). */
+/** Fontes + contagem de artigos + cursor de captura (DADO p/ a TUI). */
 export function listSourcesForUI() {
   return stmts.listSources.all().map((s) => ({
     id: s.id,
     name: s.name,
     base_url: s.base_url,
     type: s.type,
+    cursor_date: s.cursor_date ?? null,
     articles: stmts.countArticlesBySource.get(s.id).c,
   }));
+}
+
+/** Zera o cursor de captura de UMA fonte (a próxima coleta volta a decidir pelo derivado/piso). */
+export function resetSourceCursorById(sourceId) {
+  const s = stmts.getSourceById.get(sourceId);
+  if (!s) return { error: `fonte ${sourceId} não encontrada` };
+  stmts.resetSourceCursor.run(sourceId);
+  log(`cursor: ${s.name || s.base_url} resetado (próxima coleta decide pelo derivado/piso mínimo)`);
+  return { source: { ...s, cursor_date: null } };
 }
 
 /** Troca o tipo de uma fonte (index<->listing) e persiste no DB + sources.json. Síncrono. */

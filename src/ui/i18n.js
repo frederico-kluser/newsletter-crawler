@@ -41,7 +41,7 @@ export const DICT = {
     pickSources: 'Quais fontes coletar?',
     sourcesPickAtLeastOne: 'Marque pelo menos 1 fonte (espaço marca/desmarca).',
     noSources: 'Nenhuma fonte configurada (use "Adicionar fonte").',
-    sincePrompt: 'Data-limite --since (YYYY-MM-DD; vazio = 2026-01-01):',
+    sincePrompt: 'Data-limite --since (YYYY-MM-DD; vazio = cursor por fonte):',
     sinceInvalid: 'Data inválida. Use ISO, ex.: 2026-06-25.',
     maxPagesPrompt: 'Máx. páginas do índice (vazio = sem limite):',
     maxArticlesPrompt: 'Máx. artigos (vazio = sem limite):',
@@ -57,7 +57,7 @@ export const DICT = {
     on: 'LIGADO',
     off: 'desligado',
     noneVal: '—',
-    minSinceVal: '2026-01-01 (piso mínimo — o mais amplo)',
+    minSinceVal: 'cursor por fonte (sem --since)',
     noLimitVal: 'sem limite',
     scopePrompt: 'O que trazer?',
     scopeNew: 'Apenas o novo (última execução)',
@@ -88,8 +88,12 @@ export const DICT = {
     srcRedetected: 're-detectado: {type} — {reason}',
     srcRedetectFail: 'falha ao re-detectar: {msg}',
     srcRemoved: 'fonte "{name}" removida ({n} artigo(s) apagados)',
+    srcCursor: 'cursor',
+    srcCursorReset: 'cursor de "{name}" resetado — a próxima coleta decide pelo derivado/piso mínimo',
+    srcCursorNone: 'esta fonte ainda não tem cursor de captura',
     hint_toggleType: 'troca o tipo',
     hint_redetect: 're-detecta (IA)',
+    hint_resetCursor: 'zera o cursor',
     hint_removeSource: 'remove a fonte',
     statusTitle: 'Status atual',
     resetWarn: 'ATENÇÃO: isto APAGA TODOS OS DADOS (artigos, fila, páginas, seletores, classificação e fontes).',
@@ -218,13 +222,13 @@ export const DICT = {
     restoreRestart: 'A conexão com o banco foi FECHADA nesta sessão — feche e reabra o ncrawl para usar a base nova.',
     restoreQuit: 'Sair (obrigatório)',
     restoreFailed: 'Falha ao repor: {msg}',
-    // --- coleta: piso do --since ---
-    sinceHint: 'Vazio = piso {floor} — o MAIS AMPLO possível.',
+    // --- coleta: piso do --since / cursor por fonte ---
+    sinceHint: 'Vazio = piso POR FONTE (cursor da última captura; sem cursor, {floor}).',
     sinceFloorWarn:
-      'Sem data, o piso vira {floor} — MAIS AMPLO que o de uma coleta anterior com data mais recente: ' +
-      'o crawler desce mais fundo no arquivo e cura issues antigas por IA (tempo e US$).',
+      'Sem data, cada fonte usa o próprio CURSOR (data do item mais novo já capturado) — a próxima ' +
+      'coleta repete esse piso em vez de varrer de novo. Fonte sem cursor cai no derivado/piso {floor}.',
     sinceFloorPick: 'Informar uma data',
-    sinceFloorKeep: 'Seguir sem data (piso {floor})',
+    sinceFloorKeep: 'Seguir sem data (piso por fonte)',
     // --- deploy: opt-in do guard anti-encolhimento ---
     deployModeShrink: 'Publicar com o acervo MENOR que o no ar (--allow-shrink)',
     deployShrinkWarn:
@@ -315,7 +319,7 @@ export const DICT = {
     pickSources: 'Which sources to crawl?',
     sourcesPickAtLeastOne: 'Select at least 1 source (space toggles).',
     noSources: 'No sources configured (use "Add source").',
-    sincePrompt: 'Date floor --since (YYYY-MM-DD; empty = 2026-01-01):',
+    sincePrompt: 'Date floor --since (YYYY-MM-DD; empty = per-source cursor):',
     sinceInvalid: 'Invalid date. Use ISO, e.g. 2026-06-25.',
     maxPagesPrompt: 'Max index pages (empty = unlimited):',
     maxArticlesPrompt: 'Max articles (empty = unlimited):',
@@ -331,7 +335,7 @@ export const DICT = {
     on: 'ON',
     off: 'off',
     noneVal: '—',
-    minSinceVal: '2026-01-01 (min floor — the widest)',
+    minSinceVal: 'per-source cursor (no --since)',
     noLimitVal: 'unlimited',
     scopePrompt: 'What to bring?',
     scopeNew: 'Only new (last run)',
@@ -362,8 +366,12 @@ export const DICT = {
     srcRedetected: 're-detected: {type} — {reason}',
     srcRedetectFail: 're-detect failed: {msg}',
     srcRemoved: 'source "{name}" removed ({n} article(s) deleted)',
+    srcCursor: 'cursor',
+    srcCursorReset: 'cursor for "{name}" reset — next capture falls back to derived/floor',
+    srcCursorNone: 'this source has no capture cursor yet',
     hint_toggleType: 'toggle type',
     hint_redetect: 're-detect (AI)',
+    hint_resetCursor: 'reset cursor',
     hint_removeSource: 'remove source',
     statusTitle: 'Current status',
     resetWarn: 'WARNING: this WIPES ALL DATA (articles, queue, pages, selectors, classification, sources).',
@@ -492,13 +500,13 @@ export const DICT = {
     restoreRestart: 'The database connection was CLOSED in this session — quit and reopen ncrawl to use the new database.',
     restoreQuit: 'Quit (required)',
     restoreFailed: 'Restore failed: {msg}',
-    // --- crawl: the --since floor ---
-    sinceHint: 'Empty = floor {floor} — the WIDEST possible.',
+    // --- crawl: the --since floor / per-source cursor ---
+    sinceHint: 'Empty = PER-SOURCE floor (last capture cursor; without one, {floor}).',
     sinceFloorWarn:
-      'With no date the floor becomes {floor} — WIDER than a previous crawl with a more recent date: ' +
-      'the crawler digs deeper into the archive and curates old issues with AI (time and US$).',
+      'With no date each source uses its own CURSOR (date of the newest item already captured) — the ' +
+      'next capture repeats that floor instead of rescanning. A source without a cursor falls back to derived/floor {floor}.',
     sinceFloorPick: 'Enter a date',
-    sinceFloorKeep: 'Continue with no date (floor {floor})',
+    sinceFloorKeep: 'Continue with no date (per-source floor)',
     // --- deploy: anti-shrink guard opt-in ---
     deployModeShrink: 'Publish with the archive SMALLER than the live one (--allow-shrink)',
     deployShrinkWarn:

@@ -11,7 +11,7 @@ import { safeStatus } from './status.js';
 import {
   cmdCrawl, cmdExport, cmdAdd, cmdReset, cmdFinish, cmdSearch,
   getArticle, listSearchHistory, getSearchHistoryEntry, deleteSearchHistory,
-  listSourcesForUI, setSourceType, redetectSourceType, removeSourceById,
+  listSourcesForUI, setSourceType, redetectSourceType, removeSourceById, resetSourceCursorById,
   deploySnapshot, checkResetConfirmation, backupBeforeDestructive,
 } from '../commands.js';
 import { cmdRestore, swapDatabaseFile } from '../cli-restore.js';
@@ -203,6 +203,7 @@ export default function App() {
       onToggleType=${(s, type) => setSourceType(s.id, type)}
       onRedetect=${(s) => redetectSourceType(s.id)}
       onRemove=${(s) => removeSourceById(s.id)}
+      onResetCursor=${(s) => resetSourceCursorById(s.id)}
       confirmCheck=${(answer, n) => checkResetConfirmation(answer, { articles: n })}
       onDone=${(v) => (v === 'quit' ? exit() : toMenu())}
     />`;

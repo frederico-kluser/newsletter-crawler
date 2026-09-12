@@ -73,18 +73,22 @@ export async function verifyArticleRow(a, { runId = null } = {}) {
   return { verdict, problems };
 }
 
-/** Verifica os artigos sem veredito (ou todos, com force). Retorna { verified, byVerdict }. */
-export async function verifyPending({ limit = Infinity, force = false } = {}) {
+/** Verifica os artigos sem veredito (ou todos, com force). `runId` escopa o sweep às fichas
+ *  DESTA run (pós-crawl); sem ele varre o pendente global (usado pelo `finish`).
+ *  Retorna { verified, byVerdict }. */
+export async function verifyPending({ limit = Infinity, force = false, runId = null } = {}) {
   const lim = Number.isFinite(limit) ? limit : -1; // SQLite: LIMIT -1 = sem limite
   const rows = force
     ? stmts.listArticlesForReverify.all(lim)
-    : stmts.listArticlesToVerify.all(lim);
+    : runId != null
+      ? stmts.listArticlesToVerifyForRun.all(runId, lim)
+      : stmts.listArticlesToVerify.all(lim);
   if (!rows.length) {
     log('verify: nada a verificar.');
     return { verified: 0, byVerdict: {} };
   }
-  const runId = getBudgetState().runId ?? null; // events apontam p/ a run que VERIFICOU
-  log(`verify: ${rows.length} artigo(s) — veredito ok|suspect|junk, force=${force}.`);
+  const runIdEvent = getBudgetState().runId ?? null; // events apontam p/ a run que VERIFICOU
+  log(`verify: ${rows.length} artigo(s)${runId != null ? ` (run ${runId})` : ''} — veredito ok|suspect|junk, force=${force}.`);
 
   const gate = pLimit(stageWindow(VERIFY_CONCURRENCY));
   const byVerdict = {};
@@ -98,7 +102,7 @@ export async function verifyPending({ limit = Infinity, force = false } = {}) {
           return; // orçamento: a linha NULL segue retomável via `ncrawl verify`
         }
         try {
-          const { verdict, problems } = await verifyArticleRow(a, { runId });
+          const { verdict, problems } = await verifyArticleRow(a, { runId: runIdEvent });
           byVerdict[verdict] = (byVerdict[verdict] || 0) + 1;
           done++;
           if (verdict !== 'ok') {

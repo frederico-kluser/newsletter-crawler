@@ -176,11 +176,13 @@ export async function classifyArticleRow(article) {
  * só pega quem ainda não tem classificação. Retorna { classified, total, kept } — `kept` = artigos
  * mantidos pendentes porque uma faceta obrigatória caiu por rede/API (nada persistido; re-tenta).
  */
-export async function classifyPending({ limit = Infinity, force = false } = {}) {
+export async function classifyPending({ limit = Infinity, force = false, runId = null } = {}) {
   const lim = Number.isFinite(limit) ? limit : -1; // SQLite: LIMIT -1 = sem limite
   const rows = force
     ? stmts.listArticlesForReclassify.all(lim)
-    : stmts.listArticlesNeedingClassification.all(lim);
+    : runId != null
+      ? stmts.listArticlesNeedingClassificationForRun.all(runId, lim)
+      : stmts.listArticlesNeedingClassification.all(lim);
   if (!rows.length) {
     log('classify: nada a classificar.');
     return { classified: 0, total: 0 };

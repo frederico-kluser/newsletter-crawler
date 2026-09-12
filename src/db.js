@@ -179,6 +179,10 @@ ensureColumn('frontier', 'depth', 'depth INTEGER DEFAULT 0');
 ensureColumn('frontier', 'discovered_date', 'discovered_date TEXT');
 ensureColumn('sources', 'type', "type TEXT DEFAULT 'listing'");
 ensureColumn('sources', 'max_index_pages', 'max_index_pages INTEGER');
+// Cursor de captura POR FONTE: data do item mais novo já capturado dela. O crawl usa como piso
+// (em vez do --since global) e só AVANÇA, após listagem bem-sucedida. `purge` zera (recaptura do
+// zero não pode ser pulada pelo cursor). Ver src/cursor.js.
+ensureColumn('sources', 'cursor_date', 'cursor_date TEXT');
 // Resumo PT-BR p/ leitura (o `content` segue original, p/ busca/tags). Ambos nullable.
 ensureColumn('articles', 'title_pt', 'title_pt TEXT');
 ensureColumn('articles', 'summary_pt', 'summary_pt TEXT');
@@ -347,6 +351,35 @@ export const stmts = {
   ),
   getSourceById: db.prepare(`SELECT * FROM sources WHERE id = ?`),
   listSources: db.prepare(`SELECT * FROM sources ORDER BY id`),
+  // Cursor por fonte: data do item mais novo JÁ capturado (só artigos datados contam; item sem
+  // published_at não pode "envelhecer" o cursor nem adiantá-lo errado). O teto em `date('now')`
+  // ignora DATA FUTURA de scrape errado em vez de deixar a fonte sem piso para sempre (o cursor
+  // nunca avançaria e o derivado devolveria a data-bomba toda run).
+  maxPublishedForSource: db.prepare(
+    `SELECT MAX(iso_date(published_date)) AS d FROM (
+        SELECT published_at AS published_date FROM articles
+         WHERE source_id = ? AND published_at IS NOT NULL
+       )
+      WHERE iso_date(published_date) IS NOT NULL AND iso_date(published_date) <= date('now')`,
+  ),
+  // Teto do piso: trabalho INACABADO da fonte (pending/in_progress) não pode ser ultrapassado pelo
+  // cursor — senão um backlog deixado por uma captura parcial (`--max-articles`, budget, Ctrl+C,
+  // deadline) fica abaixo do piso, é marcado `done` no skip e some para sempre (enqueue é
+  // INSERT OR IGNORE e o isUrlKnown conta frontier em qualquer estado). O seed da LISTAGEM
+  // (kind='listing') fica fora: ele é re-enfileirado em toda run e não tem data.
+  oldestUnfinishedForSource: db.prepare(
+    `SELECT MIN(iso_date(discovered_date)) AS d,
+            SUM(CASE WHEN iso_date(discovered_date) IS NULL THEN 1 ELSE 0 END) AS undated
+       FROM frontier
+      WHERE source_id = ? AND state IN ('pending','in_progress') AND kind <> 'listing'`,
+  ),
+  // Avanço SÓ (nunca retrocede): o piso de uma fonte nunca volta no tempo por causa de uma run.
+  advanceSourceCursor: db.prepare(
+    `UPDATE sources SET cursor_date = @date
+      WHERE id = @id AND (cursor_date IS NULL OR cursor_date < @date)`,
+  ),
+  resetSourceCursor: db.prepare(`UPDATE sources SET cursor_date = NULL WHERE id = ?`),
+  resetAllSourceCursors: db.prepare(`UPDATE sources SET cursor_date = NULL`),
 
   // pages
   upsertPage: db.prepare(
@@ -428,6 +461,13 @@ export const stmts = {
     `SELECT id, url, title, kind, blurb, content, content_source FROM articles
       WHERE verify_status IS NULL ORDER BY id LIMIT ?`,
   ),
+  // Escopo por RUN (sweep pós-crawl): só as fichas DESTA run — o backlog de runs anteriores fica
+  // para o `finish` explícito. Sem isso, uma run de data coberta drena a dívida global (medido em
+  // docs/reprocesso-IA-audit-2026-09-11.md).
+  listArticlesToVerifyForRun: db.prepare(
+    `SELECT id, url, title, kind, blurb, content, content_source FROM articles
+      WHERE verify_status IS NULL AND run_id = ? ORDER BY id LIMIT ?`,
+  ),
   listArticlesForReverify: db.prepare(
     `SELECT id, url, title, kind, blurb, content, content_source FROM articles ORDER BY id LIMIT ?`,
   ),
@@ -450,6 +490,10 @@ export const stmts = {
   setSummary: db.prepare(`UPDATE articles SET title_pt = @title_pt, summary_pt = @summary_pt WHERE id = @id`),
   listArticlesNeedingSummary: db.prepare(
     `SELECT id, url, title, content FROM articles WHERE summary_pt IS NULL ORDER BY id LIMIT ?`,
+  ),
+  listArticlesNeedingSummaryForRun: db.prepare(
+    `SELECT id, url, title, content FROM articles
+      WHERE summary_pt IS NULL AND run_id = ? ORDER BY id LIMIT ?`,
   ),
   listArticlesForResummarize: db.prepare(
     `SELECT id, url, title, content FROM articles ORDER BY id LIMIT ?`,
@@ -826,6 +870,14 @@ export const stmts = {
       ORDER BY a.id
       LIMIT ?`,
   ),
+  listArticlesNeedingClassificationForRun: db.prepare(
+    `SELECT a.id, a.url, a.title, a.content
+       FROM articles a
+       LEFT JOIN classifications c ON c.article_id = a.id
+      WHERE c.article_id IS NULL AND a.run_id = ?
+      ORDER BY a.id
+      LIMIT ?`,
+  ),
   listArticlesForReclassify: db.prepare(
     `SELECT id, url, title, content FROM articles ORDER BY id LIMIT ?`,
   ),
@@ -1047,6 +1099,9 @@ export function purgeSource(sourceId, { selectors = false } = {}) {
     counts.frontier = stmts.deleteFrontierBySource.run(sourceId).changes;
     counts.events = stmts.deleteEventsBySource.run(sourceId).changes;
     if (selectors) counts.selectors = host ? stmts.deleteSelectorsLike.run(`${host}:%`).changes : 0;
+    // Cursor ZERADO na mesma transação: a fonte segue cadastrada (purge não descadastra) e a
+    // recaptura do zero NÃO pode ser pulada pelo piso da captura anterior.
+    stmts.resetSourceCursor.run(sourceId);
   });
   tx();
   return counts;

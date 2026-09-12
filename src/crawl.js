@@ -603,13 +603,19 @@ export function enrichAnchorDate(enriching, published) {
     : (enriching?.published_at || published || null);
 }
 
-/** Item curado cujo alvo não rendeu corpo: o registro FICA com o blurb do agregador. */
-function keepAggregatorVersion(row, ev, reason) {
+/** Item curado cujo alvo não rendeu corpo: o registro FICA com o blurb do agregador.
+ *  Devolve `{ verifyUrl }` de propósito: a ficha entra no STREAMING pós-save da própria run
+ *  (verify+resumo+classify). Sem isso ela só era alcançada pelo sweep pós-crawl — que é
+ *  interrompível e não escopado — e o blurb virava dívida para a run seguinte (medido em
+ *  docs/reprocesso-IA-audit-2026-09-11.md: ~400 pendentes migrando entre runs).
+ *  Exportada p/ teste DB-backed (test/kept-blurb.stream.test.js). */
+export function keepAggregatorVersion(row, ev, reason) {
   stmts.finishEnrich.run(row.id);
   bump('mantidosBlurb');
   logEvent({ ...ev, stage: 'enrich', status: 'kept-blurb', detail: { reason } });
   log(`item mantido com o blurb do agregador (${reason}): ${(row.title || row.url).slice(0, 70)}`);
   emitRunEvent({ phase: 'articles', kind: 'kept-blurb', level: 'warn', detail: reason });
+  return { verifyUrl: row.url };
 }
 
 // Descarta páginas de erro (404, 500, etc.): o Playwright renderiza a página de erro e o
@@ -647,8 +653,8 @@ async function processArticle(job, source, opts) {
   }
 
   if (!(await ensureAllowed(url, opts))) {
-    if (enriching) keepAggregatorVersion(enriching, ev, 'robots');
-    else logEvent({ ...ev, stage: 'article', status: 'skip', detail: { reason: 'robots' } });
+    if (enriching) return keepAggregatorVersion(enriching, ev, 'robots');
+    logEvent({ ...ev, stage: 'article', status: 'skip', detail: { reason: 'robots' } });
     return;
   }
 
@@ -922,6 +928,9 @@ async function processArticle(job, source, opts) {
     const anchorDate = enrichAnchorDate(enriching, published);
     stmts.enrichArticle.run({
       id: enriching.id,
+      // Carimba a run CORRENTE: o item entra no delta da busca e no sweep escopado desta run
+      // (sem isso, uma ficha enriquecida hoje mas criada na run N ficava invisível aos dois).
+      run_id: opts.runId ?? null,
       title: enriching.title || title || canonicalUrl,
       content,
       content_hash: contentHash,

@@ -407,6 +407,9 @@ async function crawlRun(flags) {
   }
   // Piso efetivo por source_id, resolvido no seed (cursor + derivado) e lido no dispatch.
   const floorBySource = new Map();
+  // Fontes semeadas nesta run: o cursor delas é re-avançado no FIM (a listagem pode terminar
+  // antes dos itens que ela mesma descobriu serem salvos — ver o bloco pós-loop).
+  const seededSourceIds = new Set();
 
   // Re-crawl incremental: por padrão re-visita as listagens das fontes a cada execução (só enfileira
   // o novo; a dedup de artigo impede re-baixar o existente). `--no-refresh` desliga a re-visita.
@@ -436,6 +439,7 @@ async function crawlRun(flags) {
     }
     const src = upsertSource(s);
     sourceSeen(src.id, src.name || s.name || hostOf(s.url)); // painel: fontes x/y + % por data
+    seededSourceIds.add(src.id);
     // Piso efetivo DESTA fonte: override (--since-source) > --since global > cursor > derivado
     // (MAX do que já temos dela, cobre pós-restore sem cursor) > piso mínimo. Uma flag/cursor mais
     // NOVO é mais restritivo e vence.
@@ -735,6 +739,12 @@ async function crawlRun(flags) {
   if (timedOut) log(`deadline: ${timedOut} job(s) cortado(s) em ${JOB_TIMEOUT_MS}ms de TRABALHO (fila/LLM não contam; ficha mantida com o blurb; detalhe por fase no ncrawl inspect)`);
   log('crawl concluído.');
   emitRunEvent({ phase: 'articles', kind: 'phase-end', level: 'success', detail: `${processedArticles} artigos` });
+
+  // CURSOR POR FONTE — avanço final: o avanço no dispatch acontece quando a LISTAGEM termina, e a
+  // listagem pode terminar ANTES de os itens que ela descobriu serem salvos (os jobs de artigo
+  // correm em paralelo). Sem este passe o cursor ficava uma run atrás do que já temos (medido:
+  // AI Weekly com itens de 09/09 e cursor em 20/08). Aqui a fila já drenou: o MAX da fonte é o real.
+  for (const id of seededSourceIds) advanceCursorFor(id);
 
   // Registra na run quantos artigos novos ela descobriu (o delta desta execução).
   if (runId != null) {

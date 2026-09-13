@@ -97,6 +97,19 @@ export default function FilterPanel({ meta, filters, dispatch, facetCounts }) {
         </select>
       </label>
 
+      {/* Descartados (junk) ficam fora por padrão: não são matéria. O checkbox os traz de volta. */}
+      <label className="filter-block switch-row">
+        <input
+          type="checkbox"
+          checked={filters.showJunk === true}
+          onChange={(e) => set('showJunk', e.target.checked)}
+        />
+        <span>
+          <span className="facet-label">{STR.showJunk}</span>
+          <span className="filter-hint">{STR.showJunkHint}</span>
+        </span>
+      </label>
+
       <div className="filter-block">
         <span className="facet-label facet-label-strong">{STR.filterFacets}</span>
         {meta.facets.map((f) => (

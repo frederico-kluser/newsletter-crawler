@@ -22,6 +22,8 @@ export const EMPTY_FILTERS = Object.freeze({
   facets: {},
   kind: 'all',
   verify: '',
+  // Mostrar os DESCARTADOS (verify_status='junk')? Desligado por padrão: a lista é de matérias.
+  showJunk: false,
 });
 
 /**
@@ -71,6 +73,9 @@ export function applyFilters(articles, f, toolTypes) {
       }
     }
     if (f.verify && a.verify_status !== f.verify) return false;
+    // DESCARTADOS (junk): não são matéria (stub, tweet, página de imagem, URL malformada) — ficam
+    // FORA por padrão. `showJunk` (checkbox) ou escolher verify='junk' no select os trazem.
+    if (a.verify_status === 'junk' && !f.showJunk && f.verify !== 'junk') return false;
     return true;
   });
 }

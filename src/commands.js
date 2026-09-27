@@ -169,13 +169,14 @@ export function buildCliSummary({
  * limite calibrado — "diminuir até calibrar" vira estado, não recomeça do zero a cada run.
  * Fail-open: erro de escrita nunca derruba o run (telemetria de calibração, não dado).
  */
-function persistLlmCalibration() {
+// Exportado p/ o teste de regressão do formato do log (test/commands.calib-log.test.js).
+export function persistLlmCalibration() {
   try {
     const cal = getCalibration();
     if (!cal.dirty || cal.llmCap < 1) return;
     upsertEnvVar('GOVERNOR_LLM_CAP', String(cal.llmCap));
     log(
-      `calibração: teto llm -> ${cal.llmCap} (${cal.rateLimitEvents} 429 nesta run); ` +
+      `calibração: teto llm -> ${cal.llmCap} (${cal.rateLimitEvents.llm} 429 nesta run); ` +
         `GOVERNOR_LLM_CAP=${cal.llmCap} gravado em ${ENV_PATH} (vale p/ os próximos runs)`,
     );
   } catch (e) {

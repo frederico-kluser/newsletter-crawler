@@ -15,6 +15,7 @@ const SECRET_PATTERNS = [
   /glpat-[A-Za-z0-9_-]{20,}/g, // GitLab
   /sk-ant-[A-Za-z0-9_-]{20,}/g, // Anthropic (vem antes de sk- genérico)
   /sk-proj-[A-Za-z0-9_-]{20,}/g, // OpenAI projeto (vem antes de sk- genérico)
+  /sk-or-v\d+-[A-Za-z0-9]{20,}/g, // OpenRouter (sk-or-v1-<64 hex>: os hífens escapavam do sk- genérico)
   /sk-[A-Za-z0-9]{32,}/g, // OpenAI legacy (48 chars); 32+ evita slug de URL
   /AKIA[0-9A-Z]{16}/g, // AWS access key
   /ASIA[0-9A-Z]{16}/g, // AWS session key

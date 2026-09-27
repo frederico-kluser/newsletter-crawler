@@ -78,6 +78,7 @@ test('reextract NÃO troca corpo bom por stub curto (guard de encolhimento) e re
   const out = await reextractTargets({
     fetchSmartImpl: async (u) => ({ html: STUB, url: u }),
     urlFilter: 'shrink.test',
+    includeLegacy: true, // run_id NULL = acervo legado: o piso da migração Jev exige a porta explícita
   });
   assert.equal(out.reextracted, 0, 'nada re-extraído');
   assert.equal(out.skipped, 1, 'contada como pulada');
@@ -102,6 +103,7 @@ test('o guard não é um freio geral: corpo MAIOR continua substituindo o salvo'
   const out = await reextractTargets({
     fetchSmartImpl: async (u) => ({ html: CHEIA, url: u }),
     urlFilter: 'artigo-melhora',
+    includeLegacy: true,
   });
   assert.equal(out.reextracted, 1, 're-extração aceita');
   const depois = stmts.getArticleFullByUrl.get(url);

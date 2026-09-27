@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html id="remysharp-com" lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Progressive Enhancement inside of JavaScript</title>
+    <meta name="source" content="https://github.com/remy/remysharp.com">
+    <meta name="description" content="Lately I've had the opportunity to travel by train and coach, during which time I also tend to work. It's really only during these periods that I'm reminded of…">
+    <meta name="author" content="Remy Sharp">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1A1A1A">
+    <meta name="monetization" content="$ilp.uphold.com/AQzKX9y6jBdh">
+    <meta property="og:type" content="website">
+    <link rel="webmention" href="https://webmention.io/remysharp.com/webmention">
+    <link rel="pingback" href="https://webmention.io/remysharp.com/xmlrpc">
+    <link rel="canonical" href="https://remysharp.com/2026/08/05/progressive-enhancement-inside-of-javascript">
+    <link rel="search" type="application/opensearchdescription+xml" href="/opensearch.xml" title="Remy Sharp's b:log">
+    <link rel="canonical" href="https://remysharp.com/2026/08/05/progressive-enhancement-inside-of-javascript">
+    <link rel="og:url" href="https://remysharp.com/2026/08/05/progressive-enhancement-inside-of-javascript">
+    <meta name="og:description" content="Lately I've had the opportunity to travel by train and coach, during which time I also tend to work. It's really only during these periods that I'm reminded of…">
+    <meta name="og:title" content="Progressive Enhancement inside of JavaScript">
+    <meta property="og:site_name" content="Remy's b:log">
+    <meta property="og:type" content="article">
+    <meta name="og:author" content="Remy Sharp">
+    <meta property="og:image" content="https://remysharp.com/images/cards/og/9-1.jpg">
+    <link rel="apple-touch-icon" sizes="57x57" href="/images/favicons/blog/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/images/favicons/blog/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/images/favicons/blog/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/images/favicons/blog/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/images/favicons/blog/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/images/favicons/blog/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/images/favicons/blog/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/images/favicons/blog/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/favicons/blog/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/images/favicons/blog/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/images/favicons/blog/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/images/favicons/blog/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/images/favicons/blog/favicon-16x16.png">
+    <meta name="color-scheme" content="light dark">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link rel="preload" href="https://fonts.gstatic.com/s/ubuntumono/v8/KFOjCneDtsqEr0keqCMhbCc6CsTYl4BO.woff2" as="font" crossorigin>
+    <link rel="alternate" type="application/rss+xml" title="Remy Sharp's b:log" href="/feed.xml">
+    <link rel="alternate" type="application/rss+xml" title="Remy Sharp's (just the) b:log" href="/blog.xml">
+    <link rel="alternate" type="application/rss+xml" title="Remy Sharp's l:inks" href="/links.xml">
+    <link rel="alternate" type="application/rss+xml" title="Remy Sharp's d:evlog" href="/devlog.xml">
+    <link rel="alternate" type="application/rss+xml" title="Remy Sharp's b:ooks" href="/books.xml">
+    <style>:root{--c-bg-cta: #fff;--c-input-bg:#fff;--c-bg:#fdfdfd;--c-bg-alt:#1a1a1a;--c-text:#212121;--c-cta:#1565c0;--c-metadata:#5f5f5f;--c-input-fg:#212121;--c-text-dark-bg:#999;--c-text-dark:#999;--c-heading-article:#000;--c-heading-bg:#eee;--c-code-bg:#f5f5f5;--c-code-fg:#000}@media (prefers-color-scheme: dark){:root{--c-bg-cta: #222;--c-code-bg:#2d2d2d;--c-code-fg:#fff;--c-cta:#03a9f4;--c-bg:#262626;--c-bg-alt:#222;--c-text:#d6d6d6;--c-text-dark:#8b8b8b;--c-text-dark-bg:#dfdfdf;--c-input-bg:#3b3a3a;--c-input-fg:#fff;--c-heading-article:#fff;--c-heading-bg:#111;}blockquote{background-color:#3c3c3c}}.post h1.title{margin-top:0;line-height:1.4}.post-content img{max-width:660px}.post-content ul{padding-left:20px}.post-content{position:relative;margin:0 40px 20px;padding:0 20px}.subpanel,.subpanel a{background:var(--c-bg-alt);color:var(--c-text-dark);border-color: var(--text-dark)}.subpanel,body,nav form.search input[type='submit']{background-position:initial initial;background-repeat:initial initial}*{box-sizing:border-box}#index-page article:nth-child(3n + 0) h2.title,#index-page article:nth-child(3n + 1) h2.title{background-color:#6d6d6d;background-position:initial initial;background-repeat:initial initial}#index-page article:nth-child(3n + 1) h2.title{background-color:#888}#index-page h1,#index-page h2{color:var(--c-heading-article)}#index-page h1.title img{z-index:1;vertical-align:bottom}#index-page h1.title{margin:0 0 20px;line-height:48px;font-size:48px;font-weight:500;padding:20px 60px}#index-page h1{background:var(--c-heading-bg);background-position:initial initial;background-repeat:initial initial}#index-page h2 a{color:var(--c-input-bg);border-color:var(--c-input-bg)}a.anchor span::before{margin-left:-30px}.anchor{padding:0 6px 0 30px;display:none;left:0}a{color:var(--c-cta);text-decoration:none;border-bottom-width:1px;border-bottom-style:solid;border-bottom-color:var(--c-cta)}abbr{text-decoration:none;border-bottom-width:1px;border-bottom-style:dotted;border-bottom-color:var(--c-text)}article.post li{padding-left:0;margin:4px 0;font-size:.95rem;line-height:1.6}body,h2{font-weight:400}body{padding:0;font-style:normal;font-variant:normal;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif,'Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol';color:var(--c-text);background-color:var(--c-bg);font-size:1.2em;margin:0 auto;max-width:800px;min-height:100%;line-height:32px}h1,h2{font-size:180%}h1.title a,h2.title a{color:var(--c-heading-article);text-decoration:none;border-bottom-style:none}h1.title,h2.title{position:relative;background-color:var(--c-heading-bg);padding:20px 60px;color:#000;margin:20px 0;background-position:initial initial;background-repeat:initial initial}h1{font-weight:600;line-height:1.6}h2{margin-top:40px;line-height:1.2}html,input,ul.post-nav li.search a{background-repeat:no-repeat no-repeat}html{background-color:#000;height:100%;background-position:-50px 0;background-image:url(/images/background.jpg)}img{max-width:100%;height:auto;border-top-left-radius:2px;border-top-right-radius:2px;border-bottom-right-radius:2px;border-bottom-left-radius:2px}input{font-family:sans-serif;font-size:105%;padding:6px;border:1px solid #aaa;background-attachment:scroll;background-color:var(--c-input-bg);background-position:-3px -3px}nav form.search input[type='submit']{background-color:#ccc;border:0;padding:0 3%}nav form.search input[type='text']{border:0}nav form.search{height:0;padding:0 10px;position:relative;overflow:hidden;transition:height 50ms ease-in-out;-webkit-transition:height 50ms ease-in-out}p{margin:1.4rem 0}ul.post-nav li.prev a::before{content:'« '}ul.post-nav li.search a{border-bottom-style:none;display:inline-block;text-indent:-9999px;background-image:url(/images/search.svg);background-size:100%;width:1.4em;padding:0;background-position:50% 50%;padding-left:0}ul.post-nav li{display:inline;padding:10px 20px}ul.post-nav{display:flex;overflow:hidden;list-style:none;padding:0;margin:0;font-size:90%}ul{padding-left:40px;list-style:square;margin:12px 0}code{padding:2px}code,pre{font-family:'Ubuntu Mono',menlo,monaco,consolas,courier,'courier new','lucida console',monospace}pre{padding:0 .2em;margin:10px 0;line-height:1.475;color:var(--c-code-fg);background:var(--c-code-bg);border-radius:3px;display:block;width:100%;overflow:auto;max-width:100%}pre code{display:table-cell!important}.misc-content .metadata{margin-top:80px}@media only screen and (max-width: 720px){body{line-height:28px}ul.post-nav li{padding:10px}.post h1.title{padding:20px 10px}.misc-content,.comments,.post-content{margin-left:0;margin-right:0;padding:0 10px}}@media only screen and (max-width: 412px){li,p{font-size:.9rem;line-height:1.6rem}}.offline-indicator{flex:1}.needs-js{display:none!important}.h-review details[open] summary+p{display:none}.h-review .book-meta{margin-top:20px; border-bottom:1px solid var(--c-text-dark-bg); margin-bottom:20px; padding-bottom:20px}.h-review .book-meta strong{display:inline-block}.h-review .book-meta strong:after{content:':'}.h-review .book-meta p{margin:0}.post h3[id]{font-weight:500}a.cta,a.cta:hover{text-decoration:none;border:1px solid var(--c-input-bg);display:flex;align-items:stretch;padding:0;color:inherit;overflow:hidden;position:relative;border-radius:2px;box-shadow:0 0 10px rgba(0,0,0,0.1);background:var(--c-bg-cta);gap:12px}a.cta:hover,a.cta:hover:hover{border-color:#ccc}a.cta img,a.cta:hover img{border-top-right-radius:0;border-bottom-right-radius:0;object-fit:cover;height:auto;max-height:200px}a.cta > div,a.cta:hover > div{padding:12px;display:flex;flex-direction:column;justify-content:space-around}a.cta p,a.cta:hover p{margin:0}a.cta p:last-child,a.cta:hover p:last-child{flex-grow:0}a.cta .label,a.cta:hover .label{font-size:70%;height:inherit;display:inline-block;margin-right:5px;background:#4caf50;line-height:initial;border-radius:3px;color:#fff;padding:2px 5px;vertical-align:text-bottom}a.cta .desc,a.cta:hover .desc{font-size:80%;line-height:1.6}a.cta:after,a.cta:hover:after{position:absolute;top:0;right:0;z-index:1;background:#dcdcdc;color:#fff;font-size:70%;padding:0 5px;border-bottom-left-radius:2px}a.cta:hover:after,a.cta:hover:hover:after{background:#ccc}</style>
+    <link as="style" href="/css/screen.css" rel="preload">
+    <link as="style" href="/css/prism.css" rel="preload">
+    <link rel="stylesheet" href="/css/screen.css?2">
+    <link rel="stylesheet" href="/css/prism.css">
+    <script>var whenReady = []; // on ready handler</script>
+  </head>
+  <body class="month-september" id="blog-progressive-enhancement-inside-of-javascript-page">
+    <div id="notice">
+      <p class="wire">I'm running <strong>FFConf 2026</strong><span>: UK's best JS & webdev conf, with talks meant to be experienced, not bookmarked. </span><a href="https://2026.ffconf.org/?utm_source=blog&amp;utm_medium=banner&amp;utm_campaign=2026">Find out more today.</a></p>
+    </div>
+    <nav class="main-nav clearfix subpanel">
+      <form class="search" id="inline-search" aria-hidden="true" action="/search">
+        <input aria-label="Search for text in a blog post" type="text" name="q" placeholder="Search for...">
+        <input type="submit" value="Search">
+      </form>
+      <ul class="post-nav">
+        <li class="left home"><a href="/">Home</a></li>
+        <li class="left search"><a id="search" href="#search">Search</a></li>
+        <li class="offline-indicator"></li>
+        <li class="prev"><a href="/2026/07/24/when-do-web-component" title="when-do web component">Previous</a></li>
+        <li class="next"><a href="/2026/08/27/16-for-tia" title="16 for Tia">Next</a></li>
+      </ul>
+    </nav>
+    <main class="content">
+      <article class="post h-entry">
+        <h1 class="title p-name"><a class="u-url u-uid" href="https://remysharp.com/2026/08/05/progressive-enhancement-inside-of-javascript" rel="bookmark" title="Permanent Link: Progressive Enhancement inside of JavaScript">Progressive Enhancement inside of JavaScript</a></h1>
+        <div class="post-content e-content"><p>Lately I've had the opportunity to travel by train and coach, during which time I also tend to work. It's really only during these periods that I'm <a href="https://bsky.app/profile/remysharp.com/post/3ml6yw2gke22i">reminded of how web sites fail</a> so terribly over a slow connection.</p>
+<p>On the odd occasion I can be guilty of this too. I had a tiny tool that takes markdown and renders it for quick reading (no apps, or split view in VS Code, etc). When I loaded it up on the train, the page asked me to drop the file in to be rendered, which I dutifully did, only for the page to load the source markdown.</p>
+<p>It's nothing new, but Progressive Enhancement doesn't only apply to HTML being enhanced with JavaScript. It also applies within JavaScript. Sometimes this was the <em><a href="https://responsivenews.co.uk/post/18948466399/cutting-the-mustard">cut the mustard</a></em> test, but sometimes it's about thinking laterally about JavaScript. In particular, can I capture the user's intent if they try to interact with my page before it's fully ready?</p>
+
+<p>Below I've made a visual demonstration of the issue, and the effect after I fixed the logic. It shows the browser throttled to &quot;good 2G&quot; network connectivity, and first I try to drop the markdown file and the browser (naturally) assumes I want to open the file. The result being the browser navigates away from the page to render the raw markdown - not what I wanted.</p>
+<p>The second part of the video shows with the same throttled connection, I can drop the file, and the page remains in place with a &quot;Loading&quot; indicator. The browser status shows that more files are being loaded (over the network from <a href="http://esm.sh">esm.sh</a>) and when those settle down after 10 seconds, the fully rendered page loads. It's slow, but it got there in the end.</p>
+<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/Hst7eTRfF3w?si=mac4kpBel6KYodJf" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+<p>The original source code had the JavaScript at the end of the HTML but one of the first tasks was to import the <a href="https://github.com/markdown-it/markdown-it">markdown parsing</a> module from <a href="http://esm.sh">esm.sh</a>. This is a significant amount of code. Then it imports <a href="https://highlightjs.org/">highlightjs</a> (which might not even be required). Although this was very much a quickly thrown together project, it does pull 600kB (compressed) - which feels rather heavy and I'd like to optimise if this wasn't just for me.</p>
+<p>That 600kB, decompressed to 1.3MB, has to be downloaded and parsed <em>before</em> the browser parses the &quot;author code&quot;, i.e. my code, that does the rendering of the markdown file.</p>
+<hr>
+<p>By prioritising the user interaction and including only the required JavaScript both inline <em>and</em> directly after the source HTML that's going to encourage the user to interact, I'm able to catch the interaction and queue up the work until the prerequisite functionality is loaded.</p>
+<p>That means breaking out the event handler binding, queue logic and simple visual feedback from the main body of JavaScript.</p>
+<p>The result is that, even over a GPRS connection, the full interactivity still works, even if it takes nearly 2 minutes to complete.</p>
+<hr>
+<p>This particular project is designed not to have a backend at all (that's just a constraint I set myself). Though I can see how this could actually upload the markdown to a server for rendering. I imagine I can use <a href="https://docs.netlify.com/build/configure-builds/on-demand-builders/">Netlify <abbr title="On-demand Builder">ODB</abbr></a> - though I haven't measured the timings, I'd bet that it's still faster than 2 minutes over GPRS.</p>
+<hr>
+<p>This is not a new method by any measure at all. I was only reminded of it because I was on a train. Admittedly my daily client work is deep in backend API work, so I don't often get to take a closer look at front end JavaScript so much these days!</p>
+
+        </div>
+        <div class="misc-content">
+          <p class="metadata">Posted 
+            <time class="dt-published" datetime="2026-08-05 00:00:00">5-Aug 2026</time>
+          </p>
+          <p class="tags">Tags: <a class="tag" href="/search?q=tag:web">#web</a> 
+          </p>
+          <div class="webmentions">
+            <p>👍 29 likes</p>
+            <div><a class="reset" href="https://bsky.app/profile/cathy-codes.bsky.social"><img width="32" title="Cathy" height="32" onerror="this.src='/images/no-user.svg'" loading="lazy" src="https://cdn.bsky.app/img/avatar/plain/did:plc:qsb7jmua53ax3x5kljzjtj5r/bafkreihfs33im22ajz7jse3eukg5b6raiaf7c7xdy6erz5u3qnuofuhtmi" alt="Cathy"></a><a class="reset" href="https://bsky.app/profile/th3s4mur41.me"><img width="32" title="Michaël Vanderheyden" height="32" onerror="this.src='/images/no-user.svg'" loading="lazy" src="https://cdn.bsky.app/img/avatar/plain/did:plc:xetli7nktzsvhl74bhl4r4yx/bafkreife33jtukgp5uszhogca2r3ei4lmx37ri2f3ohpi2ipqjy3w66r7u" alt="Michaël Vanderheyden"></a><a class="reset" href="https://bsky.app/profile/pgrucza.bsky.social"><img width="32" title="Peter Grucza" height="32" onerror="this.src='/images/no-user.svg'" loading="lazy" src="https://cdn.bsky.app/img/avatar/plain/did:plc:n4gdjsxxm3ltkyczw5rfuguj/bafkreiapw6o5ipcasesu2nedos2t4hc3j57aqkops3cwhdmisskfoeenbe" alt="Peter Grucza"></a><a class="reset" href="https://bsky.app/profile/vielle.dev"><img width="32" title="vielle ????" height="32" onerror="this.src='/images/no-user.svg'" loading="lazy" src="https://cdn.bsky.app/img/avatar/plain/did:plc:4zht3z4caxwrw3dlsybodywc/bafkreihdvyivxbehld2wwb6bkcacujusahqghebgrwug3ymwvhnbjxqhpu" alt="vielle ????"></a><a class="reset" href="https://mastodon.online/@atjn"><img width="32" title="Anton ????????????????" height="32" onerror="this.src='/images/no-user.svg'" loading="lazy" src="https://avatars.webmention.io/cdn.masto.host/cf0bd98a0257df7872813128a05b0b899fb4444aee3727412d93be082e70be13.jpg" alt="Anton ????????????????"></a><a class="reset" href="https://fosstodon.org/@krinkle"><img width="32" title="Timo Tijhof" height="32" onerror="this.src='/images/no-user.svg'" loading="lazy" src="https://avatars.webmention.io/cdn.masto.host/c070ecc02a223955fa3835dc8508640b0a1a88223c2d963d599356c9f65c0916.jpg" alt="Timo Tijhof"></a><a class="reset" href="https://bsky.app/profile/bdadam.bsky.social"><img width="32" title="" height="32" onerror="this.src='/images/no-user.svg'" loading="lazy" src="https://cdn.bsky.app/img/avatar/plain/did:plc:y4jhcy6vda424i37mf36mflq/bafkreihfiuh767yp2dk5l7jbmhky6n3phzy4ybcetowjy7dc5nyxkl2xui" alt=""></a><a class="reset" href="https://bsky.app/profile/danbeddows.bsky.social"><img width="32" title="Dan Beddows" height="32" onerror="this.src='/images/no-user.svg'" loading="lazy" src="https://cdn.bsky.app/img/avatar/plain/did:plc:r4obmg3zhzvnj4pxsaqtixb7/bafkreiesummepol2v4hg353djajoin7lhdadxq2depdkem633m22llg3wm" alt="Dan Beddows"></a><a class="reset" href="https://bsky.app/profile/bell.bz"><img width="32" title="Andy Bell" height="32" onerror="this.src='/images/no-user.svg'" loading="lazy" src="https://cdn.bsky.app/img/avatar/plain/did:plc:pzgvqg4ihnaihkrpmxqz5pu6/bafkreiaapdk2gfx55k2bvki4b3c4azfba5uae6ej43yrgqi3cjwxrvk4ie" alt="Andy Bell"></a><a class="reset" href="https://bsky.app/profile/andydavies.me"><img width="32" title="Andy Davies" height="32" onerror="this.src='/images/no-user.svg'" loading="lazy" src="https://cdn.bsky.app/img/avatar/plain/did:plc:ccw4zckt3u7hytoxemgoe654/bafkreibthta5fiablcbztoiuclttohjox4ilrok6eex2qd42sxvgrhzuny" alt="Andy Davies"></a><a class="reset" href="https://bsky.app/profile/jgarplind.eurosky.social"><img width="32" title="Joel" height="32" onerror="this.src='/images/no-user.svg'" loading="lazy" src="https://cdn.bsky.app/img/avatar/plain/did:plc:uadg5rghbytnpom6xe3xknqy/bafkreicog2f2jmy7zl5icb64sqapg7ztfuc2jsekxvkkwng6stpzou5re4" alt="Joel"></a><a class="reset" href="https://bsky.app/profile/flensrocker.de"><img width="32" title="Lars Hanisch" height="32" onerror="this.src='/images/no-user.svg'" loading="lazy" src="https://cdn.bsky.app/img/avatar/plain/did:plc:3bmkbznkbh6zdbcelgeocvwa/bafkreiayuesvijktsmwmaltk7ixjbbf2efek2iolg24a7vuui7q6u23spe" alt="Lars Hanisch"></a><a class="reset" href="https://bsky.app/profile/briandmilne.bsky.social"><img width="32" title="Brian Milne" height="32" onerror="this.src='/images/no-user.svg'" loading="lazy" src="https://cdn.bsky.app/img/avatar/plain/did:plc:q2nqsia2zwarz5oqa6wym45t/bafkreiggwvlixld67ylaxcram7cqktlof7imqev72f57tkwu5e7435bthi" alt="Brian Milne"></a><a class="reset" href="https://bsky.app/profile/yankeemorla.bsky.social"><img width="32" title="Jean Carlos Morla · Conditec" height="32" onerror="this.src='/images/no-user.svg'" loading="lazy" src="https://cdn.bsky.app/img/avatar/plain/did:plc:asodcn76lcar32eawgwza3os/bafkreihdu7svdmxxke2j3uowr5kvyswa4tkbsfqzgn555hiiddbkh4wpaq" alt="Jean Carlos Morla · Conditec"></a><a class="reset" href="https://bsky.app/profile/fry69.dev"><img width="32" title="fry69" height="32" onerror="this.src='/images/no-user.svg'" loading="lazy" src="https://cdn.bsky.app/img/avatar/plain/did:web:fry69.dev/bafkreicxcocpyrg7bl4to3e6ncrizsove7lbi3swq3yhmn3x77h6ii3z2i" alt="fry69"></a><a class="reset" href="https://bsky.app/profile/fubits.dev"><img width="32" title="Ilja" height="32" onerror="this.src='/images/no-user.svg'" loading="lazy" src="https://cdn.bsky.app/img/avatar/plain/did:plc:6aglx53tojyuwxwueap5og3h/bafkreiclnob3mnfvo74an6ugrnbdikrkxcskndjojrdtkwf5vwjuu77z5u" alt="Ilja"></a><a class="reset" href="https://bsky.app/profile/marvinh.dev"><img width="32" title="Marvin Hagemeister" height="32" onerror="this.src='/images/no-user.svg'" loading="lazy" src="https://cdn.bsky.app/img/avatar/plain/did:plc:qxrys7rkfs6q6zg3gqhij4gp/bafkreidpwounrag7idbpxlk3hymzx3kvme436ir5kissgx2unmaz7arheu" alt="Marvin Hagemeister"></a><a class="reset" href="https://bsky.app/profile/bobbyjack.me"><img width="32" title="Bobby Jack" height="32" onerror="this.src='/images/no-user.svg'" loading="lazy" src="https://cdn.bsky.app/img/avatar/plain/did:plc:lohty74lt55wjfuj65kizooa/bafkreiceyl43mfskcdlu7cizlz6yz7kfbtqm6ue52nl27yq6wyds23tgkm" alt="Bobby Jack"></a><a class="reset" href="https://bsky.app/profile/mastrojs.bsky.social"><img width="32" title="Mastro.{js,ts}" height="32" onerror="this.src='/images/no-user.svg'" loading="lazy" src="https://cdn.bsky.app/img/avatar/plain/did:plc:slxmn2ejggkwwbzlej2axmx6/bafkreicizuiyr3nvt254ufexepmsoerc5gfcpdjg4b43l4hueantbveslm" alt="Mastro.{js,ts}"></a><a class="reset" href="https://bsky.app/profile/nodaldot.bsky.social"><img width="32" title="Nodaldot" height="32" onerror="this.src='/images/no-user.svg'" loading="lazy" src="https://cdn.bsky.app/img/avatar/plain/did:plc:zdm6uqbpyqgj3l3hso3qy2hv/bafkreihbo6cmcgwec2gdsv3chvy6bqrx4rnzauntvovl2uvrthrausr4qq" alt="Nodaldot"></a><a class="reset" href="https://bsky.app/profile/tfedder.de"><img width="32" title="Tobias Fedder" height="32" onerror="this.src='/images/no-user.svg'" loading="lazy" src="https://cdn.bsky.app/img/avatar/plain/did:plc:a64baelxsmvy6aonnbfhbirv/bafkreigcjhsxk6uz4plibvdto6t23vicadmispnvgq2hlpj23x2fyilngy" alt="Tobias Fedder"></a><a class="reset" href="https://bsky.app/profile/sil.kryogenix.org"><img width="32" title="Stuart Langridge" height="32" onerror="this.src='/images/no-user.svg'" loading="lazy" src="https://cdn.bsky.app/img/avatar/plain/did:plc:y52xi2qdwcfsjkrno3aykkhc/bafkreiakpmfei5j6asycfke34nwmb2l2lbw42wg22bic7m5azmii64iflq" alt="Stuart Langridge"></a><a class="reset" href="https://bsky.app/profile/michalhorak.bsky.social"><img width="32" title="" height="32" onerror="this.src='/images/no-user.svg'" loading="lazy" src="https://cdn.bsky.app/img/avatar/plain/did:plc:4v5fmlg5l2ejyxnzumnzqtyp/bafkreihqafp2wntkwo4mzxmkf2qgej67t6kezfssxb55k34uzifwxtrb5a" alt=""></a><a class="reset" href="https://bsky.app/profile/vinkius-mcp-ai.bsky.social"><img width="32" title="Vinkius" height="32" onerror="this.src='/images/no-user.svg'" loading="lazy" src="https://cdn.bsky.app/img/avatar/plain/did:plc:wl4yqrcbtaaykjpslissa4in/bafkreih5thp4hzzzujr67d3kkm7xtz2mbo2ohd5lsn3dgxcmq7tngy4xpm" alt="Vinkius"></a><a class="reset" href="https://mastodon.social/@jfroehlich"><img width="32" title="jfroehlich" height="32" onerror="this.src='/images/no-user.svg'" loading="lazy" src="https://avatars.webmention.io/cdn.masto.host/b321d8321d850cd6cad3aa097331c85c77d28798752d09eceaca496d515b1910.png" alt="jfroehlich"></a><a class="reset" href="https://topspicy.social/@ddlyh"><img width="32" title="DHeadshot's Alt" height="32" onerror="this.src='/images/no-user.svg'" loading="lazy" src="https://avatars.webmention.io/cdn.masto.host/2ce37e836fc1cd7092dfc5df37e1ebd17765c18802fe9e2e54709381e71ef3cd.jpg" alt="DHeadshot's Alt"></a><a class="reset" href="https://bundyo.com/@bundyo"><img width="32" title="Bundyo" height="32" onerror="this.src='/images/no-user.svg'" loading="lazy" src="https://avatars.webmention.io/cdn.masto.host/56d5b96865c7c882366927b94acc6e029ea2394a6f1e51055e8d6e636a350960.jpg" alt="Bundyo"></a><a class="reset" href="https://bsky.app/profile/nonzerosumjames.mastodon.social.ap.brid.gy"><img width="32" title="James" height="32" onerror="this.src='/images/no-user.svg'" loading="lazy" src="https://cdn.bsky.app/img/avatar/plain/did:plc:adozrdwbzo67xzu7pl23wkyq/bafkreibg4ykl2oyzp5h26ilnyyun3kqk4aimonqfzy35bf4ded32uotqiy" alt="James"></a><a class="reset" href="https://bsky.app/profile/startyparty.dev"><img width="32" title="startyparty" height="32" onerror="this.src='/images/no-user.svg'" loading="lazy" src="https://cdn.bsky.app/img/avatar/plain/did:plc:n5rvzal42653bux7x2mt65gy/bafkreieshf3u5u7wdw6zffl7vv43txm4rniye3iewjrbjfitab4d4jogd4" alt="startyparty"></a></div>
+          </div>
+        </div>
+      </article>
+    </main>
+    <footer class="site-footer clearfix flex subpanel">
+      <div class="flex-item archives">
+        <h2>Archives</h2>
+        <ul class="archive-links">
+          <li><a href="/archive">All years</a></li>
+          <li><a href="/2026">2026</a><small title="published blog posts"> #22<span> posts</span></small></li>
+          <li><a href="/2025">2025</a><small title="published blog posts"> #22<span> posts</span></small></li>
+          <li><a href="/2024">2024</a><small title="published blog posts"> #15<span> posts</span></small></li>
+          <li><a href="/2023">2023</a><small title="published blog posts"> #21<span> posts</span></small></li>
+          <li><a href="/2022">2022</a><small title="published blog posts"> #16<span> posts</span></small></li>
+          <li><a href="/2021">2021</a><small title="published blog posts"> #29<span> posts</span></small></li>
+          <li><a href="/2020">2020</a><small title="published blog posts"> #37<span> posts</span></small></li>
+          <li><a href="/2019">2019</a><small title="published blog posts"> #59<span> posts</span></small></li>
+          <li><a href="/2018">2018</a><small title="published blog posts"> #26<span> posts</span></small></li>
+          <li><a href="/2017">2017</a><small title="published blog posts"> #36<span> posts</span></small></li>
+          <li><a href="/2016">2016</a><small title="published blog posts"> #61<span> posts</span></small></li>
+          <li><a href="/2015">2015</a><small title="published blog posts"> #33<span> posts</span></small></li>
+          <li><a href="/2014">2014</a><small title="published blog posts"> #26<span> posts</span></small></li>
+          <li><a href="/2013">2013</a><small title="published blog posts"> #21<span> posts</span></small></li>
+          <li><a href="/2012">2012</a><small title="published blog posts"> #12<span> posts</span></small></li>
+          <li><a href="/2011">2011</a><small title="published blog posts"> #15<span> posts</span></small></li>
+          <li><a href="/2010">2010</a><small title="published blog posts"> #24<span> posts</span></small></li>
+          <li><a href="/2009">2009</a><small title="published blog posts"> #25<span> posts</span></small></li>
+          <li><a href="/2008">2008</a><small title="published blog posts"> #60<span> posts</span></small></li>
+          <li><a href="/2007">2007</a><small title="published blog posts"> #85<span> posts</span></small></li>
+          <li><a href="/2006">2006</a><small title="published blog posts"> #40<span> posts</span></small></li>
+        </ul>
+      </div>
+      <div class="flex-item links">
+        <h2>Links</h2>
+        <ul>
+          <li><a href="/about">About Remy</a></li>
+          <li><a href="/work">Work with Remy</a></li>
+          <li><a href="/speaking">Speaking & Training</a></li>
+          <li><a href="/links">Links</a></li>
+          <li><a href="/tif">Things I Fixed</a></li>
+          <li><a href="/til">Things I Learned</a></li>
+          <li><a href="/books">Books I've Read</a></li>
+          <li><a href="/ethos">Ethos</a></li>
+          <li><a href="/house-rules">House Rules</a></li>
+          <li><a href="/attic">The Attic</a></li>
+          <li><a target="_blank" rel="noopener me" href="https://github.com/remy">On GitHub</a></li>
+          <li><a target="_blank" rel="noopener me" href="https://bsky.app/profile/remysharp.com">On Bluesky</a></li>
+          <li><a href="/feeds">RSS feeds</a></li>
+          <li><strong><a href="/search">Search</a></strong></li>
+        </ul>
+      </div>
+      <div class="flex-item license">
+        <div class="row social">
+          <h2>Remy Sharp</h2><img class="u-photo" id="avatar" alt="" src="/images/avatar-2022-square.avif" width="60">
+          <div class="social-badge ltr ready hcount count-ready">
+            <div class="btn-o"><a class="btn" id="follow-button" href="https://bsky.app/profile/remysharp.com"><i></i><span class="label" id="l">Follow&nbsp;<b>rem</b></span></a></div>
+            <div class="count-o" id="c"><i></i>
+              <u></u><a class="note" id="count" href="https://bsky.app/profile/remysharp.com">3,658 followers</a>
+            </div>
+          </div>
+        </div>
+        <div class="row bio p-note"><p>I'm a JavaScript developer working professionally on the web since 1999. I run my own <a href="/work">consultancy</a>, build products, run training, speak at conferences and curate the UK's best <a href="https://ffconf.org">Web &amp; JavaScript conference</a>. You can <strong><a href="/work">hire me</a></strong> too.</p>
+
+        </div>
+        <h2>License</h2>
+        <p class="vcard">All content by <a class="url fn" href="https://remysharp.com">Remy Sharp</a> and under <a href="http://creativecommons.org/licenses/by-nc-sa/2.0/uk/">creative commons</a> and code under <a href="http://rem.mit-license.org">MIT&nbsp;license</a>.</p><p>All code and content for this blog is available as <a href="https://github.com/remy/remysharp.com">open source on GitHub</a>.</p>
+
+      </div>
+    </footer>
+    <script src="/js/permalink.js"></script>
+    <script src="/js/index.js?2"></script>
+    <script src="/js/redirect.js"></script>
+    <script>if ('serviceWorker' in navigator && location.origin.indexOf('localhost') === -1) navigator.serviceWorker.register('/service-worker.js');</script>
+    <script src="/js/version.js"></script>
+    <script type="awesome/sauce">
+      
+      
+       Carved up by hand using JavaScript, hard work and a sparkle of hacking.
+      
+       Also, this:
+      
+      
+      
+                             \_            /;              _.._
+                             `\~--.._     //'            ,(+=\\\\
+                              `//////\  \\/;'             /~ (\\\\
+                                ~/////\~\`)'             /;   ))))
+                                    `~'  |              ((`~/((((\
+                                    ;'_\'\             /'))   )))))
+                                   /~/ '" "'     _.  /'/\_ /^\`((( \
+                                  `\/'       _.-~/--/ (  =(   | ,  |
+                                          _/~\_)_}___/^\/~`\.__\|==|
+                                         /uUUU)        )        |  |
+                                        (   / |      _-=o|\__ /'/~ \
+                                        ' /'  |     /(((((\`\(  |~\/
+                                        /'    |   /' )))))"`\`\|/_/---.._,$$,
+                                  .,ssS$$$Sss|._/_..-((('    )\)>>>      ~\$
+                               ,sS$$$$$$$$$$$|$$$$$$$  |/    //'~`o        `\
+                             ,$$$$$$$$$$$$$$|$$S$$$$'  (    /                \
+                           ,$$$$$$$$$$$$S$$|$$$$$$$'   |   /              ,s$$$
+                         s$$$$$S$$$$$$$$$S|$$$$$$$$    |  /              $$$$$$
+                       _~,$S""''     ``"S|$$S$$$$$"    (_,`\,          ,$$$$$$$;
+                     /~ ,"'             / 'S$$$$$"      \_./|        s$$$$$$$$$$
+                  (~'      _,  \==~~)  /     """         \  |       $$$$$$$$$$$$
+                   (0\   /0/     \-' /'                   \ |  |  ,$$$$$$$$$$$$$,
+                   `/'  '         _-~                     |= \_-\ $$$$$$$$$$$$$$s
+                   (~~~)      _.-~_-   \             \  ,s|= |   `"$$$$$$$$$$$$$$$
+                  ( `-'  )/>-~  _/-__   |            |,$$$|_/,      `"$$$$$$$$$$$$
+                  /V^^^^V~/' _/~/~~  ~~-|            |$$$$$$$$         "$$$$$$$$$$,
+                 /  (^^^^),/' /'        )           /S$$$$$$$;         ,$$$$$$$$$$$,
+               ,$$_  `~~~'.,/'         /     _-ss, /(/-(/-(/'        ,s$$$$$$$$$$$$$
+             ,s$$$$$ssSS$$$'         ,$'.s$$$$$$$$'                  (/-(/-(/-(/-(/'
+            S$$$$$$$$$$$$$$        ,$$$$$$$$$$$$$'
+           (/-(/-(/-(/-(/'      _s$$$$$$$$$$$$$$
+                               (/-(/-(/-(/-(/-'
+      
+      
+      
+       – Remy 🖤
+      
+      
+    </script>
+  <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"0fd660699c474848ac947e75f59c2567","r":1,"spa":2}' crossorigin="anonymous"></script>
+</body>
+</html>

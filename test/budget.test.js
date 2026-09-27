@@ -1,20 +1,23 @@
 // Eval do ledger de orçamento: admissão por reserva, regra da 1ª chamada, EMA da estimativa,
 // cancel devolve a reserva, latch do stop, e o singleton persistindo em runs/llm_usage.
-// Usa NC_HOME TEMPORÁRIO (setado ANTES do import dinâmico) — nunca toca o banco real.
+// Usa a sandbox de env (NC_HOME TEMPORÁRIO + DB_PATH/chaves neutralizados, montada ANTES do import
+// dinâmico) — nunca toca o banco real. Os motores (Jev × chat), o 402 e o sub-orçamento do fallback
+// estão em test/budget.engines.test.js.
 import { test, after } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, rmSync } from 'node:fs';
-import path from 'node:path';
-import os from 'node:os';
+import { sandboxEnv } from './helpers/env.js';
 
-process.env.NC_HOME = mkdtempSync(path.join(os.tmpdir(), 'nc-budget-'));
+const sb = sandboxEnv({ JEV_ENABLED: 'false' }, { homePrefix: 'nc-budget-' });
+// Redundante com a sandbox (que já setou) — explícito p/ a malha do nc-home-isolation.test.js, que
+// audita o assignment literal ANTES do 1º import de src/.
+process.env.NC_HOME = sb.home;
 const { BudgetLedger, BudgetExceededError, beginRun, endRun, reserve, getBudgetState, shouldStop } =
   await import('../src/budget.js');
 const { db, stmts } = await import('../src/db.js');
 
 after(() => {
   db.close();
-  rmSync(process.env.NC_HOME, { recursive: true, force: true });
+  sb.restore();
 });
 
 const flashUsage = (cost) => ({ cost, prompt_tokens: 1000, completion_tokens: 200 });
@@ -53,12 +56,12 @@ test('regra da 1ª chamada: budget menor que o seed ainda admite 1 chamada', () 
   const t = l.reserve('classify', 'acme/llm-probe'); // seed 0.05 > 0.001, mas é a 1ª
   t.commit({ usage: flashUsage(0.0008) });
   assert.equal(l.calls, 1);
-  assert.equal(l.shouldStop(), true, 'depois da 1ª, a sobra não paga nem uma Flash');
+  assert.equal(l.shouldStop(), true, 'depois da 1ª, a sobra não paga nem a chamada mais barata (Jev)');
 });
 
 test('estimativa: seed antes de dados; converge p/ 2x EMA com clamp', () => {
   const l = new BudgetLedger({ budgetUsd: 10 });
-  assert.equal(l.estimate('summarize', 'deepseek/deepseek-v4-flash-0731'), 0.005, 'seed flash');
+  assert.equal(l.estimate('summarize', 'deepseek/deepseek-v4-flash-0731'), 0.01, 'seed flash/gemini');
   assert.equal(l.estimate('classify', 'acme/llm-probe'), 0.05, 'seed pro');
   for (let i = 0; i < 30; i++) {
     l.reserve('summarize', 'deepseek/deepseek-v4-flash-0731').commit({ usage: flashUsage(0.002) });
@@ -69,7 +72,7 @@ test('estimativa: seed antes de dados; converge p/ 2x EMA com clamp', () => {
   for (let i = 0; i < 50; i++) {
     l.reserve('summarize', 'deepseek/deepseek-v4-flash-0731').commit({ usage: flashUsage(0) });
   }
-  assert.equal(l.estimate('summarize', 'deepseek/deepseek-v4-flash-0731'), 0.0005, 'piso seed/10');
+  assert.equal(l.estimate('summarize', 'deepseek/deepseek-v4-flash-0731'), 0.001, 'piso seed/10');
 });
 
 test('cancel devolve a reserva (e o token é de uso único)', () => {

@@ -1,0 +1,1893 @@
+<!DOCTYPE html>
+<html lang=en-GB class="page    page--post  page--blog" id=htmlElement>
+
+  <script>performance.mark('HEAD_Start');</script>
+<meta charset=UTF-8>
+<meta name=viewport content="width=device-width, minimum-scale=1.0">
+
+<script>
+// Track First Potential Paint (FPP)
+requestAnimationFrame((timestamp) => {
+  const fpp = performance.mark('fpp', {
+    startTime: timestamp,
+  });
+});
+</script>
+
+<script>
+/*! Obs.js | (c) Harry Roberts, csswizardry.com | MIT */
+;(()=>{const e=document.currentScript;if((!e||e.src||e.type&&"module"===e.type.toLowerCase())&&!1===/^(localhost|127\.0\.0\.1|::1)$/.test(location.hostname))return void console.warn("[Obs.js] Skipping: must be an inline, classic <script> in <head>.",e?e.src?"src="+e.src:"type="+e.type:"type=module");const t=document.documentElement,{connection:i}=navigator;window.obs=window.obs||{};const a=!0===(window.obs&&window.obs.config||{}).observeChanges,o=()=>{const e=window.obs||{},i="number"==typeof e.downlinkBucket?e.downlinkBucket:null;e.connectionCapability="low"===e.rttCategory&&null!=i&&i>=8?"strong":"high"===e.rttCategory||null!=i&&i<=5?"weak":"moderate";const a=!0===e.dataSaver||!0===e.batteryLow||!0===e.batteryCritical;e.conservationPreference=a?"conserve":"neutral";const o="weak"===e.connectionCapability||!0===e.dataSaver||!0===e.batteryCritical;e.deliveryMode="strong"!==e.connectionCapability||o||a?o?"lite":"cautious":"rich",e.canShowRichMedia="lite"!==e.deliveryMode,e.shouldAvoidRichMedia="lite"===e.deliveryMode,["strong","moderate","weak"].forEach(e=>{t.classList.remove(`has-connection-capability-${e}`)}),t.classList.add(`has-connection-capability-${e.connectionCapability}`),["conserve","neutral"].forEach(e=>{t.classList.remove(`has-conservation-preference-${e}`)}),t.classList.add(`has-conservation-preference-${e.conservationPreference}`),["rich","cautious","lite"].forEach(e=>{t.classList.remove(`has-delivery-mode-${e}`)}),t.classList.add(`has-delivery-mode-${e.deliveryMode}`)},n=()=>{if(!i)return;const{saveData:e,rtt:a,downlink:n}=i;window.obs.dataSaver=!!e,t.classList.toggle("has-data-saver",!!e);const s=(e=>Number.isFinite(e)?25*Math.ceil(e/25):null)(a);null!=s&&(window.obs.rttBucket=s);const r=(e=>Number.isFinite(e)?e<75?"low":e<=275?"medium":"high":null)(a);r&&(window.obs.rttCategory=r,["low","medium","high"].forEach(e=>t.classList.remove(`has-latency-${e}`)),t.classList.add(`has-latency-${r}`));const c=(l=n,Number.isFinite(l)?Math.ceil(l):null);var l;if(null!=c){window.obs.downlinkBucket=c;const e=c<=5?"low":c>=8?"high":"medium";window.obs.downlinkCategory=e,["low","medium","high"].forEach(e=>t.classList.remove(`has-bandwidth-${e}`)),t.classList.add(`has-bandwidth-${e}`)}"downlinkMax"in i&&(window.obs.downlinkMax=i.downlinkMax),o()};n(),a&&i&&"function"==typeof i.addEventListener&&i.addEventListener("change",n);const s=e=>{if(!e)return;const{level:i,charging:a}=e,n=Number.isFinite(i)?i<=.05:null;window.obs.batteryCritical=n;const s=Number.isFinite(i)?i<=.2:null;window.obs.batteryLow=s,["critical","low"].forEach(e=>t.classList.remove(`has-battery-${e}`)),s&&t.classList.add("has-battery-low"),n&&t.classList.add("has-battery-critical");const r=!!a;window.obs.batteryCharging=r,t.classList.toggle("has-battery-charging",r),o()};if("getBattery"in navigator&&navigator.getBattery().then(e=>{s(e),a&&"function"==typeof e.addEventListener&&(e.addEventListener("levelchange",()=>s(e)),e.addEventListener("chargingchange",()=>s(e)))}).catch(()=>{}),"deviceMemory"in navigator){const e=Number(navigator.deviceMemory),i=Number.isFinite(e)?e:null;window.obs.ramBucket=i;const a=(r=i,Number.isFinite(r)?r<=1?"very-low":r<=2?"low":r<=4?"medium":"high":null);a&&(window.obs.ramCategory=a,["very-low","low","medium","high"].forEach(e=>t.classList.remove(`has-ram-${e}`)),t.classList.add(`has-ram-${a}`))}var r;if("hardwareConcurrency"in navigator){const e=Number(navigator.hardwareConcurrency),i=Number.isFinite(e)?e:null;window.obs.cpuBucket=i;const a=(e=>Number.isFinite(e)?e<=2?"low":e<=5?"medium":"high":null)(i);a&&(window.obs.cpuCategory=a,["low","medium","high"].forEach(e=>t.classList.remove(`has-cpu-${e}`)),t.classList.add(`has-cpu-${a}`))}(()=>{const e=window.obs||{},i=e.ramCategory,a=e.cpuCategory;let o="moderate";"high"!==i&&"medium"!==i||"high"!==a?("very-low"===i||"low"===i||"low"===a)&&(o="weak"):o="strong",e.deviceCapability=o,["strong","moderate","weak"].forEach(e=>{t.classList.remove(`has-device-capability-${e}`)}),t.classList.add(`has-device-capability-${o}`)})()})();
+//# sourceURL=obs.inline.js
+</script>
+
+<title>Measuring Component Performance with the Container Timing API – CSS Wizardry</title>
+
+<link rel=describedby href=/llms.txt>
+
+
+  <link rel=alternate type=text/markdown href="https://raw.githubusercontent.com/csswizardry/csswizardry.github.com/refs/heads/master/_posts/2026-07-26-meaasuring-component-performance-with-the-container-timing-api.md" title="Measuring Component Performance with the Container Timing API in Markdown">
+
+
+
+<link rel=preconnect href=https://res.cloudinary.com>
+
+
+
+
+
+
+<link rel=preconnect href=https://csswizardry.com crossorigin>
+
+<script
+  src=https://js.sentry-cdn.com/63ca7852aff6fe7487dff1b4a8a4b07d.min.js
+  async
+  crossorigin=anonymous
+></script>
+
+<script>
+  /* SpeedCurve RUM Snippet v2.0.0 */LUX=function(){var n=Math.floor;function t(){return Date.now?Date.now():+new Date}var r,a=t(),e=window.performance||{},i=e.timing||{navigationStart:(null===(r=window.LUX)||void 0===r?void 0:r.ns)||a};function o(){return e.now?n(e.now()):t()-i.navigationStart}(LUX=window.LUX||{}).ac=[],LUX.addData=function(n,t){return LUX.cmd(["addData",n,t])},LUX.cmd=function(n){return LUX.ac.push(n)},LUX.getDebug=function(){return[[a,0,[]]]},LUX.init=function(n){return LUX.cmd(["init",n||o()])},LUX.mark=function(){for(var n=[],t=0;t<arguments.length;t++)n[t]=arguments[t];if(e.mark)return e.mark.apply(e,n);var r=n[0],a=n[1]||{};void 0===a.startTime&&(a.startTime=o());LUX.cmd(["mark",r,a])},LUX.markLoadTime=function(){return LUX.cmd(["markLoadTime",o()])},LUX.startSoftNavigation=function(){return LUX.cmd(["startSoftNavigation",o()])},LUX.measure=function(){for(var n=[],t=0;t<arguments.length;t++)n[t]=arguments[t];if(e.measure)return e.measure.apply(e,n);var r,a=n[0],i=n[1],u=n[2];r="object"==typeof i?n[1]:{start:i,end:u};r.duration||r.end||(r.end=o());LUX.cmd(["measure",a,r])},LUX.on=function(n,t){return LUX.cmd(["on",n,t])},LUX.send=function(n){return LUX.cmd(["send",n])},LUX.snippetVersion="2.0.0",LUX.ns=a;var u=LUX;return window.LUX_ae=[],window.addEventListener("error",function(n){window.LUX_ae.push(n)}),u}();
+  LUX = window.LUX || {};
+  LUX.samplerate = 100;
+  
+  
+    LUX.label = 'Post';
+  
+  //# sourceURL=speedcurve.inline.js
+</script>
+
+<script>
+  (function(t,e,n,r){function a(){return e&&e.now?e.now():null}if(!n.version){n._events=[];n._errors=[];n._metadata={};n._urlGroup=null;window.RM=n;n.install=function(e){n._options=e;var a=t.createElement("script");a.async=true;a.crossOrigin="anonymous";a.src=r;var o=t.getElementsByTagName("script")[0];o.parentNode.insertBefore(a,o)};n.identify=function(t,e){n._userId=t;n._identifyOptions=e};n.sendEvent=function(t,e){n._events.push({eventName:t,metadata:e,time:a()})};n.setUrlGroup=function(t){n._urlGroup=t};n.track=function(t,e){n._errors.push({error:t,metadata:e,time:a()})};n.addMetadata=function(t){n._metadata=Object.assign(n._metadata,t)}}})(document,window.performance,window.RM||{},"https://cdn.requestmetrics.com/agent/current/rm.js");
+  RM.install({
+    token: "j5ss3vj:q7xf9tv"
+  });
+  //# sourceURL=request-metrics.inline.js
+</script>
+
+<script>
+  (function(){var dbpr=100;if(Math.random()*100>100-dbpr){var d="dbbRum",w=window,o=document,a=addEventListener,scr=o.createElement("script");scr.async=!0;w[d]=w[d]||[];w[d].push(["presampling",dbpr]);["error","unhandledrejection"].forEach(function(t){a(t,function(e){w[d].push([t,e])});});scr.src="https://cdn.debugbear.com/vUKP1Yu0eg5g.js";o.head.appendChild(scr);}})()
+  //# sourceURL=debugbear.inline.js
+</script>
+
+<script>performance.mark('CSS_Start');</script>
+<style>
+
+  /*!
+ * inuitcss, by @csswizardry
+ *
+ * github.com/inuitcss | inuitcss.com
+ */:root{--font-family-system: system-ui, sans-serif;--font-family-code: "Operator Mono", ui-monospace, monospace;--font-family-serif: New York, Charter, "Bitstream Charter", "Sitka Text", Cambria, serif }:root{--spacing-unit: 24px;--spacing-unit--tiny: 6px;--spacing-unit--small: 12px;--spacing-unit--large: 48px}:root{--border-radius: 3px;--header-border-width: 6px;--header-max-height: 480px}:root{--color-brand: #f43059;--color-pink: var(--color-brand);--color-bg: #f9f9f9;--color-gray: #333;--color-gray-light: #999;--color-gray-mid: #666;--color-gray-ui: #ddd;--color-green: #859900;--color-highlight: #fff;--color-tint: #f2f2f2;--color-positive: #3f990f;--color-negative: #9f102e;--color-hilite: #ffc;--color-links: var(--color-pink);--color-links-carousel: var(--color-gray-ui);--color-code: var(--color-green);--color-pre-background: var(--color-gray);--color-pre: #fff;--color-btn: var(--color-links);--color-iconic: var(--color-gray-ui);--color-masthead: #fff;--color-page-head-border: var(--color-pink);--color-page-head: #fff;--color-page-head-background: #fff;--color-site-nav: var(--color-gray);--color-sub-menu-border: var(--color-gray-ui);--color-sub-menu-link: var(--color-gray);--color-sub-menu-link-hover: var(--color-links);--color-nav-secondary: var(--color-gray-light);--color-nav-secondary-text: var(--color-gray);--color-page-foot: #fff;--color-page-micro: #fff;--color-page-micro-background: var(--color-gray);--color-headings: var(--color-pink);--color-heading-sub: var(--color-gray);--color-quote: var(--color-gray-mid);--color-quote--banner: var(--color-gray);--color-box-highlight-background: var(--color-highlight);--color-box-highlight-border: var(--color-gray-ui);--color-box-tint-background: var(--color-tint);--color-band-highlight-background: var(--color-highlight);--color-band-tint-background: var(--color-tint);--color-band-dark: #fff;--color-band-dark-background: var(--color-gray);--color-band-attention: #fff;--color-band-attention-background: var(--color-brand)}html{box-sizing:border-box}*,*::before,*::after{box-sizing:inherit}@supports(-webkit-text-size-adjust: none){html{-webkit-text-size-adjust:none}}h1,h2,h3,h4,h5,h6,p,blockquote,pre,hr,ul,ol,dl,dd,th,td,body,figure,dialog,fieldset,legend,input,textarea,button,select,option{margin:0;padding:0}h1,h2,h3,h4,h5,h6,p,blockquote,pre,hr,ul,ol,dl,table,figure,dialog,fieldset{margin-block-end:var(--defaults-margin-bottom, 0)}html{font-family:serif}h1{font-size:2em}small{font-size:80%}sub,sup{font-size:80%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-0.25em}sup{top:-0.5em}@media(hover: hover){abbr[title],dfn[title]{cursor:help}}u,ins{text-decoration:none}strong,b{font-weight:bold}pre,code,kbd,samp,output{font-family:monospace,monospace;font-size:inherit}hr{color:gray;border:1px inset}table{border-collapse:collapse;border-spacing:0;font-variant-numeric:tabular-nums}input,textarea,button,select,option{font:inherit;color:inherit}::placeholder{color:inherit}img,video,canvas,svg{vertical-align:middle;max-inline-size:100%;block-size:auto}img{font-style:italic;background-repeat:no-repeat;background-size:cover;shape-margin:var(--defaults-shape-margin, 0)}iframe{vertical-align:middle;max-inline-size:100%;border:none}@media(prefers-reduced-motion: no-preference){html:focus-within{scroll-behavior:smooth}}:target{scroll-margin-block-start:var(--defaults-scroll-margin, 0)}@media(hover: hover){summary,:is(button,input:is([type=submit],[type=button],[type=file],[type=image],[type=reset],[type=checkbox],[type=radio])):not([disabled]){cursor:pointer}}h1,h2,h3,h4,h5,h6,ul,ol,dl,blockquote,p,address,hr,table,fieldset,figure,pre,.promo__block,.page-head,[open]>summary,details{margin-bottom:24px;margin-bottom:1.5rem}ul,ol,dd{margin-left:48px;margin-left:3rem}html{font-size:1em;line-height:1.5;background-color:var(--color-bg);color:var(--color-gray);overflow-y:scroll;min-height:100%;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;-moz-osx-font-smoothing:grayscale;-webkit-font-smoothing:antialiased}@media(prefers-reduced-motion: no-preference){@view-transition{navigation:auto}}html{font-family:var(--font-family-system);font-weight:400;scroll-behavior:smooth}h1,.alpha{font-size:36px;font-size:2.25rem;line-height:1.3333333333}h2,.beta{font-size:30px;font-size:1.875rem;line-height:1.6}h3,.gamma{font-size:24px;font-size:1.5rem;line-height:1}h4,.delta{font-size:20px;font-size:1.25rem;line-height:1.2}h5,.epsilon{font-size:16px;font-size:1rem;line-height:1.5}h6,.zeta{font-size:14px;font-size:.875rem;line-height:1.7142857143}h6,h5,h4,h3,h2,h1{font-weight:300;color:var(--color-headings);text-wrap:balance}@media screen and (min-width: 45em){h1{font-size:72px;font-size:4.5rem;line-height:1;font-weight:900;border-left:var(--spacing-unit) solid var(--color-brand);border-radius:var(--border-radius);margin-left:calc(-1*(var(--spacing-unit) + var(--spacing-unit--small)));padding-left:var(--spacing-unit--small)}}h2:has(>img){line-height:1}.heading{display:block;font-size:22px;font-size:1.375rem;line-height:1.0909090909;color:var(--color-headings)}.heading-sub{display:block;font-size:16px;font-size:1rem;line-height:1.5;font-weight:600;margin-bottom:0;color:var(--color-heading-sub)}a,strong,b,dt{font-weight:600}p{text-wrap:pretty}code,kbd,samp,output{color:var(--color-code);font-family:var(--font-family-code);font-style:normal;word-break:break-word}a:hover code,a:active code,a:focus code,a:hover kbd,a:active kbd,a:focus kbd,a:hover samp,a:active samp,a:focus samp,a:hover output,a:active output,a:focus output{text-decoration:underline}pre{white-space:pre;word-wrap:normal;overflow:auto;padding:var(--spacing-unit--small);background-color:var(--color-pre-background);border-radius:var(--border-radius)}@media screen and (min-width: 45em){pre{margin-right:calc(-1*var(--spacing-unit--small));margin-left:calc(-1*var(--spacing-unit--small))}}pre,pre code,pre kbd,pre samp{color:var(--color-pre);word-break:keep-all}li pre{margin-top:1.5rem}var{font-family:var(--font-family-serif);line-height:1;font-style:italic}figure{counter-increment:figure}@media screen and (min-width: 1380px){figure{margin-left:-128px}}figure>img{border-radius:var(--border-radius)}figure:has(img){position:relative}figure:has(img)::before{content:"Loading…"/"";font-size:12px;font-size:.75rem;line-height:2;text-transform:uppercase;letter-spacing:.1em;position:absolute;top:50%;left:50%;transform:translate(-50%, -50%);color:#ccc;z-index:-1}figcaption{font-size:12px;font-size:.75rem;line-height:2}@media screen and (min-width: 1380px){figcaption{margin-left:128px}}figcaption::before{content:"Fig. " counter(figure) ": ";font-weight:bold}hr{border:none;border-bottom:1px solid var(--color-gray-ui);margin-bottom:calc(var(--spacing-unit) - 1px)}@media screen and (min-width: 1380px){.s-post hr{margin-left:-128px;margin-top:calc(3*var(--spacing-unit));margin-bottom:calc(3*var(--spacing-unit) - 1px)}}mark{background-color:rgba(0,0,0,0);color:inherit;text-decoration:from-font #ffd048 wavy underline;text-decoration-skip-ink:none}mark::before{content:"👉 "}mark::after{content:" 👈"}.text-banner{text-align:center;text-wrap:balance}s,del,ins{text-decoration:none;border-bottom:none;background-color:rgba(0,0,0,0)}s,del{color:var(--color-negative)}s::before,del::before{content:"[−﻿"}s::after,del::after{content:"﻿−]"}ins{color:var(--color-positive)}ins::before{content:"{+﻿"}ins::after{content:"﻿+}"}ol ol{list-style-type:lower-alpha}ol ol ol{list-style-type:lower-roman}ol ul{list-style-type:disc}a{text-decoration:none;color:var(--color-links);text-decoration-skip:ink}a:hover,a:active,a:focus{text-decoration:underline}.link-secret{color:inherit;font-weight:400}.link-secret:hover,.link-secret:active,.link-secret:focus{color:var(--color-links);text-decoration:none}@supports(position: sticky){@media screen and (min-height: 75em){:target{scroll-margin-top:calc(5*var(--spacing-unit))}}}li>ul,li>ol{margin-bottom:0}img{--defaults-shape-margin: 0.75rem}q{font-style:italic;quotes:"‘" "’" "“" "”"}q:before{content:open-quote}q:after{content:close-quote}blockquote{margin-right:var(--spacing-unit--large);margin-left:var(--spacing-unit--large);font-style:italic;quotes:"“" "”"}blockquote p{text-indent:-0.45em}@supports(hanging-punctuation: first last){blockquote p{hanging-punctuation:first last;text-indent:0}}blockquote p:before{content:open-quote}blockquote p:after{content:no-close-quote}blockquote p:last-of-type{margin-bottom:0}blockquote p:last-of-type:after{content:close-quote}blockquote q{quotes:"‘" "’"}blockquote q:before{content:open-quote}blockquote q:after{content:close-quote}label{font-size:12px;font-size:.75rem;line-height:2;font-weight:600;cursor:pointer}table{font-size:12px;font-size:.75rem;line-height:2;font-variant-numeric:tabular-nums;width:calc(100% + var(--spacing-unit));margin-right:calc(-1*var(--spacing-unit--small));margin-left:calc(-1*var(--spacing-unit--small))}@media screen and (min-width: 45em){table{font-size:16px;font-size:1rem;line-height:1.5;width:100%;margin-right:0;margin-left:0}}th{font-weight:600;text-align:left}th,td{padding:var(--spacing-unit--tiny)}details+details{padding-top:var(--spacing-unit);border-top:1px solid var(--color-gray-ui)}summary{color:var(--color-brand);font-weight:600;cursor:pointer;text-decoration:none}summary:hover,summary:focus,[open]>summary{text-decoration:underline}.wrapper{max-width:1100px;margin:0 auto;padding-right:var(--spacing-unit--small);padding-left:var(--spacing-unit--small)}@media screen and (min-width: 45em){.wrapper{padding-right:var(--spacing-unit);padding-left:var(--spacing-unit)}}.wrapper--wide{max-width:1280px}.wrapper--unconstrained{max-width:none}.btn{display:inline-block;vertical-align:middle;font:inherit;text-align:center;margin:0;cursor:pointer;overflow:visible;padding:10px 22px;background-color:var(--color-btn);border:2px solid var(--color-btn);border-radius:var(--border-radius)}.btn,.btn:hover,.btn:active,.btn:focus{text-decoration:none;color:#fff}.btn::-moz-focus-inner{border:0;padding:0}.btn--small{padding:4px 10px}.btn--full{width:100%;padding-right:0;padding-left:0}.layout{list-style:none;margin:0;padding:0;margin-left:-24px}.layout__item{display:inline-block;padding-left:24px;vertical-align:top;width:100%;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box}.layout--large{margin-left:-48px}.layout--large>.layout__item{padding-left:48px}.layout--middle>.layout__item{vertical-align:middle}.layout--bottom>.layout__item{vertical-align:bottom}.box{display:block;padding:24px}.box>:last-child{margin-bottom:0}.media{display:block}.media__img{float:left;margin-right:24px}.media__img>img{display:block}.media__body{overflow:hidden;display:block}.media__body,.media__body>:last-child{margin-bottom:0}.flag{display:table;width:100%}.flag__img,.flag__body{display:table-cell;vertical-align:middle}.flag__img{padding-right:24px}.flag__img>img{display:block;max-width:none}.flag__body{width:100%}.flag__body,.flag__body>:last-child{margin-bottom:0}.flag--rev{direction:rtl}.flag--rev>.flag__img,.flag--rev>.flag__body{direction:ltr}.flag--rev>.flag__img{padding-right:0;padding-left:24px}@media screen and (max-width: 479px){.flag--responsive{direction:ltr}.flag--responsive,.flag--responsive>.flag__img,.flag--responsive>.flag__body{display:block}.flag--responsive>.flag__img{padding-right:0;padding-left:0;margin-bottom:24px}}.flag__img{white-space:nowrap}.list-ui,.list-ui__item,.list-ui>li{border:0 solid var(--color-gray-ui)}.list-ui{margin:0;padding:0;list-style:none;border-top-width:1px}.list-ui__item,.list-ui>li{padding:24px;border-bottom-width:1px}.list-ui--small>.list-ui__item,.list-ui--small.list-ui>li{padding:12px}.list-ui__title{display:block;font-size:12px;font-size:.75rem;line-height:2;font-weight:600;color:var(--color-gray-light);margin-bottom:0}.o-list-inline{margin-left:0}.o-list-inline>li{display:inline-block}.o-list-inline--spaced>li{padding:.75rem}.o-list-columnar{list-style:none;margin-left:0;column-count:2;column-gap:var(--spacing-unit)}@media screen and (min-width: 45em){.o-list-columnar{column-count:3}}.page-head{border-style:solid;border-width:var(--header-border-width) 0 1px;border-top-color:var(--color-page-head-border);border-bottom-color:#f2f2f2;padding-top:var(--spacing-unit--small);padding-bottom:var(--spacing-unit--small);background-color:var(--color-page-head-background)}@media screen and (min-width: 45em){.page-head{padding-top:var(--spacing-unit);padding-bottom:var(--spacing-unit)}}@supports(position: sticky){@media screen and (min-height: 75em){.page-head{position:sticky;top:0;background-color:hsla(0,0%,100%,.95);z-index:2}}}.band{padding-top:var(--spacing-unit);padding-bottom:var(--spacing-unit);content-visibility:auto;contain-intrinsic-size:1px 1000px}@media screen and (min-width: 64em){.band{padding-top:var(--spacing-unit--large);padding-bottom:var(--spacing-unit--large)}}.band--large{padding:var(--spacing-unit--large)}.band--highlight{background-color:var(--color-band-highlight-background)}.band--tint{background-color:var(--color-band-tint-background)}.band--dark{background-color:var(--color-band-dark-background)}.band--dark,.band--dark a,.band--dark code{color:var(--color-band-dark)}.band--attention{background-color:var(--color-band-attention-background);color:var(--color-band-attention)}.band__title{text-align:center;font-size:12px;font-size:.75rem;line-height:2;text-transform:uppercase;letter-spacing:.1em;color:hsla(0,0%,100%,.5);-webkit-font-smoothing:auto}.promo{padding-bottom:0;text-align:center}@media screen and (min-width: 64em){.promo{padding-bottom:var(--spacing-unit)}}.promo__link{display:block;color:#333;font-weight:400}.promo__link:hover{text-decoration:none}.promo__links{text-align:center}@media screen and (min-width: 45em){.promo__links-spacer{padding-right:1.5em;padding-left:1.5em}}.site-nav{--site-nav-logo-height: 64px}.page-head--masthead .site-nav{position:absolute;top:0;right:var(--spacing-unit--small);left:var(--spacing-unit--small)}@media screen and (min-width: 45em){.page-head--masthead .site-nav{top:0;right:var(--spacing-unit);left:var(--spacing-unit)}}.site-nav__home-link{display:block;float:left;position:relative;z-index:3;will-change:transform}@media screen and (min-width: 45em){.site-nav__home-link{position:static}}.site-nav__logo{display:block}.site-nav__logo-fill{fill:var(--color-brand);transition:fill .2s}.site-nav.is-open .site-nav__logo-fill{fill:#fff}.page-head--masthead .site-nav__logo-fill{fill:var(--color-page-head)}.site-nav__closer,.site-nav__opener{font-size:12px;font-size:.75rem;line-height:2;line-height:var(--site-nav-logo-height);text-transform:uppercase;font-weight:bold;padding:0;background:none;border:none}.site-nav__closer:hover,.site-nav__opener:hover,.site-nav__closer:focus,.site-nav__opener:focus{text-decoration:none}.site-nav__opener{color:var(--color-links);float:right}.page-head--masthead .site-nav__opener{color:#fff}@media screen and (min-width: 45em){.site-nav__opener{display:none}}.site-nav__list{margin:0;padding:0;list-style:none;position:fixed;top:54px;right:0;bottom:0;left:0;z-index:2;overflow:scroll;transform:translateX(100%);transition:.2s;will-change:transform;background-color:var(--color-gray);contain:layout;content-visibility:hidden}.has-battery-low .site-nav__list,.has-battery-critical .site-nav__list{transition:none;will-change:auto}@media(prefers-reduced-motion: reduce){.site-nav__list{transition:none;will-change:auto}}@supports(backdrop-filter: blur(5px)){.site-nav__list{background-color:rgb(from var(--color-gray) r g b/80%);backdrop-filter:blur(5px)}}.is-open .site-nav__list{content-visibility:visible;transform:none}@media screen and (min-width: 45em){.site-nav__list{content-visibility:visible;position:relative;top:auto;right:auto;bottom:auto;left:auto;float:right;background-color:rgba(0,0,0,0);overflow:visible;backdrop-filter:none;transform:none}}.site-nav__item{border-bottom:1px solid hsla(0,0%,100%,.1)}.site-nav__item:last-child{border-bottom:none}@media screen and (min-width: 45em){.site-nav__item{position:relative;border-bottom:none;float:left}.site-nav__item.has-sub-menu>a{transition:.2s}.site-nav__item.has-sub-menu:hover>a{transform:translateY(-2px)}.site-nav__sub-menu .site-nav__item{float:none}.site-nav__sub-menu .site-nav__item+.site-nav__item{border-top:1px solid var(--color-sub-menu-border)}}.site-nav__item--closer{text-align:right}@media screen and (min-width: 45em){.site-nav__item--closer{display:none}}.site-nav__closer{width:100%;text-align:right}.site-nav__closer.site-nav__closer.site-nav__closer:hover,.site-nav__closer.site-nav__closer.site-nav__closer:active,.site-nav__closer.site-nav__closer.site-nav__closer:focus{text-decoration:none}.site-nav__sub-menu{list-style:none;margin-left:0;padding-left:var(--spacing-unit)}@media screen and (min-width: 45em){.site-nav__sub-menu{position:absolute;top:100%;left:50%;transform:translateX(-50%) translateY(-10px);z-index:1;padding-left:0;text-align:center;white-space:nowrap;background-color:#fff;border-radius:var(--border-radius);border:1px solid var(--color-sub-menu-border);box-shadow:var(--border-radius) var(--border-radius) 0 rgba(0,0,0,.1);visibility:hidden;opacity:0;transition:.333s}.site-nav__item:hover .site-nav__sub-menu{opacity:1;visibility:visible;will-change:opacity;transform:translateX(-50%) translateY(0)}.site-nav__sub-menu:before,.site-nav__sub-menu:after{content:"";position:absolute;bottom:100%;left:50%}.site-nav__sub-menu:before{border:12px solid rgba(0,0,0,0);border-bottom-color:var(--color-sub-menu-border);margin-left:-12px}.site-nav__sub-menu:after{border:11px solid rgba(0,0,0,0);border-bottom-color:#fff;margin-left:-11px}}.site-nav__link{display:block;padding:var(--spacing-unit--small);color:#fff}.site-nav__link:hover,.site-nav__link:active,.site-nav__link:focus{text-decoration:underline;color:#fff}@media screen and (min-width: 45em){.site-nav__link{line-height:var(--site-nav-logo-height);color:var(--color-gray);padding-top:0;padding-bottom:0}.site-nav__link:hover,.site-nav__link:active,.site-nav__link:focus{color:var(--color-links);text-decoration:none}}.page-head--masthead .site-nav__link,.page-head--masthead .site-nav__link:hover,.page-head--masthead .site-nav__link:active,.page-head--masthead .site-nav__link:focus{color:var(--color-masthead)}.page-head--masthead .site-nav__link:hover,.page-head--masthead .site-nav__link:active,.page-head--masthead .site-nav__link:focus{text-decoration:underline}.page--contact .site-nav__contact,.page--services .site-nav__services,.page--speaking .site-nav__speaking,.page--case-studies .site-nav__case-studies,.page--blog .site-nav__blog,.page--about .site-nav__about{color:#fff;text-decoration:underline}@media screen and (min-width: 45em){.page--contact .site-nav__contact,.page--services .site-nav__services,.page--speaking .site-nav__speaking,.page--case-studies .site-nav__case-studies,.page--blog .site-nav__blog,.page--about .site-nav__about{color:var(--color-links);position:relative;text-decoration:none}.page--contact .site-nav__contact:before,.page--services .site-nav__services:before,.page--speaking .site-nav__speaking:before,.page--case-studies .site-nav__case-studies:before,.page--blog .site-nav__blog:before,.page--about .site-nav__about:before,.page--contact .site-nav__contact:after,.page--services .site-nav__services:after,.page--speaking .site-nav__speaking:after,.page--case-studies .site-nav__case-studies:after,.page--blog .site-nav__blog:after,.page--about .site-nav__about:after{content:"";position:absolute;left:50%;pointer-events:none;border-style:solid;border-color:rgba(0,0,0,0)}.page--contact .site-nav__contact:before,.page--services .site-nav__services:before,.page--speaking .site-nav__speaking:before,.page--case-studies .site-nav__case-studies:before,.page--blog .site-nav__blog:before,.page--about .site-nav__about:before{border-width:var(--spacing-unit--small);border-bottom-color:#f2f2f2;margin-left:calc(-1*var(--spacing-unit--small));bottom:calc(-1*var(--spacing-unit))}.page--contact .site-nav__contact:after,.page--services .site-nav__services:after,.page--speaking .site-nav__speaking:after,.page--case-studies .site-nav__case-studies:after,.page--blog .site-nav__blog:after,.page--about .site-nav__about:after{border-width:calc(var(--spacing-unit--small) - 1px);border-bottom-color:var(--color-bg);margin-left:calc(-1*(var(--spacing-unit--small) - 1px));bottom:calc(-1*(var(--spacing-unit) + 1px))}}.page--masterclasses .site-nav__masterclasses,.page--sentinel .site-nav__sentinel,.page--downloads .site-nav__downloads,.page--consultancy .site-nav__consultancy,.page--code-reviews .site-nav__code-reviews,.page--workshops .site-nav__workshops,.page--supporters .site-nav__supporters,.page--testimonials .site-nav__testimonials,.page--newsletter .site-nav__newsletter{text-decoration:underline}@media screen and (min-width: 45em){.page--masterclasses .site-nav__masterclasses,.page--sentinel .site-nav__sentinel,.page--downloads .site-nav__downloads,.page--consultancy .site-nav__consultancy,.page--code-reviews .site-nav__code-reviews,.page--workshops .site-nav__workshops,.page--supporters .site-nav__supporters,.page--testimonials .site-nav__testimonials,.page--newsletter .site-nav__newsletter{text-decoration:none;color:var(--color-links)}}.page--home .site-nav__home{text-decoration:underline}.site-nav__sub-link{display:block;padding:var(--spacing-unit--small);color:#fff}.site-nav__sub-link:hover,.site-nav__sub-link:active,.site-nav__sub-link:focus{text-decoration:underline}@media screen and (min-width: 45em){.site-nav__sub-link{font-weight:400;color:var(--color-gray)}.site-nav__sub-link:hover,.site-nav__sub-link:active,.site-nav__sub-link:focus{text-decoration:none;color:var(--color-sub-menu-link-hover)}}html:active-view-transition .page-head:not(.page-head--masthead) .site-nav__link::before{view-transition-name:nav-indicator-before}html:active-view-transition .page-head:not(.page-head--masthead) .site-nav__link::after{view-transition-name:nav-indicator-after}::view-transition-group(*){animation-duration:.333s;animation-timing-function:ease-in-out}.c-nav-secondary{margin-left:0;list-style:none;display:table;table-layout:fixed;width:100%;text-align:center;font-size:12px;font-size:.75rem;line-height:1.833333333;border:1px solid var(--color-nav-secondary);border-radius:var(--border-radius)}.c-nav-secondary__item{display:table-cell;vertical-align:middle}.c-nav-secondary__item+.c-nav-secondary__item{border-left:1px solid var(--color-nav-secondary)}.c-nav-secondary__link{display:block;padding-top:var(--spacing-unit--small);padding-bottom:var(--spacing-unit--small);color:var(--color-nav-secondary-text)}.c-nav-secondary__link.is-current{color:#fff;background-color:var(--color-nav-secondary);text-decoration:none;cursor:default;pointer-events:none}.c-sub-content{content-visibility:auto;contain-intrinsic-size:1px 1500px}@media screen and (min-width: 64em){.c-sub-content{content-visibility:visible;contain-intrinsic-size:none none}}.btn{font-weight:600;transition:transform .2s;position:relative;font-weight:600;will-change:transform;z-index:1}.btn:hover,.btn:active,.btn:focus{background-color:hsl(from var(--color-btn) h s calc(l - 10));border-color:hsl(from var(--color-btn) h s calc(l - 10));transform:translateY(-1px)}.btn::before{content:"";position:absolute;top:0;right:0;bottom:0;left:0;box-shadow:0 4px 0 #000;opacity:0;will-change:opacity}.btn:hover::before,.btn:active::before,.btn:focus::before{opacity:.1}.btn.btn.btn::after{display:none}.btn--full{padding:10px 22px}.btn--secondary{background:none;color:var(--color-btn)}.btn--secondary:hover,.btn--secondary:active,.btn--secondary:focus{background:none;color:hsl(from var(--color-btn) h s calc(l - 10))}.btn--positive,.btn--positive:hover,.btn--positive:active,.btn--positive:focus{background-color:var(--color-positive);border-color:var(--color-positive)}.btn--negative,.btn--negative:hover,.btn--negative:active,.btn--negative:focus{background-color:var(--color-negative);border-color:var(--color-negative)}.box{border-radius:var(--border-radius)}.box--highlight{background-color:var(--color-box-highlight-background);border-bottom:1px solid var(--color-box-highlight-border)}.box--tint{background-color:var(--color-box-tint-background)}.post__date{display:block;color:var(--color-gray-light);margin-bottom:0}.post__title{margin-bottom:0}.post__title>a{font-weight:400}.pull-quote{font-size:18px;font-size:1.125rem;line-height:1.3333333333;font-style:normal;color:var(--color-quote);padding-left:var(--spacing-unit--small);border-left:var(--spacing-unit--small) solid var(--color-brand);border-radius:var(--border-radius);margin-right:0;margin-left:0}@media screen and (min-width: 45em){.pull-quote{margin-left:calc(-1*var(--spacing-unit))}}.pull-quote__source{font-style:normal}.pull-quote--banner{max-width:27em;padding:0 var(--spacing-unit--small);text-indent:0;border-left:none;margin:0 auto;color:var(--color-quote--banner);font-style:normal}@media screen and (min-width: 45em){.pull-quote--banner{font-size:32px;font-size:2rem;line-height:1.4}}.pull-quote--context{font-size:20px;font-size:1.25rem;line-height:1.2;font-style:italic}@media screen and (min-width: 45em){.pull-quote--context{width:50%;float:left;margin-right:var(--spacing-unit);padding-right:var(--spacing-unit--small);padding-left:0;border-right:var(--spacing-unit--small) solid var(--color-brand);border-left:none;text-align:right}}.pull-quote--context-alt{font-size:20px;font-size:1.25rem;line-height:1.2;font-style:italic}@media screen and (min-width: 45em){.pull-quote--context-alt{width:50%;float:right;margin-left:var(--spacing-unit)}}.annotate{position:relative}.annotate__image{display:block;border-radius:var(--border-radius)}.annotate__list{list-style:none;margin:0;position:absolute;top:0;right:0;bottom:0;left:0}.annotate__item{position:absolute;width:5%;height:5%;overflow:hidden;white-space:nowrap;text-indent:100%;cursor:help;border-width:2px;border-style:solid;border-color:rgba(0,0,0,0);border-radius:var(--border-radius);transition:.2s}.annotate:hover .annotate__item{border-color:#ccc;border-color:hsla(0,0%,100%,.5)}.annotate:hover .annotate__item:hover{z-index:1;border-color:#fff}.annotate__caption{position:relative;z-index:1}.adpacks{min-height:calc(9*var(--spacing-unit))}.carbon-wrap{display:block;text-align:center}.carbon-img{display:block;margin-bottom:6px}.carbon-img>img{border-radius:var(--border-radius)}.carbon-img:hover+.carbon-text{text-decoration:underline}.carbon-text{overflow:hidden;display:block;color:var(--color-gray-mid);text-wrap:balance}.carbon-poweredby{display:block;text-align:center;font-size:12px;font-size:.75rem;line-height:2;text-transform:uppercase;color:var(--color-gray-light);letter-spacing:.01em}.c-label{display:block}.c-input-text{border:2px solid var(--color-gray-ui);min-width:25ch;outline:none;transition:border-color .2s;padding:10px 6px;vertical-align:middle;border-radius:var(--border-radius)}.c-input-text:active,.c-input-text:focus{border-color:var(--color-brand)}.c-input-text::placeholder{color:var(--color-gray-light)}.c-newsletter{text-align:center}.c-newsletter__title{font-size:16px;font-size:1rem;line-height:1.5;font-weight:600;color:inherit;margin-bottom:0}.c-newsletter__text{font-size:12px;font-size:.75rem;line-height:2}.c-newsletter__email{width:100%;margin-bottom:var(--spacing-unit);text-align:center}@media screen and (min-width: 45em){.c-newsletter__email{width:auto;margin-bottom:0;min-width:40ch}}.c-newsletter__submit{width:100%}@media screen and (min-width: 45em){.c-newsletter__submit{width:auto}}.c-video{position:relative;padding-bottom:56.25%}@media screen and (min-width: 1380px){.c-video{padding-bottom:75%}}.c-video__media{position:absolute;top:0;left:0;width:100%;height:100%}.footnotes{font-size:12px;font-size:.75rem;line-height:2}.footnotes p{margin-bottom:0}.twitter-tweet-rendered{margin-top:0 !important;margin-right:auto;margin-bottom:var(--spacing-unit) !important;margin-left:auto}.c-youtube-embed{max-width:100%}.c-youtube-embed,.c-spotify-embed{display:block;margin-right:auto;margin-bottom:var(--spacing-unit);margin-left:auto}.c-highlight{padding:var(--spacing-unit);background-color:var(--color-hilite)}.c-highlight,.c-highlight a{color:#36393a}.c-highlight::selection,.c-highlight ::selection{color:var(--color-hilite);background-color:#36393a}.c-highlight a{text-decoration:underline}.c-highlight>:last-child{margin-bottom:0}.c-highlight--small{padding:var(--spacing-unit--small)}.c-highlight--ribbon{display:block;text-align:center}.c-cross-sell{width:50%;float:left;margin-right:var(--spacing-unit--small)}@media screen and (min-width: 45em){.c-cross-sell{margin-left:calc(-1*var(--spacing-unit--small))}}.c-cross-sell:nth-of-type(even){float:right;text-align:right;margin-right:0;margin-left:var(--spacing-unit--small)}@media screen and (min-width: 45em){.c-cross-sell:nth-of-type(even){margin-right:calc(-1*var(--spacing-unit--small))}}.c-cross-sell__title{font-size:var(--spacing-unit--small);line-height:2;margin-bottom:0;font-weight:bold;text-transform:uppercase;color:#999}.c-list-tags{--delimiter: ","}.c-list-tags>li::after{content:var(--delimiter)}.c-list-tags>li:last-child::after{content:""}@supports(animation-timeline: scroll()){@keyframes progress{to{transform:scaleX(100%)}}.s-post::before{content:"";height:6px;position:fixed;top:0;right:0;left:0;transform:scaleX(0);transform-origin:left;background-color:var(--color-brand);animation:progress linear both;animation-timeline:scroll();z-index:2}}.s-post p,.s-post li{text-wrap:pretty}.s-post thead{border-bottom:2px solid var(--color-gray-ui)}.s-post tbody tr:nth-of-type(even){background-color:rgba(0,0,0,.05)}.s-post iframe{max-width:100%;width:100%;border:none;margin-bottom:var(--spacing-unit)}.s-post :target{background-color:var(--color-hilite)}.s-post>h2:nth-of-type(2)~p{content-visibility:auto;contain-intrinsic-size:1px 250px}.s-post .c-cross-sell.c-cross-sell+p{content-visibility:visible}.s-post .c-toc~* a[href^="https://csswizardry.com"]::after,.s-post .c-toc~* a[href^="/"]::after{content:"";display:inline-block;width:1ch;height:1ch;background-image:url(/icon.png);background-size:cover;margin-left:.1ch;vertical-align:super}.s-post a:visited:not(.btn){color:#6a0dad}.clearfix:after,.box:after,.media:after,.site-nav:after{content:"";display:table;clear:both}.one-whole{width:100% !important}.one-half,.two-quarters,.three-sixths,.four-eighths,.five-tenths,.six-twelfths{width:50% !important}.one-third,.two-sixths,.three-ninths,.four-twelfths{width:33.3333333% !important}.two-thirds,.four-sixths,.six-ninths,.eight-twelfths{width:66.6666666% !important}.one-quarter,.two-eighths,.three-twelfths{width:25% !important}.three-quarters,.six-eighths,.nine-twelfths{width:75% !important}.one-fifth,.two-tenths{width:20% !important}.two-fifths,.four-tenths{width:40% !important}.three-fifths,.six-tenths{width:60% !important}.four-fifths,.eight-tenths{width:80% !important}.one-sixth,.two-twelfths{width:16.6666666% !important}.five-sixths,.ten-twelfths{width:83.3333333% !important}.one-eighth{width:12.5% !important}.three-eighths{width:37.5% !important}.five-eighths{width:62.5% !important}.seven-eighths{width:87.5% !important}.one-ninth{width:11.1111111% !important}.two-ninths{width:22.2222222% !important}.four-ninths{width:44.4444444% !important}.five-ninths{width:55.5555555% !important}.seven-ninths{width:77.7777777% !important}.eight-ninths{width:88.8888888% !important}.one-tenth{width:10% !important}.three-tenths{width:30% !important}.seven-tenths{width:70% !important}.nine-tenths{width:90% !important}.one-twelfth{width:8.3333333% !important}.five-twelfths{width:41.6666666% !important}.seven-twelfths{width:58.3333333% !important}.eleven-twelfths{width:91.6666666% !important}@media screen and (min-width: 45em){.lap-and-up-one-half{width:50%}.lap-and-up-one-quarter{width:25%}}@media screen and (min-width: 64em){.desk-one-third{width:33.333333333%}.desk-two-thirds{width:66.666666666%}.desk-three-fifths{width:60%}.desk-three-tenths{width:30%}.desk-push-one-tenth{position:relative;left:10%}}.m{margin:24px !important}.mt{margin-top:24px !important}.mr{margin-right:24px !important}.mb{margin-bottom:24px !important}.ml{margin-left:24px !important}.mh{margin-right:24px !important;margin-left:24px !important}.mv{margin-top:24px !important;margin-bottom:24px !important}.m\+\+{margin:96px !important}.mt\+\+{margin-top:96px !important}.mr\+\+{margin-right:96px !important}.mb\+\+{margin-bottom:96px !important}.ml\+\+{margin-left:96px !important}.mh\+\+{margin-right:96px !important;margin-left:96px !important}.mv\+\+{margin-top:96px !important;margin-bottom:96px !important}.m0{margin:0 !important}.mt0{margin-top:0 !important}.mr0{margin-right:0 !important}.mb0{margin-bottom:0 !important}.ml0{margin-left:0 !important}.mh0{margin-right:0 !important;margin-left:0 !important}.mv0{margin-top:0 !important;margin-bottom:0 !important}.hide{position:absolute !important;width:1px !important;height:1px !important;padding:0 !important;margin:-1px !important;overflow:hidden !important;clip:rect(0, 0, 0, 0) !important;white-space:nowrap !important;border-width:0 !important}@media screen and (max-width: 44.9375em){.hide-palm{position:absolute !important;width:1px !important;height:1px !important;padding:0 !important;margin:-1px !important;overflow:hidden !important;clip:rect(0, 0, 0, 0) !important;white-space:nowrap !important;border-width:0 !important}}@media screen and (min-width: 45em)and (max-width: 63.9375em){.hide-lap{position:absolute !important;width:1px !important;height:1px !important;padding:0 !important;margin:-1px !important;overflow:hidden !important;clip:rect(0, 0, 0, 0) !important;white-space:nowrap !important;border-width:0 !important}}@media screen and (min-width: 45em){.hide-lap-and-up{position:absolute !important;width:1px !important;height:1px !important;padding:0 !important;margin:-1px !important;overflow:hidden !important;clip:rect(0, 0, 0, 0) !important;white-space:nowrap !important;border-width:0 !important}}@media screen and (max-width: 63.9375em){.hide-portable{position:absolute !important;width:1px !important;height:1px !important;padding:0 !important;margin:-1px !important;overflow:hidden !important;clip:rect(0, 0, 0, 0) !important;white-space:nowrap !important;border-width:0 !important}}@media screen and (min-width: 64em){.hide-desk{position:absolute !important;width:1px !important;height:1px !important;padding:0 !important;margin:-1px !important;overflow:hidden !important;clip:rect(0, 0, 0, 0) !important;white-space:nowrap !important;border-width:0 !important}}::selection{color:#fff;background-color:var(--color-brand)}.u-text-prominent{font-size:22px;font-size:1.375rem;line-height:1.0909090909;font-weight:600;text-align:center}.u-color-brand{color:var(--color-brand) !important}.u-color-positive{color:var(--color-positive) !important}.u-color-negative{color:var(--color-negative) !important}@media screen and (min-width: 64em){.u-outdent{margin-left:calc(-1*var(--spacing-unit))}}@media screen and (min-width: 64em){.u-outdent-alt{margin-right:calc(-1*var(--spacing-unit))}}
+
+
+  
+    /*!
+ * inuitcss, by @csswizardry
+ *
+ * github.com/inuitcss | inuitcss.com
+ */.highlight{background-color:#002b36;color:#93a1a1;border-radius:var(--border-radius)}@media screen and (min-width: 45em){.highlight{margin-right:calc(-1*var(--spacing-unit--small));margin-left:calc(-1*var(--spacing-unit--small))}}.highlight pre{background-color:rgba(0,0,0,0);margin-right:auto;margin-left:auto}.highlight .c{color:#586e75}.highlight .err{color:#93a1a1}.highlight .g{color:#93a1a1}.highlight .k{color:#859900}.highlight .l{color:#93a1a1}.highlight .n{color:#93a1a1}.highlight .o{color:#859900}.highlight .x{color:#cb4b16}.highlight .p{color:#93a1a1}.highlight .cm{color:#586e75}.highlight .cp{color:#859900}.highlight .c1{color:#586e75}.highlight .cs{color:#859900}.highlight .gd{color:#2aa198}.highlight .ge{color:#93a1a1;font-style:italic}.highlight .gr{color:#dc322f}.highlight .gh{color:#cb4b16}.highlight .gi{color:#859900}.highlight .go{color:#93a1a1}.highlight .gp{color:#93a1a1}.highlight .gs{color:#93a1a1;font-weight:bold}.highlight .gu{color:#cb4b16}.highlight .gt{color:#93a1a1}.highlight .kc{color:#cb4b16}.highlight .kd{color:#268bd2}.highlight .kn{color:#859900}.highlight .kp{color:#859900}.highlight .kr{color:#268bd2}.highlight .kt{color:#dc322f}.highlight .ld{color:#93a1a1}.highlight .m{color:#2aa198}.highlight .s{color:#2aa198}.highlight .na{color:#93a1a1}.highlight .nb{color:#b58900}.highlight .nc{color:#268bd2}.highlight .no{color:#cb4b16}.highlight .nd{color:#268bd2}.highlight .ni{color:#cb4b16}.highlight .ne{color:#cb4b16}.highlight .nf{color:#268bd2}.highlight .nl{color:#93a1a1}.highlight .nn{color:#93a1a1}.highlight .nx{color:#93a1a1}.highlight .py{color:#93a1a1}.highlight .nt{color:#268bd2}.highlight .nv{color:#268bd2}.highlight .ow{color:#859900}.highlight .w{color:#93a1a1}.highlight .mf{color:#2aa198}.highlight .mh{color:#2aa198}.highlight .mi{color:#2aa198}.highlight .mo{color:#2aa198}.highlight .sb{color:#586e75}.highlight .sc{color:#2aa198}.highlight .sd{color:#93a1a1}.highlight .s2{color:#2aa198}.highlight .se{color:#cb4b16}.highlight .sh{color:#93a1a1}.highlight .si{color:#2aa198}.highlight .sx{color:#2aa198}.highlight .sr{color:#dc322f}.highlight .s1{color:#2aa198}.highlight .ss{color:#2aa198}.highlight .bp{color:#268bd2}.highlight .vc{color:#268bd2}.highlight .vg{color:#268bd2}.highlight .vi{color:#268bd2}.highlight .il{color:#2aa198}.highlight .m{margin:0 !important}.highlight .p{padding:0 !important}
+
+  
+
+  /*# sourceURL=csswizardry.inline.css */
+
+</style>
+<script>
+  performance.mark('CSS_End');
+
+  performance.measure('CSS_Time', {
+    start: 'CSS_Start',
+    end: 'CSS_End',
+    detail: {
+      devtools: {
+        dataType: 'track-entry',
+        trackGroup: 'csswizardry.com',
+        track: 'Technical Timings',
+        tooltipText: 'Main CSS Bundle Parsed',
+        color: 'secondary-light'
+      }
+    }
+  });
+</script>
+
+<script src="https://www.googletagmanager.com/gtag/js?id=G-DNCL1RY4GT" async crossorigin></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-DNCL1RY4GT');
+</script>
+
+<script src=https://cdn.speedcurve.com/js/lux.js?id=47684395 defer crossorigin></script>
+
+
+
+
+
+
+<meta name=author content="Harry Roberts">
+<meta name=twitter:card content=summary_large_image>
+<meta name=twitter:site content=@csswizardry>
+<meta name=twitter:domain content=csswizardry.com>
+<meta name=twitter:creator content=@csswizardry>
+<meta property=og:type content=website>
+<meta property=og:title content="Measuring Component Performance with the Container Timing API – CSS Wizardry">
+<meta name=twitter:title content="Measuring Component Performance with the Container Timing API – CSS Wizardry">
+
+<meta property=og:description content="Measure how entire components render with the Container Timing API: how it differs from Element Timing, where it helps, and how to try it today.">
+<meta name=twitter:description content="Measure how entire components render with the Container Timing API: how it differs from Element Timing, where it helps, and how to try it today.">
+
+
+<meta property=og:image content=https://csswizardry.com/img/css/masthead-small.jpg>
+<meta name=twitter:image content=https://csswizardry.com/img/css/masthead-small.jpg>
+
+
+<link rel=alternate type=application/atom+xml href=https://csswizardry.com/feed.xml>
+
+<link rel=icon href=/icon.png>
+<link rel=apple-touch-icon href=/icon.png>
+<meta name=apple-mobile-web-app-title content=csswizardry>
+
+  <meta name=description content="Measure how entire components render with the Container Timing API: how it differs from Element Timing, where it helps, and how to try it today.">
+
+
+
+<link rel=canonical href="https://csswizardry.com/2026/07/meaasuring-component-performance-with-the-container-timing-api/">
+<meta property=og:url content="https://csswizardry.com/2026/07/meaasuring-component-performance-with-the-container-timing-api/">
+
+
+<meta name=theme-color content=#f43059>
+<link rel=manifest href=/manifest.json>
+
+<meta name=format-detection content="telephone=no">
+<meta name=format-detection content="address=no">
+
+<meta name="robots" content="max-image-preview:large">
+
+
+  <meta name=robots content="noai, noimageai">
+
+
+
+
+
+
+<script>
+  performance.mark('HEAD_End');
+
+  performance.measure('HEAD_Time', {
+    start: 'HEAD_Start',
+    end: 'HEAD_End',
+    detail: {
+      devtools: {
+        dataType: 'track-entry',
+        trackGroup: 'csswizardry.com',
+        track: 'Technical Timings',
+        tooltipText: 'Head Tags Parsed',
+        color: 'secondary-light'
+      }
+    }
+  });
+</script>
+
+
+  <nav class=hide>
+    <a href="
+             
+              #section:main
+             
+            ">Skip to main content</a>
+  </nav>
+
+  <a href="/masterclasses/" class="c-highlight  c-highlight--small c-highlight--ribbon" id=jsRibbon data-sctrack=ribbon elementtiming=ribbon>Arrange a Masterclass</a>
+
+<script>
+(() => {
+
+  const VARIANT_VERSION = 3;
+  const STORAGE_KEY = `ribbonVariant_v${VARIANT_VERSION}`;
+
+
+  const ribbonVariants = [
+    { href: '/masterclasses/',                  text: 'Arrange a Masterclass' },
+    { href: '/sentinel/',                       text: 'Sentinel: Your Web-Performance Watchman' },
+    { href: '/performance-audits/#fix-it-fast', text: 'Suffering? Fix it Fast!' },
+    { href: '/newsletter/',                     text: 'Join the Newsletter' },
+    { href: '/supporters/',                     text: 'Become a Supporter' }
+  ];
+
+  const getVariantIndex = () => {
+    const stored = sessionStorage.getItem(STORAGE_KEY);
+    const len = ribbonVariants.length;
+
+    if (stored !== null) {
+      const n = Number(stored);
+      if (Number.isInteger(n) && n >= 0 && n < len) {
+        return n;
+      }
+    }
+
+    const i = Math.floor(Math.random() * len);
+    sessionStorage.setItem(STORAGE_KEY, i);
+    return i;
+  };
+
+  const i = getVariantIndex();
+  const { href, text } = ribbonVariants[i];
+  const ribbon = document.querySelector('#jsRibbon');
+
+  if (!ribbon) return;
+
+  ribbon.href = href;
+  ribbon.textContent = text;
+
+})();
+</script>
+
+
+<header class=page-head>
+
+    <div class=wrapper>
+
+        <nav class=site-nav id=jsSiteNav data-sctrack=site-nav aria-label="Primary">
+
+  <a href=/ class=site-nav__home-link data-sctrack=logo id=logo elementtiming=siteLogo>
+    <svg class=site-nav__logo width=64 height=64 xmlns="http://www.w3.org/2000/svg"><title>CSS Wizardry</title><path d="M.234 44.003v-41.002c0-1.664 1.344-3.001 3.001-3.001h57.998c1.664 0 3.001 1.344 3.001 3.001v39.536c-1.803-1.102-3.911-1.653-6.324-1.653-3.356 0-5.9.788-7.632 2.363-1.732 1.576-2.598 3.554-2.598 5.936 0 2.61.896 4.528 2.688 5.755 1.058.734 2.971 1.413 5.737 2.039l2.814.631c1.648.361 2.857.776 3.626 1.245.77.481 1.155 1.161 1.155 2.039 0 1.503-.776 2.532-2.327 3.085l-.063.022-.078.001h-5.853c-.773-.274-1.385-.684-1.836-1.232-.493-.601-.824-1.509-.992-2.724h-5.304c0 1.491.288 2.809.864 3.956h-4.483c.524-1.058.786-2.232.786-3.523 0-2.369-.794-4.18-2.381-5.43-1.022-.806-2.538-1.449-4.546-1.93l-4.583-1.101c-1.768-.421-2.923-.788-3.464-1.101-.842-.469-1.263-1.179-1.263-2.129 0-1.034.427-1.84 1.281-2.418.854-.577 1.997-.866 3.428-.866 1.287 0 2.363.223 3.229.668 1.299.674 1.997 1.81 2.093 3.41h5.34c-.096-2.827-1.134-4.982-3.112-6.468-1.979-1.485-4.369-2.228-7.172-2.228-3.356 0-5.9.788-7.632 2.363-1.732 1.576-2.598 3.554-2.598 5.936 0 2.61.896 4.528 2.688 5.755 1.058.734 2.971 1.413 5.737 2.039l2.814.631c1.648.361 2.857.776 3.626 1.245.77.481 1.155 1.161 1.155 2.039 0 1.503-.776 2.532-2.327 3.085l-.066.023h-5.928c-.773-.274-1.385-.684-1.836-1.232-.493-.601-.824-1.509-.992-2.724h-5.304c0 1.491.288 2.809.864 3.956h-5.604c.887-1.39 1.481-2.991 1.781-4.804h-5.503c-.373 1.371-.842 2.4-1.407 3.085-.697.869-1.609 1.442-2.736 1.719h-3.314c-1.201-.309-2.236-.987-3.106-2.034-1.233-1.485-1.849-3.72-1.849-6.702 0-2.983.583-5.289 1.75-6.919s2.76-2.445 4.781-2.445c1.985 0 3.482.577 4.492 1.732.565.649 1.028 1.612 1.389 2.887h5.557c-.084-1.66-.698-3.314-1.84-4.961-2.069-2.935-5.34-4.402-9.815-4.402-3.114 0-5.717.949-7.809 2.848zm64 9.742v-4.165h-1.381c-.096-1.6-.794-2.736-2.093-3.41-.866-.445-1.942-.668-3.229-.668-1.431 0-2.574.289-3.428.866-.854.577-1.281 1.383-1.281 2.418 0 .95.421 1.66 1.263 2.129.541.313 1.696.68 3.464 1.101l4.583 1.101c.774.185 1.475.395 2.103.629z" fill="#f43059" class="site-nav__logo-fill"/></svg>
+  </a>
+
+  <button id=jsSiteNavOpener class=site-nav__opener data-sctrack=hamburger aria-controls=jsSiteNavList aria-expanded=false aria-label="Open navigation menu">Menu</button>
+
+  <ul class=site-nav__list id=jsSiteNavList aria-label="Primary navigation links">
+
+    <li class="site-nav__item  site-nav__item--closer">
+      <button id=jsSiteNavCloser class="site-nav__link  site-nav__closer" aria-label="Close navigation menu">Close</button>
+    </li>
+
+    
+      <li class="site-nav__item">
+        <a href=/ class="site-nav__link  site-nav__home">Home</a>
+
+        
+      </li>
+    
+      <li class="site-nav__item">
+        <a href=/about/ class="site-nav__link  site-nav__about">About</a>
+
+        
+      </li>
+    
+      <li class="site-nav__item  has-sub-menu">
+        <a href=/blog/ class="site-nav__link  site-nav__blog">Blog</a>
+
+        
+          <ul class=site-nav__sub-menu>
+            
+              <li class=site-nav__item>
+                <a href=/newsletter/ class="site-nav__sub-link  site-nav__newsletter">Newsletter</a>
+              </li>
+            
+              <li class=site-nav__item>
+                <a href=/downloads/ class="site-nav__sub-link  site-nav__downloads">Downloads</a>
+              </li>
+            
+              <li class=site-nav__item>
+                <a href=/supporters/ class="site-nav__sub-link  site-nav__supporters">Supporters</a>
+              </li>
+            
+          </ul>
+        
+      </li>
+    
+      <li class="site-nav__item  has-sub-menu">
+        <a href=/services/ class="site-nav__link  site-nav__services">Services</a>
+
+        
+          <ul class=site-nav__sub-menu>
+            
+              <li class=site-nav__item>
+                <a href=/performance-audits/ class="site-nav__sub-link  site-nav__code-reviews">Performance Audits</a>
+              </li>
+            
+              <li class=site-nav__item>
+                <a href=/consultancy/ class="site-nav__sub-link  site-nav__consultancy">Consultancy</a>
+              </li>
+            
+              <li class=site-nav__item>
+                <a href=/sentinel/ class="site-nav__sub-link  site-nav__sentinel">Sentinel</a>
+              </li>
+            
+              <li class=site-nav__item>
+                <a href=/workshops/ class="site-nav__sub-link  site-nav__workshops">Workshops and Training</a>
+              </li>
+            
+              <li class=site-nav__item>
+                <a href=/masterclasses/ class="site-nav__sub-link  site-nav__masterclasses">Masterclasses <sup style="text-transform: uppercase; font-size: 0.625rem; line-height: 1.2; color: #f43059;"><strong>New</strong></sup></a>
+              </li>
+            
+          </ul>
+        
+      </li>
+    
+      <li class="site-nav__item">
+        <a href=/speaking/ class="site-nav__link  site-nav__speaking">Speaking</a>
+
+        
+      </li>
+    
+      <li class="site-nav__item  has-sub-menu">
+        <a href=/case-studies/ class="site-nav__link  site-nav__case-studies">Case Studies</a>
+
+        
+          <ul class=site-nav__sub-menu>
+            
+              <li class=site-nav__item>
+                <a href=/testimonials/ class="site-nav__sub-link  site-nav__testimonials">Testimonials</a>
+              </li>
+            
+          </ul>
+        
+      </li>
+    
+      <li class="site-nav__item">
+        <a href=/contact/ class="site-nav__link  site-nav__contact">Contact</a>
+
+        
+      </li>
+    
+
+  </ul>
+
+</nav>
+
+<script>
+  (function() {
+    const site          = document.documentElement;
+    const siteNav       = document.getElementById('jsSiteNav');
+    const siteNavList   = document.getElementById('jsSiteNavList');
+    const siteNavOpener = document.getElementById('jsSiteNavOpener');
+    const siteNavCloser = document.getElementById('jsSiteNavCloser');
+
+    siteNavOpener.addEventListener('click', (event) => {
+      site.style.overflow='hidden';
+      siteNav.classList.add('is-open');
+      siteNavOpener.setAttribute('aria-expanded', 'true');
+    });
+
+    function siteNavClose() {
+      site.style.overflow=null;
+      siteNav.classList.remove('is-open');
+      siteNavOpener.setAttribute('aria-expanded', 'false');
+    };
+
+    siteNavCloser.addEventListener('click', (event) => {
+      siteNavClose();
+    });
+
+    window.addEventListener('pagehide', (event) => {
+      siteNavClose();
+    });
+
+  }());
+
+  //# sourceURL=nav.inline.js
+</script>
+
+
+    </div>
+
+</header>
+
+
+<div class=wrapper>
+
+  <div class=layout>
+
+    <main class="layout__item  desk-three-fifths" data-ui-component="Main content" itemscope itemtype=http://schema.org/BlogPosting id=section:main>
+      <div class="s-post">
+
+        <script>performance.mark('contentStart')</script>
+
+        <p class=post__date>
+          <time class=jsLocalDate datetime="2026-07-26T13:51:29+00:00" itemprop=datePublished>26 July, 2026</time>
+
+          
+
+          
+            in
+            
+              
+              <a href="/blog/category/web-performance/">Web Performance</a>
+            
+          
+
+          
+
+        </p>
+
+          <script>performance.mark('beforeH1')</script>
+          <h1 itemprop="name  headline" elementtiming=page-title style="view-transition-name: x-2026-07-26">Measuring Component Performance with the Container Timing API</h1>
+
+          <p class=hide>Written by <b itemprop=author>Harry Roberts</b> on <b itemprop=publisher>CSS Wizardry</b>.</p>
+
+          
+            <p class=hide><a href="https://raw.githubusercontent.com/csswizardry/csswizardry.github.com/refs/heads/master/_posts/2026-07-26-meaasuring-component-performance-with-the-container-timing-api.md">View this page as Markdown.</a></p>
+          
+
+          
+
+          
+            <details class=c-toc>
+
+              <summary>Table of Contents</summary>
+
+                <p>Independent writing is brought to you via my wonderful
+                  <a href="/supporters/">Supporters</a>.</p>
+
+                <ol>
+  <li><a href="#what-problem-does-container-timing-solve">What Problem Does Container Timing Solve?</a></li>
+  <li><a href="#how-the-container-timing-api-works">How the Container Timing API Works</a></li>
+  <li><a href="#what-counts-as-an-update">What Counts as an Update?</a></li>
+  <li><a href="#a-container-is-never-necessarily-finished">A Container Is Never Necessarily ‘Finished’</a></li>
+  <li><a href="#container-timing-vs-element-timing">Container Timing vs. Element Timing</a>
+    <ol>
+      <li><a href="#the-material-change">The Material Change</a></li>
+      <li><a href="#the-philosophical-change">The Philosophical Change</a></li>
+    </ol>
+  </li>
+  <li><a href="#realistic-uses-for-container-timing">Realistic Uses for Container Timing</a>
+    <ol>
+      <li><a href="#ecommerce-product-summary">Ecommerce Product Summary</a></li>
+      <li><a href="#search-results-and-product-grids">Search Results and Product Grids</a></li>
+      <li><a href="#dashboards-and-data-heavy-widgets">Dashboards and Data-Heavy Widgets</a></li>
+      <li><a href="#publisher-homepages-and-article-regions">Publisher Homepages and Article Regions</a></li>
+      <li><a href="#component-and-team-level-performance">Component and Team-Level Performance</a></li>
+    </ol>
+  </li>
+  <li><a href="#what-container-timing-is-not">What Container Timing Is Not</a>
+    <ol>
+      <li><a href="#it-is-not-a-new-core-web-vital">It Is Not a New Core Web Vital</a></li>
+      <li><a href="#it-is-not-component-ready">It Is Not ‘Component Ready’</a></li>
+      <li><a href="#it-is-not-visual-completeness">It Is Not Visual Completeness</a></li>
+      <li><a href="#it-is-not-free-reinstrumentation">It Is Not Free Reinstrumentation</a></li>
+    </ol>
+  </li>
+  <li><a href="#trying-the-chrome-origin-trial">Trying the Chrome Origin Trial</a></li>
+  <li><a href="#browser-support-and-standardisation">Browser Support and Standardisation</a></li>
+  <li><a href="#what-i-would-measure-first">What I Would Measure First</a></li>
+</ol>
+
+
+            </details>
+          
+
+          <p>The browser is very good at telling us when <em>a page</em> looked ready. <a href="/2022/03/optimising-largest-contentful-paint/">Largest
+Contentful Paint</a>, for example,
+gives us a useful high-level signal for the point at which the largest thing in
+the viewport was rendered. It is much less good at telling us when <em>our things</em>
+looked ready.</p>
+
+<p>An ecommerce site might care when its product gallery and buy box rendered;
+a publisher might care about its lead story; a financial application might care
+about the quote panel that its customers actually opened the page to see. None
+of those necessarily maps neatly to the largest image or block of text.</p>
+
+<p>We can get closer with the <a href="https://developer.mozilla.org/en-US/docs/Web/API/PerformanceElementTiming">Element Timing
+API</a>,
+but a component is rarely one element. A useful product card might contain an
+image, title, price, stock status, rating, delivery estimate, and call to action.
+Knowing that the image rendered at 700 ms is helpful, but it does not tell
+us how the card as a whole came together.</p>
+
+<p>Enter the <a href="https://github.com/WICG/container-timing">Container Timing
+API</a>: an experimental performance API
+that allows us to annotate a whole region of the DOM and receive entries as new,
+contentful parts of it are painted. Developed by <a href="https://developer.chrome.com/blog/container-timing-origin-trial/">Bloomberg and
+Igalia</a>, it is
+currently available in a <a href="https://developer.chrome.com/origintrials/">Chrome origin
+trial</a> and is one of the more
+interesting additions to the performance timeline in a while.</p>
+
+<p>And while the syntax is very simple, the implications are far more interesting.</p>
+
+<article class="[ box  box--highlight ]  [ flag  flag--responsive ]  mb" data-ui-component="Cross-sell promo">
+  <div class="flag__img"><a href="/contact/" class="btn btn--full">Get in touch</a></div>
+  <div class="flag__body">
+    <span class="heading  mb0">Need Some Help?</span>
+    <p>I help companies find and fix site-speed issues. <b>Performance audits</b>, <b>training</b>, <b>consultancy</b>, and more.</p>
+  </div>
+</article>
+
+<h2 id="what-problem-does-container-timing-solve">What Problem Does Container Timing Solve?</h2>
+
+<p>Most of the web performance metrics that we use day to day are necessarily
+pretty generic. The browser can tell us when the first content appeared, which
+contentful element was largest, whether the page shifted around, or how long an
+interaction took, but it can’t know which parts of our product matter most to
+our users.</p>
+
+<p>This is partly the point I was getting at when I wrote <a href="/2022/08/measure-what-you-impact-not-what-you-influence/"><cite>Measure What You
+Impact, Not What You
+Influence</cite></a>.
+Standard metrics are enormously valuable, but they describe things that our work
+<em>influences</em>. Product-specific metrics describe the things that our teams
+actually build and <em>impact</em>.</p>
+
+<p>Before Container Timing, we had three broad choices:</p>
+
+<ul>
+  <li>use a generic milestone such as LCP and hope the important component happened
+to be represented by it;</li>
+  <li>annotate one or more individual images or text elements with
+<a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/elementtiming"><code class="language-plaintext highlighter-rouge">elementtiming</code></a>
+and attempt to reconstruct the component from those entries; or</li>
+  <li>instrument application milestones with <a href="https://developer.mozilla.org/en-US/docs/Web/API/Performance_API/User_timing">User
+Timing</a>
+and accept that <q>the JavaScript finished</q> is not the same as <q>the
+result was painted</q>.</li>
+</ul>
+
+<p>All three can be useful, but none asks the rendering engine the question we
+actually have: <q>How did this whole section appear to the user?</q></p>
+
+<p>It is possible to approximate that in userland by adding <code class="language-plaintext highlighter-rouge">elementtiming</code> to
+everything in a subtree, watching for new nodes with a
+<a href="https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver"><code class="language-plaintext highlighter-rouge">MutationObserver</code></a>,
+and keeping track of all of their rectangles. In fact, an early Container
+Timing polyfill did roughly that, and the explainer still documents the
+<a href="https://github.com/WICG/container-timing#user-space-polyfill-in-javascript">user-space approach and its
+drawbacks</a>.
+Unfortunately, the setup needs to happen before content paints, and doing
+geometry accounting in JavaScript is both race-prone and expensive. The
+polyfill is now <a href="https://blogs.igalia.com/dape/2026/02/10/container-timing-measuring-web-components-performance/">deprecated in favour of the native
+implementation</a>.</p>
+
+<p>Container Timing moves that work into the rendering engine, which already knows
+what painted, when it painted, and where it painted.</p>
+
+<h2 id="how-the-container-timing-api-works">How the Container Timing API Works</h2>
+
+<p>We begin by adding a <code class="language-plaintext highlighter-rouge">containertiming</code> attribute to the root of the component or
+region that we want to observe:</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;section</span> <span class="na">containertiming=</span><span class="s">product-summary</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;img</span> <span class="na">src=</span><span class="s">/products/boots.jpg</span> <span class="na">alt=</span><span class="s">"A pair of brown walking boots"</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;h1&gt;</span>Ridgeline Walking Boots<span class="nt">&lt;/h1&gt;</span>
+  <span class="nt">&lt;p&gt;</span>£129<span class="nt">&lt;/p&gt;</span>
+  <span class="nt">&lt;p&gt;</span>In stock<span class="nt">&lt;/p&gt;</span>
+  <span class="nt">&lt;button&gt;</span>Add to basket<span class="nt">&lt;/button&gt;</span>
+<span class="nt">&lt;/section&gt;</span>
+</code></pre></div></div>
+
+<p>The attribute’s value becomes the container’s <code class="language-plaintext highlighter-rouge">identifier</code> in the performance
+entries, so give it a stable, meaningful name. <code class="language-plaintext highlighter-rouge">thing</code>, <code class="language-plaintext highlighter-rouge">wrapper</code>, and
+<code class="language-plaintext highlighter-rouge">component-7</code> will become annoying in analytics extremely quickly.</p>
+
+<p>We then observe entries of type <code class="language-plaintext highlighter-rouge">container</code> with the familiar
+<a href="https://developer.mozilla.org/en-US/docs/Web/API/PerformanceObserver"><code class="language-plaintext highlighter-rouge">PerformanceObserver</code></a>
+API:</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if </span><span class="p">(</span><span class="k">typeof</span> <span class="nx">PerformanceContainerTiming</span> <span class="o">!==</span> <span class="dl">'</span><span class="s1">undefined</span><span class="dl">'</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">observer</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">PerformanceObserver</span><span class="p">((</span><span class="nx">list</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="k">for </span><span class="p">(</span><span class="kd">const</span> <span class="nx">entry</span> <span class="k">of</span> <span class="nx">list</span><span class="p">.</span><span class="nf">getEntries</span><span class="p">())</span> <span class="p">{</span>
+      <span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">({</span>
+        <span class="na">identifier</span><span class="p">:</span> <span class="nx">entry</span><span class="p">.</span><span class="nx">identifier</span><span class="p">,</span>
+        <span class="na">firstRenderTime</span><span class="p">:</span> <span class="nx">entry</span><span class="p">.</span><span class="nx">firstRenderTime</span><span class="p">,</span>
+        <span class="na">latestPaintTime</span><span class="p">:</span> <span class="nx">entry</span><span class="p">.</span><span class="nx">startTime</span><span class="p">,</span>
+        <span class="na">size</span><span class="p">:</span> <span class="nx">entry</span><span class="p">.</span><span class="nx">size</span><span class="p">,</span>
+        <span class="na">lastPaintedElement</span><span class="p">:</span> <span class="nx">entry</span><span class="p">.</span><span class="nx">lastPaintedElement</span>
+      <span class="p">});</span>
+    <span class="p">}</span>
+  <span class="p">});</span>
+
+  <span class="nx">observer</span><span class="p">.</span><span class="nf">observe</span><span class="p">({</span>
+    <span class="na">type</span><span class="p">:</span> <span class="dl">'</span><span class="s1">container</span><span class="dl">'</span><span class="p">,</span>
+    <span class="na">buffered</span><span class="p">:</span> <span class="kc">true</span>
+  <span class="p">});</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>As different contentful parts of <code class="language-plaintext highlighter-rouge">product-summary</code> paint, the observer receives
+new <a href="https://wicg.github.io/container-timing/#sec-performancecontainertiming"><code class="language-plaintext highlighter-rouge">PerformanceContainerTiming</code>
+entries</a>.
+Each one contains:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">identifier</code>: the value of the <code class="language-plaintext highlighter-rouge">containertiming</code> attribute;</li>
+  <li><code class="language-plaintext highlighter-rouge">firstRenderTime</code>: when the first contentful part of the container rendered;</li>
+  <li><code class="language-plaintext highlighter-rouge">startTime</code>: the latest qualifying paint time represented by this entry;</li>
+  <li><code class="language-plaintext highlighter-rouge">size</code>: the cumulative area that has received qualifying paint;</li>
+  <li><code class="language-plaintext highlighter-rouge">intersectionRect</code>: the bounding rectangle of the painted region accumulated
+so far;</li>
+  <li><code class="language-plaintext highlighter-rouge">lastPaintedElement</code>: the element that contributed the largest new painted
+area in that frame;</li>
+  <li><code class="language-plaintext highlighter-rouge">rootElement</code>: the element carrying the <code class="language-plaintext highlighter-rouge">containertiming</code> attribute; and</li>
+  <li><code class="language-plaintext highlighter-rouge">duration</code>: always <code class="language-plaintext highlighter-rouge">0</code>, because these entries represent moments, not spans.</li>
+</ul>
+
+<p>The precise <a href="https://wicg.github.io/container-timing/#processing-model">processing model</a>
+is more involved, but the practical shape is straightforward. Imagine our
+product summary renders in three stages:</p>
+
+<ol>
+  <li><strong>at 480 ms</strong>, its title and price appear;</li>
+  <li><strong>at 710 ms</strong>, the main product image appears; and</li>
+  <li><strong>at 940 ms</strong>, stock status and the call to action arrive.</li>
+</ol>
+
+<p>Those figures are illustrative, but we would expect a series of entries whose
+<code class="language-plaintext highlighter-rouge">firstRenderTime</code> remains at roughly 480 ms while <code class="language-plaintext highlighter-rouge">startTime</code> and <code class="language-plaintext highlighter-rouge">size</code>
+move forward as more of the component receives its first contentful paint.</p>
+
+<p>That series is the useful bit. Container Timing does not merely give us
+a single answer; it gives us the <em>shape</em> of the component’s render.</p>
+
+<h2 id="what-counts-as-an-update">What Counts as an Update?</h2>
+
+<p>Container Timing is not a general-purpose record of every repaint in a DOM
+subtree. That would be extremely noisy, not to mention expensive.</p>
+
+<p>Instead, an entry is generated when content paints into an area of the
+container that has not previously been counted. The <a href="https://wicg.github.io/container-timing/#sec-report-container-timing">current
+specification</a>
+builds up a cumulative painted region from contentful image and text paints,
+emitting updated information after relevant rendering frames.</p>
+
+<p>This leads to a few behaviours worth understanding:</p>
+
+<ul>
+  <li>A blank box or CSS-only skeleton does not make the container ‘contentful’.</li>
+  <li>Adding text to an empty element can create an entry because that area is
+receiving its first contentful paint.</li>
+  <li>Changing text inside an area that has already been counted does not endlessly
+create new entries merely because its pixels changed.</li>
+  <li>Adding a new image or block of text in a previously unpainted part of the
+component can create another entry.</li>
+  <li>Pure decoration is not the point of the API, and composite content such as
+Canvas, SVG, and Shadow DOM has <a href="https://github.com/WICG/container-timing#non-goals">important early
+limitations</a>.</li>
+</ul>
+
+<p>The API is also concerned with what was painted <em>in the viewport</em>. Its
+rectangles are maintained in viewport coordinates and clipped to the visual
+viewport. A below-the-fold component may therefore begin producing useful
+entries when the user scrolls it into view, rather than when its DOM was first
+constructed off-screen.</p>
+
+<p>That is potentially very useful for lazy-rendered interfaces, but it also means
+we need to distinguish load timing from exposure timing in our analysis. If
+a container appears at 12 seconds because the user did not scroll to it until
+then, the API has not found a 12-second network regression.</p>
+
+<p>There is another trial-era edge case hiding in that geometry. The <a href="https://wicg.github.io/container-timing/#painted-region">painted
+region is cumulative in viewport
+coordinates</a>, so
+movement can expand it into new coordinates. Components that move substantially
+during load need particularly careful interpretation.</p>
+
+<h2 id="a-container-is-never-necessarily-finished">A Container Is Never Necessarily ‘Finished’</h2>
+
+<p>Here is the most important thing to understand about Container Timing:
+<strong>the browser does not tell us when the container is complete</strong>. It can’t do.</p>
+
+<p>A news feed could append another story. A stock widget could receive a delayed
+market status. A product card could add a promotion after a personalisation
+request. An application could render a validation message after an interaction.
+From the browser’s point of view, there is no reliable way to know whether
+a subtree has finished forever or is merely quiet for the moment.</p>
+
+<p>This is why the API <a href="https://developer.chrome.com/blog/container-timing-origin-trial/#how-the-container-timing-api-works">emits updated entries as new areas
+paint</a>
+rather than inventing an authoritative <code class="language-plaintext highlighter-rouge">completeTime</code>. LCP likewise produces
+a sequence of candidates as the page renders, but has defined interaction and
+visibility cut-offs for deciding when that sequence ends.</p>
+
+<p>I recently made a similar case in <a href="/2026/06/front-ends-missing-metric-the-tbt-window/">Front-End’s Missing Metric: The TBT
+Window</a>: metrics are shaped
+as much by their bookends and boundaries as by what happens between them.
+Container Timing is particularly interesting because its definition gives us
+a beginning, but deliberately no equivalent end.</p>
+
+<p>The difference is that Container Timing does not currently impose one universal
+cut-off. The application needs to decide which interpretation fits:</p>
+
+<ul>
+  <li>the first entry, for <em>time to first component content</em>;</li>
+  <li>the final substantial area increase during initial load;</li>
+  <li>the final entry before the user first interacts with the component;</li>
+  <li>the latest entry within a product-defined loading window; or</li>
+  <li>the whole sequence, so that we can study how progressively the component
+filled in.</li>
+</ul>
+
+<p>This sounds less convenient than a single metric because it is. It is also more
+honest.</p>
+
+<p>A useful first origin-trial implementation would retain the sequence, at least
+for a small sample of sessions, rather than immediately collapsing it into one
+number:</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">containerPaints</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Map</span><span class="p">();</span>
+
+<span class="k">if </span><span class="p">(</span><span class="k">typeof</span> <span class="nx">PerformanceContainerTiming</span> <span class="o">!==</span> <span class="dl">'</span><span class="s1">undefined</span><span class="dl">'</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">observer</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">PerformanceObserver</span><span class="p">((</span><span class="nx">list</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="k">for </span><span class="p">(</span><span class="kd">const</span> <span class="nx">entry</span> <span class="k">of</span> <span class="nx">list</span><span class="p">.</span><span class="nf">getEntries</span><span class="p">())</span> <span class="p">{</span>
+      <span class="kd">const</span> <span class="nx">paints</span> <span class="o">=</span> <span class="nx">containerPaints</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="nx">entry</span><span class="p">.</span><span class="nx">identifier</span><span class="p">)</span> <span class="o">||</span> <span class="p">[];</span>
+
+      <span class="nx">paints</span><span class="p">.</span><span class="nf">push</span><span class="p">({</span>
+        <span class="na">firstRenderTime</span><span class="p">:</span> <span class="nx">entry</span><span class="p">.</span><span class="nx">firstRenderTime</span><span class="p">,</span>
+        <span class="na">startTime</span><span class="p">:</span> <span class="nx">entry</span><span class="p">.</span><span class="nx">startTime</span><span class="p">,</span>
+        <span class="na">size</span><span class="p">:</span> <span class="nx">entry</span><span class="p">.</span><span class="nx">size</span><span class="p">,</span>
+        <span class="na">lastPaintedTag</span><span class="p">:</span> <span class="nx">entry</span><span class="p">.</span><span class="nx">lastPaintedElement</span><span class="p">?.</span><span class="nx">localName</span> <span class="o">||</span> <span class="kc">null</span>
+      <span class="p">});</span>
+
+      <span class="nx">containerPaints</span><span class="p">.</span><span class="nf">set</span><span class="p">(</span><span class="nx">entry</span><span class="p">.</span><span class="nx">identifier</span><span class="p">,</span> <span class="nx">paints</span><span class="p">);</span>
+    <span class="p">}</span>
+  <span class="p">});</span>
+
+  <span class="nx">observer</span><span class="p">.</span><span class="nf">observe</span><span class="p">({</span>
+    <span class="na">type</span><span class="p">:</span> <span class="dl">'</span><span class="s1">container</span><span class="dl">'</span><span class="p">,</span>
+    <span class="na">buffered</span><span class="p">:</span> <span class="kc">true</span>
+  <span class="p">});</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>From there, we can inspect:</p>
+
+<ul>
+  <li><strong>first render:</strong> <code class="language-plaintext highlighter-rouge">paints[0].firstRenderTime</code>;</li>
+  <li><strong>latest observed paint:</strong> <code class="language-plaintext highlighter-rouge">paints.at(-1).startTime</code>;</li>
+  <li><strong>initial paint span:</strong> latest paint minus first render;</li>
+  <li><strong>progressiveness:</strong> how many meaningful steps occurred between the two; and</li>
+  <li><strong>largest jump:</strong> which update contributed the greatest increase in <code class="language-plaintext highlighter-rouge">size</code>.</li>
+</ul>
+
+<p>I would not ship every raw entry from every component in every session to
+analytics indefinitely. The cardinality will become expensive and tedious. But
+during the trial, a bounded, sampled series is exactly the evidence we need in
+order to decide which reduction actually reflects our product.</p>
+
+<aside class="c-cross-sell">
+
+  
+
+  <h4 class="c-cross-sell__title">You might also like…</h4>
+  <h5 class="c-cross-sell__link">
+    <a href="/2014/05/grouping-related-classes-in-your-markup/">
+      <cite>Grouping related classes in your markup</cite>
+      <small>(<time>2014</time>)</small>
+    </a>
+  </h5>
+
+</aside>
+
+<h2 id="container-timing-vs-element-timing">Container Timing vs. Element Timing</h2>
+
+<p>Container Timing is described as an extension of <a href="https://w3c.github.io/element-timing/">Element
+Timing</a>, and its Chromium implementation
+deliberately <a href="https://blogs.igalia.com/dape/2026/02/10/container-timing-measuring-web-components-performance/">reuses much of the same machinery</a>.
+The APIs look related because they are related:</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;img</span> <span class="na">elementtiming=</span><span class="s">product-image</span> <span class="err">...</span><span class="nt">&gt;</span>
+
+<span class="nt">&lt;section</span> <span class="na">containertiming=</span><span class="s">product-summary</span><span class="nt">&gt;</span>
+  ...
+<span class="nt">&lt;/section&gt;</span>
+</code></pre></div></div>
+
+<p>Their jobs are materially different, though.</p>
+
+<figure>
+<table>
+  <thead>
+    <tr>
+      <th>&nbsp;</th>
+      <th>Element Timing</th>
+      <th>Container Timing</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>Unit of interest</th>
+      <td>One annotated image or piece of text</td>
+      <td>An annotated element and its descendant subtree</td>
+    </tr>
+    <tr>
+      <th>Question</th>
+      <td>When did this content render?</td>
+      <td>How did this region come together?</td>
+    </tr>
+    <tr>
+      <th>Entry type</th>
+      <td><code>element</code></td>
+      <td><code>container</code></td>
+    </tr>
+    <tr>
+      <th>Geometry</th>
+      <td>The chosen element’s viewport rectangle</td>
+      <td>A cumulative region of newly painted content</td>
+    </tr>
+    <tr>
+      <th>Useful detail</th>
+      <td>Render/load times, URL, intrinsic image size, element</td>
+      <td>First/latest paint, cumulative size, last contributor, root</td>
+    </tr>
+    <tr>
+      <th>Typical use</th>
+      <td>Hero image, headline, poster, critical text</td>
+      <td>Buy box, search results, widget, navigation, content section</td>
+    </tr>
+  </tbody>
+</table>
+</figure>
+
+<h3 id="the-material-change">The Material Change</h3>
+
+<p>Element Timing is intentionally narrow. The <a href="https://developer.mozilla.org/en-US/docs/Web/API/PerformanceElementTiming"><code class="language-plaintext highlighter-rouge">PerformanceElementTiming</code>
+interface</a>
+can tell us about the selected element’s <code class="language-plaintext highlighter-rouge">renderTime</code>, <code class="language-plaintext highlighter-rouge">loadTime</code>, URL,
+intrinsic dimensions, and visible rectangle. That is exactly the information we
+want when the element <em>is</em> the thing we care about.</p>
+
+<p>Container Timing trades some of that element-specific detail for aggregation.
+It watches contentful paint throughout a subtree, maintains a union of the
+painted areas, and tells us which element contributed the largest new area in
+the latest relevant frame.</p>
+
+<p>Element Timing might tell us when the product image appeared. Container Timing
+can tell us that the buy box started to appear at 480 ms, gained most of
+its area at 710 ms, and received its final substantial initial update at
+940 ms.</p>
+
+<p>The former is atomic; the latter is cumulative.</p>
+
+<h3 id="the-philosophical-change">The Philosophical Change</h3>
+
+<p>The more interesting difference is one of ownership.</p>
+
+<p>With Element Timing, we point to a browser-recognisable piece of content and ask
+for its timestamp. The object being measured is still largely a rendering
+primitive: an image, a background image, or a group of text nodes.</p>
+
+<p>With Container Timing, we define the boundary. A <code class="language-plaintext highlighter-rouge">section</code> is not inherently
+a buy box, a lead story, or a flight-search result. <em>We</em> say that it is, because
+we understand our product and our users in a way that the browser never can.</p>
+
+<p>That moves the API one layer closer to product semantics:</p>
+
+<ul>
+  <li>from individual DOM artefacts to user-recognisable regions;</li>
+  <li>from a single render timestamp to a progressive sequence;</li>
+  <li>from browser-defined significance to author-defined significance; and</li>
+  <li>from <q>largest content</q> to <q>the content our users came for</q>.</li>
+</ul>
+
+<p>This is why I think Container Timing is more than merely ‘Element Timing, but
+for a parent’. It accepts that modern interfaces are assembled from components,
+and that the meaningful unit of performance is often the component rather than
+any one of its implementation details.</p>
+
+<p>The cost of that extra meaning is responsibility. The browser supplies evidence
+but does not name our metric for us. If we choose to call the final update
+<em>Product Summary Ready</em>, we need to document exactly how we selected it.</p>
+
+<h2 id="realistic-uses-for-container-timing">Realistic Uses for Container Timing</h2>
+
+<p>The best candidates are components that are meaningful to a user, assemble in
+more than one step, and are currently awkward to represent with a standard
+metric.</p>
+
+<h3 id="ecommerce-product-summary">Ecommerce Product Summary</h3>
+
+<p>A product detail page’s LCP is often its main image, but customers need rather
+more than a photograph before they can buy anything.</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;section</span> <span class="na">containertiming=</span><span class="s">product-summary</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">product-gallery</span><span class="nt">&gt;</span>
+    ...
+  <span class="nt">&lt;/div&gt;</span>
+
+  <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">product-details</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;h1&gt;</span>Ridgeline Walking Boots<span class="nt">&lt;/h1&gt;</span>
+    <span class="nt">&lt;p</span> <span class="na">class=</span><span class="s">price</span><span class="nt">&gt;</span>£129<span class="nt">&lt;/p&gt;</span>
+    <span class="nt">&lt;p</span> <span class="na">class=</span><span class="s">availability</span><span class="nt">&gt;</span>In stock<span class="nt">&lt;/p&gt;</span>
+    <span class="nt">&lt;button&gt;</span>Add to basket<span class="nt">&lt;/button&gt;</span>
+  <span class="nt">&lt;/div&gt;</span>
+
+  <span class="nt">&lt;aside</span> <span class="na">containertiming-ignore</span><span class="nt">&gt;</span>
+    <span class="c">&lt;!-- Non-critical recommendations or an advert. --&gt;</span>
+  <span class="nt">&lt;/aside&gt;</span>
+<span class="nt">&lt;/section&gt;</span>
+</code></pre></div></div>
+
+<p>Here, Container Timing can show whether the image, commercial information, and
+call to action arrive together or in a long, awkward procession. The current
+Chromium implementation lets us exclude irrelevant descendants with
+<a href="https://chromium.googlesource.com/chromium/src/+/76d4b3fafe2bb8673115a5d322bc07af45135f80"><code class="language-plaintext highlighter-rouge">containertiming-ignore</code></a>;
+the attribute’s exact design is <a href="https://developer.chrome.com/blog/container-timing-origin-trial/#how-the-container-timing-api-works">still open to origin-trial
+feedback</a>.</p>
+
+<p>Do not call this <em>Buy Box Interactive</em>, though. Container Timing proves that
+content painted; it does not prove that the JavaScript required to choose
+a size or add the item to the basket is ready. Pair it with application
+instrumentation or <a href="https://w3c.github.io/event-timing/">Event
+Timing</a> if interactivity is part of the
+claim.</p>
+
+<h3 id="search-results-and-product-grids">Search Results and Product Grids</h3>
+
+<p>Search pages often render a shell, then a result count, then cards, images,
+prices, badges, and personalisation. LCP may pick one card image and tell us
+almost nothing about the grid as a whole.</p>
+
+<p>Annotating the results region would let us study:</p>
+
+<ul>
+  <li>time to first visible result;</li>
+  <li>how long the initial visible result set takes to fill in;</li>
+  <li>whether images arrive as a useful progression or a late wall of pixels; and</li>
+  <li>whether one release added an extra paint stage to every search.</li>
+</ul>
+
+<p>I would begin with one container around the visible result set, not
+<code class="language-plaintext highlighter-rouge">containertiming</code> on 48 individual cards. The latter may be useful for focused
+diagnosis, but the former better matches what the user is waiting for and keeps
+the analytics manageable.</p>
+
+<h3 id="dashboards-and-data-heavy-widgets">Dashboards and Data-Heavy Widgets</h3>
+
+<p>A dashboard tile might contain a heading and latest value immediately, then
+gain comparative data, a chart, annotations, and controls after one or more API
+requests.</p>
+
+<p>Container Timing can expose the difference between:</p>
+
+<ul>
+  <li>a tile that appears nearly complete in one frame;</li>
+  <li>a tile that shows useful numbers quickly but gains secondary context later;
+and</li>
+  <li>a tile whose apparently small final dependency holds back most of its visible
+area.</li>
+</ul>
+
+<p>Be careful with charts rendered solely in Canvas or complex SVG. The API’s
+first version is built around the same contentful paint concepts as Element
+Timing, and built-in composite content is <a href="https://github.com/WICG/container-timing#built-in-containers">not yet one of its
+goals</a>. A widget
+with HTML labels and values may still produce useful entries, but we should
+verify what the actual chart contributes before naming a metric after it.</p>
+
+<h3 id="publisher-homepages-and-article-regions">Publisher Homepages and Article Regions</h3>
+
+<p>Publishers routinely care about much more than the largest story image. A lead
+package might contain a headline, standfirst, image, timestamp, live status, and
+related links, all delivered by different parts of the stack.</p>
+
+<p>Container Timing can measure that package as one editorial unit while
+<code class="language-plaintext highlighter-rouge">containertiming-ignore</code> excludes an ad slot, recommendation rail, or live blog
+that is expected to continue changing.</p>
+
+<p>This is also where the ‘last entry’ trap becomes obvious. An article page with
+comments, related content, ads, and lazy-loaded media may continue receiving
+new contentful paints for minutes. Container boundaries should reflect the
+reader-facing unit we actually mean to measure, not merely whichever <code class="language-plaintext highlighter-rouge">&lt;main&gt;</code>
+happens to wrap most of the page.</p>
+
+<h3 id="component-and-team-level-performance">Component and Team-Level Performance</h3>
+
+<p>For a large application or design system, stable <code class="language-plaintext highlighter-rouge">containertiming</code> identifiers
+could become a useful contract between component owners and RUM:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">global-navigation</code></li>
+  <li><code class="language-plaintext highlighter-rouge">account-summary</code></li>
+  <li><code class="language-plaintext highlighter-rouge">quote-panel</code></li>
+  <li><code class="language-plaintext highlighter-rouge">checkout-form</code></li>
+  <li><code class="language-plaintext highlighter-rouge">order-confirmation</code></li>
+</ul>
+
+<p>Teams could compare the first render, initial paint span, and number of
+substantial updates for their own surfaces across releases. This gives
+performance ownership a much more recognisable shape than asking every team to
+explain its contribution to page-level LCP.</p>
+
+<p>The identifiers need governance. Renaming <code class="language-plaintext highlighter-rouge">quote-panel</code> to <code class="language-plaintext highlighter-rouge">quote-card-v2</code> or
+reusing the same identifier for different experiences will silently break the
+time series. Treat them like analytics event names, not CSS classes.</p>
+
+<h2 id="what-container-timing-is-not">What Container Timing Is Not</h2>
+
+<p>New performance APIs are very easy to over-promote, so a few boundaries are
+worth making explicit.</p>
+
+<h3 id="it-is-not-a-new-core-web-vital">It Is Not a New Core Web Vital</h3>
+
+<p>Container Timing does not change <a href="https://github.com/WICG/container-timing#lcp-integration">the LCP
+algorithm</a>, and its
+entries are not a new metric in CrUX or the Core Web Vitals programme. It is
+application instrumentation built on the performance timeline.</p>
+
+<p>That is a feature. The whole point is to represent regions that only the
+application can identify.</p>
+
+<h3 id="it-is-not-component-ready">It Is Not ‘Component Ready’</h3>
+
+<p>Paint is not readiness.</p>
+
+<p>A form can paint before its validation code is available; a chart can appear
+while its data is stale; a button can render before its event listener is
+attached. If the metric name promises interactive, usable, hydrated, accurate,
+or complete, Container Timing alone is insufficient evidence.</p>
+
+<p>Name the result after what it actually measures: <em>Product Summary Latest
+Contentful Paint</em> is clumsy but honest; <em>Product Summary Ready</em> needs more
+proof.</p>
+
+<h3 id="it-is-not-visual-completeness">It Is Not Visual Completeness</h3>
+
+<p>The <code class="language-plaintext highlighter-rouge">size</code> property is not a percentage. It is the cumulative area of qualifying
+painted regions, with no authoritative denominator for what the component will
+eventually become. The container may grow, move, reveal below-the-fold content,
+or add new descendants later.</p>
+
+<p>We can derive a product-specific progress model if we control the final
+geometry, but the API does not hand us ‘83% complete’.</p>
+
+<h3 id="it-is-not-free-reinstrumentation">It Is Not Free Reinstrumentation</h3>
+
+<p>The <a href="https://groups.google.com/a/chromium.org/g/blink-dev/c/1uvAGNd2uME">Blink intent</a>
+says overhead is limited to pages that enable the feature, with the
+implementation piggybacking on rendering work that already happens. That is
+encouraging, but it is not an invitation to annotate every <code class="language-plaintext highlighter-rouge">&lt;div&gt;</code>.</p>
+
+<p>Use it on a small number of important, semantic regions; sample RUM collection;
+and measure the measurement on the devices your users actually have.</p>
+
+<h2 id="trying-the-chrome-origin-trial">Trying the Chrome Origin Trial</h2>
+
+<p>At the time of writing, Container Timing is experimental and the <a href="https://github.com/WICG/container-timing#container-timing-explainer">WICG
+explainer lists an origin trial from Chrome 148 to
+153</a>.
+The API was developed by Bloomberg, implemented in Chromium by Igalia, and the
+trial is intended to test its instrumentation model, entry shape, buffering,
+nesting behaviour, and real-world ergonomics.</p>
+
+<p>That is what an origin trial is for. It is access to a proposed feature for
+field testing, not a promise that every name and behaviour is now permanent.</p>
+
+<p>To enable it for real visitors:</p>
+
+<ol>
+  <li>register for Container Timing on Chrome’s <a href="https://developer.chrome.com/origintrials/">origin-trial
+site</a>;</li>
+  <li>
+    <p>add the origin-specific token to the relevant pages, either as an HTTP
+response header:</p>
+
+    <div class="language-http highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">Origin-Trial: TOKEN_GOES_HERE
+</span></code></pre></div>    </div>
+
+    <p>or in the document <code class="language-plaintext highlighter-rouge">&lt;head&gt;</code>:</p>
+
+    <div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;meta</span> <span class="na">http-equiv=</span><span class="s">origin-trial</span> <span class="na">content=</span><span class="s">TOKEN_GOES_HERE</span><span class="nt">&gt;</span>
+</code></pre></div>    </div>
+  </li>
+  <li>add <code class="language-plaintext highlighter-rouge">containertiming</code> to the important regions in the server-rendered HTML;
+and</li>
+  <li>feature-detect before registering the observer.</li>
+</ol>
+
+<p>Chrome’s <a href="https://developer.chrome.com/docs/web-platform/origin-trials">origin-trial
+documentation</a>
+explains token scope, renewal, iframes, and how to verify enrolment in DevTools.</p>
+
+<p>For local development without a token, enable <em>Experimental Web Platform
+features</em> at:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>chrome://flags/#enable-experimental-web-platform-features
+</code></pre></div></div>
+
+<p>Alternatively, launch Chrome with:</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">--enable-blink-features</span><span class="o">=</span>ContainerTiming
+</code></pre></div></div>
+
+<p>The <code class="language-plaintext highlighter-rouge">containertiming</code> attribute itself is harmless in browsers that do not
+support the API. Feature-detect the observer code like this:</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if </span><span class="p">(</span><span class="k">typeof</span> <span class="nx">PerformanceContainerTiming</span> <span class="o">!==</span> <span class="dl">'</span><span class="s1">undefined</span><span class="dl">'</span><span class="p">)</span> <span class="p">{</span>
+  <span class="c1">// Register the PerformanceObserver here.</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>During the trial, this constructor check is preferable to relying only on
+<code class="language-plaintext highlighter-rouge">PerformanceObserver.supportedEntryTypes</code>. Chrome’s guidance warns that the
+latter is frozen on first access and can misreport if it is read before the
+origin-trial token has been processed.</p>
+
+<p>Finally, put the attribute in the original HTML or set it before inserting the
+element into the document. Adding it after the component has already started
+painting means those earlier paints are gone; the observer can only report
+subsequent qualifying updates.</p>
+
+<h2 id="browser-support-and-standardisation">Browser Support and Standardisation</h2>
+
+<p>Container Timing is not Baseline and should not yet be treated as a universally
+available production primitive.</p>
+
+<p>Chromium has the implementation and origin trial. Mozilla has recorded
+a <a href="https://github.com/mozilla/standards-positions/issues/1155">positive standards position</a>
+and has been working on an implementation; WebKit’s <a href="https://github.com/WebKit/standards-positions/issues/442">standards-position
+request</a> remains open.
+The proposal itself is still in the <a href="https://wicg.github.io/container-timing/">Web Incubator Community
+Group</a>, with discussion taking place
+in and around the W3C Web Performance Working Group.</p>
+
+<p>The specification also has known gaps. Shadow DOM is out of scope for this first
+version, composite elements such as SVG and MathML are not automatically
+treated as containers, and the ignore mechanism may still change.</p>
+
+<p>Progressive enhancement is easy enough here: unsupported browsers continue as
+normal, and our RUM receives Container Timing data only where the feature
+exists. The harder problem is analytical bias. An origin-trial dataset is
+Chromium-heavy by definition, so do not mistake its numbers for a
+browser-neutral population.</p>
+
+<article class="[ box  box--highlight ]  [ flag  flag--responsive ]  mb" data-ui-component="Cross-sell promo">
+  <div class="flag__img"><a href="/contact/" class="btn btn--full">Get in touch</a></div>
+  <div class="flag__body">
+    <span class="heading  mb0">Need Some Help?</span>
+    <p>I help companies find and fix site-speed issues. <b>Performance audits</b>, <b>training</b>, <b>consultancy</b>, and more.</p>
+  </div>
+</article>
+
+<h2 id="what-i-would-measure-first">What I Would Measure First</h2>
+
+<p>I would not begin by inventing one new company-wide metric called <em>Container
+Ready</em>.</p>
+
+<p>I would choose one important component that:</p>
+
+<ul>
+  <li>appears on a high-volume journey;</li>
+  <li>contains several independently rendered parts;</li>
+  <li>is not represented well by LCP or one Element Timing entry; and</li>
+  <li>has a clear owner who can explain how it is assembled.</li>
+</ul>
+
+<p>A product summary, search-results region, account overview, or flight-search
+result would all be good candidates.</p>
+
+<p>For a sampled group of Chromium sessions, I would collect:</p>
+
+<ul>
+  <li>the container’s first render time;</li>
+  <li>every cumulative <code class="language-plaintext highlighter-rouge">size</code> and <code class="language-plaintext highlighter-rouge">startTime</code> during the initial loading window;</li>
+  <li>the tag name of <code class="language-plaintext highlighter-rouge">lastPaintedElement</code> for diagnosis;</li>
+  <li>the first user interaction time within that component; and</li>
+  <li>the standard page-level metrics alongside it.</li>
+</ul>
+
+<p>Then I would look at the evidence before naming the metric. Perhaps first render
+correlates best with user behaviour. Perhaps the last large area increase is
+more stable. Perhaps the interesting finding is not the endpoint at all, but
+that one release turned a two-stage component into a six-stage one.</p>
+
+<p>That, to me, is the promise of Container Timing. It does not try to replace
+Core Web Vitals, and it does not pretend that the browser understands our
+product. It gives us lower-level rendering evidence at a much more useful
+boundary, then lets us apply our own domain knowledge.</p>
+
+<p>Element Timing asks when one thing rendered. Container Timing lets us ask how
+the thing our user actually recognises came together.</p>
+
+<p>That is a materially larger — and philosophically much more interesting — step.</p>
+
+
+          <script type=module async>
+            (() => {
+              for (const time of document.querySelectorAll('.jsLocalDate')) {
+                const date = new Date(time.dateTime);
+
+                if (!Number.isNaN(date.valueOf())) {
+                  time.textContent = new Intl.DateTimeFormat(undefined, {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
+                  }).format(date);
+                }
+
+              }
+            })()
+          </script>
+
+          
+
+            <hr>
+
+            <h3 class=hide>This Web Performance post is tagged with:</h3>
+
+            <ul class="o-list-inline  c-list-tags">
+              
+                
+                <li><a href="/blog/tags/browser-apis/">Browser APIs</a></li>
+              
+                
+                <li><a href="/blog/tags/measurement/">Measurement</a></li>
+              
+            </ul>
+
+          
+
+          
+
+            <hr>
+
+            <h2>Frequently Asked Questions</h2>
+
+            <div class="c-faq">
+              
+                <details>
+                  <summary>What is the Container Timing API?</summary>
+                  <p>The Container Timing API reports when new, contentful parts of an annotated DOM subtree are painted, allowing developers to measure how whole components and page regions render.</p>
+                </details>
+              
+                <details>
+                  <summary>How does Container Timing differ from Element Timing?</summary>
+                  <p>Element Timing measures the render of an individual annotated image or piece of text. Container Timing accumulates paint information across an annotated element and its descendants, emitting updated entries as new areas receive contentful paint.</p>
+                </details>
+              
+                <details>
+                  <summary>Does Container Timing report when a component is complete?</summary>
+                  <p>No. A browser cannot know whether a component will receive more content later, so the API emits a series of paint updates and leaves the site to define which update is meaningful for its own product.</p>
+                </details>
+              
+                <details>
+                  <summary>Does Container Timing measure interactivity?</summary>
+                  <p>No. It measures contentful paint inside a container; it does not prove that event handlers are attached, data is current, or the component is ready to accept input.</p>
+                </details>
+              
+                <details>
+                  <summary>Which browsers support Container Timing?</summary>
+                  <p>At the time of writing, Container Timing is experimental. Chrome is running an origin trial from versions 148 to 153, and the API can also be enabled locally with Chrome’s experimental web platform features flag.</p>
+                </details>
+              
+            </div>
+          
+
+      </div><!-- /.s-post -->
+
+        
+          <script type="application/ld+json">
+            {
+              "@context": "https://schema.org",
+              "@type": "FAQPage",
+              "mainEntity": [
+                
+                {
+                  "@type": "Question",
+                  "name": "What is the Container Timing API?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "The Container Timing API reports when new, contentful parts of an annotated DOM subtree are painted, allowing developers to measure how whole components and page regions render."
+                  }
+                },
+                
+                {
+                  "@type": "Question",
+                  "name": "How does Container Timing differ from Element Timing?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Element Timing measures the render of an individual annotated image or piece of text. Container Timing accumulates paint information across an annotated element and its descendants, emitting updated entries as new areas receive contentful paint."
+                  }
+                },
+                
+                {
+                  "@type": "Question",
+                  "name": "Does Container Timing report when a component is complete?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "No. A browser cannot know whether a component will receive more content later, so the API emits a series of paint updates and leaves the site to define which update is meaningful for its own product."
+                  }
+                },
+                
+                {
+                  "@type": "Question",
+                  "name": "Does Container Timing measure interactivity?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "No. It measures contentful paint inside a container; it does not prove that event handlers are attached, data is current, or the component is ready to accept input."
+                  }
+                },
+                
+                {
+                  "@type": "Question",
+                  "name": "Which browsers support Container Timing?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "At the time of writing, Container Timing is experimental. Chrome is running an origin trial from versions 148 to 153, and the API can also be enabled locally with Chrome’s experimental web platform features flag."
+                  }
+                }
+                
+              ]
+            }
+          </script>
+        
+
+        
+
+        <script type="application/ld+json">
+          {
+            "@context": "https://schema.org",
+            "@type": "BlogPosting",
+            "url": "https://csswizardry.com/2026/07/meaasuring-component-performance-with-the-container-timing-api/",
+            "name": "Measuring Component Performance with the Container Timing API",
+            "headline": "Measuring Component Performance with the Container Timing API",
+            "keywords": "Browser APIs,Measurement",
+            "description": "Measure how entire components render with the Container Timing API: how it differs from Element Timing, where it helps, and how to try it today.",
+            "datePublished": "2026-07-26T13:51:29+00:00",
+            "dateModified": "2026-07-26T13:51:29+00:00",
+            "inLanguage": "en-GB",
+            "isAccessibleForFree": true,
+            "author": {
+              "@type": "Person",
+              "url": "https://csswizardry.com/about/",
+              "name": "Harry Roberts"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "CSS Wizardry",
+              "url": "https://csswizardry.com",
+              "logo": {
+                "@type": "ImageObject",
+                "width": 128,
+                "height": 128,
+                "url": "https://csswizardry.com/icon.png"
+              }
+            },
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https://csswizardry.com/2026/07/meaasuring-component-performance-with-the-container-timing-api/"
+            
+            }
+          }
+        </script>
+
+        <script type="application/ld+json">
+          {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [{
+              "@type": "ListItem",
+              "position": 1,
+              "name": "blog",
+              "item": "https://csswizardry.com/blog/"
+            }, {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Measuring Component Performance with the Container Timing API",
+              "item": "https://csswizardry.com/2026/07/meaasuring-component-performance-with-the-container-timing-api/"
+            }]
+          }
+        </script>
+
+        <hr />
+
+        <script type=speculationrules>
+
+  {
+    "prerender": [
+      {
+        "urls": [
+          
+            "/2026/07/web-perf-wednesday-002-the-metrics-dont-tell-the-whole-story/",
+          
+          
+            "/2026/07/low-and-mid-tier-mobile-for-the-real-world-2026/"
+          
+        ]
+      }
+    ]
+  }
+
+</script>
+
+<style>
+  /*!
+ * inuitcss, by @csswizardry
+ *
+ * github.com/inuitcss | inuitcss.com
+ */.c-pagination{display:flex;margin-bottom:var(--spacing-unit)}.c-pagination__item{flex-grow:1;flex-basis:0;padding:12px;border-radius:var(--border-radius);border:1px solid rgba(0,0,0,0);will-change:transform;transition:.3333s transform}.c-pagination__item:hover{text-decoration:none;border-color:currentColor}.c-pagination__item.c-pagination__item.c-pagination__item::after{display:none}.c-pagination__item::before{display:block;font-size:12px;font-size:.75rem;line-height:2;line-height:1;text-transform:uppercase;font-weight:normal;color:var(--color-gray)}.c-pagination__prev:hover{transform:translateX(calc(-1 * var(--spacing-unit--small)))}.c-pagination__prev::before{content:"Previously: "}.c-pagination__next{text-align:right}.c-pagination__next:hover{transform:translateX(var(--spacing-unit--small))}.c-pagination__next::before{content:"Up next: "}
+
+</style>
+
+<nav class=c-pagination>
+  
+    <a href="/2026/07/low-and-mid-tier-mobile-for-the-real-world-2026/" class="c-pagination__item c-pagination__prev" style="view-transition-name: x-2026-07-21" id=articleOlder>Low- and Mid-Tier Mobile for the Real World (2026)</a>
+  
+  
+    <a href="/2026/07/web-perf-wednesday-002-the-metrics-dont-tell-the-whole-story/" class="c-pagination__item c-pagination__next" style="view-transition-name: x-2026-07-29" id=articleNewer>Web-Perf Wednesday 002 – The Metrics Don’t Tell the Whole Story</a>
+  
+</nav>
+
+<script>
+  (() => {
+
+    const articleOlder = document.getElementById('articleOlder');
+    const articleNewer = document.getElementById('articleNewer');
+
+    if(articleOlder) {
+
+      articleOlder.addEventListener('click', (event) => {
+
+        setTimeout(() => {
+          LUX.addData('articlePaginationUsed', true)
+          LUX.addData('articleOlderUsed', true)
+        });
+
+      });
+
+    }
+
+    if(articleNewer) {
+
+      articleNewer.addEventListener('click', (event) => {
+
+        setTimeout(() => {
+          LUX.addData('articlePaginationUsed', true)
+          LUX.addData('articleNewerUsed', true)
+        });
+
+      });
+
+    }
+
+  })();
+
+  //# sourceURL=pagination-articles.inline.js
+</script>
+
+
+        <hr />
+
+        <div class=layout>
+
+          <div class="layout__item  one-half">
+
+            <p>
+  <button id="jsShareButton"
+          class="btn btn--secondary btn--full"
+          type="button"
+          aria-label="Share this page">
+    Share this
+  </button>
+</p>
+
+<script type="module">
+
+  const shareButton = document.getElementById('jsShareButton');
+
+  if (!navigator.share) {
+    shareButton.hidden = true;
+  } else {
+
+    /**
+     * This is very non-standard, but Bluesky’s Web Share is broken so I have
+     * to bundle everything into text:
+     *
+     * https://github.com/bluesky-social/social-app/issues/5051
+     */
+    const shareData = {
+      text: `I really enjoyed ‘Measuring Component Performance with the Container Timing API` +
+            `’ by @csswizardry! https://csswizardry.com/2026/07/meaasuring-component-performance-with-the-container-timing-api/`
+      //title: "Measuring Component Performance with the Container Timing API",
+      //url:   "https://csswizardry.com/2026/07/meaasuring-component-performance-with-the-container-timing-api/" */
+    };
+
+    shareButton.addEventListener('click', async () => {
+      try {
+        await navigator.share(shareData);
+      } catch (_) {
+      }
+    });
+  }
+
+</script>
+
+
+            </div><div class="layout__item  one-half">
+
+            <p><a href=/consultancy/ class="btn  btn--full
+                                            btn--positive">
+              <strong>Hire me</strong><span class="hide"> as your site speed consultant</span></a></p>
+
+          </div>
+
+        </div>
+
+        <hr />
+
+        <style>
+
+  .c-mini-profile {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+    content-visibility: auto;
+    contain-intrinsic-size: 1px 120px;
+  }
+
+    .c-mini-profile__avatar {
+      border-radius: 100%;
+    }
+
+    .c-mini-profile a {
+      color: inherit;
+      font: inherit;
+    }
+
+</style>
+
+<article class=c-mini-profile>
+  <img src=/img/content/avatar.jpg alt width=72 height=72 loading=lazy class=c-mini-profile__avatar>
+  <div class=c-mini-profile__content>
+    <h5 class=mb0 style="font-weight: bold;">By <a href="/about/">Harry Roberts</a></h5>
+    <p class=mb0>Harry Roberts is an <a href="/consultancy/">independent
+       consultant</a> web performance engineer. He <a href="/services/">helps
+       companies</a> of all shapes and sizes find and fix site speed issues.</p>
+  </div>
+</article>
+
+
+
+        
+
+      <script>performance.mark('contentEnd')</script>
+    </main
+    ><section class="layout__item  desk-three-tenths  desk-push-one-tenth" data-ui-component="Sub content" id="section:sub-content">
+
+        <hr class=hide-desk>
+
+
+
+
+
+<style>
+@media(pointer: fine){@keyframes happy-harry{0%{transform:translateY(0) translateX(0) rotate(0deg) scale(1);box-shadow:0 4px 12px rgba(0,0,0,.25);animation-timing-function:cubic-bezier(0.36, 0, 0.08, 1)}12.5%{transform:translateY(-6px) translateX(-2px) rotate(-3deg) scale(1.03);box-shadow:0 8px 20px rgba(0,0,0,.18);animation-timing-function:cubic-bezier(0.22, 1, 0.36, 1)}25%{transform:translateY(0) translateX(0) rotate(0deg) scale(1);box-shadow:0 4px 12px rgba(0,0,0,.28);animation-timing-function:cubic-bezier(0.36, 0, 0.08, 1)}37.5%{transform:translateY(-8px) translateX(2px) rotate(3deg) scale(1.04);box-shadow:0 10px 22px rgba(0,0,0,.16);animation-timing-function:cubic-bezier(0.22, 1, 0.36, 1)}50%{transform:translateY(0) translateX(0) rotate(0deg) scale(1);box-shadow:0 5px 14px rgba(0,0,0,.3);animation-timing-function:cubic-bezier(0.36, 0, 0.08, 1)}62.5%{transform:translateY(-5px) translateX(-1px) rotate(-2deg) scale(1.02);box-shadow:0 7px 18px rgba(0,0,0,.2);animation-timing-function:cubic-bezier(0.22, 1, 0.36, 1)}75%{transform:translateY(0) translateX(0) rotate(0deg) scale(1);box-shadow:0 4px 12px rgba(0,0,0,.28);animation-timing-function:cubic-bezier(0.36, 0, 0.08, 1)}87.5%{transform:translateY(-3px) translateX(1px) rotate(1.5deg) scale(1.01);box-shadow:0 6px 16px rgba(0,0,0,.22);animation-timing-function:cubic-bezier(0.22, 1, 0.36, 1)}100%{transform:translateY(0) translateX(0) rotate(0deg) scale(1);box-shadow:0 4px 12px rgba(0,0,0,.25)}}.c-happy-harry{will-change:transform}html:has(.c-happy-harry-trigger:hover,.c-happy-harry-trigger:active,.c-happy-harry-trigger:focus) .c-happy-harry{animation:happy-harry .85s ease-in-out infinite}}@media(prefers-reduced-motion: reduce){html:has(.c-happy-harry-trigger:hover,.c-happy-harry-trigger:active,.c-happy-harry-trigger:focus) .c-happy-harry{animation:none}}
+
+/*# sourceURL=happy-harry.inline.css */
+</style>
+
+<p class=text-banner>
+  <a href=https://calendly.com/csswizardry/30min class="btn  btn--full
+    btn--positive  c-happy-harry-trigger" id=cta data-sctrack=cta-sidebar elementtiming=cta-sidebar>Book a Free Call
+</a>
+</p>
+
+<script>
+  (() => {
+
+    const cta = document.getElementById('cta');
+
+    cta.addEventListener('click', (event) => {
+
+      setTimeout(() => {
+        LUX.addData('ctaClicked', true)
+      });
+
+    });
+
+  })();
+
+  //# sourceURL=cta-sidebar.inline.js
+</script>
+
+<hr>
+
+
+
+
+<p>
+
+  <link rel=preload
+        as=image
+        href=/img/css/masthead-small-lqip.jpg
+        fetchpriority=high
+        media="(min-width: 64em)">
+
+  <img src=/img/css/masthead-small.jpg
+       alt
+       width=720
+       height=480
+       style="background-image: url(/img/css/masthead-small-lqip.jpg), url(data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQECAgICAgICAgICAgMDAwMDAwMDAwMBAQEBAQEBAgEBAgICAQICAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA//AABEIAAsAEAMBEQACEQEDEQH/xACAAAEBAQAAAAAAAAAAAAAAAAAICQoQAAAEBAUEAQUAAAAAAAAAAAMEBQYBAhMUBxIVFhcACAkkERgjJTdDAQADAQAAAAAAAAAAAAAAAAAHCAkGEQAABAUCAwcEAwAAAAAAAAABAgMEBhESExQFBwAVIwgWFyEiJDMxMkJDNEFR/9oADAMBAAIRAxEAPwDP12CsRLfmKpRpN7FZ6ok7kxPHIoiWbLlCyQvgFTI6tKWeSihwEUEcgspheMBBwYyyZBBYhTS5YRg6O3m4ei7fQrF0dEjLWmLNukNo7Vgmcz1c4uBQTTIqIpkdCc5VyFUOBDAcxREtEzV42T1KEND2/ibX1ojiNJu11ZyKTZqk2kc1XoUXE5TmKLg4lIAmEqQmrAhpgPD872MFxcADY5d2dyb4TRXcArubaCHq72buHpsQ7EQ5hxOvmicTyhscsfKlJRjMJBjAEwU88YzRm6KPZ47TCMd7RpljeO3ejbg6UgRu+W1Fskcj1e2UwvG+EmQBQVERLScEzFUAwGD7RMUtrtf0OM4AePIiiGLmcSaaUCulk0UnKKhlCVFVTstxEqJhAxSgsKavp8wH68Sm8SV79RRyjy/bUGpqHF+gafa7sb37YvvyvE1fLqume5b/AD/Kp0kz3H8MH9/Bu5xrWfexrmMr8Nnp8wpnh5ntsi3+yniWGx9zO1WjK/qdmij8v5df6p/FR536fxnwpPK9pXJTiteXaO9X9a095fFfOk1dp6x715Wz67eetmt6f2qXWm7OuD4R6lLkWdlpzxMvvHO0pbyp+0xaZ4tHTtXMnq08HN7id2HV3m96+aXLsnMnSaU7fSs/5X6JVVefH//Z
+); view-transition-name: masthead;"
+       elementtiming=sidebar-image
+       decoding=sync
+       fetchpriority=low
+       loading=lazy
+       class=c-happy-harry>
+
+</p>
+
+
+<p>Hi there, I’m <b>Harry Roberts</b>. I am an <b><a
+    href=https://web.archive.org/web/20190630140300/https://thenetawards.com/previous-winners/>award-winning</a>
+  Consultant Web Performance Engineer</b>, <b>designer</b>, <b>developer</b>,
+<b>writer</b>, and <b>speaker</b> from the UK. I <b><a
+    href=/blog/>write</a></b>, <b><a
+    href=https://twitter.com/csswizardry>Tweet</a></b>, <b><a
+href=/speaking/>speak</a></b>, and <b><a href="https://github.com/csswizardry">share code</a></b> about measuring and
+improving site-speed. You <a href=/services/>should hire me</a>.</p>
+
+<hr>
+
+<h4>Connect</h4>
+
+<ul>
+  <li><a href=https://twitter.com/csswizardry>𝕏 (Twitter)</a></li>
+  <li><a href="https://webperf.social/@csswizardry" rel="me">Mastodon</a></li>
+  <li><a href="https://bsky.app/profile/csswizardry.com">Bluesky</a></li>
+  <li><a href="https://www.linkedin.com/in/csswizardry/">LinkedIn</a></li>
+  <li><a href="https://github.com/csswizardry">GitHub</a></li>
+  <li><a href="https://www.youtube.com/@csswizardry?sub_confirmation=1">YouTube</a></li>
+</ul>
+
+<hr>
+
+<h4>Projects</h4>
+
+
+
+<ul class="[ list-ui  list-ui--small ]  mb">
+
+  <li>
+    <a href=/Obs.js/demo/>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 510 164.36" role="img" aria-labelledby="logo-title">
+        <title id="logo-title">Obs.js: context-aware web performance for everyone</title>
+        <defs>
+          <style>
+            .color-dot {
+              fill: #f43059;
+            }
+
+            .color-text {
+              fill: #009aa2;
+            }
+          </style>
+        </defs>
+        <g id="Obs.js_Logo" data-name="Obs.js Logo">
+          <g>
+            <circle class="color-dot" cx="361.31" cy="85.22" r="15.47"/>
+            <path class="color-text" d="M472.27,136.2c-6.99,0-14.14-1.2-21.44-3.59-7.3-2.39-17.86-9.33-17.86-9.33-1.67-1.09-2.14-3.36-1.05-5.03l8.01-12.33c1.09-1.67,3.35-2.16,5.03-1.09,0,0,7.71,4.93,13.05,6.88,5.34,1.96,10.34,2.95,15,2.95,4.05,0,7.02-.67,8.93-2.02,1.9-1.35,2.01-1.81,2.01-1.81.46-1.94.84-3.61.84-3.71s-.25-1.43-.55-2.95l-1.11-1.1c-1.1-1.1-2.61-2.05-4.51-2.85-1.9-.8-4.08-1.56-6.53-2.3-2.46-.74-5.03-1.53-7.73-2.39-3.44-.98-6.9-2.18-10.4-3.59-3.49-1.41-6.66-3.25-9.48-5.52-2.82-2.27-5.12-5.06-6.9-8.38-1.78-3.31-2.31-8.54-2.31-8.54-.2-1.98-.36-3.69-.36-3.79s.16-1.81.36-3.79c0,0,.59-5.87,2.49-9.74s4.48-7.15,7.73-9.85c3.25-2.7,7.05-4.72,11.41-6.07,4.35-1.35,9.05-2.02,14.08-2.02,6.26,0,12.61,1.01,19.05,3.04,6.44,2.02,14.6,6.6,14.6,6.6,1.74.98,2.37,3.2,1.41,4.94l-7.17,12.98c-.96,1.74-3.2,2.42-4.96,1.5,0,0-6.48-3.38-11.14-5.04-4.67-1.66-8.77-2.48-12.33-2.48s-6.01.64-7.73,1.93c-1.72,1.29-1.74,1.35-1.74,1.35-.46,1.94-.84,3.61-.84,3.71s.25,1.33.55,2.73l1.1,1.04c1.1,1.04,2.58,2.02,4.42,2.95,1.84.92,3.96,1.81,6.35,2.67,2.39.86,4.94,1.72,7.64,2.58,3.43,1.1,6.93,2.42,10.49,3.96,3.56,1.54,6.75,3.41,9.57,5.61,2.82,2.21,5.15,4.91,6.99,8.1,1.84,3.19,2.37,7.99,2.37,7.99.22,1.98.39,3.68.39,3.78s-.15,1.81-.33,3.79c0,0-.62,6.67-2.52,10.66-1.9,3.99-4.57,7.27-8.01,9.85-3.44,2.58-7.45,4.51-12.06,5.8-4.6,1.29-9.54,1.93-14.82,1.93Z"/>
+            <path class="color-text" d="M206.87,136.2c-7.49,0-13.66-1.47-18.5-4.42-4.85-2.95-9.67-7.75-9.67-7.75-1.41-1.41-2.57-.93-2.57,1.07v5.64c0,1.99-1.63,3.62-3.62,3.62h-20.73c-1.99,0-3.62-1.63-3.62-3.62V3.62c0-1.99,1.63-3.62,3.62-3.62h20.73c1.99,0,3.62,1.63,3.62,3.62v42.63c0,1.99,1.09,2.41,2.41.92,0,0,5.16-5.79,10.01-8.8,4.84-3.01,10.95-4.51,18.31-4.51,5.76,0,11.35,1.11,16.75,3.31,5.4,2.21,10.19,5.49,14.36,9.85,4.17,4.36,7.51,9.69,10.03,16.01,2.51,6.32,3.48,18.2,3.48,18.2.16,1.99.29,3.69.29,3.79s-.13,1.81-.29,3.79c0,0-.96,11.88-3.48,18.2-2.52,6.32-5.83,11.66-9.94,16.01-4.11,4.36-8.87,7.64-14.26,9.85-5.4,2.21-11.04,3.31-16.93,3.31ZM199.7,112.46c3.31,0,6.41-.64,9.3-1.93,2.88-1.29,5.43-3.13,7.63-5.52,2.21-2.39,3.96-5.24,5.25-8.56,1.29-3.31,1.64-7.62,1.64-7.62.16-1.99.29-3.69.29-3.79s-.13-1.81-.3-3.79c0,0-.34-4.15-1.63-7.53-1.29-3.37-3.04-6.26-5.25-8.65-2.21-2.39-4.75-4.23-7.63-5.52-2.89-1.29-5.99-1.93-9.3-1.93s-6.41.64-9.3,1.93c-2.88,1.29-5.4,3.13-7.55,5.52-2.15,2.39-3.86,5.28-5.15,8.65-1.29,3.38-1.63,7.53-1.63,7.53-.17,1.99-.3,3.69-.3,3.79s.14,1.81.3,3.79c0,0,.35,4.15,1.63,7.53,1.29,3.38,3,6.26,5.15,8.65,2.15,2.39,4.66,4.23,7.55,5.52,2.88,1.29,5.98,1.93,9.3,1.93Z"/>
+            <path class="color-text" d="M418.71,38.11c0-1.99-1.63-3.62-3.62-3.62h-20.73c-1.99,0-3.62,1.63-3.62,3.62v88.75c0,1.99-.21,5.24-.46,7.22,0,0-.46,3.52-2.3,5.24-1.84,1.72-4.23,2.58-7.18,2.58-1.72,0-2.3-.08-2.3-.08-1.98-.26-3.59,1.15-3.59,3.15v14.66c0,1.99,1.61,3.89,3.57,4.22,0,0,.26.04,2.04.23,1.78.18,3.96.27,6.53.27,10.43,0,18.31-2.55,23.65-7.64,5.34-5.09,7.5-20.43,7.5-20.43.28-1.97.51-5.22.51-7.21V38.11Z"/>
+            <path class="color-text" d="M297.79,136.2c-6.99,0-14.14-1.2-21.44-3.59-7.3-2.39-17.86-9.33-17.86-9.33-1.67-1.09-2.14-3.36-1.05-5.03l8.01-12.33c1.09-1.67,3.35-2.16,5.03-1.09,0,0,7.71,4.93,13.05,6.88,5.34,1.96,10.34,2.95,15,2.95,4.05,0,7.02-.67,8.93-2.02,1.9-1.35,2.01-1.81,2.01-1.81.46-1.94.84-3.61.84-3.71s-.25-1.43-.55-2.95l-1.11-1.1c-1.1-1.1-2.61-2.05-4.51-2.85-1.9-.8-4.08-1.56-6.53-2.3-2.46-.74-5.03-1.53-7.73-2.39-3.44-.98-6.9-2.18-10.4-3.59-3.49-1.41-6.66-3.25-9.48-5.52-2.82-2.27-5.12-5.06-6.9-8.38-1.78-3.31-2.31-8.54-2.31-8.54-.2-1.98-.36-3.69-.36-3.79s.16-1.81.36-3.79c0,0,.59-5.87,2.49-9.74,1.9-3.86,4.48-7.15,7.73-9.85,3.25-2.7,7.05-4.72,11.41-6.07,4.35-1.35,9.05-2.02,14.08-2.02,6.26,0,12.61,1.01,19.05,3.04,6.44,2.02,14.6,6.6,14.6,6.6,1.74.98,2.37,3.2,1.41,4.94l-7.17,12.98c-.96,1.74-3.2,2.42-4.96,1.5,0,0-6.48-3.38-11.14-5.04-4.67-1.66-8.77-2.48-12.33-2.48s-6.01.64-7.73,1.93c-1.72,1.29-1.74,1.35-1.74,1.35-.46,1.94-.84,3.61-.84,3.71s.25,1.33.55,2.73l1.1,1.04c1.1,1.04,2.58,2.02,4.42,2.95,1.84.92,3.96,1.81,6.35,2.67,2.39.86,4.94,1.72,7.64,2.58,3.43,1.1,6.93,2.42,10.49,3.96,3.56,1.54,6.75,3.41,9.57,5.61,2.82,2.21,5.15,4.91,6.99,8.1,1.84,3.19,2.37,7.99,2.37,7.99.22,1.98.39,3.68.39,3.78s-.15,1.81-.33,3.79c0,0-.62,6.67-2.52,10.66-1.9,3.99-4.57,7.27-8.01,9.85-3.44,2.58-7.45,4.51-12.06,5.8-4.6,1.29-9.54,1.93-14.82,1.93Z"/>
+            <path class="color-text" d="M131.87,43.71c-3.38-8.04-8.1-15.03-14.17-20.98-6.07-5.95-13.28-10.68-21.63-14.17-8.35-3.5-17.48-5.25-27.42-5.25s-19.11,1.75-27.51,5.25c-8.41,3.5-15.64,8.28-21.72,14.36s-10.83,13.13-14.26,21.17C1.72,52.12,0,60.74,0,69.94v.37c0,9.2,1.69,17.83,5.06,25.86,3.37,8.04,8.1,15.03,14.17,20.98,6.07,5.95,13.28,10.67,21.63,14.17,8.34,3.5,17.49,5.24,27.42,5.24s19.11-1.75,27.52-5.24c8.4-3.5,15.64-8.28,21.72-14.36,6.07-6.07,10.83-13.13,14.26-21.16,3.43-8.04,5.15-16.66,5.15-25.86v-.37c0-9.2-1.69-17.82-5.06-25.86ZM109.3,70.31c0,5.75-1.01,11.22-2.99,16.28-1.98,5.05-4.77,9.56-8.3,13.41-3.56,3.88-7.9,6.95-12.92,9.13-5.01,2.19-10.54,3.29-16.44,3.29s-11.6-1.14-16.56-3.4c-4.93-2.24-9.29-5.33-12.95-9.18-3.66-3.86-6.53-8.42-8.51-13.54-1.98-5.11-2.99-10.61-2.99-16.37v-.37c0-5.75,1.01-11.23,2.99-16.28,1.98-5.05,4.78-9.57,8.3-13.41,3.54-3.86,7.85-6.93,12.81-9.13,4.96-2.19,10.52-3.3,16.54-3.3s11.43,1.14,16.46,3.39c5,2.25,9.4,5.34,13.06,9.19,3.66,3.85,6.52,8.41,8.51,13.54,1.98,5.12,2.99,10.63,2.99,16.37v.37Z"/>
+            <path class="color-text" d="M105.22,69.94c0-3-.32-5.93-.92-8.77h-17.73c-3.24,0-6.17,1.96-7.4,4.96l-.07.17-8.83-24.28c-1.09-3-3.87-5.07-7.06-5.25-3.21-.21-6.18,1.55-7.61,4.41l-10.01,20h-13c-.56,2.72-.86,5.54-.86,8.44v.33c0,2.47.21,4.88.62,7.23h18.18c3.03,0,5.8-1.71,7.15-4.42l3.9-7.8,9.54,26.23c1.13,3.1,4.05,5.2,7.35,5.26.05,0,.11,0,.17,0,3.24,0,6.16-1.96,7.4-4.96l5.88-14.32h12.73c.37-2.24.57-4.54.57-6.9v-.33Z"/>
+          </g>
+        </g>
+      </svg>
+    </a>
+  </li>
+
+  <li><a href=https://github.com/inuitcss/inuitcss><img src=https://res.cloudinary.com/csswizardry/image/fetch/f_auto,q_auto/https://csswizardry.com/img/content/logo-inuitcss.png alt=inuitcss width=500 height=238 loading=lazy></a></li>
+
+  <li><a href=https://gist.github.com/csswizardry/6dd60f7536835d9c42ff05efd1b75a98><img src=https://res.cloudinary.com/csswizardry/image/fetch/f_auto,q_auto/https://csswizardry.com/img/content/logo-lux-sidecar.png alt="LUX Sidecar" width=500 height=341 loading=lazy></a></li>
+
+  <li><a href=https://cssguidelin.es/><img src=https://res.cloudinary.com/csswizardry/image/fetch/f_auto,q_auto/https://csswizardry.com/img/content/logo-css-guidelines.png alt="CSS Guidelines" width=540 height=180 loading=lazy></a></li>
+
+  <li><a href=https://itcss.io/>ITCSS</a> – coming soon…</li>
+
+</ul>
+
+<h4>Next Appearance</h4>
+
+<ul class="list-ui  list-ui--small">
+
+  <li>
+  <h4 class="list-ui__title">Talk</h4>
+  <img src="/img/icons/nl.png" alt width="16" height="11" loading="lazy" /> <a href="https://fronteersconf.org/">Fronteers Dark Mode</a>: Dordrecht (Netherlands), October 2026
+</li>
+
+
+</ul>
+
+
+    </section>
+
+  </div>
+
+</div>
+
+<section class="band  band--dark" id="section:learn">
+
+  <div class=wrapper>
+
+    <h4 class=band__title>Learn:</h4>
+
+    <ul class="o-list-inline  o-list-inline--spaced  text-banner  mb0">
+      <li><a href="/2019/03/cache-control-for-civilians/">Understand <code>Cache-Control</code></a>
+      <li><a href="/2023/07/core-web-vitals-for-search-engine-optimisation/">Core Web Vitals and SEO</a>
+      <li><a href="/inp-simulator/">INP Simulator</a>
+      <li><a href="/2026/06/front-ends-missing-metric-the-tbt-window/">Diagnose TBT with the TBT Window</a>
+      <li><a href="/2018/11/css-and-network-performance/">CSS Performance</a>
+      <li><a href="/2023/07/in-defence-of-domcontentloaded/">Does <code>DOMContentLoaded</code> Still Matter?</a>
+      <li><a href="/2024/12/a-layered-approach-to-speculation-rules/">Push Speculation Rules to the Max</a>
+      <li><a href="/2021/02/measuring-network-performance-in-mobile-safari/">Improve Web Performance on iOS</a>
+      <li><a href="/2026/04/what-is-css-containment-and-how-can-i-use-it/">Master CSS Containment</a>
+      <li><a href="/2026/05/better-browser-caching-with-no-vary-search/">Increase Cache Hits with <code>No-Vary-Search</code></a>
+      <li><a href="/max-age/"><code>max-age</code> calculator</a>
+      <li><a href="/workshops/core-web-vitals-on-ios/">Core Web Vitals on iOS</a>
+      <li><a href="/2024/09/optimising-for-high-latency-environments/">Design for High Latency</a>
+      <li><a href="/2022/03/optimising-largest-contentful-paint/">Optimise Largest Contentful Paint</a>
+      <li><a href="/2020/05/the-fastest-google-fonts/">Speed Up Google Fonts</a>
+      <li><a href="/2023/10/the-three-c-concatenate-compress-cache/">Can We Drop Our Build Tools Yet?</a>
+      <li><a href="/2023/09/the-ultimate-lqip-lcp-technique/">Get the Fastest Possible LCP</a>
+      <li><a href="/2019/08/time-to-first-byte-what-it-is-and-why-it-matters/">Diagnose Time to First Byte</a>
+      <li><a href="/2023/10/what-is-the-maximum-max-age/">What Is the Maximum <code>max-age</code> Value?</a>
+    </ul>
+
+  </div>
+
+</section>
+
+<section class="band  band--highlight">
+
+  <div class=wrapper>
+
+    <!-- Begin MailChimp Signup Form -->
+<div id=mc_embed_signup class=c-newsletter>
+  <form action=https://csswizardry.us14.list-manage.com/subscribe/post?u=95f3f41085f5f957a07ba5efd&amp;id=ba05b5418d method=post id=mc-embedded-subscribe-form name=mc-embedded-subscribe-form class=validate>
+    <div id=mc_embed_signup_scroll>
+
+      <h5 class=c-newsletter__title>Newsletter</h5>
+      <p class=c-newsletter__text style="text-wrap: balance">My secret blog: occasional notes on consulting, web performance, and the industry. For those in the know. <a href=/newsletter/>Learn&nbsp;more…</a></p>
+
+      <div class=mc-field-group>
+        <label for=mce-EMAIL class=c-label>Email Address </label>
+        <input type=email autocomplete=email name=EMAIL class="c-input-text c-newsletter__email  required email" id=mce-EMAIL required placeholder=email@domain.com>
+        <input type=submit value=Join name=subscribe id=mc-embedded-subscribe class="button  btn  c-newsletter__submit">
+      </div>
+
+      <div id=mce-responses class=clear>
+        <div class=response id=mce-error-response style=display:none></div>
+        <div class=response id=mce-success-response style=display:none></div>
+      </div>    <!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
+
+      <div style="position: absolute; left: -5000px;" aria-hidden=true><input type=text name=b_95f3f41085f5f957a07ba5efd_ba05b5418d tabindex=-1 value></div>
+
+    </div>
+  </form>
+</div>
+<!--End mc_embed_signup-->
+
+
+  </div>
+
+</section>
+
+<style>
+/*!
+ * inuitcss, by @csswizardry
+ *
+ * github.com/inuitcss | inuitcss.com
+ */.page-foot{font-size:12px;font-size:.75rem;line-height:2;padding-bottom:0}@media screen and (min-width: 64em){.page-foot{padding-bottom:var(--spacing-unit)}}
+
+</style>
+
+<section class="[ band  band--tint ]  page-foot">
+
+    <div class=wrapper>
+
+        <div class="layout  layout--middle">
+            <div class="layout__item  lap-and-up-one-quarter">
+              <p>I help teams achieve <b>class-leading web performance</b>, providing consultancy, guidance, and hands-on expertise.</p>
+            </div
+           ><div class="layout__item  lap-and-up-one-quarter">
+              <p>I specialise in tackling complex, large-scale projects where speed, scalability, and reliability are <b>critical to success</b>.</p>
+            </div
+           ><div class="layout__item  lap-and-up-one-half">
+              <p><a href=/contact/ class="btn  btn--secondary btn--full" data-sctrack=cta-footer>Start a Conversation</a></p>
+            </div>
+        </div>
+
+    </div>
+
+</section>
+
+<style>
+/*!
+ * inuitcss, by @csswizardry
+ *
+ * github.com/inuitcss | inuitcss.com
+ */.page-micro{background-color:var(--color-page-micro-background);padding:var(--spacing-unit--small);text-align:center;content-visibility:auto;contain-intrinsic-size:1px 100px}.page-micro,.page-micro a{color:var(--color-page-micro)}.page-micro__copy{font-size:12px;font-size:.75rem;line-height:2;display:block}
+
+</style>
+
+<footer class=page-micro>
+
+  <p class=wrapper>
+    <small class=page-micro__copy><b>CSS Wizardry Ltd</b> is a company registered in England and Wales. <b>Company No.</b> 08698093, <b>VAT No.</b> 170659396. <a href="/license/">License Information</a>.</small>
+  </p>
+
+</footer>
+
+
+
+  <script>
+    performance.measure('contentTime', {
+      start: 'contentStart',
+      end: 'contentEnd',
+      detail: {
+        devtools: {
+          dataType: 'track-entry',
+          trackGroup: 'csswizardry.com',
+          track: 'Technical Timings',
+          tooltipText: 'Main Content Parsed',
+          color: 'secondary-light'
+        }
+      }
+    });
+  </script>
+
+  <style>
+
+    /**
+     * The site nav has been explicitly ‘turned off’ with `content-visibility:
+     * hidden;` in its component (S)CSS file. This means we don’t need to bother
+     * rendering it at all on the first pass: it’s off-screen anyway. Once we’re
+     * approaching `domInteractive` (that’s now), we turn it ‘back on’. This
+     * prioritises the painting of on-screen or above-the-fold content ahead of
+     * an off-screen nav drawer.
+     */
+
+    .site-nav__list {
+      content-visibility: visible;
+    }
+
+    /*# sourceURL=nav-visibility.inline.css */
+
+  </style>
+
+  <script type=speculationrules>
+    {
+      "prefetch": [
+        {
+          "where": {
+            "href_matches": "/*"
+          },
+          "eagerness": "immediate"
+        }
+      ],
+      "prerender": [
+        {
+          "where": {
+            "href_matches": "/*"
+          },
+          "eagerness": "moderate"
+        }
+      ]
+    }
+  </script>
+
+  <script src=/js/obs.speedcurve.js?v=0013 type=module></script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"d26eafeaf6c548aab578020cce0e5d1f","r":1,"spa":2}' crossorigin="anonymous"></script>

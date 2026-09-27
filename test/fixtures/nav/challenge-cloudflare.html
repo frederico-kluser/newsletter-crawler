@@ -1,0 +1,60 @@
+<!doctype html>
+<!--
+  Fixture SINTÉTICA (W0, 2026-09-26): interstitial anti-bot no estilo Cloudflare ("Just a moment..."),
+  servido com status 403/503 ou até 200. NÃO é artigo: o detector de bloqueio (isBlockedPage hoje,
+  pageAssess/noul "blocked" depois) tem de marcá-lo e o crawl NÃO pode salvá-lo como conteúdo.
+  Marcadores presentes: título "Just a moment...", "Checking if the site connection is secure",
+  "Enable JavaScript and cookies to continue", Ray ID, "Performance & security by Cloudflare",
+  widget cf-turnstile, form de desafio (cf-chl). Sem recurso externo (o script é relativo e não carrega).
+  Captura REAL equivalente: challenge-cloudflare-medium.html (medium.com, 403, 2026-09-26).
+-->
+<html lang="en-US">
+<head>
+  <title>Just a moment...</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{display:flex;flex-direction:column;height:100vh;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:#313131}
+    .main-content{margin:8rem auto;padding-left:1.5rem;max-width:60rem}
+    .h1{font-size:2.5rem;font-weight:500;line-height:3.75rem}
+    .h2{font-size:1.5rem;font-weight:500;line-height:2.25rem}
+    .footer{margin:0 auto;padding:1rem;font-size:.75rem;text-align:center}
+  </style>
+</head>
+<body>
+  <div class="main-wrapper" role="main">
+    <div class="main-content">
+      <h1 class="zone-name-title h1">www.example-news.test</h1>
+      <p id="Truv1" class="h2 spacer-bottom">Verifying you are human. This may take a few seconds.</p>
+      <div id="challenge-stage">
+        <div class="cf-turnstile" data-sitekey="0x4AAAAAAAsynthetic0000" data-action="managed"></div>
+      </div>
+      <p class="h2">Checking if the site connection is secure</p>
+      <div id="challenge-body-text" class="core-msg spacer">www.example-news.test needs to review the security of your connection before proceeding.</div>
+      <noscript>
+        <div class="h2"><span id="challenge-error-text">Enable JavaScript and cookies to continue</span></div>
+      </noscript>
+      <form id="challenge-form" action="/articles/some-story?__cf_chl_f_tk=synthetic-token-000" method="POST" enctype="application/x-www-form-urlencoded">
+        <input type="hidden" name="md" value="synthetic-md-value">
+      </form>
+    </div>
+  </div>
+  <script>
+    (function(){window._cf_chl_opt={cvId:'3',cZone:'www.example-news.test',cType:'managed',cRay:'8c1f0a0b1c2d3e4f',cH:'synthetic',cUPMDTk:'/articles/some-story?__cf_chl_tk=synthetic-000',cFPWv:'b',cITimeS:'1790000000'};
+    var cpo=document.createElement('script');cpo.src='/cdn-cgi/challenge-platform/h/b/orchestrate/chl_page/v1?ray=8c1f0a0b1c2d3e4f';
+    window._cf_chl_opt.cOgUHash=location.hash===''&&location.href.indexOf('#')!==-1?'#':location.hash;
+    document.getElementsByTagName('head')[0].appendChild(cpo);}());
+  </script>
+  <div class="footer" role="contentinfo">
+    <div class="footer-inner">
+      <div class="clearfix diagnostic-wrapper">
+        <div class="ray-id">Ray ID: <code>8c1f0a0b1c2d3e4f</code></div>
+      </div>
+      <div class="text-center" id="footer-text">Performance &amp; security by <a rel="noopener noreferrer" href="https://www.cloudflare.com?utm_source=challenge&amp;utm_campaign=m" target="_blank">Cloudflare</a></div>
+    </div>
+  </div>
+</body>
+</html>

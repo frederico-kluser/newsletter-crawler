@@ -1,3 +1,0 @@
-{
-  "content_must_include": ["STALENESS", "SECOND-OPINION", "skill-eval.mjs", "regression"]
-}

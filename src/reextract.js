@@ -275,35 +275,63 @@ async function reextractOne(row, { fs }) {
 }
 
 /**
- * Re-extrai os artigos com conteúdo do ALVO (content_source='target' — blurb-only não tem o
- * que re-extrair), opcionalmente filtrando por substring da URL. Respeita o orçamento
- * (shouldStop) e é retomável (as fichas puladas ficam intactas). Retorna contadores.
+ * Fichas que o reextract processaria: conteúdo do ALVO (content_source='target' — blurb-only não
+ * tem o que re-extrair), filtro por substring da URL e --limit, em ordem de id. Lista LEVE
+ * (id/url/run_id): o corpo só é lido na hora de processar cada ficha. Piso legado (decisão 8 da
+ * migração Jev): o acervo anterior ao piso (run_id NULL — ex.: os restaurados do git) só entra com
+ * includeLegacy — re-clean e re-verify são pagos. O portão do `--include-legacy` (commands.js)
+ * conta sobre ESTA função, então a contagem exibida é exatamente o que roda.
  */
-export async function reextractTargets({ urlFilter = null, limit = REEXTRACT_DEFAULT_LIMIT, fetchSmartImpl = null } = {}) {
-  const fs = fetchSmartImpl || fetchSmart;
+export function selectReextractTargets({ urlFilter = null, limit = REEXTRACT_DEFAULT_LIMIT, includeLegacy = false } = {}) {
   const filter = urlFilter ? String(urlFilter).toLowerCase() : null;
-  const rows = stmts
-    .listArticlesForReverify.all(-1)
-    .filter((r) => r.content_source === 'target')
+  return stmts.listReextractCandidates
+    .all({ lim: -1, includeLegacy })
     .filter((r) => !filter || (r.url || '').toLowerCase().includes(filter))
     .slice(0, Number.isFinite(limit) ? limit : undefined);
-  if (!rows.length) {
-    log(`reextract: nada a re-extrair${filter ? ` (filtro "${urlFilter}")` : ''}.`);
+}
+
+/**
+ * Re-extrai os artigos com conteúdo do ALVO, opcionalmente filtrando por substring da URL (ver
+ * selectReextractTargets — inclusive o piso legado). Respeita o orçamento (shouldStop) e é
+ * retomável (as fichas puladas ficam intactas). Retorna contadores.
+ */
+export async function reextractTargets({
+  urlFilter = null, limit = REEXTRACT_DEFAULT_LIMIT, includeLegacy = false, fetchSmartImpl = null,
+} = {}) {
+  const fs = fetchSmartImpl || fetchSmart;
+  const filter = urlFilter ? String(urlFilter).toLowerCase() : null;
+  const targets = selectReextractTargets({ urlFilter, limit, includeLegacy });
+  if (!targets.length) {
+    // Sem nada DESTA era, mas o filtro casaria fichas do legado: diz como incluí-las (senão o
+    // "nada a re-extrair" parece bug num acervo 100% restaurado). Sem --yes na dica: o portão do
+    // --include-legacy mostra contagem × custo e só então pede a confirmação.
+    const legacy = includeLegacy ? 0 : selectReextractTargets({ urlFilter, limit, includeLegacy: true }).length;
+    log(
+      `reextract: nada a re-extrair${filter ? ` (filtro "${urlFilter}")` : ''}` +
+        `${legacy ? ` — ${legacy} ficha(s) do acervo LEGADO casam; incluir: --include-legacy (mostra contagem × custo antes do --yes)` : ''}.`,
+    );
     return { reextracted: 0, skipped: 0, byVerdict: {} };
   }
   log(
-    `reextract: ${rows.length} artigo(s) — re-fetch + re-parse + re-clean + re-verify` +
-      `${HAS_LLM ? '' : ' (sem chave LLM: sem clean/verify — só a re-extração determinística)'}.`,
+    `reextract: ${targets.length} artigo(s) — re-fetch + re-parse + re-clean + re-verify` +
+      `${HAS_LLM ? '' : ' (sem chave LLM: sem clean/verify — só a re-extração determinística)'}` +
+      `${includeLegacy ? ' (+legado)' : ''}.`,
   );
   const gate = pLimit(REEXTRACT_CONCURRENCY);
   let reextracted = 0;
   let skipped = 0;
   const byVerdict = {};
   await Promise.all(
-    rows.map((row) =>
+    targets.map((t) =>
       gate(async () => {
         if (shouldStop()) {
           skipped++; // orçamento: a ficha fica intacta (retomável com `ncrawl reextract`)
+          return;
+        }
+        // Corpo lido só agora (a lista é leve): com --all o acervo não fica inteiro na memória.
+        const row = stmts.getArticleForReextract.get(t.id);
+        if (!row) {
+          skipped++; // sumiu entre a seleção e o processamento (remove/purge concorrente)
           return;
         }
         try {

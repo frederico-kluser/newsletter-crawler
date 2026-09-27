@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Issue #638: Node 26.8 reads and writes ZIP files — Node Weekly</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Node Weekly Issue #638: Node 26.8 reads and writes ZIP files">
+  <meta property="og:title" content="Node 26.8 reads and writes ZIP files">
+  <meta property="og:description" content="Node Weekly — Issue #638">
+  <meta property="og:type" content="article">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Node 26.8 reads and writes ZIP files">
+  <meta name="twitter:description" content="Node Weekly — Issue #638">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    .issue-bar {
+      background: #6ca629;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      font-size: 14px;
+    }
+    .issue-bar a {
+      color: #fff;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .issue-bar a:hover { text-decoration: underline; }
+    .issue-bar .bar-title { font-weight: 600; font-size: 15px; }
+    .issue-bar .bar-links { display: flex; gap: 16px; align-items: center; }
+    .issue-bar .bar-subscribe {
+      background: rgba(255,255,255,0.2);
+      padding: 4px 12px;
+      border-radius: 4px;
+    }
+    .issue-bar .bar-subscribe:hover {
+      background: rgba(255,255,255,0.35);
+      text-decoration: none;
+    }
+
+    .issue-nav {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 0;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.18), 0 0 0 2px #6ca629;
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      font-size: 14px;
+      z-index: 9999;
+      overflow: hidden;
+    }
+    .issue-nav a, .issue-nav span {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 18px;
+      color: #333;
+      text-decoration: none;
+      font-weight: 500;
+      white-space: nowrap;
+      transition: background 0.12s;
+    }
+    .issue-nav a:hover {
+      background: #f0f0f0;
+      text-decoration: none;
+    }
+.issue-nav .issue-ref {
+      padding: 10px 16px;
+      color: #888;
+      font-weight: 600;
+      border-left: 1px solid #eee;
+      border-right: 1px solid #eee;
+    }
+    .issue-nav svg {
+      width: 14px;
+      height: 14px;
+      fill: currentColor;
+    }
+  </style>
+</head>
+<body style="margin:0">
+<div class="issue-bar">
+  <a href="/" class="bar-title">Node Weekly</a>
+  <div class="bar-links">
+    <a href="/latest">Latest Issue</a>
+    <a href="/issues">All Issues</a>
+    <a href="/" class="bar-subscribe">Subscribe</a>
+  </div>
+</div>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+<meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    
+  <style>body {
+margin: 0; padding: 0; width: 100%; background-color: white; text-size-adjust: 100%;
+}
+body {
+font-family: system-ui, -apple-system, sans-serif;
+}
+body {
+font-size: 15px; line-height: 1.48em;
+}
+img {
+border: 0; outline: none; height: auto; text-decoration: none; max-width: 100%; line-height: 100%;
+}
+@media screen and (max-width: 600px) {
+  table[id="main"] {
+    max-width: 600px !important; width: 100% !important; min-width: 100% !important;
+  }
+  .nomob {
+    display: none !important;
+  }
+  .onlymob {
+    display: inline-block !important;
+  }
+  .rightifmob {
+    text-align: right !important;
+  }
+  .som {
+    max-width: 33% !important;
+  }
+  div.footer p {
+    text-align: left !important;
+  }
+  div.footer td {
+    text-align: left !important;
+  }
+  .el-columns .column {
+    width: 100% !important;
+  }
+}
+</style>
+</head>
+<body style="width: 100%; background-color: white; text-size-adjust: 100%; font-family: system-ui, -apple-system, sans-serif; font-size: 15px; line-height: 1.48em; margin: 0; padding: 0;">
+<div id="preview" class="preheader noarchive" style="color: white; font-family: helvetica, arial; line-height: 0px; height: 0px; overflow-y: hidden; margin: 0; padding: 0; border-width: 0px;">Plus Node gets an AI contribution policy, the latest annual Node.js survey, and a plan to make fs.glob faster with C++. </div>
+<!--[if (gte mso 9)|(IE)]>
+<table cellpadding="0" cellspacing="0" align="center" bgcolor="#ffffff" width="600"><tr><td valign="top" style="width: 600px;" bgcolor="#ffffff"><![endif]-->
+<table align="center" border="0" cellpadding="0" cellspacing="0" id="main" width="100%" style="table-layout: fixed; border-collapse: collapse; max-width: 600px; height: 100% !important; direction: ltr; padding: 0px;">
+  <tr><td style="font-size: 15px; line-height: 1.48em;">
+  <div id="content">    <!-- left/right splitbar -->
+    <table class="el-splitbar" width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse;"><tr>
+<td width="50%" align="left" style="padding-left: 4px; font-size: 15px; line-height: 1.48em;"><p style="font-size: 12px; color: #999999; text-transform: uppercase; line-height: 1.0em; margin-top: 0.8em; margin-bottom: 0.8em;">#​638 — August 27, 2026</p></td>
+<td width="50%" align="right" style="padding-right: 4px; font-size: 15px; line-height: 1.48em;"><p style="font-size: 12px; text-transform: uppercase; line-height: 1.0em; margin-top: 0.8em; margin-bottom: 0.8em;"><a href="https://nodeweekly.com/issues/638" style="text-decoration: none; color: #20824B;">Read on the Web</a></p></td>
+</tr></table>
+<!-- normal content section -->
+<table width="100%" cellpadding="0" cellspacing="0" class="content el-content top" style="color: #222; border-collapse: collapse;"><tr><td style="font-size: 15px; line-height: 1.48em; padding: 0px 15px;"><p style="margin-top: 0.8em; margin-bottom: 0.8em; line-height: 1.4em; font-size: 0.9em;">🗓️ We're back! If you missed us last week, we took a brief summer vacation :-)<br>__<br><em>Your editor, Peter Cooper</em></p></td></tr></table>
+<table class="norss" id="together" width="100%" align="center" style="text-align: center; border-collapse: collapse; margin: 0;">
+  <tr><td style="font-size: 15px; line-height: 1.48em; margin: 0; padding: 0;">
+    <table align="center" style="margin-top: 4px; margin-bottom: 4px; border-collapse: collapse;">
+      <tr>
+<td style="vertical-align: middle; text-align: right; text-transform: uppercase; letter-spacing: -0.2px; font-weight: 500; color: #222; font-size: 0.9em; line-height: 1.48em;">Together with </td>
+        <td style="vertical-align: middle; text-align: left; font-size: 15px; line-height: 1.48em;">
+          <a href="https://agentfield.ai/github/pr-af/?utm_source=node&amp;utm_medium=newsletter&amp;utm_campaign=node-260827&amp;utm_id=node-260827-pr-af&amp;utm_content=pr-af" style="outline: none; text-decoration: none; color: #20824B; border-width: 0;">
+          <img src="https://res.cloudinary.com/cpress/image/upload/c_fill,g_auto,e_trim,w_1280,h_229/e_make_transparent/co_white,e_outline:10/kfuqkwkso6tqxqr2r1jz.png" style="max-width: 130px; outline: none; height: auto; text-decoration: none; line-height: 100%; border-width: 0;" width="130" alt="agentfield.ai">
+          </a>
+        </td>
+      </tr>
+    </table>
+  </td></tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse;"><tr><td style="height: 8px; font-size: 15px; line-height: 1.48em;"></td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" bgcolor="#6ca629" border="0" style="border-collapse: collapse;"><tr style="max-height: 90px;" width="100%"><td style="width: 100%; font-size: 15px; line-height: 1.48em; margin: 0; padding: 0;"><img src="https://res.cloudinary.com/cpress/image/upload/v1653576619/lgfqinzbdqttwmhvljxb.png" alt="Node.js Weekly" width="100%" style="max-width: 100%; outline: none; height: auto; text-decoration: none; line-height: 100%; border-width: 0;"></td></tr></table>
+<table width="100%" class="el-fullwidthimage " cellpadding="0" cellspacing="0" style="border-collapse: collapse;"><tr><td style="font-size: 15px; line-height: 1.48em;">
+  <a href="https://nodejs.org/en/blog/events/nodejs-interactive-2026" style="text-decoration: none; color: #20824B;"><img src="https://res.cloudinary.com/cpress/image/upload/w_1280,e_sharpen:60,q_auto/jndmfwg6izjwgqc7sfs9.jpg" alt="" width="640" style="outline: none; height: auto; text-decoration: none; max-width: 100%; line-height: 100%; width: 100%; border-bottom-color: #6ca629; border-bottom-style: solid; border-width: 0 0 3px;"></a>
+</td></tr></table>
+
+<table width="100%" cellpadding="0" cellspacing="0" class="el-item item  " style="border-collapse: collapse; margin-bottom: 4px;"><tr><td style="font-size: 15px; line-height: 1.48em; padding: 0px 15px;">
+  
+  <p class="desc" style="color: #222; margin-top: 0.8em; margin-bottom: 0; line-height: 1.6em !important; font-size: 15px !important;"><span style="font-weight: 500 !important; font-size: 18px !important; color: #000;" class="mainlink"><a href="https://nodejs.org/en/blog/events/nodejs-interactive-2026" title="nodejs.org" style="text-decoration: none; color: #20824B; border-bottom-width: 1px !important; border-bottom-color: #ddd !important; border-bottom-style: solid !important;">A Recap of Node.js Interactive 2026</a></span> — <em>Node.js Interactive</em> returned for the first time since 2019 as part of this month's <em>RenderATL</em> event with Node contributors and invited speakers tackling Node's near-term roadmap in areas like AI, supply chain security, WinterCG becoming Ecma TC55, work on QUIC and HTTP/3 support, and Node's move to one major release a year.</p>
+  <p class="name" style="color: #aaa !important; margin-top: 4px; margin-bottom: 0.8em; text-transform: uppercase; font-size: 12px; line-height: 1.2em;">Aviv Keller </p>
+</td></tr></table>
+
+<table width="100%" cellpadding="0" cellspacing="0" class="el-item item  " style="border-collapse: collapse; margin-bottom: 4px;"><tr><td style="font-size: 15px; line-height: 1.48em; padding: 0px 15px;">
+  <a target="_blank" href="https://agentfield.ai/github/pr-af/?utm_source=node&amp;utm_medium=newsletter&amp;utm_campaign=node-260827&amp;utm_id=node-260827-pr-af&amp;utm_content=pr-af" style="text-decoration: none; color: #20824B; border-bottom-width: 1px !important; border-bottom-color: #ddd !important; border-bottom-style: solid !important;"><img src="https://res.cloudinary.com/cpress/image/upload/c_limit,w_480,h_480,q_auto/copm/4509c04e.png" width="130" height="130" style="padding-top: 12px; padding-left: 12px; outline: none; height: auto; text-decoration: none; max-width: 100%; line-height: 100%; border-width: 0;" align="right" alt="" class="som"></a>
+  <p class="desc" style="color: #222; margin-top: 0.8em; margin-bottom: 0; line-height: 1.6em !important; font-size: 15px !important;"><span style="font-weight: 500 !important; font-size: 18px !important; color: #000;" class="mainlink"><a href="https://agentfield.ai/github/pr-af/?utm_source=node&amp;utm_medium=newsletter&amp;utm_campaign=node-260827&amp;utm_id=node-260827-pr-af&amp;utm_content=pr-af" title="agentfield.ai" style="text-decoration: none; color: #20824B; border-bottom-width: 1px !important; border-bottom-color: #ddd !important; border-bottom-style: solid !important;">Open Source Just Out-Reviewed the Commercial Tools</a></span> — PR-AF places #2 of 42 on Martian's Code-Review-Bench, ahead of CodeRabbit, Copilot, and Devin, at ~10x lower cost per review. It plans the review per PR, runs reviewer agents in parallel, and verifies every finding against your source. Self-hosted.</p>
+  <p class="name" style="color: #aaa !important; margin-top: 4px; margin-bottom: 0.8em; text-transform: uppercase; font-size: 12px; line-height: 1.2em;">AgentField.ai <span style="text-transform: uppercase; margin-left: 4px; font-size: 0.9em; border-radius: 2px; background-color: #ff8; color: #997 !important; padding: 1px 4px; border: 1px solid #eeb;" class="tag-sponsor">sponsor</span></p>
+</td></tr></table>
+
+<table width="100%" cellpadding="0" cellspacing="0" class="el-item item  " style="border-collapse: collapse; margin-bottom: 4px;"><tr><td style="font-size: 15px; line-height: 1.48em; padding: 0px 15px;">
+  
+  <p class="desc" style="color: #222; margin-top: 0.8em; margin-bottom: 0; line-height: 1.6em !important; font-size: 15px !important;"><span style="font-weight: 500 !important; font-size: 18px !important; color: #000;" class="mainlink"><a href="https://nodejs.org/en/blog/release/v26.8.0" title="nodejs.org" style="text-decoration: none; color: #20824B; border-bottom-width: 1px !important; border-bottom-color: #ddd !important; border-bottom-style: solid !important;">Node.js 26.8.0 (Current) Released</a></span> — Among a variety of additions, Node can <a href="https://nodejs.org/api/zlib.html#class-zlibzipbuffer" style="text-decoration: none; color: #20824B; border-bottom-width: 1px !important; border-bottom-color: #ddd !important; border-bottom-style: solid !important;">read and write ZIP archives</a> without a third-party dependency. Plus <strong style="font-weight: 600;">Node's REPL now has <a href="https://github.com/nodejs/node/pull/64591" style="text-decoration: none; color: #20824B; border-bottom-width: 1px !important; border-bottom-color: #ddd !important; border-bottom-style: solid !important;">basic syntax highlighting</a> support.</strong> <a href="https://nodejs.org/en/blog/release/v26.8.1" style="text-decoration: none; color: #20824B; border-bottom-width: 1px !important; border-bottom-color: #ddd !important; border-bottom-style: solid !important;">v26.8.1</a> landed hours later to fix a broken version string.</p>
+  <p class="name" style="color: #aaa !important; margin-top: 4px; margin-bottom: 0.8em; text-transform: uppercase; font-size: 12px; line-height: 1.2em;">Antoine du Hamel </p>
+</td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" class="content el-content blue" style="color: #222; border-collapse: collapse;"><tr><td style="font-size: 15px; line-height: 1.48em; padding: 0px 15px;"><p style="margin-top: 0; margin-bottom: 0.8em; background-color: #eff6ff; line-height: 1.4em; font-size: 0.9em; padding: 8px;">💡 <a href="https://nodejs.org/en/blog/release/v24.20.0" style="text-decoration: none; color: #20824B; font-weight: 600;">Node 24.20.0 (LTS)</a> also landed with several backported features including package maps, permission auditing, <code>node:stream/iter</code>, and <a href="https://v8.dev/blog/jspi" style="text-decoration: none; color: #20824B; font-weight: 600;">WebAssembly JSPI</a>.</p></td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" class="content el-md " style="border-collapse: collapse;"><tr><td style="font-size: 15px; line-height: 1.48em; padding: 0px 15px;">
+<p style="margin-top: 0.6em; margin-bottom: 0.8em;"><strong style="font-weight: 600;">IN BRIEF:</strong></p>
+<ul style="margin-left: 0; padding-left: 18px; list-style-type: circle;">
+<li style="color: #222; margin-bottom: 12px; line-height: 1.35em; margin-left: 0px !important;">
+<p style="margin-top: 0.6em; margin-bottom: 0.8em;">🤚 The <a href="https://linuxfoundation.surveymonkey.com/r/nodejs-users-2026" style="text-decoration: none; color: #20824B; font-weight: 500 !important; border-bottom-width: 1px; border-bottom-color: #ddd; border-bottom-style: solid;">latest annual Node.js user survey</a> has just launched. As always, your responses help shape the future priorities of the Node.js team.</p>
+</li>
+<li style="color: #222; margin-bottom: 12px; line-height: 1.35em; margin-left: 0px !important;">
+<p style="margin-top: 0.6em; margin-bottom: 0.8em;">💡 Aviv Keller has proposed <a href="https://github.com/nodejs/node/pull/65392" style="text-decoration: none; color: #20824B; font-weight: 500 !important; border-bottom-width: 1px; border-bottom-color: #ddd; border-bottom-style: solid;">reimplementing <code style='font-family: menlo, monaco, "Ubuntu Mono", courier, monospace; font-weight: normal; background-color: inherit;'>fs.glob</code> natively in C++</a>, calling straight into libuv and benching at over twice the speed of the current version. Not landed yet, but there are some <em>big</em> names on this thread.</p>
+</li>
+<li style="color: #222; margin-bottom: 12px; line-height: 1.35em; margin-left: 0px !important;">
+<p style="margin-top: 0.6em; margin-bottom: 0.8em;">James Snell is <a href="https://github.com/nodejs/node/issues/65314" style="text-decoration: none; color: #20824B; font-weight: 500 !important; border-bottom-width: 1px; border-bottom-color: #ddd; border-bottom-style: solid;">seeking early feedback</a> on a proposed Fetch Server API, part of Node's unified HTTP API initiative, offering one handler model for HTTP/1.1, 2 and 3.</p>
+</li>
+<li style="color: #222; margin-bottom: 12px; line-height: 1.35em; margin-left: 0px !important;">
+<p style="margin-top: 0.6em; margin-bottom: 0.8em;"><a href="https://termdom.org/" style="text-decoration: none; color: #20824B; font-weight: 500 !important; border-bottom-width: 1px; border-bottom-color: #ddd; border-bottom-style: solid;">TermDOM</a>, featured in our <a href="https://nodeweekly.com/issues/637" style="text-decoration: none; color: #20824B; font-weight: 500 !important; border-bottom-width: 1px; border-bottom-color: #ddd; border-bottom-style: solid;">last issue</a>, lets you build TUI apps with HTML and CSS in Node, and <a href="https://github.com/bikeshaving/termdom/releases/tag/v0.1.5" style="text-decoration: none; color: #20824B; font-weight: 500 !important; border-bottom-width: 1px; border-bottom-color: #ddd; border-bottom-style: solid;">now</a> supports CSS Grid for layout.</p>
+</li>
+<li style="color: #222; margin-bottom: 12px; line-height: 1.35em; margin-left: 0px !important;">
+<p style="margin-top: 0.6em; margin-bottom: 0.8em;">AWS Lambda has introduced <a href="https://aws.amazon.com/blogs/compute/introducing-public-preview-runtimes-on-aws-lambda-starting-with-node-js-26-and-python-3-15/" style="text-decoration: none; color: #20824B; font-weight: 500 !important; border-bottom-width: 1px; border-bottom-color: #ddd; border-bottom-style: solid;">a new Node.js 26 runtime in preview</a>.</p>
+</li>
+</ul>
+</td></tr></table>
+
+<table width="100%" cellpadding="0" cellspacing="0" class="el-item item  " style="border-collapse: collapse; margin-bottom: 4px;"><tr><td style="font-size: 15px; line-height: 1.48em; padding: 0px 15px;">
+  
+  <p class="desc" style="color: #222; margin-top: 0.8em; margin-bottom: 0; line-height: 1.6em !important; font-size: 15px !important;"><span style="font-weight: 500 !important; font-size: 18px !important; color: #000;" class="mainlink"><span class="pretitle">🤖</span> <a href="https://github.com/nodejs/node/blob/main/doc/contributing/ai-guidelines.md" title="github.com" style="text-decoration: none; color: #20824B; border-bottom-width: 1px !important; border-bottom-color: #ddd !important; border-bottom-style: solid !important;">Node's Official AI Use Policy and Guidelines</a></span> — Merged into Node's contributing docs after months of debate, PRs with AI code you haven't understood or tested can be closed unreviewed, bot-opened PRs need pre-approval, and more to be aware of. Plus, don't use AI to claim <em>"good first issue"</em> tasks!</p>
+  <p class="name" style="color: #aaa !important; margin-top: 4px; margin-bottom: 0.8em; text-transform: uppercase; font-size: 12px; line-height: 1.2em;">Node.js Project </p>
+</td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" class="content el-md " style="border-collapse: collapse;"><tr><td style="font-size: 15px; line-height: 1.48em; padding: 0px 15px;">
+<p style="margin-top: 0.6em; margin-bottom: 0.8em;">📄 <a href="https://blog.platformatic.dev/query-pipelining-in-node-postgres-2-3x-throughput-with-one-line-of-code" style="text-decoration: none; color: #20824B; font-weight: 500 !important;">Query Pipelining in node-postgres: 2-3x More Throughput</a> – More throughput and lower latency from one config change is always worth looking into. <cite style="color: #444; text-transform: uppercase; font-size: 0.8em; font-style: normal; white-space: nowrap; line-height: 1.4em;">Matteo Collina</cite></p>
+<p style="margin-top: 0.8em; margin-bottom: 0.8em;">📄 <a href="https://blog.gaborkoos.com/posts/2026-08-14-Your-Modules-Are-Lying-to-You/" style="text-decoration: none; color: #20824B; font-weight: 500 !important;">ESM vs CommonJS: What <code style='font-family: menlo, monaco, "Ubuntu Mono", courier, monospace; font-weight: normal; background-color: inherit;'>import</code> and <code style='font-family: menlo, monaco, "Ubuntu Mono", courier, monospace; font-weight: normal; background-color: inherit;'>require</code> Actually Do</a>  <cite style="color: #444; text-transform: uppercase; font-size: 0.8em; font-style: normal; white-space: nowrap; line-height: 1.4em;">Gabor Koos</cite></p>
+</td></tr></table>
+<!-- normal content section -->
+<table width="100%" cellpadding="0" cellspacing="0" class="content el-content " style="color: #222; border-collapse: collapse;"><tr><td style="font-size: 15px; line-height: 1.48em; padding: 0px 15px;"><p style="color: #46483d; font-size: 1.4em; margin-top: 14px; font-weight: 600; border-bottom-width: 4px; border-bottom-color: #eeeeee; border-bottom-style: solid; line-height: 1.4em; display: inline-block; margin-bottom: 10px;">🛠 Code &amp; Tools</p></td></tr></table>
+
+<table width="100%" cellpadding="0" cellspacing="0" class="el-item item  " style="border-collapse: collapse; margin-bottom: 4px;"><tr><td style="font-size: 15px; line-height: 1.48em; padding: 0px 15px;">
+  
+  <p class="desc" style="color: #222; margin-top: 0.8em; margin-bottom: 0; line-height: 1.6em !important; font-size: 15px !important;"><span style="font-weight: 500 !important; font-size: 18px !important; color: #000;" class="mainlink"><a href="https://pnpm.io/blog/releases/12.0" title="pnpm.io" style="text-decoration: none; color: #20824B; border-bottom-width: 1px !important; border-bottom-color: #ddd !important; border-bottom-style: solid !important;">pnpm 12: Rewritten in Rust, Same Commands and Lockfile</a></span> — The Rust rewrite is stable, but all of v11's commands, flags and lockfile format carry over with only a <a href="https://pnpm.io/blog/whats-different-in-pnpm-12" style="text-decoration: none; color: #20824B; border-bottom-width: 1px !important; border-bottom-color: #ddd !important; border-bottom-style: solid !important;">handful of changes</a>. A global <code style="background-color: #f4ffdd !important;">node</code> now follows the version your project pins, too. Note that npm's <code style="background-color: #f4ffdd !important;">latest</code> tag still points to pnpm 11, so you'll need <code style="background-color: #f4ffdd !important;">pnpm self-update next-12</code> to upgrade.</p>
+  <p class="name" style="color: #aaa !important; margin-top: 4px; margin-bottom: 0.8em; text-transform: uppercase; font-size: 12px; line-height: 1.2em;">Zoltan Kochan </p>
+</td></tr></table>
+
+<table width="100%" cellpadding="0" cellspacing="0" class="el-item item  " style="border-collapse: collapse; margin-bottom: 4px;"><tr><td style="font-size: 15px; line-height: 1.48em; padding: 0px 15px;">
+  
+  <p class="desc" style="color: #222; margin-top: 0.8em; margin-bottom: 0; line-height: 1.6em !important; font-size: 15px !important;"><span style="font-weight: 500 !important; font-size: 18px !important; color: #000;" class="mainlink"><a href="https://better-auth.com/blog/1-7" title="better-auth.com" style="text-decoration: none; color: #20824B; border-bottom-width: 1px !important; border-bottom-color: #ddd !important; border-bottom-style: solid !important;">Better Auth 1.7 Ships a Standards-Based OAuth Server</a></span> — A big OAuth provider release with DPoP, per-API token rules and device code flow, plus MCP auth in its own package. Breaking changes make the upgrade guide required reading.</p>
+  <p class="name" style="color: #aaa !important; margin-top: 4px; margin-bottom: 0.8em; text-transform: uppercase; font-size: 12px; line-height: 1.2em;">Gustavo Valverde </p>
+</td></tr></table>
+
+<table width="100%" cellpadding="0" cellspacing="0" class="el-item item  " style="border-collapse: collapse; margin-bottom: 4px;"><tr><td style="font-size: 15px; line-height: 1.48em; padding: 0px 15px;">
+  
+  <p class="desc" style="color: #222; margin-top: 0.8em; margin-bottom: 0; line-height: 1.6em !important; font-size: 15px !important;"><span style="font-weight: 500 !important; font-size: 18px !important; color: #000;" class="mainlink"><a href="https://xyops.io" title="" style="text-decoration: none; color: #20824B; border-bottom-width: 1px !important; border-bottom-color: #ddd !important; border-bottom-style: solid !important;">Outgrowing Cron? Meet xyOps for Self-Hosted Ops Automation</a></span> — Schedule jobs, run Node scripts, monitor servers, and automate response. Open source, from the Cronicle team.</p>
+  <p class="name" style="color: #aaa !important; margin-top: 4px; margin-bottom: 0.8em; text-transform: uppercase; font-size: 12px; line-height: 1.2em;">xyOps <span style="text-transform: uppercase; margin-left: 4px; font-size: 0.9em; border-radius: 2px; background-color: #ff8; color: #997 !important; padding: 1px 4px; border: 1px solid #eeb;" class="tag-sponsor">sponsor</span></p>
+</td></tr></table>
+
+<table width="100%" cellpadding="0" cellspacing="0" class="el-item item  " style="border-collapse: collapse; margin-bottom: 4px;"><tr><td style="font-size: 15px; line-height: 1.48em; padding: 0px 15px;">
+  
+  <p class="desc" style="color: #222; margin-top: 0.8em; margin-bottom: 0; line-height: 1.6em !important; font-size: 15px !important;"><span style="font-weight: 500 !important; font-size: 18px !important; color: #000;" class="mainlink"><a href="https://gtkx.dev/" title="gtkx.dev" style="text-decoration: none; color: #20824B; border-bottom-width: 1px !important; border-bottom-color: #ddd !important; border-bottom-style: solid !important;">GTKX: Build Linux Desktop Apps with Node, GTK and React</a></span> — Build Linux desktop apps with real GTK4 and Adwaita widgets with no webview involved. Write JSX and get real widgets in an ordinary Node process with npm package and Fast Refresh support.</p>
+  <p class="name" style="color: #aaa !important; margin-top: 4px; margin-bottom: 0.8em; text-transform: uppercase; font-size: 12px; line-height: 1.2em;">Eugenio Depalo </p>
+</td></tr></table>
+
+<table width="100%" cellpadding="0" cellspacing="0" class="el-item item  " style="border-collapse: collapse; margin-bottom: 4px;"><tr><td style="font-size: 15px; line-height: 1.48em; padding: 0px 15px;">
+  
+  <p class="desc" style="color: #222; margin-top: 0.8em; margin-bottom: 0; line-height: 1.6em !important; font-size: 15px !important;"><span style="font-weight: 500 !important; font-size: 18px !important; color: #000;" class="mainlink"><a href="https://stryker-mutator.io/" title="stryker-mutator.io" style="text-decoration: none; color: #20824B; border-bottom-width: 1px !important; border-bottom-color: #ddd !important; border-bottom-style: solid !important;">Stryker Mutator 10.0: Test Your Tests with Mutation Testing</a></span> — Stryker deliberately <a href="https://stryker-mutator.io/docs/mutation-testing-elements/supported-mutators/" style="text-decoration: none; color: #20824B; border-bottom-width: 1px !important; border-bottom-color: #ddd !important; border-bottom-style: solid !important;">changes</a> your code to see if your test suite catches the mutations. If not, your tests are too lax and need work. Here's <a href="https://stryker-mutator.io/docs/stryker-js/getting-started/" style="text-decoration: none; color: #20824B; border-bottom-width: 1px !important; border-bottom-color: #ddd !important; border-bottom-style: solid !important;">how to get started</a>.</p>
+  <p class="name" style="color: #aaa !important; margin-top: 4px; margin-bottom: 0.8em; text-transform: uppercase; font-size: 12px; line-height: 1.2em;">Jansen, de Lang, et al. </p>
+</td></tr></table>
+
+<table width="100%" cellpadding="0" cellspacing="0" class="el-item item  " style="border-collapse: collapse; margin-bottom: 4px;"><tr><td style="font-size: 15px; line-height: 1.48em; padding: 0px 15px;">
+  
+  <p class="desc" style="color: #222; margin-top: 0.8em; margin-bottom: 0; line-height: 1.6em !important; font-size: 15px !important;"><span style="font-weight: 500 !important; font-size: 18px !important; color: #000;" class="mainlink"><a href="https://svgo.dev/" title="svgo.dev" style="text-decoration: none; color: #20824B; border-bottom-width: 1px !important; border-bottom-color: #ddd !important; border-bottom-style: solid !important;">SVGO 4.1: Node-Powered SVG Optimizer</a></span> — SVGs often contain redundant information. You can use SVGO as a CLI tool or Node library to slim them down. <a href="https://github.com/svg/svgo/releases/tag/v4.1.0" style="text-decoration: none; color: #20824B; border-bottom-width: 1px !important; border-bottom-color: #ddd !important; border-bottom-style: solid !important;">v4.1</a> has stricter XML validation and security improvements.</p>
+  <p class="name" style="color: #aaa !important; margin-top: 4px; margin-bottom: 0.8em; text-transform: uppercase; font-size: 12px; line-height: 1.2em;">Kir Belevich </p>
+</td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" class="content el-md releases flat" style="border-collapse: collapse;"><tr><td style="font-size: 15px; line-height: 1.48em; padding: 0px 15px;">
+<ul style="margin-left: 0px; padding-left: 0; list-style: none inside;">
+<li style="color: #222; margin-bottom: 12px; line-height: 1.35em; margin-left: 0px !important;">
+<p style="margin-top: 0.6em; margin-bottom: 0.8em;"><a href="https://github.com/electron/electron/releases/tag/v44.0.0" style="text-decoration: none; color: #20824B; font-weight: 500 !important; border-bottom-width: 1px; border-bottom-color: #ddd; border-bottom-style: solid;">Electron 44</a> – 32-bit builds are gone, macOS 13+ is now required, <code>clipboard</code> is aligned with the W3C Clipboard API, <code>net.WebSocket</code> is added, plus the ability to set window opacity on Linux.</p>
+</li>
+<li style="color: #222; margin-bottom: 12px; line-height: 1.35em; margin-left: 0px !important;">
+<p style="margin-top: 0.6em; margin-bottom: 0.8em;"><a href="https://github.com/antoniomuso/lz4-napi" style="text-decoration: none; color: #20824B; font-weight: 500 !important; border-bottom-width: 1px; border-bottom-color: #ddd; border-bottom-style: solid;">lz4-napi 2.10.0</a> – N-API bindings for LZ4 compression/decompression, implemented in Rust and backed by <a href="https://github.com/pseitz/lz4_flex" style="text-decoration: none; color: #20824B; font-weight: 500 !important; border-bottom-width: 1px; border-bottom-color: #ddd; border-bottom-style: solid;">lz4_flex</a>.</p>
+</li>
+<li style="color: #222; margin-bottom: 12px; line-height: 1.35em; margin-left: 0px !important;">
+<p style="margin-top: 0.6em; margin-bottom: 0.8em;">🤖 <a href="https://github.com/grammyjs/grammY" style="text-decoration: none; color: #20824B; font-weight: 500 !important; border-bottom-width: 1px; border-bottom-color: #ddd; border-bottom-style: solid;">grammY 1.46.0</a> – The framework for building Telegram bots from Node now supports the latest <a href="https://core.telegram.org/bots/api#august-24-2026" style="text-decoration: none; color: #20824B; font-weight: 500 !important; border-bottom-width: 1px; border-bottom-color: #ddd; border-bottom-style: solid;">Telegram Bot API 10.3</a>.</p>
+</li>
+<li style="color: #222; margin-bottom: 12px; line-height: 1.35em; margin-left: 0px !important;">
+<p style="margin-top: 0.6em; margin-bottom: 0.8em;"><a href="https://github.com/axios/axios" style="text-decoration: none; color: #20824B; font-weight: 500 !important; border-bottom-width: 1px; border-bottom-color: #ddd; border-bottom-style: solid;">Axios 1.20.0</a> – The long-standing HTTP client for the browser and Node.js.</p>
+</li>
+<li style="color: #222; margin-bottom: 12px; line-height: 1.35em; margin-left: 0px !important;">
+<p style="margin-top: 0.6em; margin-bottom: 0.8em;"><a href="https://github.com/mongodb/node-mongodb-native/releases/tag/v7.6.0" style="text-decoration: none; color: #20824B; font-weight: 500 !important; border-bottom-width: 1px; border-bottom-color: #ddd; border-bottom-style: solid;">node-mongodb-native 7.6</a> – MongoDB 4.2 support has been dropped entirely.</p>
+</li>
+<li style="color: #222; margin-bottom: 12px; line-height: 1.35em; margin-left: 0px !important;">
+<p style="margin-top: 0.6em; margin-bottom: 0.8em;">📺 <a href="https://github.com/LuanRT/YouTube.js/releases/tag/v18.0.0" style="text-decoration: none; color: #20824B; font-weight: 500 !important; border-bottom-width: 1px; border-bottom-color: #ddd; border-bottom-style: solid;">YouTube.js 18.0</a> – JavaScript client for YouTube's internal API.</p>
+</li>
+<li style="color: #222; margin-bottom: 12px; line-height: 1.35em; margin-left: 0px !important;">
+<p style="margin-top: 0.6em; margin-bottom: 0.8em;"><a href="https://sidorares.github.io/node-x11/" style="text-decoration: none; color: #20824B; font-weight: 500 !important; border-bottom-width: 1px; border-bottom-color: #ddd; border-bottom-style: solid;">node-x11 4.1</a> – Feature-rich X11 protocol client library.</p>
+</li>
+</ul>
+</td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse;"><tr><td style="height: 28px; font-size: 15px; line-height: 1.48em;"></td></tr></table>
+
+<table class="footer noarchive" width="100%" cellpadding="0" cellspacing="0" style="border-top-width: 3px; border-top-color: #dddddd; border-top-style: solid; border-collapse: collapse;"><tr><td style="font-size: 15px; line-height: 1.48em; padding: 10px 15px;">
+
+        <p style="line-height: 1.3em; margin: 1em 0;"><strong style="text-transform: uppercase; font-weight: 600;">Got a link for us?</strong> Reply and tell us. We can't include everything but we'll look at anything you send. <em>Thanks!</em></p>
+
+<hr style="width: 60px; margin-left: 0; border-top-color: #ddd; border-top-style: solid; border-width: 2px 0 0;">
+
+        <p style="margin: 1em 0;"><strong style="text-transform: uppercase; font-weight: 600;">Sponsorship:</strong> Email <code><a href="mailto:kristina@cooperpress.com" style="color: #000; text-decoration: none;">kristina@cooperpress.com</a></code> for details.</p>
+
+        <hr style="width: 60px; margin-left: 0; border-top-color: #6ca629; border-top-style: solid; border-width: 4px 0 0;">
+      <p style="font-size: 12px; line-height: 18px; margin: 1em 0;">Published by Cooper Press Ltd.<br>Fairfield Enterprise Centre, Louth, LN11 0LS, United Kingdom</p>
+        <p style="font-size: 0.9em; margin: 1em 0;"><a href="https://nodeweekly.com/leave/*|UID|*" style="text-decoration: underline; color: #20824B;">Cancel your subscription</a> or <a href="https://nodeweekly.com/edit_subscription/*|UID|*" style="text-decoration: underline; color: #20824B;">change your address</a>.</p>
+
+</td></tr></table>
+</div>
+  </td></tr>
+</table>
+<!--[if (gte mso 9)|(IE)]></td></tr></table><![endif]-->
+<div id="footer" class="noarchive">
+
+  </div>
+</body>
+</html>
+
+
+<div class="issue-nav">
+  <a href="/issues/637"><svg viewBox="0 0 320 512"><path d="M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l192 192c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L77.3 256 246.6 86.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-192 192z"/></svg> Issue 637</a>
+  <span class="issue-ref">#638</span>
+  <a href="/issues/639">Issue 639 <svg viewBox="0 0 320 512"><path d="M310.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-192 192c-12.5-12.5-32.8-12.5-45.3 0s-12.5-32.8 0-45.3L242.7 256 73.4 86.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l192 192z"/></svg></a>
+</div>
+
+<script>
+(function() {
+  var tag = "node:638";
+  
+  var links = document.getElementsByTagName("a");
+  for (var i = 0; i < links.length; i++) {
+    var a = links[i];
+    if (a.hostname && a.hostname !== location.hostname) {
+      a.target = "_blank";
+      a.rel = "noopener";
+    }
+  }
+  function trackClick(e) {
+    var a = e.target.closest("a");
+    if (!a) return;
+    var href = a.getAttribute("href");
+    if (!href || a.hostname === location.hostname) return;
+    var encoded = btoa(unescape(encodeURIComponent(href))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+    navigator.sendBeacon("/tracklink/" + tag + "/" + encoded, "");
+  }
+  document.addEventListener("click", trackClick);
+  
+  document.addEventListener("auxclick", function(e) {
+    if (e.button === 1) trackClick(e);
+  });
+})();
+</script>
+</body>
+</html>

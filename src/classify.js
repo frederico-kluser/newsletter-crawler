@@ -175,12 +175,15 @@ export async function classifyArticleRow(article) {
  * Classifica os artigos pendentes (ou todos, com force). Idempotente e retomável: sem force
  * só pega quem ainda não tem classificação. Retorna { classified, total, kept } — `kept` = artigos
  * mantidos pendentes porque uma faceta obrigatória caiu por rede/API (nada persistido; re-tenta).
+ * Piso legado (db.js LEGACY_FLOOR): só artigos DESTA era; includeLegacy=true (o `--include-legacy
+ * --yes` do finish) inclui o acervo anterior (ex.: os restaurados do git sem classificação).
  */
-export async function classifyPending({ limit = Infinity, force = false } = {}) {
+export async function classifyPending({ limit = Infinity, force = false, includeLegacy = false } = {}) {
   const lim = Number.isFinite(limit) ? limit : -1; // SQLite: LIMIT -1 = sem limite
+  const params = { lim, includeLegacy };
   const rows = force
-    ? stmts.listArticlesForReclassify.all(lim)
-    : stmts.listArticlesNeedingClassification.all(lim);
+    ? stmts.listArticlesForReclassify.all(params)
+    : stmts.listArticlesNeedingClassification.all(params);
   if (!rows.length) {
     log('classify: nada a classificar.');
     return { classified: 0, total: 0 };
@@ -189,7 +192,7 @@ export async function classifyPending({ limit = Infinity, force = false } = {}) 
   const facetCount = getFacets().length;
   log(
     `classify: ${rows.length} artigo(s) — model=${stageModel('classify').model}, ` +
-      `${facetCount} facetas/artigo, force=${force}.`,
+      `${facetCount} facetas/artigo, force=${force}${includeLegacy ? ', +legado' : ''}.`,
   );
 
   // O gate global de facetas morreu: a lane llm (no transporte do callJSON) já limita o total
@@ -235,7 +238,7 @@ export async function classifyPending({ limit = Infinity, force = false } = {}) 
   log(
     `classify concluído: ${done}/${rows.length} (partial=${partial}` +
       `${kept ? `, ${kept} mantidos pendentes por falha de rede/API — re-tente com internet` : ''}` +
-      `${skipped ? `, ${skipped} pulados por orçamento — retome com \`ncrawl classify\`` : ''}).`,
+      `${skipped ? `, ${skipped} pulados por orçamento — retome com \`ncrawl finish\`` : ''}).`,
   );
   return { classified: done, total: rows.length, kept };
 }

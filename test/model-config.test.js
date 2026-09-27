@@ -80,13 +80,14 @@ test('MODELS.pro === MODELS.flash === slug novo (sem env override)', () => {
   assert.equal(MODELS.pro, MODELS.flash);
 });
 
-test('seedForModel: slug novo cai em SEED_FLASH (0.005); sem "flash" = SEED_PRO (0.05)', () => {
+test('seedForModel: slug novo cai em SEED_CHAT (0.01, gemini/flash); sem "flash" = SEED_PRO (0.05)', () => {
+  // Seeds por MOTOR desde a W1 do Jev (budget.js): jev 0.0005 · gemini/flash 0.01 · resto 0.05.
   const l = new BudgetLedger({ budgetUsd: 0 });
-  assert.equal(l.seedFor(SWAPPED_SLUG), 0.005, `'${SWAPPED_SLUG}' contém 'flash' -> SEED_FLASH`);
+  assert.equal(l.seedFor(SWAPPED_SLUG), 0.01, `'${SWAPPED_SLUG}' contém 'flash' -> SEED_CHAT`);
   assert.equal(l.seedFor('acme/llm-probe'), 0.05, 'sem "flash" -> SEED_PRO');
   // Caminho real usado pelo ledger (mesma assertiva de test/budget.test.js, agora com o slug NOVO
   // explícito e sem dados de EMA): a reserva da chamada usa o seed do tier.
-  assert.equal(l.estimate('summarize', SWAPPED_SLUG), 0.005, 'seed flash antes de dados EMA');
+  assert.equal(l.estimate('summarize', SWAPPED_SLUG), 0.01, 'seed flash antes de dados EMA');
   assert.equal(l.estimate('classify', 'acme/llm-probe'), 0.05, 'seed pro antes de dados EMA');
 });
 

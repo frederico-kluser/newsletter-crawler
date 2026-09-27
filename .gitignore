@@ -41,3 +41,9 @@ TASK_PLAN.md
 .agents/skills/.validation/
 
 .deep-orchestrator/
+
+# eval Jev: cache de respostas pagas (reusado nas varreduras de limiar), ledger de custo isolado
+# do eval e saídas brutas dos runs — locais por máquina, nunca versionados.
+eval/jev/.cache/
+eval/jev/.ledger.db*
+eval/jev/out/

@@ -16,6 +16,9 @@ const EMPTY = {
   pendingClassif: 0,
   summaries: 0,
   pendingSummary: 0,
+  // Mesma forma do getStatus (piso legado da migração Jev): pendentes desta era + o legado fora.
+  pendingVerify: 0,
+  legacy: { floor: 1, articles: 0, noVerify: 0, noSummary: 0, noClassif: 0, suspect: 0 },
   frontier: { pending: 0, in_progress: 0, done: 0, failed: 0 },
 };
 

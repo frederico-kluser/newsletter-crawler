@@ -4,6 +4,8 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import os from 'node:os';
 import { normalizeUrl, warn } from './util.js'; // util é puro (não importa config) -> sem ciclo
+// jev-core é PURO/isomórfico (não importa nada) -> sem ciclo; daqui só o modelo default e o clamp de effort.
+import { JEV_MODEL_DEFAULT, clampEffort } from './shared/jev-core.js';
 
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -29,11 +31,19 @@ function seedFile(dest, src) {
   }
 }
 
+// Guarda de gasto do desenvolvimento (scripts/dev-spend.mjs): o filho recebe DEV_SPEND_GUARDED=1 +
+// BUDGET_USD (o que resta da guarda) + LLM_PROVIDER no env. Os .env abaixo carregam com OVERRIDE —
+// sem este pino, um BUDGET_USD/LLM_PROVIDER no .env do repo ou do NC_HOME venceria o teto do filho
+// (gasto além da guarda, ou chamadas indo p/ a api.deepseek.com). Decidido ANTES de ler os .env: um
+// .env não liga nem desliga a guarda (por isso o próprio DEV_SPEND_GUARDED também fica pinado).
+const ENV_PINNED =
+  process.env.DEV_SPEND_GUARDED === '1' ? new Set(['BUDGET_USD', 'LLM_PROVIDER', 'DEV_SPEND_GUARDED']) : null;
+
 // Carrega o .env do projeto e faz OVERRIDE de variáveis herdadas do shell.
 // (Tanto `node --env-file` quanto process.loadEnvFile NÃO sobrescrevem variáveis
 //  que já existem no ambiente; aqui o .env do projeto tem precedência, para honrar
 //  a chave que o usuário salvou — evitando que uma OPENROUTER_API_KEY antiga no
-//  perfil do shell "sombreie" a correta.)
+//  perfil do shell "sombreie" a correta.) Exceção: as chaves pinadas pela guarda (ENV_PINNED).
 function loadDotEnvOverride(file) {
   if (!existsSync(file)) return;
   let txt = '';
@@ -55,7 +65,7 @@ function loadDotEnvOverride(file) {
     ) {
       val = val.slice(1, -1);
     }
-    if (key) process.env[key] = val;
+    if (key && !ENV_PINNED?.has(key)) process.env[key] = val;
   }
 }
 // Precedência (o último a rodar vence): env do shell < .env do repo (dev) < NC_HOME/.env (usuário).
@@ -77,9 +87,56 @@ const clampProvider = (p) => (p === 'deepseek' ? 'deepseek' : 'openrouter');
 export let LLM_PROVIDER = clampProvider(String(process.env.LLM_PROVIDER || 'openrouter').toLowerCase());
 // HAS_LLM é provider-aware: vale o provider ATIVO ter a chave correspondente.
 export let HAS_LLM = Boolean(LLM_PROVIDER === 'deepseek' ? DEEPSEEK_API_KEY : OPENROUTER_API_KEY);
+// O Jev (Decisions API) só existe no OpenRouter: HAS_JEV depende SÓ da chave OpenRouter, qualquer que
+// seja o provedor de chat ativo (live binding, acompanha o setRuntimeKey como o HAS_LLM).
+export let HAS_JEV = Boolean(OPENROUTER_API_KEY);
 
 // BaseURL da API direta da DeepSeek (OpenAI-compatível; o SDK openai anexa /chat/completions).
 export const DEEPSEEK_BASE_URL = process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com';
+
+// ---- OpenRouter: base da API lida em CALL-TIME ----
+// OPENROUTER_BASE_URL (default https://openrouter.ai/api/v1) é também a COSTURA de teste: um teste
+// aponta p/ um servidor local e o chat (llm.js), o Jev (jev.js) e o /key (keys.js) vão juntos, sem
+// reimportar nada. URL malformada = host público (fail-open, mesmo critério do keys.js).
+export const OPENROUTER_DEFAULT_BASE_URL = 'https://openrouter.ai/api/v1';
+export function openrouterBaseUrl() {
+  const raw = String(process.env.OPENROUTER_BASE_URL || '').trim();
+  if (raw) {
+    try {
+      const u = new URL(raw);
+      return `${u.origin}${u.pathname}`.replace(/\/+$/, '');
+    } catch {
+      /* malformada: cai no host público */
+    }
+  }
+  return OPENROUTER_DEFAULT_BASE_URL;
+}
+/** Endpoint da Decisions API do Jev: {origin da base do OpenRouter}/api/alpha/decisions (call-time). */
+export function jevUrl() {
+  return `${new URL(openrouterBaseUrl()).origin}/api/alpha/decisions`;
+}
+
+// ---- tripwire da rede PAGA em teste ----
+// Sob a suíte (NODE_TEST_CONTEXT, que o `node --test` seta em cada arquivo, ou NC_TEST=1, que a
+// sandbox dos testes seta — cobre também `node test/x.test.js` direto), o transporte PADRÃO do Jev
+// (jev.js) e do chat (fetch do SDK no llm.js) recusa sair p/ a rede: um teste que esqueceu o dublê
+// falha ALTO (PAID_NETWORK_BLOCKED) em vez de gastar com a chave real do shell. Loopback passa (um
+// servidor local de teste não custa nada — é como se exercita o transporte real). Escotilha
+// explícita: NC_ALLOW_PAID_NETWORK=1 (a sandbox a apaga; nunca vale no `npm test`). Lido NA HORA.
+const LOOPBACK_HOSTS = new Set(['localhost', '127.0.0.1', '::1', '[::1]']);
+export function isTestRuntime(env = process.env) {
+  return Boolean(env.NODE_TEST_CONTEXT) || env.NC_TEST === '1';
+}
+export function paidNetworkBlocked(url, env = process.env) {
+  if (env.NC_ALLOW_PAID_NETWORK === '1' || !isTestRuntime(env)) return false;
+  try {
+    const host = new URL(String(url)).hostname.toLowerCase();
+    if (LOOPBACK_HOSTS.has(host) || /^127\.\d+\.\d+\.\d+$/.test(host)) return false;
+  } catch {
+    /* URL ilegível sob teste: bloqueia (fail-safe — o oposto do resto do projeto, de propósito) */
+  }
+  return true;
+}
 
 // Info do provedor ATUAL, calculada em runtime (live bindings): consumida por llm.js e pela
 // onda 2 (keys.js/commands.js/web.js). `keyVar` é o nome da variável de env da chave do provedor.
@@ -94,7 +151,7 @@ export function providerInfo() {
   }
   return {
     name: 'OpenRouter',
-    baseURL: 'https://openrouter.ai/api/v1',
+    baseURL: openrouterBaseUrl(),
     keyVar: 'OPENROUTER_API_KEY',
     keyPresent: Boolean(OPENROUTER_API_KEY),
   };
@@ -117,11 +174,25 @@ export function setRuntimeKey(key, provider = LLM_PROVIDER) {
     OPENROUTER_API_KEY = k;
   }
   HAS_LLM = Boolean(k);
+  HAS_JEV = Boolean(OPENROUTER_API_KEY);
 }
 
+// config/models.json lido UMA vez (modelos por etapa + bloco "jev"); ausente/ inválido = {} (fail-open).
+const _modelsCfg = loadModelsConfig();
+
+// Modelo do Jev FIXADO (pinned): os limiares de config/jev-thresholds.json valem p/ o snapshot em que
+// foram calibrados (calibratedOn) — o alias sem data pode mover de snapshot, e aí o noteJevModel avisa.
+export const JEV_MODEL = process.env.JEV_MODEL || _modelsCfg.jev?.model || JEV_MODEL_DEFAULT;
+
 export const MODELS = {
+  // Legado (W1): as etapas chat ainda não migradas seguem no deepseek VIA OpenRouter até a onda
+  // delas trocar o models.json; pro também é o default hardcoded e o modelo de escalada do callJSON.
   pro: process.env.LLM_PRO_MODEL || 'deepseek/deepseek-v4-flash-0731',
   flash: process.env.LLM_FLASH_MODEL || 'deepseek/deepseek-v4-flash-0731',
+  // Motor de TEXTO da migração Jev (resumos, seletores e o fallback das decisões incertas).
+  chat: process.env.LLM_CHAT_MODEL || 'google/gemini-3.8-flash',
+  escalate: process.env.LLM_ESCALATE_MODEL || process.env.LLM_CHAT_MODEL || 'google/gemini-3.8-flash',
+  jev: JEV_MODEL,
 };
 
 // ---- provedor DeepSeek DIRETO (api.deepseek.com): tradução de slugs + custo local ----
@@ -455,6 +526,59 @@ export const RENDER_EST_MB = Number(process.env.RENDER_EST_MB || 300);
 // um lote pendurado seguraria slots por até 40 min e cegaria o governador.
 export const LLM_TIMEOUT_MS = Number(process.env.LLM_TIMEOUT_MS || 180000);
 
+// ---- Jev (Decisions API do OpenRouter: src/jev.js + src/decide.js) ----
+// Número finito >= 0 do env, senão o default (inválido nunca vira NaN silencioso num limite).
+const envNumOr = (k, dflt) => {
+  const raw = process.env[k];
+  if (raw == null || String(raw).trim() === '') return dflt;
+  const v = Number(raw);
+  return Number.isFinite(v) && v >= 0 ? v : dflt;
+};
+const OFF_WORDS = new Set(['false', '0', 'off', 'no']);
+/** Liga/desliga GLOBAL do Jev, lido NA HORA (default ligado; false = modo só-Gemini: tudo vai ao fallback). */
+export function jevEnabled() {
+  return !OFF_WORDS.has(String(process.env.JEV_ENABLED ?? '').trim().toLowerCase());
+}
+export const JEV_ENABLED = jevEnabled();
+// Timeout de UMA chamada (o Jev responde em ~0,3–0,6 s; 20 s cobre fila do provedor sem segurar a lane).
+export const JEV_TIMEOUT_MS = envNumOr('JEV_TIMEOUT_MS', 20000) || 20000;
+// Retentativas de 429/5xx/rede por request (além da 1ª tentativa). 400/401/402/403/404/413/422 não repetem.
+export const JEV_RETRIES = Math.floor(envNumOr('JEV_RETRIES', 2));
+// Teto de UMA espera de retry de 5xx/rede (backoff 250ms·2^n com jitter, ou o Retry-After do servidor).
+export const JEV_MAX_RETRY_WAIT_MS = envNumOr('JEV_MAX_RETRY_WAIT_MS', 10000);
+// Lane 'jev' e portão de rps: o governor.js/ratelimit.js leem estas chaves do env NA HORA (initGovernor
+// e cada take); os exports aqui servem ao `limits show`, à documentação e ao initGovernor explícito.
+export const JEV_CONCURRENCY = Math.floor(envNumOr('JEV_CONCURRENCY', 8)) || 8;
+export const GOVERNOR_JEV_CAP = envIntOr0('GOVERNOR_JEV_CAP');
+export const JEV_MAX_RPS = envNumOr('JEV_MAX_RPS', 15); // 0 desliga o portão (a penalidade de 429 segue)
+// Orçamento de tokens por request (limites duros: 64K no total e state + a maior pergunta <= 32K). O
+// state é clipado ESTRUTURALMENTE (jev-core clipState) a JEV_MAX_STATE_TOKENS antes do planejamento; o
+// resto é dividido em vários requests (cada um paga o state de novo) pelo planRequests.
+export const JEV_MAX_STATE_TOKENS = Math.floor(envNumOr('JEV_MAX_STATE_TOKENS', 24000)) || 24000;
+export const JEV_MAX_REQUEST_TOKENS = Math.min(64000, Math.floor(envNumOr('JEV_MAX_REQUEST_TOKENS', 56000)) || 56000);
+// Perguntas por request: provisório até o smoke pago da W1 medir se 40/120 são aceitas num request só.
+export const JEV_MAX_QUESTIONS_PER_REQUEST = Math.floor(envNumOr('JEV_MAX_QUESTIONS_PER_REQUEST', 120)) || 120;
+// Preço de entrada do Jev 1.13 (US$/1M tokens; saída grátis) — só p/ o custo LOCAL quando a resposta
+// vier sem usage.cost (o OpenRouter manda; o ledger não pode registrar 0 por falta do campo).
+export const JEV_PRICE_PER_M = envNumOr('JEV_PRICE_PER_M', 0.042);
+// Lints de conceito do jev-core (geração de texto, contagem/datas, pergunta composta) como AVISO.
+export const JEV_LINT = process.env.JEV_LINT === 'true';
+// Trace das decisões (tabela jev_decisions): min (default: não-aceitas + amostra de 5% dos aceitos) |
+// full | off. O events.js lê NA HORA; o export é p/ status/docs.
+export const JEV_TRACE = ['min', 'full', 'off'].includes(String(process.env.JEV_TRACE || '').toLowerCase())
+  ? String(process.env.JEV_TRACE).toLowerCase()
+  : 'min';
+// Fração das decisões ACEITAS também conferidas no Gemini (concordância p/ calibração; custa dinheiro).
+// Produção = 0; o eval liga.
+export const JEV_SHADOW_RATE = Math.min(1, envNumOr('JEV_SHADOW_RATE', 0));
+// Sub-teto em US$ do fallback Gemini por run (0 = sem sub-teto próprio: com --budget vale 50% dele).
+// O budget.js lê NA HORA; o export é p/ status/docs.
+export const GEMINI_FALLBACK_BUDGET_USD = envNumOr('GEMINI_FALLBACK_BUDGET_USD', 0);
+// Disjuntor por etapa (decide.js): N erros SEGUIDOS do Jev abrem o circuito por JEV_CIRCUIT_OPEN_MS —
+// nesse intervalo as decisões vão direto ao fallback, sem pagar retries contra um Jev fora do ar.
+export const JEV_CIRCUIT_ERRORS = Math.floor(envNumOr('JEV_CIRCUIT_ERRORS', 5)) || 5;
+export const JEV_CIRCUIT_OPEN_MS = envNumOr('JEV_CIRCUIT_OPEN_MS', 60000);
+
 // ---- crawl multinível (índice -> roundup/issue -> artigo) ----
 // Profundidade máxima da recursão (índice=0, issue=1, artigo=2, roundup-do-artigo=3...).
 // Trava de segurança contra recursão infinita em páginas que parecem coleções.
@@ -508,7 +632,130 @@ export const STAGE_KEYS = [
   'verifyRecord', // verificação pós-cadastro: veredito ok|suspect|junk (high)
   'dateSelector', // seletor de DATA da listagem (CSS + regex) lendo a página real (high)
   'detectType', // detecção automática do tipo da fonte (index|listing) ao adicionar (high, 1x/add)
+  // articleReclean (re-limpeza FORTE dos suspect) ficou anos FORA desta lista: o stageModel caía no
+  // default (xhigh) ignorando o 'high' do models.json. Na lista, o arquivo vale.
+  'articleReclean',
+  // Etapas chat/Gemini da navegação (W5b) registradas já na W1 — as ondas só trocam o models.json
+  // delas, sem disputar este arquivo. Até lá resolvem pelo default.
+  'pageAssess', // fallback Gemini da avaliação de página (bloqueio/conteúdo) quando o Jev fica inseguro
+  'linkPick', // fallback Gemini da escolha de links da listagem/índice
+  'navAutopilot', // fallback Gemini do autopiloto de ações de navegação
 ];
+
+// ---- etapas do Jev (nome termina em 'Jev'; a BASE = o nome sem o sufixo = a etapa chat/Gemini) ----
+// A base continua em STAGE_KEYS/models.json (LLM_MODEL_<BASE>, histórico do ledger, fallback Gemini);
+// a etapa Jev fica SÓ aqui — nunca no models.json (o modelo do Jev é global e fixado: JEV_MODEL).
+// Registradas todas de uma vez (W1) p/ as ondas W2–W6 não disputarem este arquivo.
+export const JEV_STAGES = Object.freeze([
+  'jevHealth', // sonda de 1 noul (ncrawl key test --jev, smoke, guarda de gasto) — W1
+  'summaryQaJev', // QA do resumo Gemini (base: summarize) — W2
+  'verifyRecordJev', // verificação ok|suspect|junk (base: verifyRecord) — W3
+  'articleCleanJev', // limpeza por blocos (base: articleClean) — W3
+  'articleRecleanJev', // re-limpeza forte dos suspect (base: articleReclean) — W3
+  'articleExtractJev', // extração por blocos, modo 'extract' (base: articleExtract) — W3
+  'classifyJev', // classificação por faceta em blocos + confirmação (base: classify) — W4
+  'curateJev', // curadoria de issue/roundup por candidato (base: curate) — W5a
+  'detectTypeJev', // tipo da fonte index|listing (base: detectType) — W5a
+  'pageAssessJev', // página bloqueada/conteúdo (base: pageAssess) — W5b
+  'linkPickJev', // escolha de links (base: linkPick) — W5b
+  'nextPickJev', // próxima página (Gemini: nextLink/deriveNextLink) — W5b
+  'navAutopilotJev', // autopiloto de ações (base: navAutopilot) — W5b
+  'searchSpecJev', // entendimento da consulta + tags do modo B (base: searchSpec) — W6
+  'searchBatchJev', // busca soft em lote (base: searchBatch) — W6
+  'searchRelevanceJev', // busca profunda por artigo (base: searchRelevance) — W6
+]);
+
+/** Base de uma etapa do Jev: 'verifyRecordJev' -> 'verifyRecord' (sem o sufixo, o nome fica igual). */
+export function jevBaseStage(stage) {
+  return String(stage || '').replace(/Jev$/, '');
+}
+// Token de env: camelCase -> SNAKE, qualquer não-alfanumérico -> '_' ('facets.domain.minConf' -> FACETS_DOMAIN_MIN_CONF).
+const envTokenOf = (s) =>
+  String(s || '')
+    .replace(/([a-z0-9])([A-Z])/g, '$1_$2')
+    .replace(/[^A-Za-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .toUpperCase();
+/** Sufixo de env da BASE de uma etapa Jev: 'verifyRecordJev' -> 'VERIFY_RECORD' (JEV_ENGINE_<BASE>, JEV_TH_<BASE>_<KEY>). */
+export function jevEnvBase(stage) {
+  return envTokenOf(jevBaseStage(stage));
+}
+
+// ---- limiares do Jev: config/jev-thresholds.json (ÚNICO registro; só o eval o escreve) ----
+// {calibratedOn, <etapaJev>: {calibratedAt, n, ...chaves nomeadas}}. Duas semânticas, sempre NOMEADAS
+// por chave: certeza (minConf, 0..1 sobre certainty()) e faixa de probabilidade ({lo, hi} sobre o p de
+// um noul ou a pMass de uma choice). Probabilidades de perguntas DIFERENTES nunca se comparam.
+const JEV_THRESHOLDS_PATH = path.join(ROOT, 'config', 'jev-thresholds.json');
+let _jevThresholds = null;
+function jevThresholdsCfg() {
+  if (_jevThresholds) return _jevThresholds;
+  try {
+    const raw = JSON.parse(readFileSync(JEV_THRESHOLDS_PATH, 'utf8'));
+    _jevThresholds = raw && typeof raw === 'object' && !Array.isArray(raw) ? raw : {};
+  } catch {
+    _jevThresholds = {}; // ausente/ inválido: todo limiar cai no default do código (fail-open)
+  }
+  return _jevThresholds;
+}
+const isPlainObj = (v) => v !== null && typeof v === 'object' && !Array.isArray(v);
+// Um limiar válido é um número finito ou um objeto (faixa {lo, hi} ou bloco aninhado, ex. facets).
+const validThreshold = (v) => (typeof v === 'number' && Number.isFinite(v)) || isPlainObj(v);
+const _warnedThresholdEnv = new Set();
+
+/**
+ * Limiar `key` da etapa Jev `stage`: env JEV_TH_<BASE>_<KEY> (número ou JSON, ex. {"lo":0.2,"hi":0.7})
+ * > config/jev-thresholds.json[stage][key] > `dflt`. `key` aceita caminho com ponto p/ blocos aninhados
+ * ('facets.domain.minConf' -> env JEV_TH_CLASSIFY_FACETS_DOMAIN_MIN_CONF). Valor inválido = default.
+ */
+export function jevThreshold(stage, key, dflt) {
+  const envKey = `JEV_TH_${jevEnvBase(stage)}_${envTokenOf(key)}`;
+  const raw = process.env[envKey];
+  if (raw != null && String(raw).trim() !== '') {
+    const s = String(raw).trim();
+    let v = Number(s);
+    if (!Number.isFinite(v)) {
+      try {
+        v = JSON.parse(s);
+      } catch {
+        v = undefined;
+      }
+    }
+    if (validThreshold(v)) return v;
+    if (!_warnedThresholdEnv.has(envKey)) {
+      _warnedThresholdEnv.add(envKey);
+      warn(`${envKey} inválido (${JSON.stringify(s)}) — usando o limiar do arquivo/default`);
+    }
+  }
+  let node = jevThresholdsCfg()[stage];
+  for (const part of String(key).split('.')) {
+    if (!isPlainObj(node) || !Object.prototype.hasOwnProperty.call(node, part)) return dflt;
+    node = node[part];
+  }
+  return validThreshold(node) ? node : dflt;
+}
+
+/** Snapshot em que os limiares foram calibrados (jev-thresholds.json > models.json jev.calibratedOn). */
+export function jevCalibratedOn() {
+  return jevThresholdsCfg().calibratedOn || _modelsCfg.jev?.calibratedOn || null;
+}
+
+const _jevModelsSeen = new Set();
+/**
+ * Chame com o modelo RESOLVIDO de cada resposta do Jev: avisa UMA vez por snapshot diferente do
+ * calibratedOn — os limiares calibrados podem não valer mais (o alias do Jev mudou de snapshot).
+ * Devolve true quando o modelo bate (ou não há calibração registrada).
+ */
+export function noteJevModel(model) {
+  const want = jevCalibratedOn();
+  const got = String(model || '');
+  if (!want || !got || got === want) return true;
+  if (!_jevModelsSeen.has(got)) {
+    _jevModelsSeen.add(got);
+    warn(`jev: resposta do snapshot ${got}, mas os limiares foram calibrados em ${want} — recalibre (eval/jev) se a qualidade mudar`);
+  }
+  return false;
+}
+
 const DEFAULT_MODEL = MODELS.pro;
 const DEFAULT_EFFORT = 'xhigh';
 
@@ -544,18 +791,27 @@ function resolveStage(stage, cfg) {
     fileDef.effort ||
     DEFAULT_EFFORT;
   if (effort === 'max') effort = 'xhigh'; // DeepSeek V4 rejeita "max" (400); callJSON também protege
-  return { model, effort };
+  // Teto de tokens de SAÍDA (opcional): backstop de custo p/ o Gemini (saída a US$ 3,75/M). Só entra
+  // no objeto quando definido — quem compara {model, effort} por igualdade segue igual.
+  const maxTokens = Number(process.env[`LLM_MAX_TOKENS_${ek}`] || fileStage.maxTokens || 0);
+  return Number.isFinite(maxTokens) && maxTokens > 0 ? { model, effort, maxTokens: Math.floor(maxTokens) } : { model, effort };
 }
 
-const _modelsCfg = loadModelsConfig();
 export const STAGE_MODELS = Object.fromEntries(STAGE_KEYS.map((s) => [s, resolveStage(s, _modelsCfg)]));
 
-/** {model, effort} resolvido para uma etapa do pipeline (default: deepseek/deepseek-v4-flash-0731 + xhigh). */
+/**
+ * {model, effort, maxTokens?} resolvido para uma etapa CHAT do pipeline (default:
+ * deepseek/deepseek-v4-flash-0731 + xhigh). O effort sai CLAMPADO p/ a allow-list da família do modelo
+ * (jev-core clampEffort: 'max' nunca passa; o Gemini não aceita xhigh) — etapas Jev não passam por aqui.
+ */
 export function stageModel(stage) {
   const base = STAGE_MODELS[stage] || { model: DEFAULT_MODEL, effort: DEFAULT_EFFORT };
   // O modelo resolve pelo provedor ATIVO: identidade no openrouter, slug direto no deepseek
   // (translateModel; STAGE_MODELS continua guardando o slug OpenRouter do config/models.json).
-  return { model: translateModel(base.model), effort: base.effort };
+  const model = translateModel(base.model);
+  const out = { model, effort: clampEffort(model, base.effort) ?? base.effort };
+  if (base.maxTokens) out.maxTokens = base.maxTokens;
+  return out;
 }
 
 /**
@@ -575,7 +831,8 @@ export function classifyFacetModel(facetName) {
   if (effort === 'max') effort = 'xhigh'; // DeepSeek V4 rejeita "max"
   // Traduz o modelo final p/ o provider ativo (env com slug direto passa inalterado; base.model
   // já vem traduzido de stageModel e translateModel é idempotente).
-  return { model: translateModel(model || base.model), effort };
+  const finalModel = translateModel(model || base.model);
+  return { model: finalModel, effort: clampEffort(finalModel, effort) ?? effort };
 }
 
 // ---- classificação multi-faceta (pós-processamento) ----

@@ -21,4 +21,4 @@ Before writing or editing any `src/*.js`, adding a module, or reviewing a diff. 
 - **No `axios`** (supply-chain incident; see README); all HTTP goes through `got`. `README.md@79fd5d8`.
 
 ## Evolution
-On task completion, if you find an important, externally-verified convention missing here, update this file via the memory pipeline (see meta-skill-evolution). Importance alone does not authorize a write - it needs a green check or explicit user confirmation.
+On task completion, if you find an important, externally-verified convention missing here, update this file via the memory pipeline (see a memória CoALA local (`coala.py add`)). Importance alone does not authorize a write - it needs a green check or explicit user confirmation.

@@ -56,6 +56,9 @@ function init(env, opts = {}) {
     ramHysteresisPct: 10,
     ramFreeTargetPct: 20,
     cpuFreeTargetPct: 40,
+    // Lane jev pinada (JEV_CONCURRENCY/GOVERNOR_JEV_CAP do env da máquina não entram no teste).
+    jevConcurrency: 8,
+    jevCap: 0,
     ...opts,
   });
 }
@@ -119,15 +122,17 @@ test('429: lane llm halva e CALIBRA o teto — converge no limite aprendido (nã
   const env = makeEnv({});
   init(env, { profile: 'llm-only' });
   assert.equal(getLane('llm').concurrency, 32);
-  assert.equal(getCalibration().dirty, false, 'no teto do perfil: nada a persistir');
+  assert.equal(getCalibration().dirty.llm, false, 'no teto do perfil: nada a persistir');
   reportRateLimit();
   assert.equal(getLane('llm').concurrency, 16, 'lane 32 -> 16');
   assert.equal(getCalibration().llmCap, 16, 'teto calibrado 16 (limite aprendido)');
-  assert.equal(getCalibration().rateLimitEvents, 1);
+  assert.equal(getCalibration().rateLimitEvents.llm, 1);
+  assert.equal(getCalibration().rateLimitEvents.jev, 0, 'o 429 da llm não conta na lane jev');
   reportRateLimit();
   assert.equal(getLane('llm').concurrency, 8, 'lane 16 -> 8');
   assert.equal(getCalibration().llmCap, 8, 'teto calibrado 8');
-  assert.equal(getCalibration().dirty, true, 'abaixo do teto do perfil -> persiste no fim do run');
+  assert.equal(getCalibration().dirty.llm, true, 'abaixo do teto do perfil -> persiste no fim do run');
+  assert.equal(getCalibration().dirty.jev, false, 'a lane jev segue no teto dela');
   env.tick(120); // 2 minutos limpos (janelas de 10s)
   assert.equal(getLane('llm').concurrency, 8, 'NÃO recresce: 8 É o teto calibrado (convergência)');
   assert.equal(getCalibration().llmCap, 8, 'teto permanece calibrado');
@@ -143,11 +148,11 @@ test('llmCap persistido: lane parte do cap (clamp piso 3..perfil); setProfile n�
   stopGovernor();
   init(env, { profile: 'crawl', llmCap: 999 });
   assert.equal(getLane('llm').concurrency, 32, 'cap 999 > alloc -> clamp ao teto do perfil');
-  assert.equal(getCalibration().dirty, false, 'no teto do perfil: nada a persistir');
+  assert.equal(getCalibration().dirty.llm, false, 'no teto do perfil: nada a persistir');
   reportRateLimit(); // 32 -> 16 (lane e teto)
   setProfile('llm-only'); // alloc llm-only = 32; o cap calibrado 16 sobrevive
   assert.equal(getLane('llm').concurrency, 16, 'setProfile não ressuscita o teto calibrado');
-  assert.equal(getCalibration().dirty, true);
+  assert.equal(getCalibration().dirty.llm, true);
 });
 
 test('CPU em HOLD: mesmo com RAM abundante, a pressão de CPU segura o crescimento', () => {

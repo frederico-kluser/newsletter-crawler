@@ -23,17 +23,22 @@ export async function summarizeArticleRow(a) {
   return { title_pt, summary_pt };
 }
 
-/** Resume os artigos sem summary_pt (ou todos, com force). Retorna { summarized, total }. */
-export async function summarizePending({ limit = Infinity, force = false } = {}) {
+/**
+ * Resume os artigos sem summary_pt (ou todos, com force). Retorna { summarized, total }.
+ * Piso legado (db.js LEGACY_FLOOR): só artigos DESTA era — resumir o acervo inteiro custaria
+ * ~US$ 46; includeLegacy=true (o `--include-legacy --yes` do finish) é a única porta.
+ */
+export async function summarizePending({ limit = Infinity, force = false, includeLegacy = false } = {}) {
   const lim = Number.isFinite(limit) ? limit : -1; // SQLite: LIMIT -1 = sem limite
+  const params = { lim, includeLegacy };
   const rows = force
-    ? stmts.listArticlesForResummarize.all(lim)
-    : stmts.listArticlesNeedingSummary.all(lim);
+    ? stmts.listArticlesForResummarize.all(params)
+    : stmts.listArticlesNeedingSummary.all(params);
   if (!rows.length) {
     log('summarize: nada a resumir.');
     return { summarized: 0, total: 0 };
   }
-  log(`summarize: ${rows.length} artigo(s) — PT-BR, force=${force}.`);
+  log(`summarize: ${rows.length} artigo(s) — PT-BR, force=${force}${includeLegacy ? ', +legado' : ''}.`);
 
   // Janela = min(override de env, capacidade atual da lane llm do governador).
   const gate = pLimit(stageWindow(SUMMARIZE_CONCURRENCY));
@@ -63,7 +68,7 @@ export async function summarizePending({ limit = Infinity, force = false } = {})
 
   log(
     `summarize concluído: ${done}/${rows.length}` +
-      `${skipped ? ` (${skipped} pulados por orçamento — retome com \`ncrawl summarize\`)` : ''}.`,
+      `${skipped ? ` (${skipped} pulados por orçamento — retome com \`ncrawl finish\`)` : ''}.`,
   );
   return { summarized: done, total: rows.length };
 }

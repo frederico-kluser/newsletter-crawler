@@ -164,6 +164,42 @@ CREATE TABLE IF NOT EXISTS searches (
   hits_json TEXT,
   created_at TEXT DEFAULT (datetime('now'))
 );
+
+-- Chave/valor do PRÓPRIO banco (não é acervo: fica fora do DATA_TABLES do backup e do hasAnyData).
+-- Hoje guarda só o piso "legado" da migração Jev (jev_floor_run_id — ver LEGACY_FLOOR_KEY).
+CREATE TABLE IF NOT EXISTS settings (
+  key TEXT PRIMARY KEY,
+  value TEXT
+);
+
+-- Log central das DECISÕES do Jev: 1 linha por PERGUNTA decidida (não por chamada — o custo por
+-- chamada fica no llm_usage). É o insumo da recalibração offline dos limiares (eval/jev) e do
+-- 'inspect --decisions'. Escrito SÓ por events.logDecision, em lote, na MESMA transação do flush
+-- dos events. Com JEV_TRACE=min (default) entram os desfechos não-aceitos + uma AMOSTRA
+-- determinística dos aceitos; sample_rate guarda a taxa com que a linha entrou (1 = sempre
+-- registrada; 0.05 = aceito amostrado) p/ o inspect estimar o total sem mentir: SUM(1/sample_rate).
+-- value/fb_value: texto cru quando a resposta é string (choice), JSON nos demais (noul/score/listas).
+CREATE TABLE IF NOT EXISTS jev_decisions (
+  id INTEGER PRIMARY KEY,
+  run_id INTEGER,
+  stage TEXT NOT NULL,
+  subject TEXT,
+  url TEXT,
+  qid TEXT NOT NULL,
+  value TEXT,
+  p REAL,
+  certainty REAL,
+  threshold REAL,
+  outcome TEXT NOT NULL CHECK (outcome IN ('accept', 'fallback', 'default', 'error', 'shadow')),
+  reason TEXT,
+  fb_value TEXT,
+  agree INTEGER,
+  model TEXT,
+  sample_rate REAL DEFAULT 1,
+  created_at TEXT DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_jev_decisions_run_stage ON jev_decisions(run_id, stage);
+CREATE INDEX IF NOT EXISTS idx_jev_decisions_stage_qid ON jev_decisions(stage, qid);
 `);
 
 // Migração leve p/ DBs criados antes das colunas multinível (CREATE TABLE IF NOT EXISTS
@@ -217,6 +253,20 @@ ensureColumn('articles', 'enrich_attempts', 'enrich_attempts INTEGER DEFAULT 0')
 ensureColumn('selectors', 'date_selector', 'date_selector TEXT');
 ensureColumn('selectors', 'date_attribute', 'date_attribute TEXT');
 ensureColumn('selectors', 'date_regex', 'date_regex TEXT');
+// Ledger por MOTOR (migração Jev): o mesmo llm_usage passa a separar Jev × chat (Gemini/fallback).
+// - engine: 'jev' | 'chat' (NULL em linhas antigas — quem lê deduz pelo model, ver usageByStageEngine)
+// - decisions: nº de perguntas decididas pela chamada (Jev) ou resolvidas pelo fallback (chat)
+// - fallback_reason: NULL = chamada primária; texto = chamada de fallback e o porquê
+//   (low-confidence, escape-option, jev-error, injection, circuit-open…)
+// - latency_ms: duração da chamada (p95 do Jev no smoke/inspect)
+// - requested_model: o slug PEDIDO (o `model` guarda o RESOLVIDO: 'typesafe/jev-1.13' pede,
+//   'typesafe/jev-1.13-20260917' responde) — estimateStageCallUsd filtra por ele sem ambiguidade
+//   de prefixo ('gemini-3.8-flash' × 'gemini-3.8-flash-lite')
+ensureColumn('llm_usage', 'engine', 'engine TEXT');
+ensureColumn('llm_usage', 'decisions', 'decisions INTEGER');
+ensureColumn('llm_usage', 'fallback_reason', 'fallback_reason TEXT');
+ensureColumn('llm_usage', 'latency_ms', 'latency_ms INTEGER');
+ensureColumn('llm_usage', 'requested_model', 'requested_model TEXT');
 
 // Dedup de conteúdo à prova de concorrência: promove idx_articles_hash a UNIQUE em DBs
 // antigos (CREATE UNIQUE ... IF NOT EXISTS não converte um índice já existente). Só age se
@@ -278,6 +328,14 @@ const SEARCH_SCOPE_WHERE = `
 
 // Índice do delta por execução (run_id vem via ensureColumn, então não existe no CREATE base).
 db.exec('CREATE INDEX IF NOT EXISTS idx_articles_run ON articles(run_id)');
+// Piso legado: pendências por era (countPendingByEra) e as varreduras NULL-only filtram por
+// verify_status/summary_pt + run_id. Índices ESTREITOS respondem sem ler a linha (as colunas vêm
+// depois do `content`, e ler a linha atravessa o overflow do corpo). O de resumo é PARCIAL: só as
+// linhas sem resumo entram (centenas, não 15 mil).
+db.exec(`
+  CREATE INDEX IF NOT EXISTS idx_articles_verify_run ON articles(verify_status, run_id);
+  CREATE INDEX IF NOT EXISTS idx_articles_nosummary_run ON articles(run_id) WHERE summary_pt IS NULL;
+`);
 
 // ---- FTS5/BM25 sobre articles: metade LÉXICA da busca híbrida (gerador de candidatos) ----
 // Tabela external-content (content='articles'): guarda SÓ o índice invertido, lê o texto por
@@ -326,6 +384,61 @@ if (VEC_OK) {
     END;
   `);
 }
+
+// ---- piso "legado" (migração Jev, decisão 8: NÃO reprocessar o acervo que já existe) ----
+// As varreduras PAGAS (verify / classify / summarize / reclean, inclusive o --force) só enxergam
+// artigos DESTA era: run_id carimbado por uma run >= settings.jev_floor_run_id. O piso nasce no
+// boot como MAX(runs.id)+1 (INSERT OR IGNORE: fixado UMA vez) — então as runs anteriores à
+// migração e o acervo restaurado do git (15.502 linhas, todas com run_id NULL) ficam de fora por
+// construção. `run_id IS NOT NULL` vem ANTES do >= de propósito: mesmo com @floor errado/ausente
+// o NULL nunca entra. A ÚNICA porta de entrada é @includeLegacy = 1 (`finish|reclean
+// --include-legacy --yes`, que mostra contagem e custo antes). Um predicado só, em TODA varredura.
+export const LEGACY_FLOOR_KEY = 'jev_floor_run_id';
+const jevEraSql = (col) => `(${col} IS NOT NULL AND ${col} >= @floor)`;
+const legacyFloorSql = (col) => `(@includeLegacy = 1 OR ${jevEraSql(col)})`;
+const LEGACY_FLOOR = legacyFloorSql('run_id');
+
+// Varredura com piso: o wrapper preenche @floor (settings) e normaliza @includeLegacy p/ 0/1
+// (better-sqlite3 não binda boolean) e @lim (LIMIT -1 = sem limite). Aceita SÓ objeto: a
+// assinatura antiga `.all(lim)` LANÇA em vez de rodar sem piso por engano — e um chamador que
+// esquece o includeLegacy cai no seguro (legado fora). `floor` explícito só em teste.
+function sweepStmt(sql) {
+  const st = db.prepare(sql);
+  return {
+    all: (params) => {
+      if (params == null || typeof params !== 'object') {
+        throw new TypeError('varredura com piso legado: passe { lim, includeLegacy } (objeto), não um número');
+      }
+      return st.all({
+        ...params,
+        lim: Number.isFinite(params.lim) ? params.lim : -1,
+        floor: Number.isInteger(params.floor) ? params.floor : getLegacyFloor(),
+        includeLegacy: params.includeLegacy ? 1 : 0,
+      });
+    },
+  };
+}
+
+// Pendências por ERA (status + confirmação do --include-legacy): "desta era" = o que as
+// varreduras processam por padrão (MESMO predicado jevEraSql do LEGACY_FLOOR); "legado" = total
+// menos desta era. Uma subconsulta por contagem DE PROPÓSITO: cada uma casa com um índice estreito
+// (idx_articles_verify_run / idx_articles_nosummary_run / idx_articles_run) e responde sem tocar
+// na linha — o SUM(CASE…) numa passada lia colunas DEPOIS do `content` e atravessava as páginas de
+// overflow do corpo (~55 ms em 15,5 mil artigos; o getStatus roda a cada 1 s na TUI). Assim: ~2 ms.
+const JEV_ERA = jevEraSql('run_id');
+const NOT_CLASSIFIED = 'NOT EXISTS (SELECT 1 FROM classifications c WHERE c.article_id = a.id)';
+const countPendingByEraStmt = db.prepare(
+  `SELECT (SELECT COUNT(*) FROM articles) AS total,
+          (SELECT COUNT(*) FROM articles WHERE ${JEV_ERA}) AS jev_articles,
+          (SELECT COUNT(*) FROM articles WHERE summary_pt IS NULL) AS no_summary,
+          (SELECT COUNT(*) FROM articles WHERE summary_pt IS NULL AND ${JEV_ERA}) AS jev_summary,
+          (SELECT COUNT(*) FROM articles WHERE verify_status IS NULL) AS no_verify,
+          (SELECT COUNT(*) FROM articles WHERE verify_status IS NULL AND ${JEV_ERA}) AS jev_verify,
+          (SELECT COUNT(*) FROM articles WHERE verify_status = 'suspect') AS suspect,
+          (SELECT COUNT(*) FROM articles WHERE verify_status = 'suspect' AND ${JEV_ERA}) AS jev_suspect,
+          (SELECT COUNT(*) FROM articles a WHERE ${NOT_CLASSIFIED}) AS no_classify,
+          (SELECT COUNT(*) FROM articles a WHERE ${NOT_CLASSIFIED} AND ${jevEraSql('a.run_id')}) AS jev_classify`,
+);
 
 // UPDATE real do enriquecimento (ver stmts.enrichArticle logo abaixo, que é o wrapper com o
 // default de @run_id). Fica fora do literal porque o objeto não pode referenciar a si mesmo.
@@ -424,17 +537,34 @@ export const stmts = {
   setVerify: db.prepare(
     `UPDATE articles SET verify_status = @verify_status, verify_notes = @verify_notes WHERE id = @id`,
   ),
-  listArticlesToVerify: db.prepare(
+  // Varreduras com PISO LEGADO (sweepStmt): `.all({ lim, includeLegacy })` — ver LEGACY_FLOOR.
+  listArticlesToVerify: sweepStmt(
     `SELECT id, url, title, kind, blurb, content, content_source FROM articles
-      WHERE verify_status IS NULL ORDER BY id LIMIT ?`,
+      WHERE verify_status IS NULL AND ${LEGACY_FLOOR} ORDER BY id LIMIT @lim`,
   ),
-  listArticlesForReverify: db.prepare(
-    `SELECT id, url, title, kind, blurb, content, content_source FROM articles ORDER BY id LIMIT ?`,
+  // verify --force / finish --force (re-verifica TODOS desta era; o legado só com includeLegacy).
+  listArticlesForReverifySweep: sweepStmt(
+    `SELECT id, url, title, kind, blurb, content, content_source FROM articles
+      WHERE ${LEGACY_FLOOR} ORDER BY id LIMIT @lim`,
+  ),
+  // reextract (src/reextract.js): candidatos LEVES — id/url/run_id, SEM o corpo — com o MESMO piso
+  // legado das varreduras (re-clean + re-verify pagos sobre o acervo antigo só com
+  // --include-legacy --yes). O filtro --url e o --limit rodam em JS sobre esta lista e só as fichas
+  // escolhidas têm o corpo lido (getArticleForReextract): antes a lista trazia o conteúdo do
+  // acervo INTEIRO p/ usar 20 fichas. A contagem do portão do --include-legacy usa a mesma lista,
+  // então o número exibido é exatamente o que roda.
+  listReextractCandidates: sweepStmt(
+    `SELECT id, url, run_id FROM articles
+      WHERE content_source = 'target' AND ${LEGACY_FLOOR} ORDER BY id LIMIT @lim`,
+  ),
+  getArticleForReextract: db.prepare(
+    `SELECT id, url, title, kind, blurb, content, content_source FROM articles WHERE id = ?`,
   ),
   // reclean: só os vereditos 'suspect' (utilizáveis, mas com problemas) p/ um passe de limpeza forte.
-  listSuspectArticles: db.prepare(
+  // Com piso: os 4.517 suspect do acervo restaurado só entram com --include-legacy --yes.
+  listSuspectArticles: sweepStmt(
     `SELECT id, url, title, kind, blurb, content, content_source FROM articles
-      WHERE verify_status = 'suspect' ORDER BY id LIMIT ?`,
+      WHERE verify_status = 'suspect' AND ${LEGACY_FLOOR} ORDER BY id LIMIT @lim`,
   ),
   // reclean: atualiza SÓ o conteúdo limpo (passe Pro) + hash + marca cleaned; não toca em kind/blurb.
   setContentCleaned: db.prepare(
@@ -446,13 +576,14 @@ export const stmts = {
     `SELECT * FROM articles WHERE source_id = ? AND run_id = ? ORDER BY id`,
   ),
 
-  // resumos PT-BR (title_pt/summary_pt; LIMIT -1 = sem limite, como em classify)
+  // resumos PT-BR (title_pt/summary_pt; LIMIT -1 = sem limite, como em classify). Com piso legado.
   setSummary: db.prepare(`UPDATE articles SET title_pt = @title_pt, summary_pt = @summary_pt WHERE id = @id`),
-  listArticlesNeedingSummary: db.prepare(
-    `SELECT id, url, title, content FROM articles WHERE summary_pt IS NULL ORDER BY id LIMIT ?`,
+  listArticlesNeedingSummary: sweepStmt(
+    `SELECT id, url, title, content FROM articles
+      WHERE summary_pt IS NULL AND ${LEGACY_FLOOR} ORDER BY id LIMIT @lim`,
   ),
-  listArticlesForResummarize: db.prepare(
-    `SELECT id, url, title, content FROM articles ORDER BY id LIMIT ?`,
+  listArticlesForResummarize: sweepStmt(
+    `SELECT id, url, title, content FROM articles WHERE ${LEGACY_FLOOR} ORDER BY id LIMIT @lim`,
   ),
   countSummaries: db.prepare(`SELECT COUNT(*) c FROM articles WHERE summary_pt IS NOT NULL`),
 
@@ -710,6 +841,45 @@ export const stmts = {
       GROUP BY stage, status ORDER BY stage, status`,
   ),
 
+  // jev_decisions (log central das decisões do Jev; escrito em lote por events.logDecision)
+  insertJevDecision: db.prepare(
+    `INSERT INTO jev_decisions (run_id, stage, subject, url, qid, value, p, certainty, threshold,
+                                outcome, reason, fb_value, agree, model, sample_rate)
+     VALUES (@run_id, @stage, @subject, @url, @qid, @value, @p, @certainty, @threshold,
+             @outcome, @reason, @fb_value, @agree, @model, @sample_rate)`,
+  ),
+  // Listagem/exportação (inspect --decisions, recalibração offline): filtros ANULÁVEIS (NULL =
+  // desligado) p/ um prepared statement só; @lim = -1 devolve tudo (LIMIT -1 do SQLite).
+  listJevDecisions: db.prepare(
+    `SELECT * FROM jev_decisions
+      WHERE (@runId IS NULL OR run_id = @runId)
+        AND (@stage IS NULL OR stage = @stage)
+        AND (@qid IS NULL OR qid = @qid)
+        AND (@outcome IS NULL OR outcome = @outcome)
+      ORDER BY id LIMIT @lim`,
+  ),
+  // Contagem por (estágio, desfecho) de uma run. `n` = linhas gravadas; `est` = total ESTIMADO
+  // (com JEV_TRACE=min os aceitos entram por amostra: cada linha vale 1/sample_rate decisões).
+  countJevDecisionsByStageOutcome: db.prepare(
+    `SELECT stage, outcome, COUNT(*) n,
+            CAST(ROUND(SUM(1.0 / CASE WHEN sample_rate > 0 THEN sample_rate ELSE 1 END)) AS INTEGER) est,
+            AVG(certainty) avg_certainty
+       FROM jev_decisions WHERE run_id = ?
+      GROUP BY stage, outcome ORDER BY stage, outcome`,
+  ),
+  // Motivos dos desfechos NÃO-aceitos (fallback/default/error/shadow) de uma run.
+  countJevDecisionReasonsForRun: db.prepare(
+    `SELECT stage, outcome, COALESCE(reason, '') reason, COUNT(*) n
+       FROM jev_decisions WHERE run_id = ? AND outcome <> 'accept'
+      GROUP BY stage, outcome, reason ORDER BY n DESC, stage, outcome`,
+  ),
+  // Os fallbacks de MENOR certeza de uma run (onde o limiar está mordendo) — inspect.
+  listJevLowestCertaintyForRun: db.prepare(
+    `SELECT * FROM jev_decisions
+      WHERE run_id = @runId AND outcome <> 'accept'
+      ORDER BY certainty IS NULL, certainty ASC, id LIMIT @lim`,
+  ),
+
   // inspect (auditoria de uma run: artigos com veredito + agrupamento por issue de origem)
   getRunById: db.prepare(
     `SELECT r.*,
@@ -748,8 +918,8 @@ export const stmts = {
   // Serve a UM propósito: o guard de backup das operações destrutivas precisa distinguir o
   // `createBackup() === null` LEGÍTIMO ("banco vazio, não havia o que copiar" — pode seguir) da
   // FALHA de backup (disco cheio/permissão — ABORTA a destruição). A lista de tabelas é a MESMA
-  // do DATA_TABLES do src/backup.js: "0 artigos" não é "0 dados" (selectors e llm_usage saíram
-  // de chamadas de IA que custaram dinheiro).
+  // do DATA_TABLES do src/backup.js: "0 artigos" não é "0 dados" (selectors, llm_usage e
+  // jev_decisions saíram de chamadas de IA que custaram dinheiro).
   hasAnyData: db.prepare(
     `SELECT (EXISTS(SELECT 1 FROM articles)
           OR EXISTS(SELECT 1 FROM sources)
@@ -762,7 +932,8 @@ export const stmts = {
           OR EXISTS(SELECT 1 FROM classification_uncovered)
           OR EXISTS(SELECT 1 FROM llm_usage)
           OR EXISTS(SELECT 1 FROM events)
-          OR EXISTS(SELECT 1 FROM searches)) AS x`,
+          OR EXISTS(SELECT 1 FROM searches)
+          OR EXISTS(SELECT 1 FROM jev_decisions)) AS x`,
   ),
 
   // remoção COMPLETA de uma fonte (descadastra de vez, além do purge): ids dos artigos p/ decidir
@@ -818,16 +989,17 @@ export const stmts = {
   // NÃO há curadoria (kind NULL — itens de fontes listing/avulsos). O WHERE protege o kind
   // curado dos roundups de fontes index: a curadoria é a autoridade, nunca é sobrescrita.
   setKindIfNull: db.prepare(`UPDATE articles SET kind = @kind WHERE id = @id AND kind IS NULL`),
-  listArticlesNeedingClassification: db.prepare(
+  // Com piso legado (sweepStmt): os ~250 restaurados sem classificação só entram com includeLegacy.
+  listArticlesNeedingClassification: sweepStmt(
     `SELECT a.id, a.url, a.title, a.content
        FROM articles a
        LEFT JOIN classifications c ON c.article_id = a.id
-      WHERE c.article_id IS NULL
+      WHERE c.article_id IS NULL AND ${legacyFloorSql('a.run_id')}
       ORDER BY a.id
-      LIMIT ?`,
+      LIMIT @lim`,
   ),
-  listArticlesForReclassify: db.prepare(
-    `SELECT id, url, title, content FROM articles ORDER BY id LIMIT ?`,
+  listArticlesForReclassify: sweepStmt(
+    `SELECT id, url, title, content FROM articles WHERE ${LEGACY_FLOOR} ORDER BY id LIMIT @lim`,
   ),
   countClassifications: db.prepare(`SELECT COUNT(*) c FROM classifications`),
   topUncovered: db.prepare(
@@ -842,8 +1014,10 @@ export const stmts = {
     `UPDATE runs SET status = @status, finished_at = datetime('now') WHERE id = @id`,
   ),
   insertLlmUsage: db.prepare(
-    `INSERT INTO llm_usage (run_id, stage, model, prompt_tokens, completion_tokens, cost_usd)
-     VALUES (@run_id, @stage, @model, @prompt_tokens, @completion_tokens, @cost_usd)`,
+    `INSERT INTO llm_usage (run_id, stage, model, prompt_tokens, completion_tokens, cost_usd,
+                            engine, decisions, fallback_reason, latency_ms, requested_model)
+     VALUES (@run_id, @stage, @model, @prompt_tokens, @completion_tokens, @cost_usd,
+             @engine, @decisions, @fallback_reason, @latency_ms, @requested_model)`,
   ),
   sumUsageForRun: db.prepare(
     `SELECT COALESCE(SUM(cost_usd), 0) usd, COUNT(*) n FROM llm_usage WHERE run_id = ?`,
@@ -852,6 +1026,35 @@ export const stmts = {
   // média REAL do custo por chamada de um estágio (estimativa exibida ANTES de rodar uma busca)
   avgUsageByStage: db.prepare(
     `SELECT COALESCE(AVG(cost_usd), 0) avg, COUNT(*) n FROM llm_usage WHERE stage = ? AND cost_usd > 0`,
+  ),
+  // Mesma média, mas SÓ do modelo pedido (@model NULL = todos): quando um estágio troca de modelo
+  // (deepseek → Gemini, chat → Jev), a média do modelo antigo mentiria na estimativa. Casa pelo
+  // slug PEDIDO (requested_model) ou, em linhas antigas sem ele, pelo resolvido.
+  avgUsageByStageModel: db.prepare(
+    `SELECT COALESCE(AVG(cost_usd), 0) avg, COUNT(*) n FROM llm_usage
+      WHERE stage = @stage AND cost_usd > 0
+        AND (@model IS NULL OR requested_model = @model OR model = @model)`,
+  ),
+  // Custo por (estágio, motor) de uma run — "custo por motor" do inspect/extrato. Linha antiga sem
+  // engine é deduzida pelo slug (typesafe/* = jev), a mesma regra do engineOf do budget.js.
+  usageByStageEngine: db.prepare(
+    `SELECT stage,
+            COALESCE(engine, CASE WHEN model LIKE 'typesafe/%' THEN 'jev' ELSE 'chat' END) engine,
+            COUNT(*) n,
+            COALESCE(SUM(decisions), 0) decisions,
+            COALESCE(SUM(cost_usd), 0) usd,
+            SUM(CASE WHEN fallback_reason IS NOT NULL THEN 1 ELSE 0 END) fallback_calls,
+            COALESCE(SUM(CASE WHEN fallback_reason IS NOT NULL THEN cost_usd END), 0) fallback_usd,
+            AVG(latency_ms) avg_latency_ms,
+            MAX(latency_ms) max_latency_ms
+       FROM llm_usage WHERE run_id = ?
+      GROUP BY 1, 2 ORDER BY usd DESC`,
+  ),
+  // Acumulado all-time por motor (status/extrato).
+  sumUsageByEngine: db.prepare(
+    `SELECT COALESCE(engine, CASE WHEN model LIKE 'typesafe/%' THEN 'jev' ELSE 'chat' END) engine,
+            COUNT(*) n, COALESCE(SUM(decisions), 0) decisions, COALESCE(SUM(cost_usd), 0) usd
+       FROM llm_usage GROUP BY 1 ORDER BY usd DESC`,
   ),
   usageByStage: db.prepare(
     `SELECT stage, COUNT(*) n, COALESCE(SUM(cost_usd), 0) usd
@@ -973,7 +1176,85 @@ export const stmts = {
   ),
   countArticleTags: db.prepare(`SELECT COUNT(*) c FROM article_tags`),
   countFrontier: db.prepare(`SELECT COUNT(*) c FROM frontier`),
+
+  // settings (chave/valor do banco). value é TEXT: quem lê converte (ver getLegacyFloor).
+  getSetting: db.prepare(`SELECT value FROM settings WHERE key = ?`),
+  setSetting: db.prepare(
+    `INSERT INTO settings (key, value) VALUES (@key, @value)
+     ON CONFLICT(key) DO UPDATE SET value = excluded.value`,
+  ),
+  deleteSetting: db.prepare(`DELETE FROM settings WHERE key = ?`),
+  // Piso legado = a PRÓXIMA run (MAX(runs.id)+1; 1 numa base sem runs). OR IGNORE: fixado uma vez
+  // e nunca "anda" sozinho — senão cada boot empurraria as runs desta era p/ o legado.
+  seedLegacyFloor: db.prepare(
+    `INSERT OR IGNORE INTO settings (key, value) SELECT ?, COALESCE(MAX(id), 0) + 1 FROM runs`,
+  ),
+  // pendências por era (status + confirmação do --include-legacy). Use countPendingByEra().
+  countPendingByEra: {
+    get: (params = {}) =>
+      countPendingByEraStmt.get({ floor: Number.isInteger(params.floor) ? params.floor : getLegacyFloor() }),
+  },
 };
+
+// Boot: semeia o piso legado se ainda não existe. Checa antes p/ não abrir transação de escrita
+// a cada processo (o INSERT OR IGNORE sozinho já seria idempotente, mas pega o lock de escrita).
+if (!stmts.getSetting.get(LEGACY_FLOOR_KEY)) stmts.seedLegacyFloor.run(LEGACY_FLOOR_KEY);
+
+/**
+ * Piso legado vigente (menor run_id que as varreduras processam por padrão). Linha ausente ou
+ * ilegível: re-semeia pela MESMA regra do boot (MAX(runs.id)+1 — o lado seguro: na dúvida, o que
+ * já existe é legado) e relê; se nem assim, 1. Em qualquer caso o SQL barra run_id NULL.
+ */
+export function getLegacyFloor() {
+  const read = () => {
+    const n = Number(stmts.getSetting.get(LEGACY_FLOOR_KEY)?.value);
+    return Number.isInteger(n) && n >= 1 ? n : null;
+  };
+  const v = read();
+  if (v != null) return v;
+  try {
+    stmts.deleteSetting.run(LEGACY_FLOOR_KEY); // valor corrompido não bloqueia o OR IGNORE
+    stmts.seedLegacyFloor.run(LEGACY_FLOOR_KEY);
+  } catch (e) {
+    warn(`piso legado: não consegui re-semear (${e.message}) — usando 1 (run_id NULL segue fora)`);
+  }
+  return read() ?? 1;
+}
+
+/** true = a linha é do acervo LEGADO (run_id NULL ou anterior ao piso): fora do pós-processamento pago. */
+export function isLegacyRow(row, floor = getLegacyFloor()) {
+  const id = row?.run_id;
+  return id == null || !(Number(id) >= floor);
+}
+
+/**
+ * Pendências de pós-processamento por era, prontas p/ exibir: `jev` = o que as varreduras
+ * processam por padrão; `legacy` = o que o piso deixa de fora (só entra com --include-legacy).
+ * Retorna { floor, total, summaries, jev: {articles, verify, summary, classify, suspect}, legacy: {…} }.
+ */
+export function countPendingByEra() {
+  const floor = getLegacyFloor();
+  const r = stmts.countPendingByEra.get({ floor });
+  return {
+    floor,
+    total: r.total,
+    summaries: r.total - r.no_summary,
+    jev: {
+      articles: r.jev_articles,
+      verify: r.jev_verify,
+      summary: r.jev_summary,
+      classify: r.jev_classify,
+      suspect: r.jev_suspect,
+    },
+    legacy: {
+      articles: r.total - r.jev_articles,
+      verify: r.no_verify - r.jev_verify,
+      summary: r.no_summary - r.jev_summary,
+      classify: r.no_classify - r.jev_classify,
+      suspect: r.suspect - r.jev_suspect,
+    },
+  };
+}
 
 // Statements da busca vetorial: só quando o sqlite-vec carregou (senão referenciariam uma tabela
 // inexistente). rowid = articles.id (BigInt no bind — o vec0 exige inteiro); embedding = BLOB float32.
@@ -1012,12 +1293,18 @@ export function wipeAll() {
     'selectors',
     'frontier',
     'events',
+    'jev_decisions',
     'llm_usage',
     'runs',
     'sources',
   ];
   const tx = db.transaction(() => {
     for (const t of tables) db.prepare(`DELETE FROM ${t}`).run();
+    // Piso legado: com `runs` zerada o rowid RECOMEÇA em 1 (sem AUTOINCREMENT). Um piso antigo
+    // (ex.: 51) jogaria as runs 1..50 do recomeço no "legado" e as varreduras parariam de
+    // processar o que é novo. Re-semeia na base vazia (=> 1); `settings` em si não é acervo.
+    stmts.deleteSetting.run(LEGACY_FLOOR_KEY);
+    stmts.seedLegacyFloor.run(LEGACY_FLOOR_KEY);
   });
   tx();
   db.exec('VACUUM');
@@ -1269,8 +1556,9 @@ export function restoreSourceByName(name, baseUrl = null, type = null) {
  * `classifications` NÃO é escrita por padrão. O snapshot só carrega as tags: confidences,
  * uncovered, domain_confidence, taxonomy_version e model_used não existem nele, e uma linha
  * inventada seria indistinguível de uma classificação real. Sem a linha, as tags ficam válidas
- * p/ busca/browse e `listArticlesNeedingClassification` re-seleciona o artigo — o próximo
- * classify refaz a classificação COMPLETA (custa LLM, mas o dado fica íntegro).
+ * p/ busca/browse e `listArticlesNeedingClassification` o torna ELEGÍVEL — mas o artigo
+ * restaurado tem run_id NULL, então o piso legado o deixa fora da varredura padrão: só um
+ * `finish --include-legacy --yes` refaz a classificação COMPLETA (custa LLM; o dado fica íntegro).
  * `markClassified: true` inverte o trade-off: grava a linha com `status = 'restored'` e
  * `model_used = 'restore'` (rótulos EXPLÍCITOS, nunca 'done'/um modelo real) p/ o sweep não
  * re-classificar o acervo restaurado inteiro.

@@ -73,18 +73,26 @@ export async function verifyArticleRow(a, { runId = null } = {}) {
   return { verdict, problems };
 }
 
-/** Verifica os artigos sem veredito (ou todos, com force). Retorna { verified, byVerdict }. */
-export async function verifyPending({ limit = Infinity, force = false } = {}) {
+/**
+ * Verifica os artigos sem veredito (ou todos, com force). Retorna { verified, byVerdict }.
+ * Piso legado (db.js LEGACY_FLOOR): só artigos DESTA era; includeLegacy=true (o `--include-legacy
+ * --yes` do finish) abre a porta p/ o acervo anterior — nunca é o default.
+ */
+export async function verifyPending({ limit = Infinity, force = false, includeLegacy = false } = {}) {
   const lim = Number.isFinite(limit) ? limit : -1; // SQLite: LIMIT -1 = sem limite
+  const params = { lim, includeLegacy };
   const rows = force
-    ? stmts.listArticlesForReverify.all(lim)
-    : stmts.listArticlesToVerify.all(lim);
+    ? stmts.listArticlesForReverifySweep.all(params)
+    : stmts.listArticlesToVerify.all(params);
   if (!rows.length) {
     log('verify: nada a verificar.');
     return { verified: 0, byVerdict: {} };
   }
   const runId = getBudgetState().runId ?? null; // events apontam p/ a run que VERIFICOU
-  log(`verify: ${rows.length} artigo(s) — veredito ok|suspect|junk, force=${force}.`);
+  log(
+    `verify: ${rows.length} artigo(s) — veredito ok|suspect|junk, force=${force}` +
+      `${includeLegacy ? ', +legado' : ''}.`,
+  );
 
   const gate = pLimit(stageWindow(VERIFY_CONCURRENCY));
   const byVerdict = {};
@@ -95,7 +103,7 @@ export async function verifyPending({ limit = Infinity, force = false } = {}) {
       gate(async () => {
         if (shouldStop()) {
           skipped++;
-          return; // orçamento: a linha NULL segue retomável via `ncrawl verify`
+          return; // orçamento: a linha NULL segue retomável via `ncrawl finish`
         }
         try {
           const { verdict, problems } = await verifyArticleRow(a, { runId });
@@ -118,7 +126,7 @@ export async function verifyPending({ limit = Infinity, force = false } = {}) {
   const parts = Object.entries(byVerdict).map(([k, n]) => `${k}=${n}`).join(' ');
   log(
     `verify concluído: ${done}/${rows.length} (${parts || '—'})` +
-      `${skipped ? ` (${skipped} pulados por orçamento — retome com \`ncrawl verify\`)` : ''}.`,
+      `${skipped ? ` (${skipped} pulados por orçamento — retome com \`ncrawl finish\`)` : ''}.`,
   );
   return { verified: done, byVerdict };
 }
@@ -128,16 +136,18 @@ export async function verifyPending({ limit = Infinity, force = false } = {}) {
  * a melhoria da seção 7: um "falso-sujo" auditável pode virar 'ok' com uma limpeza melhor. Mesma
  * mecânica do pré-save (junk_spans -> remoção local exata + guarda anti over-deletion + texto puro),
  * agora com o modelo caro. Idempotente/retomável (o item segue 'suspect' se pular por orçamento).
+ * Piso legado: só os suspect DESTA era; includeLegacy=true (`reclean --include-legacy --yes`)
+ * inclui os do acervo anterior.
  */
-export async function recleanSuspects({ limit = Infinity } = {}) {
+export async function recleanSuspects({ limit = Infinity, includeLegacy = false } = {}) {
   const lim = Number.isFinite(limit) ? limit : -1;
-  const rows = stmts.listSuspectArticles.all(lim);
+  const rows = stmts.listSuspectArticles.all({ lim, includeLegacy });
   if (!rows.length) {
     log('reclean: nenhum suspect a reprocessar.');
     return { recleaned: 0, upgraded: 0 };
   }
   const runId = getBudgetState().runId ?? null;
-  log(`reclean: ${rows.length} suspect(s) — limpeza forte (Pro) + re-verify.`);
+  log(`reclean: ${rows.length} suspect(s) — limpeza forte (Pro) + re-verify${includeLegacy ? ' (+legado)' : ''}.`);
 
   const gate = pLimit(stageWindow(VERIFY_CONCURRENCY));
   let recleaned = 0;

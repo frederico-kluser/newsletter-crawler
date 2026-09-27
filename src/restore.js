@@ -1033,9 +1033,11 @@ function sourceHints() {
  *   - IDS DO SNAPSHOT MAIS NOVO PRESERVADOS; os demais registros recebem ids alocados acima do
  *     maior id já em uso (max entre o snapshot novo e o que a base já tem) — zero colisão.
  *   - `restoreTags(..., { markClassified: true })` é OBRIGATÓRIO e não-opcional por default: sem
- *     ele `listArticlesNeedingClassification` re-seleciona o acervo INTEIRO e o próximo
- *     crawl/finish re-classificaria 15 mil artigos × 9 facetas de LLM — o "recomeçar do zero"
- *     que o restore existe para impedir, só que na conta do usuário.
+ *     ele `listArticlesNeedingClassification` torna o acervo INTEIRO elegível e um
+ *     `finish --include-legacy --yes` re-classificaria 15 mil artigos × 9 facetas de LLM — o
+ *     "recomeçar do zero" que o restore existe para impedir, só que na conta do usuário. (O piso
+ *     legado da migração Jev já tira os restaurados — run_id NULL — da varredura PADRÃO; a linha
+ *     'restored' continua sendo a defesa de quem abre a porta do legado.)
  *   - `markUrlDone` por artigo (senão o próximo crawl re-descobre tudo) e `restorePage` por
  *     `issue_url` DISTINTA quando o snapshot carrega o campo (degrada em silêncio sem ele).
  *   - TUDO numa transação só (15 mil linhas com fsync por item seria inviável).

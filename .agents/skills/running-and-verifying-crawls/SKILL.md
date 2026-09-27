@@ -27,5 +27,5 @@ Running, smoke-testing, reproducing, or verifying the crawler end to end after a
 
 Knowledge deps to load first: calling-the-llm-layer, fetching-and-extracting, persisting-and-orchestrating.
 
-## <evolution>
-On completion, if a new verification step proved necessary AND you confirmed it by actually running it, update THIS skill's Procedure via the memory pipeline (replace the relevant step; keep it lean). Never record a step you did not run. See meta-skill-evolution.
+## registo de aprendizado (memória CoALA local)
+On completion, if a new verification step proved necessary AND you confirmed it by actually running it, update THIS skill's Procedure via the memory pipeline (replace the relevant step; keep it lean). Never record a step you did not run. See a memória CoALA local (`coala.py add`).

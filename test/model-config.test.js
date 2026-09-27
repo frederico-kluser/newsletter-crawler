@@ -1,6 +1,7 @@
 // Contrato de RESOLUÇÃO DE MODELOS pós-troca p/ deepseek/deepseek-v4-flash-0731 (commit 54c5c68):
 // slug único em TODOS os estágios, efforts preservados (xhigh/high/medium), contrato do
-// config/models.json, o gotcha STAGE_KEYS do articleReclean e o seed de orçamento do slug novo.
+// config/models.json, a resolução do articleReclean (agora EM STAGE_KEYS, models.json = high) e o
+// seed de orçamento do slug novo.
 // Env limpo ANTES do import dinâmico: config.js lê process.env no LOAD (MODELS/STAGE_MODELS são
 // pré-computados) e ainda sobrescreve com o .env do NC_HOME temporário (vazio) — o .env do usuário
 // real NÃO pode vazar para cá (mesmo padrão de test/budget.test.js / test/config.key.test.js).
@@ -50,6 +51,12 @@ const EXPECTED_EFFORTS = {
   verifyRecord: 'high', // verificação pós-cadastro: veredito ok|suspect|junk
   dateSelector: 'high', // seletor de DATA da listagem (CSS + regex) lendo a página real
   detectType: 'high', // detecção automática do tipo da fonte (index|listing) ao adicionar
+  articleReclean: 'high', // re-limpeza FORTE dos suspect — EM STAGE_KEYS, resolve do models.json
+  // Etapas chat/Gemini da navegação (W5b): registradas em STAGE_KEYS mas SEM chave no models.json
+  // até as ondas delas — resolvem pelo default (Pro/xhigh).
+  pageAssess: 'xhigh',
+  linkPick: 'xhigh',
+  navAutopilot: 'xhigh',
 };
 
 test('slug único em TODOS os estágios de STAGE_KEYS (env limpo)', () => {
@@ -174,14 +181,18 @@ test('classify:<faceta>: 7 facetas com override no models.json = slug novo + med
   assert.deepEqual(classifyFacetModel('nao-existe'), { model: SWAPPED_SLUG, effort: 'high' });
 });
 
-test('articleReclean NÃO está em STAGE_KEYS -> cai no DEFAULT (slug novo + xhigh), ignorando o high do models.json', () => {
-  // GOTCHA conhecido (skill calling-the-llm-layer): a chave articleReclean existe no models.json
-  // com effort high, mas o estágio NÃO está em STAGE_KEYS — stageModel resolve pelo default
-  // (Pro/xhigh). Verificado em runtime 2026-08-13: STAGE_KEYS.includes('articleReclean') === false.
-  // Este teste CONGELA o comportamento REAL: se articleReclean entrar em STAGE_KEYS, a resolução
-  // passa a vir do arquivo (high) e estes asserts precisam mudar DE PROPÓSITO.
-  assert.equal(STAGE_KEYS.includes('articleReclean'), false);
-  assert.deepEqual(stageModel('articleReclean'), { model: SWAPPED_SLUG, effort: 'xhigh' });
-  // Mesmo fallthrough do default para qualquer estágio desconhecido.
+test('articleReclean ESTÁ em STAGE_KEYS -> resolve do models.json (high), não do default (xhigh)', () => {
+  // HISTÓRIA (skill calling-the-llm-layer): articleReclean ficou ANOS fora de STAGE_KEYS e o
+  // stageModel caía no default (Pro/xhigh), ignorando o 'high' do models.json. A migração Jev
+  // (onda0) colocou o estágio NA lista — "na lista, o arquivo vale" (src/config.js) — então a
+  // resolução agora vem do models.json: { model, effort: 'high' }. Este teste CONGELA o
+  // comportamento NOVO.
+  assert.equal(STAGE_KEYS.includes('articleReclean'), true);
+  assert.deepEqual(stageModel('articleReclean'), { model: SWAPPED_SLUG, effort: 'high' });
+  // Estágio desconhecido continua caindo no default (Pro/xhigh).
   assert.deepEqual(stageModel('stageInexistente'), { model: SWAPPED_SLUG, effort: 'xhigh' });
+  // As etapas de navegação (W5b) ainda sem chave no models.json resolvem pelo default (xhigh).
+  for (const s of ['pageAssess', 'linkPick', 'navAutopilot']) {
+    assert.deepEqual(stageModel(s), { model: SWAPPED_SLUG, effort: 'xhigh' }, `stageModel("${s}")`);
+  }
 });

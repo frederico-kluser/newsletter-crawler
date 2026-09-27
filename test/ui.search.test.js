@@ -3,7 +3,7 @@
 // Navegação por LABEL (helpers/ink.js): imune a reordenação do menu. Rode com: npm test.
 import { test, after } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import { render } from 'ink-testing-library';
@@ -13,6 +13,13 @@ import { keys, selectMenuItem, typeText, waitForFrame } from './helpers/ink.js';
 // NC_HOME real, `npm test` abriria o crawler.db do USUÁRIO em ESCRITA). Import dinâmico porque o
 // `import` estático é IÇADO — rodaria antes desta linha.
 process.env.NC_HOME = mkdtempSync(path.join(os.tmpdir(), 'nc-ui-search-'));
+// Chave DUMMY no .env do NC_HOME temporário (o .env do NC_HOME vence o shell — determinístico em
+// QUALQUER máquina): o fluxo de busca tem o portão HAS_LLM antes do prompt; sem chave o teste só
+// veria o alerta. Sem chave real o teste é sempre offline — nenhuma chamada LLM acontece aqui.
+writeFileSync(
+  path.join(process.env.NC_HOME, '.env'),
+  'OPENROUTER_API_KEY=nc-test-dummy\nDEEPSEEK_API_KEY=nc-test-dummy\nLLM_PROVIDER=\n',
+);
 const { html } = await import('../src/ui/html.js');
 const { default: App } = await import('../src/ui/App.js');
 const { db } = await import('../src/db.js');

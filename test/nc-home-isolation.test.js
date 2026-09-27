@@ -208,6 +208,9 @@ const DYNAMIC_RE = new RegExp(`\\bimport\\s*\\(\\s*${SPEC}\\s*\\)`, 'gd');
 const REQUIRE_RE = new RegExp(`\\brequire\\s*\\(\\s*${SPEC}\\s*\\)`, 'gd');
 const CREATE_REQUIRE_RE = new RegExp(`\\bcreateRequire\\s*\\([^()]*\\)\\s*\\(\\s*${SPEC}\\s*\\)`, 'gd');
 const NC_HOME_SET_RE = /process\.env\.NC_HOME\s*=(?!=)/g;
+// sandboxEnv (test/helpers/env.js) também isola (seta NC_HOME para um tmpdir novo por dentro) —
+// sem reconhecê-lo, todo teste que usa o helper seria acusado de "import sem setar NC_HOME antes".
+const SANDBOX_ENV_RE = /\bsandboxEnv\s*\(/g;
 // Marcadores de que o NC_HOME NÃO saiu da casa real (o critério é "está isolado?", não "usou
 // mkdtempSync"): apontar para o home do usuário, ou deixar vazio/undefined — o config.js cai no
 // default ~/.newsletter-crawler quando process.env.NC_HOME é falsy.
@@ -318,6 +321,14 @@ function ncHomeSets(code, values, depths) {
     else if (NOT_ISOLATED_RE.test(rhs) || !rhs) verdict = 'vazio';
     sets.push({ at, line: lineOf(code, at), depth: depths[at], rhs, verdict });
   }
+  // sandboxEnv() (test/helpers/env.js) é o helper SANCTIONADO de sandbox: cria o tmpdir, aponta o
+  // NC_HOME para ele e semeia o .env neutralizado — conta como "set ok" na posição da CHAMADA
+  // (a profundidade de chaves decide se ela roda antes do import perigoso, igual ao assignment).
+  for (const m of code.matchAll(SANDBOX_ENV_RE)) {
+    const at = m.index;
+    sets.push({ at, line: lineOf(code, at), depth: depths[at], rhs: 'sandboxEnv(...)', verdict: 'ok' });
+  }
+  sets.sort((a, b) => a.at - b.at);
   return sets;
 }
 

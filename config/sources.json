@@ -29,6 +29,31 @@
       "name": "Golang Weekly",
       "url": "https://golangweekly.com/issues",
       "type": "index"
+    },
+    {
+      "name": "The Rundown",
+      "url": "https://www.therundown.ai/articles",
+      "type": "listing"
+    },
+    {
+      "name": "This Week in Rust",
+      "url": "https://this-week-in-rust.org/blog/archives/index.html",
+      "type": "index"
+    },
+    {
+      "name": "Superhuman",
+      "url": "https://www.superhuman.ai/archive",
+      "type": "index"
+    },
+    {
+      "name": "llmnews.ai",
+      "url": "https://llmnews.ai",
+      "type": "listing"
+    },
+    {
+      "name": "AI Weekly",
+      "url": "https://aiweekly.co/issues",
+      "type": "listing"
     }
   ]
 }

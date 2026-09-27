@@ -24,21 +24,28 @@ export async function summarizeArticleRow(a) {
 }
 
 /**
- * Resume os artigos sem summary_pt (ou todos, com force). Retorna { summarized, total }.
- * Piso legado (db.js LEGACY_FLOOR): só artigos DESTA era — resumir o acervo inteiro custaria
- * ~US$ 46; includeLegacy=true (o `--include-legacy --yes` do finish) é a única porta.
+ * Resume os artigos sem summary_pt (ou todos, com force). `runId` escopa o sweep às fichas DESTA
+ * run (pós-crawl); sem ele varre o pendente global (usado pelo `finish`). Piso legado
+ * (db.js LEGACY_FLOOR): só artigos DESTA era — resumir o acervo inteiro custaria ~US$ 46;
+ * includeLegacy=true (o `--include-legacy --yes` do finish) é a única porta.
+ * Retorna { summarized, total }.
  */
-export async function summarizePending({ limit = Infinity, force = false, includeLegacy = false } = {}) {
+export async function summarizePending({ limit = Infinity, force = false, includeLegacy = false, runId = null } = {}) {
   const lim = Number.isFinite(limit) ? limit : -1; // SQLite: LIMIT -1 = sem limite
-  const params = { lim, includeLegacy };
+  const params = { lim, includeLegacy, runId };
   const rows = force
     ? stmts.listArticlesForResummarize.all(params)
-    : stmts.listArticlesNeedingSummary.all(params);
+    : runId != null
+      ? stmts.listArticlesNeedingSummaryForRun.all(params)
+      : stmts.listArticlesNeedingSummary.all(params);
   if (!rows.length) {
     log('summarize: nada a resumir.');
     return { summarized: 0, total: 0 };
   }
-  log(`summarize: ${rows.length} artigo(s) — PT-BR, force=${force}${includeLegacy ? ', +legado' : ''}.`);
+  log(
+    `summarize: ${rows.length} artigo(s)${runId != null ? ` (run ${runId})` : ''} — PT-BR, force=${force}` +
+      `${includeLegacy ? ', +legado' : ''}.`,
+  );
 
   // Janela = min(override de env, capacidade atual da lane llm do governador).
   const gate = pLimit(stageWindow(SUMMARIZE_CONCURRENCY));

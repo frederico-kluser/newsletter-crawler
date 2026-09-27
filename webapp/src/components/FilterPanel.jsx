@@ -9,9 +9,10 @@ function daysAgoIso(days) {
 
 /**
  * Conteúdo dos filtros — COMPARTILHADO entre a Sidebar (desktop) e o FilterDrawer (mobile).
- * Fontes (multi-seleção), rodízio de fontes, período (presets 7/30 dias), verificação e as 9 facetas.
+ * Fontes (multi-seleção), período (presets 7/30 dias), verificação e as 9 facetas.
+ * A ORDEM de exibição não mora aqui: a lista é sempre data DESC com as fontes misturadas.
  */
-export default function FilterPanel({ meta, filters, dispatch, facetCounts, mix, onMixChange }) {
+export default function FilterPanel({ meta, filters, dispatch, facetCounts }) {
   const STR = useStrings();
   const { FACET_LABEL, VERIFY_LABEL } = STR;
   const set = (key, value) => dispatch({ type: 'set', key, value });
@@ -47,15 +48,6 @@ export default function FilterPanel({ meta, filters, dispatch, facetCounts, mix,
           <span className="filter-hint">{STR.filterSourcesHint}</span>
         )}
       </fieldset>
-
-      {/* Ordem de exibição: rodízio entre fontes dentro de cada data (ligado) vs agrupado por fonte. */}
-      <label className="filter-block switch-row">
-        <input type="checkbox" checked={mix} onChange={(e) => onMixChange(e.target.checked)} />
-        <span>
-          <span className="facet-label">{STR.mixSources}</span>
-          <span className="filter-hint">{STR.mixSourcesHint}</span>
-        </span>
-      </label>
 
       <fieldset className="filter-block">
         <legend className="facet-label">{STR.filterPeriod}</legend>
@@ -103,6 +95,19 @@ export default function FilterPanel({ meta, filters, dispatch, facetCounts, mix,
             </option>
           ))}
         </select>
+      </label>
+
+      {/* Descartados (junk) ficam fora por padrão: não são matéria. O checkbox os traz de volta. */}
+      <label className="filter-block switch-row">
+        <input
+          type="checkbox"
+          checked={filters.showJunk === true}
+          onChange={(e) => set('showJunk', e.target.checked)}
+        />
+        <span>
+          <span className="facet-label">{STR.showJunk}</span>
+          <span className="filter-hint">{STR.showJunkHint}</span>
+        </span>
       </label>
 
       <div className="filter-block">

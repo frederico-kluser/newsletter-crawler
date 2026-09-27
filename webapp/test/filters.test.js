@@ -196,3 +196,13 @@ test('countActiveFilters conta fonte/período/verify/tags (kind fica no Segmente
     5,
   );
 });
+
+test('applyFilters: DESCARTADOS (junk) ficam FORA por padrão — showJunk e verify=junk os trazem', () => {
+  const ok = art({ verify_status: 'ok' });
+  const sus = art({ verify_status: 'suspect' });
+  const junk = art({ verify_status: 'junk' });
+  const all = [ok, sus, junk];
+  assert.deepEqual(ids(applyFilters(all, f(), [])), [ok.id, sus.id], 'junk fora da lista por padrão');
+  assert.deepEqual(ids(applyFilters(all, f({ showJunk: true }), [])), [ok.id, sus.id, junk.id], 'showJunk inclui');
+  assert.deepEqual(ids(applyFilters(all, f({ verify: 'junk' }), [])), [junk.id], 'select junk mostra só eles');
+});

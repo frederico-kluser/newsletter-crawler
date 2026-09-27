@@ -178,12 +178,14 @@ export async function classifyArticleRow(article) {
  * Piso legado (db.js LEGACY_FLOOR): só artigos DESTA era; includeLegacy=true (o `--include-legacy
  * --yes` do finish) inclui o acervo anterior (ex.: os restaurados do git sem classificação).
  */
-export async function classifyPending({ limit = Infinity, force = false, includeLegacy = false } = {}) {
+export async function classifyPending({ limit = Infinity, force = false, includeLegacy = false, runId = null } = {}) {
   const lim = Number.isFinite(limit) ? limit : -1; // SQLite: LIMIT -1 = sem limite
-  const params = { lim, includeLegacy };
+  const params = { lim, includeLegacy, runId };
   const rows = force
     ? stmts.listArticlesForReclassify.all(params)
-    : stmts.listArticlesNeedingClassification.all(params);
+    : runId != null
+      ? stmts.listArticlesNeedingClassificationForRun.all(params)
+      : stmts.listArticlesNeedingClassification.all(params);
   if (!rows.length) {
     log('classify: nada a classificar.');
     return { classified: 0, total: 0 };
@@ -191,7 +193,7 @@ export async function classifyPending({ limit = Infinity, force = false, include
 
   const facetCount = getFacets().length;
   log(
-    `classify: ${rows.length} artigo(s) — model=${stageModel('classify').model}, ` +
+    `classify: ${rows.length} artigo(s)${runId != null ? ` (run ${runId})` : ''} — model=${stageModel('classify').model}, ` +
       `${facetCount} facetas/artigo, force=${force}${includeLegacy ? ', +legado' : ''}.`,
   );
 

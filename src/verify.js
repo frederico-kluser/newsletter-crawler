@@ -74,23 +74,27 @@ export async function verifyArticleRow(a, { runId = null } = {}) {
 }
 
 /**
- * Verifica os artigos sem veredito (ou todos, com force). Retorna { verified, byVerdict }.
- * Piso legado (db.js LEGACY_FLOOR): só artigos DESTA era; includeLegacy=true (o `--include-legacy
- * --yes` do finish) abre a porta p/ o acervo anterior — nunca é o default.
+ * Verifica os artigos sem veredito (ou todos, com force). `runId` escopa o sweep às fichas DESTA
+ * run (pós-crawl); sem ele varre o pendente global (usado pelo `finish`). Piso legado
+ * (db.js LEGACY_FLOOR): só artigos DESTA era; includeLegacy=true (o `--include-legacy --yes` do
+ * finish) abre a porta p/ o acervo anterior — nunca é o default.
+ * Retorna { verified, byVerdict }.
  */
-export async function verifyPending({ limit = Infinity, force = false, includeLegacy = false } = {}) {
+export async function verifyPending({ limit = Infinity, force = false, includeLegacy = false, runId = null } = {}) {
   const lim = Number.isFinite(limit) ? limit : -1; // SQLite: LIMIT -1 = sem limite
-  const params = { lim, includeLegacy };
+  const params = { lim, includeLegacy, runId };
   const rows = force
     ? stmts.listArticlesForReverifySweep.all(params)
-    : stmts.listArticlesToVerify.all(params);
+    : runId != null
+      ? stmts.listArticlesToVerifyForRun.all(params)
+      : stmts.listArticlesToVerify.all(params);
   if (!rows.length) {
     log('verify: nada a verificar.');
     return { verified: 0, byVerdict: {} };
   }
-  const runId = getBudgetState().runId ?? null; // events apontam p/ a run que VERIFICOU
+  const runIdEvent = getBudgetState().runId ?? null; // events apontam p/ a run que VERIFICOU
   log(
-    `verify: ${rows.length} artigo(s) — veredito ok|suspect|junk, force=${force}` +
+    `verify: ${rows.length} artigo(s)${runId != null ? ` (run ${runId})` : ''} — veredito ok|suspect|junk, force=${force}` +
       `${includeLegacy ? ', +legado' : ''}.`,
   );
 
@@ -106,7 +110,7 @@ export async function verifyPending({ limit = Infinity, force = false, includeLe
           return; // orçamento: a linha NULL segue retomável via `ncrawl finish`
         }
         try {
-          const { verdict, problems } = await verifyArticleRow(a, { runId });
+          const { verdict, problems } = await verifyArticleRow(a, { runId: runIdEvent });
           byVerdict[verdict] = (byVerdict[verdict] || 0) + 1;
           done++;
           if (verdict !== 'ok') {

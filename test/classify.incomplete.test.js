@@ -55,7 +55,7 @@ async function classifyOne(urlSuffix, provider, key) {
     issue_url: null, section: null, blurb: null, content_source: 'target', cleaned: 0, needs_enrich: 0,
   });
   const id = Number(r.lastInsertRowid);
-  const [article] = stmts.listArticlesNeedingClassification.all(-1).filter((a) => a.id === id);
+  const [article] = stmts.listArticlesNeedingClassification.all({ lim: -1, includeLegacy: true }).filter((a) => a.id === id);
   config.setRuntimeKey(key, provider);
   await classifyArticleRow(article);
   const row = stmts.getClassification.get(id);

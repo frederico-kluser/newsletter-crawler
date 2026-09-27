@@ -1,0 +1,139 @@
+<!doctype html>
+<!--
+  Fixture SINTÉTICA (W0, 2026-09-26) para a navegação: listagem de blog com
+  (1) banner de cookies em overlay modal (role=dialog, aria-modal) cobrindo a página,
+  (2) botão "Load more" que anexa 10 itens por clique (3 cliques = 40 itens; depois some),
+  (3) ruído de prefiltro: nav/topo, tags, redes sociais, mailto, RSS, login, assets.
+  Base URL presumida: https://blog.example.test/posts/ (hrefs relativos resolvem contra ela).
+  Determinística (sem aleatoriedade/data corrente) e sem recurso externo.
+  Verdade: links de artigo = /posts/<slug>/ (10 iniciais + 30 via Load more).
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Posts — Example Engineering Blog</title>
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="/feed.xml">
+  <link rel="stylesheet" href="/assets/site.css">
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 0; }
+    header, footer, main, aside { padding: 16px 24px; }
+    .layout { display: grid; grid-template-columns: 1fr 260px; gap: 24px; }
+    .post-card { border-bottom: 1px solid #ddd; padding: 12px 0; }
+    .post-card time { color: #666; font-size: 13px; }
+    #load-more { margin: 24px 0; padding: 10px 18px; font-size: 16px; }
+    .cookie-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.55); z-index: 999; }
+    .cookie-dialog { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%);
+      width: min(520px, 92vw); background: #fff; padding: 24px; border-radius: 8px; z-index: 1000; }
+    .cookie-dialog[hidden], .cookie-backdrop[hidden] { display: none; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <a class="logo" href="/">Example Engineering</a>
+    <nav aria-label="Primary">
+      <a href="/">Home</a>
+      <a href="/posts/">Posts</a>
+      <a href="/about/">About</a>
+      <a href="/careers/">Careers</a>
+      <a href="/login?next=/posts/">Sign in</a>
+    </nav>
+  </header>
+
+  <div class="layout">
+    <main id="content">
+      <h1>All posts</h1>
+      <ol id="post-list" class="post-list">
+        <li class="post-card"><article><h2><a href="/posts/postgres-19-repack-in-practice/">REPACK in practice: shrinking tables on Postgres 19</a></h2><time datetime="2026-09-24">September 24, 2026</time><p>How we reclaimed 40% of disk without locking writes.</p><a class="read-more" href="/posts/postgres-19-repack-in-practice/">Read more</a></article></li>
+        <li class="post-card"><article><h2><a href="/posts/tokio-cooperative-budget/">What Tokio's cooperative budget taught us about tail latency</a></h2><time datetime="2026-09-22">September 22, 2026</time><p>A p99 story in three flame graphs.</p><a class="read-more" href="/posts/tokio-cooperative-budget/">Read more</a></article></li>
+        <li class="post-card"><article><h2><a href="https://blog.example.test/posts/wasi-03-components/">Shipping WASI 0.3 components to production</a></h2><time datetime="2026-09-19">September 19, 2026</time><p>Async by default, and what broke.</p><a class="read-more" href="https://blog.example.test/posts/wasi-03-components/">Read more</a></article></li>
+        <li class="post-card"><article><h2><a href="/posts/rsc-boundaries/">Where we draw server/client boundaries with RSC</a></h2><time datetime="2026-09-17">September 17, 2026</time><p>Server Functions are not an API.</p><a class="read-more" href="/posts/rsc-boundaries/">Read more</a></article></li>
+        <li class="post-card"><article><h2><a href="/posts/evals-for-code-review-bots/">Building evals for our code review bot</a></h2><time datetime="2026-09-15">September 15, 2026</time><p>Precision, recall and cost per PR.</p><a class="read-more" href="/posts/evals-for-code-review-bots/">Read more</a></article></li>
+        <li class="post-card"><article><h2><a href="/posts/go-126-iterators/">Go 1.26 iterators in a large codebase</a></h2><time datetime="2026-09-12">September 12, 2026</time><p>Range-over-func one year later.</p><a class="read-more" href="/posts/go-126-iterators/">Read more</a></article></li>
+        <li class="post-card"><article><h2><a href="/posts/node-26-zip/">Node 26 can read and write ZIP files now</a></h2><time datetime="2026-09-10">September 10, 2026</time><p>Replacing three dependencies with one built-in.</p><a class="read-more" href="/posts/node-26-zip/">Read more</a></article></li>
+        <li class="post-card"><article><h2><a href="/posts/css-anchor-positioning/">Anchor positioning finally shipped everywhere</a></h2><time datetime="2026-09-08">September 8, 2026</time><p>Tooltips without JavaScript.</p><a class="read-more" href="/posts/css-anchor-positioning/">Read more</a></article></li>
+        <li class="post-card"><article><h2><a href="/posts/coding-agents-worktrees/">Running five coding agents in parallel with git worktrees</a></h2><time datetime="2026-09-05">September 5, 2026</time><p>Isolation, review and cost caps.</p><a class="read-more" href="/posts/coding-agents-worktrees/">Read more</a></article></li>
+        <li class="post-card"><article><h2><a href="/posts/sqlite-in-the-browser/">SQLite in the browser with OPFS</a></h2><time datetime="2026-09-03">September 3, 2026</time><p>Offline-first without IndexedDB.</p><a class="read-more" href="/posts/sqlite-in-the-browser/">Read more</a></article></li>
+      </ol>
+      <button id="load-more" type="button" data-page="1" aria-controls="post-list">Load more</button>
+      <p class="pager-note">Showing <span id="shown-count">10</span> of 40 posts</p>
+    </main>
+
+    <aside class="sidebar" aria-label="Sidebar">
+      <section>
+        <h3>Tags</h3>
+        <a href="/tags/postgres/">postgres</a>
+        <a href="/tags/rust/">rust</a>
+        <a href="/tags/webassembly/">webassembly</a>
+        <a href="/tags/react/">react</a>
+      </section>
+      <section>
+        <h3>Subscribe</h3>
+        <form action="/newsletter/subscribe" method="post"><input type="email" name="email" placeholder="you@example.com"><button type="submit">Subscribe</button></form>
+        <a href="/feed.xml">RSS feed</a>
+      </section>
+      <section>
+        <h3>Follow</h3>
+        <a href="https://x.com/exampleeng">X</a>
+        <a href="https://github.com/example-eng">GitHub</a>
+        <a href="https://www.linkedin.com/company/example-eng">LinkedIn</a>
+      </section>
+    </aside>
+  </div>
+
+  <footer class="site-footer">
+    <a href="/privacy/">Privacy</a>
+    <a href="/terms/">Terms</a>
+    <a href="mailto:blog@example.test">Contact</a>
+    <a href="/assets/press-kit.zip">Press kit</a>
+    <p>© 2026 Example Engineering</p>
+  </footer>
+
+  <div class="cookie-backdrop" id="cookie-backdrop"></div>
+  <div class="cookie-dialog" id="cookie-banner" role="dialog" aria-modal="true" aria-labelledby="cookie-title">
+    <h2 id="cookie-title">We value your privacy</h2>
+    <p>We use cookies to improve your experience, analyse traffic and personalise content. You can accept all cookies,
+      reject non-essential ones, or manage your preferences. See our <a href="/cookie-policy/">Cookie Policy</a>.</p>
+    <button type="button" id="cookie-accept" class="btn-primary">Accept all</button>
+    <button type="button" id="cookie-reject">Reject non-essential</button>
+    <button type="button" id="cookie-manage">Manage preferences</button>
+  </div>
+
+  <script>
+    // Consentimento: fecha o overlay (backdrop + dialog). Sem isso o botão Load more fica coberto.
+    (function () {
+      var close = function () {
+        document.getElementById('cookie-banner').hidden = true;
+        document.getElementById('cookie-backdrop').hidden = true;
+      };
+      document.getElementById('cookie-accept').addEventListener('click', close);
+      document.getElementById('cookie-reject').addEventListener('click', close);
+    })();
+
+    // Load more: 3 páginas extras de 10 itens, determinísticas; depois o botão some.
+    (function () {
+      var TOPICS = ['Postgres', 'Rust', 'WebAssembly', 'React', 'LLM evals', 'Go', 'Node.js', 'CSS', 'Agents', 'SQLite'];
+      var btn = document.getElementById('load-more');
+      var list = document.getElementById('post-list');
+      var shown = document.getElementById('shown-count');
+      btn.addEventListener('click', function () {
+        var page = Number(btn.getAttribute('data-page')) + 1;
+        for (var i = 0; i < 10; i++) {
+          var n = (page - 1) * 10 + i + 1;
+          var day = 42 - n; // n=11..40 -> 31..2 de agosto, sempre decrescente
+          var slug = 'archive-post-' + n;
+          var li = document.createElement('li');
+          li.className = 'post-card';
+          li.innerHTML = '<article><h2><a href="/posts/' + slug + '/">' + TOPICS[i] + ' notes #' + n + '</a></h2>' +
+            '<time datetime="2026-08-' + String(day).padStart(2, '0') + '">August ' + day + ', 2026</time>' +
+            '<p>Older post number ' + n + '.</p><a class="read-more" href="/posts/' + slug + '/">Read more</a></article>';
+          list.appendChild(li);
+        }
+        btn.setAttribute('data-page', String(page));
+        shown.textContent = String(list.children.length);
+        if (page >= 4) btn.remove();
+      });
+    })();
+  </script>
+</body>
+</html>

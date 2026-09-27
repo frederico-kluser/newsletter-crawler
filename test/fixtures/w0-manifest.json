@@ -1,0 +1,387 @@
+{
+  "fetchedAt": "2026-09-26",
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+  "method": "curl -L --compressed (GET público, sem cookie, sem JS); HTML cru salvo SEM modificação",
+  "clean": [
+    {
+      "file": "clean/therundown-openai-cuts-out-spacex-owned-cursor.html",
+      "url": "https://www.therundown.ai/articles/openai-cuts-out-spacex-owned-cursor",
+      "finalUrl": "https://www.therundown.ai/articles/openai-cuts-out-spacex-owned-cursor",
+      "httpStatus": 200,
+      "contentType": "text/html; charset=utf-8",
+      "bytes": 221570,
+      "sha256": "e8f458414b0e3db4fa45ee76cb0a5181807559f9080d8c06e713843d764592c5",
+      "junk": "página de UM artigo que carrega o boletim inteiro (várias notícias, saudação, blocos patrocinados)",
+      "db": {
+        "idAtCapture": 13703,
+        "title": "OpenAI cuts out SpaceX-owned Cursor",
+        "source": "The Rundown",
+        "publishedAt": "2026-08-31",
+        "verifyStatus": "suspect",
+        "verifyNotes": "Conteúdo inclui página inteira do newsletter, com múltiplas notícias e anúncios, em vez do artigo único do título.; Presença de saudações e conteúdo de marketing ('Good morning', 'Automate DMs') que não pertencem ao artigo.; Repetição de trechos da notícia dentro do conteúdo.",
+        "storedContentChars": 9450,
+        "cleaned": true
+      }
+    },
+    {
+      "file": "clean/theguardian-cockroaches-search-rescue.html",
+      "url": "https://www.theguardian.com/technology/2026/aug/27/cockroaches-used-search-rescue-earthquakes-science-technology-australia",
+      "finalUrl": "https://www.theguardian.com/technology/2026/aug/27/cockroaches-used-search-rescue-earthquakes-science-technology-australia",
+      "httpStatus": 200,
+      "contentType": "text/html; charset=UTF-8",
+      "bytes": 445443,
+      "sha256": "9e0f8566729a5cfe81118ca3d925dedcacd97e3021d13135c8e4d64144089972",
+      "junk": "jornal grande: chamada de newsletter no meio do texto, related/most-viewed, rodapé enorme",
+      "db": {
+        "idAtCapture": 9991,
+        "title": "Care Critters",
+        "source": "Superhuman",
+        "publishedAt": "2026-08-29",
+        "verifyStatus": "suspect",
+        "verifyNotes": "Conteúdo contém chamada para assinatura de newsletter ('Sign up for the Breaking News Australia email'); Conteúdo contém elementos de interface como legenda de vídeo e crédito de imagem ('Giant cyborg cockroaches... - video', 'Photograph: PR image')",
+        "storedContentChars": 3303,
+        "cleaned": true
+      }
+    },
+    {
+      "file": "clean/ibm-think-ai-decision-making.html",
+      "url": "https://www.ibm.com/think/insights/ai-decision-making-where-do-businesses-draw-the-line",
+      "finalUrl": "https://www.ibm.com/think/insights/ai-decision-making-where-do-businesses-draw-the-line",
+      "httpStatus": 200,
+      "contentType": "text/html;charset=utf-8",
+      "bytes": 179406,
+      "sha256": "741e0717d2453ecdcec0424ae0781d647bc109ecc0ded48c77f5c0b6e8f5f634",
+      "junk": "bloco de assinatura de newsletter intercalado no texto, navegação corporativa pesada",
+      "db": {
+        "idAtCapture": 8925,
+        "title": "AI decision-making: where do businesses draw the line?",
+        "source": "Superhuman",
+        "publishedAt": "2026-08-27",
+        "verifyStatus": "suspect",
+        "verifyNotes": "Conteúdo contém bloco de assinatura de newsletter intercalado no texto ('The latest AI trends, brought to you by experts...'), que é um elemento de interface/marketing; Há elementos de formatação/interface no início, como 'Author' e campos vazios, que sugerem extração de página com restos de layout",
+        "storedContentChars": 7202,
+        "cleaned": true
+      }
+    },
+    {
+      "file": "clean/eslint-v10-9-1-released.html",
+      "url": "https://eslint.org/blog/2026/08/eslint-v10.9.1-released",
+      "finalUrl": "https://eslint.org/blog/2026/08/eslint-v10.9.1-released/",
+      "httpStatus": 200,
+      "contentType": "text/html; charset=UTF-8",
+      "bytes": 62189,
+      "sha256": "12f6f465be11e8f2c09be47ac43f2a3eb1434fed8205e2ae68282f23f15e4698",
+      "junk": "release notes com seção \"From the blog\" (outros posts) e navegação de docs",
+      "db": {
+        "idAtCapture": 198,
+        "title": "ESLint 10.9.1",
+        "source": "JavaScript Weekly",
+        "publishedAt": "2026-08-25",
+        "verifyStatus": "suspect",
+        "verifyNotes": "Conteúdo inclui seção 'From the blog' com outros posts, que é resto de interface/marketing",
+        "storedContentChars": 2583,
+        "cleaned": true
+      }
+    },
+    {
+      "file": "clean/techcrunch-stripe-openrouter.html",
+      "url": "https://techcrunch.com/2026/08/16/stripe-will-reportedly-acquire-ai-gateway-startup-openrouter-for-7b",
+      "finalUrl": "https://techcrunch.com/2026/08/16/stripe-will-reportedly-acquire-ai-gateway-startup-openrouter-for-7b/",
+      "httpStatus": 200,
+      "contentType": "text/html; charset=UTF-8",
+      "bytes": 212845,
+      "sha256": "062a9a3a029ccb159dc2829611c5921b382f4847c682badc16b28bfd8ec67f5f",
+      "junk": "notícia com \"Topics\", \"Subscribe for the industry’s biggest tech news\", \"Latest\" no fim",
+      "db": {
+        "idAtCapture": 15106,
+        "title": "Stripe will reportedly acquire AI gateway startup OpenRouter for $7B+",
+        "source": "llmnews.ai",
+        "publishedAt": "2026-08-16",
+        "verifyStatus": "suspect",
+        "verifyNotes": "Conteúdo termina com elementos de interface/marketing: 'Topics', 'Subscribe for the industry’s biggest tech news', 'Latest in AI'",
+        "storedContentChars": 1102,
+        "cleaned": true
+      }
+    },
+    {
+      "file": "clean/remysharp-progressive-enhancement.html",
+      "url": "https://remysharp.com/2026/08/05/progressive-enhancement-inside-of-javascript",
+      "finalUrl": "https://remysharp.com/2026/08/05/progressive-enhancement-inside-of-javascript",
+      "httpStatus": 200,
+      "contentType": "text/html; charset=UTF-8",
+      "bytes": 34471,
+      "sha256": "8e5030d0cd0506119b49df14c73718c1d3e3f21341138c6eb1842a2bd87e4945",
+      "junk": "blog pessoal quase limpo (controle); rodapé \"Published … under #web. Edit this post.\"",
+      "db": {
+        "idAtCapture": 14971,
+        "title": "Progressive Enhancement Inside of JavaScript",
+        "source": "JavaScript Weekly",
+        "publishedAt": "2026-08-11",
+        "verifyStatus": "suspect",
+        "verifyNotes": "Conteúdo termina com resto de interface ('Published 5-Aug 2026 under #web. Edit this post.')",
+        "storedContentChars": 3398,
+        "cleaned": true
+      }
+    },
+    {
+      "file": "clean/lordgoatius-tail-call.html",
+      "url": "https://lordgoati.us/blog/tail-call",
+      "finalUrl": "https://lordgoati.us/blog/tail-call/",
+      "httpStatus": 200,
+      "contentType": "text/html",
+      "bytes": 174538,
+      "sha256": "2cb311696ec942ca7ec290943448e28a6d334d38b2425f925e020c7a30572ae9",
+      "junk": "menu de navegação do site (Home, Posts, Ternary, Github) antes do texto; muito código",
+      "db": {
+        "idAtCapture": 8307,
+        "title": "Tail-Call Interpreters in Rust",
+        "source": "This Week in Rust",
+        "publishedAt": "2026-08-05",
+        "verifyStatus": "suspect",
+        "verifyNotes": "Conteúdo contém menu de navegação do site (Home, Posts, Ternary, Github) antes do texto do artigo; kind 'news' aparentemente inadequado para um post técnico de blog; seria mais apropriado 'blog' ou 'article'",
+        "storedContentChars": 25916,
+        "cleaned": true
+      }
+    },
+    {
+      "file": "clean/csswizardry-container-timing-api.html",
+      "url": "https://csswizardry.com/2026/07/meaasuring-component-performance-with-the-container-timing-api",
+      "finalUrl": "https://csswizardry.com/2026/07/meaasuring-component-performance-with-the-container-timing-api/",
+      "httpStatus": 200,
+      "contentType": "text/html; charset=utf-8",
+      "bytes": 137232,
+      "sha256": "c4c6a668002d5531b3f01e141b90038079ff9e9c307f6285ee076242cd5e6f02",
+      "junk": "data + espaço em branco + Table of Contents antes do texto; bloco de consultoria no fim",
+      "db": {
+        "idAtCapture": 7684,
+        "title": "Measuring Component Performance with the Container Timing API",
+        "source": "Frontend Focus",
+        "publishedAt": "2026-07-29",
+        "verifyStatus": "suspect",
+        "verifyNotes": "Conteúdo começa com data, grande quantidade de espaços em branco e um sumário (Table of Contents), que são restos de interface do site.; Há um aviso de marketing 'Independent writing is brought to you via my wonderful Supporters.' no início do conteúdo.; O tipo 'news' parece inadequado: é um artigo técnico/blog, não uma notícia.",
+        "storedContentChars": 27711,
+        "cleaned": true
+      }
+    },
+    {
+      "file": "clean/masterdev-conic-gradients-triangle.html",
+      "url": "https://master.dev/blog/when-you-need-to-make-a-triangle-think-conic-gradients",
+      "finalUrl": "https://blog.master.dev/when-you-need-to-make-a-triangle-think-conic-gradients/",
+      "httpStatus": 200,
+      "contentType": "text/html; charset=UTF-8",
+      "bytes": 68120,
+      "sha256": "c0b35c0cf42de268917489edafca566d65ac807e9d8db9ef7897b822effce673",
+      "junk": "bloco promocional \"Want to expand your CSS skills?\" no fim (redirect master.dev → blog.master.dev)",
+      "db": {
+        "idAtCapture": 7680,
+        "title": "When you need to make a triangle, think conic gradients",
+        "source": "Frontend Focus",
+        "publishedAt": "2026-07-29",
+        "verifyStatus": "suspect",
+        "verifyNotes": "Conteúdo termina com bloco promocional/marketing ('Want to expand your CSS skills?' com link de assinatura), resto de interface do site.; kind 'news' parece inadequado: o conteúdo é um tutorial/artigo técnico, não uma notícia.",
+        "storedContentChars": 3111,
+        "cleaned": true
+      }
+    },
+    {
+      "file": "clean/mantine-changelog-9-6-0.html",
+      "url": "https://mantine.dev/changelog/9-6-0",
+      "finalUrl": "https://mantine.dev/changelog/9-6-0/",
+      "httpStatus": 200,
+      "contentType": "text/html; charset=utf-8",
+      "bytes": 537730,
+      "sha256": "195bd2fe5b5a2c57bc6a473ea196024605f573620fb9c55f6981547dfd941d7a",
+      "junk": "changelog em app Next.js: apelo de patrocínio antes das notas, demos com UI (date picker \"MoTuWeThFrSaSu\")",
+      "db": {
+        "idAtCapture": 13733,
+        "title": "Mantine 9.6",
+        "source": "JavaScript Weekly",
+        "publishedAt": "2026-09-01",
+        "verifyStatus": "suspect",
+        "verifyNotes": "Conteúdo começa com apelo de patrocínio/marketing ('Support Mantine development') antes das notas de release.; Há um fragmento de tabela com cabeçalhos concatenados ('Element positionElement nameSymbolAtomic mass') no meio do conteúdo, provavelmente artefato de extração de HTML.",
+        "storedContentChars": 10774,
+        "cleaned": true
+      }
+    },
+    {
+      "file": "clean/goose-love-metadata-analysis.html",
+      "url": "https://blog.goose.love/posts/three-seconds-of-compilation-shaved-by-metadata-analysis",
+      "finalUrl": "https://blog.goose.love/posts/three-seconds-of-compilation-shaved-by-metadata-analysis/",
+      "httpStatus": 200,
+      "contentType": "text/html; charset=utf-8",
+      "bytes": 12799,
+      "sha256": "7745d9bd7cf678d76a9a5bec6eead85fc136b05ac2c0a17bff50cd71d97915f5",
+      "junk": "sumário/títulos de seção duplicados no início (cabeçalho clonado)",
+      "db": {
+        "idAtCapture": 10654,
+        "title": "3 Seconds of compilation shaved by metadata analysis",
+        "source": "This Week in Rust",
+        "publishedAt": "2026-08-26",
+        "verifyStatus": "suspect",
+        "verifyNotes": "Conteúdo inicia com um sumário/títulos de seção que parecem ser clone do artigo (possível duplicação de cabeçalho); Texto do artigo é apenas um recorte e termina cortado no meio da frase ('...and that hashbrown is not use'); A presença dos cabeçalhos repetidos e do corte no final pode indicar extração incompleta ou resto de navegação",
+        "storedContentChars": 4990,
+        "cleaned": true
+      }
+    },
+    {
+      "file": "clean/addyo-substack-agentic-skill-decay.html",
+      "url": "https://addyo.substack.com/p/agentic-skill-decay",
+      "finalUrl": "https://addyo.substack.com/p/agentic-skill-decay",
+      "httpStatus": 200,
+      "contentType": "text/html; charset=utf-8",
+      "bytes": 271656,
+      "sha256": "7261fffea17df8d2dc3fc4d4537617f2c21de6e4fd68b10ef2af5599058d7c86",
+      "junk": "Substack: chrome de assinatura/compartilhar, comentários, JSON de config com \"captcha\" (falso positivo em HTML cru)",
+      "db": {
+        "idAtCapture": 13736,
+        "title": "Addy Osmani says mastery still comes from 'doing the reps'",
+        "source": "JavaScript Weekly",
+        "publishedAt": "2026-09-01",
+        "verifyStatus": "ok",
+        "verifyNotes": null,
+        "storedContentChars": 20059,
+        "cleaned": true
+      }
+    }
+  ],
+  "listings": [
+    {
+      "file": "listings/nodeweekly-issues.html",
+      "source": "Node Weekly",
+      "sourceType": "index",
+      "url": "https://nodeweekly.com/issues",
+      "finalUrl": "https://nodeweekly.com/issues",
+      "httpStatus": 200,
+      "contentType": "text/html; charset=utf-8",
+      "bytes": 143849,
+      "sha256": "d291bcb7a29ab9dbc5ff0eecbc22d1ecd5afed4188b461b843f277102d3e9728",
+      "truthPattern": "/issues/<n> (cada edição numerada)",
+      "truthRegex": "href=\"/issues/\\d+\"",
+      "truthLinksDistinct": 573
+    },
+    {
+      "file": "listings/javascriptweekly-issues.html",
+      "source": "JavaScript Weekly",
+      "sourceType": "index",
+      "url": "https://javascriptweekly.com/issues",
+      "finalUrl": "https://javascriptweekly.com/issues",
+      "httpStatus": 200,
+      "contentType": "text/html; charset=utf-8",
+      "bytes": 155619,
+      "sha256": "11fd29b22fe86e11c62302258420d6a1c1a4d43601283b7e7330233540e01cf1",
+      "truthPattern": "/issues/<n> (cada edição numerada)",
+      "truthRegex": "href=\"/issues/\\d+\"",
+      "truthLinksDistinct": 614
+    },
+    {
+      "file": "listings/twir-archives.html",
+      "source": "This Week in Rust",
+      "sourceType": "index",
+      "url": "https://this-week-in-rust.org/blog/archives/index.html",
+      "finalUrl": "https://this-week-in-rust.org/blog/archives/index.html",
+      "httpStatus": 200,
+      "contentType": "text/html; charset=utf-8",
+      "bytes": 293776,
+      "sha256": "ad5567e6555116f8c3a2694ce9cb3f5e148ea6a41683a8f08034249bddd85922",
+      "truthPattern": "/blog/YYYY/MM/DD/this-week-in-rust-<n>/ (cada edição)",
+      "truthRegex": "href=\"[^\"]*/blog/\\d{4}/\\d{2}/\\d{2}/this-week-in-rust-\\d+/?\"",
+      "truthLinksDistinct": 666
+    },
+    {
+      "file": "listings/therundown-articles.html",
+      "source": "The Rundown",
+      "sourceType": "listing",
+      "url": "https://www.therundown.ai/archive",
+      "finalUrl": "https://www.therundown.ai/articles",
+      "httpStatus": 200,
+      "contentType": "text/html; charset=utf-8",
+      "bytes": 65025,
+      "sha256": "a3bf3e829f91a569c65702a877d1418cf2cf7bc6496a63b2963d2a254e3dbf7a",
+      "truthPattern": "/articles/<slug> (8 artigos) + paginação ?page=2 com rel=\"next\"",
+      "truthRegex": "href=\"/articles/[a-z0-9-]+\"",
+      "truthLinksDistinct": 8
+    }
+  ],
+  "issues": [
+    {
+      "file": "nodeweekly-638.html",
+      "source": "Node Weekly",
+      "issue": "#638, 2026-08-27 (23 itens curados no DB, ~36 candidatos externos)",
+      "url": "https://nodeweekly.com/issues/638",
+      "finalUrl": "https://nodeweekly.com/issues/638",
+      "httpStatus": 200,
+      "contentType": "text/html; charset=utf-8",
+      "bytes": 37045,
+      "sha256": "bf9e9f596e92794f9ac007134ffdd93fb04150f03d861841c20d26bc93cdc41f",
+      "externalHrefsDistinct": 37
+    },
+    {
+      "file": "twir-666.html",
+      "source": "This Week in Rust",
+      "issue": "#666, 2026-08-26 (76 itens curados no DB, ~211 candidatos externos)",
+      "url": "https://this-week-in-rust.org/blog/2026/08/26/this-week-in-rust-666/",
+      "finalUrl": "https://this-week-in-rust.org/blog/2026/08/26/this-week-in-rust-666/",
+      "httpStatus": 200,
+      "contentType": "text/html; charset=utf-8",
+      "bytes": 41512,
+      "sha256": "d17f6ecb6e61d344b5bc4ba9c5b483a2ee5d2a0e881696e92c8f26f162c86e4c",
+      "externalHrefsDistinct": 216
+    }
+  ],
+  "nav": [
+    {
+      "file": "nav/listing-overlay.html",
+      "kind": "sintética",
+      "bytes": 9217,
+      "sha256": "6a580105d0c898954877e08065af9c1599aaa4a8d033abec390e20111a8c7f19",
+      "purpose": "banner de cookies em overlay modal cobrindo o botão \"Load more\" (clique interceptado até aceitar); Load more anexa 10 itens ×3 (10→40) e some; ruído de prefiltro (tags, social, mailto, RSS, login, assets). Base presumida https://blog.example.test/posts/"
+    },
+    {
+      "file": "nav/listing-pager.html",
+      "kind": "sintética",
+      "bytes": 3868,
+      "sha256": "83b53a3cd530cd5f8094a3002224ca4a44d49def22f99f6a81a347c0462f3a83",
+      "purpose": "arquivo paginado (página 2 de 5): <link rel=next/prev> no head, <a rel=next> no paginador, números com aria-current e \"Older posts ›\" sem rel; próxima = /archive/page/3/. Base presumida https://news.example.test/archive/page/2/"
+    },
+    {
+      "file": "nav/challenge-cloudflare.html",
+      "kind": "sintética",
+      "bytes": 3538,
+      "sha256": "e13a49c8c2fb7b1ce3ad69e704e0cdc3a5dab4034b09e4e44ed3ec54b3ed8682",
+      "purpose": "interstitial anti-bot estilo Cloudflare (\"Just a moment...\", Ray ID, cf-turnstile, \"Enable JavaScript and cookies\"); isBlockedPage=true"
+    },
+    {
+      "file": "nav/challenge-cloudflare-medium.html",
+      "kind": "REAL",
+      "bytes": 5901,
+      "sha256": "5ebd1b469e47ba23edeb72494797fcc9eb353bec5a1a9f6e919d128add734ac3",
+      "purpose": "desafio Cloudflare servido pela medium.com (HTTP 403) ao GET de https://medium.com/@yardenlaif/go-sync-or-go-home-waitgroup-5f074a03776e; innerText vazio, título \"Just a moment...\"; isBlockedPage=true"
+    }
+  ],
+  "skipped": [
+    {
+      "url": "https://www.newscientist.com/article/2582376-first-targeted-treatment-for-guillain-barre-syndrome-nears-approval",
+      "reason": "HTTP 406 com corpo vazio ao GET (bloqueio por UA/headers)"
+    },
+    {
+      "url": "https://ui.shadcn.com/docs/components/base/questionnaire",
+      "reason": "1,9 MB (perto do teto de 2 MB); pulado para manter o tamanho total razoável"
+    },
+    {
+      "url": "https://medium.com/@yardenlaif/go-sync-or-go-home-waitgroup-5f074a03776e",
+      "reason": "HTTP 403 desafio Cloudflare — não serve como artigo; guardado como nav/challenge-cloudflare-medium.html"
+    },
+    {
+      "url": "https://developerlife.com/2026/08/22/to-async-or-not-to-async-rust-mcp-server",
+      "reason": "baixado (200), mas ficou de fora: a meta era 12 páginas e já havia 12 hosts diversos"
+    },
+    {
+      "url": "https://archive.superhuman.ai",
+      "reason": "redireciona para /login (parede de login, 3 KB) — não é listagem"
+    },
+    {
+      "url": "https://golangweekly.com/issues",
+      "reason": "baixado (200), mas ficou de fora: mesmo template Cooperpress de nodeweekly/javascriptweekly"
+    }
+  ]
+}

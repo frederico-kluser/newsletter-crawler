@@ -94,7 +94,7 @@ async function classifyCase(relUrl, contentTypeTags, insertKind) {
     issue_url: null, section: null, blurb: null, content_source: 'target', cleaned: 0, needs_enrich: 0,
   });
   const id = Number(r.lastInsertRowid);
-  const [article] = stmts.listArticlesNeedingClassification.all(-1).filter((a) => a.id === id);
+  const [article] = stmts.listArticlesNeedingClassification.all({ lim: -1, includeLegacy: true }).filter((a) => a.id === id);
   facetTags = { 'content-type': contentTypeTags };
   await classifyArticleRow(article);
   return stmts.getArticleFullByUrl.get(url).kind;

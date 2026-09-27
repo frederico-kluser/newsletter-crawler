@@ -4,7 +4,9 @@
 import { execSync } from 'node:child_process';
 import { mkdirSync, writeFileSync, rmSync, existsSync } from 'node:fs';
 import path from 'node:path';
-import { stmts, wipeAll, removeSource, purgeSource } from './db.js';
+import {
+  stmts, wipeAll, removeSource, purgeSource, countPendingByEra, getLegacyFloor, isLegacyRow,
+} from './db.js';
 import { createBackup, pruneBackups, latestBackup } from './backup.js';
 import { writeWipeMarker, WIPE_MARKER_FILE, DATA_DIR_REL } from './restore.js';
 import {
@@ -15,18 +17,20 @@ import {
   AGGRESSIVE_DEFAULT, DEFAULT_SINCE, MIN_CRAWL_DATE, VERIFY_AFTER_CRAWL, VERIFY_STREAMING, JOB_TIMEOUT_MS, JOB_HARD_TIMEOUT_MS,
   CLASSIFY_STREAMING, SUMMARIZE_STREAMING, CURATE_JOBS, ROUNDUP_TIMEOUT_MS, COST_LOG_INTERVAL_MS,
   ENRICH_MAX_ATTEMPTS, defaultParallel, loadSources, addSourceToConfig, removeSourceFromConfig, setRuntimeKey,
+  stageModel,
 } from './config.js';
 import {
   initGovernor, stopGovernor, setProfile, jobsCapacity, getTelemetry, getCalibration,
 } from './governor.js';
-import { beginRun, endRun, shouldStop, getBudgetState } from './budget.js';
+import { beginRun, endRun, shouldStop, getBudgetState, estimateStageCallUsd } from './budget.js';
 import { processJob, enqueue, upsertSource } from './crawl.js';
 import { detectSourceType } from './detect-type.js';
 import { exportWebSnapshot } from './export-web.js';
 import { exportPublicApi } from './export-api.js';
 import { runDeploy, DeployError } from './deploy.js';
-import { reextractTargets, REEXTRACT_DEFAULT_LIMIT } from './reextract.js';
+import { reextractTargets, selectReextractTargets, REEXTRACT_DEFAULT_LIMIT } from './reextract.js';
 import { classifyPending, classifyArticleRow } from './classify.js';
+import { getFacets } from './taxonomy.js';
 import { summarizePending, summarizeArticleRow } from './summarize.js';
 import { verifyPending, verifyArticleRow, recleanSuspects } from './verify.js';
 import { runSearch, getSearchProgress } from './search.js';
@@ -230,12 +234,19 @@ async function runWithLimits({ command, flags = {}, profile }, fn) {
   }
 }
 
-/** Contagens do banco como DADO (reusado pela UI e pelo printStatus). */
+/**
+ * Contagens do banco como DADO (reusado pela UI e pelo printStatus). Os PENDENTES seguem o piso
+ * legado (decisão 8 da migração Jev): pendingVerify/pendingSummary/pendingClassif = o que as
+ * varreduras (finish/pós-crawl) processam de fato — só DESTA era; `legacy` = o que o piso deixa
+ * de fora e só entra com `--include-legacy --yes`. Assim o "rode finish" da UI não promete
+ * trabalho que o finish não faria.
+ */
 export function getStatus() {
   const f = Object.fromEntries(stmts.countFrontierByState.all().map((r) => [r.state, r.c]));
-  const articles = stmts.countArticles.get().c;
+  const era = countPendingByEra(); // um statement: pendentes por era + resumos feitos (~2 ms)
+  const articles = era.total;
   const classified = stmts.countClassifications.get().c;
-  const summaries = stmts.countSummaries.get().c;
+  const summaries = era.summaries;
   // Gasto LLM acumulado (ledger). Aditivo e tolerante: telemetria não pode derrubar o status.
   let spend = { totalUsd: 0, calls: 0, lastRun: null };
   try {
@@ -251,9 +262,18 @@ export function getStatus() {
     articles,
     selectors: stmts.countSelectors.get().c,
     classified,
-    pendingClassif: Math.max(0, articles - classified),
+    pendingClassif: era.jev.classify,
     summaries,
-    pendingSummary: Math.max(0, articles - summaries),
+    pendingSummary: era.jev.summary,
+    pendingVerify: era.jev.verify,
+    legacy: {
+      floor: era.floor,
+      articles: era.legacy.articles,
+      noVerify: era.legacy.verify,
+      noSummary: era.legacy.summary,
+      noClassif: era.legacy.classify,
+      suspect: era.legacy.suspect,
+    },
     frontier: {
       pending: f.pending || 0,
       in_progress: f.in_progress || 0,
@@ -286,8 +306,22 @@ export function printStatus() {
   log(`pages:     ${s.pages}`);
   log(`articles:  ${s.articles}`);
   log(`selectors: ${s.selectors}`);
-  log(`classif.:  done=${s.classified} pending=${s.pendingClassif}`);
-  log(`resumos:   done=${s.summaries} pending=${s.pendingSummary}`);
+  // Pendentes por era: "desta era (Jev)" é o que finish/pós-crawl processam; "legado (não
+  // processado)" fica fora das varreduras pelo piso (só pelo portão do --include-legacy).
+  const lg = s.legacy;
+  log(`classif.:  done=${s.classified} pendentes: desta era (Jev)=${s.pendingClassif} · legado (não processado)=${lg.noClassif}`);
+  log(`resumos:   done=${s.summaries} pendentes: desta era (Jev)=${s.pendingSummary} · legado (não processado)=${lg.noSummary}`);
+  log(`verific.:  pendentes: desta era (Jev)=${s.pendingVerify} · legado (não processado)=${lg.noVerify}`);
+  if (lg.noVerify + lg.noSummary + lg.noClassif > 0) {
+    // O `finish --include-legacy` pega só os PENDENTES do legado (não os N artigos legados) — a
+    // dica cita esses números. E NÃO traz --yes: rodá-la mostra contagem × custo e o próprio
+    // portão diz a linha de confirmação (colar um `--yes` daqui gastaria sem ver a estimativa).
+    log(
+      `legado:    ${lg.noVerify} sem veredito · ${lg.noSummary} sem resumo · ${lg.noClassif} sem tags ` +
+        `(de ${lg.articles} artigo(s) com run_id NULL ou < ${lg.floor}) ficam fora das varreduras pagas — ` +
+        'ver contagem × custo: ncrawl finish --include-legacy',
+    );
+  }
   log(`gasto LLM: US$ ${s.spend.totalUsd.toFixed(4)} em ${s.spend.calls} chamadas`);
   log(
     `frontier:  pending=${s.frontier.pending} in_progress=${s.frontier.in_progress} ` +
@@ -310,6 +344,17 @@ export function filterSeedSources(sources, flags) {
     selected: sources.filter((s) => list.some((w) => matches(s, w))),
     unmatched: list.filter((w) => !sources.some((s) => matches(s, w))),
   };
+}
+
+/**
+ * A ficha recém-salva/enriquecida entra no pós-processamento em STREAMING (verify + summarize +
+ * classify pagos)? Não se sumiu, nem se é do acervo LEGADO (run_id NULL/anterior ao piso): mesma
+ * regra das varreduras. O caso real é a ficha RESTAURADA do git (run_id NULL, needs_enrich) que
+ * este crawl re-enriquece — o enrichArticle do crawl.js não passa run_id (coalesce mantém o NULL),
+ * então ela segue legado e o streaming a pula. Puro p/ teste.
+ */
+export function shouldStreamPostSave(row, floor) {
+  return Boolean(row) && !isLegacyRow(row, floor);
 }
 
 export async function cmdCrawl(flags) {
@@ -452,10 +497,12 @@ async function crawlRun(flags) {
     const p = task().finally(() => streaming.delete(p));
     streaming.add(p);
   };
+  // Piso legado lido UMA vez por crawl (é fixo: o boot/reset é quem o move).
+  const legacyFloor = getLegacyFloor();
   const streamPostSave = (savedUrl) => {
     if (!(HAS_LLM && savedUrl) || shouldStop()) return;
     const a = stmts.getArticleFullByUrl.get(savedUrl);
-    if (!a) return; // sumiu: pula
+    if (!shouldStreamPostSave(a, legacyFloor)) return;
     if (VERIFY_STREAMING && a.verify_status == null) {
       track(() => inStage('verificação', async () => {
         try {
@@ -1230,35 +1277,181 @@ export function cmdExport(flags) {
   log(`exportados ${n} artigos para ${outDir} (${format})${all ? ' [todos]' : ` [run ${latest}]`}`);
 }
 
+// ---- piso "legado" (migração Jev, decisão 8): --include-legacy com contagem + custo + --yes ----
+
+/**
+ * Custo ESTIMADO (US$) de processar N artigos por etapa — exibido ANTES do `--include-legacy`
+ * rodar (a confirmação precisa de um número, não de "pode sair caro"). Por artigo: verify = 1
+ * chamada verifyRecord; summarize = 1; classify = 1 por faceta (o ledger agrega todas sob
+ * 'classify'); reclean = articleReclean + o re-verify; reextract = articleClean + o re-verify.
+ * estimateStageCallUsd usa a média REAL do llm_usage quando há amostra; sem histórico cai no seed
+ * do tier — aí é TETO, não previsão.
+ */
+export function estimateLegacyUsd({ verify = 0, summary = 0, classify = 0, reclean = 0, reextract = 0 } = {}) {
+  const call = (stage) => estimateStageCallUsd(stage, stageModel(stage).model);
+  let facets = 1;
+  try {
+    facets = Math.max(1, getFacets().length);
+  } catch {
+    /* taxonomia ilegível: estima 1 chamada por artigo (a classificação nem rodaria) */
+  }
+  const parts = {
+    verify: verify * call('verifyRecord'),
+    summary: summary * call('summarize'),
+    classify: classify * facets * call('classify'),
+    reclean: reclean * (call('articleReclean') + call('verifyRecord')),
+    reextract: reextract * (call('articleClean') + call('verifyRecord')),
+  };
+  return { ...parts, total: parts.verify + parts.summary + parts.classify + parts.reclean + parts.reextract };
+}
+
+const fmtUsd = (n) => `US$ ${n.toFixed(n >= 1 ? 2 : 4)}`;
+
+/**
+ * `--limit` de finish/reclean/reextract: ausente = `dflt`; senão inteiro >= 0, ou sai 1. Negativo
+ * ou lixo NÃO pode passar: o portão do legado capa a contagem em 0 (mostra "0 itens / US$ 0") mas
+ * o sweep repassaria o valor ao SQLite, onde `LIMIT -1` = SEM limite (e `Number('x')` = NaN vira
+ * Infinity nos sweeps) — o número exibido deixaria de ser o que roda.
+ */
+function parseLimitFlag(flags, command, dflt = Infinity) {
+  const raw = flags.limit;
+  if (raw === undefined || raw === null || raw === false) return dflt;
+  const n = typeof raw === 'string' && raw.trim() !== '' ? Number(raw) : typeof raw === 'number' ? raw : Number.NaN;
+  if (!Number.isInteger(n) || n < 0) {
+    errorLog(`${command}: --limit precisa ser um inteiro >= 0 (veio "${raw}") — nada foi processado.`);
+    process.exit(1);
+  }
+  return n;
+}
+
+/**
+ * Flags que mudam O QUE roda, repetidas na linha "Confirme com:" — sem elas, colar a sugestão
+ * rodaria OUTRA coisa (ex.: sem o --budget, sem teto; sem um --no-*, um sweep a mais).
+ */
+function confirmFlagsSuffix(flags, names) {
+  let s = '';
+  for (const k of names) {
+    if (flags[k] === true) s += ` --${k}`;
+    else if (flags[k] != null && flags[k] !== false) s += ` --${k} ${flags[k]}`;
+  }
+  return s;
+}
+
+/**
+ * Portão do `--include-legacy` (finish/reclean/reextract): SEMPRE imprime quanto do legado entraria
+ * e o custo estimado; sem `--yes` sai 1 (nada roda). Chamado ANTES do cheque de chave — recusar/
+ * mostrar o impacto não depende de ter LLM configurado. `counts` = {verify?, summary?, classify?,
+ * reclean?, reextract?} já capados pelo --limit; `confirm` = a linha de comando que confirma;
+ * `free` = o comando roda sem LLM (reextract sem chave: só a parte determinística, US$ 0).
+ */
+function gateIncludeLegacy({ command, counts, floor, legacyTotal, confirm, free = false }, flags) {
+  const est = free ? { verify: 0, summary: 0, classify: 0, reclean: 0, reextract: 0, total: 0 } : estimateLegacyUsd(counts);
+  const LABEL = {
+    verify: 'verificação', summary: 'resumos', classify: 'classificação', reclean: 'reclean (suspect)',
+    reextract: 'reextract (alvo)',
+  };
+  const keys = Object.keys(counts).filter((k) => LABEL[k]);
+  const byStage = keys.map((k) => `${LABEL[k]}=${counts[k]}`).join(' · ');
+  const byCost = keys.filter((k) => counts[k] > 0).map((k) => `${LABEL[k]} ${fmtUsd(est[k])}`).join(' · ');
+  warn(
+    `${command} --include-legacy: o ACERVO LEGADO (${legacyTotal} artigo(s) com run_id NULL ou < ${floor} — ` +
+      `ex.: os restaurados do git) entraria no ${free ? 'reprocessamento (sem chave LLM: só a parte determinística)' : 'pós-processamento PAGO'}.`,
+  );
+  warn(`legado a processar: ${byStage || 'nada'}`);
+  if (free) {
+    warn('custo estimado: US$ 0 (sem chave LLM não há limpeza/verificação por IA).');
+  } else {
+    warn(
+      `custo estimado: ~${fmtUsd(est.total)}${byCost ? ` (${byCost})` : ''} — média real do ledger quando há ` +
+        'histórico; sem ele, teto conservador pelo seed do modelo. Limite com --limit N / --budget USD.',
+    );
+  }
+  if (flags.yes !== true) {
+    errorLog(`Confirme com:  ${confirm}   (sem --include-legacy o ${command} processa só o que é DESTA era)`);
+    process.exit(1);
+  }
+  return est;
+}
+
+/**
+ * Dica do `finish` SEM --include-legacy quando o piso deixou pendentes do legado de fora (null =
+ * nada ficou de fora). NÃO traz --yes: rodá-la primeiro mostra contagem × custo; o --yes vem
+ * depois, pedido pelo próprio portão. `era` = countPendingByEra().
+ */
+export function legacyLeftHint(era) {
+  const lg = era?.legacy;
+  if (!lg || lg.verify + lg.summary + lg.classify <= 0) return null;
+  return (
+    `legado fora (piso run >= ${era.floor}): ${lg.verify} sem veredito · ${lg.summary} sem resumo · ` +
+    `${lg.classify} sem tags — não serão processados (p/ ver contagem × custo: ncrawl finish --include-legacy).`
+  );
+}
+
 // Finaliza o PÓS-PROCESSAMENTO dos pendentes (verify + classify + summarize) num comando só, SEM
 // novo crawl — p/ terminar/retomar um backlog interrompido. Roda os 3 sweeps EM PARALELO (colunas
 // independentes) no perfil llm-only, honrando --limit/--force/--budget/--parallel e os --no-* p/
 // pular um sweep. O orçamento (shouldStop) para e devolve os pendentes, então dá p/ limitar o gasto
 // por execução e retomar depois. Espelha o bloco pós-crawl (crawlRun) num comando avulso.
+// Piso legado: por padrão só os artigos DESTA era (run_id >= settings.jev_floor_run_id); o acervo
+// anterior (ex.: os 15.502 restaurados, run_id NULL) só com --include-legacy --yes.
 export async function cmdFinish(flags) {
   const force = flags.force === true;
-  // `--force` é DESTRUIÇÃO disfarçada de re-processamento: ele re-roda o acervo INTEIRO (o
-  // default de --limit é Infinity) e, no caminho do classify, APAGA as tags já gravadas
-  // (deleteTagsForArticle) além de sobrescrever resumos e vereditos. Se algum sweep parar no
-  // meio (orçamento, 429, Ctrl+C), o que foi apagado NÃO volta sozinho. Por isso: --yes + backup,
-  // como em qualquer destruição. É verificado ANTES do cheque de chave — recusar um flag
-  // destrutivo não depende de ter LLM configurado.
+  const includeLegacy = Boolean(flags['include-legacy']);
+  const limit = parseLimitFlag(flags, 'finish');
+  // UMA linha de confirmação p/ os dois portões (--force e --include-legacy), com TODA flag que
+  // muda o que roda: colar a sugestão tem de rodar exatamente o que foi mostrado.
+  const confirm =
+    `ncrawl finish${force ? ' --force' : ''}${includeLegacy ? ' --include-legacy' : ''} --yes` +
+    confirmFlagsSuffix(flags, ['limit', 'budget', 'parallel', 'no-verify', 'no-summarize', 'no-classify']);
+  // `--force` é DESTRUIÇÃO disfarçada de re-processamento: ele re-roda TODOS os artigos desta era
+  // (o default de --limit é Infinity; com --include-legacy, o acervo INTEIRO) e, no caminho do
+  // classify, APAGA as tags já gravadas (deleteTagsForArticle) além de sobrescrever resumos e
+  // vereditos. Se algum sweep parar no meio (orçamento, 429, Ctrl+C), o que foi apagado NÃO volta
+  // sozinho. Por isso: --yes + backup, como em qualquer destruição. É verificado ANTES do cheque
+  // de chave — recusar um flag destrutivo não depende de ter LLM configurado.
   if (force && flags.yes !== true) {
     errorLog(
-      'finish --force RE-PROCESSA o acervo INTEIRO por LLM e APAGA as tags/classificações, os ' +
-        'resumos e os vereditos já gravados (interromper no meio deixa o buraco). Isso custa dinheiro.',
+      `finish --force RE-PROCESSA por LLM todos os artigos ${includeLegacy ? 'do acervo (legado incluído)' : 'desta era'} ` +
+        'e APAGA as tags/classificações, os resumos e os vereditos já gravados (interromper no meio ' +
+        'deixa o buraco). Isso custa dinheiro.',
     );
-    errorLog(
-      `Confirme com:  ncrawl finish --force --yes${flags.limit ? ` --limit ${flags.limit}` : ''}` +
-        '   (sem --force o finish só completa os PENDENTES, sem apagar nada)',
+    // Com --include-legacy a recusa fica p/ o portão do legado logo abaixo: ele mostra contagem ×
+    // custo ANTES de pedir o --yes (senão o caminho MAIS caro — o legado inteiro — seria o único
+    // confirmado às cegas: a sugestão com --yes passaria pelos dois portões de uma vez).
+    if (!includeLegacy) {
+      errorLog(`Confirme com:  ${confirm}   (sem --force o finish só completa os PENDENTES, sem apagar nada)`);
+      process.exit(1);
+    }
+  }
+  const era = countPendingByEra();
+  if (includeLegacy) {
+    // Quanto do legado cada sweep pegaria (--force: TODOS os legados; senão só os pendentes),
+    // capado pelo --limit (cada sweep aplica o limite sozinho) e zerado pelos --no-*.
+    const cap = (n) => (Number.isFinite(limit) ? Math.min(n, Math.max(0, limit)) : n);
+    const pick = (skip, pending) => (skip ? 0 : cap(force ? era.legacy.articles : pending));
+    gateIncludeLegacy(
+      {
+        command: 'finish',
+        floor: era.floor,
+        legacyTotal: era.legacy.articles,
+        counts: {
+          verify: pick(flags['no-verify'] === true, era.legacy.verify),
+          summary: pick(flags['no-summarize'] === true, era.legacy.summary),
+          classify: pick(flags['no-classify'] === true, era.legacy.classify),
+        },
+        confirm,
+      },
+      flags,
     );
-    process.exit(1);
   }
   if (!HAS_LLM) {
     errorLog(`${providerInfo().keyVar} ausente — finalizar os pendentes requer o caminho LLM.`);
     process.exit(1);
   }
-  const limit = flags.limit ? Number(flags.limit) : Infinity;
+  if (!includeLegacy) {
+    const hint = legacyLeftHint(era);
+    if (hint) log(hint);
+  }
   if (force) {
     const guard = backupBeforeDestructive('finish-force');
     if (!guard.ok) {
@@ -1268,14 +1461,15 @@ export async function cmdFinish(flags) {
   }
   await runWithLimits({ command: 'finish', flags, profile: 'llm-only' }, () => {
     const tasks = [];
+    const opts = { limit, force, includeLegacy };
     if (flags['no-verify'] !== true) {
-      tasks.push(verifyPending({ limit, force }).catch((e) => errorLog(`verify falhou: ${e.message}`)));
+      tasks.push(verifyPending(opts).catch((e) => errorLog(`verify falhou: ${e.message}`)));
     }
     if (flags['no-summarize'] !== true) {
-      tasks.push(summarizePending({ limit, force }).catch((e) => errorLog(`summarize falhou: ${e.message}`)));
+      tasks.push(summarizePending(opts).catch((e) => errorLog(`summarize falhou: ${e.message}`)));
     }
     if (flags['no-classify'] !== true) {
-      tasks.push(classifyPending({ limit, force }).catch((e) => errorLog(`classify falhou: ${e.message}`)));
+      tasks.push(classifyPending(opts).catch((e) => errorLog(`classify falhou: ${e.message}`)));
     }
     return Promise.all(tasks);
   });
@@ -1291,8 +1485,31 @@ export async function cmdReextract(flags) {
   // Varredura completa exige --all EXPLÍCITO: sem --limit o default é PEQUENO
   // (REEXTRACT_DEFAULT_LIMIT) — uma migração acidental não reescreve o corpus inteiro.
   const all = flags.all === true;
-  const limit = all ? Infinity : (flags.limit ? Number(flags.limit) : REEXTRACT_DEFAULT_LIMIT);
+  const limit = all ? Infinity : parseLimitFlag(flags, 'reextract', REEXTRACT_DEFAULT_LIMIT);
   const urlFilter = typeof flags.url === 'string' && flags.url.trim() ? flags.url.trim() : null;
+  // Piso legado (decisão 8 da migração Jev): re-clean + re-verify do acervo ANTERIOR ao piso (os
+  // restaurados do git) é pago — só com --include-legacy --yes, depois de mostrar contagem e custo.
+  // A contagem sai da MESMA seleção que roda (selectReextractTargets), já com --url e --limit.
+  const includeLegacy = Boolean(flags['include-legacy']);
+  if (includeLegacy) {
+    const floor = getLegacyFloor();
+    const n = selectReextractTargets({ urlFilter, limit, includeLegacy: true })
+      .filter((r) => isLegacyRow(r, floor)).length;
+    gateIncludeLegacy(
+      {
+        command: 'reextract',
+        floor,
+        legacyTotal: countPendingByEra().legacy.articles,
+        counts: { reextract: n },
+        free: !HAS_LLM,
+        confirm:
+          `ncrawl reextract --include-legacy --yes${all ? ' --all' : ''}` +
+          `${!all && flags.limit != null ? ` --limit ${flags.limit}` : ''}${urlFilter ? ` --url ${urlFilter}` : ''}` +
+          confirmFlagsSuffix(flags, ['budget']),
+      },
+      flags,
+    );
+  }
   // `--all` reescreve o CORPO de todo o acervo: é sobrescrita em massa, não "reprocessamento"
   // inócuo. Backup antes (o guard de encolhimento do reextract.js protege ficha a ficha; a cópia
   // protege o conjunto). O default limitado (REEXTRACT_DEFAULT_LIMIT) segue sem cerimônia.
@@ -1304,19 +1521,36 @@ export async function cmdReextract(flags) {
     }
   }
   await runWithLimits({ command: 'reextract', flags, profile: 'llm-only' }, () =>
-    reextractTargets({ urlFilter, limit }));
+    reextractTargets({ urlFilter, limit, includeLegacy }));
   printStatus();
 }
 
 // reclean: re-limpa os 'suspect' com o passe FORTE (Pro) e re-verifica (melhoria da seção 7).
+// Piso legado: só os suspect DESTA era; os do acervo anterior (4.517 restaurados) só com
+// --include-legacy --yes, que mostra contagem e custo antes (portão ANTES do cheque de chave).
 export async function cmdReclean(flags) {
+  const includeLegacy = Boolean(flags['include-legacy']);
+  const limit = parseLimitFlag(flags, 'reclean');
+  if (includeLegacy) {
+    const era = countPendingByEra();
+    const n = Number.isFinite(limit) ? Math.min(era.legacy.suspect, limit) : era.legacy.suspect;
+    gateIncludeLegacy(
+      {
+        command: 'reclean',
+        floor: era.floor,
+        legacyTotal: era.legacy.articles,
+        counts: { reclean: n },
+        confirm: `ncrawl reclean --include-legacy --yes${confirmFlagsSuffix(flags, ['limit', 'budget', 'parallel'])}`,
+      },
+      flags,
+    );
+  }
   if (!HAS_LLM) {
     errorLog(`${providerInfo().keyVar} ausente — o reclean requer o caminho LLM.`);
     process.exit(1);
   }
-  const limit = flags.limit ? Number(flags.limit) : Infinity;
   await runWithLimits({ command: 'reclean', flags, profile: 'llm-only' }, () =>
-    recleanSuspects({ limit }));
+    recleanSuspects({ limit, includeLegacy }));
   printStatus();
 }
 

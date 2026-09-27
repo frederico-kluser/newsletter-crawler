@@ -1,0 +1,59 @@
+<!doctype html>
+<!--
+  Fixture SINTÉTICA (W0, 2026-09-26) para a paginação: arquivo paginado, PÁGINA 2 DE 5.
+  Sinais de "próxima página" em camadas (para o findNextPage cache → rel=next → determinístico):
+    - <link rel="next"> / <link rel="prev"> no <head>;
+    - <a rel="next"> no paginador + números (aria-current="page" na atual);
+    - texto "Older posts ›" (sem rel) apontando para a mesma página 3.
+  Base URL presumida: https://news.example.test/archive/page/2/
+  Verdade: próxima = /archive/page/3/ ; anterior = /archive/page/1/ ; 12 itens de artigo = /p/<slug>
+  (externos marcados com data-external="1" apontam para outros hosts, como num agregador).
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Archive — page 2 of 5 — Example Weekly</title>
+  <link rel="canonical" href="https://news.example.test/archive/page/2/">
+  <link rel="prev" href="https://news.example.test/archive/page/1/">
+  <link rel="next" href="https://news.example.test/archive/page/3/">
+</head>
+<body>
+  <header>
+    <a href="/">Example Weekly</a>
+    <nav><a href="/archive/">Archive</a> <a href="/about/">About</a> <a href="/sponsor/">Sponsor</a> <a href="/subscribe/">Subscribe</a></nav>
+  </header>
+  <main>
+    <h1>Archive</h1>
+    <ul class="archive-list">
+      <li><a href="/p/issue-452-postgres-19-lands">Issue 452 — Postgres 19 lands with REPACK</a> <time datetime="2026-08-20">Aug 20, 2026</time></li>
+      <li><a href="/p/issue-451-async-rust-state-machines">Issue 451 — Async Rust as state machines</a> <time datetime="2026-08-13">Aug 13, 2026</time></li>
+      <li><a href="/p/issue-450-wasi-03">Issue 450 — WASI 0.3 is out</a> <time datetime="2026-08-06">Aug 6, 2026</time></li>
+      <li><a href="/p/issue-449-rsc-protocol">Issue 449 — RSC as a protocol</a> <time datetime="2026-07-30">Jul 30, 2026</time></li>
+      <li><a href="/p/issue-448-llm-benchmarks">Issue 448 — Are LLM benchmarks broken?</a> <time datetime="2026-07-23">Jul 23, 2026</time></li>
+      <li><a href="/p/issue-447-go-iterators">Issue 447 — Go iterators everywhere</a> <time datetime="2026-07-16">Jul 16, 2026</time></li>
+      <li><a href="/p/issue-446-node-permissions">Issue 446 — Node's permission model grows up</a> <time datetime="2026-07-09">Jul 9, 2026</time></li>
+      <li><a href="/p/issue-445-css-scope">Issue 445 — @scope in the wild</a> <time datetime="2026-07-02">Jul 2, 2026</time></li>
+      <li><a href="/p/issue-444-agents-worktrees">Issue 444 — Agents in parallel worktrees</a> <time datetime="2026-06-25">Jun 25, 2026</time></li>
+      <li><a href="/p/issue-443-sqlite-opfs">Issue 443 — SQLite on OPFS</a> <time datetime="2026-06-18">Jun 18, 2026</time></li>
+      <li><a data-external="1" href="https://planetscale.example.test/blog/whats-new-in-postgres-19">Three new things in Postgres 19</a> <time datetime="2026-06-11">Jun 11, 2026</time></li>
+      <li><a data-external="1" href="https://tokio.example.test/blog/2026-06-01-tokio-1-50">Tokio 1.50 released</a> <time datetime="2026-06-04">Jun 4, 2026</time></li>
+    </ul>
+
+    <nav class="pagination" aria-label="Pagination">
+      <a class="prev" rel="prev" href="/archive/page/1/">‹ Newer posts</a>
+      <a href="/archive/page/1/">1</a>
+      <a href="/archive/page/2/" aria-current="page" class="current">2</a>
+      <a href="/archive/page/3/">3</a>
+      <a href="/archive/page/4/">4</a>
+      <span class="gap">…</span>
+      <a href="/archive/page/5/">5</a>
+      <a class="next" rel="next" href="/archive/page/3/">Next ›</a>
+    </nav>
+    <p class="older"><a href="/archive/page/3/">Older posts ›</a></p>
+  </main>
+  <footer>
+    <a href="/privacy/">Privacy</a> <a href="mailto:editor@news.example.test">Email the editor</a> <a href="/rss/">RSS</a>
+  </footer>
+</body>
+</html>

@@ -446,8 +446,12 @@ test('restoreFromGit: markClassified evita o re-classify de TODO o acervo restau
   // (a base é a do teste anterior — 4 artigos já restaurados)
   // Sem markClassified o sweep re-selecionaria os 4; com ele sobra só /c, que NUNCA teve tag em
   // snapshot nenhum (é classificação de verdade a fazer, não re-trabalho pago duas vezes).
-  const pendentes = stmts.listArticlesNeedingClassification.all(1000);
+  // includeLegacy: os restaurados têm run_id NULL (o piso legado os tira da varredura PADRÃO —
+  // abaixo); aqui a pergunta é quem ainda PRECISA de classificação, com a porta aberta.
+  const pendentes = stmts.listArticlesNeedingClassification.all({ lim: 1000, includeLegacy: true });
   assert.equal(pendentes.length, 1);
+  assert.equal(stmts.listArticlesNeedingClassification.all({ lim: 1000 }).length, 0,
+    'piso legado: nada do acervo restaurado entra na varredura padrão');
   assert.equal(pendentes[0].url, 'https://ex.test/c');
   assert.equal(stmts.countClassifications.get().c, 3, 'só os 3 registros COM tags ganham a linha');
   assert.equal(stmts.getClassification.get(stmts.getArticleFullByUrl.get('https://ex.test/c').id), undefined,
@@ -817,7 +821,9 @@ test('maybeAutoRestore: base VAZIA + snapshot no git => restaura sozinho (o requ
   assert.equal(res.skipped, null);
   assert.equal(res.inserted, 4);
   assert.equal(countArticles(), 4);
-  assert.equal(stmts.listArticlesNeedingClassification.all(1000).length, 1, 'só o artigo sem tags');
+  assert.equal(
+    stmts.listArticlesNeedingClassification.all({ lim: 1000, includeLegacy: true }).length, 1, 'só o artigo sem tags',
+  );
 });
 
 test('maybeAutoRestore: sem git / sem snapshot é fail-open (nunca derruba o comando)', () => {

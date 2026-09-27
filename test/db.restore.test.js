@@ -211,9 +211,12 @@ test('restoreTags: grava article_tags com rank e é idempotente', () => {
 test('restoreTags: por padrão NÃO inventa linha em classifications (o snapshot não tem os campos)', () => {
   const id = stmts.getArticleByUrl.get('https://alvo.example/post').id;
   assert.equal(stmts.getClassification.get(id), undefined);
-  // consequência assumida: o artigo segue elegível ao sweep de classificação
-  const pendentes = stmts.listArticlesNeedingClassification.all(-1).map((a) => a.id);
-  assert.ok(pendentes.includes(id));
+  // consequência assumida: o artigo segue ELEGÍVEL ao sweep de classificação — mas, restaurado
+  // (run_id NULL), só com --include-legacy: o piso legado o tira da varredura padrão
+  const elegiveis = stmts.listArticlesNeedingClassification.all({ lim: -1, includeLegacy: true }).map((a) => a.id);
+  assert.ok(elegiveis.includes(id));
+  const padrao = stmts.listArticlesNeedingClassification.all({ lim: -1 }).map((a) => a.id);
+  assert.ok(!padrao.includes(id), 'piso legado: o restaurado não entra na varredura padrão');
 });
 
 test('restoreTags markClassified: grava rótulo EXPLÍCITO "restored" e nunca rebaixa uma real', () => {
@@ -224,8 +227,10 @@ test('restoreTags markClassified: grava rótulo EXPLÍCITO "restored" e nunca re
   assert.equal(c.status, 'restored');
   assert.equal(c.model_used, 'restore');
   assert.deepEqual(JSON.parse(c.result_json).facets, { domain: ['ai'] });
-  // sai da fila do sweep
-  assert.ok(!stmts.listArticlesNeedingClassification.all(-1).some((a) => a.id === r.id));
+  // sai da fila do sweep (nem com --include-legacy ele volta: já está classificado)
+  assert.ok(
+    !stmts.listArticlesNeedingClassification.all({ lim: -1, includeLegacy: true }).some((a) => a.id === r.id),
+  );
 
   // classificação REAL já existente não é sobrescrita
   stmts.upsertClassification.run({

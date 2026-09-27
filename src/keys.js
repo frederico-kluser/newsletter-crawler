@@ -5,7 +5,9 @@
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
 import path from 'node:path';
 import got from 'got';
-import { LLM_PROVIDER, ENV_PATH } from './config.js';
+// OPENROUTER_API_KEY é LIVE BINDING (export let do config): lido só em call-time (default de
+// parâmetro do getKeyUsage), então vê a chave trocada em runtime pelo setRuntimeKey.
+import { LLM_PROVIDER, ENV_PATH, OPENROUTER_API_KEY } from './config.js';
 
 // ---- descritores por provedor (espelha providerInfo() de config.js, mas por NOME) ----
 // O cmdKey com --provider e o dispatcher precisam do keyVar/baseURL de um provedor que pode NÃO
@@ -42,6 +44,80 @@ export async function probeOpenRouterKey(key) {
     return { ok: res.statusCode === 200, status: res.statusCode };
   } catch (e) {
     return { ok: false, status: 0, reason: e.message };
+  }
+}
+
+// ---- consumo da chave OpenRouter (GET /api/v1/key — grátis: não gasta crédito) ----
+// Origem da API lida em CALL-TIME: o ORIGIN de OPENROUTER_BASE_URL quando setado (o teste aponta
+// p/ um servidor local e nunca toca a rede paga); sem env, o host público. URL inválida = default.
+function openrouterOrigin() {
+  const raw = process.env.OPENROUTER_BASE_URL;
+  if (raw) {
+    try {
+      return new URL(raw).origin;
+    } catch {
+      /* OPENROUTER_BASE_URL malformada: cai no host público (fail-open) */
+    }
+  }
+  return 'https://openrouter.ai';
+}
+
+// O `label` que a API devolve costuma ser a PRÓPRIA chave truncada (sk-or-v1-abc...xyz): tudo que
+// tem cara de chave sai mascarado. Um nome dado pelo usuário no painel passa como está (não é segredo).
+function redactKeyLabel(label) {
+  if (label == null || label === '') return null;
+  const s = String(label);
+  return /sk-/i.test(s) ? maskKey(s) : s;
+}
+
+// Valor em USD da resposta: número finito ou null (null = "não informado", NUNCA zero — `limit`
+// null na OpenRouter significa chave SEM teto de crédito).
+function usdOrNull(v) {
+  if (v == null || v === '') return null;
+  const n = Number(v);
+  return Number.isFinite(n) ? n : null;
+}
+
+/**
+ * Consumo da chave OpenRouter: GET {origin}/api/v1/key → data.usage / limit / limit_remaining
+ * (USD, acumulado da vida da chave). Base do guard de gasto do desenvolvimento
+ * (scripts/dev-spend.mjs). Mesmo contrato defensivo dos probes: NUNCA lança — falha devolve
+ * { ok:false, status, reason } com os números em null; quem decide gasto trata null como
+ * DESCONHECIDO (fail-safe), nunca como zero. O label sai mascarado; a chave nunca é devolvida.
+ */
+export async function getKeyUsage(key = OPENROUTER_API_KEY, { timeoutMs = 15000 } = {}) {
+  const empty = { usage: null, limit: null, limit_remaining: null, label: null };
+  if (!key) return { ok: false, status: 0, reason: 'chave vazia', ...empty };
+  try {
+    const res = await got(`${openrouterOrigin()}/api/v1/key`, {
+      headers: { Authorization: `Bearer ${key}` },
+      throwHttpErrors: false, // 401/403 devolvem statusCode em vez de lançar
+      timeout: { request: timeoutMs },
+      retry: { limit: 1 },
+    });
+    if (res.statusCode !== 200) {
+      return { ok: false, status: res.statusCode, reason: `HTTP ${res.statusCode}`, ...empty };
+    }
+    let data = null;
+    try {
+      data = JSON.parse(res.body)?.data ?? null;
+    } catch {
+      data = null; // corpo não-JSON (proxy/página de erro): cai no "sem data.usage" abaixo
+    }
+    const usage = usdOrNull(data?.usage);
+    if (!data || usage == null) {
+      return { ok: false, status: res.statusCode, reason: 'resposta sem data.usage', ...empty };
+    }
+    return {
+      ok: true,
+      status: res.statusCode,
+      usage,
+      limit: usdOrNull(data.limit),
+      limit_remaining: usdOrNull(data.limit_remaining),
+      label: redactKeyLabel(data.label),
+    };
+  } catch (e) {
+    return { ok: false, status: 0, reason: e.message, ...empty };
   }
 }
 

@@ -24,6 +24,7 @@ test('redige os principais padrões de token (prefixos reservados)', () => {
     'glpat-AbCdEfGhIjKlMnOpQrStUvWx',
     'sk-ant-api03-abcdefghijklmnopqrstuvwxyz-ABCDEFGHIJKLMNOPQRSTUVWXYZ',
     'sk-proj-abcdefghijklmnopqrstuvwxyz-ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+    'sk-' + 'or-v1-' + 'a1b2c3d4'.repeat(8), // OpenRouter (concat p/ não casar no push protection)
     'sk-' + 'a'.repeat(48),
     'AKIAIOSFODNN7EXAMPLE',
     'ASIAIOSFODNN7EXAMPLE',
@@ -49,6 +50,7 @@ test('não toca texto limpo nem slug de URL parecido com chave', () => {
   const clean = [
     'o crawler roda com got e não axios',
     'sk-zuckerberg-killed-trumps-ai-safety-order-in-three', // slug de URL com sk-
+    'sk-or-v1-placeholder', // exemplo de doc (corpo curto demais p/ ser chave)
     'npm_package_using_postinstall_to_inject', // nome de pacote
     'npm_config__auth', // nome de variável de ambiente
     'hf_tools são da Hugging Face', // prefixo sem corpo de token

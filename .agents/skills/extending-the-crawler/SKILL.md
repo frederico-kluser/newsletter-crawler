@@ -19,5 +19,5 @@ Adding a newsletter source, a new `src/` module, a CLI command, a publication, o
 - Always reuse util/db/llm/fetch/clean/selectors; never add `axios`; log via the util helpers.
 - Verify the change via `running-and-verifying-crawls`.
 
-## <evolution>
-On completion, if you discovered an important, externally-verified convention, update the relevant KNOWLEDGE skill (not this one) via the memory pipeline. Update this skill only when the extension procedure itself changed and you verified the new steps. See meta-skill-evolution.
+## registo de aprendizado (memória CoALA local)
+On completion, if you discovered an important, externally-verified convention, update the relevant KNOWLEDGE skill (not this one) via the memory pipeline. Update this skill only when the extension procedure itself changed and you verified the new steps. See a memória CoALA local (`coala.py add`).

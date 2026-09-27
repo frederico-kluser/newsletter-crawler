@@ -24,4 +24,4 @@ Editing `src/fetch.js`, `src/clean.js`, `src/parse-core.js`/`src/parse-pool.js`,
 - **Selector validity thresholds** gate cache writes/self-healing: link selector >= 3 unique links; content >= 400 chars; date spec >= max(3, 50% dos itens) parseable. Below threshold, re-derive. `src/selectors.js:180-210@d17d599`, `src/crawl.js:255-285@d17d599`.
 
 ## Evolution
-On task completion, update this file only for an important, externally-verified change (a green bounded crawl that proves the new behavior). See meta-skill-evolution.
+On task completion, update this file only for an important, externally-verified change (a green bounded crawl that proves the new behavior). See a memória CoALA local (`coala.py add`).

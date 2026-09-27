@@ -1,4 +1,5 @@
 {
+  "jev": { "model": "typesafe/jev-1.13", "calibratedOn": "typesafe/jev-1.13-20260917" },
   "default": { "model": "deepseek/deepseek-v4-flash-0731", "effort": "xhigh" },
   "stages": {
     "linkSelector":    { "model": "deepseek/deepseek-v4-flash-0731", "effort": "xhigh" },

@@ -23,8 +23,8 @@
 
 ## meta
 
-- **meta-skill-consolidate** — Periodic garbage-collection over all skills - dedup redundant content, resolve conflicts, detect staleness by provenance hash, enforce a per-skill token budget, and retire obsolete content. Use on a schedule or when skills grow or overlap, never as part of a feature task. Deletions require a second-opinion review.
-- **meta-skill-evolution** — End-of-task memory pipeline that decides whether to update an existing skill directly, propose a new skill (a human-reviewed draft), or discard. Use at the end of every task or whenever there may be important new knowledge to persist into a skill. Enforces external verification before any SKILL.md write.
+- **a memória CoALA local (supersessão por `--key`)** — Periodic garbage-collection over all skills - dedup redundant content, resolve conflicts, detect staleness by provenance hash, enforce a per-skill token budget, and retire obsolete content. Use on a schedule or when skills grow or overlap, never as part of a feature task. Deletions require a second-opinion review.
+- **a memória CoALA local (`coala.py add`)** — End-of-task memory pipeline that decides whether to update an existing skill directly, propose a new skill (a human-reviewed draft), or discard. Use at the end of every task or whenever there may be important new knowledge to persist into a skill. Enforces external verification before any SKILL.md write.
 
 ## Tooling
 - Lint all skills: `node .agents/skills/scripts/skill-lint.mjs --all`

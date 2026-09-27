@@ -17,10 +17,10 @@ IMPORTANT: all questions and interactions with the user are ALWAYS in BRAZILIAN 
 5. Assemble the skill CHAIN (order + what can run in parallel via isolated-context subagents).
 6. Load the selected skills' knowledge BEFORE implementing.
 7. Execute the chain following TASK_PLAN.md.
-8. ON COMPLETION: (a) run each involved task skill's <evolution> (the memory pipeline in meta-skill-evolution); (b) DELETE TASK_PLAN.md.
+8. ON COMPLETION: (a) run each involved task skill's registo de aprendizado (memória CoALA local) (the memory pipeline of the local CoALA memory (`coala.py add`)); (b) DELETE TASK_PLAN.md.
 
 ## Rules
-- If no skill covers the task, invoke meta-skill-evolution to PROPOSE a new skill (a human-reviewed draft, not a direct publish).
+- If no skill covers the task, invoke the local CoALA memory (`coala.py add`) to PROPOSE a new skill (a human-reviewed draft, not a direct publish).
 - Skills with broad side effects (deploy, structural changes) are NOT auto-invocable without user confirmation.
 - Never skip the evolution step on completion. Never leave TASK_PLAN.md behind.
 - TASK_PLAN.md is disposable and deleted at the end; the bootstrap artifacts (project-analysis.md, skill-map.md, catalog.md, validation-report.md, .bootstrap-state.json) are NOT - never delete them.

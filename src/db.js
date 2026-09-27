@@ -171,6 +171,35 @@ CREATE TABLE IF NOT EXISTS settings (
   key TEXT PRIMARY KEY,
   value TEXT
 );
+
+-- Log central das DECISÕES do Jev: 1 linha por PERGUNTA decidida (não por chamada — o custo por
+-- chamada fica no llm_usage). É o insumo da recalibração offline dos limiares (eval/jev) e do
+-- 'inspect --decisions'. Escrito SÓ por events.logDecision, em lote, na MESMA transação do flush
+-- dos events. Com JEV_TRACE=min (default) entram os desfechos não-aceitos + uma AMOSTRA
+-- determinística dos aceitos; sample_rate guarda a taxa com que a linha entrou (1 = sempre
+-- registrada; 0.05 = aceito amostrado) p/ o inspect estimar o total sem mentir: SUM(1/sample_rate).
+-- value/fb_value: texto cru quando a resposta é string (choice), JSON nos demais (noul/score/listas).
+CREATE TABLE IF NOT EXISTS jev_decisions (
+  id INTEGER PRIMARY KEY,
+  run_id INTEGER,
+  stage TEXT NOT NULL,
+  subject TEXT,
+  url TEXT,
+  qid TEXT NOT NULL,
+  value TEXT,
+  p REAL,
+  certainty REAL,
+  threshold REAL,
+  outcome TEXT NOT NULL CHECK (outcome IN ('accept', 'fallback', 'default', 'error', 'shadow')),
+  reason TEXT,
+  fb_value TEXT,
+  agree INTEGER,
+  model TEXT,
+  sample_rate REAL DEFAULT 1,
+  created_at TEXT DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_jev_decisions_run_stage ON jev_decisions(run_id, stage);
+CREATE INDEX IF NOT EXISTS idx_jev_decisions_stage_qid ON jev_decisions(stage, qid);
 `);
 
 // Migração leve p/ DBs criados antes das colunas multinível (CREATE TABLE IF NOT EXISTS
@@ -224,6 +253,20 @@ ensureColumn('articles', 'enrich_attempts', 'enrich_attempts INTEGER DEFAULT 0')
 ensureColumn('selectors', 'date_selector', 'date_selector TEXT');
 ensureColumn('selectors', 'date_attribute', 'date_attribute TEXT');
 ensureColumn('selectors', 'date_regex', 'date_regex TEXT');
+// Ledger por MOTOR (migração Jev): o mesmo llm_usage passa a separar Jev × chat (Gemini/fallback).
+// - engine: 'jev' | 'chat' (NULL em linhas antigas — quem lê deduz pelo model, ver usageByStageEngine)
+// - decisions: nº de perguntas decididas pela chamada (Jev) ou resolvidas pelo fallback (chat)
+// - fallback_reason: NULL = chamada primária; texto = chamada de fallback e o porquê
+//   (low-confidence, escape-option, jev-error, injection, circuit-open…)
+// - latency_ms: duração da chamada (p95 do Jev no smoke/inspect)
+// - requested_model: o slug PEDIDO (o `model` guarda o RESOLVIDO: 'typesafe/jev-1.13' pede,
+//   'typesafe/jev-1.13-20260917' responde) — estimateStageCallUsd filtra por ele sem ambiguidade
+//   de prefixo ('gemini-3.8-flash' × 'gemini-3.8-flash-lite')
+ensureColumn('llm_usage', 'engine', 'engine TEXT');
+ensureColumn('llm_usage', 'decisions', 'decisions INTEGER');
+ensureColumn('llm_usage', 'fallback_reason', 'fallback_reason TEXT');
+ensureColumn('llm_usage', 'latency_ms', 'latency_ms INTEGER');
+ensureColumn('llm_usage', 'requested_model', 'requested_model TEXT');
 
 // Dedup de conteúdo à prova de concorrência: promove idx_articles_hash a UNIQUE em DBs
 // antigos (CREATE UNIQUE ... IF NOT EXISTS não converte um índice já existente). Só age se
@@ -798,6 +841,45 @@ export const stmts = {
       GROUP BY stage, status ORDER BY stage, status`,
   ),
 
+  // jev_decisions (log central das decisões do Jev; escrito em lote por events.logDecision)
+  insertJevDecision: db.prepare(
+    `INSERT INTO jev_decisions (run_id, stage, subject, url, qid, value, p, certainty, threshold,
+                                outcome, reason, fb_value, agree, model, sample_rate)
+     VALUES (@run_id, @stage, @subject, @url, @qid, @value, @p, @certainty, @threshold,
+             @outcome, @reason, @fb_value, @agree, @model, @sample_rate)`,
+  ),
+  // Listagem/exportação (inspect --decisions, recalibração offline): filtros ANULÁVEIS (NULL =
+  // desligado) p/ um prepared statement só; @lim = -1 devolve tudo (LIMIT -1 do SQLite).
+  listJevDecisions: db.prepare(
+    `SELECT * FROM jev_decisions
+      WHERE (@runId IS NULL OR run_id = @runId)
+        AND (@stage IS NULL OR stage = @stage)
+        AND (@qid IS NULL OR qid = @qid)
+        AND (@outcome IS NULL OR outcome = @outcome)
+      ORDER BY id LIMIT @lim`,
+  ),
+  // Contagem por (estágio, desfecho) de uma run. `n` = linhas gravadas; `est` = total ESTIMADO
+  // (com JEV_TRACE=min os aceitos entram por amostra: cada linha vale 1/sample_rate decisões).
+  countJevDecisionsByStageOutcome: db.prepare(
+    `SELECT stage, outcome, COUNT(*) n,
+            CAST(ROUND(SUM(1.0 / CASE WHEN sample_rate > 0 THEN sample_rate ELSE 1 END)) AS INTEGER) est,
+            AVG(certainty) avg_certainty
+       FROM jev_decisions WHERE run_id = ?
+      GROUP BY stage, outcome ORDER BY stage, outcome`,
+  ),
+  // Motivos dos desfechos NÃO-aceitos (fallback/default/error/shadow) de uma run.
+  countJevDecisionReasonsForRun: db.prepare(
+    `SELECT stage, outcome, COALESCE(reason, '') reason, COUNT(*) n
+       FROM jev_decisions WHERE run_id = ? AND outcome <> 'accept'
+      GROUP BY stage, outcome, reason ORDER BY n DESC, stage, outcome`,
+  ),
+  // Os fallbacks de MENOR certeza de uma run (onde o limiar está mordendo) — inspect.
+  listJevLowestCertaintyForRun: db.prepare(
+    `SELECT * FROM jev_decisions
+      WHERE run_id = @runId AND outcome <> 'accept'
+      ORDER BY certainty IS NULL, certainty ASC, id LIMIT @lim`,
+  ),
+
   // inspect (auditoria de uma run: artigos com veredito + agrupamento por issue de origem)
   getRunById: db.prepare(
     `SELECT r.*,
@@ -836,8 +918,8 @@ export const stmts = {
   // Serve a UM propósito: o guard de backup das operações destrutivas precisa distinguir o
   // `createBackup() === null` LEGÍTIMO ("banco vazio, não havia o que copiar" — pode seguir) da
   // FALHA de backup (disco cheio/permissão — ABORTA a destruição). A lista de tabelas é a MESMA
-  // do DATA_TABLES do src/backup.js: "0 artigos" não é "0 dados" (selectors e llm_usage saíram
-  // de chamadas de IA que custaram dinheiro).
+  // do DATA_TABLES do src/backup.js: "0 artigos" não é "0 dados" (selectors, llm_usage e
+  // jev_decisions saíram de chamadas de IA que custaram dinheiro).
   hasAnyData: db.prepare(
     `SELECT (EXISTS(SELECT 1 FROM articles)
           OR EXISTS(SELECT 1 FROM sources)
@@ -850,7 +932,8 @@ export const stmts = {
           OR EXISTS(SELECT 1 FROM classification_uncovered)
           OR EXISTS(SELECT 1 FROM llm_usage)
           OR EXISTS(SELECT 1 FROM events)
-          OR EXISTS(SELECT 1 FROM searches)) AS x`,
+          OR EXISTS(SELECT 1 FROM searches)
+          OR EXISTS(SELECT 1 FROM jev_decisions)) AS x`,
   ),
 
   // remoção COMPLETA de uma fonte (descadastra de vez, além do purge): ids dos artigos p/ decidir
@@ -931,8 +1014,10 @@ export const stmts = {
     `UPDATE runs SET status = @status, finished_at = datetime('now') WHERE id = @id`,
   ),
   insertLlmUsage: db.prepare(
-    `INSERT INTO llm_usage (run_id, stage, model, prompt_tokens, completion_tokens, cost_usd)
-     VALUES (@run_id, @stage, @model, @prompt_tokens, @completion_tokens, @cost_usd)`,
+    `INSERT INTO llm_usage (run_id, stage, model, prompt_tokens, completion_tokens, cost_usd,
+                            engine, decisions, fallback_reason, latency_ms, requested_model)
+     VALUES (@run_id, @stage, @model, @prompt_tokens, @completion_tokens, @cost_usd,
+             @engine, @decisions, @fallback_reason, @latency_ms, @requested_model)`,
   ),
   sumUsageForRun: db.prepare(
     `SELECT COALESCE(SUM(cost_usd), 0) usd, COUNT(*) n FROM llm_usage WHERE run_id = ?`,
@@ -941,6 +1026,35 @@ export const stmts = {
   // média REAL do custo por chamada de um estágio (estimativa exibida ANTES de rodar uma busca)
   avgUsageByStage: db.prepare(
     `SELECT COALESCE(AVG(cost_usd), 0) avg, COUNT(*) n FROM llm_usage WHERE stage = ? AND cost_usd > 0`,
+  ),
+  // Mesma média, mas SÓ do modelo pedido (@model NULL = todos): quando um estágio troca de modelo
+  // (deepseek → Gemini, chat → Jev), a média do modelo antigo mentiria na estimativa. Casa pelo
+  // slug PEDIDO (requested_model) ou, em linhas antigas sem ele, pelo resolvido.
+  avgUsageByStageModel: db.prepare(
+    `SELECT COALESCE(AVG(cost_usd), 0) avg, COUNT(*) n FROM llm_usage
+      WHERE stage = @stage AND cost_usd > 0
+        AND (@model IS NULL OR requested_model = @model OR model = @model)`,
+  ),
+  // Custo por (estágio, motor) de uma run — "custo por motor" do inspect/extrato. Linha antiga sem
+  // engine é deduzida pelo slug (typesafe/* = jev), a mesma regra do engineOf do budget.js.
+  usageByStageEngine: db.prepare(
+    `SELECT stage,
+            COALESCE(engine, CASE WHEN model LIKE 'typesafe/%' THEN 'jev' ELSE 'chat' END) engine,
+            COUNT(*) n,
+            COALESCE(SUM(decisions), 0) decisions,
+            COALESCE(SUM(cost_usd), 0) usd,
+            SUM(CASE WHEN fallback_reason IS NOT NULL THEN 1 ELSE 0 END) fallback_calls,
+            COALESCE(SUM(CASE WHEN fallback_reason IS NOT NULL THEN cost_usd END), 0) fallback_usd,
+            AVG(latency_ms) avg_latency_ms,
+            MAX(latency_ms) max_latency_ms
+       FROM llm_usage WHERE run_id = ?
+      GROUP BY 1, 2 ORDER BY usd DESC`,
+  ),
+  // Acumulado all-time por motor (status/extrato).
+  sumUsageByEngine: db.prepare(
+    `SELECT COALESCE(engine, CASE WHEN model LIKE 'typesafe/%' THEN 'jev' ELSE 'chat' END) engine,
+            COUNT(*) n, COALESCE(SUM(decisions), 0) decisions, COALESCE(SUM(cost_usd), 0) usd
+       FROM llm_usage GROUP BY 1 ORDER BY usd DESC`,
   ),
   usageByStage: db.prepare(
     `SELECT stage, COUNT(*) n, COALESCE(SUM(cost_usd), 0) usd
@@ -1179,6 +1293,7 @@ export function wipeAll() {
     'selectors',
     'frontier',
     'events',
+    'jev_decisions',
     'llm_usage',
     'runs',
     'sources',

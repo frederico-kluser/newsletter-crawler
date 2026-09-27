@@ -29,5 +29,5 @@ Editing anything under `webapp/src/` — a UI string/translation, the language t
 
 `cd webapp && npm test` (pure libs + `test/i18n.test.js`) + `npm run build` (Vite compiles every `.jsx`). For UI behavior, drive the built app: `vite preview` + Playwright — a fresh context with `locale:'en-US'` vs `'pt-BR'` asserts detection, then click the in-card toggle, walk the steps, assert persistence (`nc-tutorial-seen`) + reopen via `HelpButton`; `colorScheme:'dark'` proves the token theming.
 
-## <evolution>
-On completion, if the webapp shell (the i18n mechanism, the tutorial, the tokens, or a Motion/React gotcha) changed AND you verified it (`npm test` + `npm run build` + a Playwright drive), update this skill via the memory pipeline. Keep it lean; the AI-search/export half stays in searching-the-corpus. See meta-skill-evolution.
+## registo de aprendizado (memória CoALA local)
+On completion, if the webapp shell (the i18n mechanism, the tutorial, the tokens, or a Motion/React gotcha) changed AND you verified it (`npm test` + `npm run build` + a Playwright drive), update this skill via the memory pipeline. Keep it lean; the AI-search/export half stays in searching-the-corpus. See a memória CoALA local (`coala.py add`).

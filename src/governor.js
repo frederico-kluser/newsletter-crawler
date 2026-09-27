@@ -4,9 +4,12 @@
 // grow acorda a fila na hora; shrink é NÃO-preemptivo (trabalho em voo termina; só novas
 // admissões esperam) — semântica pinada em test/governor.gate.test.js.
 // A lane llm tem AIMD PRÓPRIO, calibrado por falhas de API: 429 halva a lane E o TETO
-// (st.llmCap) — a recuperação +1/10s só sobe até o teto calibrado, então a lane CONVERGE no
+// (st.api.llm.cap) — a recuperação +1/10s só sobe até o teto calibrado, então a lane CONVERGE no
 // nível sem 429 em vez de oscilar. O teto calibrado parte de GOVERNOR_LLM_CAP (persistido
 // pelo fim de run em NC_HOME/.env) e é re-persistido quando a calibração baixa mais.
+// A lane jev (Decisions API do Jev) tem o MESMO AIMD por 429, com teto e contadores PRÓPRIOS
+// (GOVERNOR_JEV_CAP): latência (~300ms) e limite de taxa (TypeSafe, ~1.200 rpm) diferentes dos
+// do chat — um 429 do Jev não halva o Gemini, e vice-versa. Independe do perfil (crawl/llm-only).
 // Sem init explícito, as lanes ficam em defaults conservadores (≈ o comportamento antigo),
 // então eval/ e testes podem importar llm.js sem subir o laço.
 import { readFileSync } from 'node:fs';
@@ -21,11 +24,31 @@ import { debug, warn } from './util.js';
 const GIB = 1024 ** 3;
 // Pisos incondicionais (garantia de progresso): nenhuma lane chega a 0. llm=3 dá folga p/ o
 // fan-out por seção (curadoria) + o streaming de verify/summarize/classify nas máquinas menores.
-const FLOORS = { llm: 3, fetch: 1, render: 1, cpu: 1 };
+// jev=2: uma decisão em voo + a próxima já admitida — a navegação (render) espera o Jev em série.
+const FLOORS = { llm: 3, jev: 2, fetch: 1, render: 1, cpu: 1 };
 // A lane cpu limita parses SÍNCRONOS (JSDOM/Readability/prune) — o teto é FIXO e baixo de
 // propósito: 32 núcleos não ajudam num event loop só; o que importa é o débito de latência.
 // (O parse ASSÍNCRONO roda no pool de workers PARSE_WORKERS, fora do event loop e sem esta lane.)
 const CPU_CAP = Number(process.env.CPU_CAP || 2);
+// Teto default da lane jev: ≈ 20 rps × 0,3 s de latência × 1,3 de folga. O portão de rps
+// (src/ratelimit.js, JEV_MAX_RPS) é quem segura a TAXA; a lane segura a CONCORRÊNCIA.
+const DEFAULT_JEV_CONCURRENCY = 8;
+// Lanes com AIMD de API (429 halva lane E teto calibrado; +1/10s até o teto).
+const API_LANES = ['llm', 'jev'];
+
+// Inteiro >= 0 do env lido NA HORA (o config.js já carregou repo/.env e NC_HOME/.env em
+// process.env): JEV_CONCURRENCY/GOVERNOR_JEV_CAP não precisam de export no config p/ valer, e
+// um re-init da TUI enxerga o valor corrente. Inválido/ausente -> fallback.
+function envInt(name, fallback = 0) {
+  const raw = process.env[name];
+  if (raw == null || String(raw).trim() === '') return fallback;
+  const v = Number(raw);
+  return Number.isFinite(v) && v >= 0 ? Math.floor(v) : fallback;
+}
+
+function jevConcurrencyFromEnv() {
+  return envInt('JEV_CONCURRENCY', DEFAULT_JEV_CONCURRENCY) || DEFAULT_JEV_CONCURRENCY;
+}
 
 /** Extrai MemTotal/MemAvailable (kB -> bytes) do texto de /proc/meminfo. null se faltar. */
 export function parseMemInfo(text) {
@@ -83,8 +106,13 @@ export function readCpuInfo() {
 
 // Lanes singleton: os módulos pegam a referência via getLane() a cada uso; init/setProfile
 // só REDIMENSIONAM (nunca recriam), então referências antigas continuam válidas.
+// CONTRATO llm × jev (src/decide.js e todo estágio Jev-primeiro): as duas lanes NUNCA são
+// aninhadas. O fallback Gemini (lane 'llm') só é chamado DEPOIS que a chamada ao Jev devolveu o
+// slot da lane 'jev' — segurar um slot jev esperando um slot llm (ou o inverso) com as duas
+// saturadas é deadlock, e uma chamada Gemini de 5–60 s parada num slot jev travaria a navegação.
 const lanes = {
   llm: pLimit(6),
+  jev: pLimit(jevConcurrencyFromEnv()),
   fetch: pLimit(3),
   render: pLimit(2),
   cpu: pLimit(CPU_CAP),
@@ -95,7 +123,10 @@ const st = {
   timer: null,
   parallel: MAX_PARALLEL,
   profile: 'llm-only',
-  alloc: { llm: 6, fetch: 3, render: 2 }, // tetos por lane do perfil ativo
+  // Tetos por lane: llm/fetch/render do perfil ativo; jev = min(JEV_CONCURRENCY, parallel), piso 2,
+  // fixado no init (independe do perfil — setProfile não mexe nele).
+  alloc: { llm: 6, jev: jevConcurrencyFromEnv(), fetch: 3, render: 2 },
+  jevConcurrency: jevConcurrencyFromEnv(),
   ramMaxPct: RAM_MAX_PCT,
   hysteresisPct: RAM_HYSTERESIS_PCT,
   ramFreeTargetPct: RAM_FREE_TARGET_PCT,
@@ -118,14 +149,15 @@ const st = {
   calmTicks: 0,
   lastShrinkAt: 0,
   brakeSince: 0,
-  lastRateLimitAt: 0,
-  llmGrowAt: 0,
   expectedAt: 0,
   lagMs: 0,
-  // Teto CALIBRADO da lane llm (0 = ainda não calibrado; vale o teto do perfil). Só desce:
-  // reportRateLimit() o baixa junto com a lane; o grow +1/10s não passa dele.
-  llmCap: 0,
-  rateLimitEvents: 0,
+  // AIMD de API POR LANE (llm, jev), estado independente. cap = teto CALIBRADO (0 = ainda não
+  // calibrado; vale o alloc da lane). Só desce: reportRateLimit(lane) o baixa junto com a lane; o
+  // grow +1/10s não passa dele. lastRateLimitAt/growAt = relógios do dwell de 10s; events = 429s.
+  api: {
+    llm: { cap: 0, lastRateLimitAt: 0, growAt: 0, events: 0 },
+    jev: { cap: 0, lastRateLimitAt: 0, growAt: 0, events: 0 },
+  },
 };
 
 function safeRead() {
@@ -141,7 +173,7 @@ function computeAlloc(profile, n, ramRenderCap) {
     // llm = n (a máquina INTEIRA na lane de API): fetch/render são lanes SEPARADAS (rede/RAM),
     // então 1.0+0.25+0.25 = 1.5n operações I/O-bound cabe num event loop de n núcleos sem
     // roubar nada. O teto de API é quem manda no llm — e é EXATAMENTE o que a calibração por
-    // 429 encontra (reportRateLimit baixa st.llmCap; o grow +1/10s não passa do calibrado).
+    // 429 encontra (reportRateLimit baixa st.api.llm.cap; o grow +1/10s não passa do calibrado).
     // Salvaguardas de custo intactas (orçamento + penalty window compartilhada).
     return {
       llm: Math.max(FLOORS.llm, n),
@@ -158,16 +190,29 @@ function applyProfile() {
   const avail = st.emaAvail ?? st.totalBytes;
   const usable = Math.max(0, avail - st.floorBytes);
   const ramRenderCap = Math.max(1, Math.min(Math.floor((usable * 0.5) / st.renderEstBytes) || 1, 64));
-  st.alloc = computeAlloc(st.profile, st.parallel, ramRenderCap);
+  // A lane jev é fixada no init (applyJevLane) e independe do perfil: preserva o alloc dela.
+  st.alloc = { ...computeAlloc(st.profile, st.parallel, ramRenderCap), jev: st.alloc.jev };
   // O teto calibrado da lane llm sobrevive ao perfil (crawl -> llm-only) e é re-clampado ao
   // teto do perfil atual: nunca sobe sozinho acima do que a API suportou.
-  st.llmCap = st.llmCap > 0 ? Math.max(FLOORS.llm, Math.min(st.llmCap, st.alloc.llm)) : st.alloc.llm;
-  lanes.llm.concurrency = st.llmCap;
+  const llm = st.api.llm;
+  llm.cap = llm.cap > 0 ? Math.max(FLOORS.llm, Math.min(llm.cap, st.alloc.llm)) : st.alloc.llm;
+  lanes.llm.concurrency = llm.cap;
   lanes.fetch.concurrency = st.alloc.fetch;
   // Slew de partida: render começa pequeno e o AIMD cresce +1/tick com folga de RAM — evita
   // admitir N contextos Chromium de uma vez antes da 1ª amostra sentir o impacto deles.
   lanes.render.concurrency = Math.min(2, st.alloc.render);
   lanes.cpu.concurrency = CPU_CAP;
+}
+
+// Lane jev: teto = min(JEV_CONCURRENCY, --parallel) com piso 2 — o --parallel segue sendo o teto
+// GLOBAL, mas o perfil não entra (a navegação decide com o Jev dentro do crawl E os sweeps
+// llm-only também). Teto calibrado (GOVERNOR_JEV_CAP) clampado piso..alloc, como o da llm.
+// Só roda no init: setProfile NÃO toca na lane jev (não ressuscita uma lane halvada por 429).
+function applyJevLane() {
+  st.alloc.jev = Math.max(FLOORS.jev, Math.min(st.jevConcurrency, st.parallel));
+  const jev = st.api.jev;
+  jev.cap = jev.cap > 0 ? Math.max(FLOORS.jev, Math.min(jev.cap, st.alloc.jev)) : st.alloc.jev;
+  lanes.jev.concurrency = jev.cap;
 }
 
 function shrinkLane(name, to, now) {
@@ -261,18 +306,22 @@ export function governorTick(now = st.now()) {
     }
   }
 
-// Lane llm: cresce +1/10s somente no estado 'ok' (RAM e CPU livres acima dos alvos de % —
-  // pressão segura o crescimento) E NUNCA acima do TETO CALIBRADO (st.llmCap): o limite
-  // aprendido por falhas de API (429 halva lane E teto; converge no nível sem 429). Os dois
-  // gates são complementares: sistema manda no crescimento, a API manda no teto.
-  if (
-    st.ramState === 'ok' &&
-    lanes.llm.concurrency < st.llmCap &&
-    now - st.lastRateLimitAt >= 10_000 &&
-    now - st.llmGrowAt >= 10_000
-  ) {
-    lanes.llm.concurrency += 1;
-    st.llmGrowAt = now;
+  // Lanes de API (llm, jev — cada uma com o SEU estado): cresce +1/10s somente no estado 'ok'
+  // (RAM e CPU livres acima dos alvos de % — pressão segura o crescimento) E NUNCA acima do TETO
+  // CALIBRADO da lane (api[lane].cap): o limite aprendido por falhas de API (429 halva lane E
+  // teto; converge no nível sem 429). Os dois gates são complementares: sistema manda no
+  // crescimento, a API manda no teto. Um 429 numa lane não segura o crescimento da outra.
+  for (const name of API_LANES) {
+    const a = st.api[name];
+    if (
+      st.ramState === 'ok' &&
+      lanes[name].concurrency < a.cap &&
+      now - a.lastRateLimitAt >= 10_000 &&
+      now - a.growAt >= 10_000
+    ) {
+      lanes[name].concurrency += 1;
+      a.growAt = now;
+    }
   }
 
   // Lane cpu: lag alto no tick = event loop atolado em parses síncronos -> encolhe; volta
@@ -308,7 +357,9 @@ function startLoop() {
  * (Re)configura as lanes e liga o laço AIMD. Re-init é seguro (a TUI roda vários comandos no
  * mesmo processo). Opções injetáveis p/ teste: readMem, now, tickMs, autoStart:false (dirigir
  * com governorTick), ramMaxPct, ramHysteresisPct, renderEstMb, brakeBytes, onEmergencyBrake,
- * llmCap (teto calibrado inicial; default = GOVERNOR_LLM_CAP do env / NC_HOME .env).
+ * llmCap (teto calibrado inicial; default = GOVERNOR_LLM_CAP do env / NC_HOME .env),
+ * jevConcurrency (teto da lane jev; default = env JEV_CONCURRENCY ou 8) e jevCap (teto calibrado
+ * inicial da lane jev; default = env GOVERNOR_JEV_CAP). Os dois do Jev são lidos do env NA HORA.
  */
 export function initGovernor(opts = {}) {
   stopGovernor();
@@ -339,20 +390,36 @@ export function initGovernor(opts = {}) {
   st.calmTicks = 0;
   st.lastShrinkAt = 0;
   st.brakeSince = 0;
-  st.lastRateLimitAt = 0;
-  st.llmGrowAt = 0;
   st.lagMs = 0;
-  st.rateLimitEvents = 0;
-  // Teto calibrado inicial: cap persistido (env/NC_HOME) ou teto do perfil; applyProfile clampa.
-  const cap = opts.llmCap != null ? Number(opts.llmCap) : GOVERNOR_LLM_CAP;
-  st.llmCap = Number.isFinite(cap) && cap > 0 ? Math.floor(cap) : 0;
+  // Teto calibrado inicial POR LANE: cap persistido (env/NC_HOME) ou o alloc; applyProfile e
+  // applyJevLane clampam piso..alloc. Relógios e contadores de 429 recomeçam a cada run.
+  const capOf = (v) => {
+    const n = Number(v);
+    return Number.isFinite(n) && n > 0 ? Math.floor(n) : 0;
+  };
+  st.api.llm = {
+    cap: capOf(opts.llmCap != null ? opts.llmCap : GOVERNOR_LLM_CAP),
+    lastRateLimitAt: 0,
+    growAt: 0,
+    events: 0,
+  };
+  st.api.jev = {
+    cap: capOf(opts.jevCap != null ? opts.jevCap : envInt('GOVERNOR_JEV_CAP')),
+    lastRateLimitAt: 0,
+    growAt: 0,
+    events: 0,
+  };
+  st.jevConcurrency = capOf(opts.jevConcurrency) || jevConcurrencyFromEnv();
 
+  applyJevLane();
   applyProfile();
   debug(
     `governor: init parallel=${st.parallel} profile=${st.profile} ` +
-      `lanes llm=${lanes.llm.concurrency} fetch=${lanes.fetch.concurrency} render=${lanes.render.concurrency} ` +
+      `lanes llm=${lanes.llm.concurrency} jev=${lanes.jev.concurrency} fetch=${lanes.fetch.concurrency} ` +
+      `render=${lanes.render.concurrency} ` +
       `(alloc render=${st.alloc.render}) targets RAM-livre>=${st.ramFreeTargetPct}% CPU-livre>=${st.cpuFreeTargetPct}%` +
-      (GOVERNOR_LLM_CAP > 0 ? ` cap calibrado llm=${GOVERNOR_LLM_CAP}` : ''),
+      (GOVERNOR_LLM_CAP > 0 ? ` cap calibrado llm=${GOVERNOR_LLM_CAP}` : '') +
+      (st.api.jev.cap < st.alloc.jev ? ` cap calibrado jev=${st.api.jev.cap}` : ''),
   );
   if (opts.autoStart !== false) startLoop();
   return getTelemetry();
@@ -381,37 +448,59 @@ export function jobsCapacity() {
   return lanes.fetch.concurrency + lanes.render.concurrency;
 }
 
-/** Janela de um estágio: min(override de env se > 0, capacidade atual da lane llm). */
-export function stageWindow(override) {
-  return Math.max(1, Math.min(override > 0 ? override : Infinity, lanes.llm.concurrency));
+/**
+ * Janela de um estágio: min(override de env se > 0, capacidade atual da lane). lane='llm' é o
+ * default (chamadores antigos seguem iguais); sweeps Jev-primeiro dimensionam a janela externa
+ * pela lane 'jev' — senão ela seguiria a capacidade do Gemini, não a do motor que decide.
+ * Lane desconhecida cai na llm (fail-open).
+ */
+export function stageWindow(override, lane = 'llm') {
+  const l = lanes[lane] || lanes.llm;
+  return Math.max(1, Math.min(override > 0 ? override : Infinity, l.concurrency));
 }
 
 /**
- * Backpressure de 429 do provedor: multiplicativo na lane llm E no TETO CALIBRADO (st.llmCap).
- * A lane halva na hora (recupera +1/10s no tick); o teto desce junto e NÃO sobe mais nesta
- * run — é a "calibração de um valor limite": converge no nível sem 429 e é persistido no
- * fim do run (GOVERNOR_LLM_CAP) p/ os próximos partirem dele.
+ * Backpressure de 429 do provedor: multiplicativo na lane (default 'llm') E no TETO CALIBRADO
+ * DELA (api[lane].cap) — a outra lane de API não é tocada. A lane halva na hora (recupera
+ * +1/10s no tick); o teto desce junto e NÃO sobe mais nesta run — é a "calibração de um valor
+ * limite": converge no nível sem 429 e é persistido no fim do run (GOVERNOR_LLM_CAP /
+ * GOVERNOR_JEV_CAP) p/ os próximos partirem dele. Lane sem AIMD de API: ignorado (fail-open).
  */
-export function reportRateLimit() {
-  st.lastRateLimitAt = st.now();
-  st.rateLimitEvents += 1;
-  const to = Math.max(FLOORS.llm, Math.ceil(lanes.llm.concurrency / 2));
-  if (to < lanes.llm.concurrency) {
-    warn(`governor: 429 do provedor — lane llm ${lanes.llm.concurrency} -> ${to}`);
-    lanes.llm.concurrency = to;
+export function reportRateLimit(lane = 'llm') {
+  const a = st.api[lane];
+  if (!a) {
+    debug(`governor: reportRateLimit numa lane sem AIMD de API (${lane}) — ignorado`);
+    return;
   }
-  if (to < st.llmCap) {
-    warn(`governor: calibrando teto llm para ${to} (${st.rateLimitEvents}º 429; limite ${st.llmCap} -> ${to})`);
-    st.llmCap = to;
+  const l = lanes[lane];
+  a.lastRateLimitAt = st.now();
+  a.events += 1;
+  const to = Math.max(FLOORS[lane], Math.ceil(l.concurrency / 2));
+  if (to < l.concurrency) {
+    warn(`governor: 429 do provedor — lane ${lane} ${l.concurrency} -> ${to}`);
+    l.concurrency = to;
+  }
+  if (to < a.cap) {
+    warn(`governor: calibrando teto ${lane} para ${to} (${a.events}º 429; limite ${a.cap} -> ${to})`);
+    a.cap = to;
   }
 }
 
-/** Calibração corrente da lane llm p/ persistir no fim do run (dirty = teto < teto do perfil). */
+/**
+ * Calibração corrente das lanes de API p/ persistir no fim do run: dirty.<lane> = teto calibrado
+ * abaixo do alloc da lane (perfil p/ a llm; min(JEV_CONCURRENCY, parallel) p/ a jev) — é o que
+ * vira GOVERNOR_LLM_CAP / GOVERNOR_JEV_CAP. rateLimitEvents = 429s desta run por lane.
+ */
 export function getCalibration() {
+  const { llm, jev } = st.api;
   return {
-    llmCap: st.llmCap,
-    rateLimitEvents: st.rateLimitEvents,
-    dirty: st.llmCap > 0 && st.llmCap < st.alloc.llm,
+    llmCap: llm.cap,
+    jevCap: jev.cap,
+    rateLimitEvents: { llm: llm.events, jev: jev.events },
+    dirty: {
+      llm: llm.cap > 0 && llm.cap < st.alloc.llm,
+      jev: jev.cap > 0 && jev.cap < st.alloc.jev,
+    },
   };
 }
 
@@ -437,11 +526,16 @@ export function getTelemetry() {
     parallel: { max: st.parallel, profile: st.profile },
     lanes: {
       llm: laneInfo(lanes.llm),
+      jev: laneInfo(lanes.jev),
       fetch: laneInfo(lanes.fetch),
       render: laneInfo(lanes.render),
       cpu: laneInfo(lanes.cpu),
       jobs: { capacity: jobsCapacity() },
     },
-    calib: { llmCap: st.llmCap, rateLimitEvents: st.rateLimitEvents },
+    calib: {
+      llmCap: st.api.llm.cap,
+      jevCap: st.api.jev.cap,
+      rateLimitEvents: { llm: st.api.llm.events, jev: st.api.jev.events },
+    },
   };
 }

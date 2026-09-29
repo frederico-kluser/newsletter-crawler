@@ -8,6 +8,17 @@ Todas as mudanças relevantes deste projeto. Formato baseado em
 Webapp bilíngue (PT/EN) com detecção de idioma e tutorial de introdução no site público.
 
 ### Adicionado
+- **Backend Vercel + página `/admin` (análise JEV × webhook):** segunda página (`webapp/admin/`,
+  Vite multipage) **mediante login e senha** (`ADMIN_USER`/`ADMIN_PASSWORD`, cookie de sessão
+  assinado HMAC) onde se cadastra um **webhook de disparo** e se corre uma **análise JEV**
+  (`typesafe/jev-1.13` via Decisions API) mediante o **input digitado** + **filtro de data o mesmo
+  do site** (from/to em `date_iso` + fontes): cada notícia ganha 1 decisão `noul` (probabilidade
+  calibrada) e as **separadas** (`p ≥ limiar`, guarda de injeção por lote) disparam num **JSON
+  array** puro (metadados + resumo PT-BR + veredito; SEM corpo) com `X-NC-Signature` HMAC. Um
+  **cron diário** na Vercel (`0 3 * * *` UTC, `CRON_SECRET`) re-roda a **busca completa** toda a
+  noite e termina runs pendentes antes de criar a nova. Backend serverless zero-deps em
+  `webapp/api/` (motor em `webapp/api/_lib/`, `jev-core` partilhado, dados = snapshot publicado,
+  persistência Vercel KV/Upstash via REST). Docs: `docs/admin-backend.md`.
 - **Idiomas PT/EN no webapp (`webapp/`):** interface bilíngue com **detecção pelo navegador**
   (português → PT; **qualquer outro idioma → EN**) e **seletor manual PT | EN** na barra do topo,
   com a escolha salva no `localStorage`. Camada i18n própria (Context `useStrings` + `DICTS` em

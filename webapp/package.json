@@ -9,6 +9,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "node --test",
+    "admin-smoke": "node scripts/admin-smoke.mjs",
     "screenshots": "node scripts/screenshots.mjs"
   },
   "dependencies": {

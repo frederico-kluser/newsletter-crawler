@@ -1,0 +1,188 @@
+/* Página /admin — layout próprio (adm-*) por cima dos tokens semânticos e das classes
+   compartilhadas do app.css (.btn/.input/.badge/.history-row/.date-row/.ai-progress-*).
+   Só tokens semânticos → funciona em claro e escuro sem CSS específico de tema. */
+
+.adm {
+  min-height: 100vh;
+}
+
+.adm-top {
+  max-width: 860px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.adm-main {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 24px 16px 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.adm-subtitle {
+  color: var(--fg-muted);
+  font-size: 14px;
+  margin: 0;
+}
+
+.adm-card {
+  background: var(--bg-raised);
+  border: 1px solid var(--hairline);
+  border-radius: 14px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.adm-card h2 {
+  font-size: 18px;
+  margin: 0;
+}
+
+.adm-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--fg-soft);
+}
+
+.adm-small {
+  font-size: 13px;
+  color: var(--fg-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.adm-hint {
+  font-size: 12.5px;
+  color: var(--fg-muted);
+  margin: 0;
+}
+
+.adm-muted {
+  font-size: 13px;
+  color: var(--fg-muted);
+  margin: 0;
+}
+
+.adm-input {
+  resize: vertical;
+  min-height: 72px;
+  font: inherit;
+}
+
+.adm-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 640px) {
+  .adm-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.adm-source-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  max-height: 180px;
+  overflow: auto;
+  padding: 8px 10px;
+  border: 1px solid var(--hairline);
+  border-radius: 10px;
+  background: var(--seg-bg);
+}
+
+.adm-check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.adm-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.adm-notice {
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 13.5px;
+  border: 1px solid var(--hairline);
+  background: var(--seg-bg);
+  color: var(--fg-soft);
+}
+
+.adm-notice-ok {
+  border-color: color-mix(in oklab, var(--ok) 45%, var(--hairline));
+  color: var(--ok);
+}
+
+.adm-notice-error {
+  border-color: color-mix(in oklab, var(--danger) 45%, var(--hairline));
+  color: var(--danger);
+}
+
+.adm-notice-info {
+  color: var(--fg-muted);
+}
+
+.adm-login {
+  max-width: 380px;
+}
+
+.adm-run {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-top: 1px solid var(--hairline);
+  padding-top: 12px;
+}
+
+.adm-run-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.adm-run-row {
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+}
+
+.adm-matches-title {
+  font-size: 14px;
+  margin: 8px 0 0;
+}
+
+.adm-matches {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 360px;
+  overflow: auto;
+}
+
+.adm-match {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 10px;
+  border: 1px solid var(--hairline);
+  border-radius: 10px;
+  font-size: 13.5px;
+}

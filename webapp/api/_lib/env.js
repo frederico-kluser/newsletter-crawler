@@ -52,8 +52,9 @@ export function jevSettings() {
   return {
     model: env('NC_JEV_MODEL') || JEV_MODEL_DEFAULT,
     baseUrl: env('NC_JEV_BASE_URL') || 'https://openrouter.ai/api/alpha/decisions',
-    batchSize: envInt('NC_JEV_BATCH', 30),
-    concurrency: envInt('NC_JEV_CONCURRENCY', 6),
+    // lote 1..25 (default 25) · lotes disparados 30 por vez (teto 30)
+    batchSize: clampBatchSize(envInt('NC_JEV_BATCH', DEFAULT_BATCH_SIZE)),
+    concurrency: clampConcurrency(envInt('NC_JEV_CONCURRENCY', DEFAULT_BATCH_CONCURRENCY)),
     timeoutMs: envInt('NC_JEV_TIMEOUT_MS', 30000),
     maxAttempts: envInt('NC_JEV_ATTEMPTS', 4),
   };
@@ -61,3 +62,23 @@ export function jevSettings() {
 
 /** Modelo por omissão do limiar de separação ("separadas" = p ≥ limiar). */
 export const DEFAULT_THRESHOLD = 0.5;
+
+// Lote de artigos por pedido ao JEV: configurável 1..25 (default 25) — página /admin ou env.
+export const DEFAULT_BATCH_SIZE = 25;
+export const MIN_BATCH_SIZE = 1;
+export const MAX_BATCH_SIZE = 25;
+// Lotes disparados 30 por vez (concorrência garantida; pode baixar por env, nunca passar de 30).
+export const DEFAULT_BATCH_CONCURRENCY = 30;
+export const MAX_BATCH_CONCURRENCY = 30;
+
+export function clampBatchSize(n) {
+  const v = Number(n);
+  if (!Number.isInteger(v)) return DEFAULT_BATCH_SIZE;
+  return Math.min(MAX_BATCH_SIZE, Math.max(MIN_BATCH_SIZE, v));
+}
+
+export function clampConcurrency(n) {
+  const v = Number(n);
+  if (!Number.isInteger(v)) return DEFAULT_BATCH_CONCURRENCY;
+  return Math.min(MAX_BATCH_CONCURRENCY, Math.max(1, v));
+}

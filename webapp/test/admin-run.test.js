@@ -167,6 +167,8 @@ test('run completa: escopo → batches Jev → separadas (p ≥ limiar) → JSON
         const config = { input: 'AI e MCP', from: '', to: '', sourceIds: [], kind: 'all', threshold: 0.5, webhookUrl };
         const run = await startRun({ env, trigger: 'manual', config, transport });
         assert.equal(run.scope.total, 4, 'junk fica fora do escopo');
+        assert.equal(run.scope.batchSize, 2, 'NC_JEV_BATCH=2 fixa o lote');
+        assert.equal(run.config.batchSize, 2, 'o lote fica registado na config da run');
         assert.equal(run.progress.total, 2, '4 artigos em batches de 2 → 2 batches');
 
         const done = await advanceRun(run.id, { env, budgetMs: 60000, transport });

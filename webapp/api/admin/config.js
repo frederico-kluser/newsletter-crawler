@@ -1,7 +1,7 @@
 // GET|PUT /api/admin/config — a configuração da análise (input, período do site, fontes, limiar)
 // e o webhook de disparo. Grava no KV (modo persistente); sem KV a leitura cai para env (fixa).
 import { requireAdmin } from '../_lib/auth.js';
-import { DEFAULT_THRESHOLD, adminSecrets, env } from '../_lib/env.js';
+import { DEFAULT_BATCH_SIZE, DEFAULT_THRESHOLD, MAX_BATCH_SIZE, MIN_BATCH_SIZE, adminSecrets, env } from '../_lib/env.js';
 import { allowMethod, bad, readJsonBody, sendJson } from '../_lib/http.js';
 import { validateWebhookUrl } from '../_lib/dispatch.js';
 import { getAdminConfig, kvAvailable, saveAdminConfig } from '../_lib/kv.js';
@@ -40,6 +40,13 @@ export function sanitizeConfigPatch(body) {
     if (!Number.isFinite(th) || th < 0.05 || th > 0.95) return { ok: false, message: 'o limiar deve ficar entre 0.05 e 0.95' };
     patch.threshold = th;
   }
+  if ('batchSize' in b) {
+    const bs = Number(b.batchSize);
+    if (!Number.isInteger(bs) || bs < MIN_BATCH_SIZE || bs > MAX_BATCH_SIZE) {
+      return { ok: false, message: `o lote deve ser inteiro entre ${MIN_BATCH_SIZE} e ${MAX_BATCH_SIZE}` };
+    }
+    patch.batchSize = bs;
+  }
   if ('webhookUrl' in b) {
     const check = validateWebhookUrl(b.webhookUrl);
     if (!check.ok) return { ok: false, message: `webhook: ${check.message}` };
@@ -58,7 +65,7 @@ export default async function handler(req, res) {
   if (m === 'GET') {
     const config = await getAdminConfig(env);
     return sendJson(res, 200, {
-      config: config || { input: '', from: '', to: '', sourceIds: [], kind: 'all', threshold: DEFAULT_THRESHOLD, webhookUrl: '', source: null },
+      config: config || { input: '', from: '', to: '', sourceIds: [], kind: 'all', threshold: DEFAULT_THRESHOLD, batchSize: DEFAULT_BATCH_SIZE, webhookUrl: '', source: null },
     });
   }
 

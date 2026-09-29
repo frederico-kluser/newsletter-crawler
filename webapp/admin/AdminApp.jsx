@@ -10,7 +10,7 @@ import { fmtDate } from '../src/lib/format.js';
 import { fmtInt, fmtUsd } from '../src/strings.js';
 import { api } from './api.js';
 
-const EMPTY_CFG = { input: '', from: '', to: '', sourceIds: [], kind: 'all', threshold: 0.5, webhookUrl: '' };
+const EMPTY_CFG = { input: '', from: '', to: '', sourceIds: [], kind: 'all', threshold: 0.5, batchSize: 25, webhookUrl: '' };
 const KINDS = ['all', 'news', 'tool', 'release'];
 
 export default function AdminApp() {
@@ -89,6 +89,7 @@ export default function AdminApp() {
         sourceIds: cfg.sourceIds,
         kind: cfg.kind,
         threshold: Number(cfg.threshold),
+        batchSize: Number(cfg.batchSize),
         webhookUrl: cfg.webhookUrl,
       });
       setCfg({ ...EMPTY_CFG, ...config });
@@ -341,6 +342,23 @@ export default function AdminApp() {
                   onChange={(e) => patch({ threshold: Number(e.target.value) })}
                 />
                 <p className="adm-hint">{A.thresholdHint}</p>
+              </div>
+
+              <div>
+                <label className="adm-label" htmlFor="adm-batch">
+                  {A.batchLabel}
+                </label>
+                <input
+                  id="adm-batch"
+                  className="input adm-batch"
+                  type="number"
+                  min="1"
+                  max="25"
+                  step="1"
+                  value={cfg.batchSize}
+                  onChange={(e) => patch({ batchSize: e.target.value === '' ? '' : Number(e.target.value) })}
+                />
+                <p className="adm-hint">{A.batchHint}</p>
               </div>
 
               <div className="adm-actions">

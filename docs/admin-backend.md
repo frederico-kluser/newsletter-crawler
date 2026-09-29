@@ -36,7 +36,7 @@ Sem backend de busca novo: os dados são o **snapshot publicado** (`/data/meta.j
    | `WEBHOOK_SECRET` | recomendado | assina o payload (`X-NC-Signature`) |
    | `ANALYSIS_INPUT/ANALYSIS_FROM/ANALYSIS_TO/ANALYSIS_THRESHOLD/WEBHOOK_URL` | não | config fixa por env (modo sem KV) |
    | `NC_DATA_BASE_URL` | não | de onde ler o snapshot (default: produção do projeto) |
-   | `NC_JEV_MODEL/NC_JEV_BATCH/NC_JEV_CONCURRENCY/NC_JEV_TIMEOUT_MS/NC_JEV_ATTEMPTS` | não | afinar o Jev (defaults `typesafe/jev-1.13`, 30, 6, 30 s, 4) |
+   | `NC_JEV_MODEL/NC_JEV_BATCH/NC_JEV_CONCURRENCY/NC_JEV_TIMEOUT_MS/NC_JEV_ATTEMPTS` | não | afinar o Jev (defaults `typesafe/jev-1.13`, **lote 25** [1..25], **30 por vez** [teto 30], 30 s, 4) |
 3. **Deploy**: `git push` na `main` (o cron já vem no `vercel.json`; Hobby = 1×/dia, disparo em
    qualquer momento dentro da hora 03:00 UTC ≈ 00:00 BRT).
 4. Abrir `https://<site>/admin/`, fazer login, preencher input + período + webhook, **Guardar**.
@@ -47,10 +47,11 @@ Sem backend de busca novo: os dados são o **snapshot publicado** (`/data/meta.j
   User interest: «input»."* → probabilidade calibrada `p` (0..1).
 - **Separada** = `p ≥ limiar` (default 0.5, configurável 0.05–0.95 na página). `band(p, th)` do
   jev-core (mesma regra de borda do eval offline).
-- **Batches** (~30 artigos por request; `NC_JEV_BATCH`): state condensado `{articles:[{n, title,
-  title_pt, summary}]}` + 1 pergunta por artigo + guarda `injection` POR request; a âncora
-  `UNTRUSTED` (conteúdo web não confiável) vai em todas as questions. Lote sinalizado por injeção
-  **não dispara** nada e fica contado (`injectionFlagged` no registo).
+- **Batches** (1..25 artigos por request — **configurável na página e por env, default 25**;
+  `NC_JEV_BATCH`): os lotes são **disparados 30 por vez** (`NC_JEV_CONCURRENCY`, teto 30). state
+  condensado `{articles:[{n, title, title_pt, summary}]}` + 1 pergunta por artigo + guarda `injection`
+  POR request; a âncora `UNTRUSTED` (conteúdo web não confiável) vai em todas as questions. Lote
+  sinalizado por injeção **não dispara** nada e fica contado (`injectionFlagged` no registo).
 - **Orçamento** por batch via jev-core (`state + maior pergunta ≤ 32K × 0.9`); 429/5xx repetem com
   `Retry-After`; 400/401/402/403 são terminais (402 aborta a run com erro claro).
 - **Custo**: só entrada (~US$ 0,042/M tokens; saída grátis). ~160 tokens/artigo ⇒ **~US$ 0,15 por
@@ -117,14 +118,21 @@ estável data DESC, id ASC), então retomar não repaga nem perde artigos.
 
 ```bash
 cd webapp
-npm test                          # 148 testes (inclui admin-lib/admin-run offline)
+npm test                          # 149 testes (inclui admin-lib/admin-run offline)
 npm run build                     # Vite: main + admin
 node scripts/admin-smoke.mjs      # drive Playwright do /admin com API simulada (screenshots em scripts/out/)
+OPENROUTER_API_KEY=sk-or-… node scripts/jev-live-smoke.mjs   # teste AO VIVO (≤ 25×30 notícias)
 ```
 
 Os testes do backend correm 100% offline: snapshot de fixture servido por HTTP local, KV emulado e
 transporte falso roteado (Decisions × KV × webhook) — o mesmo shape do dublê
 `test/helpers/jev-double.js`.
+
+**Teste ao vivo (2026-09-28, 750 notícias = 25×30, uma onda de 30 lotes × 25 artigos):**
+filtragem confirmada — 145 sim · 605 não · 0 sem resposta · 25 itens em lote sinalizado pela guarda de
+injeção (descartados do disparo). Latência por request ao Jev: **min 554 ms · p50 612 ms · p95 721 ms ·
+máx 750 ms**; parede total 1,3 s (585 artigos/s com 30 pedidos em paralelo); custo real
+**US$ 0,0095** (225.510 tokens de entrada; saída grátis).
 
 ## 8. Segurança
 

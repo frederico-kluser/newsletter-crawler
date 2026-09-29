@@ -3,6 +3,7 @@
 // (aliases UPSTASH_REDIS_REST_URL/TOKEN também aceites). Sem KV: a LEITURA de config cai para
 // env (ANALYSIS_* / WEBHOOK_URL) e as escritas/histórico devolvem 503 com mensagem acionável.
 import { warn } from './log.js';
+import { clampBatchSize, DEFAULT_BATCH_SIZE } from './env.js';
 
 const CONFIG_KEY = 'nc:admin:config';
 const RUNS_LIST_KEY = 'nc:admin:runs';
@@ -110,6 +111,7 @@ export function configFromEnv(env) {
     sourceIds: [],
     kind: 'all',
     threshold: Number.parseFloat(env('ANALYSIS_THRESHOLD')) || 0.5,
+    batchSize: clampBatchSize(Number.parseInt(env('ANALYSIS_BATCH'), 10) || DEFAULT_BATCH_SIZE),
     webhookUrl: webhookUrl || '',
     updatedAt: null,
     source: 'env',

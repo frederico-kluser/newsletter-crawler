@@ -7,7 +7,7 @@
 // (ordenação estável data DESC, id ASC) para os batches serem os mesmos entre invocações.
 import { randomUUID } from 'node:crypto';
 import { applyFilters } from '../../src/lib/filters.js';
-import { dataBaseUrl, DEFAULT_THRESHOLD, jevSettings, openrouterKey } from './env.js';
+import { clampBatchSize, dataBaseUrl, DEFAULT_BATCH_SIZE, DEFAULT_THRESHOLD, jevSettings, openrouterKey } from './env.js';
 import { httpTransport } from './http.js';
 import { batchBudgetLeft, buildBatchQuestions, buildBatchState, jevDecide, JevHttpError, verdictFor } from './jev.js';
 import { createRunRecord, getRunRecord, saveRunRecord } from './kv.js';
@@ -36,13 +36,15 @@ export function resolveScope(articles, meta, config) {
 }
 
 /**
- * Batches por tamanho fixo (default 30), com guarda de orçamento do jev-core: se o state +
- * maior pergunta passarem de STATE_PLUS_LONGEST_Q × SAFETY, divide ao meio até caber.
+ * Batches por tamanho fixo (1..25 artigos, default 25 — clamp garantido), com guarda de orçamento
+ * do jev-core: se o state + maior pergunta passarem de STATE_PLUS_LONGEST_Q × SAFETY, divide ao
+ * meio até caber. Os batches são disparados 30 por vez (jevSettings().concurrency).
  */
-export function planBatches(items, { input, batchSize = 30 }) {
+export function planBatches(items, { input, batchSize = DEFAULT_BATCH_SIZE }) {
+  const max = clampBatchSize(batchSize);
   const batches = [];
   for (let i = 0; i < items.length; ) {
-    let size = Math.max(1, Math.min(batchSize, items.length - i));
+    let size = Math.max(1, Math.min(max, items.length - i));
     for (;;) {
       const slice = items.slice(i, i + size);
       const state = buildBatchState(slice);
@@ -81,7 +83,9 @@ export async function startRun({ env, trigger, config, transport } = {}) {
   const { meta, articles } = await loadSnapshot(dataBaseUrl());
   const scoped = resolveScope(articles, meta, config);
   const settings = jevSettings();
-  const batches = planBatches(scoped, { input: config.input, batchSize: settings.batchSize });
+  // lote da run: o da configuração (página) primeiro, senão o env — sempre clampado a 1..25
+  const batchSize = clampBatchSize(config.batchSize ?? settings.batchSize);
+  const batches = planBatches(scoped, { input: config.input, batchSize });
   const now = new Date().toISOString();
   const run = {
     id: randomUUID().slice(0, 18),
@@ -97,9 +101,10 @@ export async function startRun({ env, trigger, config, transport } = {}) {
       sourceIds: Array.isArray(config.sourceIds) ? config.sourceIds.map(Number) : [],
       kind: config.kind || 'all',
       threshold: Number(config.threshold) || DEFAULT_THRESHOLD,
+      batchSize,
       webhookUrl: config.webhookUrl || '',
     },
-    scope: { total: scoped.length, batches: batches.length, batchSize: settings.batchSize },
+    scope: { total: scoped.length, batches: batches.length, batchSize },
     progress: { done: 0, total: batches.length, processed: 0 },
     stats: { yes: 0, no: 0, uncertain: 0, noAnswer: 0 },
     injectionFlagged: 0,
@@ -134,7 +139,10 @@ export async function advanceRun(runId, { env, budgetMs = 20000, transport = htt
   const deadline = Date.now() + budgetMs;
   const { meta, articles } = await loadSnapshot(dataBaseUrl());
   const scoped = resolveScope(articles, meta, run.config);
-  const batches = planBatches(scoped, { input: run.config.input, batchSize: run.scope.batchSize || settings.batchSize });
+  const batches = planBatches(scoped, {
+    input: run.config.input,
+    batchSize: clampBatchSize(run.config.batchSize ?? run.scope.batchSize ?? settings.batchSize),
+  });
   if (batches.length !== run.progress.total) {
     warn(`run ${run.id}: snapshot mudou (${run.progress.total} → ${batches.length} batches) — a seguir do ponto atual`);
     run.progress.total = batches.length;

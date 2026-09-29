@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="plannotator-theme" content="host">
+<title>Backend Vercel — Análise JEV × Webhook</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231e242e'/%3E%3Cpath d='M18 42V22l14-8 14 8v20l-14 8-14-8Z' fill='none' stroke='%23b9a7f5' stroke-width='4' stroke-linejoin='round'/%3E%3Ccircle cx='32' cy='32' r='5' fill='%23e8b04b'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  /* ============ THEME (Plannotator tokens — theme-override.md) ============ */
+  :root {
+    /* Surfaces */
+    --background: oklch(0.97 0.005 260);
+    --foreground: oklch(0.18 0.02 260);
+    --card: oklch(1 0 0);
+    --card-foreground: oklch(0.18 0.02 260);
+    --muted: oklch(0.92 0.01 260);
+    --muted-foreground: oklch(0.40 0.02 260);
+
+    /* Accents */
+    --primary: oklch(0.50 0.25 280);
+    --primary-foreground: oklch(1 0 0);
+    --secondary: oklch(0.50 0.18 180);
+    --accent: oklch(0.60 0.22 50);
+    --accent-foreground: oklch(0.18 0.02 260);
+
+    /* Semantic */
+    --destructive: oklch(0.50 0.25 25);
+    --success: oklch(0.45 0.20 150);
+    --warning: oklch(0.55 0.18 85);
+
+    /* Structure */
+    --border: oklch(0.88 0.01 260);
+    --code-bg: oklch(0.92 0.01 260);
+    --ring: oklch(0.50 0.25 280);
+    --radius: 0.625rem;
+
+    /* Typography */
+    --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+    --font-display: ui-serif, Georgia, 'Times New Roman', serif;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --background: oklch(0.15 0.02 260);
+      --foreground: oklch(0.90 0.01 260);
+      --card: oklch(0.22 0.02 260);
+      --card-foreground: oklch(0.90 0.01 260);
+      --muted: oklch(0.26 0.02 260);
+      --muted-foreground: oklch(0.72 0.02 260);
+      --primary: oklch(0.75 0.18 280);
+      --primary-foreground: oklch(0.15 0.02 260);
+      --accent: oklch(0.70 0.20 60);
+      --border: oklch(0.35 0.02 260);
+      --code-bg: oklch(0.26 0.02 260);
+      --destructive: oklch(0.65 0.20 25);
+      --success: oklch(0.72 0.17 150);
+      --warning: oklch(0.75 0.15 85);
+    }
+  }
+
+  /* ============ BASE ============ */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    font-size: 15.5px;
+    line-height: 1.6;
+    padding: 48px 24px 96px;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 1060px; margin: 0 auto; display: flex; flex-direction: column; gap: 72px; }
+
+  /* ============ TYPOGRAPHY ============ */
+  h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; letter-spacing: -0.015em; }
+  h1 { font-size: clamp(30px, 4.6vw, 44px); font-weight: 640; line-height: 1.12; }
+  h2 { font-size: clamp(23px, 3vw, 30px); font-weight: 640; margin-bottom: 6px; }
+  h3 { font-size: 17px; font-weight: 640; }
+  p { max-width: 65ch; }
+  a { color: var(--primary); text-decoration: underline; text-underline-offset: 3px; }
+  a:focus-visible, summary:focus-visible { outline: 2px solid var(--ring); outline-offset: 3px; border-radius: 4px; }
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--primary);
+  }
+  .lede { color: var(--muted-foreground); font-size: 17px; max-width: 62ch; }
+  .caption { font-family: var(--font-mono); font-size: 11px; color: var(--muted-foreground); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 14px; }
+
+  /* ============ HEADER ============ */
+  .doc-header { display: flex; flex-direction: column; gap: 18px; }
+  .prompt-box {
+    border-left: 3px solid var(--primary);
+    background: color-mix(in oklab, var(--primary) 5%, var(--card));
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 18px 22px;
+    font-family: var(--font-mono);
+    font-size: 13.5px;
+    line-height: 1.7;
+    max-width: 72ch;
+    color: var(--card-foreground);
+  }
+
+  /* ============ SUMMARY STRIP ============ */
+  .stat-strip { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; }
+  .stat {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 16px;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .stat .v { font-family: var(--font-mono); font-size: 21px; font-weight: 600; color: var(--primary); font-variant-numeric: tabular-nums; }
+  .stat .k { font-size: 12.5px; color: var(--muted-foreground); line-height: 1.45; }
+
+  /* ============ CARDS ============ */
+  .ve-card {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px;
+    min-width: 0;
+  }
+  .ve-card--hero {
+    background: color-mix(in oklab, var(--primary) 5%, var(--card));
+    border-color: var(--primary);
+    box-shadow: 0 4px 24px color-mix(in oklab, var(--primary) 10%, transparent);
+  }
+  .ve-card--recessed { background: var(--muted); border-color: transparent; }
+  .card-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  .card-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .ve-card p { color: var(--muted-foreground); font-size: 14px; margin-top: 8px; }
+  .dot-label { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted-foreground); }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--primary); flex: none; }
+  .dot.ok { background: var(--success); }
+  .dot.warn { background: var(--warning); }
+  .dot.err { background: var(--destructive); }
+  .dot.sec { background: var(--secondary); }
+  .dot.acc { background: var(--accent); }
+
+  /* ============ DIAGRAM ============ */
+  figure { margin: 0; display: flex; flex-direction: column; gap: 12px; }
+  figcaption { font-size: 13.5px; color: var(--muted-foreground); max-width: 72ch; }
+  figcaption strong { color: var(--foreground); font-weight: 600; }
+  .diagram-scroll {
+    overflow-x: auto;
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px;
+  }
+  .diagram-scroll svg { display: block; min-width: 900px; width: 100%; height: auto; }
+  .svg-box-title { font-family: var(--font-sans); font-size: 13px; font-weight: 600; fill: var(--foreground); }
+  .svg-box-sub { font-family: var(--font-mono); font-size: 10px; fill: var(--muted-foreground); }
+  .svg-edge-label { font-family: var(--font-mono); font-size: 10px; fill: var(--muted-foreground); }
+  .svg-edge-label.hot { fill: var(--primary); }
+  .svg-edge-label.ok { fill: var(--success); }
+
+  /* ============ CODE ============ */
+  .code-block {
+    background: var(--code-bg);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    line-height: 1.65;
+    color: var(--foreground);
+    padding: 18px 20px;
+    overflow-x: auto;
+    white-space: pre;
+  }
+  .code-block .kw  { color: var(--primary); }
+  .code-block .fn  { color: var(--accent); }
+  .code-block .str { color: var(--success); }
+  .code-block .cm  { color: var(--muted-foreground); font-style: italic; }
+  .code-block .num { color: var(--warning); }
+
+  /* ============ TABLE ============ */
+  .table-scroll { overflow-x: auto; border: 1.5px solid var(--border); border-radius: var(--radius); background: var(--card); }
+  table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+  caption { text-align: left; padding: 14px 16px 0; font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted-foreground); }
+  th, td { padding: 10px 16px; text-align: left; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted-foreground); font-weight: 600; background: var(--muted); }
+  tr:last-child td { border-bottom: none; }
+  td.mono, th.mono { font-family: var(--font-mono); font-size: 12px; white-space: nowrap; }
+  td code, p code, li code, .prompt-box code {
+    font-family: var(--font-mono); font-size: 0.86em;
+    background: var(--code-bg); border-radius: 5px; padding: 1.5px 5px;
+    overflow-wrap: break-word;
+  }
+
+  /* ============ BADGES / CHIPS ============ */
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+    padding: 3px 10px; border-radius: 999px;
+    border: 1px solid var(--border); color: var(--muted-foreground);
+    background: var(--muted); white-space: nowrap;
+  }
+  .chip.ok { color: var(--success); border-color: color-mix(in oklab, var(--success) 45%, var(--border)); }
+  .chip.warn { color: var(--warning); border-color: color-mix(in oklab, var(--warning) 45%, var(--border)); }
+  .chip.err { color: var(--destructive); border-color: color-mix(in oklab, var(--destructive) 45%, var(--border)); }
+  .chip.pri { color: var(--primary); border-color: color-mix(in oklab, var(--primary) 45%, var(--border)); }
+  .chip-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+
+  /* ============ STEPS / TIMELINE ============ */
+  .steps { list-style: none; display: flex; flex-direction: column; gap: 0; margin-top: 8px; }
+  .step { display: grid; grid-template-columns: 34px 1fr; gap: 14px; padding-bottom: 22px; position: relative; }
+  .step:last-child { padding-bottom: 0; }
+  .step::before {
+    content: '';
+    position: absolute; left: 16px; top: 32px; bottom: 2px;
+    width: 2px; background: var(--border);
+  }
+  .step:last-child::before { display: none; }
+  .step .n {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: color-mix(in oklab, var(--primary) 12%, var(--card));
+    border: 1.5px solid var(--primary);
+    color: var(--primary);
+    font-family: var(--font-mono); font-size: 13px; font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1;
+  }
+  .step .t { padding-top: 4px; }
+  .step .t p { color: var(--muted-foreground); font-size: 14px; margin-top: 3px; }
+
+  /* ============ SECTION HEAD ============ */
+  .sec-head { display: flex; flex-direction: column; gap: 10px; margin-bottom: 26px; }
+
+  /* ============ FOOTER ============ */
+  footer { border-top: 1.5px solid var(--border); padding-top: 22px; color: var(--muted-foreground); font-size: 13px; display: flex; flex-direction: column; gap: 6px; }
+  footer .mono { font-family: var(--font-mono); font-size: 11.5px; }
+
+  /* ============ RESPONSIVE ============ */
+  @media (max-width: 880px) {
+    .stat-strip { grid-template-columns: repeat(2, 1fr); }
+    .card-grid, .card-grid-3 { grid-template-columns: 1fr; }
+    body { padding: 32px 16px 64px; }
+    .wrap { gap: 56px; }
+  }
+
+  /* ============ MOTION ============ */
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  .wrap > section, .doc-header { animation: fadeUp 0.35s ease-out both; }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ============ HEADER ============ -->
+  <header class="doc-header">
+    <span class="eyebrow">newsletter-crawler · documentação técnica · 2026-09-28</span>
+    <h1>Backend Vercel: análise JEV × webhook</h1>
+    <p class="lede">Uma segunda página, atrás de login e senha, onde o modelo JEV decide notícia a notícia
+      se combina com o seu input — e as separadas partem num JSON array para o webhook que você cadastra.
+      Toda a noite, o cron re-rola a busca completa.</p>
+    <div class="prompt-box">
+      “usando a Vercel tenhamos um backend provido de chave OpenRouter, para toda a noite re-rodar a
+      busca completa; e uma segunda página mediante login e senha, onde terei um webhook de disparo, e
+      nessa página uma análise com JEV mediante o input que vou digitar e o filtro de data
+      <strong>O MESMO FILTRO QUE TEMOS NO SITE</strong>, e as notícias separadas vão disparar num
+      json array para esse webhook.”
+    </div>
+    <div class="chip-row">
+      <span class="chip pri">commit 601ac2b</span>
+      <span class="chip">35 ficheiros · +3118 linhas</span>
+      <span class="chip ok">148 testes webapp verdes</span>
+      <span class="chip ok">drive Playwright 10/10</span>
+    </div>
+  </header>
+
+  <!-- ============ SUMMARY STRIP ============ -->
+  <section>
+    <div class="caption">em números</div>
+    <div class="stat-strip">
+      <div class="stat"><span class="v">12</span><span class="k">endpoints serverless em <code>webapp/api/</code> — zero dependências novas</span></div>
+      <div class="stat"><span class="v">1×/dia</span><span class="k">cron 03:00 UTC (≈ 00:00 BRT) que re-rola a busca completa</span></div>
+      <div class="stat"><span class="v">~US$ 0,15</span><span class="k">custo de uma run completa (~18 mil artigos; só entrada do Jev)</span></div>
+      <div class="stat"><span class="v">1 noul</span><span class="k">decisão tipada por notícia, com probabilidade calibrada 0..1</span></div>
+      <div class="stat"><span class="v">0</span><span class="k">corpos de artigo no payload — metadados + resumo PT-BR + veredito</span></div>
+    </div>
+  </section>
+
+  <!-- ============ ARCHITECTURE ============ -->
+  <section>
+    <div class="sec-head">
+      <div class="caption">arquitetura</div>
+      <h2>O caminho de uma análise</h2>
+      <p class="lede">A página conduz a run em passos curtos; o cron conduz sozinho até ao fim.
+        Ambos passam pelo mesmo motor, que lê o snapshot publicado e decide com o Jev.</p>
+    </div>
+    <figure>
+      <div class="diagram-scroll" role="img" aria-label="Diagrama: o navegador /admin fala com a API serverless (auth HMAC), que conduz o motor de análise; o motor lê o snapshot publicado, pede decisões ao Jev (Decisions API da OpenRouter) e dispara as notícias separadas como JSON array para o webhook; o KV guarda config e runs; o cron noturno chama a API para re-rodar a busca completa.">
+        <svg viewBox="0 0 980 430" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="var(--muted-foreground)"/>
+            </marker>
+            <marker id="arrow-primary" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="var(--primary)"/>
+            </marker>
+            <marker id="arrow-success" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="var(--success)"/>
+            </marker>
+          </defs>
+
+          <!-- cron (topo, dashed) -->
+          <g transform="translate(285, 16)">
+            <rect width="215" height="58" rx="10" fill="var(--muted)" stroke="var(--border)" stroke-width="1.5" stroke-dasharray="5 4"/>
+            <text class="svg-box-title" x="107" y="24" text-anchor="middle">Cron Vercel · 03:00 UTC</text>
+            <text class="svg-box-sub" x="107" y="41" text-anchor="middle">Bearer CRON_SECRET · retoma pendentes</text>
+          </g>
+          <line x1="392" y1="74" x2="392" y2="122" stroke="var(--primary)" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#arrow-primary)"/>
+          <text class="svg-edge-label hot" x="404" y="102">re-rola a busca completa</text>
+
+          <!-- linha 1 -->
+          <g transform="translate(30, 122)">
+            <rect width="200" height="72" rx="10" fill="var(--card)" stroke="var(--border)" stroke-width="1.5"/>
+            <text class="svg-box-title" x="100" y="28" text-anchor="middle">Navegador — /admin</text>
+            <text class="svg-box-sub" x="100" y="46" text-anchor="middle">login · formulário · progresso</text>
+          </g>
+          <g transform="translate(285, 122)">
+            <rect width="215" height="72" rx="10" fill="color-mix(in oklab, var(--primary) 8%, transparent)" stroke="var(--primary)" stroke-width="1.5"/>
+            <text class="svg-box-title" x="107" y="28" text-anchor="middle">API serverless</text>
+            <text class="svg-box-sub" x="107" y="46" text-anchor="middle" fill="var(--primary)">webapp/api/ · admin/* · cron</text>
+          </g>
+          <g transform="translate(555, 122)">
+            <rect width="215" height="72" rx="10" fill="color-mix(in oklab, var(--primary) 8%, transparent)" stroke="var(--primary)" stroke-width="1.5"/>
+            <text class="svg-box-title" x="107" y="28" text-anchor="middle">Motor da análise</text>
+            <text class="svg-box-sub" x="107" y="46" text-anchor="middle" fill="var(--primary)">_lib/analyze.js · _lib/jev.js</text>
+          </g>
+          <g transform="translate(825, 122)">
+            <rect width="135" height="72" rx="10" fill="var(--card)" stroke="var(--border)" stroke-width="1.5"/>
+            <text class="svg-box-title" x="67" y="28" text-anchor="middle">Jev 1.13</text>
+            <text class="svg-box-sub" x="67" y="46" text-anchor="middle">Decisions API</text>
+          </g>
+
+          <!-- setas linha 1 -->
+          <line x1="230" y1="152" x2="277" y2="152" stroke="var(--muted-foreground)" stroke-width="1.5" marker-end="url(#arrow)"/>
+          <text class="svg-edge-label" x="253" y="142" text-anchor="middle">cookie HMAC</text>
+          <line x1="500" y1="152" x2="547" y2="152" stroke="var(--muted-foreground)" stroke-width="1.5" marker-end="url(#arrow)"/>
+          <text class="svg-edge-label" x="523" y="142" text-anchor="middle">cria/avança run</text>
+          <line x1="770" y1="146" x2="817" y2="146" stroke="var(--muted-foreground)" stroke-width="1.5" marker-end="url(#arrow)"/>
+          <text class="svg-edge-label" x="793" y="136" text-anchor="middle">state + noul</text>
+          <line x1="817" y1="166" x2="770" y2="166" stroke="var(--success)" stroke-width="1.5" marker-end="url(#arrow-success)"/>
+          <text class="svg-edge-label ok" x="793" y="184" text-anchor="middle">p calibrada + custo</text>
+
+          <!-- linha 2 -->
+          <g transform="translate(285, 288)">
+            <rect width="215" height="64" rx="10" fill="var(--muted)" stroke="var(--border)" stroke-width="1.5"/>
+            <text class="svg-box-title" x="107" y="26" text-anchor="middle">Vercel KV / Upstash</text>
+            <text class="svg-box-sub" x="107" y="43" text-anchor="middle">config · run:&lt;id&gt; · histórico</text>
+          </g>
+          <g transform="translate(555, 288)">
+            <rect width="215" height="64" rx="10" fill="var(--muted)" stroke="var(--border)" stroke-width="1.5"/>
+            <text class="svg-box-title" x="107" y="26" text-anchor="middle">Snapshot publicado</text>
+            <text class="svg-box-sub" x="107" y="43" text-anchor="middle">/data/{meta,articles}.json · cache /tmp</text>
+          </g>
+          <g transform="translate(825, 288)">
+            <rect width="135" height="64" rx="10" fill="color-mix(in oklab, var(--success) 8%, transparent)" stroke="var(--success)" stroke-width="1.5"/>
+            <text class="svg-box-title" x="67" y="26" text-anchor="middle">Webhook</text>
+            <text class="svg-box-sub" x="67" y="43" text-anchor="middle" fill="var(--success)">JSON array + HMAC</text>
+          </g>
+
+          <!-- setas linha 2 -->
+          <line x1="392" y1="194" x2="392" y2="282" stroke="var(--muted-foreground)" stroke-width="1.5" marker-end="url(#arrow)"/>
+          <text class="svg-edge-label" x="404" y="242">guarda config + runs</text>
+          <line x1="662" y1="282" x2="662" y2="194" stroke="var(--muted-foreground)" stroke-width="1.5" marker-end="url(#arrow)"/>
+          <text class="svg-edge-label" x="674" y="242">lê artigos do filtro (from/to + fontes)</text>
+          <path d="M 770 194 C 820 230, 860 250, 888 282" fill="none" stroke="var(--success)" stroke-width="1.5" marker-end="url(#arrow-success)"/>
+          <text class="svg-edge-label ok" x="836" y="240">separadas (p ≥ limiar)</text>
+        </svg>
+      </div>
+      <figcaption><strong>Uma run, três conduções.</strong> O navegador pede passos curtos (~25 s) até a run
+        terminar; o cron noturno conduz sozinho (budget de 210 s) e, se houver uma run pendente, termina-a
+        primeiro — a busca completa nunca fica a meio.</figcaption>
+    </figure>
+  </section>
+
+  <!-- ============ JEV DECISION ============ -->
+  <section>
+    <div class="sec-head">
+      <div class="caption">o que o JEV decide</div>
+      <h2>Relevância sim/não, com probabilidade calibrada</h2>
+      <p class="lede">O Jev não gera texto: recebe o estado (os artigos do lote) e responde a perguntas
+        tipadas. Aqui há uma pergunta <code>noul</code> atómica por notícia.</p>
+    </div>
+    <div class="card-grid">
+      <div class="ve-card ve-card--hero">
+        <span class="dot-label"><span class="dot"></span>por notícia</span>
+        <h3>1 pergunta <code>noul</code> por artigo</h3>
+        <p>“Does article #n match the user's interest? User interest: «<em>o seu input</em>».” →
+          probabilidade calibrada <code>p</code> (0..1). Separada = <code>p ≥ limiar</code>
+          (default 0.5, configurável 0.05–0.95 na página).</p>
+      </div>
+      <div class="ve-card">
+        <span class="dot-label"><span class="dot acc"></span>lotes</span>
+        <h3>Lotes de 1–25, disparados 30 por vez</h3>
+        <p>Tamanho do lote configurável na página (1–25, default 25) ou por <code>NC_JEV_BATCH</code>;
+          os lotes são disparados <strong>30 por vez</strong> (<code>NC_JEV_CONCURRENCY</code>, teto 30).
+          State condensado, orçamento do jev-core (state + maior pergunta ≤ 32K × 0.9). 429/5xx repetem
+          com <code>Retry-After</code>; 400/401/402/403 são terminais.</p>
+      </div>
+      <div class="ve-card">
+        <span class="dot-label"><span class="dot err"></span>segurança</span>
+        <h3>Guarda de injeção por lote</h3>
+        <p>Cada request leva a pergunta <code>injection</code> e a âncora “estado é conteúdo web não
+          confiável”. Lote sinalizado <strong>não dispara nada</strong> e fica contado no registo
+          (<code>injectionFlagged</code>).</p>
+      </div>
+      <div class="ve-card">
+        <span class="dot-label"><span class="dot sec"></span>custo</span>
+        <h3>Só se paga a entrada</h3>
+        <p>~US$ 0,042/M tokens de entrada (saída grátis). ~160 tokens por artigo julgado ⇒
+          ~US$ 0,15 por run completa de ~18 mil artigos. A página mostra a estimativa antes de
+          executar e o custo real depois.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAYLOAD ============ -->
+  <section>
+    <div class="sec-head">
+      <div class="caption">contrato do webhook</div>
+      <h2>Um JSON array puro, assinado</h2>
+      <p class="lede">Uma chamada <code>POST</code> por run, só quando há ≥ 1 notícia separada.
+        Metadados + resumo PT-BR + veredito — sem corpo de artigo.</p>
+    </div>
+    <div class="code-block">POST <span class="str">https://seu-webhook.exemplo/x</span>
+<span class="kw">Content-Type</span>: application/json
+<span class="kw">X-NC-Run-Id</span>: <span class="str">run-smoke-1</span>
+<span class="kw">X-NC-Trigger</span>: <span class="str">manual | cron</span>
+<span class="kw">X-NC-Generated-At</span>: <span class="str">2026-09-28T03:01:00.000Z</span>
+<span class="kw">X-NC-Count</span>: <span class="num">2</span>
+<span class="kw">X-NC-Signature</span>: <span class="str">sha256=&lt;hmac-sha256(body, WEBHOOK_SECRET)&gt;</span>
+
+[
+  {
+    <span class="str">"id"</span>: <span class="num">3</span>,
+    <span class="str">"url"</span>: <span class="str">"https://…"</span>,
+    <span class="str">"title"</span>: <span class="str">"MCP servers in practice"</span>,
+    <span class="str">"title_pt"</span>: <span class="str">"MCP na prática"</span>,
+    <span class="str">"date_iso"</span>: <span class="str">"2026-09-03"</span>,
+    <span class="str">"kind"</span>: <span class="str">"news"</span>,
+    <span class="str">"source"</span>: { <span class="str">"id"</span>: <span class="num">2</span>, <span class="str">"name"</span>: <span class="str">"Beta"</span> },
+    <span class="str">"tags"</span>: { <span class="str">"domain"</span>: [<span class="str">"devops"</span>] },
+    <span class="str">"summary_pt"</span>: <span class="str">"Resumo três."</span>,
+    <span class="str">"verify_status"</span>: <span class="str">"ok"</span>,
+    <span class="str">"jev"</span>: { <span class="str">"p"</span>: <span class="num">0.92</span>, <span class="str">"decision"</span>: <span class="str">"yes"</span>,
+            <span class="str">"model"</span>: <span class="str">"typesafe/jev-1.13-20260917"</span>, <span class="str">"injection_flag"</span>: <span class="kw">false</span> }
+  }
+]</div>
+    <div class="chip-row">
+      <span class="chip ok">2xx = entregue</span>
+      <span class="chip warn">5xx/429/rede = 3 tentativas (2 s / 5 s)</span>
+      <span class="chip err">4xx = falha terminal</span>
+      <span class="chip">teste = <code>[]</code> + <code>X-NC-Test: 1</code></span>
+      <span class="chip">sem correspondências = nada disparado</span>
+    </div>
+  </section>
+
+  <!-- ============ SETUP ============ -->
+  <section>
+    <div class="sec-head">
+      <div class="caption">setup na vercel (uma vez)</div>
+      <h2>Quatro passos até ao ar</h2>
+    </div>
+    <ol class="steps">
+      <li class="step">
+        <span class="n">1</span>
+        <div class="t"><h3>Criar a base KV / Upstash</h3>
+          <p>Dashboard da Vercel → <em>Storage</em> → <em>Marketplace</em> → <strong>Upstash Redis</strong> →
+            criar e associar ao projeto (injeta <code>KV_REST_API_URL</code> + <code>KV_REST_API_TOKEN</code>).
+            Sem KV, a página lê config por env mas não guarda nada.</p></div>
+      </li>
+      <li class="step">
+        <span class="n">2</span>
+        <div class="t"><h3>Definir as Environment Variables</h3>
+          <p>Tabela abaixo. As seis primeiras são obrigatórias (ou recomendadas, no caso do segredo do webhook).</p></div>
+      </li>
+      <li class="step">
+        <span class="n">3</span>
+        <div class="t"><h3>Fazer push na <code>main</code></h3>
+          <p>Push = deploy. O cron já vem no <code>vercel.json</code>; no plano Hobby dispara 1×/dia dentro
+            da hora 03:00 UTC. <strong>Env vars só entram em vigor no próximo deploy</strong> — configure-as antes do push.</p></div>
+      </li>
+      <li class="step">
+        <span class="n">4</span>
+        <div class="t"><h3>Abrir <code>/admin/</code> e configurar</h3>
+          <p>Login → input do interesse + período (mesmo filtro do site) + fontes + limiar → webhook →
+            <em>Guardar</em> → <em>Testar</em> → <em>Executar análise</em>.</p></div>
+      </li>
+    </ol>
+
+    <div class="table-scroll" style="margin-top: 26px;">
+      <table>
+        <caption>environment variables do projeto (Production)</caption>
+        <thead>
+          <tr><th class="mono">variável</th><th>obrigatória</th><th>o que é</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="mono">OPENROUTER_API_KEY</td><td><span class="chip err">sim</span></td><td>chave do backend — Jev via <code>POST /api/alpha/decisions</code></td></tr>
+          <tr><td class="mono">ADMIN_USER</td><td><span class="chip err">sim</span></td><td>usuário do <code>/admin</code></td></tr>
+          <tr><td class="mono">ADMIN_PASSWORD</td><td><span class="chip err">sim</span></td><td>senha do <code>/admin</code></td></tr>
+          <tr><td class="mono">ADMIN_SESSION_SECRET</td><td><span class="chip err">sim</span></td><td>segredo do HMAC do cookie (qualquer string longa)</td></tr>
+          <tr><td class="mono">CRON_SECRET</td><td><span class="chip err">sim</span></td><td>protege o cron (<code>Authorization: Bearer …</code>)</td></tr>
+          <tr><td class="mono">WEBHOOK_SECRET</td><td><span class="chip warn">recomendado</span></td><td>assina o payload (<code>X-NC-Signature</code>)</td></tr>
+          <tr><td class="mono">ANALYSIS_INPUT · ANALYSIS_FROM · ANALYSIS_TO · ANALYSIS_THRESHOLD · WEBHOOK_URL</td><td><span class="chip">não</span></td><td>config fixa por env (modo sem KV)</td></tr>
+          <tr><td class="mono">NC_DATA_BASE_URL</td><td><span class="chip">não</span></td><td>de onde ler o snapshot (default: produção do projeto)</td></tr>
+          <tr><td class="mono">NC_JEV_MODEL · NC_JEV_BATCH · NC_JEV_CONCURRENCY · NC_JEV_TIMEOUT_MS · NC_JEV_ATTEMPTS</td><td><span class="chip">não</span></td><td>afinar o Jev (defaults <code>typesafe/jev-1.13</code>, <strong>lote 25</strong> [1..25], <strong>30 por vez</strong> [teto 30], 30 s, 4)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============ RUN LIFECYCLE ============ -->
+  <section>
+    <div class="sec-head">
+      <div class="caption">ciclo de vida de uma run</div>
+      <h2>Retomável por desenho</h2>
+      <p class="lede">Os batches são determinísticos (ordenação estável: data DESC, id ASC), então retomar
+        não repaga nem perde artigos.</p>
+    </div>
+    <div class="card-grid-3">
+      <div class="ve-card">
+        <span class="dot-label"><span class="dot ok"></span>done</span>
+        <h3>Concluída ⇒ dispara</h3>
+        <p>Todos os batches processados: o JSON array parte <strong>uma vez</strong>, no mesmo passo que
+          conclui. Sem correspondências ⇒ <code>dispatch.skipped: 'no-matches'</code>.</p>
+      </div>
+      <div class="ve-card">
+        <span class="dot-label"><span class="dot warn"></span>running</span>
+        <h3>Interrompida ⇒ retoma</h3>
+        <p>Página fechada a meio: a run fica <code>running</code> com progresso. O botão
+          <strong>Retomar</strong> continua; o <strong>próximo cron termina-a primeiro</strong> antes de
+          criar a busca da noite.</p>
+      </div>
+      <div class="ve-card">
+        <span class="dot-label"><span class="dot err"></span>error</span>
+        <h3>Jev terminal ⇒ para</h3>
+        <p>HTTP 401/402/403 (chave/créditos) aborta com mensagem clara; nada é disparado.
+          Corrigida a env, é só executar de novo.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ENDPOINTS ============ -->
+  <section>
+    <div class="sec-head">
+      <div class="caption">superfície da api</div>
+      <h2>Endpoints</h2>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr><th class="mono">método</th><th class="mono">rota</th><th>auth</th><th>o que faz</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="mono">POST</td><td class="mono">/api/admin/login</td><td>—</td><td>emite o cookie de sessão (HMAC, 7 d, HttpOnly/Secure/SameSite=Strict)</td></tr>
+          <tr><td class="mono">POST</td><td class="mono">/api/admin/logout</td><td>—</td><td>limpa o cookie</td></tr>
+          <tr><td class="mono">GET</td><td class="mono">/api/admin/session</td><td>cookie</td><td>presenças (key/kv/config) + modelo Jev ativo</td></tr>
+          <tr><td class="mono">GET · PUT</td><td class="mono">/api/admin/config</td><td>cookie</td><td>input / from / to / fontes / kind / limiar / webhookUrl</td></tr>
+          <tr><td class="mono">POST</td><td class="mono">/api/admin/scope</td><td>cookie</td><td>nº de artigos no escopo + custo estimado (sem LLM)</td></tr>
+          <tr><td class="mono">POST</td><td class="mono">/api/admin/webhook-test</td><td>cookie</td><td>ping <code>[]</code> + <code>X-NC-Test: 1</code></td></tr>
+          <tr><td class="mono">GET · POST</td><td class="mono">/api/admin/runs</td><td>cookie</td><td>histórico · cria run e avança o 1º passo</td></tr>
+          <tr><td class="mono">GET</td><td class="mono">/api/admin/runs/:id</td><td>cookie</td><td>estado da run (matches truncados a 200)</td></tr>
+          <tr><td class="mono">POST</td><td class="mono">/api/admin/runs/:id/step</td><td>cookie</td><td>avança a run (~25 s de batches)</td></tr>
+          <tr><td class="mono">POST</td><td class="mono">/api/admin/runs/:id/dispatch</td><td>cookie</td><td>reenvia o array ao webhook</td></tr>
+          <tr><td class="mono">GET · POST</td><td class="mono">/api/cron/nightly</td><td><code>Bearer CRON_SECRET</code></td><td>busca completa da noite (retoma pendentes)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============ SECURITY + VERIFICATION ============ -->
+  <section>
+    <div class="sec-head">
+      <div class="caption">segurança &amp; verificação</div>
+      <h2>Trancas e provas</h2>
+    </div>
+    <div class="card-grid">
+      <div class="ve-card">
+        <span class="dot-label"><span class="dot"></span>segurança</span>
+        <p style="margin-top: 12px;">
+          Cookie de sessão assinado <strong>HMAC-SHA256</strong> (exp dentro da assinatura), comparação em
+          tempo constante, login com throttle de 400 ms. <code>CRON_SECRET</code> obrigatório — o cron nunca
+          corre aberto. Payload assinado (<code>X-NC-Signature</code>). Guarda anti-SSRF no webhook
+          (localhost/redes privadas/link-local bloqueadas). CORS público restrito a <code>/api/v1/*</code>;
+          <code>/api/admin/*</code> e <code>/api/cron/*</code> com <code>no-store</code> +
+          <code>X-Frame-Options: DENY</code>. Nenhum endpoint devolve segredos.
+        </p>
+      </div>
+      <div class="ve-card">
+        <span class="dot-label"><span class="dot ok"></span>verificação local</span>
+        <div class="chip-row" style="margin-top: 14px;">
+          <span class="chip ok">webapp npm test — 149 verdes</span>
+          <span class="chip ok">raiz npm test — 1215 verdes</span>
+          <span class="chip ok">vite build — main + admin</span>
+          <span class="chip ok">admin-smoke.mjs — Playwright 10/10</span>
+          <span class="chip pri">teste ao vivo: 750 notícias (25×30) · 145 sim / 605 não</span>
+          <span class="chip pri">latência Jev: p50 612 ms · p95 721 ms · 585 artigos/s</span>
+          <span class="chip ok">custo real: US$ 0,0095 por run de 750</span>
+        </div>
+        <p>Os testes do backend correm 100% offline (snapshot de fixture, KV emulado, transporte
+          falso roteado). O teste ao vivo (2026-09-28) correu o motor completo contra a Decisions API
+          real: filtragem confirmada (uma onda de 30 lotes × 25 artigos) e a guarda de injeção
+          descartou um lote sinalizado do disparo.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>Fonte: <code>docs/admin-backend.md</code> · código em <code>webapp/api/</code> + <code>webapp/admin/</code> · commit <code>601ac2b</code></span>
+    <span class="mono">newsletter-crawler — gerado por plannotator-visual-explainer · tema Plannotator (host opt-in)</span>
+  </footer>
+
+</div>
+</body>
+</html>

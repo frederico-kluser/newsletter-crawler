@@ -97,6 +97,12 @@ test('sanitizeConfigPatch: valida input/datas/limiar/kind/fontes/webhook', () =>
   assert.equal(sanitizeConfigPatch({ from: '2026-02-01', to: '2026-01-01' }).ok, false, 'início depois do fim');
   assert.equal(sanitizeConfigPatch({ threshold: 1.2 }).ok, false);
   assert.deepEqual(sanitizeConfigPatch({ threshold: 0.7 }).patch, { threshold: 0.7 });
+  // lote: inteiro 1..25 (default 25) — fora disso o PUT recusa
+  assert.deepEqual(sanitizeConfigPatch({ batchSize: 25 }).patch, { batchSize: 25 });
+  assert.deepEqual(sanitizeConfigPatch({ batchSize: 1 }).patch, { batchSize: 1 });
+  assert.equal(sanitizeConfigPatch({ batchSize: 26 }).ok, false);
+  assert.equal(sanitizeConfigPatch({ batchSize: 0 }).ok, false);
+  assert.equal(sanitizeConfigPatch({ batchSize: 3.5 }).ok, false);
   assert.equal(sanitizeConfigPatch({ kind: 'podcast' }).ok, false);
   assert.deepEqual(sanitizeConfigPatch({ sourceIds: [3, 'x', 3, -1, 2.5] }).patch, { sourceIds: [3] });
   assert.equal(sanitizeConfigPatch({ webhookUrl: 'http://127.0.0.1/x' }).ok, false);
@@ -140,6 +146,15 @@ test('planBatches: respeita o tamanho e não estoura o orçamento do jev-core', 
     const questions = buildBatchQuestions('IA', b.items.length);
     assert.ok(batchBudgetLeft(state, questions) >= 0, 'cada batch cabe no orçamento');
   }
+});
+
+test('planBatches: lote 1..25 com default 25 (garantia do contrato)', () => {
+  const items = Array.from({ length: 60 }, (_, i) => ({ id: i + 1, title: `t${i}`, summary_pt: 's' }));
+  assert.equal(Math.max(...planBatches(items, { input: 'x' }).map((b) => b.items.length)), 25, 'default 25');
+  assert.equal(Math.max(...planBatches(items, { input: 'x', batchSize: 999 }).map((b) => b.items.length)), 25, 'acima de 25 satura em 25');
+  assert.equal(Math.max(...planBatches(items, { input: 'x', batchSize: 0 }).map((b) => b.items.length)), 1, 'abaixo de 1 satura em 1');
+  assert.equal(Math.max(...planBatches(items, { input: 'x', batchSize: 10 }).map((b) => b.items.length)), 10);
+  assert.equal(planBatches(items, { input: 'x' }).length, 3, '60 artigos / 25 → 3 lotes');
 });
 
 test('buildBatchState/Questions: state numerado, 1 noul por artigo + guarda de injeção ancorada', () => {

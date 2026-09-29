@@ -74,6 +74,10 @@
   font: inherit;
 }
 
+.adm-batch {
+  width: 110px;
+}
+
 .adm-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;

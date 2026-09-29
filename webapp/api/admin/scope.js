@@ -3,7 +3,7 @@
 // cacheado na instância (data.js) e não há chamada de LLM.
 import { planBatches, resolveScope } from '../_lib/analyze.js';
 import { requireAdmin } from '../_lib/auth.js';
-import { DEFAULT_THRESHOLD, adminSecrets, dataBaseUrl, env, jevSettings } from '../_lib/env.js';
+import { DEFAULT_THRESHOLD, adminSecrets, clampBatchSize, dataBaseUrl, env } from '../_lib/env.js';
 import { allowMethod, bad, readJsonBody, sendJson } from '../_lib/http.js';
 import { loadSnapshot } from '../_lib/data.js';
 
@@ -32,9 +32,10 @@ export default async function handler(req, res) {
     sourceIds: body?.sourceIds || [],
     kind: body?.kind || 'all',
     threshold: Number(body?.threshold) || DEFAULT_THRESHOLD,
+    batchSize: clampBatchSize(body?.batchSize),
   };
   const scoped = resolveScope(articles, meta, config);
-  const batches = planBatches(scoped, { input: config.input, batchSize: jevSettings().batchSize });
+  const batches = planBatches(scoped, { input: config.input, batchSize: config.batchSize });
   const total = scoped.length;
   const estUsd = (total * INPUT_TOKENS_PER_ARTICLE * JEV_INPUT_PRICE_PER_M) / 1e6;
   return sendJson(res, 200, { total, batches: batches.length, estUsd: Number(estUsd.toFixed(4)) });

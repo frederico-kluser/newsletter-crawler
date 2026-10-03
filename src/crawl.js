@@ -55,6 +55,13 @@ export function upsertSource(seed) {
   const type = (typeof seed === 'object' && seed.type) || 'listing';
   const maxIndexPages =
     typeof seed === 'object' && seed.maxIndexPages != null ? Number(seed.maxIndexPages) : null;
+  // Linha ÓRFÃ do restore (fonte recriada só pelo NOME, base_url NULL): COMPLETA em vez de
+  // deixar o upsert criar uma linha GÊMEA. Sem isto os artigos legados da fonte ficavam numa
+  // linha e os novos em outra (fonte dividida — contagens, cursor e purge passam a mentir).
+  const orphan = stmts.getSourceByName.get(name);
+  if (orphan && !orphan.base_url && !stmts.getSourceByBaseUrl.get(base)) {
+    stmts.fillSourceBaseUrl.run({ id: orphan.id, base_url: base });
+  }
   return stmts.upsertSource.get({ name, base_url: base, type, max_index_pages: maxIndexPages });
 }
 

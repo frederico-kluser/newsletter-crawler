@@ -15,6 +15,7 @@
     "crawl": "node --env-file-if-exists=.env src/index.js crawl",
     "status": "node --env-file-if-exists=.env src/index.js status",
     "inspect": "node --env-file-if-exists=.env src/index.js inspect",
+    "audit": "node --env-file-if-exists=.env src/index.js audit",
     "purge": "node --env-file-if-exists=.env src/index.js purge",
     "add": "node --env-file-if-exists=.env src/index.js add",
     "remove": "node --env-file-if-exists=.env src/index.js remove",

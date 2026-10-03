@@ -186,6 +186,19 @@ export function consolidateItems(results, { baseUrl }) {
 }
 
 /**
+ * Classifica uma supressão de dedup do INSERT OR IGNORE: `'url'` = a URL já tem linha (skip
+ * correto — já capturámos este link); `'hash'` = URL nova suprimida por COLISÃO de content_hash
+ * (o `twin` é a URL do artigo que ocupou o hash — a única perda real da dedup, e o `ncrawl audit`
+ * lista-a). Testável direto sobre o DB.
+ */
+export function dupAttribution(url, content) {
+  const byUrl = stmts.getArticleByUrl.get(url);
+  if (byUrl) return { by: 'url', twin: null };
+  const byHash = stmts.getArticleByHash.get(sha256(content));
+  return { by: 'hash', twin: byHash ? (stmts.getArticleUrlById.get(byHash.id)?.url ?? null) : null };
+}
+
+/**
  * Curadoria completa de uma issue: chunks -> agentes paralelos -> consolidação -> cadastro +
  * enfileiramento do enriquecimento. Retorna um resumo, {belowFloor:true} quando a issue é
  * anterior ao piso --since, ou null p/ o chamador cair no fluxo antigo (página sem corpo).
@@ -352,7 +365,16 @@ export async function curateRoundup({ html, url, source, runId = null, depth = 0
         });
       } else {
         dup++;
-        logEvent({ ...ev, url: it.url, stage: 'item', status: 'dup', detail: { issue: url } });
+        // PORQUE é dup? URL já capturada (skip correto — "já pegámos este link") ou COLISÃO de
+        // content_hash (URL NOVA suprimida por já haver outro artigo com o MESMO conteúdo — a
+        // única perda real da dedup). O `by`/`twin` do evento é o que o `ncrawl audit` usa para
+        // separar "pulado corretamente" de "perdido" e mostrar contra quem colidiu.
+        const { by, twin } = dupAttribution(it.url, content);
+        logEvent({
+          ...ev, url: it.url,
+          stage: 'item', status: 'dup',
+          detail: { issue: url, by, twin },
+        });
         // Registro antigo ainda sem corpo (run anterior falhou)? Re-ativa o job de enriquecimento
         // — exceto quem estourou o teto de tentativas (alvo morto/PDF: mantém o blurb, fail-open).
         const prev = stmts.getArticleFullByUrl.get(it.url);

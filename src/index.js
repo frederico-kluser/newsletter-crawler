@@ -14,7 +14,7 @@ import {
   printStatus, cmdCrawl, cmdAdd, cmdRemove, cmdReset, cmdExport, cmdSearch, cmdKey,
   cmdWeb,
   cmdLimits,
-  cmdReclean, cmdInspect, cmdPurge, cmdFinish, cmdDeploy, cmdReextract,
+  cmdReclean, cmdInspect, cmdAudit, cmdPurge, cmdFinish, cmdDeploy, cmdReextract,
 } from './commands.js';
 import { bootstrapFromCli, cmdBackup, cmdRestore } from './cli-restore.js';
 
@@ -63,9 +63,11 @@ function printHelp() {
       '                          [--since-source "Nome=AAAA-MM-DD[,Outro=...]"] [--reset-cursor [fonte]]',
       '                          [--sweep-all] [--max-pages N] [--max-articles N] [--no-aggressive] [--no-refresh]',
       '                          [--no-classify] [--no-summarize] [--no-verify] [--budget USD] [--parallel N]',
-      '                          [--ram-free-pct P] [--cpu-free-pct P]',
+      '                          [--ram-free-pct P] [--cpu-free-pct P] [--debug]',
       '                          modo agressivo é o DEFAULT (ignora robots.txt + UA de navegador real);',
       '                          --no-aggressive volta ao modo educado. --no-refresh: só drena a fila.',
+      '                          --debug (modo debug): no fim, derrama o audit da run (o que entrou ×',
+      '                          o que foi pulado/perdido/errado) — mesmo relatório do `audit`.',
       '                          PISO POR FONTE: cada fonte repete a data do item mais novo já capturado',
       '                          (cursor) em vez de varrer de novo; --since explícito vence o cursor,',
       '                          --since-source força uma fonte, --reset-cursor zera (purge também zera).',
@@ -73,6 +75,9 @@ function printHelp() {
       '  node src/index.js status          contagens; os PENDENTES saem por era: "desta era (Jev)" (o que',
       '                          finish/pós-crawl processam) × "legado (não processado)" (fora do piso)',
       '  node src/index.js inspect [--run N] [--url <substr>] [--verbose]   auditoria da run (itens, vereditos, motivos)',
+      '  node src/index.js audit [--run N] [--source <nome>] [--verbose] [--json]',
+      '                          MODO DEBUG: o que a coleta perde/pula/erra em TODAS as newsletters',
+      '                          (fontes nunca semeadas, skips × perdas, alvos mortos, picos de data)',
       '  node src/index.js reclean [--limit N] [--include-legacy --yes]',
       '                          re-limpa os "suspect" DESTA era com passe forte (Pro) e re-verifica;',
       '                          --include-legacy inclui os do acervo LEGADO (mostra contagem + custo; exige --yes)',
@@ -152,7 +157,7 @@ function printHelp() {
 
 // Comandos que abrem o log persistente do processo e fazem dispatch (o resto é erro de uso).
 const KNOWN_COMMANDS = new Set([
-  'crawl', 'status', 'inspect', 'reclean', 'reextract', 'purge', 'add', 'remove', 'export',
+  'crawl', 'status', 'inspect', 'audit', 'reclean', 'reextract', 'purge', 'add', 'remove', 'export',
   'finish', 'search', 'web', 'key', 'limits', 'deploy', 'reset', 'clean', 'restore', 'backup',
 ]);
 
@@ -201,7 +206,7 @@ try {
     } else if (!KNOWN_COMMANDS.has(cmd)) {
       errorLog(
         `comando desconhecido: ${cmd} ` +
-          '(use: crawl | status | inspect | reclean | reextract | purge | add | remove | export | finish | search | web | key | limits | deploy | restore | backup | reset | ui)',
+          '(use: crawl | status | inspect | audit | reclean | reextract | purge | add | remove | export | finish | search | web | key | limits | deploy | restore | backup | reset | ui)',
       );
       process.exit(1);
     } else {
@@ -209,7 +214,9 @@ try {
       // aponta p/ ele). TODO o log do comando (log/warn/errorLog/debug) é gravado ali com flush
       // imediato — `tail -f` acompanha ao vivo mesmo com o stdout do npm buferizado num pipe.
       const logFile = openLogFile({ command: cmd });
-      if (logFile) log(`log do run: ${logFile}`);
+      // `--json` = saída de MÁQUINA: o anúncio do log ficaria no stdout a poluir o payload
+      // (o arquivo de log continua a receber tudo pelo sink do openLogFile).
+      if (logFile && flags.json !== true) log(`log do run: ${logFile}`);
       // BOOTSTRAP: ponto ÚNICO de decisão (a allowlist e as condições vivem em cli-restore.js;
       // aqui só há a chamada). Base vazia + snapshot no histórico do git ⇒ o acervo volta antes
       // do comando rodar — "nunca recomece do zero". NUNCA fiado em printStatus() (o cmdReset o
@@ -229,6 +236,9 @@ try {
         db.close();
       } else if (cmd === 'inspect') {
         cmdInspect(flags);
+        db.close();
+      } else if (cmd === 'audit') {
+        cmdAudit(flags);
         db.close();
       } else if (cmd === 'reclean') {
         await cmdReclean(flags);

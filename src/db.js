@@ -531,6 +531,29 @@ export const stmts = {
     `UPDATE articles SET published_at = @date
       WHERE issue_url = @url AND (published_at IS NULL OR published_at != @date)`,
   ),
+  // Reatribuição de itens LEGADOS (scripts/reattribute-dates.mjs): a página da issue mostra que
+  // o link pertence a ela — preenche issue_url + published_at (âncora da issue) numa linha que
+  // ainda não tem atribuição. Só mexe em `issue_url IS NULL` (a curadoria viva é a autoridade),
+  // só na MESMA fonte (um link cruzado entre newsletters não contamina) e nunca rebaixa uma
+  // atribuição existente — processar as issues em ordem cronológica faz a MAIS ANTIGA ganhar.
+  setIssueAttribution: db.prepare(
+    `UPDATE articles SET issue_url = @issue_url, published_at = @date
+      WHERE url = @url AND source_id IS @source_id AND issue_url IS NULL`,
+  ),
+  // Data própria do ALVO para item ainda sem issue_url — o fallback documentado ("item AVULSO
+  // mantém a data própria do alvo"). É o modo `--target-dates` do scripts/reattribute-dates.mjs:
+  // itens que sobraram sem atribuição (links atrás do redirector `/leave/*|UID|*` da Cooperpress,
+  // cuja URL real não existe no HTML da issue) ganham a data da própria página.
+  setArticleOwnDate: db.prepare(
+    `UPDATE articles SET published_at = @date
+      WHERE id = @id AND issue_url IS NULL AND (published_at IS NULL OR published_at != @date)`,
+  ),
+  listArticlesWithoutIssue: db.prepare(
+    `SELECT id, url, title, published_at FROM articles
+      WHERE issue_url IS NULL AND (@date IS NULL OR published_at LIKE @date || '%')
+        AND (@sourceId IS NULL OR source_id IS @sourceId)
+      ORDER BY id LIMIT @lim`,
+  ),
   // URL conhecida em QUALQUER conteúdo já capturado (articles/pages/frontier) — base da
   // parada determinística de paginação: não depende do estado da frontier, que pode ter sido
   // limpa e transformar todo link em "novo" de novo.
@@ -889,6 +912,93 @@ export const stmts = {
   countEventsByStage: db.prepare(
     `SELECT stage, status, COUNT(*) c FROM events WHERE run_id = ?
       GROUP BY stage, status ORDER BY stage, status`,
+  ),
+
+  // ---- audit (modo debug: o que a coleta PERDE, PULA e ERRA — `ncrawl audit`) ----
+  // Agregados por (stage, status, motivo) com escopo de run ANULÁVEL (NULL = todas as runs).
+  // `n` soma o campo `count` do detail quando existe (item|skipped agrupa N itens num evento).
+  auditEventsByReason: db.prepare(
+    `SELECT stage, status,
+            COALESCE(json_extract(detail, '$.reason'), json_extract(detail, '$.kind'), '') AS reason,
+            COUNT(*) AS events,
+            COALESCE(SUM(COALESCE(json_extract(detail, '$.count'), 1)), 0) AS n
+       FROM events
+      WHERE (@runId IS NULL OR run_id = @runId)
+        AND stage IN ('item', 'article', 'enrich', 'roundup', 'job', 'clean', 'extract', 'curate')
+      GROUP BY stage, status, reason ORDER BY n DESC, stage, status`,
+  ),
+  // Eventos `item|dup` com a origem da supressão já CLASSIFICADA pela curadoria nova
+  // (detail.by = 'url' | 'hash'; detail.twin = o artigo que ocupou o hash). Evento antigo
+  // (sem `by`) é reclassificado pelo chamador via known_url.
+  auditDupEvents: db.prepare(
+    `SELECT e.url, e.run_id, e.created_at,
+            json_extract(e.detail, '$.by') AS by,
+            json_extract(e.detail, '$.twin') AS twin,
+            json_extract(e.detail, '$.issue') AS issue,
+            EXISTS(SELECT 1 FROM articles a WHERE a.url = e.url) AS known_url
+       FROM events e
+      WHERE e.stage = 'item' AND e.status = 'dup' AND (@runId IS NULL OR e.run_id = @runId)
+      ORDER BY e.id`,
+  ),
+  // Descobertas da listagem (archive/ok): links vistos × novos × abaixo do piso — o resto
+  // é "pulado por já conhecido" (a resposta à pergunta "estamos pulando as que já pegamos?").
+  auditArchivePasses: db.prepare(
+    `SELECT url, run_id, created_at,
+            json_extract(detail, '$.page') AS page,
+            json_extract(detail, '$.links') AS links,
+            json_extract(detail, '$.novos') AS novos,
+            json_extract(detail, '$.abaixoDoPiso') AS abaixo,
+            json_extract(detail, '$.childKind') AS child_kind
+       FROM events
+      WHERE stage = 'archive' AND status = 'ok' AND (@runId IS NULL OR run_id = @runId)
+      ORDER BY id`,
+  ),
+  auditFetchFails: db.prepare(
+    `SELECT url, detail, run_id, created_at FROM events
+      WHERE stage = 'fetch' AND status = 'fail' AND (@runId IS NULL OR run_id = @runId)
+      ORDER BY id`,
+  ),
+  auditFrontierFailed: db.prepare(
+    `SELECT f.url, f.kind, f.retries, f.source_id, s.name AS source_name
+       FROM frontier f LEFT JOIN sources s ON s.id = f.source_id
+      WHERE f.state = 'failed' ORDER BY f.id`,
+  ),
+  auditBlurbPending: db.prepare(
+    `SELECT a.url, a.title, a.enrich_attempts, a.source_id, s.name AS source_name
+       FROM articles a LEFT JOIN sources s ON s.id = a.source_id
+      WHERE a.needs_enrich = 1 ORDER BY a.enrich_attempts DESC, a.id LIMIT @lim`,
+  ),
+  // Panorama POR FONTE (todas as newsletters): contagens, datas e pendências numa leitura.
+  auditSourceStats: db.prepare(
+    `SELECT s.id, s.name, s.base_url, s.type, s.cursor_date,
+            COUNT(a.id) AS articles,
+            MAX(iso_date(a.published_at)) AS last_date,
+            SUM(CASE WHEN a.needs_enrich = 1 THEN 1 ELSE 0 END) AS needs_enrich,
+            SUM(CASE WHEN a.verify_status IS NULL THEN 1 ELSE 0 END) AS no_verify,
+            SUM(CASE WHEN a.summary_pt IS NULL THEN 1 ELSE 0 END) AS no_summary,
+            SUM(CASE WHEN a.published_at IS NULL THEN 1 ELSE 0 END) AS no_date,
+            SUM(CASE WHEN a.content IS NOT NULL AND length(a.content) < 200 THEN 1 ELSE 0 END) AS thin
+       FROM sources s LEFT JOIN articles a ON a.source_id = s.id
+      GROUP BY s.id ORDER BY s.id`,
+  ),
+  auditMonthCounts: db.prepare(
+    `SELECT source_id, substr(iso_date(published_at), 1, 7) AS ym, COUNT(*) c
+       FROM articles WHERE published_at IS NOT NULL
+      GROUP BY source_id, ym ORDER BY source_id, ym`,
+  ),
+  // Contagem por DIA exato: picos anômalos (data de captura no lugar da data real) saltam à vista.
+  auditDateCounts: db.prepare(
+    `SELECT source_id, iso_date(published_at) AS d, COUNT(*) c
+       FROM articles WHERE published_at IS NOT NULL
+      GROUP BY source_id, d ORDER BY source_id, d`,
+  ),
+  auditWeekCounts: db.prepare(
+    `SELECT source_id, strftime('%Y-W%W', iso_date(published_at)) AS wk, COUNT(*) c
+       FROM articles WHERE iso_date(published_at) >= date('now', '-126 days')
+      GROUP BY source_id, wk ORDER BY source_id, wk`,
+  ),
+  auditJobsByKindState: db.prepare(
+    `SELECT kind, state, COUNT(*) c FROM frontier GROUP BY kind, state ORDER BY kind, state`,
   ),
 
   // jev_decisions (log central das decisões do Jev; escrito em lote por events.logDecision)
@@ -1535,11 +1645,16 @@ export function restoreArticle(row) {
   const wantId = Number.isInteger(row?.local_id) && row.local_id > 0 ? row.local_id : null;
   if (wantId !== null) {
     const taken = stmts.getArticleUrlById.get(wantId);
-    if (taken) {
-      return taken.url === url
-        ? { inserted: false, id: taken.id, reason: 'url' }
+    if (taken && taken.url !== url) {
+      // O id pedido é de OUTRA url viva. Se ESTA url já existe sob outro id, é 2ª passada
+      // idempotente ('url'); senão é colisão real ('id-taken') — e o chamador REALOCA um id
+      // novo em vez de descartar o artigo (medido: 618 artigos, 542 do TWIR, se perdiam aqui).
+      const same = stmts.getArticleByUrl.get(url);
+      return same
+        ? { inserted: false, id: same.id, reason: 'url' }
         : { inserted: false, id: null, reason: 'id-taken' };
     }
+    if (taken) return { inserted: false, id: taken.id, reason: 'url' };
   }
   const content = typeof row.content === 'string' ? row.content : '';
   const contentHash = content ? sha256(content) : null;

@@ -143,7 +143,8 @@ export function restoreReportLines(res, { dryRun = false } = {}) {
     return lines;
   }
   lines.push(
-    `aplicado: ${res.inserted} artigo(s) repostos, ${res.tags} tag(s), ${res.classifications} classificação(ões), ` +
+    `aplicado: ${res.inserted} artigo(s) repostos${res.reassignedId ? ` (${res.reassignedId} com id realocado por colisão)` : ''}, ` +
+      `${res.tags} tag(s), ${res.classifications} classificação(ões), ` +
       `${res.frontier} URL(s) na frontier, ${res.pages} página(s), ${res.sources} fonte(s) — ${(res.ms / 1000).toFixed(1)}s`,
   );
   const skipped = Object.entries(res.skippedRows || {});

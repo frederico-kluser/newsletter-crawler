@@ -1086,6 +1086,9 @@ export function restoreFromGit({
     inserted: 0,
     keptId: 0,
     freshId: 0,
+    // ids do snapshot ocupados por OUTRA url viva: o artigo entra com id NOVO em vez de ser
+    // descartado (ver o laço de aplicação).
+    reassignedId: 0,
     // motivos por LINHA (url/hash/bad-source/id-taken). Nome distinto do `skipped` do
     // maybeAutoRestore (motivo do BOOTSTRAP não ter rodado): os dois objetos se misturam no spread.
     skippedRows: {},
@@ -1134,7 +1137,7 @@ export function restoreFromGit({
         out.freshId += 1;
         nextId += 1;
       }
-      const res = restoreArticle({
+      const res0 = restoreArticle({
         // `local_id` (e não `id`): o db.js IGNORA o `id` cru do snapshot de propósito — quem
         // decide preservar um id é este módulo, que já resolveu a identidade pela URL.
         local_id: explicitId,
@@ -1155,6 +1158,29 @@ export function restoreFromGit({
         verify_status: rec.verify_status,
         verify_notes: rec.verify_notes,
       });
+      // Colisão de id com OUTRA url viva: o artigo NÃO é descartado — ganha id novo (do `nextId`
+      // desta união, acima de todos) e entra no acervo. A linha viva nunca é sobrescrita.
+      let res = res0;
+      if (res.reason === 'id-taken') {
+        out.reassignedId += 1;
+        res = restoreArticle({
+          local_id: nextId,
+          source_id: sourceId,
+          url: rec.url,
+          title: rec.title,
+          title_pt: rec.title_pt,
+          summary_pt: rec.summary_pt,
+          content: rec.content || '',
+          blurb: rec.contentLen ? null : rec.snippet || null,
+          published_at: rec.date_iso,
+          kind: rec.kind,
+          section: rec.section,
+          issue_url: rec.issue_url,
+          verify_status: rec.verify_status,
+          verify_notes: rec.verify_notes,
+        });
+        nextId += 1;
+      }
       if (res.inserted) out.inserted += 1;
       else out.skippedRows[res.reason || 'ignored'] = (out.skippedRows[res.reason || 'ignored'] || 0) + 1;
       // Tags só quando a linha é DESTA url (inserida agora, ou a mesma já presente). Em
@@ -1283,7 +1309,7 @@ export function maybeAutoRestore({
     if (!quiet) {
       log(
         `restore: ${res.inserted} artigos repostos (${res.keptId} com o id do snapshot, ` +
-          `${res.freshId} com id novo), ${res.tags} tags, ${res.classifications} classificações ` +
+          `${res.freshId} com id novo, ${res.reassignedId} realocados por colisão de id), ${res.tags} tags, ${res.classifications} classificações ` +
           `marcadas, ${res.frontier} URLs na frontier — ${(res.ms / 1000).toFixed(1)}s.`,
       );
       const mem = collected.report.memory;

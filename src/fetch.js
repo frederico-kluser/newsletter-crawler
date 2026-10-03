@@ -194,6 +194,17 @@ export function isPdfUrl(url) {
 }
 export const isDownloadError = (e) => /download is starting/i.test(String(e?.message || ''));
 
+/**
+ * Alvo MORTO para a rede: DNS não resolve, conexão recusada, rede inalcançável ou handshake SSL
+ * impossível. NÃO é falha transitória nem anti-bot — re-tentar dentro da run e o fallback para
+ * Playwright (mesmo resolver/socket) só multiplicam o ruído. A política ENRICH_MAX_ATTEMPTS=0
+ * continua valendo: o item NUNCA é aposentado, só re-tenta na PRÓXIMA run (rápido: 1 tentativa).
+ */
+export const isDeadTargetError = (e) =>
+  /ENOTFOUND|ERR_NAME_NOT_RESOLVED|EAI_AGAIN|ECONNREFUSED|ERR_CONNECTION_REFUSED|ENETUNREACH|ERR_ADDRESS_UNREACHABLE|ERR_SSL_PROTOCOL_ERROR/i.test(
+    String(e?.message || ''),
+  );
+
 // ---- fetch estático ----
 // Host limiter por FORA (politeness é invariante, não escala com a máquina); a lane fetch do
 // governador por dentro limita o total de requests simultâneos na máquina inteira.
@@ -620,6 +631,12 @@ export async function fetchSmart(url, {
     staticRes = await fetchStatic(url, { aggressive, clock, signal });
   } catch (e) {
     if (signal?.aborted) throw abortErrorOf(signal); // job morto: sem fallback p/ Playwright
+    // Alvo morto (DNS/conexão/SSL): o Playwright falha IGUAL (mesmo resolver) — só cai fora;
+    // o dispatch encerra o job sem retry no run (o próximo crawl re-tenta).
+    if (isDeadTargetError(e)) {
+      warn(`alvo morto (${url}): ${e.message}`);
+      throw e;
+    }
     warn(`estático falhou (${url}): ${e.message}; tentando Playwright`);
   }
   // PDF/binário servido SEM extensão .pdf (content-type no HEAD/GET): idem acima. Antes do

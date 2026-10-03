@@ -35,7 +35,8 @@ import { getFacets } from './taxonomy.js';
 import { summarizePending, summarizeArticleRow } from './summarize.js';
 import { verifyPending, verifyArticleRow, recleanSuspects } from './verify.js';
 import { runSearch, getSearchProgress } from './search.js';
-import { closeBrowser } from './fetch.js';
+import { buildAuditReport, renderAudit } from './audit.js';
+import { closeBrowser, isDeadTargetError } from './fetch.js';
 import { closeParsePool } from './parse-pool.js';
 import { logEvent, flushEvents } from './events.js';
 import { createJobClock } from './deadline.js';
@@ -708,6 +709,18 @@ async function crawlRun(flags) {
             emitRunEvent({ phase: 'articles', kind: 'job-error', level: 'error', detail: `${e.message}`.slice(0, 80) });
           }
         }
+        // Alvo MORTO (DNS não resolve / conexão recusada / SSL morto): re-tentar dentro da run é
+        // inútil (mesmo resolver e socket). Item curado com blurb encerra o job com `done` e
+        // MANTÉM needs_enrich=1 — a PRÓXIMA run o re-enfileira (política ENRICH_MAX_ATTEMPTS=0:
+        // nada é aposentado) — e o log vira 1 aviso em vez de MAX_RETRIES erros + browser à toa.
+        if (e?.code !== 'JOB_TIMEOUT' && isDeadTargetError(e) && job.kind === 'article') {
+          const deadRow = stmts.getArticleFullByUrl.get(normalizeUrl(job.url) || job.url);
+          if (deadRow?.needs_enrich) {
+            warn(`alvo morto — ficha mantida com o blurb, re-tenta na próxima run: ${job.url.slice(0, 80)}`);
+            stmts.finish.run('done', job.url);
+            return;
+          }
+        }
         const r = stmts.getRetries.get(job.url);
         if ((r?.retries ?? 0) < MAX_RETRIES) stmts.bumpRetry.run(job.url);
         else stmts.finish.run('failed', job.url);
@@ -825,6 +838,13 @@ async function crawlRun(flags) {
     await Promise.all(post);
   } else if (shouldStop()) {
     log('orçamento atingido: verify/classify/summarize pulados — retome com os comandos diretos');
+  }
+
+  // MODO DEBUG (`--debug`): derrama o audit DESTA run no fim — o que entrou × o que foi pulado,
+  // perdido ou errado (o mesmo relatório do `ncrawl audit`, restrito ao escopo da run).
+  if (flags.debug === true) {
+    log('');
+    for (const line of renderAudit(buildAuditReport({ runId }), { verbose: true })) log(line);
   }
 
   printStatus();
@@ -1841,6 +1861,29 @@ export function cmdInspect(flags) {
   const failed = stmts.countFrontierByState.all().find((r) => r.state === 'failed');
   if (failed?.c) log(`frontier: ${failed.c} job(s) em estado failed (use --url p/ investigar um link)`);
   if (flags.verbose !== true) log('dica: --verbose mostra as notas de verificação; --url <substr> audita um link.');
+}
+
+/**
+ * MODO DEBUG — `ncrawl audit [--run N] [--source <nome>] [--verbose] [--json]`.
+ * Relatório de TUDO o que a coleta perde, pula e erra (por fonte, todas as newsletters):
+ * fontes nunca semeadas/mudas, o que a listagem pulou por já capturado (vs. perdido por
+ * colisão de conteúdo), erros de fetch classificados (alvo morto × bloqueio × transitório),
+ * jobs failed/estourados, kept-blurb por motivo, pendências e picos de data suspeitos.
+ * 100% leitura (sem LLM e sem escrita) — pode rodar à vontade depois de qualquer run.
+ */
+export function cmdAudit(flags) {
+  const runId = flags.run ? Number(flags.run) : null;
+  const report = buildAuditReport({
+    runId: Number.isFinite(runId) ? runId : null,
+    source: typeof flags.source === 'string' && flags.source ? flags.source : null,
+  });
+  if (flags.json === true) {
+    // Saída de MÁQUINA: sem prefixo de timestamp (o log() carimbo-a quebraria o jq/parser).
+    console.log(JSON.stringify(report, null, 2));
+    return report;
+  }
+  for (const line of renderAudit(report, { verbose: flags.verbose === true })) log(line);
+  return report;
 }
 
 // Busca na base. Modo A (Flash, varre tudo) ou B (Pro, por tags). RETORNA os resultados (a UI captura).

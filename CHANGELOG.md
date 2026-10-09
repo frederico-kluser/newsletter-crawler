@@ -5,7 +5,13 @@ Todas as mudanças relevantes deste projeto. Formato baseado em
 
 ## [Unreleased]
 
+## [3.1.0] - 2026-10-09
+
 Webapp bilíngue (PT/EN) com detecção de idioma e tutorial de introdução no site público.
+
+> **Nota de numeração.** As tags `v2.0.0`/`v3.0.0` (jul–ago/2026) são âncoras de snapshot de dados,
+> sem release notes — a série documentada segue `1.9.0 → 3.1.0`. O número `3.1.0` é o próximo
+> SemVer **calculado** dos commits desde `v3.0.0` (0 breaking · 18 feat · 11 fix), não escolhido à mão.
 
 ### Adicionado
 - **Backend Vercel + página `/admin` (análise JEV × webhook):** segunda página (`webapp/admin/`,
@@ -76,6 +82,76 @@ Webapp bilíngue (PT/EN) com detecção de idioma e tutorial de introdução no 
   DNS no ápice, então a URL normalizada dava `ENOTFOUND` e a fonte inteira falhava (a detecção e
   TODO `/p/` enfileirado). Agora `stripWWW: false`, alinhado a `hostOf`/`domainSig` (que já
   preservavam o www). Regressão coberta por `test/util.normalizeUrl.test.js`.
+
+<details>
+<summary>Registro de commits desde v3.0.0 (gerado por <code>oss-changelog.py</code>)</summary>
+
+### Features
+- **audit:** modo debug da coleta (npm run audit) + reattribute-dates ([be85968](https://github.com/frederico-kluser/newsletter-crawler/commit/be85968))
+- **admin:** lote JEV 1–25 (default 25) disparado 30 por vez + teste ao vivo ([0d98fe8](https://github.com/frederico-kluser/newsletter-crawler/commit/0d98fe8))
+- **admin:** backend Vercel + página /admin (análise JEV × webhook) ([5a06741](https://github.com/frederico-kluser/newsletter-crawler/commit/5a06741))
+- **memory:** memória CoALA local + jev-core partilhado + budget ([f69c492](https://github.com/frederico-kluser/newsletter-crawler/commit/f69c492))
+- **onda0-guardrails:** piso legado em toda varredura paga, dublês offline do Jev/Gemini, infra de eval, golden v3 por URL e guarda de gasto ([1f35fb8](https://github.com/frederico-kluser/newsletter-crawler/commit/1f35fb8))
+- **webapp:** esconde DESCARTADOS (junk) por padrao ([7a3b54c](https://github.com/frederico-kluser/newsletter-crawler/commit/7a3b54c))
+- **webapp:** lista SEMPRE por data com fontes misturadas ([3d8710a](https://github.com/frederico-kluser/newsletter-crawler/commit/3d8710a))
+- **crawl:** piso de data por fonte (cursor) + teto de backlog + sweep por run + kept-blurb no streaming ([a8ae6b0](https://github.com/frederico-kluser/newsletter-crawler/commit/a8ae6b0))
+- **onda4-tui:** reset sai do menu principal p/ um submenu de recuperacao com desafio digitado, telas de backup e restauracao, fricção no remover fonte, aviso do piso --since ([5b4bac0](https://github.com/frederico-kluser/newsletter-crawler/commit/5b4bac0))
+- **onda3-bootstrap:** comandos restore/backup + bootstrap automatico (base vazia + historico no git = acervo de volta, sem coletar nada) ([088a816](https://github.com/frederico-kluser/newsletter-crawler/commit/088a816))
+- **onda3-destruicao:** backup obrigatorio antes de toda destruicao, confirmacao por numero de artigos no reset, marcador de wipe commitado, purge transacional, guard de encolhimento no reextract ([e22b3d5](https://github.com/frederico-kluser/newsletter-crawler/commit/e22b3d5))
+- **onda2-restore:** reconstroi o acervo a partir do historico do git (uniao por riqueza, ids preservados, marcador de wipe ancorado no conteudo, orcamento de memoria) ([608154d](https://github.com/frederico-kluser/newsletter-crawler/commit/608154d))
+- **onda2-export-guard:** guard anti-encolhimento DENTRO do export (cobre os 4 escritores) + issue_url/blurb no snapshot e na API v1 + escrita atomica e teto no articles.json ([b43650c](https://github.com/frederico-kluser/newsletter-crawler/commit/b43650c))
+- **onda1-modulo-backup:** backup consistente do SQLite por VACUUM INTO, retencao segura e publicacao atomica ([0e9c3fc](https://github.com/frederico-kluser/newsletter-crawler/commit/0e9c3fc))
+- **onda1-camada-db:** camada de restore no db.js + correcoes de incrementalidade (isUrlKnown, run_id no enrich, cap no ramo de timeout) ([6bccd04](https://github.com/frederico-kluser/newsletter-crawler/commit/6bccd04))
+- **onda1-guard-snapshot:** guard anti-encolhimento do snapshot (decisão pura, compartilhada por deploy e pre-push) ([51a6511](https://github.com/frederico-kluser/newsletter-crawler/commit/51a6511))
+- **onda1-reset-apaga-snapshot:** reset apaga o snapshot do site do git (nunca mais herdar noticias velhas) ([181efed](https://github.com/frederico-kluser/newsletter-crawler/commit/181efed))
+- **onda2-therundown-json:** atalho json archive do The Rundown (espelho substack) ([9ac3c39](https://github.com/frederico-kluser/newsletter-crawler/commit/9ac3c39))
+
+### Bug Fixes
+- **export-web:** realpath no high-water do snapshot (TMPDIR symlinkado) ([be94540](https://github.com/frederico-kluser/newsletter-crawler/commit/be94540))
+- **crawl:** deadline de parede + AbortSignal em jobs de curadoria/listing ([b7d9237](https://github.com/frederico-kluser/newsletter-crawler/commit/b7d9237))
+- **llm:** teto real de 60s na janela de penalty (Retry-After) ([5d602fe](https://github.com/frederico-kluser/newsletter-crawler/commit/5d602fe))
+- **calibração:** log do teto llm mostrava [object Object] no lugar da contagem de 429 ([92dcfaa](https://github.com/frederico-kluser/newsletter-crawler/commit/92dcfaa))
+- **test:** fecha 3 vermelhos pré-existentes p/ a suíte voltar a 0 fail ([6c719af](https://github.com/frederico-kluser/newsletter-crawler/commit/6c719af))
+- **cursor:** re-avanca o cursor de todas as fontes no fim da run ([0cd621a](https://github.com/frederico-kluser/newsletter-crawler/commit/0cd621a))
+- **onda5-acabamento:** export sai da allowlist do bootstrap (push nao reescreve mais o banco), hook diagnostica o guard corretamente, fronteira do wipe nao abandona stage, docs e skills em dia ([d396e28](https://github.com/frederico-kluser/newsletter-crawler/commit/d396e28))
+- **onda2-restore:** isola NC_HOME na restauracao do finally (gate) ([dffd6e2](https://github.com/frederico-kluser/newsletter-crawler/commit/dffd6e2))
+- **onda2-deploy-hook:** deploy e pre-push consomem o guard (segundo cerco), restauracao escopada que nao apaga arquivo do usuario, diagnostico de repo atrasado primeiro ([c332a87](https://github.com/frederico-kluser/newsletter-crawler/commit/c332a87))
+- **onda4-contents-split:** contents fatiado em partN.json (fix GH001) + loader lazy por parte + deploy/hook porcelain ([395f94d](https://github.com/frederico-kluser/newsletter-crawler/commit/395f94d))
+- **onda3-twir-coverage:** passe de cobertura escalado (TWIR) + régua lista pura ([420b1eb](https://github.com/frederico-kluser/newsletter-crawler/commit/420b1eb))
+
+### Documentation
+- **skill:** cursor avanca tambem num passe final da run (listagem termina antes dos itens que descobriu) ([d08c305](https://github.com/frederico-kluser/newsletter-crawler/commit/d08c305))
+- mitigacoes da auditoria de reprocesso + revisao adversarial do piso por fonte; skill atualizada ([554cb0f](https://github.com/frederico-kluser/newsletter-crawler/commit/554cb0f))
+- auditoria de reprocessamento por IA (run validacao --since 2026-09-05 + forense SQL + 5 relatorios de subagents) ([5b1236a](https://github.com/frederico-kluser/newsletter-crawler/commit/5b1236a))
+- **skill:** mede limites do pipeline em re-run (curadoria pre-dedup, kept-blurb fora do streaming, sweeps nao escopados por run) ([16ff17e](https://github.com/frederico-kluser/newsletter-crawler/commit/16ff17e))
+- limpa a raiz e registra debitos e aprendizados da execucao ([1d8cf96](https://github.com/frederico-kluser/newsletter-crawler/commit/1d8cf96))
+- EXPLAINER.html da execução 2026-09-01 (atualização incremental + reset apaga snapshot + deploy 13.758) ([1b53bd5](https://github.com/frederico-kluser/newsletter-crawler/commit/1b53bd5))
+- EXPLAINER.html da execução (3 fontes novas + GH001 split + coleta 13.701) ([b0d1c5b](https://github.com/frederico-kluser/newsletter-crawler/commit/b0d1c5b))
+- **onda1-analise-twir:** analise profunda da fonte (docs/sources) ([265c7f2](https://github.com/frederico-kluser/newsletter-crawler/commit/265c7f2))
+- **onda1-analise-therundown:** analise profunda da fonte (docs/sources) ([e73f821](https://github.com/frederico-kluser/newsletter-crawler/commit/e73f821))
+- **onda1-analise-superhuman:** analise profunda da fonte (docs/sources) ([5dc569d](https://github.com/frederico-kluser/newsletter-crawler/commit/5dc569d))
+
+### Tests
+- **restore:** orçamento de memória determinístico no teste de corpos ([8901c12](https://github.com/frederico-kluser/newsletter-crawler/commit/8901c12))
+- **webapp:** fixa que descartados (junk) ficam fora por padrao e voltam com showJunk/verify=junk ([8e4cc99](https://github.com/frederico-kluser/newsletter-crawler/commit/8e4cc99))
+- cobre cursor por fonte, teto de pendencias, sweep escopado e kept-blurb no streaming ([58751ac](https://github.com/frederico-kluser/newsletter-crawler/commit/58751ac))
+- **onda1-isola-testes:** npm test nunca mais abre o banco de producao (24 arquivos isolados + rede de seguranca por grafo de imports) ([8e9ef25](https://github.com/frederico-kluser/newsletter-crawler/commit/8e9ef25))
+
+### Chores
+- **oss:** fundação de governança — licença, docs sociais, CI, gates (#2) ([dfae900](https://github.com/frederico-kluser/newsletter-crawler/commit/dfae900))
+- **data:** atualiza snapshot do webapp + API pública ([d1fb359](https://github.com/frederico-kluser/newsletter-crawler/commit/d1fb359))
+- **data:** atualiza snapshot do webapp + API pública ([d1fb359](https://github.com/frederico-kluser/newsletter-crawler/commit/d1fb359))
+- **data:** atualiza snapshot do webapp + API pública ([d1fb359](https://github.com/frederico-kluser/newsletter-crawler/commit/d1fb359))
+- **data:** atualiza snapshot do webapp + API pública ([d1fb359](https://github.com/frederico-kluser/newsletter-crawler/commit/d1fb359))
+- **data:** atualiza snapshot do webapp + API pública ([d1fb359](https://github.com/frederico-kluser/newsletter-crawler/commit/d1fb359))
+- **data:** atualiza snapshot do webapp + API pública ([d1fb359](https://github.com/frederico-kluser/newsletter-crawler/commit/d1fb359))
+- **data:** atualiza snapshot do webapp + API pública ([d1fb359](https://github.com/frederico-kluser/newsletter-crawler/commit/d1fb359))
+- **data:** atualiza snapshot do webapp + API pública (pre-push, 17515 artigos) ([919a144](https://github.com/frederico-kluser/newsletter-crawler/commit/919a144))
+- **data:** atualiza snapshot do webapp + API pública (pre-push, 15502 artigos) ([bb4b465](https://github.com/frederico-kluser/newsletter-crawler/commit/bb4b465))
+- **data:** atualiza snapshot do webapp + API pública ([d1fb359](https://github.com/frederico-kluser/newsletter-crawler/commit/d1fb359))
+- **data:** atualiza snapshot do webapp + API pública ([d1fb359](https://github.com/frederico-kluser/newsletter-crawler/commit/d1fb359))
+
+</details>
 
 ## [1.9.0] - 2026-07-03
 
@@ -392,6 +468,8 @@ As 5 melhorias de paralelismo/robustez apontadas no `ARQUITETURA.html` — todas
   **Notícias** e **Ferramentas**.
 - **Menu guiado (TUI)** Ink/React (htm, sem build), bilíngue PT/EN, com painel de progresso ao vivo.
 
+[Unreleased]: https://github.com/frederico-kluser/newsletter-crawler/compare/v3.1.0...HEAD
+[3.1.0]: https://github.com/frederico-kluser/newsletter-crawler/compare/v3.0.0...v3.1.0
 [1.2.0]: https://github.com/frederico-kluser/newsletter-crawler/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/frederico-kluser/newsletter-crawler/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/frederico-kluser/newsletter-crawler/releases/tag/v1.0.0

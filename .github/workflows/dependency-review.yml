@@ -1,0 +1,48 @@
+# =============================================================================
+# dependency-review — revisão de dependências em PRs · opensource-project
+#
+# NOTA (para o agente):
+#   * Compara as dependências ADICIONADAS no PR com as bases de vulnerabilidade
+#     (GitHub Advisory) e falha o PR acima da severidade configurada. Corre só
+#     em `pull_request` — é aí que existe diff de dependências.
+#   * `contents: read` basta para ler o diff; `pull-requests: write` só é
+#     preciso se o resumo for comentado no PR (`comment-summary`).
+#   * Formato obrigatório em TODOS os `uses:`: owner/repo@<PIN_SHA> # vX.Y.Z
+#     (fixe com `bash scripts/oss-pin-actions.sh` antes do primeiro push).
+#     Requer Dependency graph ativado no repositório (Settings → Code security).
+# =============================================================================
+
+name: dependency-review
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dependency-review-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  dependency-review:
+    name: dependency-review
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: write # só para comentar o resumo no PR (opcional)
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Dependency review
+        uses: actions/dependency-review-action@2031cfc080254a8a887f58cffee85186f0e49e48 # v4.9.0
+        with:
+          fail-on-severity: high # none|low|moderate|high|critical
+          # comment-summary: always # comenta o resumo no PR
+          # deny-licenses: GPL-3.0 # política de licenças (opcional)
+          # retry-on-snapshot-warnings: true
+
+      - name: Sumário do run
+        run: echo "### dependency-review ✅" >> "$GITHUB_STEP_SUMMARY"

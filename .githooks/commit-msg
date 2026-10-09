@@ -1,0 +1,4 @@
+#!/bin/sh
+# Gate 1 (opensource-project): mensagens em Conventional Commits.
+# Alternativa zero-dep ao commitlint/oss-gate.sh — ver CONTRIBUTING.md.
+exec node "$(dirname "$0")/../scripts/check-commit-msg.mjs" "$1"

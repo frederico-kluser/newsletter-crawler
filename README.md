@@ -1,5 +1,11 @@
 # newsletter-crawler
 
+[![tests](https://github.com/frederico-kluser/newsletter-crawler/actions/workflows/tests.yml/badge.svg)](https://github.com/frederico-kluser/newsletter-crawler/actions/workflows/tests.yml)
+[![license](https://img.shields.io/github/license/frederico-kluser/newsletter-crawler)](LICENSE)
+[![release](https://img.shields.io/github/v/release/frederico-kluser/newsletter-crawler)](https://github.com/frederico-kluser/newsletter-crawler/releases)
+[![node](https://img.shields.io/badge/node-%3E%3D22-brightgreen)](package.json)
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/frederico-kluser/newsletter-crawler/badge)](https://securityscorecards.dev/viewer/?uri=github.com/frederico-kluser/newsletter-crawler)
+
 > Crawler de newsletters em **Node.js puro** (ESM, Node ≥ 22, **sem build**) que descobre, extrai, classifica, resume em PT-BR e **busca** artigos — com **menu guiado no terminal** (Ink/React) e as flags diretas.
 
 > Histórico de versões em [CHANGELOG.md](CHANGELOG.md) — atual: **v1.9.0**.

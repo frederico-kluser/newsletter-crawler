@@ -1,0 +1,16 @@
+# CODEOWNERS — newsletter-crawler
+#
+# Ownership map for review routing. The repository ruleset requires changes to
+# land via pull request (squash-merge) with the `tests-ok` status check, but does
+# not require approvals (solo-maintainer repository) — these entries route review
+# notifications and will carry review obligations as the team grows.
+# The last matching pattern wins; keep the most specific rules at the bottom.
+
+# Default owners for everything in the repository.
+*       @frederico-kluser
+
+# Source code: runtime, CLI and public API surface.
+/src/   @frederico-kluser
+
+# CI/CD, workflows and repository configuration.
+/.github/ @frederico-kluser

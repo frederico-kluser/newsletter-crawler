@@ -1,0 +1,71 @@
+# =============================================================================
+# codeql — análise estática (SAST) com CodeQL · opensource-project
+#
+# NOTA (para o agente):
+#   * O CodeQL compila/interpreta o código e sobe alertas para o tab
+#     Security → Code scanning; combina com dependency-review e secret scanning
+#     (ver references/seguranca-openssf.md e references/github-actions-automacoes.md).
+#   * `security-events: write` é necessário para submeter SARIF e fica
+#     restrito A ESTE JOB (menor privilégio pontual).
+#   * Matriz de linguagens: ajuste `language` às linguagens do projeto
+#     (javascript-typescript, python, go, java-kotlin, csharp, ruby, swift…).
+#   * Formato obrigatório em TODOS os `uses:`: owner/repo@<PIN_SHA> # vX.Y.Z
+#     (fixe com `bash scripts/oss-pin-actions.sh` antes do primeiro push).
+# =============================================================================
+
+name: codeql
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  schedule:
+    - cron: "0 6 * * 1" # segunda-feira às 06:00 UTC
+
+permissions:
+  contents: read
+
+concurrency:
+  group: codeql-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  analyze:
+    name: analyze (${{ matrix.language }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      security-events: write # upload de SARIF — só aqui
+      packages: read # registos privados, se existirem
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [javascript-typescript]
+        # language: [javascript-typescript, python, go]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      # init: descarrega o pacote de queries e deteta a linguagem
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@9f759ee644a3e7c15c1390abf49868036c00067b # v3
+        with:
+          languages: ${{ matrix.language }}
+          # queries: security-extended # análise mais profunda (mais ruído/tempo)
+          # config-file: .github/codeql/codeql-config.yml # paths/paths-ignore
+
+      # autobuild: compila linguagens compiladas (Go/Java/C#); para
+      # JavaScript/TypeScript/Python é um no-op e pode ser removido.
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@9f759ee644a3e7c15c1390abf49868036c00067b # v3
+
+      # analyze: corre as queries e sobe os resultados (SARIF)
+      - name: Perform CodeQL analysis
+        uses: github/codeql-action/analyze@9f759ee644a3e7c15c1390abf49868036c00067b # v3
+        with:
+          category: "/language:${{ matrix.language }}"
+
+      - name: Sumário do run
+        run: echo "### codeql ✅" >> "$GITHUB_STEP_SUMMARY"

@@ -44,6 +44,13 @@ Single source of truth for agents working in this repo. Keep it short; scoped de
 - The Playwright context uses `ignoreHTTPSErrors: true` (some outlets have invalid TLS cert CN, e.g. kedglobal.com).
 - Full, scoped knowledge with provenance: `.agents/skills/` (start at `catalog.md`).
 
+## Governança OSS (gates — skill `opensource-project`)
+- **Commits**: Conventional Commits (`tipo(escopo): descrição`, ≤72 chars); o hook `.githooks/commit-msg` (`scripts/check-commit-msg.mjs`, zero-dep) rejeita mensagens inválidas no commit.
+- **`main` é cofre**: sem push direto — branch efémera → PR → **squash merge** (o título do PR vira a mensagem do commit). O ruleset exige PR + o status check `tests-ok` (CI `tests.yml`); o deploy Vercel dispara no merge para a `main`.
+- **Versão**: SemVer CALCULADO dos commits desde a última tag (`oss-version.py next` da skill `opensource-project`); changelog gerado, nunca reescrito à mão; versões publicadas nunca retrocedem.
+- **Release**: tag `vX.Y.Z` anotada + `gh release create vX.Y.Z --verify-tag`.
+- Antes de fechar tarefa com código: `npm run status && npm test` verdes; nada de segredos em claro (o export redige; push protection varre o histórico).
+
 ## Skills
 Every implementation task goes through `.agents/skills/project-router`. Catalog: `.agents/skills/catalog.md`.
 To evolve a skill safely: stage `<skill>/SKILL.md.next`, then `node .agents/skills/scripts/validate-skill.mjs <skill>`.

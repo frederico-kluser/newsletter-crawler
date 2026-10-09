@@ -6,8 +6,9 @@
 //
 // Ordem: preflight (git/branch/remoto) → ahead/behind (remoto à frente ABORTA aqui, antes de
 // qualquer escrita na árvore) → estado do HEAD + do site no ar → export (com o GUARD
-// anti-encolhimento armado) → mudança real → decisão → commit → push (--no-verify: o hook pre-push
-// faria o MESMO export de novo e abortaria o push) → polling até publicar.
+// anti-encolhimento armado) → mudança real → decisão → commit numa BRANCH DE DEPLOY efémera →
+// push da branch + PR + squash merge (a `main` é cofre: o ruleset rejeita push direto) → volta à
+// main (fast-forward até o squash) → polling até publicar.
 //
 // O ahead/behind vem ANTES do export de propósito: "repo atrasado" é o caso mais comum do fluxo
 // multi-máquina e o diagnóstico dele ("git pull --rebase") tem de chegar primeiro. Com o export na
@@ -226,6 +227,35 @@ function git(args, { allowFail = false } = {}) {
   }
 }
 
+// ---- gh (fluxo por PR: a `main` é cofre e o ruleset exige PR + squash) ----
+
+function gh(args, { allowFail = false } = {}) {
+  try {
+    return execFileSync('gh', args, {
+      cwd: ROOT,
+      encoding: 'utf8',
+      stdio: 'pipe',
+      maxBuffer: 8 * 1024 * 1024,
+      env: { ...process.env, GH_PROMPT_DISABLED: '1', GH_NO_UPDATE_NOTIFIER: '1', GIT_TERMINAL_PROMPT: '0' },
+    }).replace(/\s+$/, '');
+  } catch (e) {
+    if (allowFail) return null;
+    const detail = [e.stderr, e.stdout, e.message].map((x) => String(x || '').trim()).find(Boolean);
+    throw new DeployError(
+      `gh ${args[0]} falhou: ${detail}`,
+      'o deploy publica por PR (a `main` é cofre): instale o gh CLI (https://cli.github.com) e rode `gh auth login`.',
+    );
+  }
+}
+
+/**
+ * Nome da branch efémera de um deploy (`deploy/data-<timestamp>`). Pura: os testes fixam o
+ * formato. Timestamp legível (em vez de random) p/ o PR ficar autodescritivo.
+ */
+export function deployBranchName(now = new Date()) {
+  return `deploy/data-${now.toISOString().slice(0, 19).replace(/[:.]/g, '-')}`;
+}
+
 // Conteúdo de um arquivo no HEAD (null se não existe lá — primeiro commit do snapshot).
 // `run` é o executor de git (o real, ou a costura de teste — ver runDeploy).
 function showHead(run, rel) {
@@ -386,6 +416,7 @@ async function waitForPublish(expected, { waitMs = DEPLOY_WAIT_MS, pollMs = DEPL
 export async function runDeploy(flags = {}, deps = {}) {
   const {
     git: run = git,
+    gh: runGh = gh,
     exportWeb = exportWebSnapshot,
     exportApi = exportPublicApi,
     fetchLive = fetchLiveStamp,
@@ -401,6 +432,14 @@ export async function runDeploy(flags = {}, deps = {}) {
   const waitMs = Number(flags.timeout) > 0 ? Number(flags.timeout) * 1000 : DEPLOY_WAIT_MS;
 
   const { branch } = preflight(run);
+  // O fluxo de publicação é por PR (a `main` é cofre) e o PR sai do `gh` CLI: sem ele não há
+  // deploy — e é melhor descobrir ANTES de exportar/commitar qualquer coisa.
+  if (runGh(['--version'], { allowFail: true }) === null) {
+    throw new DeployError(
+      'gh CLI não encontrado — o deploy publica por PR (a `main` é cofre).',
+      'instale o GitHub CLI (https://cli.github.com), rode `gh auth login` e tente de novo.',
+    );
+  }
 
   // 1. Código pendente: nunca entra por acidente. Sem --include-code, só avisa.
   const dirty = splitDirtyPaths(run(['status', '--porcelain'], { allowFail: true }) || '');
@@ -513,39 +552,46 @@ export async function runDeploy(flags = {}, deps = {}) {
     log('--dry-run: nada foi commitado nem pushado. Plano:');
     log(`  motivo: ${MOTIVO[plan.reason] || plan.reason}`);
     log(`  commit: ${alvo.commit ? `${DATA_REL} + ${API_REL}${alvo.code.length ? ` + ${alvo.code.length} arquivo(s) de código` : ''}` : '(nada — só push)'}`);
-    log(`  push:   origin ${branch}${ahead ? ` (${ahead} commit(s) local(is) pendente(s))` : ''}`);
+    log(`  push:   branch efémera deploy/data-… → PR → squash merge em ${branch}${ahead ? ` (${ahead} commit(s) local(is) pendente(s) entram no PR)` : ''}`);
     log(`  espera: ${noWait ? 'não (--no-wait)' : `até ${fmtElapsed(waitMs)} pelo site no ar`}`);
     // Sem dado novo, um --dry-run não deixa rastro (o export só bumpou o generatedAt).
     if (!dataChanged) restoreSnapshot(run);
     return { status: 'dry-run', ...alvo };
   }
 
-  // 7. Commit. `plan.refresh` (force/site atrasado) publica o snapshot recém-gerado: o generatedAt
-  //    novo é justamente o que faz a Vercel ver dado novo e o polling ter um alvo verificável.
+  // 7. Branch de deploy EFÉMERA + commit nela. A `main` é cofre (ruleset: PR + squash + tests-ok;
+  //    push direto é rejeitado), então o deploy publica por PR. O commit nasce NA BRANCH — nunca na
+  //    main local — p/ que, depois do merge, a main local só precise fast-forwardar até o squash.
+  //    `plan.refresh` (force/site atrasado) publica o snapshot recém-gerado: o generatedAt novo é
+  //    justamente o que faz a Vercel ver dado novo e o polling ter um alvo verificável.
+  const deployBranch = deployBranchName();
+  const assunto =
+    plan.reason === 'code'
+      ? 'chore(deploy): publica código do webapp + snapshot'
+      : `chore(data): atualiza snapshot do webapp + API pública${dataChanged ? '' : ' (republicação)'}`;
+  const corpo =
+    `${web.articles} artigos` +
+    `${alvo.code.length ? ` + ${alvo.code.length} arquivo(s) de código` : ''}` +
+    `${ahead > 0 ? ` + ${ahead} commit(s) local(is) pendente(s)` : ''}` +
+    ` — publicado por \`ncrawl deploy\` (motivo: ${plan.reason}).`;
+  run(['switch', '-c', deployBranch]);
   if (alvo.commit) {
     const paths = [DATA_REL, API_REL, ...alvo.code];
-    const assunto =
-      plan.reason === 'code'
-        ? 'chore(deploy): publica código do webapp + snapshot'
-        : `chore(data): atualiza snapshot do webapp + API pública${dataChanged ? '' : ' (republicação)'}`;
-    const msg =
-      `${assunto}\n\n${web.articles} artigos` +
-      `${alvo.code.length ? ` + ${alvo.code.length} arquivo(s) de código` : ''}` +
-      ` — publicado por \`ncrawl deploy\` (motivo: ${plan.reason}).`;
     run(['add', '--', ...paths]);
-    run(['commit', '--no-verify', '-m', msg, '--', ...paths]);
+    run(['commit', '--no-verify', '-m', `${assunto}\n\n${corpo}`, '--', ...paths]);
     log(`commit criado: ${run(['rev-parse', '--short', 'HEAD'])} — ${web.articles} artigos.`);
   } else {
-    // Só push: o export reescreveu o snapshot na árvore sem nada a publicar — limpa o ruído.
+    // Só push: o export reescreveu o snapshot na árvore sem nada a publicar — limpa o ruúdo.
     restoreSnapshot(run);
     log(`nada novo a commitar; publicando ${ahead} commit(s) local(is) pendente(s).`);
   }
 
-  // 8. Push. --no-verify: o hook pre-push refaria ESTE MESMO export e abortaria o push (por design
-  //    dele, p/ o commit novo não ficar de fora) — aqui o snapshot já está commitado.
-  log(`enviando para origin/${branch}…`);
+  // 8. Push da branch + PR + squash merge. --no-verify: o hook pre-push refaria ESTE MESMO export e
+  //    abortaria o push (por design dele, p/ o commit novo não ficar de fora) — aqui o snapshot já
+  //    está commitado. O TÍTULO do PR vira a mensagem do squash — daí sair em Conventional Commits.
+  log(`enviando ${deployBranch} e abrindo o PR…`);
   try {
-    run(['push', '--no-verify', 'origin', `HEAD:refs/heads/${branch}`]);
+    run(['push', '--no-verify', 'origin', `HEAD:refs/heads/${deployBranch}`]);
   } catch (e) {
     // Falha de AUTENTICAÇÃO é a causa nº1 do deploy no menu: dá hint acionável em vez do erro cru.
     const msg = String(e?.message || e);
@@ -557,10 +603,46 @@ export async function runDeploy(flags = {}, deps = {}) {
     }
     throw e;
   }
-  const sha = run(['rev-parse', 'HEAD']);
-  log(`push concluído ✓ commit ${sha.slice(0, 7)} na ${branch}.`);
+  let sha = run(['rev-parse', 'HEAD']);
+  try {
+    const prUrl = runGh([
+      'pr', 'create', '--base', branch, '--head', deployBranch,
+      '--title', assunto, '--body', corpo,
+    ]);
+    const prNum = String(prUrl || '').match(/\/pull\/(\d+)/)?.[1] ?? null;
+    log(`PR aberto: ${prUrl || '(sem URL)'}`);
+    runGh(prNum
+      ? ['pr', 'merge', prNum, '--squash', '--delete-branch']
+      : ['pr', 'merge', deployBranch, '--squash', '--delete-branch']);
+    sha = (prNum && runGh(['api', `repos/{owner}/{repo}/pulls/${prNum}`, '--jq', '.merge_commit_sha'], { allowFail: true })) || sha;
+    log(`PR squash-merged ✓ — a Vercel constrói ${String(sha).slice(0, 7)} na ${branch}.`);
+  } catch (e) {
+    // Qualquer falha aqui (PR sem permissão, CI vermelho, gh fora do ar) deixa o snapshot
+    // commitado na branch de deploy — o hint diz exatamente onde a coisa parou e como sair.
+    throw new DeployError(
+      e instanceof DeployError ? e.message : `publicação por PR falhou: ${String(e?.message || e)}`,
+      `${e instanceof DeployError && e.hint ? `${e.hint} ` : ''}fiquei na branch ${deployBranch} (o snapshot está commitado lá): ` +
+        `resolva e complete com "gh pr merge --squash" (ou volte sem publicar: "git switch ${branch}" e apague a branch).`,
+    );
+  }
 
-  // 9. O alvo do polling é o generatedAt DO HEAD (o que a Vercel vai construir) — não o da árvore
+  // 9. Volta à main e sincroniza com o squash. Sem commits locais próprios é um fast-forward puro;
+  //    com commits locais (que entraram no PR e foram squashed) o ff falha de propósito e o
+  //    conselho é explícito — nunca se reescreve a main local automaticamente.
+  run(['switch', branch]);
+  run(['fetch', '--quiet', 'origin', branch], { allowFail: true });
+  const ff = run(['merge', '--ff-only', `origin/${branch}`], { allowFail: true });
+  if (ff === null) {
+    if (ahead > 0) {
+      warn(`os ${ahead} commit(s) locais entraram no PR e foram SQUASHADOS — corrija a ${branch} local: "git reset --hard origin/${branch}" (o conteúdo já está lá).`);
+    } else {
+      warn(`não deu para fast-forwardar a ${branch} local — rode "git pull --ff-only" antes do próximo deploy.`);
+    }
+  } else {
+    log(`${branch} local em dia com o origin ✓`);
+  }
+
+  // 10. O alvo do polling é o generatedAt DO HEAD (o que a Vercel vai construir) — não o da árvore
   //     de trabalho, que pode ter sido bumpado sem commit.
   const headStamp = readSnapshotStamp(showHead(run, META_REL));
   if (noWait) {

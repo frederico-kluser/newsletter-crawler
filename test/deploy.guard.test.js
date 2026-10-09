@@ -74,11 +74,29 @@ function fakeGit({ headArticles = null, headStamp = 'HEAD-STAMP', ahead = 0, beh
   return run;
 }
 
-// Deps padrão: export/API/site injetados (nenhum I/O real).
+// Duplo do `gh` CLI (o fluxo de publicação é por PR: a `main` é cofre). Responde ao argv e
+// REGISTRA tudo — nenhum teste daqui pode tocar o GitHub de verdade.
+function fakeGh({ prUrl = 'https://github.com/x/y/pull/42' } = {}) {
+  const calls = [];
+  const run = (args) => {
+    calls.push(args.join(' '));
+    const [cmd, sub] = args;
+    if (cmd === '--version') return 'gh version 2.98.0';
+    if (cmd === 'pr' && sub === 'create') return prUrl;
+    if (cmd === 'pr') return '';
+    if (cmd === 'api') return 'deadbeefcafe0123456789';
+    return '';
+  };
+  run.calls = calls;
+  return run;
+}
+
+// Deps padrão: export/API/site/gh injetados (nenhum I/O real).
 function deps({ git, novo = 0, live = null, exportWeb = null }) {
   const vistos = { exportWeb: [] };
   const d = {
     git,
+    gh: fakeGh(),
     exportWeb: exportWeb || ((opts) => { vistos.exportWeb.push(opts); return { articles: novo, bytes: 123 }; }),
     exportApi: () => ({ bytes: 45 }),
     fetchLive: async () => live,

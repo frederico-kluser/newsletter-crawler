@@ -694,7 +694,8 @@ test('clone RASO (--depth 1): degrada para o working tree com aviso, não falha'
 
 test('memória: sem heap para os CORPOS, degrada para metadados com aviso (nunca estoura)', () => {
   // `FATAL ERROR: Reached heap limit` é um ABORT do V8 — o try/catch do maybeAutoRestore não o
-  // captura. Snapshot com ~8 MB de corpos e um teto de heap de 3 MB: a fase de corpos nem começa.
+  // captura. Snapshot com ~8 MB de corpos (need × 1.35 ≈ 11 MB) e orçamento de 10 MB: a fase de
+  // corpos nem começa.
   const root = tmpdir('nc-mem-');
   git(root, ['init', '-b', 'main', '-q']);
   const map = {};
@@ -711,7 +712,11 @@ test('memória: sem heap para os CORPOS, degrada para metadados com aviso (nunca
     parts: [{ file: 'contents.part0.json', from: 1, to: 1000, map }],
   });
 
-  const tight = collectFromGit({ root, heapLimitBytes: process.memoryUsage().heapUsed + 3 * 1048576 });
+  // Orçamento PINNADO (teto 30 MB / usado 20 MB = 10 MB livres), não medido do heap real: medir
+  // aqui corria com o GC — entre a medição e a decisão a coleta podia liberar >11 MB de lixo, o
+  // `freeBytes` inflava e o teste virava vermelho ao sabor da coleta (medido 2026-10-09:
+  // 32 MB → 21 MB numa única coleta; vermelho intermitente na suíte cheia).
+  const tight = collectFromGit({ root, heapLimitBytes: 30 * 1048576, heapUsedBytes: 20 * 1048576 });
   assert.equal(tight.records.length, 1000, 'os METADADOS (resumo/tags/classificação) vêm inteiros');
   assert.equal(tight.report.memory.skippedBodies, true);
   assert.ok(tight.report.memory.needMb >= 8, `estimativa ~${tight.report.memory.needMb} MB`);

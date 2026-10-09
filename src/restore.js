@@ -554,11 +554,14 @@ function oldSpaceLimitBytes() {
 /**
  * Heap do V8 agora: { limitBytes, usedBytes, freeBytes }. `limitOverride` (> 0) troca o teto por
  * um explícito — é o que permite exercitar a degradação sem subir um processo com
- * `--max-old-space-size`, e serve a quem quiser um teto MENOR que o do V8.
+ * `--max-old-space-size`, e serve a quem quiser um teto MENOR que o do V8. `usedOverride` (> 0)
+ * fixa o heap USADO (em vez do instantâneo): o orçamento passa a ser determinístico nos testes de
+ * degradação — sem ele, um GC entre a medição e a decisão infla o `freeBytes` e o teste decide
+ * ao sabor da coleta (medido: heapBefore 32 MB → heapAfter 21 MB numa única coleta).
  */
-export function heapStats(limitOverride = 0) {
+export function heapStats(limitOverride = 0, usedOverride = 0) {
   const limitBytes = limitOverride > 0 ? limitOverride : oldSpaceLimitBytes();
-  const usedBytes = process.memoryUsage().heapUsed;
+  const usedBytes = usedOverride > 0 ? usedOverride : process.memoryUsage().heapUsed;
   return { limitBytes, usedBytes, freeBytes: limitBytes ? Math.max(0, limitBytes - usedBytes) : Infinity };
 }
 
@@ -697,6 +700,9 @@ export function metaRichness(row) {
  *   - `marker`     : marcador de wipe já lido (default: lê do repo). `false` desliga a fronteira.
  *   - `heapLimitBytes`: teto de heap EXPLÍCITO (default: o do V8). Serve a quem quer um teto
  *                    menor que o do processo e é como a degradação por memória é exercitada.
+ *   - `heapUsedBytes`: heap USADO fixo (default 0 = mede o instantâneo). Companheiro do
+ *                    `heapLimitBytes` nos testes de degradação: tira a corrida com o GC da
+ *                    decisão de pular corpos.
  *
  * Cada registro: { url, id, title, title_pt, summary_pt, snippet, date_iso, kind, section,
  *                  issue_url, verify_status, verify_notes, tags, content, source_name,
@@ -712,6 +718,7 @@ export function collectFromGit({
   bodyPolicy = RESTORE_BODY_POLICY,
   marker,
   heapLimitBytes = 0,
+  heapUsedBytes = 0,
 } = {}) {
   const started = Date.now();
   const policy = BODY_POLICIES.has(bodyPolicy) ? bodyPolicy : 'best';
@@ -723,7 +730,7 @@ export function collectFromGit({
     if (m.rss > peakRss) peakRss = m.rss;
     if (m.heapUsed > peakHeap) peakHeap = m.heapUsed;
   };
-  const heap = () => heapStats(heapLimitBytes);
+  const heap = () => heapStats(heapLimitBytes, heapUsedBytes);
   const heapTight = () => {
     const h = heap();
     return h.limitBytes > 0 && h.usedBytes > h.limitBytes * MEM_STOP_FRAC;

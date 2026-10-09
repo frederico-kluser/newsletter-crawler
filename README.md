@@ -8,7 +8,7 @@
 
 > Crawler de newsletters em **Node.js puro** (ESM, Node ≥ 22, **sem build**) que descobre, extrai, classifica, resume em PT-BR e **busca** artigos — com **menu guiado no terminal** (Ink/React) e as flags diretas.
 
-> Histórico de versões em [CHANGELOG.md](CHANGELOG.md) — atual: **v1.9.0**.
+> Histórico de versões em [CHANGELOG.md](CHANGELOG.md) — atual: **v3.1.0**.
 
 > 🎨 **[ARQUITETURA.html](ARQUITETURA.html)** — a arquitetura inteira desenhada em canvas e explicada
 > para leigos: o pipeline, o paralelismo (governador/lanes), as boas decisões, os gargalos e os números

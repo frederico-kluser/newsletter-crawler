@@ -525,13 +525,14 @@ function sectionHint(section) {
   return `Esta parte é a seção «${section}» da edição. ${tip}`.trim();
 }
 
-export async function curateRoundupItems({ markdown, baseUrl, section = null, part = null }) {
+export async function curateRoundupItems({ markdown, baseUrl, section = null, part = null, signal = null }) {
   const { model, effort } = stageModel('curate');
   const hint = sectionHint(section);
   const out = await callJSON({
     model,
     reasoning: { effort },
     stage: 'curate',
+    signal,
     schemaName: 'curated_items',
     schema: curateSchema,
     zod: curateZ, // shape inválido re-amostra (P2); esgotado, items vira [] em vez de cair a seção
@@ -568,7 +569,7 @@ export async function curateRoundupItems({ markdown, baseUrl, section = null, pa
 // Passe de COBERTURA da curadoria: o curador pode omitir itens (recall imperfeito); a
 // diferença determinística de conjuntos (links do corpo − itens emitidos) chega aqui, e um
 // agente decide o que é item real que FALTOU vs link secundário/patrocínio. Mesmo schema.
-export async function curateLeftoverLinks({ pageContext, baseUrl, leftovers }) {
+export async function curateLeftoverLinks({ pageContext, baseUrl, leftovers, signal = null }) {
   const { model, effort } = stageModel('curate');
   const list = leftovers
     .map((l) => `- ${l.url}${l.anchor ? ` (âncora: ${JSON.stringify(l.anchor.slice(0, 80))})` : ''}`)
@@ -577,6 +578,7 @@ export async function curateLeftoverLinks({ pageContext, baseUrl, leftovers }) {
     model,
     reasoning: { effort },
     stage: 'curate',
+    signal,
     schemaName: 'curated_items',
     schema: curateSchema,
     zod: curateZ,

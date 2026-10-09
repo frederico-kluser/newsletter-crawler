@@ -656,17 +656,34 @@ async function crawlRun(flags) {
   const dispatch = (job, set, deadline) => {
     const p = (async () => {
       const clock = job.kind === 'article' && deadline > 0 ? createJobClock(deadline) : null;
+      // Curadoria/listing: deadline de PAREDE + AbortSignal. ANTES não havia corte algum
+      // (deadline 0 = sem corte) e um job wedged (await que nunca resolve) segurava o drain da
+      // run inteira para sempre — medido em 2026-10-09 (2 runs congeladas em curadoria). O corte
+      // aborta o trabalho em voo (fetch/LLM honram o signal) e o job volta p/ a próxima run.
+      const wall = !clock && deadline > 0 ? new AbortController() : null;
       // Piso POR FONTE (cursor): o job usa o piso da fonte dele; sem entrada no mapa (fonte fora
       // do seed desta run) cai no --since global.
       const base = { ...opts, sinceDate: floorBySource.get(job.source_id) ?? opts.sinceDate };
-      const jobOpts = clock ? { ...base, clock, signal: clock.signal } : base;
+      const jobOpts = clock
+        ? { ...base, clock, signal: clock.signal }
+        : wall
+          ? { ...base, signal: wall.signal }
+          : base;
       try {
         const work = processJob(job, jobOpts);
-        const res = await (clock
-          ? JOB_HARD_TIMEOUT_MS > 0
-            ? withTimeout(work, JOB_HARD_TIMEOUT_MS)
-            : work
-          : withTimeout(work, deadline)); // curadoria: deadline de parede antigo (0 = sem corte)
+        let res;
+        if (clock) {
+          res = await (JOB_HARD_TIMEOUT_MS > 0 ? withTimeout(work, JOB_HARD_TIMEOUT_MS) : work);
+        } else if (wall) {
+          try {
+            res = await withTimeout(work, deadline);
+          } catch (e) {
+            wall.abort(e); // sem zumbi: derruba fetch/LLM em voo e devolve as lanes
+            throw e;
+          }
+        } else {
+          res = await work;
+        }
         if (job.kind === 'article') processedArticles++;
         if (job.kind === 'listing') sourceListingDone(job.source_id); // fonte: descoberta concluída
         stmts.finish.run('done', job.url);
@@ -678,6 +695,21 @@ async function crawlRun(flags) {
           // já parou de reivindicar (shouldStop), então não há hot-loop aqui.
           stmts.finish.run('pending', job.url);
           budgetRequeued++;
+          return;
+        }
+        // Job WEDGED cortado pelo deadline de parede (curadoria/listing): sem retry em run (o
+        // wedge não sara sozinho) e sem 'failed' (isUrlKnown contaria como conhecido e a issue
+        // nunca mais voltava) — apaga a linha da frontier e a próxima listagem o re-descobre.
+        if (e?.code === 'JOB_TIMEOUT' && wall) {
+          stmts.dropFrontierJob.run(job.url);
+          timedOut++;
+          bump('estouros');
+          warn(`job wedged cortado (${deadline}ms de parede) — volta na próxima run: ${job.url.slice(0, 80)}`);
+          logEvent({
+            runId, url: job.url, stage: 'job', status: 'timeout',
+            detail: { ms: deadline, kind: job.kind, wall: true },
+          });
+          emitRunEvent({ phase: 'articles', kind: 'timeout', level: 'warn', detail: job.url.slice(0, 70) });
           return;
         }
         // Teto duro disparou (withTimeout) com o clock ainda vivo: aborta o trabalho em voo

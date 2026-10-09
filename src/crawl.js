@@ -513,7 +513,7 @@ async function processRoundup(job, source, opts = {}) {
     return;
   }
 
-  const fetched = await fetchSmart(url, { profile: 'listing', aggressive: opts.aggressive }); // roundup é lista: rola/clica como listagem
+  const fetched = await fetchSmart(url, { profile: 'listing', aggressive: opts.aggressive, signal: opts.signal ?? null }); // roundup é lista: rola/clica como listagem
   const finalUrl = fetched.url || url;
   logEvent({ ...ev, stage: 'fetch', status: 'ok', detail: { rendered: fetched.rendered === true } });
 
@@ -537,7 +537,7 @@ async function processRoundup(job, source, opts = {}) {
     try {
       const cur = await inStage('curadoria', () => curateRoundup({
         html: fetched.html, url: finalUrl, source, runId: opts.runId ?? null, depth,
-        sinceDate: opts.sinceDate, issueDate: issueDateRaw,
+        sinceDate: opts.sinceDate, issueDate: issueDateRaw, signal: opts.signal ?? null,
       }));
       if (cur?.belowFloor) {
         floorHit(source?.id); // a curadoria datou a issue abaixo do alvo

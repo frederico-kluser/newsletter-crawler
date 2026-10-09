@@ -855,6 +855,10 @@ export const stmts = {
   ),
   finish: db.prepare(`UPDATE frontier SET state = ? WHERE url = ?`),
   bumpRetry: db.prepare(`UPDATE frontier SET retries = retries + 1, state = 'pending' WHERE url = ?`),
+  // Job WEDGED cortado pelo deadline de parede (curadoria/listing): apaga a linha da frontier em
+  // vez de marcar 'failed' — 'failed' conta como CONHECIDA no isUrlKnown e a issue/listing nunca
+  // mais voltava; sem linha, a próxima passagem da listagem re-descobre o link como NOVO.
+  dropFrontierJob: db.prepare(`DELETE FROM frontier WHERE url = ?`),
   getRetries: db.prepare(`SELECT retries FROM frontier WHERE url = ?`),
   resetInProgress: db.prepare(`UPDATE frontier SET state = 'pending' WHERE state = 'in_progress'`),
   // Re-crawl incremental: re-ativa o seed de listagem de UMA fonte (done/failed -> pending) p/

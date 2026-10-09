@@ -203,7 +203,7 @@ export function dupAttribution(url, content) {
  * enfileiramento do enriquecimento. Retorna um resumo, {belowFloor:true} quando a issue é
  * anterior ao piso --since, ou null p/ o chamador cair no fluxo antigo (página sem corpo).
  */
-export async function curateRoundup({ html, url, source, runId = null, depth = 0, sinceDate = null, issueDate: issueDateFromListing = null }) {
+export async function curateRoundup({ html, url, source, runId = null, depth = 0, sinceDate = null, issueDate: issueDateFromListing = null, signal = null }) {
   const ev = { runId, sourceId: source?.id ?? null, url };
   const capped = capHtml(html);
   const art = await extractArticleAsync(capped, url); // JSDOM no pool de workers
@@ -222,6 +222,7 @@ export async function curateRoundup({ html, url, source, runId = null, depth = 0
         baseUrl: url,
         section: sec.section,
         part: sections.length > 1 ? `${i + 1}/${sections.length}` : null,
+        signal,
       }),
     ),
   );
@@ -273,7 +274,7 @@ export async function curateRoundup({ html, url, source, runId = null, depth = 0
       // senão o agente conclui "secundário" por não achar o bloco do link.
       const pageContext = await cpuParse(() => pruneForLLM(capped));
       const extra = await curateLeftoverLinks({
-        pageContext: pageContext.slice(0, CURATE_CHUNK_CHARS), baseUrl: url, leftovers,
+        pageContext: pageContext.slice(0, CURATE_CHUNK_CHARS), baseUrl: url, leftovers, signal,
       });
       const cons2 = consolidateItems([{ issue_date: null, items: extra.items }], { baseUrl: url });
       const realUrls = new Set(cons2.items.map((i) => i.url));

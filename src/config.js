@@ -473,10 +473,17 @@ export const JOB_HARD_TIMEOUT_MS = Number(
 );
 // Curadoria (listing/roundup) tem POOL de reivindicação próprio: a fase de LLM (por seção +
 // cobertura) é longa e NÃO deve ocupar a capacidade de fetch/render dos artigos. CURATE_JOBS=0
-// => default calculado em commands.js (max(2, ceil(MAX_PARALLEL/4))). Sem deadline duro por
-// default (a curadoria já é limitada por LLM_TIMEOUT_MS/orçamento; cortar no meio joga fora fan-out).
+// => default calculado em commands.js (max(2, ceil(MAX_PARALLEL/4))). DEADLINE DE PAREDE com
+// default FINITO (20 min) + AbortSignal: sem corte, um job wedged (await que nunca resolve —
+// medido 2026-10-09: 2 runs congeladas em curadoria) segura o drain da run PARA SEMPRE. O corte
+// aborta o trabalho em voo (LLM/Playwright honram o signal), o job volta p/ a próxima run e o
+// fan-out perdido é recuperado (o roundup é re-curado inteiro). ROUNDUP_TIMEOUT_MS=0 restaura o
+// "sem corte" antigo.
 export const CURATE_JOBS = envIntOr0('CURATE_JOBS');
-export const ROUNDUP_TIMEOUT_MS = Number(process.env.ROUNDUP_TIMEOUT_MS || 0);
+export const ROUNDUP_TIMEOUT_MS =
+  process.env.ROUNDUP_TIMEOUT_MS != null && process.env.ROUNDUP_TIMEOUT_MS !== ''
+    ? Number(process.env.ROUNDUP_TIMEOUT_MS)
+    : 1200000;
 // Teto de tentativas de ENRIQUECIMENTO por alvo (em RODADAS de crawl): um alvo que falhou N
 // runs seguidas p/ entregar o corpo para de ser re-enfileirado — o item curado fica com o
 // blurb do agregador (fail-open: o registro continua válido) em vez de a run inteira

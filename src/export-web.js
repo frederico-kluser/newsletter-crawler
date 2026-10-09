@@ -30,7 +30,7 @@
 // high-water. Com o meta por último, o baseline só avança depois que o corpo do snapshot já está
 // no lugar; falhou antes disso, o baseline continua sendo o do snapshot antigo (o verdadeiro).
 import { execFileSync } from 'node:child_process';
-import { existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, realpathSync, renameSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { stmts } from './db.js';
 import {
@@ -380,8 +380,13 @@ export function publishedHighWater(outDir, { commits = HIGH_WATER_COMMITS } = {}
     return null;
   }
   try {
-    // pathspec relativo à RAIZ do repo (todos os comandos rodam com cwd = top)
-    const rel = path.relative(top, path.join(path.resolve(outDir), 'meta.json')).split(path.sep).join('/');
+    // pathspec relativo à RAIZ do repo (todos os comandos rodam com cwd = top). REALPATH nos dois
+    // lados: o `rev-parse --show-toplevel` devolve o caminho REAL (git canonicaliza symlinks) e
+    // `path.resolve` mantém o LÓGICO — com TMPDIR symlinkado (macOS /tmp; esta máquina em
+    // 2026-10-09) o path.relative virava "../../.s/…/meta.json", o rev-list falhava em silêncio e o
+    // high-water ficava CEGO (baseline null) — era o "outDir fora do repo" falso-positivo.
+    const rel = path.relative(realpathSync(top), realpathSync(path.join(path.resolve(outDir), 'meta.json')))
+      .split(path.sep).join('/');
     if (!rel || rel.startsWith('..')) return null; // outDir fora do repo: nada a comparar
     const todos = git(top, ['rev-list', '--all', '--', rel])
       .split('\n')

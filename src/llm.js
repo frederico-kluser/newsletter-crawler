@@ -76,7 +76,10 @@ async function awaitPenalty() {
 function bumpPenalty(err) {
   _penaltyK = Math.min(_penaltyK + 1, 6);
   const backoff = Math.min(2 ** _penaltyK * 1000 * (0.5 + Math.random()), 60_000);
-  const until = Date.now() + Math.max(retryAfterMsOf(err), backoff);
+  // TETO REAL de 60s para a janela INTEIRA (backoff E Retry-After do provedor): sem o Math.min,
+  // um Retry-After grande do provedor congelava TODAS as admissões em awaitPenalty por minutos/
+  // horas — o comentário dizia "teto 60s" mas o código só limitava o backoff.
+  const until = Date.now() + Math.min(Math.max(retryAfterMsOf(err), backoff), 60_000);
   if (until > _penaltyUntil) _penaltyUntil = until;
   reportRateLimit();
 }

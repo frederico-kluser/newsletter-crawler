@@ -121,7 +121,12 @@ test('createOnce deepseek (via callJSON): body SEM reasoning/usage.include; cust
     choices: [{ message: { content: JSON.stringify({}) } }],
   });
   const before = getBudgetState().spentUsd;
+  // Tokens sintéticos GIGANTES p/ a matemática de custo: o guard de resposta degenerada
+  // (>1.2× o teto de saída — src/config.js stageMaxTokens) re-amostraria a chamada.
+  // Sobe o teto do stage SÓ para este teste (env override por stage).
+  process.env.LLM_MAX_TOKENS_COSTINJ = '600000';
   await llm.callJSON(jsonArgs({ stage: 'costInj' }));
+  delete process.env.LLM_MAX_TOKENS_COSTINJ;
   const body = calls[0].body;
   assert.equal(body.model, 'deepseek-v4-flash');
   assert.equal(body.reasoning, undefined, 'reasoning (parâmetro do OpenRouter) omitido no deepseek');

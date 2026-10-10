@@ -19,6 +19,7 @@ import {
 import { curateRoundup } from './curate.js';
 import { logEvent } from './events.js';
 import { emitRunEvent } from './run-events.js';
+import { devTrace } from './devtrace.js';
 import { inStage, dateSeen, floorHit, bump } from './progress.js';
 import { abortErrorOf } from './deadline.js';
 import { isSubstack, substackArchive } from './substack.js';
@@ -704,6 +705,7 @@ async function processArticle(job, source, opts) {
   // 1) Readability (uma vez; reaproveitado p/ roundup-detection e p/ extração do corpo).
   // JSDOM roda no pool de workers (isolado do processo principal); null se crashou/timeout.
   const art = await onClock('parse', () => extractArticleAsync(capHtml(html), finalUrl));
+  devTrace('parse', { url: finalUrl, method: 'readability', chars: art?.content?.length ?? 0, title: art?.title ?? null });
 
   // Roundup-detection: às vezes um "link" aponta p/ uma página que é uma COLEÇÃO de várias
   // notícias. NUNCA p/ item curado (o item é UM registro — um repo GitHub tem dezenas de links
@@ -769,6 +771,7 @@ async function processArticle(job, source, opts) {
         // Entrada em MARKDOWN (não HTML) p/ o LLM: sem tags p/ o modelo ecoar, mas preserva a
         // estrutura (títulos/listas) que ajuda a separar o corpo do boilerplate.
         const out = await extractArticleViaLLM(await cpuParse(() => htmlToMarkdown(pruneForLLM(capHtml(html)))), { signal });
+        devTrace('parse', { url: finalUrl, method: 'llm', chars: out?.content?.length ?? 0, title: out?.title ?? null });
         title = out.title;
         content = out.content;
         published = out.published_at;

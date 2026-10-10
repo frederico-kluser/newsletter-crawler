@@ -51,6 +51,14 @@ Single source of truth for agents working in this repo. Keep it short; scoped de
 - **Release**: tag `vX.Y.Z` anotada + `gh release create vX.Y.Z --verify-tag`.
 - Antes de fechar tarefa com código: `npm run status && npm test` verdes; nada de segredos em claro (o export redige; push protection varre o histórico).
 
+## Modo de desenvolvimento LLM (trace `--llm-dev`) — para AGENTES, não para o utilizador
+- **Ativar:** `--llm-dev` em QUALQUER comando (`npm run crawl -- ... --llm-dev`) ou `NC_LLM_DEV=1`. Off por default = zero I/O. Não aparece no help/menu do utilizador nem escreve no stdout/TUI — é a ferramenta da LLM para analisar erros em tempo real.
+- **Onde ler:** `NC_HOME/logs/trace-<ts>-<pid>.jsonl` + symlink `NC_HOME/logs/latest.jsonl` (`tail -f ~/.newsletter-crawler/logs/latest.jsonl` acompanha AO VIVO — escrita com flush imediato). Fora do repo, nunca commitado; retenção dos últimos `NC_LLM_DEV_KEEP` (default 20).
+- **Eventos (JSONL, um por linha, `t`/`seq`/`type`):** `meta` (comando/argv/node) · `run.start`/`run.end` (orçamento/ledger) · `job.start`/`job.done` (com `phases`/`waits` do clock)/`job.timeout`/`job.failed` (stack)/`job.budget_requeue` · `fetch.start`/`fetch.result` (rendered/bytes/ms)/`fetch.error` (`kind`: dead|timeout|download|blocked|other) · `parse` (readability|llm, chars) · `curate.sections`/`curate.items`/`curate.coverage`/`curate.section_failed` · **LLM em detalhe**: `llm.call` (prompt INTEIRO system+user), `llm.attempt` (conteúdo CRU da resposta, usage/tokens/custo, latência), `llm.parse` (ok|json-retry|schema-retry|tolerant|*-failed), `llm.rate_limit` (janela de penalidade), `llm.transport_error` (status).
+- **Segurança/tamanho:** TODO valor de string passa por `redactSecrets` (`src/redact.js`) antes do disco e strings > `NC_LLM_DEV_MAX_CHARS` (default 8k) truncam com `…[TRUNCADO N chars]` — o trace é seguro de partilhar numa análise.
+- **Receitas de análise em tempo real:** `tail -f .../latest.jsonl | jq -c 'select(.type|startswith("llm") or startswith("job"))'` · erros: `jq -c 'select(.err)' .../latest.jsonl` · custo da run: `jq -s '[.[]|select(.type=="llm.attempt")|.usage.cost // 0]|add'` · histograma: `jq -r .type .../latest.jsonl | sort | uniq -c`.
+- Implementação: `src/devtrace.js` (escritor) + ganchos em `llm.js` (funis `createOnce`/`callJSON`), `fetch.js` (wrapper do `fetchSmart`), `commands.js` (dispatch + `runWithLimits`), `curate.js`, `crawl.js` (parse), `index.js` (init). Testes: `test/devtrace.test.js`.
+
 ## Skills
 Every implementation task goes through `.agents/skills/project-router`. Catalog: `.agents/skills/catalog.md`.
 To evolve a skill safely: stage `<skill>/SKILL.md.next`, then `node .agents/skills/scripts/validate-skill.mjs <skill>`.

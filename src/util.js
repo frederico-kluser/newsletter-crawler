@@ -30,6 +30,40 @@ export function sha256(s) {
 }
 
 /**
+ * A URL é plausível como ALVO real? (defensivo; nunca lança). Complementa o normalizeUrl, que
+ * aceita o que o `new URL()` aceita — incluindo os placeholders de truncamento que o LLM da
+ * curadoria fabrica a partir do texto do agregador ("github.com/...", "x.com/…", "https://..").
+ * Medido 2026-10-10: 32 artigos PUBLICADOS com URL terminada em `/...` (ex.: `https://github.com/...`)
+ * + 31 jobs de frontier — o `new URL()` engole todos. Regras (anti falso-positivo):
+ *   - hostname de verdade: ≥1 ponto + TLD alfabético (rejeita `..`, `...`, host sem ponto);
+ *   - path/search NÃO termina em `/...` (ou `/…`) nem contém o segmento `...` (placeholder);
+ *   - sem caracteres de HTML/espaço colados.
+ * Uma URL legítima com "..." no MEIO de um slug passa (só o placeholder é rejeitado).
+ */
+export function isPlausibleUrl(url) {
+  const s = String(url || '').trim();
+  if (!s || s.length > 2048) return false;
+  let u;
+  try {
+    u = new URL(s);
+  } catch {
+    return false;
+  }
+  if (u.protocol !== 'http:' && u.protocol !== 'https:') return false;
+  if (!/^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,24}$/i.test(u.hostname)) return false;
+  // Path DECODIFICADO: a URL codifica "…" (%E2%80%A6) e o placeholder tem de ser apanhado nas
+  // duas formas. Segmento `/...` (ou `/…`) em qualquer posição = placeholder do agregador;
+  // reticências no MEIO de um slug ("a...b") continuam legítimas.
+  let p = u.pathname;
+  try {
+    p = decodeURIComponent(p);
+  } catch { /* path mal-codificado: segue com o cru */ }
+  if (/\/\.\.\.|\/\u2026/.test(p)) return false;
+  if (/[<>"]|\s/.test(s)) return false;
+  return true;
+}
+
+/**
  * Traduz uma string de data (Readability/LLM/JSON-LD) para um Date iterável/comparável.
  * Cobre ISO-8601 (com Z, offset, ou milissegundos) e date-only (YYYY-MM-DD -> meia-noite UTC).
  * Defensivo: null/vazio/inválido -> null (nunca lança), p/ uma data ruim não derrubar o crawl.

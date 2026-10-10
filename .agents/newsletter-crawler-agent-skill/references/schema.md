@@ -1,6 +1,6 @@
-# Esquema CoALA-SQLite — referência técnica (v2)
+# Esquema CoALA-SQLite — referência técnica (v3)
 
-Implementação: `scripts/coala.py` (Python 3, apenas stdlib; motor v2.0.0, esquema v2).
+Implementação: `scripts/coala.py` (Python 3, apenas stdlib; motor v2.1.0, esquema v3).
 Base de dados **local por projeto** — não existe memória global:
 
 ```
@@ -38,7 +38,8 @@ CREATE TABLE IF NOT EXISTS memory_entries (
   valid_from TEXT,                      -- quando o facto passou a valer (bitemporal: valid time)
   valid_until TEXT,                     -- NULL = ainda válido
   source TEXT,                          -- URL/caminho/conversa de origem
-  tags TEXT                             -- CSV de tags
+  tags TEXT,                            -- CSV de tags
+  content_id TEXT                       -- v3: id por conteúdo (16 hex; igual em qualquer máquina)
 );
 CREATE TABLE IF NOT EXISTS entity_nodes (
   id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT UNIQUE NOT NULL, kind TEXT
@@ -76,8 +77,17 @@ CREATE TABLE IF NOT EXISTS ingest_sources (
   ingested_at TEXT NOT NULL,
   git_commit TEXT                       -- HEAD do repositório no momento (se git)
 );
+-- v3: que entidades cada registo cita (`add --entities`, `entities` no JSONL) — é por aqui que o
+-- `forget` sabe que nós do grafo pertencem aos registos apagados
+CREATE TABLE IF NOT EXISTS entry_entities (
+  entry_id INTEGER NOT NULL REFERENCES memory_entries(id) ON DELETE CASCADE,
+  entity_id INTEGER NOT NULL REFERENCES entity_nodes(id) ON DELETE CASCADE,
+  PRIMARY KEY (entry_id, entity_id)
+);
 
 -- índices de apoio (acréscimos ao DDL mínimo, sem alterar a forma)
+CREATE INDEX IF NOT EXISTS idx_memory_cid ON memory_entries(content_id);          -- v3
+CREATE INDEX IF NOT EXISTS idx_entry_entities_entity ON entry_entities(entity_id); -- v3
 CREATE INDEX IF NOT EXISTS idx_memory_supersession ON memory_entries(supersession_key, superseded_by);
 CREATE INDEX IF NOT EXISTS idx_memory_type ON memory_entries(memory_type);
 CREATE INDEX IF NOT EXISTS idx_memory_recorded ON memory_entries(recorded_at);
@@ -86,8 +96,30 @@ CREATE INDEX IF NOT EXISTS idx_edges_src ON entity_edges(src);
 CREATE INDEX IF NOT EXISTS idx_edges_dst ON entity_edges(dst);
 ```
 
-`PRAGMA user_version = 2` marca o esquema v2. Uma base v0/v1 (sem `coala_meta`/`ingest_sources`) é
-migrada de forma aditiva na primeira abertura; `created_at` passa a ser o `MIN(recorded_at)`.
+`PRAGMA user_version = 3` marca o esquema v3. Uma base v0/v1 (sem `coala_meta`/`ingest_sources`) é
+migrada de forma aditiva na primeira abertura; `created_at` passa a ser o `MIN(recorded_at)`. Uma base
+v2 ganha, também na primeira abertura, a coluna `content_id` (preenchida para todos os registos), o
+índice dela e a tabela `entry_entities` — nada é reescrito. Um motor v2 continua a abrir uma base v3
+(o `doctor` dele só avisa da versão); os registos que ele gravar sem `content_id` são preenchidos na
+próxima abertura por um motor v3.
+
+## Id por conteúdo (v3)
+
+Cada registo guarda `content_id` — o mesmo em qualquer máquina, calculado pelo contrato:
+
+```
+sha256(json.dumps({schema, key, type, site, page, kind, body}, sort_keys=True,
+                  separators=(',', ':'), ensure_ascii=False).encode()).hexdigest()[:16]
+```
+
+Campo ausente conta como `null`. Ficam **fora** do id: `status`, `evidence`, `valid_from`, `ttl_days`,
+`supersedes` e os campos só-locais — promover um registo (`hypothesis → validated`) não muda o id.
+
+- Conteúdo que é um **registo canónico** em JSON (objeto com `schema` e `body`, ex.: `sitemem/1`) → o
+  `id` dele, se trouxer um; senão o contrato sobre os campos dele.
+- **Texto livre** (`add`, `ingest`) → o mesmo contrato com `schema = "coala/entry"`, `site/page/kind`
+  nulos e `body = {content, origin, source, tags, recorded_at, valid_from}` (os metadados imutáveis:
+  a identidade do `import --from` mais o que distingue as versões do `ingest`).
 
 Tabela **opcional** (só criada se a extensão `sqlite_vec` carregar):
 
@@ -115,7 +147,8 @@ substituída, mas o registo nunca é apagado.
   (`superseded_by = novo_id`, `valid_until = agora`) — nunca mais que uma versão ativa por chave.
 - `supersede <id> --content "…"` faz o mesmo para um registo concreto, herdando tipo/origem/chave/tags.
 - **Expiração** (sem sucessor): quando um segmento ou ficheiro de material desaparece, o `ingest`
-  fecha `valid_until` do registo ativo (nota `Expirado em …`). Nada é apagado nem reescrito.
+  fecha `valid_until` do registo ativo (nota `Expirado em …`). Nada é apagado nem reescrito — a única
+  exceção é o `forget --tag` explícito (ver abaixo).
 - Cada evento é registado em `provenance.note` (`Suplantado por #N`, `Suplanta #M`, `Expirado`,
   `Importado de <base>#<id>`, fonte, origem). Notas múltiplas são concatenadas com ` | `.
 - Por predefinição, `search`/`recall` **excluem** registos suplantados e expirados; `--include-superseded`
@@ -146,8 +179,43 @@ Sem `pdftotext`, as regras `pdf` são ignoradas com aviso (degradação graciosa
 origem **só-leitura** e copia preservando tipo, conteúdo, origem, chave, `recorded_at`, validade,
 fonte, tags e proveniência (+ nota `Importado de <base>#<id>`). Traz o **fecho da cadeia de
 supersessão** (versões anteriores/posteriores dos selecionados) e religa `superseded_by`. É
-idempotente (identidade = tipo + conteúdo + `recorded_at` + chave) e mantém o invariante
-"≤ 1 versão ativa por chave" (a de `recorded_at` mais recente ganha). `--with-graph` copia entidades.
+idempotente (identidade = id por conteúdo, ou tipo + conteúdo + `recorded_at` + chave) e mantém o
+invariante "≤ 1 versão ativa por chave" (a de `recorded_at` mais recente ganha). `--with-graph` copia
+entidades. O `content_id` viaja com o registo.
+
+`import --jsonl <ficheiro|-> [--add-tags CSV] [--origin O] [--dry-run]` importa um JSONL inteiro, numa
+transação (uma linha inválida → erro com `ficheiro:linha` e nada gravado):
+
+- **linhas do `export --format jsonl`** (têm `content`): tipo, origem, chave, datas, fonte, tags e
+  proveniência da linha; id = `cid` (ou `id`, se for texto); a supersessão refaz-se por
+  `superseded_by_cid`; um export antigo (sem `cid`, `id`/`superseded_by` inteiros) é religado pelos
+  inteiros do próprio ficheiro e o id é calculado;
+- **registos canónicos** (têm `schema` e `body`, ex.: `sitemem/1`): id = `id` da linha se vier, senão o
+  contrato; o conteúdo guardado é o registo em JSON (com o id); tags derivadas `site:`, `page:`, `kind:`,
+  `status:`, `origin:`, `run:` (+ `tags` da linha + `--add-tags`); a supersessão refaz-se pela lista
+  `supersedes` — também contra registos que já estavam na base;
+- `{"edge": [src, rel, dst]}` → aresta do grafo; `entities: [...]` → entidades ligadas ao registo.
+
+Id já presente na base (ou repetido no ficheiro) = nada muda: reimportar cria 0 registos. `--dry-run`
+corre o mesmo algoritmo numa cópia em memória (contagens exatas, disco intocado; nem cria a base).
+`export --format jsonl` escreve `cid`, `superseded_by_cid` e `entities`, por isso
+`export` → `import --jsonl` numa base nova reproduz registos, supersessões e grafo com os mesmos ids.
+
+## Esquecer (`forget`)
+
+`forget --tag T [--tag T2…] [--dry-run]` **apaga de verdade** (sem expirar, sem backup) todos os
+registos com QUALQUER das tags — todas as versões (ativas, suplantadas, expiradas) — e o que lhes
+pertence em todas as tabelas: `chunks` (texto e vetor), índice FTS5 (`delete` + `optimize`),
+`chunks_vec` (sqlite-vec; sem a extensão carregada o `forget` recusa, exit 3), `provenance`,
+`entry_entities` e as entidades que só eles citavam (com as arestas delas). Um sobrevivente cujo
+sucessor é apagado passa a apontar para o sucessor seguinte que sobrevive (ou fica sem sucessor, com a
+validade já fechada). Corre com `PRAGMA secure_delete=ON` e termina com `wal_checkpoint(TRUNCATE)`: o
+texto apagado não fica no ficheiro nem no WAL. Backups antigos (`memory/backups/`) e o material de
+origem (um `ingest` seguinte volta a trazer o que ainda estiver nos ficheiros) não são tocados.
+`--dry-run` conta numa cópia em memória. Sem base, devolve 0 e não a cria.
+
+Tags casam **literalmente** em todos os filtros (`--tags`, `--any-tags`, `import --tags`, `forget --tag`):
+os `LIKE` usam `ESCAPE '\'`, por isso `%`, `_` e `\` numa tag não são curingas.
 
 ## Busca híbrida e fórmula RRF
 
@@ -215,7 +283,7 @@ juntas). Cada chunk tem: texto (FTS5 via tabela de conteúdo externo) + embeddin
 - `doctor [--deep]`: python/SQLite/FTS5/sqlite-vec/pdftotext, resolução da base, permissões,
   `journal_mode`, `quick_check` (ou `integrity_check`), tabelas e `user_version`, `integrity-check`
   do FTS5, chunks↔índice, órfãos, cadeia de supersessão, ≤ 1 ativo por chave, proveniência,
-  contagens, **frescura** (ficheiros do `ingest.json` × `ingest_sources`) e motor local × manifesto.
+  ids por conteúdo (v3), ligações registo↔entidade, arestas do grafo, contagens, **frescura** (ficheiros do `ingest.json` × `ingest_sources`) e motor local × manifesto.
   Exit 1 (com `Erro: … — Solução: …`) se houver alguma linha `FAIL`.
 - `backup [--out F]`: snapshot consistente pela API de backup do SQLite em `memory/backups/`
   (`journal_mode=DELETE`, ficheiro autónomo, `0600`, nunca sobrescreve).

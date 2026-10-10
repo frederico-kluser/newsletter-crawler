@@ -1,0 +1,22 @@
+{
+  "coala_manifest": 1,
+  "project": "newsletter-crawler",
+  "skill": "newsletter-crawler-agent-skill",
+  "db": "memory/coala.sqlite",
+  "engine": {
+    "file": "scripts/coala.py",
+    "version": "2.1.0",
+    "sha256": "10ca915b4c29c85d07b9db7e6e3bc81d6b45792fde78b91142f27bc3c392e3ac"
+  },
+  "schema_version": 3,
+  "git_policy": "track-dump",
+  "installer": "coala-agent-skill/scripts/coala-install.py",
+  "installed_at": "2026-09-27T09:39:28+00:00",
+  "updated_at": "2026-10-10T17:48:08+00:00",
+  "managed": {
+    "SKILL.md": "5ff5e1b810b86d4b5df39bc35461f7ea21023c76ac18449901fda7d3af419967",
+    "memory/.gitignore": "a93ae126c1f67b099312fb2c55d98452f93cdaa5295afecccc84188fc75c52f0",
+    "references/schema.md": "f6ca60093d8db2da4a525b5aae5889ce48781a9f0e32f61787d5daa97870f307",
+    "scripts/coala.py": "10ca915b4c29c85d07b9db7e6e3bc81d6b45792fde78b91142f27bc3c392e3ac"
+  }
+}

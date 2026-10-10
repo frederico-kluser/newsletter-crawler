@@ -24,6 +24,11 @@ MEMORY.md
 .claude/memory/
 .claude/plans/
 
+# Memória CoALA do projeto (skill .agents/newsletter-crawler-agent-skill): a base fica FORA
+# (memory/.gitignore = `*` + o `*.sqlite` global), mas o dump canónico da política track-dump
+# (memory/coala.canonical.jsonl) É versionado — re-inclui só a pasta para o git a descer.
+!.agents/newsletter-crawler-agent-skill/memory/
+
 # webapp (Vite): build e screenshots de verificação — o snapshot em webapp/public/data/ é versionado
 webapp/dist/
 webapp/scripts/out/

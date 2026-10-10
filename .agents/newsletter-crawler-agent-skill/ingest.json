@@ -16,6 +16,26 @@
       "tags": "docs,readme"
     },
     {
+      "name": "agents",
+      "include": [
+        "AGENTS.md"
+      ],
+      "mode": "markdown",
+      "type": "procedural",
+      "origin": "agent",
+      "tags": "docs,agents,regras"
+    },
+    {
+      "name": "journal",
+      "include": [
+        "JOURNAL.md"
+      ],
+      "mode": "markdown",
+      "type": "semantic",
+      "origin": "agent",
+      "tags": "docs,journal,lesson"
+    },
+    {
       "name": "docs",
       "include": [
         "docs/**/*.md"

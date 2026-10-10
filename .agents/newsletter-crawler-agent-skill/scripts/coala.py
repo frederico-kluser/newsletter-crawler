@@ -20,6 +20,10 @@ e é resolvida por esta ordem (a primeira que se aplica):
 Modo WAL ativo. FTS5 (BM25) para ranking léxico + vetores para ranking semântico,
 fusão Reciprocal Rank Fusion (RRF) executada em SQL com funções de janela.
 
+Esquema v3: cada registo guarda o seu ID POR CONTEÚDO (`content_id`, ver CID_FIELDS) — o mesmo em
+qualquer máquina. `export --format jsonl` → `import --jsonl` refaz a base (registos, supersessões e
+grafo) pelos ids; reimportar é NO-OP. `forget --tag T` é a única operação que APAGA (privacidade).
+
 Uso:  python3 scripts/coala.py <comando> [opções]   |   python3 scripts/coala.py --selftest
 """
 
@@ -44,8 +48,8 @@ import urllib.parse
 from datetime import datetime, timezone
 
 # ----------------------------------------------------------------- constantes
-ENGINE_VERSION = "2.0.0"
-SCHEMA_VERSION = 2               # PRAGMA user_version (v0/v1 = esquema original, sem meta)
+ENGINE_VERSION = "2.1.0"
+SCHEMA_VERSION = 3               # PRAGMA user_version (v0/v1 = esquema original, sem meta; v3 = ids por conteúdo)
 RRF_K = 60                       # constante k da fórmula RRF (Cormack et al., 2009)
 EMBED_DIMS = 256                 # dimensões do vetor (fallback hashing)
 CHUNK_MAX_CHARS = 1200           # tamanho máximo de um chunk
@@ -57,7 +61,13 @@ DB_ENV = "COALA_DB"
 W_FTS_ENV = "COALA_RRF_W_FTS"
 W_VEC_ENV = "COALA_RRF_W_VEC"
 
-SKILL_SUFFIX = "-coala-memory-agent-skill"   # convenção: <projeto>-coala-memory-agent-skill
+SKILL_SUFFIX = "-agent-skill"                    # convenção: <projeto>-agent-skill (minúsculas)
+LEGACY_SKILL_SUFFIXES = ("-coala-memory-agent-skill", "-memory-agent-skill")  # nomes antigos: migram
+
+
+def is_memory_skill(name: str) -> bool:
+    """Reconhece uma skill de memória local (novo nome ou legado)."""
+    return name.endswith(SKILL_SUFFIX) or any(name.endswith(s) for s in LEGACY_SKILL_SUFFIXES)
 MANIFEST_NAME = "coala.json"                 # manifesto da instalação local
 INGEST_CONFIG_NAME = "ingest.json"           # fontes de material do projeto
 DB_SUBPATH = ("memory", "coala.sqlite")
@@ -70,6 +80,18 @@ MEMORY_TYPES = ("episodic", "semantic", "procedural")
 ORIGINS = ("owner", "agent", "untrusted", "system")
 REQUIRED_TABLES = ("memory_entries", "entity_nodes", "entity_edges", "chunks", "chunks_fts",
                    "provenance", "coala_meta", "ingest_sources")
+
+# Id por conteúdo (esquema v3). Contrato partilhado com a memória dos sites (sitemem/1):
+#   sha256(json.dumps({schema, key, type, site, page, kind, body}, sort_keys=True,
+#          separators=(',', ':'), ensure_ascii=False).encode()).hexdigest()[:16]
+# SEM status, evidence, valid_from, ttl_days, supersedes nem campos só-locais — promover um registo
+# (hypothesis → validated) não muda o id. Campo ausente conta como null.
+CID_FIELDS = ("schema", "key", "type", "site", "page", "kind", "body")
+# registos genéricos do motor (add/ingest, texto livre) usam o MESMO contrato com este `schema`
+# e um `body` com o conteúdo e os metadados imutáveis (ver entry_content_id)
+GENERIC_CID_SCHEMA = "coala/entry"
+CID_RE = re.compile(r"^[A-Za-z0-9._:-]{1,128}$")     # id trazido de fora (linha JSONL / registo)
+LIKE_ESCAPE = "\\"                                   # escape dos LIKE de tags (`%`/`_` são literais)
 
 SCHEMA_SQL = """
 CREATE TABLE IF NOT EXISTS memory_entries (
@@ -84,7 +106,8 @@ CREATE TABLE IF NOT EXISTS memory_entries (
   valid_from TEXT,
   valid_until TEXT,
   source TEXT,
-  tags TEXT
+  tags TEXT,
+  content_id TEXT
 );
 CREATE TABLE IF NOT EXISTS entity_nodes (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -122,6 +145,12 @@ CREATE TABLE IF NOT EXISTS ingest_sources (
   ingested_at TEXT NOT NULL,
   git_commit TEXT
 );
+CREATE TABLE IF NOT EXISTS entry_entities (
+  entry_id INTEGER NOT NULL REFERENCES memory_entries(id) ON DELETE CASCADE,
+  entity_id INTEGER NOT NULL REFERENCES entity_nodes(id) ON DELETE CASCADE,
+  PRIMARY KEY (entry_id, entity_id)
+);
+CREATE INDEX IF NOT EXISTS idx_entry_entities_entity ON entry_entities(entity_id);
 CREATE INDEX IF NOT EXISTS idx_memory_supersession ON memory_entries(supersession_key, superseded_by);
 CREATE INDEX IF NOT EXISTS idx_memory_type ON memory_entries(memory_type);
 CREATE INDEX IF NOT EXISTS idx_memory_recorded ON memory_entries(recorded_at);
@@ -230,6 +259,56 @@ def ro_uri(path: str) -> str:
     return "file:" + urllib.parse.quote(os.path.abspath(path)) + "?mode=ro"
 
 
+# ------------------------------------------------------------ id por conteúdo
+def content_id(record: dict) -> str:
+    """Id por conteúdo de um registo canónico — o contrato de CID_FIELDS, byte a byte."""
+    canon = {f: record.get(f) for f in CID_FIELDS}
+    raw = json.dumps(canon, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+    return hashlib.sha256(raw.encode("utf-8")).hexdigest()[:16]
+
+
+def record_of_content(content: str):
+    """Se o conteúdo é um registo canónico em JSON (objeto com `schema` e `body`), devolve-o; senão None."""
+    if not content or not content.lstrip().startswith("{"):
+        return None
+    try:
+        rec = json.loads(content)
+    except (ValueError, TypeError):
+        return None
+    if isinstance(rec, dict) and isinstance(rec.get("schema"), str) and rec["schema"] and "body" in rec:
+        return rec
+    return None
+
+
+def entry_content_id(memory_type: str, content: str, key: str = None, origin: str = None,
+                     source: str = None, tags: str = None, recorded_at: str = None,
+                     valid_from: str = None) -> str:
+    """
+    Id por conteúdo de um registo do motor:
+      - conteúdo = registo canónico em JSON (ex.: sitemem/1) → o `id` dele, se trouxer um; senão o
+        contrato sobre os campos dele;
+      - texto livre (add/ingest) → o mesmo contrato com schema `coala/entry` e um body com o conteúdo e
+        os metadados IMUTÁVEIS (origem, fonte, tags, recorded_at, valid_from) — a mesma identidade do
+        `import --from` (tipo, conteúdo, recorded_at, chave), mais o que distingue as versões do ingest.
+    """
+    rec = record_of_content(content)
+    if rec is not None:
+        rid = rec.get("id")
+        if isinstance(rid, str) and CID_RE.match(rid):
+            return rid
+        return content_id(rec)
+    return content_id({"schema": GENERIC_CID_SCHEMA, "key": key, "type": memory_type,
+                       "body": {"content": content, "origin": origin, "source": source, "tags": tags,
+                                "recorded_at": recorded_at, "valid_from": valid_from}})
+
+
+def row_content_id(row) -> str:
+    """entry_content_id de uma linha de memory_entries (sqlite3.Row ou dict)."""
+    return entry_content_id(row["memory_type"], row["content"], row["supersession_key"],
+                            row["origin_class"], row["source"], row["tags"], row["recorded_at"],
+                            row["valid_from"])
+
+
 # --------------------------------------------------- embeddings (fallback local)
 def embed_text(text: str, dims: int = EMBED_DIMS) -> list:
     """
@@ -322,7 +401,7 @@ def skill_dir_of_engine(engine_file: str = None):
     """Se o motor está vendorizado em <x>-coala-memory-agent-skill/scripts/, devolve a skill."""
     here = os.path.dirname(os.path.abspath(engine_file or __file__))
     skill = os.path.dirname(here)
-    if os.path.basename(here) == "scripts" and os.path.basename(skill).endswith(SKILL_SUFFIX):
+    if os.path.basename(here) == "scripts" and is_memory_skill(os.path.basename(skill)):
         return skill
     return None
 
@@ -331,7 +410,7 @@ def skill_dir_of_db(path: str):
     """Se a base está em <x>-coala-memory-agent-skill/memory/, devolve a skill."""
     mem = os.path.dirname(os.path.abspath(path))
     skill = os.path.dirname(mem)
-    if os.path.basename(mem) == DB_SUBPATH[0] and os.path.basename(skill).endswith(SKILL_SUFFIX):
+    if os.path.basename(mem) == DB_SUBPATH[0] and is_memory_skill(os.path.basename(skill)):
         return skill
     return None
 
@@ -352,7 +431,7 @@ def find_project_skill(start: str = None):
             except OSError:
                 names = []
             found = [os.path.join(agents, n) for n in names
-                     if n.endswith(SKILL_SUFFIX)
+                     if is_memory_skill(n)
                      and os.path.isfile(os.path.join(agents, n, MANIFEST_NAME))]
             if len(found) > 1:
                 raise UsageError(
@@ -416,6 +495,16 @@ def init_schema(conn: sqlite3.Connection) -> str:
                 "ou usa outro python3")
         raise CoalaError(f"falha ao criar o esquema ({exc})", "verifica permissões do ficheiro DB")
 
+    # v3 (aditivo): coluna do id por conteúdo nas bases antigas + índice + preenchimento dos que faltam
+    if "content_id" not in table_columns(conn, "memory_entries"):
+        try:
+            conn.execute("ALTER TABLE memory_entries ADD COLUMN content_id TEXT")
+        except sqlite3.OperationalError:              # outro processo migrou entre a leitura e o ALTER
+            if "content_id" not in table_columns(conn, "memory_entries"):
+                raise
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_memory_cid ON memory_entries(content_id)")
+    backfill_content_ids(conn)
+
     ver = conn.execute("PRAGMA user_version").fetchone()[0]
     if ver < SCHEMA_VERSION:
         ts = now_iso()
@@ -446,6 +535,42 @@ def init_schema(conn: sqlite3.Connection) -> str:
     except Exception:
         backend = "hashing-256"
     return backend
+
+
+def backfill_content_ids(conn) -> int:
+    """Preenche content_id dos registos que ainda não o têm (base v2 migrada, ou escritos por um motor
+    antigo depois da migração). Idempotente; devolve quantos preencheu."""
+    rows = conn.execute(   # por posição: vale com ou sem row_factory (o instalador abre bases cruas)
+        "SELECT id, memory_type, content, supersession_key, origin_class, source, tags, recorded_at,"
+        " valid_from FROM memory_entries WHERE content_id IS NULL").fetchall()
+    if not rows:
+        return 0
+    conn.executemany("UPDATE memory_entries SET content_id=? WHERE id=?",
+                     [(entry_content_id(*tuple(r)[1:]), r[0]) for r in rows])
+    conn.commit()
+    return len(rows)
+
+
+def table_columns(conn, table: str) -> set:
+    return {r[1] for r in conn.execute(f"PRAGMA table_info({table})")}
+
+
+def open_scratch_copy(path: str):
+    """
+    Cópia EM MEMÓRIA da base (ou base vazia, se não existe), já com o esquema atual: o --dry-run do
+    `import --jsonl` e do `forget` corre o MESMO algoritmo nela e descarta — contagens exatas, disco intocado.
+    """
+    mem = sqlite3.connect(":memory:")
+    if os.path.isfile(path):
+        src = sqlite3.connect(ro_uri(path), uri=True)
+        try:
+            src.backup(mem)
+        finally:
+            src.close()
+    mem.row_factory = sqlite3.Row
+    mem.execute("PRAGMA foreign_keys=ON")
+    backend = init_schema(mem)
+    return mem, backend
 
 
 def connect_path(path: str):
@@ -549,11 +674,12 @@ def insert_entry(conn, backend: str, memory_type: str, content: str, origin: str
     Devolve (entry_id, [ids suplantados]).
     """
     ts = now_iso()
+    cid = entry_content_id(memory_type, content, key, origin, source, tags, ts, valid_from)
     cur = conn.execute(
         "INSERT INTO memory_entries(memory_type, content, origin_class, supersession_key,"
-        " recorded_at, valid_from, valid_until, source, tags)"
-        " VALUES (?,?,?,?,?,?,?,?,?)",
-        (memory_type, content, origin, key, ts, valid_from, valid_until, source, tags))
+        " recorded_at, valid_from, valid_until, source, tags, content_id)"
+        " VALUES (?,?,?,?,?,?,?,?,?,?)",
+        (memory_type, content, origin, key, ts, valid_from, valid_until, source, tags, cid))
     entry_id = cur.lastrowid
     index_content(conn, backend, entry_id, content)
     add_provenance(conn, entry_id,
@@ -599,10 +725,42 @@ def link_entities(conn, src_id: int, dst_id: int, rel: str) -> bool:
         return False
 
 
+def link_entry_entities(conn, entry_id: int, entity_ids: list) -> None:
+    """Liga o registo às entidades que ele cita (é por aqui que o `forget` sabe que nós do grafo lhe pertencem)."""
+    conn.executemany("INSERT OR IGNORE INTO entry_entities(entry_id, entity_id) VALUES (?,?)",
+                     [(entry_id, e) for e in entity_ids])
+
+
+def entry_entity_names(conn) -> dict:
+    """{entry_id: [nomes das entidades ligadas, ordenados]} (vazio numa base sem a tabela)."""
+    if "entry_entities" not in table_names(conn):
+        return {}
+    out = {}
+    for r in conn.execute("SELECT l.entry_id AS eid, n.name AS name FROM entry_entities l"
+                          " JOIN entity_nodes n ON n.id = l.entity_id ORDER BY l.entry_id, n.name"):
+        out.setdefault(r["eid"], []).append(r["name"])
+    return out
+
+
 # ------------------------------------------------------------------ filtros/busca
+def like_escape(text: str) -> str:
+    """Escapa os curingas do LIKE (`%`, `_`) e o próprio escape: a tag casa só literalmente."""
+    return (text.replace(LIKE_ESCAPE, LIKE_ESCAPE * 2)
+                .replace("%", LIKE_ESCAPE + "%").replace("_", LIKE_ESCAPE + "_"))
+
+
+def tag_clause(col: str = "e.tags") -> str:
+    """Condição SQL 'a lista CSV de tags em <col> contém esta tag' (par de tag_param)."""
+    return f"(',' || LOWER(COALESCE({col},'')) || ',') LIKE ? ESCAPE '{LIKE_ESCAPE}'"
+
+
+def tag_param(tag: str) -> str:
+    return f"%,{like_escape(tag.strip().lower())},%"
+
+
 def build_filter(mtype: str = None, tags: list = None, include_superseded: bool = False,
                  include_expired: bool = False, now: str = None, any_tags: list = None):
-    """`tags` = TODAS têm de estar presentes (AND); `any_tags` = basta UMA (OR)."""
+    """`tags` = TODAS têm de estar presentes (AND); `any_tags` = basta UMA (OR). Tags casam literalmente."""
     conds = []
     params = []
     if not include_superseded:
@@ -614,12 +772,12 @@ def build_filter(mtype: str = None, tags: list = None, include_superseded: bool 
         conds.append("e.memory_type = ?")
         params.append(mtype)
     for tag in (tags or []):
-        conds.append("(',' || LOWER(COALESCE(e.tags,'')) || ',') LIKE ?")
-        params.append(f"%,{tag.strip().lower()},%")
+        conds.append(tag_clause())
+        params.append(tag_param(tag))
     anyt = [t.strip().lower() for t in (any_tags or []) if t.strip()]
     if anyt:
-        conds.append("(" + " OR ".join("(',' || LOWER(COALESCE(e.tags,'')) || ',') LIKE ?" for _ in anyt) + ")")
-        params += [f"%,{t},%" for t in anyt]
+        conds.append("(" + " OR ".join(tag_clause() for _ in anyt) + ")")
+        params += [tag_param(t) for t in anyt]
     where = (" AND " + " AND ".join(conds)) if conds else ""
     return where, params
 
@@ -1293,6 +1451,25 @@ def doctor_report(path: str, how: str, skill: str = None, deep: bool = False,
                     " (SELECT 1 FROM provenance p WHERE p.entry_id=e.id)")
         add("OK" if noprov == 0 else "WARN", "proveniência", "todos os registos têm nota" if noprov == 0
             else f"{noprov} registos sem nota")
+        if "content_id" in table_columns(conn, "memory_entries"):
+            nocid = q1("SELECT COUNT(*) FROM memory_entries WHERE content_id IS NULL")
+            add("OK" if nocid == 0 else "WARN", "ids por conteúdo",
+                "todos os registos têm id" if nocid == 0 else f"{nocid} registos sem id por conteúdo",
+                None if nocid == 0 else "corre `coala.py init` (preenche os ids; idempotente)")
+        if "entry_entities" in tables:
+            bad_links = q1("SELECT COUNT(*) FROM entry_entities l WHERE NOT EXISTS"
+                           " (SELECT 1 FROM memory_entries e WHERE e.id=l.entry_id)"
+                           " OR NOT EXISTS (SELECT 1 FROM entity_nodes n WHERE n.id=l.entity_id)")
+            add("OK" if bad_links == 0 else "FAIL", "ligações registo↔entidade",
+                "íntegras" if bad_links == 0 else f"{bad_links} apontam para registos/entidades inexistentes",
+                None if bad_links == 0 else "restaura um backup (não apagues à mão)")
+        if {"entity_edges", "entity_nodes"} <= tables:
+            bad_edges = q1("SELECT COUNT(*) FROM entity_edges x WHERE NOT EXISTS"
+                           " (SELECT 1 FROM entity_nodes n WHERE n.id=x.src)"
+                           " OR NOT EXISTS (SELECT 1 FROM entity_nodes n WHERE n.id=x.dst)")
+            add("OK" if bad_edges == 0 else "FAIL", "arestas do grafo",
+                "íntegras" if bad_edges == 0 else f"{bad_edges} apontam para entidades inexistentes",
+                None if bad_edges == 0 else "restaura um backup (não apagues à mão)")
         now = now_iso()
         total = q1("SELECT COUNT(*) FROM memory_entries")
         sup = q1("SELECT COUNT(*) FROM memory_entries WHERE superseded_by IS NOT NULL")
@@ -1423,8 +1600,8 @@ def import_entries(dest, backend, src_path: str, key_prefixes=None, source_prefi
             conds.append("substr(COALESCE(source,''),1,?) = ?")
             params += [len(p), p]
         for t in tags or []:
-            conds.append("(',' || LOWER(COALESCE(tags,'')) || ',') LIKE ?")
-            params.append(f"%,{t.strip().lower()},%")
+            conds.append(tag_clause("tags"))
+            params.append(tag_param(t))
         if all_rows:
             conds.append("1=1")
         sel = set()
@@ -1460,13 +1637,18 @@ def import_entries(dest, backend, src_path: str, key_prefixes=None, source_prefi
         for chunk in _chunks(sorted(sel)):
             q = ",".join("?" * len(chunk))
             rows += src.execute(f"SELECT * FROM memory_entries WHERE id IN ({q}) ORDER BY id", chunk).fetchall()
+        dest_cid = "content_id" in table_columns(dest, "memory_entries")
         for r in rows:
-            if r["supersession_key"] is not None:
+            # o id por conteúdo viaja com o registo (base v3) ou é calculado (base v2)
+            cid = (r["content_id"] if "content_id" in r.keys() and r["content_id"] else row_content_id(r))
+            hit = (dest.execute("SELECT id FROM memory_entries WHERE content_id=? LIMIT 1", (cid,)).fetchone()
+                   if dest_cid else None)
+            if hit is None and r["supersession_key"] is not None:
                 hit = dest.execute(
                     "SELECT id FROM memory_entries WHERE supersession_key=? AND recorded_at=?"
                     " AND memory_type=? AND content=? LIMIT 1",
                     (r["supersession_key"], r["recorded_at"], r["memory_type"], r["content"])).fetchone()
-            else:
+            elif hit is None:
                 hit = dest.execute(
                     "SELECT id FROM memory_entries WHERE supersession_key IS NULL AND recorded_at=?"
                     " AND memory_type=? AND content=? LIMIT 1",
@@ -1480,9 +1662,10 @@ def import_entries(dest, backend, src_path: str, key_prefixes=None, source_prefi
                 continue
             cur = dest.execute(
                 "INSERT INTO memory_entries(memory_type, content, origin_class, supersession_key,"
-                " recorded_at, valid_from, valid_until, source, tags) VALUES (?,?,?,?,?,?,?,?,?)",
+                " recorded_at, valid_from, valid_until, source, tags, content_id)"
+                " VALUES (?,?,?,?,?,?,?,?,?,?)",
                 (r["memory_type"], r["content"], r["origin_class"], r["supersession_key"],
-                 r["recorded_at"], r["valid_from"], r["valid_until"], r["source"], r["tags"]))
+                 r["recorded_at"], r["valid_from"], r["valid_until"], r["source"], r["tags"], cid))
             new_id = cur.lastrowid
             index_content(dest, backend, new_id, r["content"])
             note = prov.get(r["id"])
@@ -1527,6 +1710,355 @@ def import_entries(dest, backend, src_path: str, key_prefixes=None, source_prefi
                 "entities_new": ent_new, "edges_new": edge_new, "dry_run": dry_run}
     finally:
         src.close()
+
+
+# ------------------------------------------------------ import JSONL (ids por conteúdo)
+RECORD_TAG_FIELDS = ("site", "page", "kind", "status", "origin", "run")   # tags do registo canónico (plano §8.1)
+
+
+def merge_tags(*groups):
+    """Junta grupos de tags (CSV ou listas) sem repetir (sem distinguir maiúsculas), pela ordem. None se vazio."""
+    out, seen = [], set()
+    for g in groups:
+        for t in (g.split(",") if isinstance(g, str) else (g or [])):
+            t = str(t).strip()
+            if t and t.lower() not in seen:
+                seen.add(t.lower())
+                out.append(t)
+    return ",".join(out) or None
+
+
+def record_tags(rec: dict) -> list:
+    """Tags derivadas de um registo canónico: site:, page:, kind:, status:, origin:, run: (vírgula → ';')."""
+    out = []
+    for f in RECORD_TAG_FIELDS:
+        v = rec.get(f)
+        if isinstance(v, (str, int)) and not isinstance(v, bool) and str(v).strip():
+            out.append(f"{f}:{str(v).strip().replace(',', ';')}")
+    return out
+
+
+def _cid_arg(value, where: str, field: str) -> str:
+    if isinstance(value, str) and CID_RE.match(value):
+        return value
+    raise UsageError(f"{where}: `{field}` inválido ({value!r})",
+                     "usa um id por conteúdo (ex.: 16 hex) ou omite o campo para o motor o calcular")
+
+
+def _opt_str(obj: dict, field: str, where: str):
+    v = obj.get(field)
+    if v is None or isinstance(v, str):
+        return v
+    raise UsageError(f"{where}: `{field}` tem de ser texto ou null", "corrige a linha do JSONL")
+
+
+def _str_list(obj: dict, field: str, where: str) -> list:
+    v = obj.get(field)
+    if v is None:
+        return []
+    if isinstance(v, list) and all(isinstance(x, str) and x.strip() for x in v):
+        return [x.strip() for x in v]
+    raise UsageError(f"{where}: `{field}` tem de ser uma lista de textos", "corrige a linha do JSONL")
+
+
+def jsonl_item(obj: dict, where: str, origin: str = "agent") -> dict:
+    """
+    Normaliza uma linha de import num item. Dois formatos:
+      - linha do `export --format jsonl` (tem `content`): tipo/origem/chave/datas/fonte/tags/proveniência
+        da linha; id = `cid`, ou `id` se for texto; `id` inteiro = id local da base de origem (só serve para
+        religar o `superseded_by` inteiro de um export antigo); supersessão por `superseded_by_cid`;
+      - registo canónico (tem `schema` e `body`, ex.: sitemem/1): id = `id` da linha se vier, senão o
+        contrato de CID_FIELDS; conteúdo = o próprio registo em JSON (com o id); tags derivadas
+        (record_tags) + `tags` da linha; supersessão pela lista `supersedes`; origem = `origin` do import.
+    """
+    mtype = obj.get("type")
+    if mtype not in MEMORY_TYPES:
+        raise UsageError(f"{where}: `type` {mtype!r} inválido", f"usa um de {', '.join(MEMORY_TYPES)}")
+    item = {"type": mtype, "supersedes": [], "superseded_by": None, "superseded_by_int": None,
+            "int_id": None, "provenance": None, "entities": _str_list(obj, "entities", where)}
+    for f in ("key", "recorded_at", "valid_from", "valid_until", "source"):
+        item[f] = _opt_str(obj, f, where)
+    if "content" in obj:                                            # export do motor
+        content = obj.get("content")
+        if not isinstance(content, str) or not content.strip():
+            raise UsageError(f"{where}: `content` vazio", "cada linha de registo precisa de conteúdo")
+        org = obj.get("origin") or "agent"
+        if org not in ORIGINS:
+            raise UsageError(f"{where}: `origin` {org!r} inválido", f"usa um de {', '.join(ORIGINS)}")
+        tags = _opt_str(obj, "tags", where)            # tal e qual (entra no id calculado de um export antigo)
+        rid = obj.get("id")
+        if obj.get("cid") is not None:
+            cid = _cid_arg(obj["cid"], where, "cid")
+        elif isinstance(rid, str):
+            cid = _cid_arg(rid, where, "id")
+        else:
+            cid = entry_content_id(mtype, content, item["key"], org, item["source"], tags,
+                                   item["recorded_at"], item["valid_from"])
+        if isinstance(rid, int) and not isinstance(rid, bool):
+            item["int_id"] = rid
+        sb = obj.get("superseded_by_cid")
+        if sb is not None:
+            item["superseded_by"] = _cid_arg(sb, where, "superseded_by_cid")
+        else:
+            sb = obj.get("superseded_by")
+            if isinstance(sb, str):
+                item["superseded_by"] = _cid_arg(sb, where, "superseded_by")
+            elif isinstance(sb, int) and not isinstance(sb, bool):
+                item["superseded_by_int"] = sb
+            elif sb is not None:
+                raise UsageError(f"{where}: `superseded_by` inválido ({sb!r})", "usa o id do sucessor ou null")
+        item.update(content=content, origin=org, tags=tags, provenance=_opt_str(obj, "provenance", where))
+    else:                                                           # registo canónico
+        if not isinstance(obj.get("schema"), str) or not obj["schema"].strip() or "body" not in obj:
+            raise UsageError(f"{where}: registo canónico sem `schema`/`body`",
+                             "usa uma linha do `export --format jsonl` (com `content`)"
+                             " ou um registo com schema e body")
+        if not item["key"]:
+            raise UsageError(f"{where}: registo canónico sem `key`",
+                             "dá a cada registo a sua chave (ex.: site/<s>/<pág>/<kind>/<nome>)")
+        cid = _cid_arg(obj["id"], where, "id") if obj.get("id") is not None else content_id(obj)
+        sup = obj.get("supersedes")
+        if sup is not None and not isinstance(sup, list):
+            raise UsageError(f"{where}: `supersedes` tem de ser uma lista de ids", "corrige a linha do JSONL")
+        extra = obj.get("tags")
+        if extra is not None and not isinstance(extra, (str, list)):
+            raise UsageError(f"{where}: `tags` tem de ser CSV ou lista", "corrige a linha do JSONL")
+        rec = dict(obj)
+        rec["id"] = cid
+        item.update(content=json.dumps(rec, ensure_ascii=False, sort_keys=True), origin=origin,
+                    tags=merge_tags(record_tags(obj), extra),
+                    supersedes=[_cid_arg(s, where, "supersedes") for s in (sup or [])])
+    item["cid"] = cid
+    return item
+
+
+def load_jsonl(path: str, origin: str = "agent"):
+    """Lê e valida TODO o ficheiro (ou `-` = stdin) antes de escrever. Devolve (itens, arestas, rótulo)."""
+    if path == "-":
+        text, label = sys.stdin.read(), "<stdin>"
+    else:
+        label = os.path.abspath(os.path.expanduser(path))
+        try:
+            with open(label, encoding="utf-8") as fh:
+                text = fh.read()
+        except OSError as exc:
+            raise CoalaError(f"não foi possível ler {label} ({exc})", "confirma o caminho do ficheiro JSONL")
+        except UnicodeDecodeError:
+            raise UsageError(f"{label} não é UTF-8", "exporta/grava o JSONL em UTF-8")
+    items, edges = [], []
+    # split("\n"), não splitlines(): U+2028/U+2029 podem vir crus dentro das strings (ensure_ascii=False)
+    for n, line in enumerate(text.split("\n"), 1):
+        s = line.strip()
+        if not s:
+            continue
+        where = f"{label}:{n}"
+        try:
+            obj = json.loads(s)
+        except ValueError as exc:
+            raise UsageError(f"{where}: JSON inválido ({exc})", "um objeto JSON por linha")
+        if not isinstance(obj, dict):
+            raise UsageError(f"{where}: a linha não é um objeto JSON", "um objeto JSON por linha")
+        if "edge" in obj:
+            e = obj["edge"]
+            if not (isinstance(e, list) and len(e) == 3 and all(isinstance(x, str) and x.strip() for x in e)):
+                raise UsageError(f"{where}: aresta inválida {e!r}", "usa {\"edge\": [origem, relação, destino]}")
+            edges.append(tuple(x.strip() for x in e))
+            continue
+        if "content" not in obj and "schema" not in obj:
+            raise UsageError(f"{where}: formato desconhecido (nem `content` nem `schema`)",
+                             "usa linhas do `export --format jsonl` ou registos canónicos (schema/key/type/body)")
+        try:
+            item = jsonl_item(obj, where, origin)
+        except UnicodeEncodeError as exc:
+            raise UsageError(f"{where}: texto com caracteres inválidos ({exc.reason})",
+                             "corrige a codificação da linha")
+        item["line"] = n
+        items.append(item)
+    return items, edges, label
+
+
+def _chain_reaches(conn, start: int, target: int) -> bool:
+    """A cadeia superseded_by que parte de `start` chega a `target`? (evita ciclos ao religar)"""
+    seen, cur = set(), start
+    while cur is not None and cur not in seen:
+        if cur == target:
+            return True
+        seen.add(cur)
+        row = conn.execute("SELECT superseded_by FROM memory_entries WHERE id=?", (cur,)).fetchone()
+        cur = row[0] if row else None
+    return False
+
+
+def import_jsonl(dest, backend, items: list, edges: list, label: str, add_tags=None) -> dict:
+    """
+    Importa os itens de load_jsonl numa ligação aberta, SEM commit (quem chama decide — o --dry-run corre
+    isto numa cópia em memória e descarta):
+      1. id por conteúdo já existe na base, ou repete-se no ficheiro → já presente, nada muda;
+      2. registo novo entra com o id, o tipo, a origem, a chave, as datas, a fonte, as tags (+ --add-tags) e a
+         proveniência da linha (+ nota `Importado de …`), indexado (FTS5/vetores) e ligado às suas entidades;
+      3. a supersessão é refeita pelas relações de id por conteúdo (`supersedes` dos registos canónicos,
+         `superseded_by_cid`/`superseded_by` do export), também contra registos que já estavam na base;
+      4. invariante do motor: ≤1 versão ativa por chave (a mais recente ganha, como no `import --from`);
+      5. as arestas `{"edge": [src, rel, dst]}` entram no grafo (idempotente).
+    """
+    ts = now_iso()
+    extra = merge_tags(add_tags)
+    res = {"from": label, "format": "jsonl", "records": len(items), "imported": 0, "already_present": 0,
+           "duplicates_in_file": 0, "superseded": 0, "relations_missing": 0, "conflicts_resolved": 0,
+           "entities_new": 0, "edges_new": 0}
+    n_ent0 = dest.execute("SELECT COUNT(*) FROM entity_nodes").fetchone()[0]
+    seen = set()
+    for it in items:
+        cid = it["cid"]
+        if cid in seen:
+            res["duplicates_in_file"] += 1
+            continue
+        seen.add(cid)
+        if dest.execute("SELECT 1 FROM memory_entries WHERE content_id=? LIMIT 1", (cid,)).fetchone():
+            res["already_present"] += 1
+            continue
+        cur = dest.execute(
+            "INSERT INTO memory_entries(memory_type, content, origin_class, supersession_key, recorded_at,"
+            " valid_from, valid_until, source, tags, content_id) VALUES (?,?,?,?,?,?,?,?,?,?)",
+            (it["type"], it["content"], it["origin"], it["key"], it["recorded_at"] or ts, it["valid_from"],
+             it["valid_until"], it["source"], merge_tags(it["tags"], extra) if extra else it["tags"], cid))
+        new_id = cur.lastrowid
+        index_content(dest, backend, new_id, it["content"])
+        dest.execute("INSERT OR REPLACE INTO provenance(entry_id, note) VALUES (?,?)",
+                     (new_id, (it["provenance"] + " | " if it["provenance"] else "")
+                      + f"Importado de {label} (linha {it['line']}) em {ts}; id {cid}"))
+        if it["entities"]:
+            link_entry_entities(dest, new_id, ensure_entities(dest, it["entities"]))
+        res["imported"] += 1
+
+    int_cid = {it["int_id"]: it["cid"] for it in items if it["int_id"] is not None}
+    rels = []
+    for it in items:
+        rels += [(s, it["cid"]) for s in it["supersedes"]]
+        sb = it["superseded_by"] or int_cid.get(it["superseded_by_int"])
+        if sb:
+            rels.append((it["cid"], sb))
+        elif it["superseded_by_int"] is not None:
+            res["relations_missing"] += 1
+    for old_cid, new_cid in rels:
+        if old_cid == new_cid:
+            continue
+        new = dest.execute("SELECT id FROM memory_entries WHERE content_id=?"
+                           " ORDER BY (superseded_by IS NULL) DESC, id DESC LIMIT 1", (new_cid,)).fetchone()
+        olds = [r[0] for r in dest.execute("SELECT id FROM memory_entries WHERE content_id=?", (old_cid,))]
+        if new is None or not olds:
+            res["relations_missing"] += 1
+            continue
+        for oid in olds:
+            if oid != new[0] and not _chain_reaches(dest, new[0], oid) and supersede_entry(dest, oid, new[0], ts):
+                res["superseded"] += 1
+
+    for k in sorted({it["key"] for it in items if it["key"]}):     # invariante: ≤1 versão ativa por chave
+        act = dest.execute("SELECT id FROM memory_entries WHERE supersession_key=? AND superseded_by IS NULL"
+                           " ORDER BY recorded_at, id", (k,)).fetchall()
+        for old in act[:-1]:
+            if supersede_entry(dest, old[0], act[-1][0], ts):
+                res["conflicts_resolved"] += 1
+
+    for s, rel, d in edges:
+        a, b = ensure_entities(dest, [s, d])
+        if link_entities(dest, a, b, rel):
+            res["edges_new"] += 1
+    res["entities_new"] = dest.execute("SELECT COUNT(*) FROM entity_nodes").fetchone()[0] - n_ent0
+    return res
+
+
+# ------------------------------------------------------------- forget (apagar de verdade)
+def forget_result(tags: list) -> dict:
+    return {"tags": list(tags), "entries": 0, "chunks": 0, "fts_rows": 0, "vectors": 0, "provenance": 0,
+            "entity_links": 0, "entities": 0, "edges": 0, "relinked": 0, "conflicts_resolved": 0}
+
+
+def forget_by_tags(conn, backend, tags: list, optimize: bool = True) -> dict:
+    """
+    APAGA de verdade (sem expirar, sem backup) todos os registos com QUALQUER das tags — todas as versões
+    (ativas, suplantadas, expiradas) — e o que lhes pertence em todas as tabelas: chunks (texto e vetor
+    `embedding`), índice FTS5, `chunks_vec` (sqlite-vec), proveniência, ligações registo↔entidade e as
+    entidades que só eles citavam (com as arestas delas). Um sobrevivente cujo sucessor é apagado passa a
+    apontar para o sucessor seguinte que sobrevive (ou fica sem sucessor, com a validade já fechada).
+    Sem commit (quem chama decide); quem chama liga `PRAGMA secure_delete` para zerar as páginas libertadas.
+    """
+    ts = now_iso()
+    res = forget_result(tags)
+    if not tags:
+        return res
+    where = " OR ".join(tag_clause("tags") for _ in tags)
+    ids = [r[0] for r in conn.execute(f"SELECT id FROM memory_entries WHERE {where}",
+                                      [tag_param(t) for t in tags])]
+    if not ids:
+        return res
+    tables = table_names(conn)
+    if "chunks_vec" in tables and backend != "sqlite-vec":
+        raise DependencyError("a base tem vetores sqlite-vec (chunks_vec) mas a extensão não carregou",
+                              "instala o sqlite-vec (`pip install sqlite-vec`) e repete o forget — sem ela os"
+                              " vetores ficariam para trás")
+    doomed = set(ids)
+    conn.execute("CREATE TEMP TABLE IF NOT EXISTS forget_ids(id INTEGER PRIMARY KEY)")
+    conn.execute("DELETE FROM temp.forget_ids")
+    conn.executemany("INSERT INTO temp.forget_ids(id) VALUES (?)", [(i,) for i in ids])
+    in_d = "IN (SELECT id FROM temp.forget_ids)"
+
+    # 1. índice FTS5 (conteúdo externo: o 'delete' leva o texto indexado) e vetores
+    chunks = conn.execute("SELECT id, text, embedding IS NOT NULL AS emb FROM chunks"
+                          f" WHERE entry_id {in_d}").fetchall()
+    for c in chunks:
+        conn.execute("INSERT INTO chunks_fts(chunks_fts, rowid, text) VALUES('delete', ?, ?)", (c[0], c[1]))
+    res["fts_rows"] = len(chunks)
+    res["vectors"] = sum(1 for c in chunks if c[2])
+    if "chunks_vec" in tables:
+        for part in _chunks([c[0] for c in chunks]):
+            q = ",".join("?" * len(part))
+            res["vectors"] += conn.execute(f"DELETE FROM chunks_vec WHERE rowid IN ({q})", part).rowcount
+
+    # 2. sobreviventes cujo sucessor vai ser apagado → sucessor seguinte que sobrevive (ou nenhum)
+    succ = {r[0]: r[1] for r in conn.execute(f"SELECT id, superseded_by FROM memory_entries WHERE id {in_d}")}
+    keys = set()
+    for r in conn.execute(f"SELECT id, superseded_by, supersession_key FROM memory_entries"
+                          f" WHERE superseded_by {in_d} AND id NOT {in_d}").fetchall():
+        nxt, hops = r[1], set()
+        while nxt in doomed and nxt not in hops:
+            hops.add(nxt)
+            nxt = succ.get(nxt)
+        nxt = None if nxt in doomed else nxt
+        conn.execute("UPDATE memory_entries SET superseded_by=? WHERE id=?", (nxt, r[0]))
+        add_provenance(conn, r[0], f"Sucessor apagado por `forget` em {ts}"
+                       + (f"; passa a suplantado por #{nxt}" if nxt else ""))
+        res["relinked"] += 1
+        if r[2]:
+            keys.add(r[2])
+    conn.execute(f"UPDATE memory_entries SET superseded_by=NULL WHERE id {in_d}")
+
+    # 3. linhas de todas as tabelas (a ordem respeita as chaves estrangeiras)
+    ents = []
+    if "entry_entities" in tables:
+        ents = [r[0] for r in conn.execute(f"SELECT DISTINCT entity_id FROM entry_entities WHERE entry_id {in_d}")]
+        res["entity_links"] = conn.execute(f"DELETE FROM entry_entities WHERE entry_id {in_d}").rowcount
+    res["provenance"] = conn.execute(f"DELETE FROM provenance WHERE entry_id {in_d}").rowcount
+    res["chunks"] = conn.execute(f"DELETE FROM chunks WHERE entry_id {in_d}").rowcount
+    res["entries"] = conn.execute(f"DELETE FROM memory_entries WHERE id {in_d}").rowcount
+
+    # 4. grafo: entidades que só os apagados citavam saem, com as arestas delas
+    for e in ents:
+        if conn.execute("SELECT 1 FROM entry_entities WHERE entity_id=? LIMIT 1", (e,)).fetchone():
+            continue
+        res["edges"] += conn.execute("DELETE FROM entity_edges WHERE src=? OR dst=?", (e, e)).rowcount
+        res["entities"] += conn.execute("DELETE FROM entity_nodes WHERE id=?", (e,)).rowcount
+
+    for k in sorted(keys):                                   # invariante: ≤1 versão ativa por chave
+        act = conn.execute("SELECT id FROM memory_entries WHERE supersession_key=? AND superseded_by IS NULL"
+                           " ORDER BY recorded_at, id", (k,)).fetchall()
+        for old in act[:-1]:
+            if supersede_entry(conn, old[0], act[-1][0], ts):
+                res["conflicts_resolved"] += 1
+    if optimize:   # funde os segmentos do FTS5: os termos apagados deixam de existir no índice
+        conn.execute("INSERT INTO chunks_fts(chunks_fts) VALUES('optimize')")
+    conn.execute("DELETE FROM temp.forget_ids")
+    return res
 
 
 # ----------------------------------------------------------------------- comandos
@@ -1586,6 +2118,7 @@ def cmd_add(args) -> int:
         entity_ids = ensure_entities(conn, names)
         for a, b in zip(entity_ids, entity_ids[1:]):
             link_entities(conn, a, b, "co-ocorre")
+        link_entry_entities(conn, entry_id, entity_ids)
 
     conn.commit()
     conn.close()
@@ -1866,16 +2399,25 @@ def cmd_export(args) -> int:
         "SELECT s.name AS src, e.rel AS rel, d.name AS dst"
         " FROM entity_edges e JOIN entity_nodes s ON s.id=e.src"
         " JOIN entity_nodes d ON d.id=e.dst").fetchall()
+    cids = {r["id"]: r["content_id"] for r in entries}
+    ents = entry_entity_names(conn)
+
+    def jsonl_row(r) -> dict:
+        # `cid`/`superseded_by_cid` = ids por conteúdo: é por eles que o `import --jsonl` refaz a base
+        # (os `id` inteiros são locais desta base e ficam só como referência)
+        d = {"id": r["id"], "cid": r["content_id"], "type": r["memory_type"], "origin": r["origin_class"],
+             "key": r["supersession_key"], "superseded_by": r["superseded_by"],
+             "superseded_by_cid": cids.get(r["superseded_by"]),
+             "recorded_at": r["recorded_at"], "valid_from": r["valid_from"],
+             "valid_until": r["valid_until"], "source": r["source"], "tags": r["tags"],
+             "content": redact(r["content"]), "provenance": redact(prov.get(r["id"]) or "")}
+        if ents.get(r["id"]):
+            d["entities"] = ents[r["id"]]
+        return d
 
     if args.format == "jsonl":
         # dump CANÓNICO: determinístico (sem carimbo de geração), um objeto por linha — p/ diff git
-        lines = [json.dumps({
-            "id": r["id"], "type": r["memory_type"], "origin": r["origin_class"],
-            "key": r["supersession_key"], "superseded_by": r["superseded_by"],
-            "recorded_at": r["recorded_at"], "valid_from": r["valid_from"],
-            "valid_until": r["valid_until"], "source": r["source"], "tags": r["tags"],
-            "content": redact(r["content"]), "provenance": redact(prov.get(r["id"]) or ""),
-        }, ensure_ascii=False, sort_keys=True) for r in entries]
+        lines = [json.dumps(jsonl_row(r), ensure_ascii=False, sort_keys=True) for r in entries]
         lines += [json.dumps({"edge": [e["src"], e["rel"], e["dst"]]}, ensure_ascii=False)
                   for e in sorted(edges, key=lambda e: (e["src"], e["rel"], e["dst"]))]
         text = "\n".join(lines) + ("\n" if lines else "")
@@ -1883,11 +2425,12 @@ def cmd_export(args) -> int:
         payload = {
             "db": path, "generated_at": now_iso(), "backend_vector": backend,
             "entries": [{
-                "id": r["id"], "type": r["memory_type"], "origin": r["origin_class"],
+                "id": r["id"], "cid": r["content_id"], "type": r["memory_type"], "origin": r["origin_class"],
                 "content": redact(r["content"]), "supersession_key": r["supersession_key"],
-                "superseded_by": r["superseded_by"], "recorded_at": r["recorded_at"],
+                "superseded_by": r["superseded_by"], "superseded_by_cid": cids.get(r["superseded_by"]),
+                "recorded_at": r["recorded_at"],
                 "valid_from": r["valid_from"], "valid_until": r["valid_until"],
-                "source": r["source"], "tags": r["tags"],
+                "source": r["source"], "tags": r["tags"], "entities": ents.get(r["id"], []),
                 "provenance": redact(prov.get(r["id"]) or ""),
             } for r in entries],
             "edges": [dict(e) for e in edges],
@@ -1903,7 +2446,7 @@ def cmd_export(args) -> int:
             lines.append(f"## {title} ({len(rows)})")
             for r in rows:
                 lines.append(f"### #{r['id']} · {r['origin_class']} · {fmt_validity(r)}"
-                             f" · registado {r['recorded_at']}")
+                             f" · registado {r['recorded_at']} · id `{r['content_id']}`")
                 if r["source"]:
                     lines.append(f"- fonte: {r['source']}")
                 if r["tags"]:
@@ -2009,7 +2552,49 @@ def cmd_restore(args) -> int:
     return 0
 
 
+def cmd_import_jsonl(args) -> int:
+    """`import --jsonl FICHEIRO|-`: o ficheiro inteiro, numa transação (tudo ou nada), com ids por conteúdo."""
+    if args.key_prefix or args.source_prefix or args.tags or args.ids or args.all or args.graph_entities:
+        raise UsageError("--jsonl importa o ficheiro inteiro (os seletores são do --from)",
+                         "tira --key-prefix/--source-prefix/--tags/--ids/--all/--graph-entities"
+                         " (para acrescentar tags usa --add-tags)")
+    items, edges, label = load_jsonl(args.jsonl, args.origin or "agent")
+    path, how, skill = resolve_db(args.db)
+    if args.dry_run:
+        dest, backend = open_scratch_copy(path)          # mesmo algoritmo numa cópia em memória
+    else:
+        dest, path, backend = connect_path(path)
+    try:
+        res = import_jsonl(dest, backend, items, edges, label, add_tags=args.add_tags)
+        if args.dry_run:
+            dest.rollback()
+        else:
+            dest.commit()
+    except BaseException:
+        dest.rollback()
+        raise
+    finally:
+        dest.close()
+    res.update(db=path, dry_run=bool(args.dry_run))
+    if args.json:
+        emit(json.dumps(res, ensure_ascii=False))
+    else:
+        emit(f"{'DRY-RUN: ' if args.dry_run else 'OK: '}import de {label} → {path}\n"
+             f"  registos={res['records']} · importados={res['imported']} · já presentes={res['already_present']}"
+             f" · repetidos no ficheiro={res['duplicates_in_file']}\n"
+             f"  supersessões refeitas={res['superseded']} · relações sem par={res['relations_missing']}"
+             f" · conflitos de chave resolvidos={res['conflicts_resolved']}"
+             f" · entidades novas={res['entities_new']} · arestas novas={res['edges_new']}")
+    return 0
+
+
 def cmd_import(args) -> int:
+    if bool(getattr(args, "jsonl", None)) == bool(args.from_db):
+        raise UsageError("import precisa de UMA origem", "usa --from <base> (outra base CoALA) ou --jsonl <ficheiro|->")
+    if args.jsonl:
+        return cmd_import_jsonl(args)
+    if args.add_tags or args.origin:
+        raise UsageError("--add-tags/--origin só valem com --jsonl", "o --from preserva as tags e a origem da base")
     key_prefixes = args.key_prefix or []
     source_prefixes = args.source_prefix or []
     tags = [t for t in (args.tags or "").split(",") if t.strip()]
@@ -2045,6 +2630,57 @@ def cmd_import(args) -> int:
              f" · importados={res['imported']} · já presentes={res['already_present']}\n"
              f"  cadeias religadas={res['relinked']} · conflitos de chave resolvidos={res['conflicts_resolved']}"
              f" · entidades novas={res['entities_new']} · arestas novas={res['edges_new']}")
+    return 0
+
+
+def cmd_forget(args) -> int:
+    tags = []
+    for t in args.tag or []:
+        t = (t or "").strip().lower()
+        if "," in t:
+            raise UsageError(f"--tag {t!r} tem vírgula", "uma tag por --tag (repetível: basta UMA para apagar)")
+        if t and t not in tags:
+            tags.append(t)
+    if not tags:
+        raise UsageError("forget sem --tag", "indica a tag, ex.: `forget --tag site:exemplo --dry-run`")
+    path, how, skill = resolve_db(args.db)
+    if not os.path.isfile(path):                       # nada a esquecer — e não cria uma base para isso
+        res = forget_result(tags)
+    elif args.dry_run:
+        conn, backend = open_scratch_copy(path)       # mesmo algoritmo numa cópia em memória
+        try:
+            res = forget_by_tags(conn, backend, tags, optimize=False)
+        finally:
+            conn.close()
+    else:
+        conn, path, backend = connect_path(path)
+        try:
+            conn.execute("PRAGMA secure_delete=ON")    # páginas libertadas são zeradas, não só marcadas
+            res = forget_by_tags(conn, backend, tags)
+            conn.commit()
+            if res["entries"]:                         # o WAL ainda guarda as páginas antigas: devolve-as à base
+                ck = conn.execute("PRAGMA wal_checkpoint(TRUNCATE)").fetchone()
+                res["wal_checkpoint"] = "ok" if ck and ck[0] == 0 else "ocupado"
+        except BaseException:
+            conn.rollback()
+            raise
+        finally:
+            conn.close()
+    res.update(db=path, dry_run=bool(args.dry_run), db_exists=os.path.isfile(path))
+    if args.json:
+        emit(json.dumps(res, ensure_ascii=False))
+    else:
+        verbo = "apagaria" if args.dry_run else "apagou"
+        msg = (f"{'DRY-RUN: ' if args.dry_run else 'OK: '}forget --tag {', '.join(tags)} → {path}\n"
+               f"  {verbo} registos={res['entries']} (todas as versões) · chunks={res['chunks']}"
+               f" · FTS={res['fts_rows']} · vetores={res['vectors']} · proveniência={res['provenance']}"
+               f" · ligações={res['entity_links']} · entidades={res['entities']} · arestas={res['edges']}\n"
+               f"  sobreviventes religados={res['relinked']}"
+               f" · conflitos de chave resolvidos={res['conflicts_resolved']}")
+        if res.get("wal_checkpoint") == "ocupado":
+            msg += ("\n  aviso: WAL ocupado por outro processo — as páginas antigas saem no próximo checkpoint"
+                    " (fecha os outros acessos e corre `doctor`)")
+        emit(msg)
     return 0
 
 
@@ -2129,6 +2765,288 @@ def _tiny_pdf(text: str) -> bytes:
     out += b"".join(b"%010d 00000 n \n" % off for off in offsets)
     out += b"trailer\n<< /Size %d /Root 1 0 R >>\nstartxref\n%d\n%%%%EOF\n" % (len(objs) + 1, xref)
     return out
+
+
+def _selftest_v3(tmp: str, check, run_cmd) -> None:
+    """Casos 44–58 (esquema v3). Só bases dentro de `tmp`; dados sintéticos (example.invalid, SYNTH)."""
+    def jl(path, objs):
+        with open(path, "w", encoding="utf-8") as fh:
+            fh.write("".join(json.dumps(o, ensure_ascii=False) + "\n" for o in objs))
+
+    def imp(db, jsonl, **kw):
+        a = dict(db=db, json=True, from_db=None, jsonl=jsonl, key_prefix=None, source_prefix=None, tags=None,
+                 ids=None, all=False, with_graph=False, graph_entities=None, dry_run=False, add_tags=None,
+                 origin=None)
+        a.update(kw)
+        return json.loads(run_cmd(cmd_import, **a)[1])
+
+    def forget(db, *tags, dry=False):
+        return json.loads(run_cmd(cmd_forget, db=db, json=True, tag=list(tags), dry_run=dry)[1])
+
+    def add(db, content, **kw):
+        a = dict(db=db, json=True, type="semantic", content=content, origin="agent", key=None, source=None,
+                 tags=None, valid_from=None, valid_until=None, entities=None)
+        a.update(kw)
+        return json.loads(run_cmd(cmd_add, **a)[1])["id"]
+
+    def export(db, out):
+        run_cmd(cmd_export, db=db, format="jsonl", out=out)
+
+    def fails(db):
+        return [c for c in doctor_report(db, "--db", None, deep=True, freshness=False) if c["level"] == "FAIL"]
+
+    def sha(path):
+        return file_sha256(path) if os.path.isfile(path) else None
+
+    def snap(db):
+        """Estado comparável entre bases: tudo pelos ids por conteúdo (os ids inteiros são locais)."""
+        c = sqlite3.connect(db)
+        try:
+            rows = c.execute("SELECT id, content_id, superseded_by, valid_until FROM memory_entries").fetchall()
+            cid = {r[0]: r[1] for r in rows}
+            now = now_iso()
+            return {"all": sorted(cid.values()),
+                    "active": sorted(r[1] for r in rows if r[2] is None and (r[3] is None or r[3] > now)),
+                    "pairs": sorted((cid[r[0]], cid[r[2]]) for r in rows if r[2] is not None),
+                    "ents": sorted((cid[r[0]], r[1]) for r in c.execute(
+                        "SELECT l.entry_id, n.name FROM entry_entities l JOIN entity_nodes n ON n.id=l.entity_id")),
+                    "edges": sorted(tuple(r) for r in c.execute(
+                        "SELECT s.name, x.rel, d.name FROM entity_edges x JOIN entity_nodes s ON s.id=x.src"
+                        " JOIN entity_nodes d ON d.id=x.dst"))}
+        finally:
+            c.close()
+
+    def q(db, sql, *a):
+        c = sqlite3.connect(db)
+        try:
+            return c.execute(sql, a).fetchall()
+        finally:
+            c.close()
+
+    # 44. vetor fixo do contrato (o "ç" prende o ensure_ascii=False; campos ausentes contam como null)
+    vec = {"schema": "sitemem/1", "key": "site/example.invalid/home/action/definir_endereço",
+           "type": "procedural", "site": "example.invalid", "page": "home|busca", "kind": "action",
+           "body": {"name": "definir_endereço", "params": {"cep": "{{cep}}"},
+                    "steps": [{"op": "click", "sel": "[data-synth=cep]"},
+                              {"op": "type", "sel": "[data-synth=cep]", "value": "{{cep}}"}],
+                    "irreversible": False, "requires": []},
+           "status": "hypothesis", "supersedes": [], "valid_from": "2026-09-29", "ttl_days": 30,
+           "evidence": {"offline": True, "shadow": ">=3"}, "origin": "local"}
+    promoted = dict(vec, status="validated", evidence={"live": ">=3", "walls_after": 0}, valid_from="2026-10-01",
+                    ttl_days=90, supersedes=["0123456789abcdef"], origin="curated", runs=99, last_used="2026-10-02")
+    minimal = {"schema": "sitemem/1", "key": "site/example.invalid/x/fact/lang", "type": "semantic",
+               "body": {"lang": "pt-BR"}}
+    check("44 id por conteúdo = contrato (vetor fixo; promover/status/evidence/datas/só-locais não mudam o id)",
+          content_id(vec) == "522df88d33117fee" and content_id(promoted) == "522df88d33117fee"
+          and entry_content_id("procedural", json.dumps(vec, ensure_ascii=False)) == "522df88d33117fee"
+          and content_id(minimal) == "2fd0f7067870e6e8"
+          and content_id(dict(vec, body={"name": "outro"})) != "522df88d33117fee",
+          f"{content_id(vec)} {content_id(minimal)}")
+
+    # 45. import --jsonl de registos canónicos: `id` da linha vale; supersedes refeito; tags derivadas
+    src = os.path.join(tmp, "v3-src.sqlite")
+    v2rec = dict(vec, body=dict(vec["body"], steps=vec["body"]["steps"][:1]), supersedes=["522df88d33117fee"])
+    recs = [vec,
+            {"schema": "sitemem/1", "id": "feedfacecafebeef", "key": "site/example.invalid/home/wait/lista",
+             "type": "procedural", "site": "example.invalid", "page": "home", "kind": "wait",
+             "body": {"list_min_items": {"sel": "[data-synth=lista]", "n": 1}}, "status": "validated"},
+            v2rec,
+            {"schema": "sitemem/1", "key": "site/outro.example.invalid/busca/fact/lang", "type": "semantic",
+             "site": "outro.example.invalid", "page": "busca", "kind": "fact", "body": {"lang": "pt-BR"},
+             "entities": ["SYNTH outro site"]}]
+    f_recs = os.path.join(tmp, "v3-recs.jsonl")
+    jl(f_recs, recs)
+    r1 = imp(src, f_recs, add_tags="origin:curated")
+    v2cid = content_id(v2rec)
+    rows = {r[0]: r for r in q(src, "SELECT content_id, superseded_by, tags, id FROM memory_entries")}
+    ok45 = (r1["imported"] == 4 and "feedfacecafebeef" in rows and "522df88d33117fee" in rows
+            and rows["522df88d33117fee"][1] == rows[v2cid][3] and rows[v2cid][1] is None
+            and {"site:example.invalid", "kind:action", "status:hypothesis", "origin:curated"}
+            <= set(rows[v2cid][2].split(",")))
+    check("45 import --jsonl: `id` da linha vale, supersedes refeito pelos ids, tags derivadas + --add-tags",
+          ok45, str(r1))
+
+    # 46–47. export → import numa base nova reproduz ativos, supersessões e grafo; reimportar = 0
+    add(src, "SYNTH facto v1 da porta", key="synth-porta", tags="synth,api", entities="SYNTH api,SYNTH porta")
+    add(src, "SYNTH facto v2 da porta", key="synth-porta", tags="synth,api")
+    add(src, "SYNTH facto v3 da porta — com separador unicode", key="synth-porta", tags="synth,api")
+    add(src, "SYNTH episódio sem chave", type="episodic", origin="system")
+    add(src, "SYNTH facto já expirado", key="synth-exp", valid_until="2000-01-01T00:00:00+00:00")
+    run_cmd(cmd_link, db=src, src="SYNTH outro site", rel="usa", dst="SYNTH lib")
+    f_exp, dst = os.path.join(tmp, "v3-export.jsonl"), os.path.join(tmp, "v3-dst.sqlite")
+    export(src, f_exp)
+    r2 = imp(dst, f_exp)
+    s_src, s_dst = snap(src), snap(dst)
+    check("46 export → import numa base nova: mesmos ids, ativos, supersessões e grafo",
+          s_src == s_dst and r2["imported"] == len(s_src["all"]) and len(s_src["pairs"]) == 3
+          and len(s_src["edges"]) >= 2 and len(s_src["ents"]) >= 3,
+          f"{r2} diff={[k for k in s_src if s_src[k] != s_dst[k]]}")
+    r3 = imp(dst, f_exp)
+    check("47 reimportar o mesmo JSONL cria 0 registos (e não mexe na base)",
+          r3["imported"] == 0 and r3["already_present"] == len(s_src["all"]) and snap(dst) == s_dst, str(r3))
+
+    # 48. export antigo (v2: ids inteiros, sem cid) — religa pelos inteiros do ficheiro, ids calculados
+    legacy = []
+    with open(f_exp, encoding="utf-8") as fh:
+        for ln in fh.read().split("\n"):
+            if ln.strip():
+                o = json.loads(ln)
+                o.pop("cid", None)
+                o.pop("superseded_by_cid", None)
+                o.pop("entities", None)
+                legacy.append(o)
+    f_leg, leg = os.path.join(tmp, "v3-legacy.jsonl"), os.path.join(tmp, "v3-leg.sqlite")
+    jl(f_leg, legacy)
+    r4 = imp(leg, f_leg)
+    r5 = imp(leg, f_leg)
+    s_leg = snap(leg)
+    check("48 export antigo (ids inteiros) → mesmos ids por conteúdo e cadeias; reimport = 0",
+          s_leg["all"] == s_src["all"] and s_leg["pairs"] == s_src["pairs"] and s_leg["active"] == s_src["active"]
+          and r5["imported"] == 0, f"{r4} {r5}")
+
+    # 49. --dry-run: mesmas contagens do import real e disco intocado (nem cria a base)
+    dry_db = os.path.join(tmp, "v3-dry.sqlite")
+    d1 = imp(dry_db, f_exp, dry_run=True)
+    before = sha(dst)
+    d2 = imp(dst, f_exp, dry_run=True)
+    check("49 import --jsonl --dry-run conta como o real e não escreve",
+          not os.path.exists(dry_db) and d1["imported"] == r2["imported"] and d2["imported"] == 0
+          and sha(dst) == before, f"{d1} {d2}")
+
+    # 50. tudo ou nada: uma linha inválida no fim → erro e a base fica como estava
+    f_bad = os.path.join(tmp, "v3-bad.jsonl")
+    jl(f_bad, [{"schema": "sitemem/1", "key": "site/example.invalid/z/fact/a", "type": "semantic",
+                "site": "example.invalid", "body": {"a": 1}},
+               {"schema": "sitemem/1", "key": "site/example.invalid/z/fact/b", "type": "nao-existe", "body": {}}])
+    n_before = q(dst, "SELECT COUNT(*) FROM memory_entries")[0][0]
+    try:
+        imp(dst, f_bad)
+        refused = False
+    except UsageError as exc:
+        refused = ":2:" in exc.what
+    check("50 import --jsonl é tudo ou nada (linha inválida → erro com a linha, base intocada)",
+          refused and q(dst, "SELECT COUNT(*) FROM memory_entries")[0][0] == n_before)
+
+    # 51. LIKE com ESCAPE: `_`, `%` e `\` nas tags são literais
+    esc = os.path.join(tmp, "v3-esc.sqlite")
+    for t in ("site:a_b", "site:axb", "site:a%c", "site:azzc", "site:a\\b"):
+        add(esc, f"SYNTH registo {t}", tags=t)
+    ec = sqlite3.connect(esc)
+    try:
+        def n_tag(**kw):
+            w, p = build_filter(**kw)
+            return [r[0] for r in ec.execute("SELECT e.tags FROM memory_entries e WHERE 1=1" + w, p)]
+        hits = (n_tag(tags=["site:a_b"]), n_tag(tags=["site:a%c"]), n_tag(tags=["site:a\\b"]),
+                n_tag(any_tags=["site:a_b", "site:a%c"]), n_tag(tags=["site:a%"]))
+    finally:
+        ec.close()
+    esc_dst = os.path.join(tmp, "v3-esc-dst.sqlite")
+    dconn, _, dbk = connect_path(esc_dst)
+    try:
+        ri = import_entries(dconn, dbk, esc, tags=["site:a_b"])
+    finally:
+        dconn.close()
+    fz = forget(esc, "site:a%c", dry=True)
+    check("51 tag com `_`/`%`/`\\` casa só literalmente (filtros, import --tags, forget)",
+          hits == (["site:a_b"], ["site:a%c"], ["site:a\\b"], ["site:a_b", "site:a%c"], [])
+          and ri["imported"] == 1 and fz["entries"] == 1, f"{hits} import={ri['imported']} forget={fz['entries']}")
+
+    # 52. forget --dry-run conta exatamente o que o real apaga e não escreve
+    before = sha(dst)
+    fd = forget(dst, "site:outro.example.invalid", dry=True)
+    same_disk = sha(dst) == before
+    fr = forget(dst, "site:outro.example.invalid")
+    keys = ("entries", "chunks", "fts_rows", "vectors", "provenance", "entity_links", "entities", "edges")
+    check("52 forget --dry-run = contagens do real e disco intocado",
+          same_disk and fd["entries"] == 1 and all(fd[k] == fr[k] for k in keys), f"{fd} {fr}")
+
+    # 53. forget apagou de todas as tabelas (principal, FTS, vetores, proveniência, grafo) e o doctor fica OK
+    left = q(dst, "SELECT COUNT(*) FROM memory_entries WHERE tags LIKE '%site:outro.example.invalid%'")[0][0]
+    fts = q(dst, "SELECT COUNT(*) FROM chunks_fts WHERE chunks_fts MATCH 'outro'")[0][0]
+    orphan = q(dst, "SELECT (SELECT COUNT(*) FROM chunks c WHERE NOT EXISTS (SELECT 1 FROM memory_entries e"
+                    " WHERE e.id=c.entry_id)) + (SELECT COUNT(*) FROM provenance p WHERE NOT EXISTS"
+                    " (SELECT 1 FROM memory_entries e WHERE e.id=p.entry_id))")[0][0]
+    ents = [r[0] for r in q(dst, "SELECT name FROM entity_nodes")]
+    edges_left = q(dst, "SELECT COUNT(*) FROM entity_edges x JOIN entity_nodes n ON n.id=x.src"
+                        " WHERE n.name='SYNTH outro site'")[0][0]
+    check("53 forget apaga de todas as tabelas (principal, FTS, vetores, grafo) e o doctor fica OK",
+          left == 0 and fts == 0 and orphan == 0 and "SYNTH outro site" not in ents and "SYNTH lib" in ents
+          and edges_left == 0 and fr["entities"] == 1 and fr["edges"] == 1 and fr["vectors"] >= 1
+          and not fails(dst), f"left={left} fts={fts} orphan={orphan} ents={ents} fails={fails(dst)}")
+
+    # 54. sobreviventes religados: A → B(apagado) → C vira A → C; D → E(apagado, cabeça) deixa D sem sucessor
+    ch = os.path.join(tmp, "v3-chain.sqlite")
+    a = add(ch, "SYNTH A", key="synth-k")
+    add(ch, "SYNTH B", key="synth-k", tags="site:apagar.example.invalid")
+    c_id = add(ch, "SYNTH C", key="synth-k")
+    d = add(ch, "SYNTH D", key="synth-h")
+    add(ch, "SYNTH E", key="synth-h", tags="site:apagar.example.invalid")
+    fc = forget(ch, "site:apagar.example.invalid")
+    sup = dict(q(ch, "SELECT id, superseded_by FROM memory_entries"))
+    d_exp = q(ch, "SELECT valid_until FROM memory_entries WHERE id=?", d)[0][0]
+    check("54 forget religa a cadeia dos sobreviventes (sem ponteiros pendurados; doctor OK)",
+          fc["entries"] == 2 and fc["relinked"] == 2 and sup.get(a) == c_id and sup.get(d, 0) is None
+          and d_exp is not None and not fails(ch), f"{fc} {sup} fails={fails(ch)}")
+
+    # 55. apagar de verdade: o texto esquecido já não está nos bytes do ficheiro (secure_delete + optimize + WAL)
+    fb = os.path.join(tmp, "v3-bytes.sqlite")
+
+    def disk(path):
+        blob = b""
+        for suffix in ("", "-wal"):
+            if os.path.isfile(path + suffix):
+                with open(path + suffix, "rb") as fh:
+                    blob += fh.read()
+        return blob
+
+    add(fb, "SYNTH registo que fica")
+    add(fb, "SYNTHSEGREDOFORGET marcador que tem de sumir", tags="site:bytes.example.invalid")
+    pre = disk(fb)
+    forget(fb, "site:bytes.example.invalid")
+    blob = disk(fb)
+    # `segredoforget` minúsculo só existe no índice FTS5 (termos com prefixo comprimido: `synth` + sufixo)
+    gone = (b"SYNTHSEGREDOFORGET", b"segredoforget", b"marcador", b"sumir", b"bytes.example.invalid")
+    check("55 forget não deixa o texto apagado no ficheiro (nem no WAL nem no índice FTS5)",
+          all(g in pre for g in gone) and not any(g in blob for g in gone) and b"registo que fica" in blob,
+          f"antes={[g for g in gone if g not in pre]} depois={[g for g in gone if g in blob]}")
+
+    # 56. forget sem nada a esquecer: 0 e nenhuma base criada
+    ghost = os.path.join(tmp, "v3-nao-existe.sqlite")
+    f0 = forget(ghost, "site:x.example.invalid")
+    f1 = forget(dst, "site:nada.example.invalid")
+    check("56 forget sem alvo = 0 (e não cria a base)", f0["entries"] == 0 and not os.path.exists(ghost)
+          and f1["entries"] == 0)
+
+    # 57. migração v2 → v3 (aditiva): coluna + ids preenchidos + tabela de ligações; doctor OK
+    old = os.path.join(tmp, "v3-migra.sqlite")
+    ddl = re.sub(r"CREATE TABLE IF NOT EXISTS entry_entities \(.*?\);\n", "", SCHEMA_SQL, flags=re.S)
+    ddl = re.sub(r"CREATE INDEX IF NOT EXISTS idx_entry_entities_entity[^\n]*\n", "", ddl)
+    ddl = ddl.replace(",\n  content_id TEXT", "")
+    oc = sqlite3.connect(old)
+    oc.executescript(ddl)
+    oc.execute("INSERT INTO memory_entries(memory_type, content, origin_class, supersession_key, recorded_at, tags)"
+               " VALUES ('semantic', 'SYNTH facto da base v2', 'owner', 'synth-v2', '2026-01-01T00:00:00+00:00',"
+               " 'site:example.invalid')")
+    oc.execute("INSERT INTO chunks(entry_id, text) VALUES (1, 'SYNTH facto da base v2')")
+    oc.execute("INSERT INTO chunks_fts(rowid, text) VALUES (1, 'SYNTH facto da base v2')")
+    oc.execute("INSERT INTO provenance(entry_id, note) VALUES (1, 'base v2')")
+    oc.execute("PRAGMA user_version = 2")
+    oc.commit()
+    oc.close()
+    mc, _, _ = connect_path(old)
+    try:
+        mrow = mc.execute("SELECT * FROM memory_entries WHERE id=1").fetchone()
+        mig = (mrow["content_id"] == row_content_id(mrow) and mc.execute("PRAGMA user_version").fetchone()[0] == 3
+               and "entry_entities" in table_names(mc))
+    finally:
+        mc.close()
+    check("57 migração v2 → v3 é aditiva (ids preenchidos, user_version 3) e o doctor fica OK",
+          mig and not fails(old), str(fails(old)))
+
+    # 58. o forget de um site importado da curada leva todas as versões dele
+    f58 = forget(src, "site:example.invalid", dry=True)
+    check("58 forget --tag site:x --dry-run conta todas as versões do site (ativas e suplantadas)",
+          f58["entries"] == 3, str(f58))
 
 
 def run_selftest() -> int:
@@ -2506,6 +3424,9 @@ def run_selftest() -> int:
         check("41 --tags exige todas (AND) e --any-tags basta uma (OR)", n_and == 0 and n_or >= 2,
               f"and={n_and} or={n_or}")
 
+        # 44–58. esquema v3: ids por conteúdo, import --jsonl, forget, LIKE com ESCAPE, migração v2→v3
+        _selftest_v3(tmp, check, run_cmd)
+
         conn.commit()
         conn.close()
 
@@ -2637,8 +3558,16 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--yes", action="store_true", help="confirma a substituição")
     sp.set_defaults(func=cmd_restore)
 
-    sp = sub.add_parser("import", help="copia registos de outra base CoALA (preserva histórico)")
-    sp.add_argument("--from", dest="from_db", required=True, help="base de origem (aberta só-leitura)")
+    sp = sub.add_parser("import", help="copia registos de outra base CoALA (--from) ou de um JSONL (--jsonl),"
+                                       " preservando histórico; idempotente")
+    sp.add_argument("--from", dest="from_db", default=None, help="base de origem (aberta só-leitura)")
+    sp.add_argument("--jsonl", default=None,
+                    help="ficheiro JSONL (`-` = stdin): linhas do `export --format jsonl` ou registos canónicos"
+                         " (schema/key/type/body); id por conteúdo, supersessão pelos ids; tudo ou nada")
+    sp.add_argument("--add-tags", dest="add_tags", default=None,
+                    help="só --jsonl: tags (CSV) acrescentadas a cada registo importado (ex.: origin:curated)")
+    sp.add_argument("--origin", default=None, choices=list(ORIGINS),
+                    help="só --jsonl: origem dos registos canónicos (predef: agent; as linhas do export trazem a sua)")
     sp.add_argument("--key-prefix", action="append", default=None, help="prefixo de supersession_key (repetível)")
     sp.add_argument("--source-prefix", action="append", default=None, help="prefixo de source (repetível)")
     sp.add_argument("--tags", default=None, help="tags (CSV; basta uma)")
@@ -2649,6 +3578,14 @@ def build_parser() -> argparse.ArgumentParser:
                     help="restringe o grafo copiado a estas entidades (CSV)")
     sp.add_argument("--dry-run", dest="dry_run", action="store_true", help="só conta, não escreve")
     sp.set_defaults(func=cmd_import)
+
+    sp = sub.add_parser("forget", help="APAGA de verdade os registos com a tag (todas as versões e tabelas;"
+                                       " irreversível — experimenta antes com --dry-run)")
+    sp.add_argument("--tag", action="append", default=None,
+                    help="tag exata (repetível: basta UMA); `%%`/`_` são literais, sem curingas")
+    sp.add_argument("--dry-run", dest="dry_run", action="store_true",
+                    help="conta o que apagaria (numa cópia em memória), sem escrever")
+    sp.set_defaults(func=cmd_forget)
 
     sp = sub.add_parser("ingest", help="ingere o material do projeto segundo o ingest.json (idempotente)")
     sp.add_argument("--config", default=None, help="caminho do ingest.json (predef: o da skill local)")
@@ -2699,7 +3636,7 @@ def main(argv=None) -> int:
         parser.print_help()
         raise UsageError("nenhum comando indicado",
                          "usa `where`, `init`, `add`, `search`, `recall`, `graph`, `supersede`, `stats`,"
-                         " `export`, `doctor`, `backup`, `restore`, `import`, `ingest` ou `--selftest`")
+                         " `export`, `doctor`, `backup`, `restore`, `import`, `forget`, `ingest` ou `--selftest`")
     return args.func(args)
 
 

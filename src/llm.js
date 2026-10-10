@@ -13,7 +13,7 @@ import {
 } from './config.js';
 import { getLane, reportRateLimit } from './governor.js';
 import { reserve as budgetReserve } from './budget.js';
-import { warn, sleep, hasCjk, cjkRatio } from './util.js';
+import { warn, sleep, hasCjk, cjkRatio, looksPortuguese, stripDisplayJunk } from './util.js';
 import { logEvent } from './events.js';
 import { devTrace, devTraceEnabled, devTraceErr } from './devtrace.js';
 
@@ -869,10 +869,17 @@ const summarySchema = {
 };
 const summaryZ = z.object({ title_pt: z.string(), summary_pt: z.string() });
 // Saída em idioma errado? Título com QUALQUER CJK (um título traduzido nunca contém Han/kana/
-// hangeul) OU resumo com razão CJK > 0.25 (um nome de produto citado, ex. "o 腾讯 da Tencent",
-// tem razão baixa e NÃO dispara).
+// hangeul), resumo com razão CJK > 0.25 (um nome de produto citado, ex. "o Tencent Cloud", tem
+// razão baixa e NÃO dispara) OU resumo que NÃO SE LÊ como português (looksPortuguese — o guarda
+// antigo só apanhava CJK e deixava passar resumos em inglês; medido 2026-10-10: 15 em EN + ~70
+// duvidosos no acervo). A leitura é LENIENTE com textos curtos/neutros.
 function summaryInWrongLanguage(summary) {
-  return hasCjk(summary.title_pt) || cjkRatio(summary.summary_pt) > 0.25;
+  return (
+    hasCjk(summary.title_pt) ||
+    cjkRatio(summary.summary_pt) > 0.25 ||
+    !looksPortuguese(summary.summary_pt) ||
+    !looksPortuguese(summary.title_pt) // o TÍTULO também se tem de ler PT (medido: 11 em EN passavam)
+  );
 }
 export async function summarizeArticle({ title, content }) {
   const { model, effort } = stageModel('summarize');
@@ -881,7 +888,9 @@ export async function summarizeArticle({ title, content }) {
     '- title_pt: o título adaptado para PT-BR (curto, natural).\n' +
     '- summary_pt: um resumo CLARO e LEGÍVEL em PT-BR (NÃO é tradução literal palavra-por-palavra). ' +
     'Cubra os pontos principais em 1–3 parágrafos curtos; preserve nomes próprios, termos técnicos e ' +
-    'nomes de produtos/bibliotecas no original quando fizer sentido.\n' +
+    'nomes de produtos/bibliotecas no original quando fizer sentido.\n'
+    '- Ignore artefactos de EXTRAÇÃO do texto-fonte (palavras/números colados sem espaço, ' +
+    'restos de navegação): escreva sempre com ortografia e espaçamento corretos.\n' +
     'Devolva SOMENTE JSON {"title_pt","summary_pt"}.\n\n' +
     `ARTIGO\nTítulo: ${title || ''}\n\nConteúdo:\n${clamp(content)}`;
   const call = (langHint) =>
@@ -896,11 +905,18 @@ export async function summarizeArticle({ title, content }) {
       user: langHint ? user + langHint : user,
     });
   let out = await call(null);
-  let summary = summaryZ.parse(out);
+  // Limpeza determinística ANTES do guarda: o resumo pode ecoar tags/entidades/markdown do
+  // conteúdo-fonte — nada disso chega à camada de leitura (title_pt/summary_pt são o que o
+  // utilizador lê ao clicar na matéria).
+  let summary = (() => {
+    const p = summaryZ.parse(out);
+    return { title_pt: stripDisplayJunk(p.title_pt), summary_pt: stripDisplayJunk(p.summary_pt) };
+  })();
   if (SUMMARIZE_LANG_GUARD && summaryInWrongLanguage(summary)) {
-    warn('summarize: resposta em idioma CJK; repetindo com o reforço de idioma…');
+    warn('summarize: resposta fora do PT-BR; repetindo com o reforço de idioma…');
     out = await call(SUMMARY_LANG_HINT);
-    summary = summaryZ.parse(out);
+    const p = summaryZ.parse(out);
+    summary = { title_pt: stripDisplayJunk(p.title_pt), summary_pt: stripDisplayJunk(p.summary_pt) };
   }
   if (SUMMARIZE_LANG_GUARD && summaryInWrongLanguage(summary)) {
     // Persistiu: a ficha fica NULL (o chamador não chega ao setSummary) e é re-resumida no
@@ -912,7 +928,7 @@ export async function summarizeArticle({ title, content }) {
       detail: { title_pt: summary.title_pt, summary_pt: summary.summary_pt },
     });
     throw new Error(
-      'summarize: resposta em idioma CJK mesmo após o re-try ' +
+      'summarize: resposta fora do PT-BR mesmo após o re-try ' +
         `(title_pt hasCjk=${hasCjk(summary.title_pt)}; ` +
         `summary_pt cjkRatio=${cjkRatio(summary.summary_pt).toFixed(3)})`,
     );

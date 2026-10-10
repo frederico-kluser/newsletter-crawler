@@ -135,7 +135,7 @@ test('guarda: QUALQUER CJK no title_pt dispara o re-try (mesmo com summary limpo
   assert.equal(out.title_pt, PT_SUMMARY.title_pt, 're-try devolveu o título PT-BR');
   assert.equal(calls.length, 2, 'CJK no título disparou o re-try');
   assert.ok(
-    warns.some((w) => w.includes('CJK') && w.includes('repetindo')),
+    warns.some((w) => w.includes('repetindo') && /fora do PT-BR|CJK/.test(w)),
     `warn do re-try (veio: ${warns.join(' | ')})`,
   );
   setLogSink(null);
@@ -164,12 +164,12 @@ test('guarda: CJK persistente -> THROW após 1 re-try + evento language-guard + 
   queue([CJK_SUMMARY]); // a fila repete a última: AMBAS as tentativas em chinês
   await assert.rejects(
     summarizeArticleRow({ id: stmts.getArticleByUrl.get(url).id, title: 'node:domain', content: 'corpo do artigo' }),
-    /CJK/,
+    /fora do PT-BR|CJK/,
     'throw com motivo de idioma (o chamador nunca chega ao setSummary)',
   );
   assert.equal(calls.length, 2, 'exatamente 2 admissões (original + 1 re-try; SEM loop infinito)');
   assert.ok(
-    warns.some((w) => w.includes('CJK') && w.includes('repetindo')),
+    warns.some((w) => w.includes('repetindo') && /fora do PT-BR|CJK/.test(w)),
     `warn do re-try (veio: ${warns.join(' | ')})`,
   );
 

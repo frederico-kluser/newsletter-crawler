@@ -171,6 +171,68 @@ export function cjkRatio(s) {
   return m ? m.length / t.length : 0;
 }
 
+// ---- idioma + legibilidade da camada de LEITURA (title_pt/summary_pt) ----
+// A camada de leitura tem de ser SEMPRE PT-BR e legível (regra do produto, 2026-10-10). O guarda
+// antigo só apanhava CJK — resumos em inglês/lixo passavam (medido: 15 em EN + ~70 duvidosos).
+const PT_MARKERS = new Set(
+  ('de da do das dos em no na nos nas um uma uns umas que não e ou para por com sem ser está foi são ' +
+    'como mais muito também já quando onde qual pelo pela entre sobre isto isso seu sua seus suas ' +
+    'mas se ao aos à às num numa até desde depois antes durante pode podem deve devem tem têm ' +
+    'será serão apenas ainda só novo nova novos novas versão recurso recursos').split(' '),
+);
+const EN_MARKERS = new Set(
+  ('the and of to in is for on with that are was be this from as at by or an it not you can has have ' +
+    'will its their his her they we our your which when what where there been were would should').split(' '),
+);
+
+/**
+ * O texto LÊ-SE como português? Heurística por palavras-marca (PT × EN), LENIENTE com textos
+ * curtos/neutros (menos de 3 marcas = true; indecidível não reprova). Para o guarda de idioma do
+ * summarize e a varredura de reparação — nunca lança.
+ */
+export function looksPortuguese(text) {
+  const words = String(text ?? '').toLowerCase().match(/[a-zà-ÿ']+/g) || [];
+  const marked = words.filter((w) => PT_MARKERS.has(w) || EN_MARKERS.has(w));
+  if (marked.length < 3) return true; // curto/neutro: indecidível => não reprova
+  const pt = words.filter((w) => PT_MARKERS.has(w)).length;
+  const en = words.filter((w) => EN_MARKERS.has(w)).length;
+  return pt >= en; // empate favorece o PT (nomes de produto em inglês são normais num resumo PT)
+}
+
+/**
+ * Remove o que NÃO é texto de leitura: tags HTML estruturais, entidades, markdown-link solto
+ * (`[texto](url)` fica só `texto`) e espaços em excesso. O que é citação de código em backticks
+ * (`<T>`, `<div>`) FICA — é conteúdo, não lixo. Determinístico e idempotente.
+ */
+export function stripDisplayJunk(text) {
+  let s = String(text ?? '');
+  if (!s) return s;
+  // Citações de código entre backticks ficam INTACTAS (`<T>`, `<div>` são conteúdo): protegidas
+  // com placeholders e repostas no fim.
+  const codeSpans = [];
+  s = s.replace(/`[^`\n]{1,200}`/g, (m) => {
+    codeSpans.push(m);
+    return `\u0000${codeSpans.length - 1}\u0000`;
+  });
+  s = s.replace(/\[([^\]\n]{1,200})\]\(https?:\/\/[^)\s]{1,400}\)/g, '$1'); // [texto](url) -> texto
+  s = s.replace(/<\/?(?:div|p|br|span|a|img|ul|ol|li|table|tr|td|th|section|article|header|footer|nav|h[1-6]|strong|em|i|b)\b[^>]{0,300}>/gi, ' ');
+  // Entidades HTML: os NOMES vêm por CONCATENAÇÃO p/ o código-fonte nunca conter o padrão crua.
+  const ENT_MAP = {
+    amp: String.fromCharCode(38), nbsp: ' ', quot: String.fromCharCode(34),
+    lt: String.fromCharCode(60), gt: String.fromCharCode(62),
+    hellip: '\u2026', mdash: '\u2014', ndash: '\u2013',
+  };
+  s = s.replace(/&(#[0-9a-fx]{1,8}|[a-z]{2,10});/gi, (m, name) => {
+    if (name[0] === '#') {
+      const c = Number(name[1] === 'x' || name[1] === 'X' ? '0' + name.slice(1) : name.slice(1));
+      return Number.isFinite(c) && c >= 32 && c <= 0x10ffff ? String.fromCodePoint(c) : ' ';
+    }
+    return ENT_MAP[name.toLowerCase()] ?? ' ';
+  });
+  s = s.replace(/\u0000(\d+)\u0000/g, (m, i) => codeSpans[Number(i)]);
+  return s.replace(/\s+/g, ' ').trim();
+}
+
 const ts = () => new Date().toISOString();
 
 // Sink opcional de logs: quando setado (ex.: a UI Ink), TODO o output do crawl vai p/ ele em

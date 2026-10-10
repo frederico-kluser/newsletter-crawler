@@ -33,6 +33,12 @@ export function classifyFetchError(msg) {
     return 'dead-target';
   }
   if (/ERR_SSL_PROTOCOL_ERROR|EPROTO.*alert|CERT_|ERR_CERT/i.test(m)) return 'dead-target';
+  // Conexão DERRUBADA pelo outro lado: anti-bot que fecha o socket ou transitório violento —
+  // era o buraco que mandava o papercall.io (ERR_CONNECTION_CLOSED ×4) p/ 'other' (medido
+  // 2026-10-10 no trace --llm-dev). Junto com 403/challenge em 'blocked'.
+  if (/ERR_CONNECTION_CLOSED|ERR_EMPTY_RESPONSE|ECONNRESET|EPIPE|ERR_SOCKET|UND_ERR_SOCKET|ERR_STREAM_PREMATURE_CLOSE/i.test(m)) {
+    return 'blocked';
+  }
   if (/ERR_TIMED_OUT|ETIMEDOUT|timeout|deadline|JOB_TIMEOUT/i.test(m)) return 'timeout';
   if (/status code 40[13]|ERR_TUNNEL|captcha|cloudflare|challenge|blocked/i.test(m)) return 'blocked';
   if (/status code \d{3}/i.test(m)) return 'http';

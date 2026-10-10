@@ -25,7 +25,7 @@ import { abortErrorOf } from './deadline.js';
 import { isSubstack, substackArchive } from './substack.js';
 import { isRundown, rundownArchive } from './therundown.js';
 import {
-  normalizeUrl, sha256, domainSig, hostOf, parseDate, clampFutureDate, log, warn, errorLog, debug,
+  normalizeUrl, isPlausibleUrl, sha256, domainSig, hostOf, parseDate, clampFutureDate, log, warn, errorLog, debug,
 } from './util.js';
 import {
   HAS_LLM, RESPECT_ROBOTS, MAX_CRAWL_DEPTH, ROUNDUP_MIN_LINKS, providerInfo,
@@ -36,6 +36,13 @@ import {
 export function enqueue(url, kind, fromUrl, sourceId, depth = 0, discoveredDate = null) {
   const n = normalizeUrl(url, fromUrl);
   if (!n) return false;
+  // Rede de segurança p/ placeholders de truncamento ("github.com/...", "https://.."): o
+  // normalizeUrl aceita tudo o que o `new URL()` aceita — o isPlausibleUrl filtra o que nunca
+  // pode ser alvo (o ponto primário é o item da curadoria; aqui cobre links de listagem/LLM).
+  if (!isPlausibleUrl(n)) {
+    debug(`URL implausível ignorada: ${n}`);
+    return false;
+  }
   // Rejeita URLs malformadas: `%20` colado em nome de query param (concatenação quebrada do
   // LLM — ex.: "watch%20itemv=" no lugar de "watch?v=...&item=..."). Em URLs boas o %20 é
   // espaço no path ("my%20page") ou em VALOR de query ("q=hello%20world"), nunca antes de

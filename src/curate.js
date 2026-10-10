@@ -11,7 +11,7 @@ import {
 } from './clean.js';
 import { curateRoundupItems, curateLeftoverLinks } from './llm.js';
 import { logEvent } from './events.js';
-import { normalizeUrl, hostOf, parseDate, clampFutureDate, sha256, warn, debug } from './util.js';
+import { normalizeUrl, isPlausibleUrl, hostOf, parseDate, clampFutureDate, sha256, warn, debug } from './util.js';
 import { CURATE_CHUNK_CHARS, ENRICH_MAX_ATTEMPTS } from './config.js';
 
 // Backstop DETERMINÍSTICO de patrocínio/vaga: o rótulo do LLM é clampado p/ 'news' quando
@@ -153,7 +153,10 @@ export function consolidateItems(results, { baseUrl }) {
     if (!issueDateRaw && parseDate(r?.issue_date)) issueDateRaw = String(r.issue_date).trim();
     for (const it of r?.items || []) {
       const abs = normalizeUrl(it.url, baseUrl);
-      if (!abs || !/^https?:/i.test(abs)) {
+      // isPlausibleUrl: o `new URL()` engole os placeholders de truncamento do agregador
+      // ("github.com/...", "https://..") que o LLM ecoa do texto — 32 artigos lixo publicados
+      // antes deste guard (medido 2026-10-10). Conta como `invalid` (auditável).
+      if (!abs || !/^https?:/i.test(abs) || !isPlausibleUrl(abs)) {
         skipped.invalid++;
         continue;
       }

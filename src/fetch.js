@@ -15,6 +15,8 @@ import { inStage } from './progress.js';
 import { abortErrorOf } from './deadline.js';
 import { hostOf, sleep, log, warn, debug, parseDate } from './util.js';
 import { devTrace, devTraceEnabled, devTraceErr } from './devtrace.js';
+import { classifyFetchError } from './audit.js';
+import { hostCooldownMs, noteDeadHost } from './dead-hosts.js';
 
 // ---- integração com o relógio de trabalho do job (deadline.js) ----
 // `clock.run(fase, fn)` conta o tempo de fn no orçamento do job; sem clock, roda direto.
@@ -612,42 +614,58 @@ function looksEmpty(html) {
 // Decisão "precisa de JS" cacheada por host para não pagar o custo do browser à toa.
 const needsJs = new Map();
 
-// [llm-dev] envelope de trace do fetchSmart: quando o modo de desenvolvimento está ligado, cada
-// fetch entra como `fetch.start`/`fetch.result`/`fetch.error` no trace (com latência, tamanho e o
-// ERRO CLASSIFICADO: dead|timeout|download|blocked|other). Quando off, só uma chamada a mais.
+// Envelope do fetchSmart: (1) cooldown de host MORTO (não se martela um DNS morto a cada run —
+// re-tenta depois do TTL, DEAD_HOST_TTL_MS; nada é aposentado) e (2) trace --llm-dev quando ligado
+// (`fetch.start`/`fetch.result`/`fetch.error` com o erro classificado, `fetch.skip` no cooldown).
 export async function fetchSmart(url, opts = {}) {
-  if (!devTraceEnabled()) return fetchSmartInner(url, opts);
+  const host = hostOf(url);
+  const coolMs = hostCooldownMs(host);
+  if (coolMs > 0) {
+    // Mensagem com o marcador de ALVO MORTO de propósito: dispatch/audit/classifyFetchError
+    // tratam o cooldown como tal (ficha mantém blurb, job encerra sem retry inútil).
+    const e = new Error(`alvo morto em cooldown (getaddrinfo ENOTFOUND ${host}) — re-tenta em ${Math.ceil(coolMs / 60000)}min`);
+    e.code = 'DEAD_HOST_COOLDOWN';
+    if (devTraceEnabled()) devTrace('fetch.skip', { url, host, cooldownMs: coolMs });
+    throw e;
+  }
+  const trace = devTraceEnabled();
   const t0 = Date.now();
-  devTrace('fetch.start', {
-    url,
-    profile: opts.profile ?? 'listing',
-    aggressive: opts.aggressive === true,
-    forceRender: opts.forceRender === true,
-  });
+  if (trace) {
+    devTrace('fetch.start', {
+      url,
+      profile: opts.profile ?? 'listing',
+      aggressive: opts.aggressive === true,
+      forceRender: opts.forceRender === true,
+    });
+  }
   try {
     const r = await fetchSmartInner(url, opts);
-    devTrace('fetch.result', {
-      url,
-      finalUrl: r?.url ?? url,
-      status: r?.status ?? null,
-      rendered: r?.rendered === true,
-      pdf: r?.pdf === true,
-      bytes: r?.html ? Buffer.byteLength(r.html) : 0,
-      ms: Date.now() - t0,
-    });
+    if (trace) {
+      devTrace('fetch.result', {
+        url,
+        finalUrl: r?.url ?? url,
+        status: r?.status ?? null,
+        rendered: r?.rendered === true,
+        pdf: r?.pdf === true,
+        bytes: r?.html ? Buffer.byteLength(r.html) : 0,
+        ms: Date.now() - t0,
+      });
+    }
     return r;
   } catch (e) {
-    devTraceErr('fetch.error', e, { url, ms: Date.now() - t0, kind: fetchErrorKind(e, opts) });
+    if (isDeadTargetError(e) && e?.code !== 'DEAD_HOST_COOLDOWN') noteDeadHost(host, e);
+    if (trace) devTraceErr('fetch.error', e, { url, ms: Date.now() - t0, kind: fetchErrorKind(e, opts) });
     throw e;
   }
 }
 
+// [llm-dev] classificação do erro de fetch p/ o trace — delega no MESMO classificador do audit
+// (`classifyFetchError`, src/audit.js) para o trace e o `ncrawl audit` nunca divergirem.
 function fetchErrorKind(e, opts = {}) {
-  if (isDeadTargetError(e)) return 'dead';
-  if (opts.signal?.aborted || /abort/i.test(String(e?.message || ''))) return 'timeout';
-  if (/download is starting|application\/pdf/i.test(String(e?.message || ''))) return 'download';
-  if (/challenge|cloudflare|blocked|\b40[39]\b|\b429\b/i.test(String(e?.message || ''))) return 'blocked';
-  return 'other';
+  if (isDownloadError(e) || /application\/pdf/i.test(String(e?.message || ''))) return 'download';
+  if (opts.signal?.aborted) return 'timeout';
+  const cls = classifyFetchError(e?.message);
+  return cls === 'dead-target' ? 'dead' : cls; // 'timeout' | 'blocked' | 'http' | 'other'
 }
 
 async function fetchSmartInner(url, {

@@ -88,12 +88,17 @@ test('resposta DEGENERADA (>1.2× o teto) re-amostra e, esgotado, LANÇA', async
 test('corte duro: SEMPRE há signal na request e o timeout aborta uma stream pendurada', async () => {
   calls.length = 0;
   // Handler que nunca resolve — só rejeita quando o signal aborta (o que o mock do SDK real faria).
+  // O keep-alive é NECESSÁRIO: o timer do AbortSignal.timeout é unref'd e não segura o event loop —
+  // sem ele o loop drena e o node:test cancela os testes pendentes (verificado no CI, Node 22:
+  // "Promise resolution is still pending but the event loop has already resolved").
   createImpl = (body, options) =>
     new Promise((_, rej) => {
+      const keep = setTimeout(() => rej(new Error('backstop: abort nunca chegou')), 5000);
+      const done = (r) => { clearTimeout(keep); rej(r ?? new Error('aborted')); };
       const s = options?.signal;
-      if (!s) return; // sem signal não há corte: o teste falha por timeout do node:test
-      if (s.aborted) return rej(s.reason ?? new Error('aborted'));
-      s.addEventListener('abort', () => rej(s.reason ?? new Error('aborted')), { once: true });
+      if (!s) return done(new Error('sem signal'));
+      if (s.aborted) return done(s.reason);
+      s.addEventListener('abort', () => done(s.reason), { once: true });
     });
   const t0 = Date.now();
   await assert.rejects(() => chama('classify'));
@@ -106,9 +111,11 @@ test('abort do JOB também corta a chamada (signal combinado)', async () => {
   calls.length = 0;
   createImpl = (body, options) =>
     new Promise((_, rej) => {
+      const keep = setTimeout(() => rej(new Error('backstop: abort nunca chegou')), 5000);
+      const done = (r) => { clearTimeout(keep); rej(r ?? new Error('aborted')); };
       const s = options?.signal;
-      if (s?.aborted) return rej(s.reason ?? new Error('aborted'));
-      s?.addEventListener('abort', () => rej(s.reason ?? new Error('aborted')), { once: true });
+      if (s?.aborted) return done(s.reason);
+      s?.addEventListener('abort', () => done(s.reason), { once: true });
     });
   const ac = new AbortController();
   const p = chama('classify', { signal: ac.signal });

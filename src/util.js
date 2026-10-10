@@ -164,8 +164,9 @@ let logFd = null;
 let logPathStr = null;
 
 // Mesma regra do config.js (NC_HOME override por env; default ~/.newsletter-crawler) — sem
-// importar config p/ manter util pura (config importa util).
-function ncHomeDir() {
+// importar config p/ manter util pura (config importa util). Exportado: o devtrace resolve
+// NC_HOME/logs pela MESMA regra.
+export function ncHomeDir() {
   return process.env.NC_HOME
     ? path.resolve(process.env.NC_HOME)
     : path.join(os.homedir(), '.newsletter-crawler');

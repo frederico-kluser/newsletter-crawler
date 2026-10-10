@@ -27,5 +27,8 @@ Running, smoke-testing, reproducing, or verifying the crawler end to end after a
 
 Knowledge deps to load first: calling-the-llm-layer, fetching-and-extracting, persisting-and-orchestrating.
 
+## Modo de trace LLM (`--llm-dev`) — diagnóstico em tempo real
+Quando uma run se comporta mal (lenta, erros, custo estranho), `npm run crawl -- ... --llm-dev` (ou `NC_LLM_DEV=1`) grava um trace JSONL em `NC_HOME/logs/latest.jsonl` (flush imediato; `tail -f` + `jq`): chamadas LLM com prompt/resposta/tokens/custo/latência, jobs (fases do clock), fetch (erro classificado dead|timeout|download|blocked|other), parse, curadoria e erros com stack — ver AGENTS.md (## Modo de desenvolvimento LLM). Off = zero I/O; segredos redigidos (`redactSecrets`) e strings truncadas. Foi este trace que apanhou (2026-10-10) as 47 chamadas degeneradas (60k–131k completion_tokens sem `max_tokens` no body) e as tentativas de 3.400s que o `timeout` do SDK não cortava — hoje cobertos por `stageMaxTokens` + `AbortSignal.timeout` por tentativa + guard de resposta degenerada (`test/llm.guards.test.js`).
+
 ## registo de aprendizado (memória CoALA local)
 On completion, if a new verification step proved necessary AND you confirmed it by actually running it, update THIS skill's Procedure via the memory pipeline (replace the relevant step; keep it lean). Never record a step you did not run. See a memória CoALA local (`coala.py add`).

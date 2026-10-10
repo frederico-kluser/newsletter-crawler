@@ -24,6 +24,7 @@ import {
 } from './governor.js';
 import { beginRun, endRun, shouldStop, getBudgetState, estimateStageCallUsd } from './budget.js';
 import { processJob, enqueue, upsertSource } from './crawl.js';
+import { devTrace, devTraceErr } from './devtrace.js';
 import { parseSinceSourceFlag, resolveSourceFloor, applyPendingCeiling } from './cursor.js';
 import { detectSourceType } from './detect-type.js';
 import { exportWebSnapshot } from './export-web.js';
@@ -223,14 +224,18 @@ async function runWithLimits({ command, flags = {}, profile }, fn) {
     onEmergencyBrake: () => void closeBrowser().catch(() => {}),
   });
   beginRun({ command, budgetUsd, args: flags });
+  // [llm-dev] envelope da run no trace (só acontece algo com o modo ligado).
+  devTrace('run.start', { command, profile, budgetUsd, parallel: parallel ?? null, flags });
   let failed = false;
   try {
     return await fn();
   } catch (e) {
     failed = true;
+    devTraceErr('run.error', e, { command });
     throw e;
   } finally {
     flushEvents(); // grava o que sobrou no buffer de eventos (escritas em lote) antes de fechar
+    devTrace('run.end', { command, failed, budget: getBudgetState() });
     endRun(failed ? 'failed' : undefined);
     persistLlmCalibration(); // 429s calibraram o teto llm? grava p/ os próximos runs
     stopGovernor();
@@ -669,6 +674,8 @@ async function crawlRun(flags) {
         : wall
           ? { ...base, signal: wall.signal }
           : base;
+      const jt0 = Date.now();
+      devTrace('job.start', { url: job.url, kind: job.kind, sourceId: job.source_id ?? null, deadlineMs: deadline });
       try {
         const work = processJob(job, jobOpts);
         let res;
@@ -687,6 +694,7 @@ async function crawlRun(flags) {
         if (job.kind === 'article') processedArticles++;
         if (job.kind === 'listing') sourceListingDone(job.source_id); // fonte: descoberta concluída
         stmts.finish.run('done', job.url);
+        devTrace('job.done', { url: job.url, kind: job.kind, ms: Date.now() - jt0, ...(clock ? clock.snapshot() : {}) });
         if (res?.verifyUrl) streamPostSave(res.verifyUrl); // salvou/enriqueceu -> pós-processa já
         if (job.kind === 'listing' && job.source_id) advanceCursorFor(job.source_id); // cursor da fonte
       } catch (e) {
@@ -695,6 +703,7 @@ async function crawlRun(flags) {
           // já parou de reivindicar (shouldStop), então não há hot-loop aqui.
           stmts.finish.run('pending', job.url);
           budgetRequeued++;
+          devTrace('job.budget_requeue', { url: job.url, kind: job.kind });
           return;
         }
         // Job WEDGED cortado pelo deadline de parede (curadoria/listing): sem retry em run (o
@@ -704,6 +713,7 @@ async function crawlRun(flags) {
           stmts.dropFrontierJob.run(job.url);
           timedOut++;
           bump('estouros');
+          devTrace('job.timeout', { url: job.url, kind: job.kind, wall: true, deadlineMs: deadline });
           warn(`job wedged cortado (${deadline}ms de parede) — volta na próxima run: ${job.url.slice(0, 80)}`);
           logEvent({
             runId, url: job.url, stage: 'job', status: 'timeout',
@@ -725,6 +735,7 @@ async function crawlRun(flags) {
             runId, url: job.url, stage: 'job', status: 'timeout',
             detail: { ms: deadline, kind: job.kind, ...(clock ? clock.snapshot() : {}) },
           });
+          devTrace('job.timeout', { url: job.url, kind: job.kind, deadlineMs: deadline, ...(clock ? clock.snapshot() : {}) });
           const row = job.kind === 'article' ? stmts.getArticleFullByUrl.get(normalizeUrl(job.url) || job.url) : null;
           if (row?.needs_enrich) {
             // A ficha JÁ existe com o blurb do agregador: encerra o job (não re-tenta agora, senão
@@ -736,6 +747,7 @@ async function crawlRun(flags) {
           // avulso/listing/roundup: sem ficha a preservar — trata como falha comum (retry/fail).
           errorLog(`job estourou o deadline (${job.kind} ${job.url})`);
         } else {
+          devTraceErr('job.failed', e, { url: job.url, kind: job.kind, ms: Date.now() - jt0 });
           errorLog(`job falhou (${job.kind} ${job.url}): ${e.message}`);
           if (!hasLogSink()) {
             emitRunEvent({ phase: 'articles', kind: 'job-error', level: 'error', detail: `${e.message}`.slice(0, 80) });

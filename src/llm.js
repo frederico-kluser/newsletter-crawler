@@ -9,12 +9,13 @@ import { z } from 'zod';
 import {
   OPENROUTER_API_KEY, DEEPSEEK_API_KEY, LLM_PROVIDER, providerInfo, translateModel,
   computeUsageCost, HTTP_REFERER, X_TITLE, HAS_LLM, MAX_HTML_FOR_LLM, SEARCH_MAX_CHARS,
-  MODELS, stageModel, classifyFacetModel, LLM_TIMEOUT_MS, SUMMARIZE_LANG_GUARD,
+  MODELS, stageModel, stageMaxTokens, classifyFacetModel, LLM_TIMEOUT_MS, SUMMARIZE_LANG_GUARD,
 } from './config.js';
 import { getLane, reportRateLimit } from './governor.js';
 import { reserve as budgetReserve } from './budget.js';
 import { warn, sleep, hasCjk, cjkRatio } from './util.js';
 import { logEvent } from './events.js';
+import { devTrace, devTraceEnabled, devTraceErr } from './devtrace.js';
 
 let _client = null;
 // O provider E a key podem mudar em runtime (setRuntimeKey troca ambos) — recria o client se
@@ -81,6 +82,13 @@ function bumpPenalty(err) {
   // horas — o comentário dizia "teto 60s" mas o código só limitava o backoff.
   const until = Date.now() + Math.min(Math.max(retryAfterMsOf(err), backoff), 60_000);
   if (until > _penaltyUntil) _penaltyUntil = until;
+  // [llm-dev] 429/penalidade: o que o provedor pediu, o backoff sorteado e a janela final.
+  if (devTraceEnabled()) {
+    devTrace('llm.rate_limit', {
+      status: err?.status ?? null, retryAfterMs: retryAfterMsOf(err), penaltyK: _penaltyK,
+      backoffMs: backoff, windowMs: _penaltyUntil - Date.now(), stage: err?.stage ?? null,
+    });
+  }
   reportRateLimit();
 }
 
@@ -90,22 +98,27 @@ async function createOnce({ stage, model, reasoning, response_format, messages, 
     await awaitPenalty();
     if (signal?.aborted) throw signal.reason || new Error('chamada LLM abortada');
     const resv = budgetReserve(stage, model); // lança BudgetExceededError quando esgotado
+    const t0 = Date.now();
     try {
       // Body provider-aware: o OpenRouter quer `reasoning` (effort) e `usage:{include:true}`
       // (custo real em usage.cost); a API direta da DeepSeek NÃO suporta nenhum dos dois
       // (o equivalente de reasoning é `thinking`, com outra semântica) — omite ambos.
-      const body = { model, response_format, messages };
+      // max_tokens = a small-output rule como DURA: sem teto de saída, o modelo degenera a gerar
+      // até o limite do provider (medido 2026-10-10: 131k tokens e 57 min numa chamada de classify).
+      const maxTokens = stageMaxTokens(stage);
+      const body = { model, response_format, messages, max_tokens: maxTokens };
       if (LLM_PROVIDER !== 'deepseek') {
         body.reasoning = reasoning;
         // OpenRouter usage accounting: a resposta traz usage.cost (USD) — o custo REAL que
         // alimenta o ledger/orçamento. Passa pelo SDK como campo extra, igual ao `reasoning`.
         body.usage = { include: true };
       }
-      const resp = await client().chat.completions.create(
-        body,
-        // Abort do job (teto duro): cancela a chamada em voo e devolve o slot da lane já.
-        signal ? { signal } : undefined,
-      );
+      // Corte duro POR TENTATIVA + abort do job combinados. O `timeout` do SDK não aborta uma
+      // resposta a fluir tokens (medido 2026-10-10: tentativas de 3.400s com LLM_TIMEOUT_MS=180s)
+      // — o AbortSignal.timeout corta quer a chamada pendure, quer a stream se estique em loop.
+      const hard = AbortSignal.timeout(LLM_TIMEOUT_MS);
+      const reqSignal = signal ? AbortSignal.any([signal, hard]) : hard;
+      const resp = await client().chat.completions.create(body, { signal: reqSignal });
       // Commit ANTES do parse de JSON: um 200 malformado também custou dinheiro.
       let usage = resp.usage;
       if (LLM_PROVIDER === 'deepseek' && usage && usage.cost == null) {
@@ -114,10 +127,25 @@ async function createOnce({ stage, model, reasoning, response_format, messages, 
         usage = { ...usage, cost: computeUsageCost(usage, resp.model || model) };
       }
       resv.commit({ model: resp.model || model, usage });
+      // [llm-dev] tentativa completa: conteúdo CRU, uso/custo e latência (scrub/redact no devtrace).
+      if (devTraceEnabled()) {
+        devTrace('llm.attempt', {
+          stage,
+          model: resp.model || model,
+          ms: Date.now() - t0,
+          maxTokens,
+          usage,
+          finish: resp.choices?.[0]?.finish_reason ?? null,
+          content: resp.choices?.[0]?.message?.content ?? null,
+        });
+      }
       if (Date.now() >= _penaltyUntil) _penaltyK = 0; // janela limpa: zera o backoff
       return resp;
     } catch (e) {
       resv.cancel(); // falha de transporte não é cobrada; devolve a reserva
+      if (devTraceEnabled()) {
+        devTraceErr('llm.transport_error', e, { stage, model, ms: Date.now() - t0, status: e?.status ?? null });
+      }
       throw e;
     }
   });
@@ -226,6 +254,12 @@ export async function callJSON({
   // Shape ESTRITO p/ a decisão de retry (ver strictZodShape acima). Sem `zod:` o fluxo é o
   // histórico: só o parse de JSON decide (backward-compat — o eval chama sem zod).
   const strictShape = zod?.shape ? strictZodShape(zod) : null;
+  // [llm-dev] chamada com o prompt INTEIRO (system+user) — é aqui que se vê o que foi pedido ao LLM.
+  if (devTraceEnabled()) {
+    devTrace('llm.call', {
+      stage, model, effort: reasoning?.effort ?? null, retries, schemaName, messages,
+    });
+  }
 
   // Retry no JSON inválido: o modelo às vezes trunca/malforma a resposta (esp. com reasoning alto).
   // Estratégia: até `retries+1` tentativas re-amostrando no MESMO modelo (a chamada não é
@@ -243,29 +277,52 @@ export async function callJSON({
     const resp = await createWithRateLimitRetry({
       stage, model: useModel, reasoning, response_format, messages, signal,
     });
+    // Guard de RESPOSTA DEGENERADA: saiu acima de 1.2× o teto de saída (provider ignorou o
+    // max_tokens? loop de raciocínio?) — não se parseia lixo gigante; re-amostra como JSON inválido.
+    const completionTokens = resp.usage?.completion_tokens ?? 0;
+    const capTokens = stageMaxTokens(stage);
+    if (completionTokens > capTokens * 1.2) {
+      if (devTraceEnabled()) {
+        devTrace('llm.parse', { stage, attempt, result: 'degenerate-retry', completionTokens, cap: capTokens });
+      }
+      warn(`resposta degenerada do LLM (${stage}): ${completionTokens} tokens de saída > teto ${capTokens}; re-amostrando…`);
+      if (isLast) throw new Error('resposta degenerada do LLM (tokens de saída acima do teto)');
+      continue;
+    }
     const parsed = tryParseJSON(resp.choices?.[0]?.message?.content ?? '');
-    if (parsed !== undefined && !zod) return parsed;
+    if (parsed !== undefined && !zod) {
+      if (devTraceEnabled()) devTrace('llm.parse', { stage, attempt, result: 'ok' });
+      return parsed;
+    }
     if (parsed !== undefined) {
       const strictOk = strictShape ? strictShape.safeParse(parsed).success : true;
       const check = zod.safeParse(parsed);
       if (!strictOk || !check.success) {
         if (!isLast) {
           const next = attempt + 1 >= retries && fallbackModel && model !== fallbackModel ? fallbackModel : model;
+          if (devTraceEnabled()) devTrace('llm.parse', { stage, attempt, result: 'schema-retry', next });
           warn(`resposta fora do schema do LLM (tentativa ${attempt + 1}/${retries + 1}); repetindo com ${next}…`);
           continue;
         }
         // Esgotados os retries: defaults tolerantes em vez de derrubar a etapa (ver tolerantParse).
         const tolerant = tolerantParse(zod, parsed);
         if (tolerant) {
+          if (devTraceEnabled()) devTrace('llm.parse', { stage, attempt, result: 'tolerant' });
           warn(`resposta fora do schema (${stage}); aplicando defaults tolerantes`);
           return tolerant;
         }
+        if (devTraceEnabled()) devTrace('llm.parse', { stage, attempt, result: 'schema-failed' });
         throw new Error('resposta fora do schema retornada pelo LLM');
       }
+      if (devTraceEnabled()) devTrace('llm.parse', { stage, attempt, result: 'ok' });
       return check.data;
     }
-    if (isLast) throw new Error('JSON inválido retornado pelo LLM');
+    if (isLast) {
+      if (devTraceEnabled()) devTrace('llm.parse', { stage, attempt, result: 'json-failed' });
+      throw new Error('JSON inválido retornado pelo LLM');
+    }
     const next = attempt + 1 >= retries && fallbackModel && model !== fallbackModel ? fallbackModel : model;
+    if (devTraceEnabled()) devTrace('llm.parse', { stage, attempt, result: 'json-retry', next });
     warn(`JSON inválido do LLM (tentativa ${attempt + 1}/${retries + 1}); repetindo com ${next}…`);
   }
 }

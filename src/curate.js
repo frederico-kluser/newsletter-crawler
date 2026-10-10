@@ -4,6 +4,7 @@
 // blurb do próprio agregador como conteúdo inicial. O fetch do alvo vira ENRIQUECIMENTO
 // (needs_enrich=1): se o alvo for raso/bloqueado (ferramentas!), a informação não se perde.
 import { db, stmts } from './db.js';
+import { devTrace, devTraceEnabled, devTraceErr } from './devtrace.js';
 import {
   extractArticleAsync, htmlToMarkdown, pruneForLLM, extractPublishedDate, cpuParse, capHtml,
   linksInHtml, ensurePlainText,
@@ -215,6 +216,7 @@ export async function curateRoundup({ html, url, source, runId = null, depth = 0
   // Por SEÇÃO em PARALELO: 1 agente por seção (News/Tools/Releases/…) — mais paralelismo intra-
   // edição e um hint especializado por agente. A lane llm do governador admite quantos couberem.
   const sections = splitIntoSections(md);
+  devTrace('curate.sections', { url, count: sections.length, titles: sections.map((s) => s.section) });
   const settled = await Promise.allSettled(
     sections.map((sec, i) =>
       curateRoundupItems({
@@ -230,8 +232,17 @@ export async function curateRoundup({ html, url, source, runId = null, depth = 0
   for (const s of settled) {
     if (s.status === 'fulfilled') results.push(s.value);
     else if (s.reason?.code === 'BUDGET_EXCEEDED') throw s.reason; // job volta a pending
-    else warn(`curadoria: seção falhou (${url}): ${s.reason?.message}`);
+    else {
+      devTraceErr('curate.section_failed', s.reason, { url });
+      warn(`curadoria: seção falhou (${url}): ${s.reason?.message}`);
+    }
   }
+  devTrace('curate.items', {
+    url,
+    ok: results.length,
+    failed: sections.length - results.length,
+    counts: results.map((r) => r?.items?.length ?? 0),
+  });
   if (!results.length) return null; // todas as seções falharam: fluxo antigo
 
   const { items, skipped, issueDateRaw } = consolidateItems(results, { baseUrl: url });
@@ -277,6 +288,7 @@ export async function curateRoundup({ html, url, source, runId = null, depth = 0
         pageContext: pageContext.slice(0, CURATE_CHUNK_CHARS), baseUrl: url, leftovers, signal,
       });
       const cons2 = consolidateItems([{ issue_date: null, items: extra.items }], { baseUrl: url });
+      devTrace('curate.coverage', { url, leftovers: leftovers.length, recovered: extra.items?.length ?? 0 });
       const realUrls = new Set(cons2.items.map((i) => i.url));
       for (const l of leftovers) if (!realUrls.has(l.url)) coverage.otherUrls.push(l.url);
       for (const it of cons2.items) {

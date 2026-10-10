@@ -821,6 +821,36 @@ export function stageModel(stage) {
   return out;
 }
 
+// ---- teto de TOKENS DE SAÍDA por stage (a small-output rule como DURA, não só como prompt) ----
+// Sem max_tokens no body o modelo degenera em loop: medido 2026-10-10 (trace --llm-dev) — 47
+// chamadas com 60k–131k completion_tokens (2^17 = o teto do provider) em classify/articleClean/
+// summarize, 8–57 MIN por chamada, US$0,39 de US$0,62 da run só em classify e a lane llm entupida.
+// Resolução: env `LLM_MAX_TOKENS_<STAGE>` > models.json (`maxTokens`) > tabela por família >
+// `LLM_MAX_TOKENS` > DEFAULT_MAX_TOKENS. Tetos GENEROSOS de propósito: no DeepSeek os tokens de
+// raciocínio contam no max_tokens e um teto curto trunca o JSON (o retry/tolerant cobrem, mas
+// pagam-se). articleExtract é a exceção honesta: devolve o CORPO inteiro.
+const STAGE_MAX_TOKENS = {
+  linkSelector: 2000, contentSelector: 2000, nextLink: 2000, dateSelector: 2000,
+  detectType: 2000, searchSpec: 3000, searchTags: 3000, searchRelevance: 3000,
+  classify: 4000, verifyRecord: 3000, summarize: 4000,
+  articleClean: 10000, articleReclean: 12000, searchBatch: 12000,
+  curate: 16000, linkExtract: 16000, roundupExtract: 16000,
+  articleExtract: 36000,
+};
+export const DEFAULT_MAX_TOKENS = 8000;
+
+/** Teto de tokens de SAÍDA do stage (para `max_tokens` no body do LLM). Nunca devolve 0/NaN. */
+export function stageMaxTokens(stage) {
+  const s = String(stage || '');
+  const env = Number(process.env[`LLM_MAX_TOKENS_${s.replace(/[^a-z0-9]+/gi, '_').toUpperCase()}`]);
+  if (Number.isFinite(env) && env > 0) return Math.floor(env);
+  const file = STAGE_MODELS[s] && STAGE_MODELS[s].maxTokens;
+  if (Number.isFinite(file) && file > 0) return Math.floor(file);
+  const dflt = Number(process.env.LLM_MAX_TOKENS);
+  if (Number.isFinite(dflt) && dflt > 0) return Math.floor(dflt);
+  return STAGE_MAX_TOKENS[s] || DEFAULT_MAX_TOKENS;
+}
+
 /**
  * Modelo por FACETA da classificação (o estágio mais caro): models.json pode ter uma chave
  * "classify:<faceta>" (ou env LLM_MODEL_CLASSIFY_<FACETA>) p/ escolher o modelo por faceta. Só as

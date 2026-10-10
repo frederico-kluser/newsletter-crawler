@@ -14,6 +14,7 @@ import { getLane } from './governor.js';
 import { inStage } from './progress.js';
 import { abortErrorOf } from './deadline.js';
 import { hostOf, sleep, log, warn, debug, parseDate } from './util.js';
+import { devTrace, devTraceEnabled, devTraceErr } from './devtrace.js';
 
 // ---- integração com o relógio de trabalho do job (deadline.js) ----
 // `clock.run(fase, fn)` conta o tempo de fn no orçamento do job; sem clock, roda direto.
@@ -611,7 +612,45 @@ function looksEmpty(html) {
 // Decisão "precisa de JS" cacheada por host para não pagar o custo do browser à toa.
 const needsJs = new Map();
 
-export async function fetchSmart(url, {
+// [llm-dev] envelope de trace do fetchSmart: quando o modo de desenvolvimento está ligado, cada
+// fetch entra como `fetch.start`/`fetch.result`/`fetch.error` no trace (com latência, tamanho e o
+// ERRO CLASSIFICADO: dead|timeout|download|blocked|other). Quando off, só uma chamada a mais.
+export async function fetchSmart(url, opts = {}) {
+  if (!devTraceEnabled()) return fetchSmartInner(url, opts);
+  const t0 = Date.now();
+  devTrace('fetch.start', {
+    url,
+    profile: opts.profile ?? 'listing',
+    aggressive: opts.aggressive === true,
+    forceRender: opts.forceRender === true,
+  });
+  try {
+    const r = await fetchSmartInner(url, opts);
+    devTrace('fetch.result', {
+      url,
+      finalUrl: r?.url ?? url,
+      status: r?.status ?? null,
+      rendered: r?.rendered === true,
+      pdf: r?.pdf === true,
+      bytes: r?.html ? Buffer.byteLength(r.html) : 0,
+      ms: Date.now() - t0,
+    });
+    return r;
+  } catch (e) {
+    devTraceErr('fetch.error', e, { url, ms: Date.now() - t0, kind: fetchErrorKind(e, opts) });
+    throw e;
+  }
+}
+
+function fetchErrorKind(e, opts = {}) {
+  if (isDeadTargetError(e)) return 'dead';
+  if (opts.signal?.aborted || /abort/i.test(String(e?.message || ''))) return 'timeout';
+  if (/download is starting|application\/pdf/i.test(String(e?.message || ''))) return 'download';
+  if (/challenge|cloudflare|blocked|\b40[39]\b|\b429\b/i.test(String(e?.message || ''))) return 'blocked';
+  return 'other';
+}
+
+async function fetchSmartInner(url, {
   forceRender = false, profile = 'listing', aggressive = false,
   clock = null, signal = null, sinceDate = null,
 } = {}) {

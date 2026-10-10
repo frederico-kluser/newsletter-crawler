@@ -9,6 +9,7 @@ import { db } from './db.js';
 import { closeBrowser } from './fetch.js';
 import { closeParsePool } from './parse-pool.js';
 import { openLogFile, log, warn, errorLog } from './util.js';
+import { maybeInitDevTrace } from './devtrace.js';
 import { providerInfo, ROOT } from './config.js';
 import {
   printStatus, cmdCrawl, cmdAdd, cmdRemove, cmdReset, cmdExport, cmdSearch, cmdKey,
@@ -191,6 +192,8 @@ try {
     // Log persistente também no menu: as runs da TUI ficam em NC_HOME/logs/ui-*.log (sem
     // anúncio — o feed da UI já mostra o log ao vivo).
     openLogFile({ command: 'ui' });
+    // [llm-dev] trace de desenvolvimento LLM (oculto do utilizador): --llm-dev / NC_LLM_DEV=1 — ver AGENTS.md.
+    maybeInitDevTrace({ command: 'ui', argv: ['ui'], want: flags['llm-dev'] === true, meta: { version: VERSION } });
     // BOOTSTRAP antes do render: a TUI mostra o status já no primeiro quadro, então uma base
     // vazia precisa ter voltado ANTES — senão a tela abre com "0 artigos" e o usuário manda
     // coletar tudo de novo. Este caminho NÃO passa por commands.js, por isso o gancho é aqui.
@@ -214,6 +217,8 @@ try {
       // aponta p/ ele). TODO o log do comando (log/warn/errorLog/debug) é gravado ali com flush
       // imediato — `tail -f` acompanha ao vivo mesmo com o stdout do npm buferizado num pipe.
       const logFile = openLogFile({ command: cmd });
+      // [llm-dev] trace de desenvolvimento LLM (oculto do utilizador): --llm-dev / NC_LLM_DEV=1 — ver AGENTS.md.
+      maybeInitDevTrace({ command: cmd, argv: [cmd, ...rest], want: flags['llm-dev'] === true, meta: { version: VERSION } });
       // `--json` = saída de MÁQUINA: o anúncio do log ficaria no stdout a poluir o payload
       // (o arquivo de log continua a receber tudo pelo sink do openLogFile).
       if (logFile && flags.json !== true) log(`log do run: ${logFile}`);

@@ -826,9 +826,12 @@ export function stageModel(stage) {
 // chamadas com 60k–131k completion_tokens (2^17 = o teto do provider) em classify/articleClean/
 // summarize, 8–57 MIN por chamada, US$0,39 de US$0,62 da run só em classify e a lane llm entupida.
 // Resolução: env `LLM_MAX_TOKENS_<STAGE>` > models.json (`maxTokens`) > tabela por família >
-// `LLM_MAX_TOKENS` > DEFAULT_MAX_TOKENS. Tetos GENEROSOS de propósito: no DeepSeek os tokens de
-// raciocínio contam no max_tokens e um teto curto trunca o JSON (o retry/tolerant cobrem, mas
-// pagam-se). articleExtract é a exceção honesta: devolve o CORPO inteiro.
+// `LLM_MAX_TOKENS` > DEFAULT_MAX_TOKENS. articleExtract é a exceção honesta: devolve o CORPO
+// inteiro. ATENÇÃO: este é o teto de SAÍDA (conteúdo); o `max_tokens` do body leva ainda a folga
+// de raciocínio (reasoningTokensAllowance) — em modelos de raciocínio o campo cobre os DOIS e,
+// sem folga, o raciocínio consome o teto e a resposta vem com content VAZIO (medido 2026-10-11:
+// 101 chamadas truncadas com finish_reason=length — contentSelector 33/56 vazias, classify
+// 22/561, articleClean 11/73 — o parse falhava como "JSON inválido" e as retentativas pagavam).
 const STAGE_MAX_TOKENS = {
   linkSelector: 2000, contentSelector: 2000, nextLink: 2000, dateSelector: 2000,
   detectType: 2000, searchSpec: 3000, searchTags: 3000, searchRelevance: 3000,
@@ -849,6 +852,25 @@ export function stageMaxTokens(stage) {
   const dflt = Number(process.env.LLM_MAX_TOKENS);
   if (Number.isFinite(dflt) && dflt > 0) return Math.floor(dflt);
   return STAGE_MAX_TOKENS[s] || DEFAULT_MAX_TOKENS;
+}
+
+// ---- folga de TOKENS DE RACIOCÍNIO somada ao teto de saída no `max_tokens` do body ----
+// Em modelos de raciocínio (DeepSeek V4, também via OpenRouter) o `max_tokens` cobre reasoning +
+// CONTEÚDO: com o teto de saída a raspar o total, o raciocínio consome tudo (reasoning_tokens ==
+// completion_tokens == max_tokens) e `content` vem VAZIO — o parse falha como "JSON inválido" e a
+// re-amostra paga o raciocínio outra vez (medido 2026-10-11, trace --llm-dev). A folga é TETO,
+// não alvo: chamadas que raciocinam pouco não a gastam (verifyRecord p50=193 num teto de 3000).
+// Medida da run: os stages truncados pediam 2,5k–12k de raciocínio POR CIMA do seu teto de saída
+// — 8k cobre todos os observados com margem. Env `LLM_REASONING_ALLOWANCE` (0 = sem folga,
+// comportamento antigo) > DEFAULT_REASONING_ALLOWANCE.
+export const DEFAULT_REASONING_ALLOWANCE = 8000;
+
+/** Folga de tokens de raciocínio somada a stageMaxTokens() no `max_tokens` do body. */
+export function reasoningTokensAllowance() {
+  const raw = process.env.LLM_REASONING_ALLOWANCE;
+  const env = Number(raw);
+  if (raw !== undefined && raw !== '' && Number.isFinite(env) && env >= 0) return Math.floor(env);
+  return DEFAULT_REASONING_ALLOWANCE;
 }
 
 /**

@@ -9,7 +9,8 @@ import { z } from 'zod';
 import {
   OPENROUTER_API_KEY, DEEPSEEK_API_KEY, LLM_PROVIDER, providerInfo, translateModel,
   computeUsageCost, HTTP_REFERER, X_TITLE, HAS_LLM, MAX_HTML_FOR_LLM, SEARCH_MAX_CHARS,
-  MODELS, stageModel, stageMaxTokens, classifyFacetModel, LLM_TIMEOUT_MS, SUMMARIZE_LANG_GUARD,
+  MODELS, stageModel, stageMaxTokens, reasoningTokensAllowance, classifyFacetModel, LLM_TIMEOUT_MS,
+  SUMMARIZE_LANG_GUARD,
 } from './config.js';
 import { getLane, reportRateLimit } from './governor.js';
 import { reserve as budgetReserve } from './budget.js';
@@ -105,7 +106,11 @@ async function createOnce({ stage, model, reasoning, response_format, messages, 
       // (o equivalente de reasoning é `thinking`, com outra semântica) — omite ambos.
       // max_tokens = a small-output rule como DURA: sem teto de saída, o modelo degenera a gerar
       // até o limite do provider (medido 2026-10-10: 131k tokens e 57 min numa chamada de classify).
-      const maxTokens = stageMaxTokens(stage);
+      // Em modelos de raciocínio o campo cobre reasoning + CONTEÚDO, então o body leva o teto de
+      // SAÍDA (stageMaxTokens) MAIS a folga de raciocínio (reasoningTokensAllowance): sem folga, o
+      // raciocínio consome o teto e a resposta vem com content VAZIO (medido 2026-10-11: 101
+      // chamadas truncadas com finish_reason=length → "JSON inválido" + retentativas caras).
+      const maxTokens = stageMaxTokens(stage) + reasoningTokensAllowance();
       const body = { model, response_format, messages, max_tokens: maxTokens };
       if (LLM_PROVIDER !== 'deepseek') {
         body.reasoning = reasoning;
@@ -151,16 +156,42 @@ async function createOnce({ stage, model, reasoning, response_format, messages, 
   });
 }
 
+// Erro de TRANSPORTE retentável: o hang cortado pelo timeout duro da própria chamada (o job NÃO
+// abortou — senão não faz sentido re-tentar), rede ou 5xx do provider. 4xx é do pedido/key e
+// nunca re-tenta. Medido 2026-10-11 (trace --llm-dev): 16/137 chamadas de classify penduraram
+// 180s no provider num burst e morreram SEM retry (só 429 e JSON inválido tinham retry) — cada
+// uma perdeu uma faceta e deixou o artigo 'partial'.
+export function isTransientTransportError(e, jobSignal) {
+  if (jobSignal?.aborted) return false; // quem abortou foi o JOB (deadline/cancel): não retenta
+  if (!e) return false;
+  if (e.status != null) return e.status >= 500;
+  const msg = String(e.message || '');
+  return (
+    e.name === 'AbortError' ||
+    e.name === 'TimeoutError' ||
+    ['ECONNRESET', 'ECONNREFUSED', 'EAI_AGAIN', 'ETIMEDOUT', 'EPIPE', 'EPROTO', 'ENOTFOUND'].includes(e.code) ||
+    /aborted|timeout|timed out|socket hang up|network|ECONN|EAI_AGAIN|EPROTO/i.test(msg)
+  );
+}
+
 async function createWithRateLimitRetry(args) {
   for (let attempt = 0; ; attempt++) {
     if (args.signal?.aborted) throw args.signal.reason || new Error('chamada LLM abortada');
     try {
       return await createOnce(args);
     } catch (e) {
-      if (e?.status === 429 && attempt < 3 && !args.signal?.aborted) {
+      if (args.signal?.aborted) throw args.signal.reason || new Error('chamada LLM abortada');
+      if (e?.status === 429 && attempt < 3) {
         bumpPenalty(e);
         warn(`429 ${LLM_PROVIDER === 'deepseek' ? 'da DeepSeek' : 'do OpenRouter'} (${args.stage}); aguardando a janela de penalidade…`);
         continue; // re-admite pela lane e espera a penalidade
+      }
+      // Transporte transitório (hang cortado pelo timeout duro, rede, 5xx): re-tenta com uma
+      // requisição NOVA — o provider que pendurou costuma responder de imediato na amostra
+      // seguinte (as 137 chamadas boas da run medida tinham p50=7s). Máx. 2 re-tentativas.
+      if (attempt < 2 && isTransientTransportError(e, args.signal)) {
+        warn(`transporte transitório (${args.stage}): ${String(e.message || e).slice(0, 120)}; re-tentando…`);
+        continue;
       }
       throw e;
     }
@@ -277,15 +308,31 @@ export async function callJSON({
     const resp = await createWithRateLimitRetry({
       stage, model: useModel, reasoning, response_format, messages, signal,
     });
-    // Guard de RESPOSTA DEGENERADA: saiu acima de 1.2× o teto de saída (provider ignorou o
-    // max_tokens? loop de raciocínio?) — não se parseia lixo gigante; re-amostra como JSON inválido.
+    // Guard de RESPOSTA DEGENERADA: o CONTEÚDO passou o teto de SAÍDA (loop de geração — o
+    // incidente de 2026-10-10) OU o total passou o que pedimos no max_tokens (provider ignorou-o).
+    // O reasoning NÃO conta como lixo: em modelos de raciocínio ele pode gastar a folga inteira e
+    // o total não é degenerado por isso (medido 2026-10-11: reasoning == completion == max_tokens
+    // com content vazio NÃO é loop — é folga a menos; o body leva a folga e este guard não pode
+    // re-amostrar por ela). Sem `completion_tokens_details` não há como separar: cai no total.
     const completionTokens = resp.usage?.completion_tokens ?? 0;
+    const reasoningTokens = resp.usage?.completion_tokens_details?.reasoning_tokens ?? null;
     const capTokens = stageMaxTokens(stage);
-    if (completionTokens > capTokens * 1.2) {
+    const sentMax = capTokens + reasoningTokensAllowance();
+    const contentTokens = reasoningTokens != null ? completionTokens - reasoningTokens : null;
+    const degenerate =
+      completionTokens > sentMax * 1.2 ||
+      (contentTokens != null ? contentTokens > capTokens * 1.2 : completionTokens > sentMax * 1.2);
+    if (degenerate) {
       if (devTraceEnabled()) {
-        devTrace('llm.parse', { stage, attempt, result: 'degenerate-retry', completionTokens, cap: capTokens });
+        devTrace('llm.parse', {
+          stage, attempt, result: 'degenerate-retry',
+          completionTokens, contentTokens, cap: capTokens, sentMax,
+        });
       }
-      warn(`resposta degenerada do LLM (${stage}): ${completionTokens} tokens de saída > teto ${capTokens}; re-amostrando…`);
+      warn(
+        `resposta degenerada do LLM (${stage}): conteúdo ${contentTokens ?? completionTokens} tokens ` +
+          `> teto ${capTokens} (total ${completionTokens}/${sentMax}); re-amostrando…`,
+      );
       if (isLast) throw new Error('resposta degenerada do LLM (tokens de saída acima do teto)');
       continue;
     }

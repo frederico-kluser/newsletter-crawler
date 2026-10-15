@@ -37,7 +37,7 @@ import { summarizePending, summarizeArticleRow } from './summarize.js';
 import { verifyPending, verifyArticleRow, recleanSuspects } from './verify.js';
 import { runSearch, getSearchProgress } from './search.js';
 import { buildAuditReport, renderAudit } from './audit.js';
-import { closeBrowser, isDeadTargetError } from './fetch.js';
+import { closeBrowser, isDeadTargetError, deadTargetReason } from './fetch.js';
 import { closeParsePool } from './parse-pool.js';
 import { logEvent, flushEvents } from './events.js';
 import { createJobClock } from './deadline.js';
@@ -746,23 +746,32 @@ async function crawlRun(flags) {
           }
           // avulso/listing/roundup: sem ficha a preservar — trata como falha comum (retry/fail).
           errorLog(`job estourou o deadline (${job.kind} ${job.url})`);
+        } else if (e?.code !== 'JOB_TIMEOUT' && isDeadTargetError(e) && job.kind === 'article') {
+          // Alvo MORTO (DNS não resolve / conexão recusada / SSL morto — inclui o throw do skip de
+          // COOLDOWN de host morto): erro ESPERADO e TRATADO, não uma falha. Com
+          // ENRICH_MAX_ATTEMPTS=0 todos os hosts mortos do acervo voltam a ser tentados em toda
+          // run — sem este ramo (que corre ANTES do errorLog genérico) o feed virava uma parede de
+          // "✗ erro job falhou … ENOTFOUND" que não era falha nenhuma. Vira UM marco curado
+          // coalescido (kind 'dead-target': motivo por classe + hosts como samples) + linha de log.
+          // O estado segue IGUAL: item curado com blurb encerra `done` com needs_enrich=1 (a
+          // PRÓXIMA run o re-enfileira — nada é aposentado); sem ficha que preservar, o retry comum
+          // abaixo decide.
+          const reason = deadTargetReason(e);
+          const host = hostOf(job.url);
+          devTraceErr('job.dead_target', e, { url: job.url, kind: job.kind, reason });
+          emitRunEvent({ phase: 'articles', kind: 'dead-target', level: 'warn', detail: reason, sample: host });
+          const deadRow = stmts.getArticleFullByUrl.get(normalizeUrl(job.url) || job.url);
+          if (deadRow?.needs_enrich) {
+            log(`alvo morto (${reason}) — ficha mantida com o blurb, re-tenta na próxima run: ${job.url.slice(0, 80)}`);
+            stmts.finish.run('done', job.url);
+            return;
+          }
+          log(`alvo morto (${reason}) — sem ficha que preservar, segue o retry padrão: ${job.url.slice(0, 80)}`);
         } else {
           devTraceErr('job.failed', e, { url: job.url, kind: job.kind, ms: Date.now() - jt0 });
           errorLog(`job falhou (${job.kind} ${job.url}): ${e.message}`);
           if (!hasLogSink()) {
             emitRunEvent({ phase: 'articles', kind: 'job-error', level: 'error', detail: `${e.message}`.slice(0, 80) });
-          }
-        }
-        // Alvo MORTO (DNS não resolve / conexão recusada / SSL morto): re-tentar dentro da run é
-        // inútil (mesmo resolver e socket). Item curado com blurb encerra o job com `done` e
-        // MANTÉM needs_enrich=1 — a PRÓXIMA run o re-enfileira (política ENRICH_MAX_ATTEMPTS=0:
-        // nada é aposentado) — e o log vira 1 aviso em vez de MAX_RETRIES erros + browser à toa.
-        if (e?.code !== 'JOB_TIMEOUT' && isDeadTargetError(e) && job.kind === 'article') {
-          const deadRow = stmts.getArticleFullByUrl.get(normalizeUrl(job.url) || job.url);
-          if (deadRow?.needs_enrich) {
-            warn(`alvo morto — ficha mantida com o blurb, re-tenta na próxima run: ${job.url.slice(0, 80)}`);
-            stmts.finish.run('done', job.url);
-            return;
           }
         }
         const r = stmts.getRetries.get(job.url);

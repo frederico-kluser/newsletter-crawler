@@ -42,6 +42,7 @@ const KIND_ICON = {
   'kept-blurb': '≈',
   split: '⑂',
   timeout: '⏱',
+  'dead-target': '⊘',
   'run-summary': '★',
   error: '✗',
 };
@@ -78,15 +79,25 @@ function PhaseRow({ phase, frame, barWidth }) {
   </${Box}>`;
 }
 
-function EventRow({ e, cols }) {
+// Composição do detalhe de um marco do feed (pura, exportada p/ teste): motivo + `(×N)` da rajada
+// coalescida + amostras (ex.: hosts de alvos mortos, 3 primeiros + `+N`). O `(×N)` vai ANTES das
+// amostras de propósito — em terminal estreito o truncamento corta as amostras, nunca a contagem.
+export function eventDetail(e) {
+  const samples = e.samples || [];
+  const sampleStr = samples.length
+    ? ` — ${samples.slice(0, 3).join(', ')}${samples.length > 3 ? ` +${samples.length - 3}` : ''}`
+    : '';
+  return (e.detail || '') + (e.count > 1 ? ` (×${e.count})` : '') + sampleStr;
+}
+
+function EventRow({ e, headW, detW }) {
   const icon = KIND_ICON[e.kind] || '·';
   const head = `${icon} ${t('evk_' + e.kind)}`;
-  const detail = (e.detail || '') + (e.count > 1 ? ` (×${e.count})` : '');
+  const detail = eventDetail(e);
   const src = e.source ? ` [${String(e.source).slice(0, 14)}]` : '';
-  const detW = clamp(8, cols - 9 - 20 - src.length - 1, 200);
   return html`<${Box}>
     <${Box} width=${9}><${Text} dimColor>${fmtClock(e.at)}</${Text}></${Box}>
-    <${Box} width=${20}><${Text} color=${LEVEL_COLOR[e.level]} wrap="truncate-end">${head}</${Text}></${Box}>
+    <${Box} width=${headW}><${Text} color=${LEVEL_COLOR[e.level]} wrap="truncate-end">${head}</${Text}></${Box}>
     <${Box} width=${detW}><${Text} wrap="truncate-end">${detail}</${Text}></${Box}>
     ${src ? html`<${Box}><${Text} dimColor>${src}</${Text}></${Box}>` : null}
   </${Box}>`;
@@ -99,6 +110,17 @@ export function CrawlDashboard({ status, tele, feed = [], ticker = null, warnCou
   const barWidth = clamp(6, cols - 54, 24);
   const tight = rows < 18; // terminal baixo: corta métricas/since e encolhe o feed
   const feedHeight = clamp(3, (tight ? rows - 12 : rows - 17), 10);
+  // Colunas do feed calculadas UMA vez pela fatia visível: o rótulo do marco ganha a largura do
+  // MAIOR rótulo (cap 26 — '✓ data-alvo alcançada' tem 21 e cortava numa coluna fixa de 20) e o
+  // detalhe fica com o resto; a tag de fonte alinha à direita. Por-linha desalinhava as colunas
+  // quando uns eventos têm fonte e outros não, e desperdiçava o vão do detalhe.
+  const feedRows = feed.slice(-feedHeight);
+  const headW = Math.min(
+    26,
+    feedRows.reduce((w, e) => Math.max(w, `${KIND_ICON[e.kind] || '·'} ${t('evk_' + e.kind)}`.length), 12),
+  );
+  const srcW = feedRows.reduce((w, e) => Math.max(w, e.source ? String(e.source).slice(0, 14).length + 3 : 0), 0);
+  const detW = clamp(8, cols - 9 - headW - srcW - 1, 200);
 
   // `result` (do RunView: null enquanto roda, {ok} ao fim) decide o estado global. NÃO derivamos
   // falha da presença de erros no feed — falhas de jobs isolados não reprovam uma run bem-sucedida.
@@ -143,7 +165,7 @@ export function CrawlDashboard({ status, tele, feed = [], ticker = null, warnCou
     ${feed.length === 0
       ? html`<${Box}><${Text} dimColor>${t('eventsEmpty')}</${Text}></${Box}>`
       : html`<${Box} flexDirection="column" height=${feedHeight}>
-          ${feed.slice(-feedHeight).map((e) => html`<${EventRow} key=${e.id} e=${e} cols=${cols} />`)}
+          ${feedRows.map((e) => html`<${EventRow} key=${e.id} e=${e} headW=${headW} detW=${detW} />`)}
         </${Box}>`}
 
     <${Box} marginTop=${1}>

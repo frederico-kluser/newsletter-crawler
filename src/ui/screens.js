@@ -138,9 +138,12 @@ export function StatusScreen({ status: initial, onBack }) {
       ${row(`${t('frontier')}:`, `pending=${f.pending} in_progress=${f.in_progress} done=${f.done} failed=${f.failed}`)}
     </${Box}>
     <${Box} flexDirection="column" marginBottom=${1}>
-      <${Text} bold>${t('pendingLabel')}:</${Text}>
-      ${f.pending > 0 || status.pendingClassif > 0 || status.pendingSummary > 0
+      ${f.in_progress > 0 || f.pending > 0 || status.pendingClassif > 0 || status.pendingSummary > 0
         ? html`<${Fragment}>
+            <${Text} bold>${t('pendingLabel')}:</${Text}>
+            ${f.in_progress > 0
+              ? html`<${Text} color=${colors.accent}>  ${f.in_progress} ${t('inProgress')}</${Text}>`
+              : null}
             ${f.pending > 0
               ? html`<${Text} color=${colors.warn}>  ${f.pending} ${t('queued')} — ${t('runCrawl')}</${Text}>`
               : null}
@@ -148,7 +151,7 @@ export function StatusScreen({ status: initial, onBack }) {
               ? html`<${Text} color=${colors.title}>  ${status.pendingClassif} ${t('noTags')} · ${status.pendingSummary} ${t('noSummary')} — ${t('runFinish')}</${Text}>`
               : null}
           </${Fragment}>`
-        : html`<${Text} color=${colors.ok}>  ${t('allProcessed')}</${Text}>`}
+        : html`<${Text} bold color=${colors.ok}>${t('allProcessed')}</${Text}>`}
     </${Box}>
     <${Select} options=${[{ label: t('back'), value: 'back' }]} onChange=${onBack} />
   </${Box}>`;

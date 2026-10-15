@@ -42,9 +42,14 @@ export function runEventsReset() {
  * Emite um marco. `channel:'feed'` (default) entra no ring rolável; `channel:'ticker'` substitui a
  * linha "último salvo". Campos: { phase, kind, source?, detail?, level?='info', channel? }. Rajadas
  * idênticas (mesmo kind/phase/source/detail dentro de COALESCE_MS) são coalescidas em `count`.
+ * `sample` (ex.: host de um alvo morto) NÃO faz parte da chave de coalescing: rajadas do mesmo
+ * marco com amostras diferentes (hosts distintos) fundem numa linha e acumulam `samples` únicos —
+ * a UI mostra os primeiros + `+N`; o resto fica no log/overlay.
  */
 export function emitRunEvent(ev) {
-  const e = { id: ++seq, at: Date.now(), level: 'info', phase: 'run', channel: 'feed', ...ev };
+  const { sample, ...rest } = ev;
+  const e = { id: ++seq, at: Date.now(), level: 'info', phase: 'run', channel: 'feed', ...rest };
+  if (sample) e.samples = [sample];
   if (e.channel === 'ticker') {
     ticker = e;
   } else {
@@ -59,6 +64,10 @@ export function emitRunEvent(ev) {
     ) {
       last.count = (last.count || 1) + 1;
       last.at = e.at;
+      if (sample) {
+        last.samples = last.samples || [];
+        if (!last.samples.includes(sample)) last.samples.push(sample);
+      }
     } else {
       ring.push(e);
       if (ring.length > CAP) ring.shift();

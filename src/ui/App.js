@@ -96,9 +96,12 @@ function StatusBar() {
   const s = safeStatus();
   const f = s.frontier;
   const gap = html`<${Text}> </${Text}>`;
-  // "Falta terminar", separando o que precisa de Coletar (na fila = ainda não baixado) do que
-  // precisa de Finalizar (já salvo, sem tags/resumo). Cada badge só aparece quando > 0.
+  // "Falta terminar", separando o que precisa de Coletar (em voo/na fila = ainda não baixado) do
+  // que precisa de Finalizar (já salvo, sem tags/resumo). Cada badge só aparece quando > 0; sem
+  // NADA pendente a linha vira "Tudo processado ✓" sozinha — o prefixo "Falta terminar:" com o
+  // complemento vazio virava o contraditório "Falta terminar: tudo processado ✓".
   const pend = [];
+  if (f.in_progress > 0) pend.push([`${f.in_progress} ${t('inProgress')}`, colors.accent]);
   if (f.pending > 0) pend.push([`${f.pending} ${t('queued')}`, colors.warn]);
   if (s.pendingClassif > 0) pend.push([`${s.pendingClassif} ${t('noTags')}`, colors.title]);
   if (s.pendingSummary > 0) pend.push([`${s.pendingSummary} ${t('noSummary')}`, colors.title]);
@@ -113,11 +116,13 @@ function StatusBar() {
       <${Badge} color=${colors.accent}>${`${s.classified} ${t('classif')}`}</${Badge}>
     </${Box}>
     <${Box} marginTop=${1}>
-      <${Text} bold>${t('pendingLabel')}: </${Text}>
       ${pend.length
-        ? pend.map(([label, color], i) =>
-            html`<${Fragment} key=${i}><${Badge} color=${color}>${label}</${Badge}>${gap}</${Fragment}>`)
-        : html`<${Text} color=${colors.ok}>${t('allProcessed')}</${Text}>`}
+        ? html`<${Fragment}>
+            <${Text} bold>${t('pendingLabel')}: </${Text}>
+            ${pend.map(([label, color], i) =>
+              html`<${Fragment} key=${i}><${Badge} color=${color}>${label}</${Badge}>${gap}</${Fragment}>`)}
+          </${Fragment}>`
+        : html`<${Text} bold color=${colors.ok}>${t('allProcessed')}</${Text}>`}
     </${Box}>
   </${Box}>`;
 }

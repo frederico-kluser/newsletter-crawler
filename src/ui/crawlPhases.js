@@ -20,7 +20,6 @@ export function derivePhases(status, tele, { result = null } = {}) {
   const saved = num(C.salvos) + num(C.enriquecidos);
   const srcTotal = num(P.sourcesTotal);
   const srcDone = num(P.sourcesListingDone);
-  const totalQ = num(F.pending) + num(F.in_progress) + num(F.done) + num(F.failed);
 
   // --- Descoberta: varre as listagens/índices até concluir cada fonte. Barra = fontes concluídas.
   const discActive = srcTotal > 0 && srcDone < srcTotal;
@@ -31,11 +30,19 @@ export function derivePhases(status, tele, { result = null } = {}) {
   const curRelevant = num(C.issues) > 0 || curActive;
   const curDone = num(C.issues) > 0 && !curActive && discDone;
 
-  // --- Artigos: pipeline fetch→render→limpeza→save. Barra = burn-down MONOTÔNICO da fila conhecida
-  // (inclui failed no numerador+denominador p/ não retroceder quando um retry re-enfileira).
+  // --- Artigos: pipeline fetch→render→limpeza→save. Barra = burn-down da FILA DA RUN, medido do
+  // `jobsBase` (fronteira pós-seed) p/ frente: jobs terminais (done+failed) sobre a fila conhecida
+  // da run (terminais + pendentes + em voo). O frontier é GLOBAL (milhares de artigos de runs
+  // antigas) — sem o delta por jobsBase a barra nascia 100% cheia com "0 salvos". Sem base → sem
+  // barra (nunca uma barra mentirosa). Retries re-enfileiram sem mexer no delta (só estados
+  // terminais contam), então a barra não retrocede por causa deles.
+  const base = P.jobsBase;
+  const terminal = base
+    ? Math.max(0, num(F.done) - num(base.done) + num(F.failed) - num(base.failed))
+    : null;
   const artActive = num(St.fetch) > 0 || num(St.render) > 0 || num(St['limpeza']) > 0 || num(F.in_progress) > 0;
-  const artStarted = saved > 0 || num(F.done) > 0 || artActive;
-  const artDone = discDone && num(F.pending) === 0 && num(F.in_progress) === 0 && (saved > 0 || num(F.done) > 0);
+  const artStarted = saved > 0 || (terminal != null && terminal > 0) || artActive;
+  const artDone = discDone && num(F.pending) === 0 && num(F.in_progress) === 0 && (saved > 0 || (terminal != null && terminal > 0));
 
   // --- Pós-processamento: verify/resumo/classify em streaming + sweeps finais. Barra = verificados/salvos.
   const postActive = num(St['verificação']) > 0 || num(St.resumo) > 0 || num(St['classificação']) > 0;
@@ -62,7 +69,7 @@ export function derivePhases(status, tele, { result = null } = {}) {
   phases.push({
     key: 'articles',
     state: artDone ? 'done' : artStarted ? 'active' : 'idle',
-    value: pct(num(F.done) + num(F.failed), totalQ),
+    value: terminal == null ? null : pct(terminal, terminal + num(F.pending) + num(F.in_progress)),
     counters:
       `${saved} salvos` +
       (num(F.in_progress) ? ` · ${num(F.in_progress)} ativos` : '') +

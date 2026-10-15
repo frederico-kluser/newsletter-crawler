@@ -70,3 +70,13 @@ test('segunda morte do mesmo host reforça a contagem (fails++)', () => {
   noteDeadHost('releaserun.com', new Error('connect ECONNREFUSED'), t0 + 100);
   assert.equal(deadHostsSnapshot()['releaserun.com'].fails, 2);
 });
+
+test('deadTargetReason: classe legível por tipo de falha (motivo do marco curado)', async () => {
+  const { deadTargetReason } = await import('../src/fetch.js');
+  assert.equal(deadTargetReason(new Error('getaddrinfo ENOTFOUND convey.earth')), 'DNS não resolve');
+  assert.equal(deadTargetReason(new Error('connect ECONNREFUSED 1.2.3.4:443')), 'conexão recusada');
+  assert.equal(deadTargetReason(new Error('net::ERR_ADDRESS_UNREACHABLE')), 'rede inalcançável');
+  assert.equal(deadTargetReason(new Error('page.goto: net::ERR_SSL_PROTOCOL_ERROR')), 'SSL morto');
+  // O throw do cooldown carrega o marcador ENOTFOUND de propósito → cai em "DNS não resolve".
+  assert.equal(deadTargetReason(new Error('alvo morto em cooldown (getaddrinfo ENOTFOUND x.dev)')), 'DNS não resolve');
+});

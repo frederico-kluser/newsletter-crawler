@@ -8,7 +8,7 @@ import { runParse } from './parse-pool.js';
 
 export {
   capHtml, extractArticle, linksInHtml, readableLinks, probablyArticle, pruneForLLM,
-  htmlToMarkdown, isBlockedPage, extractPublishedDate, fallbackTitle, applyJunkSpans,
+  htmlToMarkdown, isBlockedPage, isErrorPage, extractPublishedDate, fallbackTitle, applyJunkSpans,
   sanityCheckCleaned, ensurePlainText, looksLikeHtml, looksLikeJson,
   blockTextFromHtml, htmlBlockText, detectTruncatedEnd, stripTrailingTrigger,
   isGithubUrl, isGithubRepoRoot, githubReleaseText, githubLatestReleaseText,

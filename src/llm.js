@@ -14,7 +14,7 @@ import {
 } from './config.js';
 import { getLane, reportRateLimit } from './governor.js';
 import { reserve as budgetReserve } from './budget.js';
-import { warn, sleep, hasCjk, cjkRatio, looksPortuguese, stripDisplayJunk } from './util.js';
+import { warn, sleep, hasCjk, cjkRatio, looksPortuguese, stripDisplayJunk, isRefusalText } from './util.js';
 import { logEvent } from './events.js';
 import { devTrace, devTraceEnabled, devTraceErr } from './devtrace.js';
 
@@ -906,8 +906,10 @@ const SUMMARY_SYSTEM =
   'Responda SEMPRE em português do Brasil; nunca em chinês, japonês ou coreano — mesmo que o ' +
   'artigo cite ou esteja escrito nesses idiomas, traduza o conteúdo. Responda apenas com JSON.';
 const SUMMARY_LANG_HINT =
-  '\n\nIMPORTANTE: a resposta anterior veio em chinês/japonês/coreano (idioma do artigo). ' +
-  'Responda NOVAMENTE, agora TUDO em português do Brasil — traduza o conteúdo, não o copie.';
+  '\n\nIMPORTANTE: a resposta anterior foi REJEITADA (em chinês/japonês/coreano, fora do PT-BR, ' +
+  'ou como recusa tipo "artigo não fornecido"). Responda NOVAMENTE, agora TUDO em português do ' +
+  'Brasil, com o resumo REAL do artigo — traduza o conteúdo, não o copie — e nunca escreva que o ' +
+  'artigo/conteúdo não foi fornecido: use o título, o conteúdo e o resumo do agregador.';
 const summarySchema = {
   type: 'object',
   properties: { title_pt: { type: 'string' }, summary_pt: { type: 'string' } },
@@ -928,18 +930,34 @@ function summaryInWrongLanguage(summary) {
     !looksPortuguese(summary.title_pt) // o TÍTULO também se tem de ler PT (medido: 11 em EN passavam)
   );
 }
-export async function summarizeArticle({ title, content }) {
+// Recusa/meta-texto no lugar do resumo ("Artigo não fornecido", "Não foi possível gerar o resumo
+// porque o texto do artigo não foi fornecido."): a desculpa do modelo sobre a tarefa NUNCA é a
+// camada de leitura — medido 2026-10-15, 122 title_pt + ~68 summary_pt assim no acervo. Sempre
+// ativo (não depende de SUMMARIZE_LANG_GUARD): persistir recusa é bug, nunca opção. Campos
+// VAZIOS idem (title_pt "" / summary_pt "" já viveram no acervo).
+function summaryIsRefusal(summary) {
+  return (
+    isRefusalText(summary.title_pt) ||
+    isRefusalText(summary.summary_pt) ||
+    String(summary.title_pt).trim().length < 2 ||
+    String(summary.summary_pt).trim().length < 20
+  );
+}
+export async function summarizeArticle({ title, content, blurb = '' }) {
   const { model, effort } = stageModel('summarize');
   const user =
     'Traduza o TÍTULO e escreva um RESUMO em português do Brasil do artigo abaixo.\n' +
     '- title_pt: o título adaptado para PT-BR (curto, natural).\n' +
     '- summary_pt: um resumo CLARO e LEGÍVEL em PT-BR (NÃO é tradução literal palavra-por-palavra). ' +
     'Cubra os pontos principais em 1–3 parágrafos curtos; preserve nomes próprios, termos técnicos e ' +
-    'nomes de produtos/bibliotecas no original quando fizer sentido.\n'
+    'nomes de produtos/bibliotecas no original quando fizer sentido.\n' +
     '- Ignore artefactos de EXTRAÇÃO do texto-fonte (palavras/números colados sem espaço, ' +
     'restos de navegação): escreva sempre com ortografia e espaçamento corretos.\n' +
+    '- NUNCA escreva que o artigo/conteúdo não foi fornecido ou está em falta: se o corpo for curto ' +
+    'ou ausente, resuma a partir do TÍTULO e do RESUMO DO AGREGADOR.\n' +
     'Devolva SOMENTE JSON {"title_pt","summary_pt"}.\n\n' +
-    `ARTIGO\nTítulo: ${title || ''}\n\nConteúdo:\n${clamp(content)}`;
+    `ARTIGO\nTítulo: ${title || ''}\n\nConteúdo:\n${clamp(content)}` +
+    (blurb ? `\n\nRESUMO DO AGREGADOR (use quando o corpo for curto/ausente):\n${clamp(blurb)}` : '');
   const call = (langHint) =>
     callJSON({
       model,
@@ -959,23 +977,25 @@ export async function summarizeArticle({ title, content }) {
     const p = summaryZ.parse(out);
     return { title_pt: stripDisplayJunk(p.title_pt), summary_pt: stripDisplayJunk(p.summary_pt) };
   })();
-  if (SUMMARIZE_LANG_GUARD && summaryInWrongLanguage(summary)) {
-    warn('summarize: resposta fora do PT-BR; repetindo com o reforço de idioma…');
+  let reject = summaryIsRefusal(summary) ? 'refusal' : SUMMARIZE_LANG_GUARD && summaryInWrongLanguage(summary) ? 'language' : null;
+  if (reject) {
+    warn(`summarize: resposta ${reject === 'refusal' ? 'com recusa/meta-texto' : 'fora do PT-BR'}; repetindo com o reforço…`);
     out = await call(SUMMARY_LANG_HINT);
     const p = summaryZ.parse(out);
     summary = { title_pt: stripDisplayJunk(p.title_pt), summary_pt: stripDisplayJunk(p.summary_pt) };
+    reject = summaryIsRefusal(summary) ? 'refusal' : SUMMARIZE_LANG_GUARD && summaryInWrongLanguage(summary) ? 'language' : null;
   }
-  if (SUMMARIZE_LANG_GUARD && summaryInWrongLanguage(summary)) {
+  if (reject) {
     // Persistiu: a ficha fica NULL (o chamador não chega ao setSummary) e é re-resumida no
-    // próximo run — autocorretivo, nunca persiste idioma errado. Evento p/ `ncrawl inspect`
-    // e p/ o backfill (onda 2) localizarem a ficha.
+    // próximo run — autocorretivo, nunca persiste idioma errado nem recusa. Evento p/
+    // `ncrawl inspect` e p/ o backfill localizarem a ficha.
     logEvent({
       stage: 'summarize',
-      status: 'language-guard',
+      status: `${reject}-guard`,
       detail: { title_pt: summary.title_pt, summary_pt: summary.summary_pt },
     });
     throw new Error(
-      'summarize: resposta fora do PT-BR mesmo após o re-try ' +
+      `summarize: resposta fora do PT-BR/recusa (${reject}) mesmo após o re-try ` +
         `(title_pt hasCjk=${hasCjk(summary.title_pt)}; ` +
         `summary_pt cjkRatio=${cjkRatio(summary.summary_pt).toFixed(3)})`,
     );

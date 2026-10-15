@@ -207,25 +207,56 @@ export function ensurePlainText(s) {
 // Páginas de bloqueio/desafio anti-bot (Cloudflare etc.) que vêm com status 200 mas sem
 // conteúdo real — não devem virar "artigo". Detecta pelo título/início do corpo.
 const BLOCKED_PATTERNS = [
-  /just a moment/i,
-  /attention required/i,
-  /verify(?:ing)? (?:that )?you(?:'| a)?re (?:a )?human/i,
+  // Frases que praticamente SÓ saem num interstitial de desafio (força própria).
   /enable javascript and cookies/i,
   /please enable (?:js|javascript|cookies)/i,
+  /verify(?:ing)? (?:that )?you(?:'| a)?re (?:a )?human/i,
   /checking your browser/i,
-  /are you a robot/i,
-  /\bcaptcha\b/i,
-  /access denied/i,
+  /you have been blocked/i,
   /ddos protection by/i,
   /cf-browser-verification/i,
   /performing security verification/i,
   /checking if the site connection is secure/i,
 ];
+// Frases curtas que são PROSA comum num artigo ("…for just a moment", "are you a robot?"): só
+// contam no COMEÇO da página (o interstitial É isso no início; um artigo contaminado com um
+// loader pelo meio — caso #9998, Tesla — não é uma página de desafio).
+const BLOCKED_LOOSE = [/just a moment/i, /attention required/i, /are you a robot/i];
 
 /** A página parece um interstitial anti-bot (Cloudflare etc.) em vez de um artigo? */
 export function isBlockedPage(title, text) {
-  const hay = `${title || ''}\n${(text || '').slice(0, 600)}`;
-  return BLOCKED_PATTERNS.some((re) => re.test(hay));
+  const t = String(title || '');
+  const body = String(text || '');
+  const hay = `${t}\n${body.slice(0, 600)}`;
+  if (BLOCKED_PATTERNS.some((re) => re.test(hay))) return true;
+  return BLOCKED_LOOSE.some((re) => re.test(`${t}\n${body.slice(0, 200)}`));
+}
+
+// Frases de PÁGINA DE ERRO que vêm com 200 e corpo GRANDE (Heroku/Cloudflare/Next: "403 ERROR /
+// Request blocked", "500 / Apologies, but something went wrong", "404 This page could not be
+// found"). O tamanho NÃO é sinal (a regra antiga de corpo <100 chars deixava estas passarem e
+// viravam `content` — medido 2026-10-15); o sinal é o COMEÇO do corpo. Atenção à ordem: "500
+// error responses plague APIs" é NOTÍCIA (e não casa); "403 ERROR" sozinho na 1ª linha é página.
+const ERROR_PAGE_HEAD =
+  /(apologies, but something went wrong|this page could not be found|page not found|request blocked|access denied|attention required|internal server error|service unavailable|bad gateway|too many requests|we can.?t connect to the server|the page may have been moved|domain (is|has been) (parked|suspended)|account (has been )?(suspended|disabled)|error (40[1-9]|50[0-9])|http error (4\d\d|5\d\d))/i;
+const ERROR_CODE_LINE = /^\s*(4\d\d|5\d\d)[^\n]{0,30}$/;
+
+/**
+ * Página de ERRO em vez de artigo (404/500/parqueada/bloqueada): vem com 200 e corpo às vezes
+ * grande. Puro/testável — usada pelo crawl, pelo reextract e pela reparação
+ * (scripts/repair-placeholder-text.mjs); vive AQUI para os três aplicarem a MESMA regra (antes
+ * havia réplicas divergentes em crawl.js e reextract.js).
+ */
+export function isErrorPage(title, content) {
+  const t = String(title || '').toLowerCase().trim();
+  if (/^(404|403|40[1-9]|50[0-9]|52[0-9])(\s|-|$)/.test(t)) return true;
+  if (/^not found$/i.test(t)) return true;
+  if (/^(page|página)\s+not\s+found/i.test(t)) return true;
+  if (/^(error|erro)\b/i.test(t) && String(content || '').length < 200) return true;
+  const c = String(content || '').toLowerCase().trim();
+  if (c.length < 100 && /\b(not found|404|403|500|error|erro)\b/i.test(c)) return true;
+  if (ERROR_PAGE_HEAD.test(c.slice(0, 150))) return true;
+  return ERROR_CODE_LINE.test(c.split('\n', 1)[0]); // "403 ERROR" / "500" sozinho na 1ª linha
 }
 
 // Acha recursivamente um `datePublished` em JSON-LD (que costuma vir aninhado em @graph).

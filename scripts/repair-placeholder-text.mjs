@@ -21,7 +21,7 @@ import { load as loadVec } from 'sqlite-vec';
 import path from 'node:path';
 import os from 'node:os';
 import { isRefusalText } from '../src/util.js';
-import { isErrorPage, isBlockedPage, looksLikeJson } from '../src/parse-core.js';
+import { isErrorPage, isBlockedPage, looksLikeJson, looksLikeHtml, ensurePlainText } from '../src/parse-core.js';
 
 const yes = process.argv.includes('--yes');
 const home = process.env.NC_HOME ? path.resolve(process.env.NC_HOME) : path.join(os.homedir(), '.newsletter-crawler');
@@ -41,17 +41,25 @@ const contentIsGarbage = (r) => {
   if (isErrorPage(r.title, r.content)) return true;
   return isBlockedPage(r.title, r.content) && len < 1200;
 };
+// Markup REAL guardado como corpo (a página era DOM, não prosa — pré-guarda ensurePlainText):
+// limpa-se NO LUGAR com o MESMO helper do armazenamento. O corte é o COMEÇO do corpo — citações
+// de código (`<div>`) pelo meio de um artigo são CONTEÚDO e não se tocam.
+const MARKUP_START =
+  /^\s*(<!doctype|<html|<head|<body|<div|<main|<article|<section|<nav|<header|<footer|<aside|<p>|<span|<ul|<ol|<table|<h[1-6]|<script|<style|<\?php|<[a-z][a-z0-9-]*(\s+[a-z-]+=))/i;
+const contentIsDirty = (r) =>
+  Boolean(r.content) && MARKUP_START.test(String(r.content).slice(0, 120)) && looksLikeHtml(String(r.content));
 
 const rows = db.prepare('SELECT id, run_id, url, title, title_pt, summary_pt, content, needs_enrich FROM articles').all();
 const blank = (v) => v != null && !String(v).trim(); // "" ou só espaços: guardas do summarize rejeitam
 const alvo = [];
 for (const r of rows) {
   const contentBad = Boolean(r.content) && contentIsGarbage(r);
+  const contentDirty = !contentBad && contentIsDirty(r);
   const readBad =
     isRefusalText(r.title_pt) || isRefusalText(r.summary_pt) || blank(r.title_pt) || blank(r.summary_pt);
   const titleBad = isRefusalText(r.title);
-  if (contentBad || readBad || titleBad) {
-    alvo.push({ r, contentBad, readBad, titleBad });
+  if (contentBad || contentDirty || readBad || titleBad) {
+    alvo.push({ r, contentBad, contentDirty, readBad, titleBad });
   }
 }
 
@@ -93,9 +101,11 @@ const clearRead = db.prepare('UPDATE articles SET title_pt = NULL, summary_pt = 
 const clearContent = db.prepare(
   "UPDATE articles SET content = NULL, needs_enrich = 1, content_source = 'aggregator' WHERE id = ?",
 );
+const cleanContent = db.prepare('UPDATE articles SET content = ? WHERE id = ?');
 db.transaction(() => {
-  for (const { r, contentBad, readBad } of alvo) {
+  for (const { r, contentBad, contentDirty, readBad } of alvo) {
     if (contentBad) clearContent.run(r.id);
+    else if (contentDirty) cleanContent.run(ensurePlainText(r.content), r.id);
     if (contentBad || readBad) clearRead.run(r.id);
   }
 })();

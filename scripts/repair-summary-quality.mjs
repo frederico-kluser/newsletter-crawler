@@ -13,7 +13,7 @@ import Database from 'better-sqlite3';
 import { load as loadVec } from 'sqlite-vec';
 import path from 'node:path';
 import os from 'node:os';
-import { looksPortuguese, hasCjk, cjkRatio, stripDisplayJunk } from '../src/util.js';
+import { looksPortuguese, hasCjk, cjkRatio, stripDisplayJunk, isRefusalText } from '../src/util.js';
 
 const yes = process.argv.includes('--yes');
 const home = process.env.NC_HOME ? path.resolve(process.env.NC_HOME) : path.join(os.homedir(), '.newsletter-crawler');
@@ -26,18 +26,30 @@ const TAGJUNK = /<\/?(?:div|p|br|span|a|img|ul|ol|li|table|tr|td|th|section|arti
 const ENT = /&(?:#?\w{1,8});/;
 const MDLINK = /\[[^\]\n]{1,200}\]\(https?:\/\/[^)\s]{1,400}\)/;
 const GLUED = /[a-z]\.[a-z]{2,}\d|\d\.[a-z]{2,}|[a-z]{3,}\d{2,}\.[a-z]/;
+// O que NÃO é colagem: versões, domínios/extensões e identificadores técnicos ("5.js", "1.org",
+// "e.move2", "Go101.org") — normais num resumo PT de tecnologia (medido 2026-10-15: 43 dos 44
+// matches eram destes; só 1 colagem real).
+const GLUED_TECH = /^(\d+\.\d*[a-z]*|\w+\.\w*\d\w*|\w+\.(js|ts|jsx|tsx|mjs|cjs|org|com|net|dev|io|co|ai|app|py|rs|go|md|json|ya?ml|css|html|php|rb|java|kt|swift))$/i;
 
 function problemsOf(row) {
   const out = [];
   for (const field of ['title_pt', 'summary_pt']) {
     const t = row[field];
     if (t == null) continue;
-    if (hasCjk(t) || cjkRatio(field === 'summary_pt' ? t : '') > 0.25) out.push(`${field}:cjk`);
+    // CJK: MESMA régua do runtime (summaryInWrongLanguage em src/llm.js) — título com qualquer
+    // CJK reprova; no RESUMO só a razão > 0.25 (identificadores UTF-8 citados são CONTEúdo:
+    // PRs de Rust sobre UTF-8 multibyte citam 中文 em backticks e são PT perfeitos).
+    if (field === 'title_pt' ? hasCjk(t) : cjkRatio(t) > 0.25) out.push(`${field}:cjk`);
     if (!looksPortuguese(t)) out.push(`${field}:idioma`); // título TAMBÉM tem de ler-se PT
-    if (TAGJUNK.test(t)) out.push(`${field}:html`);
+    // HTML estrutural FORA de citações de código (`<div>` citado em backticks é conteúdo — o
+    // stripDisplayJunk preserva de propósito): iguala o runtime antes de reprovar.
+    if (TAGJUNK.test(String(t).replace(/`[^`\n]{1,200}`/g, ' '))) out.push(`${field}:html`);
     if (ENT.test(t)) out.push(`${field}:entidade`);
     if (MDLINK.test(t)) out.push(`${field}:markdown`);
-    if (GLUED.test(t)) out.push(`${field}:colado`);
+    const glued = [...String(t).matchAll(new RegExp(GLUED.source, 'g'))].map((m) => m[0]);
+    if (glued.some((m) => !GLUED_TECH.test(m))) out.push(`${field}:colado`);
+    if (isRefusalText(t)) out.push(`${field}:recusa`);
+    if (field === 'summary_pt' && String(t).trim().length < 60) out.push(`${field}:curto`);
     if (stripDisplayJunk(t) !== t.replace(/\s+/g, ' ').trim()) out.push(`${field}:lixo-display`);
   }
   return out;

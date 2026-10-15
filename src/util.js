@@ -265,6 +265,15 @@ const REFUSAL_STANDALONE = [
   '^\\W*n[aã]o (foi )?fornecid\\w*\\s+((o|um|o pr[oó]prio|a)\\s+)?(artigo|conte[uú]do|texto|resumo|tradu[cç][aã]o)',
   // "Não recebi/tenho o artigo…" — pedido de material
   '^\\W*n[aã]o (recebi|tenho|encontrei|possuo)\\s+((o|um|o pr[oó]prio)\\s+)?(artigo|conte[uú]do|texto|resumo)',
+  // outras desculpas/infra-estrutura de prompt que já viveram no acervo
+  'n[aã]o (h[aá] )?(conte[uú]do|texto|artigo) dispon[ií]vel',
+  'n[aã]o (forneceu|possui|apresenta) (o |um )?(conte[uú]do|texto|artigo)',
+  '^\\W*(desculpe|sorry),?\\s*(n[aã]o|i (can|cannot|can.?t))',
+  '^\\W*forne[cç]a (o |um )?(resumo|texto|artigo|conte[uú]do)',
+  '^\\W*(submit|write|translate|send|provide|enter) (an |the |a )?(article|title|summary|text|content)',
+  '^\\W*this is a (summary|title|test|sample)',
+  '^\\W*responda (\\S+ ){0,2}(apenas|só|somente)',
+  '^\\W*(translated title|proper format|summary of previous|title_pt|summary_pt)\\b',
   'n[aã]o (foi poss[ií]vel|[ée] poss[ií]vel)\\s*(gerar|realizar|produzir|extrair|traduzir|resumir)' +
     '\\s*(\\S+\\s+){0,2}(resumo|t[ií]tulo|tradu[cç][aã]o|conte[uú]do)',
   // "…, por favor, envie/insira/cole o texto [do artigo]" (em QUALQUER posição — pedido de material

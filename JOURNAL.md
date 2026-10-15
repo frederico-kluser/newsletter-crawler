@@ -178,3 +178,12 @@ As entradas seguintes consolidam decisões grandes já documentadas no `AGENTS.m
   traziam resumos PT perfeitos rejeitados porque `manual_is_variant_and`/`From::from` tokenizavam
   como palavras EN — `looksPortuguese` passou a ignorar spans de código, snake_case, camelCase e
   caminhos `X::y`.
+- **Addenda (varredura "corrija TODAS"):** além das recusas, o acervo tinha 63 leituras DEGENERADAS
+  (<60 chars: lixo de teste/modelo — "Pergunta", "3.605…", "true", "title_pt:", "resumo"), 2 com
+  CJK citado, 1 com tag citada e 1 corpo guardado como markup — reparadas com a mesma receita
+  (NULL → finish) e `ensurePlainText` no corpo. **Lição dos detetores:** as regras de reparação têm
+  de espelhar EXATAMENTE as do runtime, ou repros o que é legítimo — "colado" casava versões/domínios
+  (`5.js`, `Go101.org`, `e.move2` — 43 dos 44 matches), `hasCjk` no resumo reprova PRs de Rust sobre
+  UTF-8 multibyte (identificadores 中文 citados são conteúdo) e `TAGJUNK` reprova `<div>` citado em
+  backticks (preservado de propósito pelo stripDisplayJunk). Resultado: 19 353 fichas, ZERO
+  violações em todas as regras (leitura + conteúdo).

@@ -110,3 +110,36 @@ As entradas seguintes consolidam decisões grandes já documentadas no `AGENTS.m
   bootstrap automático de base vazia + backup OBRIGATÓRIO antes de toda destruição (reset/purge/
   remove). A memória CoALA segue a mesma filosofia: dump canónico versionado (track-dump) e
   `import --jsonl` por id de conteúdo para viajar entre máquinas.
+
+---
+
+## 2026-10-15 — Dashboard da TUI: barra da run, "alvo morto" curado e colunas do feed
+
+- **Contexto:** a captura do dashboard durante a run `--since 2026-01-01` mostrava 4 problemas que
+  "ainda encontrámos": barra "Artigos" 100% cheia com "0 salvos · 25 ativos", a linha
+  "Falta terminar: tudo processado ✓" (com 25 jobs em voo logo abaixo), uma parede de
+  "✗ erro job falhou (article …): getaddrinfo ENOTFOUND" por alvo morto e o rótulo
+  "✓ data-alvo alcança…" cortado com um vão vazio até à tag `[fonte]`.
+- **Bug 1 (escopo da barra):** `derivePhases` media `done+failed` do frontier GLOBAL — os 19.266
+  artigos das runs antigas dominavam num/denom e a barra nascia cheia. Passou ao burn-down da FILA
+  DA RUN via `progress.jobsBase` (a base pós-seed que já alimentava a linha `progresso:` do CLI —
+  existia e só o CLI usava); sem base, a barra SOME (`value: null`) em vez de mentir.
+- **Bug 2 (semântica da linha "Falta terminar"):** não contava os `in_progress` e o prefixo ficava
+  sempre no ecrã, mesmo com a lista vazia → "Falta terminar: tudo processado ✓". Agora conta
+  "N em processamento" e o prefixo só aparece com algo pendente; vazio vira "Tudo processado ✓"
+  sozinho (`StatusBar` do App + `StatusScreen`).
+- **Bug 3 (erro TRATADO apresentado como falha):** o `errorLog` genérico do dispatch corria ANTES
+  da classificação e o sink do RunView converte TODO `error` em marco vermelho do feed — alvo morto
+  (que mantém o blurb, encerra `done` e re-tenta na próxima run) virava "✗ erro job falhou" em toda
+  run, para cada um dos ~60 hosts mortos do acervo (`ENRICH_MAX_ATTEMPTS=0` + cooldown não evitam a
+  tentativa por run). O detetor `isDeadTargetError` passou a correr ANTES: marco curado `alvo morto`
+  (motivo por classe `deadTargetReason` + hosts em `samples` coalescidos "(×N)") + linha de log;
+  `errorLog` continua só para as falhas a sério. Comportamento de estado intacto.
+- **Bug 4 (layout do feed):** a coluna do rótulo era fixa em 20 e truncava '✓ data-alvo alcançada'
+  (21 c/ ícone) enquanto o detalhe vazio deixava o vão até à tag. Colunas calculadas UMA vez pela
+  fatia visível (rótulo = maior rótulo, cap 26; detalhe = resto; tags alinhadas à direita).
+- **Lição 1:** painel de estado tem de medir a UNIDADE certa — fila da run, não acumulado do banco;
+  quando a métrica certa já existe (`jobsBase`), reutilizá-la em vez de re-derivar do agregado.
+- **Lição 2:** no TUI, erros TRATADOS não podem passar pelo `errorLog`: o sink transforma cada linha
+  `error` em marco de feed, então a apresentação (curado × vermelho) decide-se no dispatch, com
+  `emitRunEvent` + `log`, não no render.

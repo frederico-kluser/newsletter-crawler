@@ -208,6 +208,22 @@ export const isDeadTargetError = (e) =>
     String(e?.message || ''),
   );
 
+/**
+ * Classe legível do alvo morto (PT, vocabulário de domínio como os contadores das fases) — o
+ * dispatch usa como `detail` do marco curado "alvo morto" no feed, p/ rajadas de hosts diferentes
+ * coalescerem numa linha só ("DNS não resolve — a, b, c (×N)") em vez de N erros crus. O throw do
+ * cooldown (`DEAD_HOST_COOLDOWN`) carrega o marcador ENOTFOUND de propósito e cai em "DNS não
+ * resolve" igual.
+ */
+export function deadTargetReason(e) {
+  const m = String(e?.message || '');
+  if (/ENOTFOUND|ERR_NAME_NOT_RESOLVED|EAI_AGAIN/i.test(m)) return 'DNS não resolve';
+  if (/ECONNREFUSED|ERR_CONNECTION_REFUSED/i.test(m)) return 'conexão recusada';
+  if (/ENETUNREACH|ERR_ADDRESS_UNREACHABLE/i.test(m)) return 'rede inalcançável';
+  if (/ERR_SSL_PROTOCOL_ERROR/i.test(m)) return 'SSL morto';
+  return 'alvo morto';
+}
+
 // ---- fetch estático ----
 // Host limiter por FORA (politeness é invariante, não escala com a máquina); a lane fetch do
 // governador por dentro limita o total de requests simultâneos na máquina inteira.

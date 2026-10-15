@@ -49,6 +49,22 @@ test('run-events: rajada idêntica coalesce em count; detail diferente não', ()
   unsub();
 });
 
+test('run-events: sample não entra na chave de coalescing — hosts distintos fundem com samples únicos', () => {
+  runEventsReset();
+  let snap = null;
+  const unsub = subscribeRunEvents((s) => (snap = s));
+  emitRunEvent({ phase: 'articles', kind: 'dead-target', level: 'warn', detail: 'DNS não resolve', sample: 'a.dev' });
+  emitRunEvent({ phase: 'articles', kind: 'dead-target', level: 'warn', detail: 'DNS não resolve', sample: 'b.dev' });
+  emitRunEvent({ phase: 'articles', kind: 'dead-target', level: 'warn', detail: 'DNS não resolve', sample: 'a.dev' });
+  assert.equal(snap.feed.length, 1, 'hosts distintos coalescem na MESMA linha');
+  assert.equal(snap.feed[0].count, 3, 'conta as tentativas');
+  assert.deepEqual(snap.feed[0].samples, ['a.dev', 'b.dev'], 'samples únicos, sem repetir');
+  emitRunEvent({ phase: 'articles', kind: 'dead-target', level: 'warn', detail: 'SSL morto', sample: 'c.dev' });
+  assert.equal(snap.feed.length, 2, 'motivo diferente abre nova linha');
+  assert.deepEqual(snap.feed[1].samples, ['c.dev'], 'evento sem coalesce nasce já com samples');
+  unsub();
+});
+
 test('run-events: ring respeita o teto (<=100); reset zera feed/ticker/warnCount', () => {
   runEventsReset();
   let snap = null;

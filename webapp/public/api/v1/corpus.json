@@ -1,22 +1,22 @@
 {
  "schemaVersion": 1,
- "generatedAt": "2026-10-11T17:38:02.000Z",
+ "generatedAt": "2026-10-15T04:11:33.499Z",
  "documentation": "/api/v1/README.md",
  "schema": "/api/v1/schema.json",
  "totals": {
-  "articles": 19266,
-  "summaries": 19266,
-  "classified": 19266,
+  "articles": 19353,
+  "summaries": 19353,
+  "classified": 19353,
   "byKind": {
-   "news": 11542,
-   "tool": 4266,
-   "release": 2762,
+   "news": 11592,
+   "tool": 4283,
+   "release": 2782,
    "unknown": 696
   }
  },
  "dates": {
   "min": "2015-01-19",
-  "max": "2026-10-11"
+  "max": "2026-10-14"
  },
  "sources": [
   {
@@ -27,7 +27,7 @@
   {
    "id": 9,
    "name": "Superhuman",
-   "count": 4278
+   "count": 4281
   },
   {
    "id": 8,
@@ -37,22 +37,22 @@
   {
    "id": 2,
    "name": "JavaScript Weekly",
-   "count": 1500
+   "count": 1517
   },
   {
    "id": 10,
    "name": "llmnews.ai",
-   "count": 1102
+   "count": 1121
   },
   {
    "id": 3,
    "name": "Frontend Focus",
-   "count": 880
+   "count": 905
   },
   {
    "id": 5,
    "name": "Postgres Weekly",
-   "count": 818
+   "count": 836
   },
   {
    "id": 4,
@@ -67,7 +67,7 @@
   {
    "id": 7,
    "name": "The Rundown",
-   "count": 358
+   "count": 363
   },
   {
    "id": 11,
@@ -81,31 +81,31 @@
    "tags": [
     {
      "tag": "backend",
-     "count": 7161
+     "count": 7189
     },
     {
      "tag": "ai-general",
-     "count": 5314
+     "count": 5340
     },
     {
      "tag": "frontend",
-     "count": 3067
+     "count": 3098
     },
     {
      "tag": "llm-models",
-     "count": 2032
+     "count": 2050
     },
     {
      "tag": "nodejs",
-     "count": 1251
+     "count": 1261
     },
     {
      "tag": "reactjs",
-     "count": 793
+     "count": 797
     },
     {
      "tag": "python",
-     "count": 249
+     "count": 251
     },
     {
      "tag": "local-llm",
@@ -118,43 +118,43 @@
    "tags": [
     {
      "tag": "tutorial",
-     "count": 2485
+     "count": 2490
     },
     {
      "tag": "news",
-     "count": 2228
+     "count": 2239
     },
     {
      "tag": "release-announcement",
-     "count": 1988
+     "count": 1994
     },
     {
      "tag": "deep-dive",
-     "count": 1854
+     "count": 1869
     },
     {
      "tag": "announcement",
-     "count": 1743
+     "count": 1748
     },
     {
      "tag": "product-launch",
-     "count": 1733
+     "count": 1746
     },
     {
      "tag": "analysis",
-     "count": 1490
+     "count": 1499
     },
     {
      "tag": "version-release",
-     "count": 1391
+     "count": 1407
     },
     {
      "tag": "how-to",
-     "count": 1140
+     "count": 1142
     },
     {
      "tag": "guide",
-     "count": 1100
+     "count": 1101
     },
     {
      "tag": "tooling",
@@ -162,51 +162,51 @@
     },
     {
      "tag": "tool-release",
-     "count": 1023
+     "count": 1030
     },
     {
      "tag": "opinion",
-     "count": 927
+     "count": 934
     },
     {
      "tag": "explainer",
-     "count": 703
+     "count": 708
     },
     {
      "tag": "library-release",
-     "count": 703
+     "count": 707
     },
     {
      "tag": "showcase",
-     "count": 624
+     "count": 627
     },
     {
      "tag": "project-spotlight",
-     "count": 441
+     "count": 444
     },
     {
      "tag": "case-study",
-     "count": 335
+     "count": 338
     },
     {
      "tag": "getting-started",
-     "count": 302
+     "count": 303
     },
     {
      "tag": "best-practices",
-     "count": 287
+     "count": 288
     },
     {
      "tag": "reference",
-     "count": 277
+     "count": 278
     },
     {
      "tag": "newsletter-roundup",
-     "count": 253
+     "count": 256
     },
     {
      "tag": "commentary",
-     "count": 242
+     "count": 244
     },
     {
      "tag": "demo",
@@ -218,7 +218,7 @@
     },
     {
      "tag": "benchmark",
-     "count": 219
+     "count": 220
     },
     {
      "tag": "documentation",
@@ -226,27 +226,27 @@
     },
     {
      "tag": "interview",
-     "count": 180
+     "count": 181
     },
     {
      "tag": "funding-news",
-     "count": 155
+     "count": 156
     },
     {
      "tag": "paper-summary",
      "count": 145
     },
     {
+     "tag": "security-advisory",
+     "count": 144
+    },
+    {
      "tag": "performance-report",
      "count": 143
     },
     {
-     "tag": "security-advisory",
-     "count": 143
-    },
-    {
      "tag": "comparison",
-     "count": 138
+     "count": 139
     },
     {
      "tag": "video",
@@ -258,27 +258,27 @@
     },
     {
      "tag": "vs-comparison",
-     "count": 112
+     "count": 114
     },
     {
      "tag": "retrospective",
-     "count": 110
+     "count": 111
     },
     {
      "tag": "talk",
      "count": 104
     },
     {
+     "tag": "curated-list",
+     "count": 95
+    },
+    {
      "tag": "conference-talk",
      "count": 94
     },
     {
-     "tag": "curated-list",
-     "count": 94
-    },
-    {
      "tag": "incident-report",
-     "count": 89
+     "count": 91
     },
     {
      "tag": "hot-take",
@@ -294,7 +294,7 @@
     },
     {
      "tag": "migration-guide",
-     "count": 63
+     "count": 64
     },
     {
      "tag": "api-reference",
@@ -349,16 +349,20 @@
      "count": 29
     },
     {
+     "tag": "anti-patterns",
+     "count": 28
+    },
+    {
      "tag": "workshop",
      "count": 28
     },
     {
-     "tag": "anti-patterns",
-     "count": 27
-    },
-    {
      "tag": "year-in-review",
      "count": 22
+    },
+    {
+     "tag": "cve",
+     "count": 21
     },
     {
      "tag": "job-posting",
@@ -367,10 +371,6 @@
     {
      "tag": "qa",
      "count": 21
-    },
-    {
-     "tag": "cve",
-     "count": 20
     },
     {
      "tag": "hiring",
@@ -411,19 +411,19 @@
    "tags": [
     {
      "tag": "software-development",
-     "count": 7631
+     "count": 7644
     },
     {
      "tag": "generative-ai",
-     "count": 1705
+     "count": 1710
     },
     {
      "tag": "javascript",
-     "count": 1631
+     "count": 1652
     },
     {
      "tag": "ai-agents",
-     "count": 1577
+     "count": 1584
     },
     {
      "tag": "system-design",
@@ -431,91 +431,91 @@
     },
     {
      "tag": "web-development",
-     "count": 1073
+     "count": 1083
     },
     {
      "tag": "agentic-ai",
-     "count": 1037
+     "count": 1040
     },
     {
      "tag": "llm-models",
-     "count": 968
+     "count": 979
     },
     {
      "tag": "nodejs",
-     "count": 947
+     "count": 957
     },
     {
      "tag": "ai-in-business",
-     "count": 946
+     "count": 952
     },
     {
      "tag": "performance-optimization",
-     "count": 888
+     "count": 892
     },
     {
      "tag": "react",
-     "count": 773
+     "count": 778
     },
     {
      "tag": "ai-adoption",
-     "count": 715
+     "count": 728
     },
     {
      "tag": "sql",
-     "count": 697
+     "count": 711
     },
     {
      "tag": "robotics",
-     "count": 695
+     "count": 699
     },
     {
      "tag": "typescript",
-     "count": 669
+     "count": 673
     },
     {
      "tag": "relational-databases",
-     "count": 660
+     "count": 662
     },
     {
      "tag": "databases",
-     "count": 557
+     "count": 578
     },
     {
      "tag": "css",
-     "count": 555
+     "count": 568
     },
     {
      "tag": "tool-calling",
-     "count": 492
+     "count": 494
+    },
+    {
+     "tag": "ai-safety",
+     "count": 462
     },
     {
      "tag": "performance-tuning",
      "count": 456
     },
     {
-     "tag": "ai-safety",
-     "count": 454
-    },
-    {
      "tag": "multimodal-ai",
-     "count": 450
+     "count": 452
     },
     {
      "tag": "computer-vision",
-     "count": 449
+     "count": 451
     },
     {
      "tag": "frontier-models",
-     "count": 436
+     "count": 441
     },
     {
      "tag": "ai-ethics",
-     "count": 393
+     "count": 401
     },
     {
      "tag": "ai-research",
-     "count": 382
+     "count": 385
     },
     {
      "tag": "image-generation",
@@ -523,7 +523,7 @@
     },
     {
      "tag": "distributed-systems",
-     "count": 370
+     "count": 372
     },
     {
      "tag": "cli-tools",
@@ -531,27 +531,27 @@
     },
     {
      "tag": "ai-infrastructure",
-     "count": 359
+     "count": 364
     },
     {
      "tag": "package-management",
-     "count": 356
+     "count": 358
     },
     {
      "tag": "automation",
-     "count": 332
+     "count": 335
     },
     {
      "tag": "prompt-engineering",
-     "count": 332
-    },
-    {
-     "tag": "machine-learning",
-     "count": 322
+     "count": 333
     },
     {
      "tag": "html",
-     "count": 314
+     "count": 324
+    },
+    {
+     "tag": "machine-learning",
+     "count": 324
     },
     {
      "tag": "concurrency",
@@ -563,43 +563,43 @@
     },
     {
      "tag": "ai-policy",
-     "count": 278
+     "count": 282
     },
     {
      "tag": "accessibility",
-     "count": 276
+     "count": 281
     },
     {
      "tag": "ai-hardware",
-     "count": 273
-    },
-    {
-     "tag": "rest-api",
-     "count": 269
+     "count": 278
     },
     {
      "tag": "ai-regulation",
-     "count": 267
+     "count": 274
+    },
+    {
+     "tag": "rest-api",
+     "count": 271
     },
     {
      "tag": "web-standards",
-     "count": 263
+     "count": 271
     },
     {
      "tag": "ai-video",
-     "count": 261
-    },
-    {
-     "tag": "nlp",
-     "count": 256
+     "count": 262
     },
     {
      "tag": "web-performance",
-     "count": 254
+     "count": 262
+    },
+    {
+     "tag": "nlp",
+     "count": 257
     },
     {
      "tag": "model-release",
-     "count": 243
+     "count": 244
     },
     {
      "tag": "component-libraries",
@@ -607,11 +607,11 @@
     },
     {
      "tag": "api-design",
-     "count": 236
+     "count": 238
     },
     {
      "tag": "ci-cd",
-     "count": 235
+     "count": 237
     },
     {
      "tag": "autonomous-vehicles",
@@ -623,59 +623,59 @@
     },
     {
      "tag": "ai-funding",
-     "count": 221
+     "count": 223
     },
     {
      "tag": "ai-startups",
-     "count": 218
+     "count": 221
     },
     {
      "tag": "database-access",
-     "count": 217
+     "count": 220
     },
     {
      "tag": "multi-agent-systems",
-     "count": 204
-    },
-    {
-     "tag": "agent-orchestration",
-     "count": 195
+     "count": 205
     },
     {
      "tag": "web-apis",
-     "count": 193
+     "count": 199
+    },
+    {
+     "tag": "agent-orchestration",
+     "count": 196
     },
     {
      "tag": "error-handling",
-     "count": 189
+     "count": 190
     },
     {
      "tag": "model-comparison",
-     "count": 185
+     "count": 188
+    },
+    {
+     "tag": "ai-benchmarks",
+     "count": 184
+    },
+    {
+     "tag": "supply-chain-security",
+     "count": 184
     },
     {
      "tag": "gpu",
      "count": 183
     },
     {
-     "tag": "supply-chain-security",
-     "count": 183
+     "tag": "model-evaluation",
+     "count": 179
     },
     {
-     "tag": "ai-benchmarks",
-     "count": 182
+     "tag": "model-training",
+     "count": 179
     },
     {
      "tag": "code-models",
      "count": 178
-    },
-    {
-     "tag": "model-training",
-     "count": 178
-    },
-    {
-     "tag": "model-evaluation",
-     "count": 177
     },
     {
      "tag": "serialization",
@@ -686,12 +686,12 @@
      "count": 168
     },
     {
-     "tag": "observability",
-     "count": 161
+     "tag": "browser-compatibility",
+     "count": 165
     },
     {
-     "tag": "browser-compatibility",
-     "count": 158
+     "tag": "observability",
+     "count": 161
     },
     {
      "tag": "natural-language-processing",
@@ -699,11 +699,11 @@
     },
     {
      "tag": "authentication",
-     "count": 153
+     "count": 154
     },
     {
      "tag": "foundation-models",
-     "count": 150
+     "count": 151
     },
     {
      "tag": "data-analysis",
@@ -714,7 +714,15 @@
      "count": 137
     },
     {
+     "tag": "query-optimization",
+     "count": 137
+    },
+    {
      "tag": "event-driven-architecture",
+     "count": 135
+    },
+    {
+     "tag": "security-node",
      "count": 135
     },
     {
@@ -722,28 +730,20 @@
      "count": 134
     },
     {
-     "tag": "query-optimization",
-     "count": 134
+     "tag": "rag",
+     "count": 131
+    },
+    {
+     "tag": "serverless",
+     "count": 131
     },
     {
      "tag": "webassembly",
      "count": 131
     },
     {
-     "tag": "rag",
-     "count": 130
-    },
-    {
      "tag": "data-visualization",
      "count": 129
-    },
-    {
-     "tag": "security-node",
-     "count": 128
-    },
-    {
-     "tag": "serverless",
-     "count": 128
     },
     {
      "tag": "open-weights",
@@ -762,19 +762,27 @@
      "count": 122
     },
     {
+     "tag": "data-pipelines",
+     "count": 121
+    },
+    {
      "tag": "kubernetes",
      "count": 121
     },
     {
-     "tag": "data-pipelines",
-     "count": 120
+     "tag": "reasoning-models",
+     "count": 121
     },
     {
      "tag": "text-to-speech",
-     "count": 120
+     "count": 121
     },
     {
      "tag": "ai-alignment",
+     "count": 120
+    },
+    {
+     "tag": "design-systems",
      "count": 119
     },
     {
@@ -782,36 +790,28 @@
      "count": 119
     },
     {
-     "tag": "reasoning-models",
-     "count": 119
-    },
-    {
      "tag": "caching",
      "count": 118
     },
     {
-     "tag": "design-systems",
-     "count": 117
-    },
-    {
      "tag": "inference-optimization",
-     "count": 114
+     "count": 116
     },
     {
      "tag": "datasets",
-     "count": 112
+     "count": 113
     },
     {
      "tag": "unit-testing",
      "count": 111
     },
     {
-     "tag": "context-engineering",
+     "tag": "animations",
      "count": 108
     },
     {
-     "tag": "animations",
-     "count": 107
+     "tag": "context-engineering",
+     "count": 108
     },
     {
      "tag": "async-await",
@@ -823,26 +823,30 @@
     },
     {
      "tag": "privacy-first-ai",
-     "count": 103
+     "count": 104
     },
     {
      "tag": "data-modeling",
      "count": 102
     },
     {
+     "tag": "server-components",
+     "count": 102
+    },
+    {
+     "tag": "ai-art",
+     "count": 101
+    },
+    {
+     "tag": "ai-chips",
+     "count": 101
+    },
+    {
      "tag": "bundling",
      "count": 101
     },
     {
-     "tag": "server-components",
-     "count": 101
-    },
-    {
-     "tag": "ai-art",
-     "count": 100
-    },
-    {
-     "tag": "ai-chips",
+     "tag": "npm-security",
      "count": 100
     },
     {
@@ -850,7 +854,11 @@
      "count": 100
     },
     {
-     "tag": "npm-security",
+     "tag": "responsive-design",
+     "count": 99
+    },
+    {
+     "tag": "speech-recognition",
      "count": 99
     },
     {
@@ -858,12 +866,8 @@
      "count": 97
     },
     {
-     "tag": "responsive-design",
-     "count": 97
-    },
-    {
-     "tag": "speech-recognition",
-     "count": 97
+     "tag": "database-migrations",
+     "count": 94
     },
     {
      "tag": "esm",
@@ -874,6 +878,10 @@
      "count": 93
     },
     {
+     "tag": "deployment",
+     "count": 92
+    },
+    {
      "tag": "model-pricing",
      "count": 92
     },
@@ -882,16 +890,8 @@
      "count": 92
     },
     {
-     "tag": "database-migrations",
-     "count": 90
-    },
-    {
-     "tag": "deployment",
-     "count": 90
-    },
-    {
      "tag": "react-native",
-     "count": 88
+     "count": 89
     },
     {
      "tag": "agi",
@@ -903,14 +903,18 @@
     },
     {
      "tag": "proprietary-models",
-     "count": 86
+     "count": 87
     },
     {
      "tag": "indexing",
-     "count": 84
+     "count": 85
     },
     {
      "tag": "ssr",
+     "count": 83
+    },
+    {
+     "tag": "reinforcement-learning",
      "count": 82
     },
     {
@@ -930,16 +934,12 @@
      "count": 80
     },
     {
-     "tag": "reinforcement-learning",
-     "count": 80
-    },
-    {
      "tag": "authorization",
-     "count": 77
+     "count": 78
     },
     {
      "tag": "dom",
-     "count": 75
+     "count": 76
     },
     {
      "tag": "open-source-models",
@@ -958,6 +958,10 @@
      "count": 71
     },
     {
+     "tag": "scalability",
+     "count": 71
+    },
+    {
      "tag": "time-series",
      "count": 71
     },
@@ -970,12 +974,8 @@
      "count": 69
     },
     {
-     "tag": "scalability",
-     "count": 69
-    },
-    {
      "tag": "transactions",
-     "count": 67
+     "count": 69
     },
     {
      "tag": "guardrails",
@@ -999,7 +999,7 @@
     },
     {
      "tag": "deepfakes",
-     "count": 61
+     "count": 62
     },
     {
      "tag": "scripting",
@@ -1014,12 +1014,16 @@
      "count": 58
     },
     {
-     "tag": "threading",
+     "tag": "data-fetching",
      "count": 57
     },
     {
-     "tag": "data-fetching",
-     "count": 56
+     "tag": "monorepos",
+     "count": 57
+    },
+    {
+     "tag": "threading",
+     "count": 57
     },
     {
      "tag": "semantic-search",
@@ -1030,11 +1034,11 @@
      "count": 56
     },
     {
-     "tag": "monorepos",
+     "tag": "edge-runtime",
      "count": 55
     },
     {
-     "tag": "edge-runtime",
+     "tag": "routing",
      "count": 54
     },
     {
@@ -1050,7 +1054,7 @@
      "count": 53
     },
     {
-     "tag": "routing",
+     "tag": "web-components",
      "count": 53
     },
     {
@@ -1066,8 +1070,8 @@
      "count": 52
     },
     {
-     "tag": "web-components",
-     "count": 52
+     "tag": "ai-accelerators",
+     "count": 51
     },
     {
      "tag": "embeddings",
@@ -1082,7 +1086,11 @@
      "count": 51
     },
     {
-     "tag": "ai-accelerators",
+     "tag": "model-serving",
+     "count": 51
+    },
+    {
+     "tag": "canvas",
      "count": 50
     },
     {
@@ -1094,7 +1102,11 @@
      "count": 50
     },
     {
-     "tag": "model-serving",
+     "tag": "image-optimization",
+     "count": 50
+    },
+    {
+     "tag": "vector-search",
      "count": 50
     },
     {
@@ -1102,11 +1114,7 @@
      "count": 49
     },
     {
-     "tag": "canvas",
-     "count": 49
-    },
-    {
-     "tag": "vector-search",
+     "tag": "fine-tuning",
      "count": 49
     },
     {
@@ -1114,11 +1122,11 @@
      "count": 48
     },
     {
-     "tag": "diffusion-models",
+     "tag": "connection-pooling",
      "count": 48
     },
     {
-     "tag": "fine-tuning",
+     "tag": "diffusion-models",
      "count": 48
     },
     {
@@ -1130,10 +1138,6 @@
      "count": 48
     },
     {
-     "tag": "image-optimization",
-     "count": 47
-    },
-    {
      "tag": "etl",
      "count": 46
     },
@@ -1142,7 +1146,11 @@
      "count": 46
     },
     {
-     "tag": "connection-pooling",
+     "tag": "websockets",
+     "count": 46
+    },
+    {
+     "tag": "anomaly-detection",
      "count": 45
     },
     {
@@ -1160,14 +1168,6 @@
     {
      "tag": "vision-language-models",
      "count": 45
-    },
-    {
-     "tag": "websockets",
-     "count": 45
-    },
-    {
-     "tag": "anomaly-detection",
-     "count": 44
     },
     {
      "tag": "webgl",
@@ -1194,16 +1194,16 @@
      "count": 43
     },
     {
+     "tag": "infrastructure-as-code",
+     "count": 42
+    },
+    {
      "tag": "superintelligence",
      "count": 42
     },
     {
      "tag": "webhooks",
      "count": 42
-    },
-    {
-     "tag": "infrastructure-as-code",
-     "count": 41
     },
     {
      "tag": "orm",
@@ -1222,11 +1222,11 @@
      "count": 40
     },
     {
-     "tag": "key-value-stores",
-     "count": 39
+     "tag": "npm-scripts",
+     "count": 40
     },
     {
-     "tag": "npm-scripts",
+     "tag": "key-value-stores",
      "count": 39
     },
     {
@@ -1270,6 +1270,10 @@
      "count": 34
     },
     {
+     "tag": "background-jobs",
+     "count": 34
+    },
+    {
      "tag": "explainable-ai",
      "count": 34
     },
@@ -1290,11 +1294,11 @@
      "count": 34
     },
     {
-     "tag": "background-jobs",
+     "tag": "component-composition",
      "count": 33
     },
     {
-     "tag": "component-composition",
+     "tag": "design-tokens",
      "count": 33
     },
     {
@@ -1322,10 +1326,6 @@
      "count": 32
     },
     {
-     "tag": "design-tokens",
-     "count": 32
-    },
-    {
      "tag": "hardware-requirements",
      "count": 32
     },
@@ -1338,6 +1338,10 @@
      "count": 32
     },
     {
+     "tag": "seo",
+     "count": 32
+    },
+    {
      "tag": "streaming-responses",
      "count": 32
     },
@@ -1346,20 +1350,16 @@
      "count": 32
     },
     {
-     "tag": "custom-elements",
+     "tag": "browser-devtools",
      "count": 31
     },
     {
-     "tag": "seo",
+     "tag": "custom-elements",
      "count": 31
     },
     {
      "tag": "theming",
      "count": 31
-    },
-    {
-     "tag": "browser-devtools",
-     "count": 30
     },
     {
      "tag": "promises",
@@ -1383,6 +1383,10 @@
     },
     {
      "tag": "load-balancing",
+     "count": 28
+    },
+    {
+     "tag": "testing-react",
      "count": 28
     },
     {
@@ -1418,11 +1422,11 @@
      "count": 27
     },
     {
-     "tag": "testing-react",
+     "tag": "streaming-ssr",
      "count": 27
     },
     {
-     "tag": "streaming-ssr",
+     "tag": "function-calling",
      "count": 26
     },
     {
@@ -1438,7 +1442,7 @@
      "count": 25
     },
     {
-     "tag": "function-calling",
+     "tag": "lazy-loading",
      "count": 25
     },
     {
@@ -1454,31 +1458,27 @@
      "count": 25
     },
     {
+     "tag": "task-queues",
+     "count": 25
+    },
+    {
+     "tag": "acid",
+     "count": 24
+    },
+    {
      "tag": "component-testing",
      "count": 24
     },
     {
-     "tag": "lazy-loading",
-     "count": 24
-    },
-    {
-     "tag": "task-queues",
-     "count": 24
-    },
-    {
-     "tag": "acid",
-     "count": 23
-    },
-    {
-     "tag": "aria",
-     "count": 23
-    },
-    {
      "tag": "core-web-vitals",
-     "count": 23
+     "count": 24
     },
     {
      "tag": "pretraining",
+     "count": 24
+    },
+    {
+     "tag": "aria",
      "count": 23
     },
     {
@@ -1606,6 +1606,10 @@
      "count": 18
     },
     {
+     "tag": "testing-python",
+     "count": 18
+    },
+    {
      "tag": "clean-architecture",
      "count": 17
     },
@@ -1627,10 +1631,6 @@
     },
     {
      "tag": "server-sent-events",
-     "count": 17
-    },
-    {
-     "tag": "testing-python",
      "count": 17
     },
     {
@@ -1738,6 +1738,10 @@
      "count": 13
     },
     {
+     "tag": "lcp",
+     "count": 13
+    },
+    {
      "tag": "local-rag",
      "count": 13
     },
@@ -1759,10 +1763,6 @@
     },
     {
      "tag": "caching-llm",
-     "count": 12
-    },
-    {
-     "tag": "lcp",
      "count": 12
     },
     {
@@ -1798,6 +1798,10 @@
      "count": 11
     },
     {
+     "tag": "inp",
+     "count": 10
+    },
+    {
      "tag": "mpa",
      "count": 10
     },
@@ -1816,10 +1820,6 @@
     {
      "tag": "time-series-databases",
      "count": 10
-    },
-    {
-     "tag": "inp",
-     "count": 9
     },
     {
      "tag": "knowledge-distillation",
@@ -1934,11 +1934,19 @@
      "count": 6
     },
     {
+     "tag": "asyncio",
+     "count": 6
+    },
+    {
      "tag": "c-extensions",
      "count": 6
     },
     {
      "tag": "client-components",
+     "count": 6
+    },
+    {
+     "tag": "cls",
      "count": 6
     },
     {
@@ -1979,14 +1987,6 @@
     },
     {
      "tag": "arc-agi",
-     "count": 5
-    },
-    {
-     "tag": "asyncio",
-     "count": 5
-    },
-    {
-     "tag": "cls",
      "count": 5
     },
     {
@@ -2360,31 +2360,31 @@
    "tags": [
     {
      "tag": "intermediate",
-     "count": 7006
+     "count": 7039
     },
     {
      "tag": "advanced",
-     "count": 2675
+     "count": 2688
     },
     {
      "tag": "all-levels",
-     "count": 2476
+     "count": 2490
     },
     {
      "tag": "beginner",
-     "count": 2405
+     "count": 2409
     },
     {
      "tag": "for-practitioners",
-     "count": 954
+     "count": 968
     },
     {
      "tag": "expert",
-     "count": 950
+     "count": 952
     },
     {
      "tag": "for-beginners",
-     "count": 236
+     "count": 238
     },
     {
      "tag": "for-researchers",
@@ -2392,7 +2392,7 @@
     },
     {
      "tag": "for-leaders",
-     "count": 91
+     "count": 92
     },
     {
      "tag": "for-architects",
@@ -2417,31 +2417,31 @@
     },
     {
      "tag": "javascript",
-     "count": 2685
+     "count": 2710
     },
     {
      "tag": "nodejs",
-     "count": 965
+     "count": 975
     },
     {
      "tag": "typescript",
-     "count": 940
+     "count": 947
     },
     {
      "tag": "sql",
-     "count": 818
+     "count": 833
     },
     {
      "tag": "css",
-     "count": 501
+     "count": 512
     },
     {
      "tag": "html",
-     "count": 389
+     "count": 395
     },
     {
      "tag": "python",
-     "count": 382
+     "count": 385
     },
     {
      "tag": "wasm",
@@ -2449,7 +2449,7 @@
     },
     {
      "tag": "json",
-     "count": 205
+     "count": 206
     },
     {
      "tag": "c",
@@ -2457,11 +2457,11 @@
     },
     {
      "tag": "cpp",
-     "count": 144
+     "count": 145
     },
     {
      "tag": "markdown",
-     "count": 99
+     "count": 100
     },
     {
      "tag": "bash",
@@ -2497,7 +2497,7 @@
     },
     {
      "tag": "swift",
-     "count": 27
+     "count": 28
     },
     {
      "tag": "php",
@@ -2505,7 +2505,7 @@
     },
     {
      "tag": "zig",
-     "count": 24
+     "count": 25
     },
     {
      "tag": "toml",
@@ -2570,35 +2570,35 @@
    "tags": [
     {
      "tag": "anthropic",
-     "count": 984
+     "count": 989
     },
     {
      "tag": "openai",
-     "count": 977
+     "count": 983
     },
     {
      "tag": "google",
-     "count": 743
+     "count": 751
     },
     {
      "tag": "claude",
-     "count": 678
+     "count": 681
     },
     {
      "tag": "gpt",
-     "count": 402
+     "count": 404
     },
     {
      "tag": "gemini",
-     "count": 273
+     "count": 278
     },
     {
      "tag": "microsoft",
-     "count": 258
+     "count": 261
     },
     {
      "tag": "nvidia",
-     "count": 223
+     "count": 226
     },
     {
      "tag": "github",
@@ -2606,15 +2606,15 @@
     },
     {
      "tag": "meta-ai",
-     "count": 175
+     "count": 180
     },
     {
      "tag": "aws",
-     "count": 153
+     "count": 156
     },
     {
      "tag": "apple",
-     "count": 141
+     "count": 146
     },
     {
      "tag": "codex",
@@ -2622,11 +2622,11 @@
     },
     {
      "tag": "claude-opus",
-     "count": 131
+     "count": 132
     },
     {
      "tag": "amazon",
-     "count": 127
+     "count": 129
     },
     {
      "tag": "deepseek",
@@ -2634,11 +2634,11 @@
     },
     {
      "tag": "xai",
-     "count": 110
+     "count": 111
     },
     {
      "tag": "cloudflare",
-     "count": 99
+     "count": 101
     },
     {
      "tag": "hugging-face",
@@ -2646,7 +2646,7 @@
     },
     {
      "tag": "google-deepmind",
-     "count": 84
+     "count": 85
     },
     {
      "tag": "qwen",
@@ -2654,11 +2654,11 @@
     },
     {
      "tag": "vercel",
-     "count": 78
+     "count": 80
     },
     {
      "tag": "grok",
-     "count": 77
+     "count": 78
     },
     {
      "tag": "alibaba",
@@ -2863,15 +2863,15 @@
    "tags": [
     {
      "tag": "react",
-     "count": 687
+     "count": 688
     },
     {
      "tag": "postgresql",
-     "count": 654
+     "count": 670
     },
     {
      "tag": "nodejs",
-     "count": 648
+     "count": 651
     },
     {
      "tag": "claude",
@@ -2883,11 +2883,11 @@
     },
     {
      "tag": "npm",
-     "count": 176
+     "count": 177
     },
     {
      "tag": "gemini",
-     "count": 166
+     "count": 167
     },
     {
      "tag": "docker",
@@ -2895,11 +2895,11 @@
     },
     {
      "tag": "vite",
-     "count": 142
+     "count": 143
     },
     {
      "tag": "nextjs",
-     "count": 139
+     "count": 140
     },
     {
      "tag": "vue",
@@ -2907,7 +2907,7 @@
     },
     {
      "tag": "aws",
-     "count": 108
+     "count": 109
     },
     {
      "tag": "kubernetes",
@@ -2919,15 +2919,15 @@
     },
     {
      "tag": "bun",
-     "count": 85
+     "count": 87
     },
     {
      "tag": "tailwind",
-     "count": 77
+     "count": 78
     },
     {
      "tag": "react-native",
-     "count": 75
+     "count": 76
     },
     {
      "tag": "claude-opus",
@@ -2935,7 +2935,7 @@
     },
     {
      "tag": "github-actions",
-     "count": 66
+     "count": 67
     },
     {
      "tag": "svelte",
@@ -2943,7 +2943,7 @@
     },
     {
      "tag": "deno",
-     "count": 61
+     "count": 63
     },
     {
      "tag": "nvidia-cuda",
@@ -2975,34 +2975,34 @@
     },
     {
      "tag": "astro",
-     "count": 42
+     "count": 43
     },
     {
      "tag": "cloudflare-workers",
-     "count": 39
+     "count": 40
     },
     {
      "tag": "grok",
-     "count": 38
+     "count": 39
     },
     {
      "tag": "kimi",
      "count": 37
     },
     {
+     "tag": "express",
+     "count": 36
+    },
+    {
      "tag": "ollama",
      "count": 36
     },
     {
-     "tag": "express",
-     "count": 35
+     "tag": "pnpm",
+     "count": 36
     },
     {
      "tag": "llama-cpp",
-     "count": 35
-    },
-    {
-     "tag": "pnpm",
      "count": 35
     },
     {
@@ -3063,7 +3063,7 @@
     },
     {
      "tag": "rolldown",
-     "count": 25
+     "count": 26
     },
     {
      "tag": "vllm",
@@ -3094,6 +3094,14 @@
      "count": 21
     },
     {
+     "tag": "tanstack-router",
+     "count": 20
+    },
+    {
+     "tag": "azure",
+     "count": 19
+    },
+    {
      "tag": "huggingface-hub",
      "count": 19
     },
@@ -3114,16 +3122,8 @@
      "count": 19
     },
     {
-     "tag": "tanstack-router",
-     "count": 19
-    },
-    {
      "tag": "zod",
      "count": 19
-    },
-    {
-     "tag": "azure",
-     "count": 18
     },
     {
      "tag": "fastify",
@@ -3146,6 +3146,10 @@
      "count": 17
     },
     {
+     "tag": "react-router",
+     "count": 17
+    },
+    {
      "tag": "esbuild",
      "count": 16
     },
@@ -3163,10 +3167,6 @@
     },
     {
      "tag": "preact",
-     "count": 16
-    },
-    {
-     "tag": "react-router",
      "count": 16
     },
     {
@@ -3234,6 +3234,14 @@
      "count": 12
     },
     {
+     "tag": "hono",
+     "count": 12
+    },
+    {
+     "tag": "remix",
+     "count": 12
+    },
+    {
      "tag": "sglang",
      "count": 12
     },
@@ -3250,15 +3258,7 @@
      "count": 11
     },
     {
-     "tag": "hono",
-     "count": 11
-    },
-    {
      "tag": "nats",
-     "count": 11
-    },
-    {
-     "tag": "remix",
      "count": 11
     },
     {
@@ -3322,6 +3322,10 @@
      "count": 8
     },
     {
+     "tag": "rollup",
+     "count": 8
+    },
+    {
      "tag": "temporal",
      "count": 8
     },
@@ -3339,6 +3343,10 @@
     },
     {
      "tag": "cypress",
+     "count": 7
+    },
+    {
+     "tag": "django",
      "count": 7
     },
     {
@@ -3366,10 +3374,6 @@
      "count": 7
     },
     {
-     "tag": "rollup",
-     "count": 7
-    },
-    {
      "tag": "tensorrt-llm",
      "count": 7
     },
@@ -3383,10 +3387,6 @@
     },
     {
      "tag": "cockroachdb",
-     "count": 6
-    },
-    {
-     "tag": "django",
      "count": 6
     },
     {
@@ -3466,6 +3466,10 @@
      "count": 5
     },
     {
+     "tag": "rails",
+     "count": 5
+    },
+    {
      "tag": "scrapy",
      "count": 5
     },
@@ -3479,6 +3483,10 @@
     },
     {
      "tag": "beautifulsoup",
+     "count": 4
+    },
+    {
+     "tag": "bootstrap",
      "count": 4
     },
     {
@@ -3538,10 +3546,6 @@
      "count": 4
     },
     {
-     "tag": "rails",
-     "count": 4
-    },
-    {
      "tag": "redux-toolkit",
      "count": 4
     },
@@ -3563,10 +3567,6 @@
     },
     {
      "tag": "alpine",
-     "count": 3
-    },
-    {
-     "tag": "bootstrap",
      "count": 3
     },
     {
@@ -3944,83 +3944,83 @@
    "tags": [
     {
      "tag": "performance",
-     "count": 4113
+     "count": 4138
     },
     {
      "tag": "dev-experience",
-     "count": 2103
+     "count": 2118
     },
     {
      "tag": "optimization",
-     "count": 1927
+     "count": 1936
     },
     {
      "tag": "security",
-     "count": 1761
+     "count": 1779
     },
     {
      "tag": "open-source",
-     "count": 1589
+     "count": 1597
     },
     {
      "tag": "architecture",
-     "count": 1582
+     "count": 1592
     },
     {
      "tag": "reliability",
-     "count": 1362
+     "count": 1371
     },
     {
      "tag": "developer-productivity",
-     "count": 1316
+     "count": 1322
     },
     {
      "tag": "api-design",
-     "count": 1029
+     "count": 1032
     },
     {
      "tag": "testing",
-     "count": 866
+     "count": 868
     },
     {
      "tag": "ui",
-     "count": 820
+     "count": 825
     },
     {
      "tag": "type-safety",
-     "count": 797
+     "count": 801
     },
     {
      "tag": "ux",
-     "count": 750
+     "count": 754
     },
     {
      "tag": "static-analysis",
-     "count": 722
+     "count": 723
     },
     {
      "tag": "community",
-     "count": 636
+     "count": 637
     },
     {
      "tag": "concurrency",
-     "count": 633
+     "count": 636
     },
     {
      "tag": "scalability",
-     "count": 597
+     "count": 601
     },
     {
      "tag": "error-handling",
-     "count": 593
+     "count": 596
     },
     {
      "tag": "design-patterns",
-     "count": 485
+     "count": 486
     },
     {
      "tag": "productivity",
-     "count": 482
+     "count": 483
     },
     {
      "tag": "debugging",
@@ -4036,47 +4036,47 @@
     },
     {
      "tag": "governance",
-     "count": 418
+     "count": 423
+    },
+    {
+     "tag": "ai-safety",
+     "count": 381
     },
     {
      "tag": "observability",
      "count": 379
     },
     {
-     "tag": "ai-safety",
-     "count": 375
-    },
-    {
      "tag": "accessibility",
-     "count": 364
+     "count": 367
     },
     {
      "tag": "prompt-engineering",
-     "count": 349
+     "count": 352
     },
     {
      "tag": "cost-optimization",
-     "count": 338
-    },
-    {
-     "tag": "cloud",
-     "count": 311
+     "count": 343
     },
     {
      "tag": "data-privacy",
-     "count": 311
+     "count": 318
+    },
+    {
+     "tag": "cloud",
+     "count": 312
     },
     {
      "tag": "async",
-     "count": 307
+     "count": 308
     },
     {
      "tag": "ci-cd",
-     "count": 307
+     "count": 308
     },
     {
      "tag": "data-engineering",
-     "count": 303
+     "count": 305
     },
     {
      "tag": "dx",
@@ -4084,19 +4084,19 @@
     },
     {
      "tag": "ai-ethics",
-     "count": 277
+     "count": 278
     },
     {
      "tag": "caching",
-     "count": 274
+     "count": 278
     },
     {
      "tag": "evaluation",
-     "count": 264
+     "count": 267
     },
     {
      "tag": "privacy",
-     "count": 255
+     "count": 259
     },
     {
      "tag": "latency",
@@ -4104,7 +4104,7 @@
     },
     {
      "tag": "agentops",
-     "count": 233
+     "count": 234
     },
     {
      "tag": "transparency",
@@ -4120,15 +4120,15 @@
     },
     {
      "tag": "devops",
-     "count": 220
+     "count": 221
     },
     {
      "tag": "validation",
-     "count": 216
+     "count": 217
     },
     {
      "tag": "availability",
-     "count": 201
+     "count": 202
     },
     {
      "tag": "profiling",
@@ -4136,19 +4136,23 @@
     },
     {
      "tag": "state-management",
-     "count": 196
+     "count": 197
     },
     {
      "tag": "guardrails",
-     "count": 194
+     "count": 196
     },
     {
      "tag": "monitoring",
-     "count": 192
+     "count": 193
     },
     {
      "tag": "design-systems",
-     "count": 188
+     "count": 190
+    },
+    {
+     "tag": "data-fetching",
+     "count": 186
     },
     {
      "tag": "context-engineering",
@@ -4156,11 +4160,7 @@
     },
     {
      "tag": "cost",
-     "count": 184
-    },
-    {
-     "tag": "data-fetching",
-     "count": 184
+     "count": 185
     },
     {
      "tag": "parallelism",
@@ -4168,7 +4168,7 @@
     },
     {
      "tag": "compliance",
-     "count": 167
+     "count": 171
     },
     {
      "tag": "containers",
@@ -4176,11 +4176,11 @@
     },
     {
      "tag": "authorization",
-     "count": 153
+     "count": 154
     },
     {
      "tag": "edge-computing",
-     "count": 151
+     "count": 152
     },
     {
      "tag": "ai-regulation",
@@ -4188,11 +4188,11 @@
     },
     {
      "tag": "technical-debt",
-     "count": 146
+     "count": 147
     },
     {
      "tag": "data-pipelines",
-     "count": 144
+     "count": 146
     },
     {
      "tag": "encryption",
@@ -4200,7 +4200,7 @@
     },
     {
      "tag": "serverless",
-     "count": 139
+     "count": 141
     },
     {
      "tag": "llmops",
@@ -4216,15 +4216,15 @@
     },
     {
      "tag": "regulation",
-     "count": 115
+     "count": 116
     },
     {
      "tag": "internationalization",
-     "count": 107
+     "count": 108
     },
     {
      "tag": "evals",
-     "count": 104
+     "count": 106
     },
     {
      "tag": "pricing",
@@ -4255,6 +4255,10 @@
      "count": 81
     },
     {
+     "tag": "platform-engineering",
+     "count": 78
+    },
+    {
      "tag": "licensing",
      "count": 77
     },
@@ -4267,12 +4271,8 @@
      "count": 77
     },
     {
-     "tag": "platform-engineering",
-     "count": 77
-    },
-    {
      "tag": "energy-efficiency",
-     "count": 70
+     "count": 71
     },
     {
      "tag": "ethics",
@@ -4280,7 +4280,7 @@
     },
     {
      "tag": "hallucination",
-     "count": 67
+     "count": 68
     },
     {
      "tag": "integration-testing",
@@ -4304,7 +4304,7 @@
     },
     {
      "tag": "seo",
-     "count": 55
+     "count": 56
     },
     {
      "tag": "e2e-testing",
@@ -4315,24 +4315,24 @@
      "count": 45
     },
     {
+     "tag": "web-vitals",
+     "count": 41
+    },
+    {
      "tag": "bias",
      "count": 38
     },
     {
-     "tag": "web-vitals",
-     "count": 37
+     "tag": "explainability",
+     "count": 28
     },
     {
      "tag": "interpretability",
      "count": 28
     },
     {
-     "tag": "explainability",
-     "count": 27
-    },
-    {
      "tag": "mlops",
-     "count": 23
+     "count": 24
     },
     {
      "tag": "sast",
@@ -4347,12 +4347,12 @@
      "count": 18
     },
     {
-     "tag": "tdd",
+     "tag": "remote-work",
      "count": 18
     },
     {
-     "tag": "remote-work",
-     "count": 17
+     "tag": "tdd",
+     "count": 18
     },
     {
      "tag": "fmops",
@@ -4381,43 +4381,43 @@
    "tags": [
     {
      "tag": "ai-agents",
-     "count": 1776
+     "count": 1785
     },
     {
      "tag": "agentic-ai",
-     "count": 1294
+     "count": 1301
     },
     {
      "tag": "ai-coding-agents",
-     "count": 730
+     "count": 734
     },
     {
      "tag": "multimodal",
-     "count": 570
+     "count": 572
     },
     {
      "tag": "frontier-models",
-     "count": 539
+     "count": 547
     },
     {
      "tag": "ai-governance",
-     "count": 532
+     "count": 537
     },
     {
      "tag": "on-device-ai",
-     "count": 424
+     "count": 425
     },
     {
      "tag": "tool-calling",
-     "count": 375
+     "count": 378
     },
     {
      "tag": "foundation-models",
-     "count": 361
+     "count": 364
     },
     {
      "tag": "reasoning-models",
-     "count": 308
+     "count": 310
     },
     {
      "tag": "mcp",
@@ -4429,15 +4429,15 @@
     },
     {
      "tag": "multi-agent",
-     "count": 238
+     "count": 240
     },
     {
      "tag": "voice-ai",
-     "count": 237
+     "count": 240
     },
     {
      "tag": "edge-ai",
-     "count": 228
+     "count": 229
     },
     {
      "tag": "agent-orchestration",
@@ -4445,15 +4445,15 @@
     },
     {
      "tag": "computer-use",
-     "count": 213
+     "count": 214
     },
     {
      "tag": "ai-data-centers",
-     "count": 210
+     "count": 212
     },
     {
      "tag": "local-llm",
-     "count": 209
+     "count": 210
     },
     {
      "tag": "open-weights",
@@ -4461,11 +4461,11 @@
     },
     {
      "tag": "gpu-economics",
-     "count": 183
+     "count": 184
     },
     {
      "tag": "vision-language-models",
-     "count": 163
+     "count": 164
     },
     {
      "tag": "copilots",
@@ -4473,19 +4473,19 @@
     },
     {
      "tag": "vibe-coding",
-     "count": 149
+     "count": 151
     },
     {
      "tag": "ai-search",
-     "count": 142
+     "count": 143
     },
     {
      "tag": "rag",
-     "count": 110
+     "count": 111
     },
     {
      "tag": "world-models",
-     "count": 108
+     "count": 109
     },
     {
      "tag": "browser-agents",
@@ -4493,7 +4493,7 @@
     },
     {
      "tag": "generative-ui",
-     "count": 103
+     "count": 104
     },
     {
      "tag": "small-language-models",
@@ -4505,30 +4505,30 @@
     },
     {
      "tag": "long-context",
-     "count": 81
+     "count": 82
     },
     {
      "tag": "structured-output",
-     "count": 66
+     "count": 67
     },
     {
      "tag": "prompt-injection",
-     "count": 64
+     "count": 65
     },
     {
      "tag": "fine-tuning",
-     "count": 57
+     "count": 58
     },
     {
      "tag": "chain-of-thought",
      "count": 54
     },
     {
-     "tag": "quantization",
-     "count": 53
+     "tag": "vector-search",
+     "count": 54
     },
     {
-     "tag": "vector-search",
+     "tag": "quantization",
      "count": 53
     },
     {
@@ -4557,7 +4557,7 @@
     },
     {
      "tag": "semantic-search",
-     "count": 28
+     "count": 29
     },
     {
      "tag": "test-time-compute",
@@ -767962,6 +767962,3894 @@
      "ai-agents",
      "multi-agent",
      "frontier-models"
+    ]
+   }
+  },
+  {
+   "id": 19767,
+   "url": "https://www.therundown.ai/articles/openai-finds-a-bug-in-its-boardroom",
+   "sourceId": 7,
+   "sourceName": "The Rundown",
+   "title": "OpenAI finds a bug in its boardroom",
+   "titlePt": "Título não informado",
+   "summaryPt": "Não foi possível gerar o resumo porque o texto do artigo não foi enviado. Por favor, inclua o conteúdo original para que eu possa traduzir o título e resumir as informações corretamente.",
+   "snippet": "Last month, OpenAI went from hacker to hacked. This month, it used ChatGPT to play the detective. Federal prosecutors now say one of its engineers hid a recorder in the company’s executive meeting room, and OpenAI says its own AI helped crack the case. Washington is treating it as a national security matter, which tells you how much the conversations in that room are now worth. In today’s AI ru",
+   "issueUrl": "https://www.therundown.ai/articles",
+   "blurb": null,
+   "kind": "news",
+   "section": null,
+   "date": "2026-10-14",
+   "verifyStatus": "suspect",
+   "tags": {
+    "company-vendor-model": [
+     "openai",
+     "xai",
+     "gpt"
+    ],
+    "concept-theme": [
+     "security",
+     "privacy",
+     "governance"
+    ],
+    "content-type": [
+     "news",
+     "incident-report"
+    ],
+    "difficulty": [
+     "all-levels"
+    ],
+    "domain": [
+     "ai-general",
+     "llm-models"
+    ],
+    "topic-technology": [
+     "ai-safety",
+     "ai-regulation",
+     "ai-policy",
+     "ai-ethics",
+     "llm-models",
+     "ai-adoption"
+    ],
+    "trending-emerging": [
+     "ai-governance"
+    ]
+   }
+  },
+  {
+   "id": 19768,
+   "url": "https://www.cnbc.com/2026/10/14/anthropic-mythos-bank-of-america-hiring-cost.html",
+   "sourceId": 10,
+   "sourceName": "llmnews.ai",
+   "title": "Bank of America hired 1,000 contractors to patch software flaws exposed by Anthropic's Mythos",
+   "titlePt": "Artigo não encontrado",
+   "summaryPt": "Não foi possível gerar o resumo porque o conteúdo do artigo não foi fornecido. Por favor, envie o texto do artigo para que eu possa traduzir o título e elaborar o resumo em português do Brasil.",
+   "snippet": "Bank of America has hired an army of external contractors to help it patch software vulnerabilities exposed by advanced artificial intelligence models including Anthropic's Mythos, the bank's CEO, Brian Moynihan, told CNBC on Wednesday. In an interview after the bank's third-quarter earnings release, Moynihan said that earlier this year the company rushed to bolster a wide spectrum of its internal",
+   "issueUrl": "https://llmnews.ai",
+   "blurb": null,
+   "kind": "news",
+   "section": null,
+   "date": "2026-10-14",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "anthropic"
+    ],
+    "concept-theme": [
+     "security",
+     "compliance",
+     "cost",
+     "ai-safety"
+    ],
+    "content-type": [
+     "news"
+    ],
+    "difficulty": [
+     "intermediate"
+    ],
+    "domain": [
+     "llm-models",
+     "ai-general"
+    ],
+    "topic-technology": [
+     "ai-safety",
+     "software-development",
+     "ai-adoption",
+     "ai-in-business",
+     "llm-models"
+    ],
+    "trending-emerging": [
+     "frontier-models"
+    ]
+   }
+  },
+  {
+   "id": 19769,
+   "url": "https://yyhh.org/blog/2026/10/ai-is-a-tool",
+   "sourceId": 10,
+   "sourceName": "llmnews.ai",
+   "title": "AI Is a Tool. Using It Well Takes Skill.",
+   "titlePt": "Artigo não fornecido",
+   "summaryPt": "Não foi possível gerar o resumo porque o texto do artigo não foi enviado. Por favor, inclua o conteúdo do artigo para que a tradução e o resumo sejam produzidos.",
+   "snippet": "In his October 11, 2026 article, \"'AI' is Not a Tool,\" Rich Hickey argues that LLMs are automation rather than tools because they cannot be wielded. I agree that outsourcing work can cost us opportunities to learn. But his conclusion does not follow. Even by his definition, an LLM can be something a human wields. And using it well takes skill, just as using other tools does. Picking up a saw does",
+   "issueUrl": "https://llmnews.ai",
+   "blurb": null,
+   "kind": "news",
+   "section": null,
+   "date": "2026-10-12",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "prompt-engineering",
+     "explainability",
+     "evaluation",
+     "dev-experience"
+    ],
+    "content-type": [
+     "commentary"
+    ],
+    "difficulty": [
+     "intermediate"
+    ],
+    "domain": [
+     "llm-models"
+    ],
+    "topic-technology": [
+     "llm-models",
+     "prompt-engineering",
+     "ai-adoption",
+     "ai-ethics",
+     "generative-ai"
+    ],
+    "trending-emerging": [
+     "foundation-models"
+    ]
+   }
+  },
+  {
+   "id": 19770,
+   "url": "https://www.superhuman.ai/p/openai-gets-bugged-apple-debuts-the-homeview",
+   "sourceId": 9,
+   "sourceName": "Superhuman",
+   "title": "OpenAI gets bugged, Apple debuts the HomeView",
+   "titlePt": "Artigo não fornecido",
+   "summaryPt": "Não foi possível gerar o resumo porque o texto do artigo não foi enviado. Por favor, forneça o conteúdo do artigo para que eu possa traduzir o título e criar um resumo claro e fiel em português do Brasil.",
+   "snippet": "Welcome back, Superhuman. OpenAI has a rat. An employee allegedly planted a hidden recording device to gather intel and was later caught on camera trying to re-collect it, leading to some instantly infamous pictures. Full story below. Meanwhile, Apple’s newest device is facing an unexpected response: backlash. Today: Gemini Argon 4 is here, learn how to hunt jobs, tailor resumes, and prepare appli",
+   "issueUrl": "https://www.superhuman.ai/archive",
+   "blurb": null,
+   "kind": "tool",
+   "section": null,
+   "date": "2026-10-14",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "openai",
+     "apple",
+     "google",
+     "gemini"
+    ],
+    "concept-theme": [
+     "security",
+     "data-privacy",
+     "prompt-engineering"
+    ],
+    "content-type": [
+     "product-launch",
+     "news"
+    ],
+    "difficulty": [
+     "all-levels"
+    ],
+    "domain": [
+     "llm-models",
+     "ai-general"
+    ],
+    "topic-technology": [
+     "text-to-speech",
+     "generative-ai",
+     "multimodal-ai",
+     "ai-hardware",
+     "ai-adoption",
+     "ai-regulation"
+    ],
+    "trending-emerging": [
+     "tool-calling",
+     "frontier-models",
+     "voice-ai"
+    ]
+   }
+  },
+  {
+   "id": 19771,
+   "url": "https://www.washingtonsun.com/immigration/ice-ai-monitor-detainees",
+   "sourceId": 10,
+   "sourceName": "llmnews.ai",
+   "title": "ICE Wants to Use AI to Monitor Detainee Calls and Movements",
+   "titlePt": "Artigo não fornecido",
+   "summaryPt": "Nenhum artigo foi enviado para tradução e resumo. Por favor, forneça o conteúdo do artigo para que eu possa gerar o título e o resumo em português do Brasil.",
+   "snippet": "Immigration and Customs Enforcement is looking for an AI software that can monitor the phone and video calls and movements of immigrants at detention centers. The system would use transcriptions and voice-recognition technology to monitor who detainees are talking to and the contents of the calls, as well as data from cameras, according to a document the agency posted Friday on a federal governmen",
+   "issueUrl": "https://llmnews.ai",
+   "blurb": null,
+   "kind": "news",
+   "section": null,
+   "date": "2026-10-13",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "data-privacy",
+     "ai-ethics",
+     "privacy"
+    ],
+    "content-type": [
+     "news"
+    ],
+    "difficulty": [
+     "all-levels"
+    ],
+    "domain": [
+     "ai-general"
+    ],
+    "topic-technology": [
+     "speech-recognition",
+     "ai-ethics",
+     "ai-policy",
+     "data-pipelines",
+     "anomaly-detection"
+    ],
+    "trending-emerging": [
+     "multimodal",
+     "voice-ai",
+     "ai-governance"
+    ]
+   }
+  },
+  {
+   "id": 19772,
+   "url": "https://startupfortune.com/banks-are-now-trying-to-offload-the-ai-data-center-debt-they-just-underwrote",
+   "sourceId": 10,
+   "sourceName": "llmnews.ai",
+   "title": "Banks are now trying to offload the AI data center debt they just underwrote",
+   "titlePt": "Artigo não fornecido",
+   "summaryPt": "Não foi possível gerar o resumo porque o conteúdo do artigo não foi enviado. Por favor, forneça o texto do artigo para que eu possa traduzir o título e elaborar o resumo em português do Brasil.",
+   "snippet": "JPMorgan, Morgan Stanley, SMBC and MUFG are quietly shopping pieces of the AI debt pile they helped build, a sign the lenders closest to the money have started hedging their own bet. Six months ago, banks were racing each other to underwrite data center loans tied to Oracle, Meta and the rest of the AI buildout. Now some of the same banks are trying to get that debt off their books. JPMorgan, Mor",
+   "issueUrl": "https://llmnews.ai",
+   "blurb": null,
+   "kind": "news",
+   "section": null,
+   "date": "2026-10-10",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "meta-ai"
+    ],
+    "concept-theme": [
+     "cost-optimization",
+     "governance"
+    ],
+    "content-type": [
+     "news"
+    ],
+    "difficulty": [
+     "intermediate"
+    ],
+    "domain": [
+     "ai-general"
+    ],
+    "topic-technology": [
+     "ai-infrastructure",
+     "ai-funding",
+     "ai-in-business",
+     "databases",
+     "distributed-systems"
+    ],
+    "trending-emerging": [
+     "ai-data-centers"
+    ]
+   }
+  },
+  {
+   "id": 19773,
+   "url": "https://www.therundown.ai/articles/apple-goes-all-in-on-the-home",
+   "sourceId": 7,
+   "sourceName": "The Rundown",
+   "title": "Apple goes all-in on the home",
+   "titlePt": "Artigo não fornecido",
+   "summaryPt": "O artigo não foi incluído na solicitação. Por favor, envie o texto para que eu possa traduzir o título e resumir.",
+   "snippet": "Good morning, tech enthusiasts. At its “Welcome Home” event in NYC, Apple just unveiled a $299 HomeView display, refreshed Apple TV and HomePod hardware, plus cameras, thermostats, and a smart lock. Here’s everything Apple announced — and why Siri could make or break the whole plan. Also: A cyberattack sends French grocery chains into a meltdown, and Google’s new Fitbit Edge has a battery you ca",
+   "issueUrl": "https://www.therundown.ai/articles",
+   "blurb": null,
+   "kind": "tool",
+   "section": null,
+   "date": "2026-10-13",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "apple",
+     "google",
+     "amazon"
+    ],
+    "concept-theme": [
+     "security"
+    ],
+    "content-type": [
+     "product-launch",
+     "newsletter-roundup"
+    ],
+    "domain": [
+     "ai-general"
+    ],
+    "topic-technology": [
+     "ai-hardware"
+    ],
+    "trending-emerging": [
+     "voice-ai"
+    ]
+   }
+  },
+  {
+   "id": 19774,
+   "url": "https://daily.tinyprojects.dev/221",
+   "sourceId": 10,
+   "sourceName": "llmnews.ai",
+   "title": "221 - I let an AI run my startup for a week",
+   "titlePt": "Artigo não fornecido",
+   "summaryPt": "Não foi possível gerar o resumo porque o artigo não foi incluído na mensagem. Por favor, forneça o texto do artigo para que eu possa traduzir o título e escrever um resumo fiel em português do Brasil.",
+   "snippet": "Wednesday, October 14th, 2026 I completely missed the OpenClaw hype - I actually thought it looked kind of dumb at the time. What is this for? But the past week or so I've been quite enjoying using Grok Bot - which is very similar (and like OpenAI dots I guess). It's basically a mini team of agent/bots that run on a Linux server somewhere that you can assign jobs to. Eg, I have a support",
+   "issueUrl": "https://llmnews.ai",
+   "blurb": null,
+   "kind": "tool",
+   "section": null,
+   "date": "2026-10-14",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "grok",
+     "cloudflare"
+    ],
+    "concept-theme": [
+     "agentops",
+     "productivity",
+     "remote-work"
+    ],
+    "content-type": [
+     "opinion",
+     "deep-dive"
+    ],
+    "difficulty": [
+     "intermediate"
+    ],
+    "domain": [
+     "ai-general"
+    ],
+    "framework-library-tool": [
+     "grok"
+    ],
+    "topic-technology": [
+     "ai-agents",
+     "agentic-ai",
+     "multi-agent-systems",
+     "agent-orchestration",
+     "tool-calling",
+     "automation"
+    ],
+    "trending-emerging": [
+     "ai-agents",
+     "multi-agent",
+     "agentic-ai"
+    ]
+   }
+  },
+  {
+   "id": 19775,
+   "url": "https://www.pi.website/blog/api-beta",
+   "sourceId": 10,
+   "sourceName": "llmnews.ai",
+   "title": "Frontier Models for Every Robot",
+   "titlePt": "Artigo não fornecido",
+   "summaryPt": "O artigo que deveria ser resumido não foi incluído na mensagem. Por favor, envie o texto para que eu possa traduzir o título e elaborar o resumo em português do Brasil.",
+   "snippet": "Published October 13, 2026 We are making our latest models available for training and inference through the Pi API beta. Deploying robots is challenging. Besides identifying the right use case and building the right hardware, developers need models intelligent enough to perform the task at hand. General-purpose robotic foundation models such as π0 and π0.5 offer a promising way to tackle this cha",
+   "issueUrl": "https://llmnews.ai",
+   "blurb": null,
+   "kind": "release",
+   "section": null,
+   "date": "2026-10-13",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "mlops",
+     "api-design",
+     "data-pipelines"
+    ],
+    "content-type": [
+     "product-launch",
+     "release-announcement"
+    ],
+    "difficulty": [
+     "intermediate"
+    ],
+    "domain": [
+     "ai-general"
+    ],
+    "topic-technology": [
+     "robotics",
+     "foundation-models",
+     "fine-tuning",
+     "model-serving",
+     "api-design",
+     "machine-learning"
+    ],
+    "trending-emerging": [
+     "frontier-models",
+     "foundation-models",
+     "fine-tuning"
+    ]
+   }
+  },
+  {
+   "id": 19776,
+   "url": "https://www.csoonline.com/article/4234854/ai-agents-arent-going-rogue-frontier-labs-are-skipping-security-basics.html",
+   "sourceId": 10,
+   "sourceName": "llmnews.ai",
+   "title": "AI agents aren’t ‘going rogue.’ Frontier labs are skipping security basics.",
+   "titlePt": "Artigo não fornecido",
+   "summaryPt": "Não foi possível gerar o resumo porque o conteúdo do artigo não foi enviado na mensagem. Por favor, forneça o texto do artigo para que eu possa traduzir o título e resumir o conteúdo em português do Brasil.",
+   "snippet": "Since July, US frontier AI labs and other AI leaders have revealed a string of incidents in which their models accessed external computer systems without authorization, events popularly described as AI agents “going rogue.” The most well-known and studied of these incidents is OpenAI’s hack into Hugging Face, which OpenAI initially characterized as “an unprecedented cyber incident, involving stat",
+   "issueUrl": "https://llmnews.ai",
+   "blurb": null,
+   "kind": "news",
+   "section": null,
+   "date": "2026-10-14",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "openai",
+     "anthropic",
+     "meta-ai",
+     "google",
+     "gemini"
+    ],
+    "concept-theme": [
+     "security",
+     "authorization",
+     "ai-safety"
+    ],
+    "content-type": [
+     "analysis",
+     "opinion"
+    ],
+    "difficulty": [
+     "intermediate"
+    ],
+    "domain": [
+     "llm-models",
+     "ai-general"
+    ],
+    "topic-technology": [
+     "ai-safety",
+     "ai-alignment",
+     "ai-agents",
+     "frontier-models",
+     "ai-regulation"
+    ],
+    "trending-emerging": [
+     "ai-agents",
+     "computer-use",
+     "ai-governance",
+     "frontier-models"
+    ]
+   }
+  },
+  {
+   "id": 19777,
+   "url": "https://blog.character.ai/an-update-on-character-ai",
+   "sourceId": 10,
+   "sourceName": "llmnews.ai",
+   "title": "An Update on Character.ai",
+   "titlePt": "Erro: artigo não fornecido",
+   "summaryPt": "Não foi possível gerar o resumo porque o texto do artigo não foi enviado. Por favor, forneça o conteúdo do artigo para que possamos traduzir o título e criar um resumo em português do Brasil.",
+   "snippet": "Oct 12, 2026 Today, we’re sharing that Character.ai has initiated a voluntary Chapter 11 bankruptcy process to facilitate a court-supervised sale of the company. Over the past year, we’ve taken meaningful steps to sustain and improve our business amid significant legal, regulatory, and operational headwinds. After a comprehensive review of our available alternatives, our boa",
+   "issueUrl": "https://llmnews.ai/page/2",
+   "blurb": null,
+   "kind": "news",
+   "section": null,
+   "date": "2026-10-13",
+   "verifyStatus": "ok",
+   "tags": {
+    "content-type": [
+     "news"
+    ],
+    "domain": [
+     "ai-general",
+     "llm-models"
+    ],
+    "topic-technology": [
+     "ai-startups",
+     "ai-regulation",
+     "ai-adoption",
+     "ai-in-business",
+     "llm-models"
+    ]
+   }
+  },
+  {
+   "id": 19778,
+   "url": "https://www.superhuman.ai/p/meta-drops-two-new-models-topping-fable-astra",
+   "sourceId": 9,
+   "sourceName": "Superhuman",
+   "title": "Meta drops two new models, topping Fable & Astra",
+   "titlePt": "Artigo não fornecido",
+   "summaryPt": "Não foi possível traduzir o título e criar o resumo porque o texto do artigo não foi enviado. Por favor, inclua o artigo para que a tradução e o resumo possam ser gerados.",
+   "snippet": "Welcome back, Superhuman. Sometimes patience pays off. This time last year, Meta was overhauling its AI division for the fourth time in just six months. Now its personal agent Muse is #1 on Apple’s App Store, and two new models just put Meta back near the top of the frontier charts. Today: SaaSpocalypse 2.0 is here, how to find the best deal before you buy with Grok Bot, and get the latest prompts",
+   "issueUrl": "https://www.superhuman.ai/archive",
+   "blurb": null,
+   "kind": "news",
+   "section": null,
+   "date": "2026-10-13",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "meta-ai",
+     "microsoft",
+     "anthropic",
+     "openai",
+     "nvidia"
+    ],
+    "concept-theme": [
+     "performance",
+     "security"
+    ],
+    "content-type": [
+     "newsletter-roundup",
+     "news"
+    ],
+    "difficulty": [
+     "all-levels"
+    ],
+    "domain": [
+     "llm-models",
+     "ai-general"
+    ],
+    "topic-technology": [
+     "frontier-models",
+     "model-comparison",
+     "ai-hardware",
+     "ai-chips",
+     "inference-optimization",
+     "ai-infrastructure"
+    ],
+    "trending-emerging": [
+     "frontier-models",
+     "ai-agents",
+     "ai-data-centers",
+     "gpu-economics"
+    ]
+   }
+  },
+  {
+   "id": 19779,
+   "url": "https://www.anthropic.com/engineering/redesigning-source-control",
+   "sourceId": 10,
+   "sourceName": "llmnews.ai",
+   "title": "Redesigning source control at Anthropic",
+   "titlePt": "Artigo não fornecido",
+   "summaryPt": "Não recebi o texto do artigo. Por favor, envie o conteúdo para que eu possa traduzir o título e produzir um resumo em português do Brasil.",
+   "snippet": "At Anthropic, coding is no longer the bottleneck to building systems or doing research. Claude is able to autonomously iterate on research loops, micro-optimize complex programs, and build new services from the ground up at a speed and scale we haven’t seen before. The bottleneck, now, is all of the developer infrastructure built for human scale: source control, builds, and CI. In May 2026, Anthro",
+   "issueUrl": "https://llmnews.ai/page/2",
+   "blurb": null,
+   "kind": "news",
+   "section": null,
+   "date": "2026-10-13",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "anthropic",
+     "claude"
+    ],
+    "concept-theme": [
+     "scalability",
+     "platform-engineering",
+     "developer-productivity",
+     "architecture"
+    ],
+    "content-type": [
+     "case-study",
+     "deep-dive"
+    ],
+    "difficulty": [
+     "advanced"
+    ],
+    "domain": [
+     "ai-general"
+    ],
+    "topic-technology": [
+     "monorepos",
+     "software-development",
+     "ai-adoption",
+     "scalability"
+    ],
+    "trending-emerging": [
+     "ai-coding-agents"
+    ]
+   }
+  },
+  {
+   "id": 19780,
+   "url": "https://azure.microsoft.com/en-us/blog/deep-dive-into-azure-maia-300-architecture",
+   "sourceId": 10,
+   "sourceName": "llmnews.ai",
+   "title": "Deep dive into Azure Maia 300 architecture",
+   "titlePt": "Artigo não fornecido",
+   "summaryPt": "Não foi possível gerar o resumo porque o texto do artigo não foi enviado. Por favor, forneça o artigo para que eu possa traduzir o título e resumir o conteúdo.",
+   "snippet": "From its inception, Azure Maia has been built around a single architectural philosophy: optimize the entire system for LLM inference so that every watt and every dollar delivers more intelligence. Now in its third generation, Maia 300 is the fullest expression of that philosophy. Maia 300 is built as a complete system, with software, silicon, physical rack infrastructure, networking, and datacente",
+   "issueUrl": "https://llmnews.ai/page/2",
+   "blurb": null,
+   "kind": "tool",
+   "section": null,
+   "date": "2026-10-12",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "microsoft"
+    ],
+    "concept-theme": [
+     "architecture",
+     "performance",
+     "energy-efficiency",
+     "cost-optimization"
+    ],
+    "content-type": [
+     "deep-dive",
+     "analysis"
+    ],
+    "difficulty": [
+     "expert"
+    ],
+    "domain": [
+     "llm-models"
+    ],
+    "framework-library-tool": [
+     "azure"
+    ],
+    "topic-technology": [
+     "ai-hardware",
+     "ai-accelerators",
+     "ai-infrastructure",
+     "inference-optimization",
+     "llm-models",
+     "agentic-ai"
+    ],
+    "trending-emerging": [
+     "agentic-ai",
+     "ai-agents",
+     "long-context",
+     "tool-calling"
+    ]
+   }
+  },
+  {
+   "id": 19781,
+   "url": "https://www.superhuman.ai/p/new-ai-startup-aims-to-build-previously-unbuildable-products",
+   "sourceId": 9,
+   "sourceName": "Superhuman",
+   "title": "New AI startup aims to build \"previously unbuildable\" products",
+   "titlePt": "Artigo não fornecido",
+   "summaryPt": "Nenhum texto de artigo foi enviado na solicitação. Para que eu possa traduzir o título e elaborar um resumo adequado em português do Brasil, por favor, envie o conteúdo completo do artigo desejado.",
+   "snippet": "Welcome back, Superhuman. After six years in stealth, Jeff Holden — Amazon’s 10th engineer — has unveiled Atomic Machines, a startup he thinks can usher in an era of “vibe manufacturing.” Plus, a third of the Fortune 500 is already using TypeSafe AI’s buzzy new model just one month after it launched. Today: Satya Nadella’s essay hits 10M views, how to turn a boring presentation into an animated ex",
+   "issueUrl": "https://www.superhuman.ai/archive",
+   "blurb": null,
+   "kind": "news",
+   "section": null,
+   "date": "2026-10-12",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "microsoft",
+     "claude"
+    ],
+    "concept-theme": [
+     "ai-safety",
+     "guardrails"
+    ],
+    "content-type": [
+     "newsletter-roundup"
+    ],
+    "difficulty": [
+     "intermediate"
+    ],
+    "domain": [
+     "ai-general",
+     "llm-models"
+    ],
+    "topic-technology": [
+     "ai-startups",
+     "ai-funding",
+     "generative-ai",
+     "ai-agents",
+     "ai-safety",
+     "ai-adoption"
+    ],
+    "trending-emerging": [
+     "vibe-coding",
+     "ai-agents",
+     "ai-governance"
+    ]
+   }
+  },
+  {
+   "id": 19782,
+   "url": "https://www.therundown.ai/articles/this-ai-factory-builds-tiny-machines-from-code",
+   "sourceId": 7,
+   "sourceName": "The Rundown",
+   "title": "This AI factory builds tiny machines from code",
+   "titlePt": "Artigo não fornecido",
+   "summaryPt": "O texto do artigo não foi enviado na mensagem. Para que eu possa traduzir o título e produzir um resumo fiel em português do Brasil, é necessário incluir o conteúdo original do artigo de tecnologia. Assim que o artigo for disponibilizado, farei um resumo claro e legível, preservando termos técnicos e nomes de produtos quando apropriado.",
+   "snippet": "Good morning, AI enthusiasts, and welcome to our 8,982 new readers. Jeff Holden helped create Amazon Prime and ran Uber’s self-driving program. Now he wants to make building a machine as easy as editing a line of code. His startup, Atomic Machines, just emerged from six years of stealth with $250M and a vision of “universal command of matter” through an AI-guided factory that builds tiny machine",
+   "issueUrl": "https://www.therundown.ai/articles",
+   "blurb": null,
+   "kind": "tool",
+   "section": null,
+   "date": "2026-10-12",
+   "verifyStatus": "suspect",
+   "tags": {
+    "content-type": [
+     "funding-news",
+     "product-launch"
+    ],
+    "difficulty": [
+     "all-levels"
+    ],
+    "domain": [
+     "ai-general"
+    ],
+    "topic-technology": [
+     "ai-startups",
+     "robotics",
+     "ai-adoption",
+     "ai-infrastructure",
+     "ai-hardware"
+    ],
+    "trending-emerging": [
+     "vibe-coding",
+     "agentic-ai"
+    ]
+   }
+  },
+  {
+   "id": 19783,
+   "url": "https://www.malwarebytes.com/blog/ai/2026/10/phishing-emails-are-baiting-your-ai-assistant",
+   "sourceId": 10,
+   "sourceName": "llmnews.ai",
+   "title": "Phishing emails are baiting your AI assistant",
+   "titlePt": "Artigo não fornecido",
+   "summaryPt": "Não foi possível gerar o resumo porque o artigo não foi incluído na mensagem. Por favor, envie o texto do artigo para que eu possa traduzir o título e elaborar um resumo claro e fiel em português do Brasil.",
+   "snippet": "You ignored the suspicious email. You didn’t open the attachment, click the link, or reply to the sender. Then you asked your AI assistant to summarize your inbox. Could the message you wisely avoided find its way back onto your to-do list—only this time presented as an urgent recommendation from a tool you trust? That’s the risk behind phishing emails containing hidden instructions aimed at AI as",
+   "issueUrl": "https://llmnews.ai/page/2",
+   "blurb": null,
+   "kind": "news",
+   "section": null,
+   "date": "2026-10-12",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "security",
+     "ai-safety",
+     "guardrails"
+    ],
+    "content-type": [
+     "explainer",
+     "analysis"
+    ],
+    "difficulty": [
+     "intermediate"
+    ],
+    "domain": [
+     "ai-general",
+     "llm-models"
+    ],
+    "topic-technology": [
+     "ai-safety",
+     "llm-models",
+     "nlp",
+     "security-node"
+    ],
+    "trending-emerging": [
+     "prompt-injection",
+     "ai-agents"
+    ]
+   }
+  },
+  {
+   "id": 19784,
+   "url": "https://taylor.town/kk-ai-2026",
+   "sourceId": 10,
+   "sourceName": "llmnews.ai",
+   "title": "Kevin Kelly's 2016 AI Predictions, 10 Years Later",
+   "titlePt": "Artigo não informado",
+   "summaryPt": "Não foi possível gerar o resumo porque o artigo não foi fornecido na mensagem. Por favor, envie o texto do artigo para que eu possa traduzir o título e produzir o resumo em português do Brasil.",
+   "snippet": "Kevin Kelly's The Inevitable articulates a handful of macro technological trends and follows them to their logical conclusions. It's an insightful read -- I highly recommend it. One decade later, here are some AI-related excerpts from the book: \"By 2026, Google’s main product will not be search but AI.\" \"oligarchy of two or three large, general-purpose cloud-based commercial intelligences\" \"Th",
+   "issueUrl": "https://llmnews.ai/page/2",
+   "blurb": null,
+   "kind": "news",
+   "section": null,
+   "date": "2026-10-12",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "google",
+     "google-deepmind",
+     "aws"
+    ],
+    "concept-theme": [
+     "cloud"
+    ],
+    "content-type": [
+     "analysis",
+     "retrospective"
+    ],
+    "difficulty": [
+     "intermediate"
+    ],
+    "domain": [
+     "ai-general"
+    ],
+    "topic-technology": [
+     "llm-models",
+     "ai-adoption",
+     "ai-infrastructure",
+     "ai-research",
+     "generative-ai"
+    ],
+    "trending-emerging": [
+     "ai-search",
+     "foundation-models",
+     "ai-agents"
+    ]
+   }
+  },
+  {
+   "id": 19785,
+   "url": "https://www.theregister.com/offbeat/2026/10/14/chaos-ensues-when-ai-interviewer-meets-ai-interviewee/5303144",
+   "sourceId": 10,
+   "sourceName": "llmnews.ai",
+   "title": "Chaos ensues when AI interviewer meets AI interviewee",
+   "titlePt": "Artigo não fornecido",
+   "summaryPt": "Não foi possível gerar o título traduzido e o resumo em português do Brasil, pois o artigo não foi incluído na mensagem. Por favor, forneça o conteúdo do artigo para que eu possa fazer a tradução e o resumo.",
+   "snippet": "Things got weird, but there's a lesson to be learned: Don't trust a bot to negotiate for you A YouTuber who’s gained a following for trolling AI interview bots brought his own computing companion to an interview with him. As chaos ensued, viewers learned that having an AI as your interview agent isn't a good idea. Graham Dot Zip is a comedian whose YouTube channel has bl",
+   "issueUrl": "https://llmnews.ai",
+   "blurb": null,
+   "kind": "news",
+   "section": null,
+   "date": "2026-10-14",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "hallucination",
+     "ai-safety",
+     "reliability"
+    ],
+    "content-type": [
+     "commentary",
+     "opinion"
+    ],
+    "difficulty": [
+     "all-levels"
+    ],
+    "domain": [
+     "ai-general"
+    ],
+    "topic-technology": [
+     "ai-agents",
+     "ai-adoption",
+     "ai-ethics",
+     "automation",
+     "ai-in-business"
+    ],
+    "trending-emerging": [
+     "multi-agent",
+     "ai-agents",
+     "agentic-ai"
+    ]
+   }
+  },
+  {
+   "id": 19786,
+   "url": "https://artificialanalysis.ai/articles/artificial-analysis-decision-index",
+   "sourceId": 10,
+   "sourceName": "llmnews.ai",
+   "title": "Artificial Analysis Decision Index v1.0",
+   "titlePt": "Nenhum artigo fornecido",
+   "summaryPt": "Não foi possível gerar o resumo porque o artigo não foi incluído na mensagem. Por favor, forneça o conteúdo do artigo para que eu possa traduzir o título e criar um resumo em português do Brasil.",
+   "snippet": "Introducing the Artificial Analysis Decision Index Decision models are an emerging class of models that output structured answers or classifications with associated probabilities. Unlike language models designed for complex reasoning and long-horizon tasks, decision models focus on making structured decisions faster and at lower cost. With the launch of the Artificial Analysis Decision Index v1.0",
+   "issueUrl": "https://llmnews.ai",
+   "blurb": null,
+   "kind": "tool",
+   "section": null,
+   "date": "2026-10-13",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "nvidia"
+    ],
+    "concept-theme": [
+     "evaluation",
+     "evals",
+     "cost-optimization",
+     "performance"
+    ],
+    "content-type": [
+     "product-launch",
+     "announcement"
+    ],
+    "difficulty": [
+     "advanced"
+    ],
+    "domain": [
+     "ai-general",
+     "llm-models"
+    ],
+    "topic-technology": [
+     "model-evaluation",
+     "ai-benchmarks",
+     "model-comparison",
+     "llm-models",
+     "tool-calling",
+     "reasoning-models"
+    ],
+    "trending-emerging": [
+     "structured-output",
+     "tool-calling",
+     "reasoning-models"
+    ]
+   }
+  },
+  {
+   "id": 19787,
+   "url": "https://www.therundown.ai/articles/meta-watermelon-ripens-into-a-frontier-model",
+   "sourceId": 7,
+   "sourceName": "The Rundown",
+   "title": "Meta's Watermelon ripens into a frontier model",
+   "titlePt": "Artigo não fornecido",
+   "summaryPt": "Não foi possível gerar o resumo porque o texto do artigo não foi enviado. Por favor, forneça o artigo para que eu possa traduzir o título e resumi-lo em português do Brasil.",
+   "snippet": "Good morning, AI enthusiasts, and welcome to our 4,730 new readers. Meta’s Watermelon has been ripening and hyped for months. It’s finally ready, and just came out bigger than almost anyone expected. The company’s new Muse Wonder family (codenamed Watermelon) is here, with its larger model now trailing only Claude Opus 5.5 in overall rankings — completing a climb to the frontier that looked pret",
+   "issueUrl": "https://www.therundown.ai/articles",
+   "blurb": null,
+   "kind": "tool",
+   "section": null,
+   "date": "2026-10-13",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "meta-ai",
+     "claude-opus",
+     "gpt",
+     "gemini",
+     "nvidia"
+    ],
+    "concept-theme": [
+     "evals",
+     "performance"
+    ],
+    "content-type": [
+     "product-launch",
+     "news"
+    ],
+    "difficulty": [
+     "all-levels"
+    ],
+    "domain": [
+     "llm-models"
+    ],
+    "topic-technology": [
+     "llm-models",
+     "frontier-models",
+     "model-comparison",
+     "model-release",
+     "ai-benchmarks",
+     "proprietary-models"
+    ],
+    "trending-emerging": [
+     "frontier-models"
+    ]
+   }
+  },
+  {
+   "id": 19788,
+   "url": "https://research.meta.ai/blog/muse-wonder",
+   "sourceId": 10,
+   "sourceName": "llmnews.ai",
+   "title": "Muse Wonder: A Frontier Model For Personal & Professional AI Agents",
+   "titlePt": "Artigo não fornecido",
+   "summaryPt": "Não foi possível gerar o resumo porque o artigo original não foi enviado na solicitação.",
+   "snippet": "A frontier model that leads on personal and professional agents Today, we’re excited to introduce the Muse Wonder series with Muse Wonder and Muse Wonder Full, our most capable models that deliver state-of-the-art performance on personal and professional agentic tasks. Together, they mark the next step on our scaling ladder and a major leap toward personal superintelligence. Muse Wonder brings to",
+   "issueUrl": "https://llmnews.ai/page/2",
+   "blurb": null,
+   "kind": "tool",
+   "section": null,
+   "date": "2026-10-12",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "meta-ai"
+    ],
+    "content-type": [
+     "product-launch"
+    ],
+    "difficulty": [
+     "intermediate"
+    ],
+    "domain": [
+     "llm-models",
+     "ai-general"
+    ],
+    "topic-technology": [
+     "frontier-models",
+     "ai-agents",
+     "model-training",
+     "reinforcement-learning",
+     "pretraining",
+     "model-evaluation"
+    ],
+    "trending-emerging": [
+     "ai-agents",
+     "agentic-ai",
+     "frontier-models",
+     "ai-coding-agents"
+    ]
+   }
+  },
+  {
+   "id": 19789,
+   "url": "https://thelastwave.substack.com/p/theres-no-going-back",
+   "sourceId": 10,
+   "sourceName": "llmnews.ai",
+   "title": "There’s No “Going Back”",
+   "titlePt": "Artigo não fornecido",
+   "summaryPt": "Não foi possível gerar um resumo porque o texto do artigo não foi enviado. Por favor, forneça o conteúdo do artigo.",
+   "snippet": "An AI-generated sign of a spa sign. Source. We might not know where we’ll be in 50 years, but if we were to look back at today half a century from now, would we know what we’ve lost? A lot of nostalgia, even future nostalgia, rides on subjectivities that have ceased to be possible. We might not talk about it as the structure of feeling that we are mourning, to borrow a term from Raymond Williams,",
+   "issueUrl": "https://llmnews.ai/page/2",
+   "blurb": null,
+   "kind": "news",
+   "section": null,
+   "date": "2026-10-11",
+   "verifyStatus": "ok",
+   "tags": {
+    "content-type": [
+     "opinion"
+    ],
+    "difficulty": [
+     "all-levels"
+    ],
+    "domain": [
+     "ai-general"
+    ],
+    "topic-technology": [
+     "generative-ai",
+     "ai-adoption",
+     "ai-ethics",
+     "ai-art",
+     "ai-video",
+     "deepfakes"
+    ]
+   }
+  },
+  {
+   "id": 19790,
+   "url": "https://developers.googleblog.com/gemini-4-argon-for-robotics",
+   "sourceId": 10,
+   "sourceName": "llmnews.ai",
+   "title": "Gemini 4 Argon for Robotics",
+   "titlePt": "Artigo não fornecido",
+   "summaryPt": "Não recebi o texto do artigo. Envie o conteúdo original para que eu possa gerar o título traduzido e o resumo em português do Brasil.",
+   "snippet": "OCT. 13, 2026 Gemini 4 Argon marks a step change in physical understanding, code generation, and visual-semantic reasoning—unlocking new workflows across the robotics stack and accelerating progress toward physical AGI. You can see this leap in capability on the Embodied Reasoning (ERQA) benchmark, which tests a model's ability to understand and solve physical, spatial problems in 3",
+   "issueUrl": "https://llmnews.ai",
+   "blurb": null,
+   "kind": "tool",
+   "section": null,
+   "date": "2026-10-13",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "gemini",
+     "google"
+    ],
+    "concept-theme": [
+     "evaluation",
+     "prompt-engineering"
+    ],
+    "content-type": [
+     "product-launch"
+    ],
+    "difficulty": [
+     "expert"
+    ],
+    "domain": [
+     "llm-models",
+     "ai-general"
+    ],
+    "framework-library-tool": [
+     "gemini"
+    ],
+    "topic-technology": [
+     "multimodal-ai",
+     "robotics",
+     "computer-vision",
+     "reasoning-models",
+     "frontier-models"
+    ],
+    "trending-emerging": [
+     "world-models",
+     "reasoning-models",
+     "agentic-ai",
+     "vision-language-models"
+    ]
+   }
+  },
+  {
+   "id": 19791,
+   "url": "https://sfstandard.com/2026/10/13/openai-engineer-arrested-alleged-bugging-executive-conference-room",
+   "sourceId": 10,
+   "sourceName": "llmnews.ai",
+   "title": "OpenAI engineer arrested in bugging of executive conference room",
+   "titlePt": "ERRO: artigo ausente",
+   "summaryPt": "O artigo não foi fornecido na mensagem. Por favor, forneça o conteúdo do artigo para que eu possa traduzir o título e escrever o resumo.",
+   "snippet": "An OpenAI engineer has been arrested on suspicion of hiding an audio recording device in an executive conference room at the company’s San Francisco headquarters, federal prosecutors said Tuesday. Abdulrahman Alfozan, 35, a Saudi national, was arrested Friday and charged with using or attempting to use a device to intercept oral communications. He made his initial appearance in federal court Tuesd",
+   "issueUrl": "https://llmnews.ai",
+   "blurb": null,
+   "kind": "news",
+   "section": null,
+   "date": "2026-10-13",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "openai"
+    ],
+    "concept-theme": [
+     "privacy",
+     "security"
+    ],
+    "content-type": [
+     "news"
+    ],
+    "domain": [
+     "ai-general"
+    ],
+    "topic-technology": [
+     "ai-ethics",
+     "ai-safety",
+     "ai-policy",
+     "ai-regulation",
+     "ai-research"
+    ]
+   }
+  },
+  {
+   "id": 19792,
+   "url": "https://runtimewire.com/article/bank-of-america-mythos-contractors-software-patching",
+   "sourceId": 10,
+   "sourceName": "llmnews.ai",
+   "title": "Bank of America added 1,000 contractors to patch AI-exposed software flaws",
+   "titlePt": "Artigo não fornecido",
+   "summaryPt": "Não foi possível gerar o resumo porque o artigo não foi enviado. Por favor, cole o conteúdo do artigo para que eu possa traduzir o título e criar um resumo fiel em português do Brasil.",
+   "snippet": "Bank of America CEO Brian Moynihan said the contractors joined in Q2 to patch flaws in internal and vendor software, amid risks from advanced AI models. By Ryan Merket · Published Oct 14th, 2026, 2:41pm CT Primary source: CNBC Why it matters Bank of America's disclosure puts a workforce and cost figure on the work that follows AI-driven vulnerability discovery. The reported",
+   "issueUrl": "https://llmnews.ai",
+   "blurb": null,
+   "kind": "news",
+   "section": null,
+   "date": "2026-10-14",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "anthropic"
+    ],
+    "concept-theme": [
+     "security",
+     "ai-safety"
+    ],
+    "content-type": [
+     "news"
+    ],
+    "domain": [
+     "llm-models",
+     "ai-general"
+    ],
+    "topic-technology": [
+     "ai-adoption",
+     "ai-in-business",
+     "ai-safety",
+     "ai-regulation",
+     "software-development",
+     "ai-research"
+    ],
+    "trending-emerging": [
+     "ai-governance",
+     "frontier-models"
+    ]
+   }
+  },
+  {
+   "id": 19793,
+   "url": "https://videojs.org/blog/iphone-duo-web-development",
+   "sourceId": 3,
+   "sourceName": "Frontend Focus",
+   "title": "What the iPhone Duo Means for Web Development",
+   "titlePt": "Artigo não fornecido",
+   "summaryPt": "O artigo para resumo não foi incluído na mensagem. Por favor, envie o conteúdo para que eu possa traduzir o título e gerar o resumo em português brasileiro.",
+   "snippet": "The Duo is out next week, so Darius fired up the simulator to try the Device Posture and Viewport Segments APIs (both available behind a flag). Using Video.js components and CSS, he tried to recreate Netflix's folded-player UI, but Apple's fullscreen restrictions made things a tad interesting.",
+   "issueUrl": "https://frontendfoc.us/issues/762",
+   "blurb": "The Duo is out next week, so Darius fired up the simulator to try the Device Posture and Viewport Segments APIs (both available behind a flag). Using Video.js components and CSS, he tried to recreate Netflix's folded-player UI, but Apple's fullscreen restrictions made things a tad interesting.",
+   "kind": "news",
+   "section": null,
+   "date": "2026-10-14",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "apple"
+    ],
+    "content-type": [
+     "analysis",
+     "deep-dive"
+    ],
+    "difficulty": [
+     "for-practitioners"
+    ],
+    "domain": [
+     "frontend"
+    ],
+    "ecosystem-language": [
+     "javascript",
+     "css",
+     "html"
+    ],
+    "topic-technology": [
+     "web-apis",
+     "web-development",
+     "css",
+     "javascript"
+    ]
+   }
+  },
+  {
+   "id": 19794,
+   "url": "https://lea.verou.me/blog/2026/icons",
+   "sourceId": 3,
+   "sourceName": "Frontend Focus",
+   "title": "The Best Way to Use Icons in Web UIs",
+   "titlePt": "Artigo não fornecido",
+   "summaryPt": "Não foi possível gerar o resumo porque o artigo não foi enviado. Por favor, inclua o conteúdo do artigo para que eu possa traduzir o título e criar um resumo em português do Brasil.",
+   "snippet": "Lea shows how to insert and tweak icons without touching any HTML, using --icon custom properties, @property, style queries, and mask. The result? A pure CSS icon system that's \"more flexible and maintainable than what you've been using\".",
+   "issueUrl": "https://frontendfoc.us/issues/762",
+   "blurb": "Lea shows how to insert and tweak icons without touching any HTML, using --icon custom properties, @property, style queries, and mask. The result? A pure CSS icon system that's \"more flexible and maintainable than what you've been using\".",
+   "kind": "news",
+   "section": null,
+   "date": "2026-10-14",
+   "verifyStatus": "suspect",
+   "tags": {
+    "concept-theme": [
+     "ui"
+    ],
+    "content-type": [
+     "tutorial",
+     "best-practices"
+    ],
+    "difficulty": [
+     "for-practitioners"
+    ],
+    "domain": [
+     "frontend"
+    ],
+    "ecosystem-language": [
+     "css",
+     "html"
+    ],
+    "topic-technology": [
+     "css",
+     "web-performance",
+     "html",
+     "javascript",
+     "react",
+     "accessibility"
+    ]
+   }
+  },
+  {
+   "id": 19795,
+   "url": "https://blog.mozilla.org/en/firefox/introducing-firefox-enterprise",
+   "sourceId": 3,
+   "sourceName": "Frontend Focus",
+   "title": "Mozilla now offers an Enterprise version of Firefox, focusing on things like compliance, regulatory requirements, security, and telemetry controls",
+   "titlePt": "Artigo não fornecido",
+   "summaryPt": "Não foi possível traduzir o título e gerar o resumo porque o conteúdo do artigo não foi enviado. Por favor, forneça o artigo para que eu possa fazer o resumo.",
+   "snippet": "Institutions are recalculating who controls the technology they rely on. Mozilla has an independent option to offer. For years, organizations consolidated technology around a small number of providers to make things simpler. Fewer systems. Tighter integrations. More economies of scale. But that consolidation went well beyond technology. It consolidated dependency, too. The resulting risks have be",
+   "issueUrl": "https://frontendfoc.us/issues/762",
+   "blurb": null,
+   "kind": "news",
+   "section": "IN BRIEF",
+   "date": "2026-10-14",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "security",
+     "compliance",
+     "governance",
+     "data-privacy"
+    ],
+    "content-type": [
+     "product-launch",
+     "announcement"
+    ],
+    "difficulty": [
+     "for-leaders"
+    ],
+    "domain": [
+     "frontend"
+    ],
+    "topic-technology": [
+     "ai-adoption",
+     "ai-in-business",
+     "ai-policy",
+     "ai-regulation",
+     "ai-ethics",
+     "ai-safety"
+    ]
+   }
+  },
+  {
+   "id": 19796,
+   "url": "https://letsencrypt.org/2026/10/07/64-day-certs",
+   "sourceId": 3,
+   "sourceName": "Frontend Focus",
+   "title": "Starting February next year all new/renewed Let's Encrypt certificates will use a 64 day lifetime by default (down from 90)",
+   "titlePt": "Artigo não fornecido",
+   "summaryPt": "Não foi possível gerar o resumo porque o artigo não foi incluído na mensagem. Por favor, forneça o conteúdo do artigo para que eu possa traduzir o título e elaborar o resumo em português do Brasil.",
+   "snippet": "By Sarah Gran · October 7, 2026 On February 10, 2027, all Let’s Encrypt subscribers will move to certificates with 64 day lifetimes by default unless they select an even shorter lifetime (45 or 6 days, as previously announced). This means that any certificate we issue or renew on and after that date wi",
+   "issueUrl": "https://frontendfoc.us/issues/762",
+   "blurb": null,
+   "kind": "news",
+   "section": "IN BRIEF",
+   "date": "2026-10-14",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "security",
+     "reliability",
+     "compliance",
+     "devops"
+    ],
+    "content-type": [
+     "announcement"
+    ],
+    "difficulty": [
+     "for-practitioners"
+    ],
+    "domain": [
+     "backend"
+    ],
+    "topic-technology": [
+     "automation",
+     "security-node",
+     "deployment",
+     "ci-cd",
+     "infrastructure-as-code"
+    ]
+   }
+  },
+  {
+   "id": 19797,
+   "url": "https://www.apple.com/safari/switch",
+   "sourceId": 3,
+   "sourceName": "Frontend Focus",
+   "title": "Apple has shared a new page making their case for switching over from Chrome to Safari",
+   "titlePt": "Artigo não fornecido",
+   "summaryPt": "Nenhum artigo foi enviado para tradução e resumo. Por favor, forneça o conteúdo do artigo para que eu possa gerar o título adaptado em português do Brasil e um resumo claro e fiel.",
+   "snippet": "Feature Safari Chrome Faster page loads on frequently visited sites when browsing on Mac3 Yes No All-day video streaming on Mac with a single charge1 Yes No Better rendering performance of animated content4 Yes No Quicker JavaScript performance on ad",
+   "issueUrl": "https://frontendfoc.us/issues/762",
+   "blurb": null,
+   "kind": "news",
+   "section": "IN BRIEF",
+   "date": "2026-10-14",
+   "verifyStatus": "suspect",
+   "tags": {
+    "company-vendor-model": [
+     "apple",
+     "google"
+    ],
+    "concept-theme": [
+     "performance",
+     "data-privacy",
+     "security"
+    ],
+    "content-type": [
+     "vs-comparison"
+    ],
+    "difficulty": [
+     "beginner"
+    ],
+    "domain": [
+     "frontend"
+    ],
+    "topic-technology": [
+     "web-performance",
+     "machine-learning",
+     "browser-compatibility",
+     "javascript",
+     "html"
+    ]
+   }
+  },
+  {
+   "id": 19798,
+   "url": "https://crestbrowser.com",
+   "sourceId": 3,
+   "sourceName": "Frontend Focus",
+   "title": "If you miss Arc, Crest is a new browser hoping to scratch a similar itch",
+   "titlePt": "Artigo não fornecido",
+   "summaryPt": "Não foi possível gerar o resumo porque o texto do artigo não foi enviado na mensagem. Por favor, forneça o artigo para que eu possa traduzir o título e elaborar o resumo em português do Brasil.",
+   "snippet": "It curiously offers both Chromium and WebKit rendering.",
+   "issueUrl": "https://frontendfoc.us/issues/762",
+   "blurb": "It curiously offers both Chromium and WebKit rendering.",
+   "kind": "news",
+   "section": "IN BRIEF",
+   "date": "2026-10-14",
+   "verifyStatus": "suspect",
+   "tags": {
+    "concept-theme": [
+     "ux"
+    ],
+    "content-type": [
+     "product-launch"
+    ],
+    "difficulty": [
+     "all-levels"
+    ],
+    "domain": [
+     "frontend"
+    ],
+    "topic-technology": [
+     "web-development",
+     "browser-compatibility",
+     "software-development"
+    ]
+   }
+  },
+  {
+   "id": 19799,
+   "url": "https://calibreapp.com/blog/native-lazy-loading",
+   "sourceId": 3,
+   "sourceName": "Frontend Focus",
+   "title": "Lazy Loading Images and Media: How Far Ahead Browsers Fetch",
+   "titlePt": "Artigo não fornecido",
+   "summaryPt": "Não foi possível gerar o resumo, pois o conteúdo do artigo não foi enviado. Por favor, forneça o texto para que possamos traduzir o título e elaborar o resumo em português do Brasil.",
+   "snippet": "Ben measures how far ahead Chrome, Firefox and Safari fetch lazy-loaded media. He also shares what we can lazy load (including video and audio in Chromium browsers), and covers where lazy, eager and fetchpriority fit.",
+   "issueUrl": "https://frontendfoc.us/issues/762",
+   "blurb": "Ben measures how far ahead Chrome, Firefox and Safari fetch lazy-loaded media. He also shares what we can lazy load (including video and audio in Chromium browsers), and covers where lazy, eager and fetchpriority fit.",
+   "kind": "news",
+   "section": "Articles, Opinions & Tutorials",
+   "date": "2026-10-14",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "performance",
+     "optimization",
+     "web-vitals"
+    ],
+    "content-type": [
+     "deep-dive",
+     "analysis"
+    ],
+    "difficulty": [
+     "beginner"
+    ],
+    "domain": [
+     "frontend"
+    ],
+    "topic-technology": [
+     "web-performance",
+     "lazy-loading",
+     "image-optimization",
+     "html",
+     "browser-compatibility"
+    ]
+   }
+  },
+  {
+   "id": 19800,
+   "url": "https://anderegg.ca/2026/10/08/i-guess-im-using-webp-now",
+   "sourceId": 3,
+   "sourceName": "Frontend Focus",
+   "title": "I Guess I’m Using WebP Now",
+   "titlePt": "Sem artigo",
+   "summaryPt": "Nenhum conteúdo de artigo foi fornecido. Envie o texto do artigo para que eu possa traduzir o título e produzir o resumo em português do Brasil.",
+   "snippet": "It’s been 16 years since Google introduced the WebP image format, support is now widespread (97%), and hey, maybe they’re worth another look?",
+   "issueUrl": "https://frontendfoc.us/issues/762",
+   "blurb": "It’s been 16 years since Google introduced the WebP image format, support is now widespread (97%), and hey, maybe they’re worth another look?",
+   "kind": "news",
+   "section": "Articles, Opinions & Tutorials",
+   "date": "2026-10-14",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "performance",
+     "optimization",
+     "web-vitals"
+    ],
+    "content-type": [
+     "opinion"
+    ],
+    "difficulty": [
+     "all-levels"
+    ],
+    "domain": [
+     "frontend"
+    ],
+    "topic-technology": [
+     "image-optimization",
+     "web-performance",
+     "html",
+     "css",
+     "javascript"
+    ]
+   }
+  },
+  {
+   "id": 19801,
+   "url": "https://chromestatus.com/release-notes/156",
+   "sourceId": 3,
+   "sourceName": "Frontend Focus",
+   "title": "Chrome 156 beta is out",
+   "titlePt": "Artigo não fornecido",
+   "summaryPt": "Não foi possível gerar o resumo, pois o artigo não foi enviado na solicitação. Por favor, forneça o texto do artigo para que eu possa traduzir o título e produzir um resumo adequado em português do Brasil.",
+   "snippet": "In other browser news, Chrome 156 beta is out (stable next week) and adds support for CSS random().",
+   "issueUrl": "https://frontendfoc.us/issues/762",
+   "blurb": "In other browser news, Chrome 156 beta is out (stable next week) and adds support for CSS random().",
+   "kind": "release",
+   "section": "Articles, Opinions & Tutorials",
+   "date": "2026-10-14",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "reliability",
+     "caching",
+     "performance"
+    ],
+    "content-type": [
+     "version-release"
+    ],
+    "difficulty": [
+     "intermediate"
+    ],
+    "domain": [
+     "frontend"
+    ],
+    "ecosystem-language": [
+     "javascript",
+     "css"
+    ],
+    "topic-technology": [
+     "web-apis",
+     "css",
+     "web-performance",
+     "browser-compatibility"
+    ]
+   }
+  },
+  {
+   "id": 19802,
+   "url": "https://webkit.org/blog/18420/release-notes-for-safari-technology-preview-254",
+   "sourceId": 3,
+   "sourceName": "Frontend Focus",
+   "title": "Safari Technology Preview 254 is out",
+   "titlePt": "Artigo não informado",
+   "summaryPt": "Não foi possível gerar o resumo porque o texto do artigo não foi enviado na solicitação. Por favor, forneça o conteúdo do artigo para que eu possa traduzir o título e produzir o resumo em português do Brasil.",
+   "snippet": "Also, Safari Technology Preview 254 is out with both calc-size() and interpolate-size support.",
+   "issueUrl": "https://frontendfoc.us/issues/762",
+   "blurb": "Also, Safari Technology Preview 254 is out with both calc-size() and interpolate-size support.",
+   "kind": "release",
+   "section": "Articles, Opinions & Tutorials",
+   "date": "2026-10-14",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "accessibility"
+    ],
+    "content-type": [
+     "version-release"
+    ],
+    "difficulty": [
+     "for-practitioners"
+    ],
+    "domain": [
+     "frontend"
+    ],
+    "ecosystem-language": [
+     "css"
+    ],
+    "topic-technology": [
+     "css",
+     "accessibility",
+     "web-standards",
+     "browser-compatibility",
+     "animations",
+     "html"
+    ]
+   }
+  },
+  {
+   "id": 19803,
+   "url": "https://blog.getbootstrap.com/2026/10/08/bootstrap-6-alpha",
+   "sourceId": 3,
+   "sourceName": "Frontend Focus",
+   "title": "Bootstrap 6 Alpha",
+   "titlePt": "Artigo não fornecido",
+   "summaryPt": "Não foi possível gerar o resumo porque o artigo não foi enviado. Por favor, forneça o texto do artigo para que eu possa traduzir o título e elaborar o resumo em português do Brasil.",
+   "snippet": "An early look at the popular framework's first major release since 2021. Modernization is the order of the day, with most Sass variables now CSS variables, ESM-only JS plugins, and it leans on more browser-native features.",
+   "issueUrl": "https://frontendfoc.us/issues/762",
+   "blurb": "An early look at the popular framework's first major release since 2021. Modernization is the order of the day, with most Sass variables now CSS variables, ESM-only JS plugins, and it leans on more browser-native features.",
+   "kind": "release",
+   "section": "Tools, Code & Resources",
+   "date": "2026-10-14",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "open-source",
+     "design-systems",
+     "ui",
+     "ux"
+    ],
+    "content-type": [
+     "version-release"
+    ],
+    "difficulty": [
+     "all-levels"
+    ],
+    "domain": [
+     "frontend"
+    ],
+    "ecosystem-language": [
+     "css",
+     "javascript"
+    ],
+    "framework-library-tool": [
+     "bootstrap"
+    ],
+    "topic-technology": [
+     "css",
+     "design-systems",
+     "javascript",
+     "web-standards"
+    ]
+   }
+  },
+  {
+   "id": 19804,
+   "url": "https://ikrishg.github.io/reseter.css",
+   "sourceId": 3,
+   "sourceName": "Frontend Focus",
+   "title": "reseter.css 3.0: The Modern CSS Reset",
+   "titlePt": "Artigo não fornecido",
+   "summaryPt": "Não foi possível gerar o resumo, pois o texto do artigo não foi enviado. Por favor, forneça o conteúdo para que eu possa traduzir e resumir.",
+   "snippet": "v3 of this popular CSS reset is a major rework. Both the 'full' and 'mini' variants now ship wrapped in @layer reset for predictable overrides, use logical properties throughout, and are built with Lightning CSS. And all just ~1KB compressed.",
+   "issueUrl": "https://frontendfoc.us/issues/762",
+   "blurb": "v3 of this popular CSS reset is a major rework. Both the 'full' and 'mini' variants now ship wrapped in @layer reset for predictable overrides, use logical properties throughout, and are built with Lightning CSS. And all just ~1KB compressed.",
+   "kind": "release",
+   "section": "Tools, Code & Resources",
+   "date": "2026-10-14",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "accessibility",
+     "internationalization",
+     "design-systems",
+     "ui"
+    ],
+    "content-type": [
+     "version-release"
+    ],
+    "difficulty": [
+     "intermediate"
+    ],
+    "domain": [
+     "frontend"
+    ],
+    "ecosystem-language": [
+     "css"
+    ],
+    "topic-technology": [
+     "css",
+     "web-standards",
+     "accessibility",
+     "responsive-design",
+     "design-tokens"
+    ]
+   }
+  },
+  {
+   "id": 19805,
+   "url": "https://interop-rank.fxdx.dev",
+   "sourceId": 3,
+   "sourceName": "Frontend Focus",
+   "title": "The 2027 Web Platform Feature Ranking Returns",
+   "titlePt": "Artigo não fornecido",
+   "summaryPt": "Não foi possível gerar o resumo porque o texto do artigo não foi incluído na solicitação. Por favor, envie o conteúdo original para que eu possa traduzir o título e produzir o resumo em português do Brasil.",
+   "snippet": "Back for a second year, Firefox's ranker lets you sign in with GitHub, compare and rank the Interop 2027 proposals. Jake Archibald says last year’s findings (taken from ~1,900 rankings) helped “prioritise a lot of work this year”, so it's worth having your say.",
+   "issueUrl": "https://frontendfoc.us/issues/762",
+   "blurb": "Back for a second year, Firefox's ranker lets you sign in with GitHub, compare and rank the Interop 2027 proposals. Jake Archibald says last year’s findings (taken from ~1,900 rankings) helped “prioritise a lot of work this year”, so it's worth having your say.",
+   "kind": "news",
+   "section": null,
+   "date": "2026-10-14",
+   "verifyStatus": "suspect",
+   "tags": {
+    "concept-theme": [
+     "community",
+     "governance",
+     "data-privacy"
+    ],
+    "content-type": [
+     "announcement",
+     "project-spotlight"
+    ],
+    "difficulty": [
+     "intermediate"
+    ],
+    "domain": [
+     "frontend"
+    ],
+    "ecosystem-language": [
+     "css",
+     "javascript"
+    ],
+    "topic-technology": [
+     "web-standards",
+     "css",
+     "web-apis",
+     "browser-compatibility",
+     "html",
+     "javascript"
+    ]
+   }
+  },
+  {
+   "id": 19806,
+   "url": "https://sindresorhus.com/blog/swift-website",
+   "sourceId": 3,
+   "sourceName": "Frontend Focus",
+   "title": "How Sindre Sorhus' Personal Site is Now Made in Swift",
+   "titlePt": "Artigo não fornecido",
+   "summaryPt": "O artigo não foi enviado na mensagem. Por favor, forneça o texto do artigo para que eu possa traduzir o título e fazer o resumo em português do Brasil.",
+   "snippet": "A prolific JavaScript developer explains why he dropped Astro and now builds his personal site, styling and markup included, with Apple's Swift language.",
+   "issueUrl": "https://frontendfoc.us/issues/762",
+   "blurb": "A prolific JavaScript developer explains why he dropped Astro and now builds his personal site, styling and markup included, with Apple's Swift language.",
+   "kind": "news",
+   "section": "Articles, Opinions & Tutorials",
+   "date": "2026-10-14",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "apple"
+    ],
+    "concept-theme": [
+     "type-safety",
+     "dev-experience"
+    ],
+    "content-type": [
+     "showcase",
+     "project-spotlight"
+    ],
+    "difficulty": [
+     "intermediate"
+    ],
+    "domain": [
+     "frontend"
+    ],
+    "ecosystem-language": [
+     "swift",
+     "html",
+     "css"
+    ],
+    "framework-library-tool": [
+     "astro"
+    ],
+    "topic-technology": [
+     "html",
+     "css",
+     "javascript",
+     "web-development"
+    ]
+   }
+  },
+  {
+   "id": 19807,
+   "url": "https://daverupert.com/2026/10/html-recursion",
+   "sourceId": 3,
+   "sourceName": "Frontend Focus",
+   "title": "Recursion is DEAD and HTML Killed It",
+   "titlePt": "Artigo não fornecido",
+   "summaryPt": "Nenhum artigo foi enviado para tradução ou resumo. Por favor, forneça o texto do artigo para que eu possa gerar o título e o resumo em português do Brasil.",
+   "snippet": "A fun, practical look at using Chrome’s new out-of-order HTML streaming (known as declarative partial updates) to let the browser assemble nested comment threads for you. Chromium-only, but exciting.",
+   "issueUrl": "https://frontendfoc.us/issues/762",
+   "blurb": "A fun, practical look at using Chrome’s new out-of-order HTML streaming (known as declarative partial updates) to let the browser assemble nested comment threads for you. Chromium-only, but exciting.",
+   "kind": "news",
+   "section": "Articles, Opinions & Tutorials",
+   "date": "2026-10-14",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "web-vitals",
+     "performance"
+    ],
+    "content-type": [
+     "explainer",
+     "deep-dive"
+    ],
+    "difficulty": [
+     "advanced"
+    ],
+    "domain": [
+     "frontend"
+    ],
+    "ecosystem-language": [
+     "html",
+     "javascript",
+     "markdown"
+    ],
+    "topic-technology": [
+     "html",
+     "web-standards",
+     "streaming-ssr",
+     "web-performance",
+     "dom"
+    ],
+    "trending-emerging": [
+     "generative-ui"
+    ]
+   }
+  },
+  {
+   "id": 19808,
+   "url": "https://utilitybend.com/blog/scroll-triggered-animation-as-the-missing-piece-for-scrollytelling-on-the-web",
+   "sourceId": 3,
+   "sourceName": "Frontend Focus",
+   "title": "Scroll-Triggered Animation as the Missing Piece for Scrollytelling on the Web",
+   "titlePt": "Faltando artigo",
+   "summaryPt": "Não foi possível gerar o resumo porque o artigo não foi enviado. Por favor, cole o texto original para que eu possa traduzir o título e escrever o resumo em português do Brasil.",
+   "snippet": "A look at the CSS Animation Triggers spec, an Interop 2027 candidate, and how it kicks off an animation based on scroll position. Five demos show what it enables.",
+   "issueUrl": "https://frontendfoc.us/issues/762",
+   "blurb": "A look at the CSS Animation Triggers spec, an Interop 2027 candidate, and how it kicks off an animation based on scroll position. Five demos show what it enables.",
+   "kind": "news",
+   "section": "Articles, Opinions & Tutorials",
+   "date": "2026-10-14",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "ux",
+     "dev-experience"
+    ],
+    "content-type": [
+     "deep-dive",
+     "explainer"
+    ],
+    "difficulty": [
+     "advanced"
+    ],
+    "domain": [
+     "frontend"
+    ],
+    "ecosystem-language": [
+     "css"
+    ],
+    "topic-technology": [
+     "css",
+     "web-standards"
+    ]
+   }
+  },
+  {
+   "id": 19809,
+   "url": "https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Releases/158",
+   "sourceId": 3,
+   "sourceName": "Frontend Focus",
+   "title": "Firefox 158 Enables JPEG XL by Default",
+   "titlePt": "Sem artigo",
+   "summaryPt": "Não foi possível gerar o resumo porque o texto do artigo não foi enviado.",
+   "snippet": "Coming shortly after Chrome did the same, Firefox now supports JPEG XL by default, adding image/jxl to its image Accept header.",
+   "issueUrl": "https://frontendfoc.us/issues/762",
+   "blurb": "Coming shortly after Chrome did the same, Firefox now supports JPEG XL by default, adding image/jxl to its image Accept header.",
+   "kind": "news",
+   "section": "Articles, Opinions & Tutorials",
+   "date": "2026-10-14",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "accessibility"
+    ],
+    "content-type": [
+     "version-release"
+    ],
+    "difficulty": [
+     "intermediate"
+    ],
+    "domain": [
+     "frontend"
+    ],
+    "ecosystem-language": [
+     "css"
+    ],
+    "topic-technology": [
+     "web-standards",
+     "browser-compatibility",
+     "accessibility",
+     "css",
+     "web-apis",
+     "image-optimization"
+    ]
+   }
+  },
+  {
+   "id": 19810,
+   "url": "https://royfish.dev/fingerprints-are-the-new-cookies",
+   "sourceId": 3,
+   "sourceName": "Frontend Focus",
+   "title": "Fingerprints are the New Cookies",
+   "titlePt": "Tokyo Xtreme Racer retorna em plataformas modernas",
+   "summaryPt": "A Genki, desenvolvedora da clássica franquia de corridas de rua, anunciou oficialmente o retorno de Tokyo Xtreme Racer. O novo título, previsto para 2025, será lançado em acesso antecipado na Steam, marcando a primeira vez que a série chega aos PCs de forma ampla. Ainda sem versões para console confirmadas, o anúncio indica que outras plataformas podem ser contempladas no futuro. O jogo faz parte da lendária série Shutokou Battle e mantém a proposta original: o jogador dirige pelas vias expressas de Tóquio, especialmente pelo Wangan, desafiando rivais em corridas diretas pela rodovia. A nova versão traz carros licenciados de montadoras japonesas populares, gráficos modernos e sistemas de jogo repaginados, preservando a essência clássica que consagrou a franquia, agora com visual e jogabilidade atualizados para os padrões atuais.",
+   "snippet": "Several ways JavaScript and browser APIs can assign a unique identifier to you.",
+   "issueUrl": "https://frontendfoc.us/issues/762",
+   "blurb": "Several ways JavaScript and browser APIs can assign a unique identifier to you.",
+   "kind": "news",
+   "section": "Articles, Opinions & Tutorials",
+   "date": "2026-10-14",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "google"
+    ],
+    "concept-theme": [
+     "privacy",
+     "data-privacy",
+     "regulation",
+     "compliance"
+    ],
+    "content-type": [
+     "opinion",
+     "explainer"
+    ],
+    "difficulty": [
+     "beginner"
+    ],
+    "domain": [
+     "frontend"
+    ],
+    "topic-technology": [
+     "privacy-first-ai",
+     "ai-ethics"
+    ]
+   }
+  },
+  {
+   "id": 19811,
+   "url": "https://blog.master.dev/testing-an-iframes-postmessage-handler",
+   "sourceId": 3,
+   "sourceName": "Frontend Focus",
+   "title": "How to Test an iframe's postMessage Handler",
+   "titlePt": "Artigo não fornecido",
+   "summaryPt": "Não foi possível gerar o resumo porque o artigo não foi incluído na sua mensagem. Por favor, envie novamente com o texto completo para que eu possa traduzir o título e resumir o conteúdo.",
+   "snippet": "An embedded widget lives in a strange spot. An iframe is a separate document, so the parent’s CSS doesn’t automatically cascade into its contents, and the frame’s CSS doesn’t cascade out, regardless of the origins involved. When the origins differ, the same-origin policy goes further and keeps either side’s scripts out of the other’s DOM. Chris Coyier’s Scope in CSS calls the iframe a brick wall.",
+   "issueUrl": "https://frontendfoc.us/issues/762",
+   "blurb": null,
+   "kind": "news",
+   "section": "Articles, Opinions & Tutorials",
+   "date": "2026-10-14",
+   "verifyStatus": "suspect",
+   "tags": {
+    "concept-theme": [
+     "testing",
+     "security",
+     "validation",
+     "error-handling"
+    ],
+    "content-type": [
+     "how-to",
+     "tutorial"
+    ],
+    "difficulty": [
+     "intermediate"
+    ],
+    "domain": [
+     "frontend"
+    ],
+    "ecosystem-language": [
+     "javascript"
+    ],
+    "topic-technology": [
+     "javascript",
+     "web-apis",
+     "security-node",
+     "testing-react",
+     "react"
+    ]
+   }
+  },
+  {
+   "id": 19812,
+   "url": "https://ascii.rest",
+   "sourceId": 3,
+   "sourceName": "Frontend Focus",
+   "title": "ascii.rest: Animated ASCII Art for Web Pages",
+   "titlePt": "Erro",
+   "summaryPt": "Nenhum artigo foi fornecido na solicitação. Por favor, envie o texto do artigo para que eu possa traduzir o título e elaborar o resumo.",
+   "snippet": "A collection of over 200 animated ASCII pieces, from lovely art pieces to more practical components like loaders, spinners, charts, shapes, etc.",
+   "issueUrl": "https://frontendfoc.us/issues/762",
+   "blurb": "A collection of over 200 animated ASCII pieces, from lovely art pieces to more practical components like loaders, spinners, charts, shapes, etc.",
+   "kind": "tool",
+   "section": "Tools, Code & Resources",
+   "date": "2026-10-14",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "ui"
+    ],
+    "content-type": [
+     "tool-release",
+     "showcase"
+    ],
+    "difficulty": [
+     "all-levels"
+    ],
+    "domain": [
+     "frontend"
+    ],
+    "topic-technology": [
+     "javascript",
+     "html",
+     "css",
+     "web-performance",
+     "canvas",
+     "web-apis"
+    ]
+   }
+  },
+  {
+   "id": 19813,
+   "url": "https://www.screen-ruler.com",
+   "sourceId": 3,
+   "sourceName": "Frontend Focus",
+   "title": "Screen Ruler: Measure, Inspect, and Edit Web Pages",
+   "titlePt": "Artigo não fornecido",
+   "summaryPt": "Não foi possível gerar o resumo porque o texto do artigo não foi enviado. Por favor, forneça o conteúdo do artigo para que eu possa traduzir o título e elaborar o resumo em português do Brasil.",
+   "snippet": "A popular Chromium extension for taking page measurements, CSS inspection, and live edits. Comes with an MCP server too.",
+   "issueUrl": "https://frontendfoc.us/issues/762",
+   "blurb": "A popular Chromium extension for taking page measurements, CSS inspection, and live edits. Comes with an MCP server too.",
+   "kind": "tool",
+   "section": "Tools, Code & Resources",
+   "date": "2026-10-14",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "ui",
+     "ux",
+     "developer-productivity"
+    ],
+    "content-type": [
+     "tool-release"
+    ],
+    "difficulty": [
+     "for-practitioners"
+    ],
+    "domain": [
+     "frontend"
+    ],
+    "topic-technology": [
+     "browser-devtools",
+     "web-development",
+     "css",
+     "responsive-design",
+     "accessibility",
+     "design-systems"
+    ]
+   }
+  },
+  {
+   "id": 19814,
+   "url": "https://webvitals.fyi",
+   "sourceId": 3,
+   "sourceName": "Frontend Focus",
+   "title": "webvitals.fyi: Explore and Compare Every Performance Tool",
+   "titlePt": "Artigo não fornecido",
+   "summaryPt": "Não foi possível gerar o resumo porque o texto do artigo não foi enviado. Por favor, forneça o artigo original para que a tradução do título e o resumo possam ser feitos.",
+   "snippet": "Currently includes 29 tools, each given an opinionated rating, based on capabilities and role (e.g. frontend vs. performance engineer).",
+   "issueUrl": "https://frontendfoc.us/issues/762",
+   "blurb": "Currently includes 29 tools, each given an opinionated rating, based on capabilities and role (e.g. frontend vs. performance engineer).",
+   "kind": "tool",
+   "section": "Tools, Code & Resources",
+   "date": "2026-10-14",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "google"
+    ],
+    "concept-theme": [
+     "performance",
+     "web-vitals",
+     "monitoring",
+     "seo"
+    ],
+    "content-type": [
+     "curated-list"
+    ],
+    "difficulty": [
+     "for-practitioners"
+    ],
+    "domain": [
+     "frontend"
+    ],
+    "topic-technology": [
+     "web-performance",
+     "core-web-vitals",
+     "lcp",
+     "cls",
+     "inp",
+     "seo"
+    ]
+   }
+  },
+  {
+   "id": 19815,
+   "url": "https://fontglyph.com",
+   "sourceId": 3,
+   "sourceName": "Frontend Focus",
+   "title": "FontGlyph: Local-First Tool to Convert SVG & PNG Icons into a WOFF2 Icon Font",
+   "titlePt": "Artigo não informado",
+   "summaryPt": "Não foi possível gerar o resumo porque o texto do artigo não foi enviado. Por favor, forneça o conteúdo para que a tradução e o resumo sejam feitos.",
+   "snippet": "Convert SVG and PNG icons into a WOFF2 icon font Create, edit, import and export custom icon fonts entirely in your browser. Your files never leave your device. Create a new library or import an existing font library to get started. Oh, and the best part? It is completely free.",
+   "issueUrl": "https://frontendfoc.us/issues/762",
+   "blurb": null,
+   "kind": "tool",
+   "section": "Tools, Code & Resources",
+   "date": "2026-10-14",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "data-privacy"
+    ],
+    "content-type": [
+     "tool-release",
+     "showcase"
+    ],
+    "difficulty": [
+     "for-beginners"
+    ],
+    "domain": [
+     "frontend"
+    ],
+    "ecosystem-language": [
+     "javascript"
+    ],
+    "topic-technology": [
+     "web-standards"
+    ]
+   }
+  },
+  {
+   "id": 19816,
+   "url": "https://registry.vite.dev",
+   "sourceId": 3,
+   "sourceName": "Frontend Focus",
+   "title": "Vite Plugin Registry: Discover and Compare Plugins for Vite, Rolldown, & Rollup",
+   "titlePt": "Artigo não fornecido",
+   "summaryPt": "Não foi possível resumir porque o texto do artigo não foi enviado.",
+   "snippet": "Discover and compare plugins for Vite, Rolldown, and Rollup. This registry collects plugin data from npm daily and provides a searchable directory of plugins for Vite, Rolldown, and Rollup. The data is refreshed every day automatically based on the data from npm and metadata provided by plugin authors. For Plugin Authors Plugin authors can provide enhanced metadata by adding a compatiblePac",
+   "issueUrl": "https://frontendfoc.us/issues/762",
+   "blurb": null,
+   "kind": "tool",
+   "section": "Tools, Code & Resources",
+   "date": "2026-10-14",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "dev-experience",
+     "developer-productivity"
+    ],
+    "content-type": [
+     "tool-release",
+     "release-announcement"
+    ],
+    "difficulty": [
+     "for-practitioners"
+    ],
+    "domain": [
+     "frontend"
+    ],
+    "ecosystem-language": [
+     "javascript",
+     "nodejs"
+    ],
+    "framework-library-tool": [
+     "vite",
+     "rolldown",
+     "rollup"
+    ],
+    "topic-technology": [
+     "javascript",
+     "nodejs",
+     "npm-scripts",
+     "package-management"
+    ]
+   }
+  },
+  {
+   "id": 19817,
+   "url": "https://lift-html.js.org",
+   "sourceId": 3,
+   "sourceName": "Frontend Focus",
+   "title": "Lift HTML: A Tiny Library for Building HTML Web Components",
+   "titlePt": "Artigo não fornecido",
+   "summaryPt": "Não foi possível gerar o resumo porque o artigo não foi enviado. Por favor, cole o texto do artigo.",
+   "snippet": "Welcome to Lift HTML Lift HTML is a tiny library for building HTML Web Components - components that enhance existing HTML on the page instead of rendering it on the client or hydrating it. It seems like in modern web development you have to make a choice between huge JavaScript-centric framework or haphazard script tags thrown around the page. And if you want something simpler you can’t have",
+   "issueUrl": "https://frontendfoc.us/issues/762",
+   "blurb": null,
+   "kind": "tool",
+   "section": "Tools, Code & Resources",
+   "date": "2026-10-14",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "performance",
+     "type-safety"
+    ],
+    "content-type": [
+     "library-release"
+    ],
+    "difficulty": [
+     "intermediate"
+    ],
+    "domain": [
+     "frontend"
+    ],
+    "ecosystem-language": [
+     "html",
+     "javascript",
+     "typescript"
+    ],
+    "topic-technology": [
+     "web-components",
+     "html",
+     "typescript",
+     "javascript"
+    ]
+   }
+  },
+  {
+   "id": 19818,
+   "url": "https://www.therundown.ai/articles/ucla-builds-a-humanoid-from-smartphone",
+   "sourceId": 7,
+   "sourceName": "The Rundown",
+   "title": "UCLA builds a humanoid from smartphone",
+   "titlePt": "Erro",
+   "summaryPt": "Não foi possível gerar o resumo porque o artigo não foi fornecido. Por favor, cole o texto do artigo para que eu possa traduzir o título e elaborar o resumo em português do Brasil.",
+   "snippet": "Good morning, robotics enthusiasts. That Android smartphone gathering dust in your junk drawer could have a second life. researchers built PhoneBot, a 19-inch humanoid with a smartphone for a brain and $400 in extra hardware. It walks, twists its torso, and pushes itself back up after a faceplant. Also: Tesla’s patent application details touch-sensitive robot skin, while unveils a robot motor",
+   "issueUrl": "https://www.therundown.ai/articles",
+   "blurb": null,
+   "kind": "news",
+   "section": null,
+   "date": "2026-10-12",
+   "verifyStatus": "suspect",
+   "tags": {
+    "content-type": [
+     "news",
+     "project-spotlight"
+    ],
+    "difficulty": [
+     "intermediate"
+    ],
+    "domain": [
+     "ai-general",
+     "llm-models"
+    ],
+    "topic-technology": [
+     "robotics",
+     "computer-vision",
+     "reinforcement-learning",
+     "datasets",
+     "speech-recognition",
+     "llm-models"
+    ],
+    "trending-emerging": [
+     "on-device-ai",
+     "edge-ai",
+     "multimodal",
+     "local-llm"
+    ]
+   }
+  },
+  {
+   "id": 19819,
+   "url": "https://www.tigerdata.com/blog/announcing-pg_vectorsearch-scalable-open-source-vector-search-postgresql",
+   "sourceId": 5,
+   "sourceName": "Postgres Weekly",
+   "title": "pg_vectorsearch: A Partition-Based Alternative to HNSW",
+   "titlePt": "Nenhum artigo fornecido",
+   "summaryPt": "Não foi possível gerar o resumo porque o artigo não foi incluído na solicitação. Por favor, forneça o texto do artigo.",
+   "snippet": "A vector search extension that uses PRISM, a vector index that scans compressed k-means partitions rather than walking a graph like HNSW, and works on existing pgvector columns. It's alpha and requires Postgres 18+, while pgvectorscale moves to maintenance mode.",
+   "issueUrl": "https://postgresweekly.com/issues/669",
+   "blurb": "A vector search extension that uses PRISM, a vector index that scans compressed k-means partitions rather than walking a graph like HNSW, and works on existing pgvector columns. It's alpha and requires Postgres 18+, while pgvectorscale moves to maintenance mode.",
+   "kind": "tool",
+   "section": null,
+   "date": "2026-10-14",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "performance",
+     "cost-optimization",
+     "architecture",
+     "open-source"
+    ],
+    "content-type": [
+     "product-launch",
+     "library-release"
+    ],
+    "difficulty": [
+     "advanced"
+    ],
+    "domain": [
+     "backend",
+     "ai-general"
+    ],
+    "ecosystem-language": [
+     "sql"
+    ],
+    "framework-library-tool": [
+     "postgresql"
+    ],
+    "topic-technology": [
+     "vector-search",
+     "databases",
+     "rag",
+     "indexing"
+    ],
+    "trending-emerging": [
+     "vector-search",
+     "rag",
+     "semantic-search"
+    ]
+   }
+  },
+  {
+   "id": 19820,
+   "url": "https://incident.io/blog/how-savepoints-quietly-throttled-our-postgres-queue",
+   "sourceId": 5,
+   "sourceName": "Postgres Weekly",
+   "title": "How Savepoints Throttled Our Postgres Queue",
+   "titlePt": "Artigo não fornecido",
+   "summaryPt": "O texto do artigo não foi incluído na solicitação. Por favor, envie o conteúdo original para que eu possa traduzir o título e produzir um resumo fiel em português do Brasil.",
+   "snippet": "A technical look, complete with some rather nifty visualizations, into how adding more workers to a Postgres-based queue made it slower because of per-job SAVEPOINTs (and how claiming jobs with a lease fixed it).",
+   "issueUrl": "https://postgresweekly.com/issues/669",
+   "blurb": "A technical look, complete with some rather nifty visualizations, into how adding more workers to a Postgres-based queue made it slower because of per-job SAVEPOINTs (and how claiming jobs with a lease fixed it).",
+   "kind": "news",
+   "section": null,
+   "date": "2026-10-14",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "performance",
+     "optimization",
+     "caching",
+     "concurrency"
+    ],
+    "content-type": [
+     "deep-dive",
+     "case-study"
+    ],
+    "difficulty": [
+     "advanced"
+    ],
+    "domain": [
+     "backend"
+    ],
+    "framework-library-tool": [
+     "postgresql"
+    ],
+    "topic-technology": [
+     "databases",
+     "sql",
+     "performance-optimization"
+    ]
+   }
+  },
+  {
+   "id": 19821,
+   "url": "https://www.postgresql.org/message-id/f161fbb7-e193-42eb-bec7-4cfc1af74a50%40postgresql.org",
+   "sourceId": 5,
+   "sourceName": "Postgres Weekly",
+   "title": "Postgres 19's release has been pushed back",
+   "titlePt": "Artigo não fornecido",
+   "summaryPt": "Nenhum artigo foi enviado para tradução e resumo. Por favor, forneça o conteúdo do artigo para que eu possa prosseguir.",
+   "snippet": "to November 19, with an extra RC2 on November 12 to include many more recent fixes. The first release candidate still lands tomorrow (October 15).",
+   "issueUrl": "https://postgresweekly.com/issues/669",
+   "blurb": "to November 19, with an extra RC2 on November 12 to include many more recent fixes. The first release candidate still lands tomorrow (October 15).",
+   "kind": "news",
+   "section": "IN BRIEF",
+   "date": "2026-10-14",
+   "verifyStatus": "ok",
+   "tags": {
+    "content-type": [
+     "release-announcement"
+    ],
+    "difficulty": [
+     "all-levels"
+    ],
+    "domain": [
+     "backend"
+    ],
+    "ecosystem-language": [
+     "sql"
+    ],
+    "topic-technology": [
+     "databases",
+     "relational-databases",
+     "sql",
+     "database-migrations"
+    ]
+   }
+  },
+  {
+   "id": 19822,
+   "url": "https://www.pgbouncer.org/2026/10/pgbouncer-1-26-1",
+   "sourceId": 5,
+   "sourceName": "Postgres Weekly",
+   "title": "PgBouncer 1.26.1",
+   "titlePt": "Artigo não fornecido",
+   "summaryPt": "Nenhum artigo foi enviado na solicitação para que o título e o resumo pudessem ser traduzidos. Por favor, forneça o conteúdo do artigo para que a tradução e o resumo em português do Brasil sejam elaborados.",
+   "snippet": "fixes three CVEs, the worst letting a client who knows one user's password log in as a different user (even a superuser) when SCRAM auth is in use.",
+   "issueUrl": "https://postgresweekly.com/issues/669",
+   "blurb": "fixes three CVEs, the worst letting a client who knows one user's password log in as a different user (even a superuser) when SCRAM auth is in use.",
+   "kind": "release",
+   "section": "IN BRIEF",
+   "date": "2026-10-14",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "security"
+    ],
+    "content-type": [
+     "release-announcement",
+     "cve"
+    ],
+    "difficulty": [
+     "for-practitioners"
+    ],
+    "domain": [
+     "backend"
+    ],
+    "topic-technology": [
+     "databases",
+     "security-node",
+     "authentication",
+     "authorization",
+     "database-access",
+     "connection-pooling"
+    ]
+   }
+  },
+  {
+   "id": 19823,
+   "url": "https://kmoppel.github.io/2026-10-09-postgres-v19-oltp-perf-check",
+   "sourceId": 5,
+   "sourceName": "Postgres Weekly",
+   "title": "Kaarel Moppel ran 800 hours of benchmarks on the Postgres 19 betas",
+   "titlePt": "Artigo não fornecido",
+   "summaryPt": "Não foi possível gerar o resumo porque o artigo não foi incluído na solicitação. Envie o conteúdo do artigo para que eu possa traduzir o título e produzir um resumo em português do Brasil.",
+   "snippet": "and found them a few percent faster than v18 on OLTP workloads.",
+   "issueUrl": "https://postgresweekly.com/issues/669",
+   "blurb": "and found them a few percent faster than v18 on OLTP workloads.",
+   "kind": "news",
+   "section": "IN BRIEF",
+   "date": "2026-10-14",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "performance",
+     "optimization"
+    ],
+    "content-type": [
+     "benchmark",
+     "comparison"
+    ],
+    "difficulty": [
+     "intermediate"
+    ],
+    "domain": [
+     "backend"
+    ],
+    "ecosystem-language": [
+     "sql"
+    ],
+    "framework-library-tool": [
+     "postgresql"
+    ],
+    "topic-technology": [
+     "databases",
+     "relational-databases",
+     "sql",
+     "database-migrations"
+    ]
+   }
+  },
+  {
+   "id": 19824,
+   "url": "https://explainmeasured.com/posts/deleting-rows",
+   "sourceId": 5,
+   "sourceName": "Postgres Weekly",
+   "title": "What Deleting Rows Does to a Table",
+   "titlePt": "Erro: artigo não fornecido",
+   "summaryPt": "Não foi possível gerar o resumo, pois o artigo não foi enviado na solicitação. Por favor, forneça o conteúdo do artigo para que eu possa traduzir o título e elaborar um resumo em português do Brasil.",
+   "snippet": "A tidy explainer and demo covering a common misunderstanding. Deleting half a table's rows, then running VACUUM, left it at 137 MB on disk, with only VACUUM FULL reclaiming it.",
+   "issueUrl": "https://postgresweekly.com/issues/669",
+   "blurb": "A tidy explainer and demo covering a common misunderstanding. Deleting half a table's rows, then running VACUUM, left it at 137 MB on disk, with only VACUUM FULL reclaiming it.",
+   "kind": "news",
+   "section": "IN BRIEF",
+   "date": "2026-10-14",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "performance",
+     "optimization",
+     "cost-optimization",
+     "data-engineering"
+    ],
+    "content-type": [
+     "how-to",
+     "deep-dive"
+    ],
+    "difficulty": [
+     "intermediate"
+    ],
+    "domain": [
+     "backend"
+    ],
+    "ecosystem-language": [
+     "sql"
+    ],
+    "framework-library-tool": [
+     "postgresql"
+    ],
+    "topic-technology": [
+     "databases",
+     "sql",
+     "query-optimization",
+     "performance-optimization"
+    ]
+   }
+  },
+  {
+   "id": 19825,
+   "url": "https://www.pgedge.com/blog/pg-phriday-against-the-wal",
+   "sourceId": 5,
+   "sourceName": "Postgres Weekly",
+   "title": "Why Setting archive_command to /bin/true Can Lose Data",
+   "titlePt": "Artigo não fornecido",
+   "summaryPt": "O artigo não foi enviado na mensagem. Por favor, forneça o texto para que eu possa traduzir o título e gerar o resumo em português do Brasil.",
+   "snippet": "The 'fix' for a full WAL disk that breaks recovery without warning.",
+   "issueUrl": "https://postgresweekly.com/issues/669",
+   "blurb": "The 'fix' for a full WAL disk that breaks recovery without warning.",
+   "kind": "news",
+   "section": "IN BRIEF",
+   "date": "2026-10-14",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "reliability"
+    ],
+    "content-type": [
+     "anti-patterns",
+     "deep-dive"
+    ],
+    "difficulty": [
+     "for-beginners"
+    ],
+    "domain": [
+     "backend"
+    ],
+    "framework-library-tool": [
+     "postgresql"
+    ],
+    "topic-technology": [
+     "databases",
+     "sql",
+     "transactions",
+     "acid",
+     "database-migrations"
+    ]
+   }
+  },
+  {
+   "id": 19826,
+   "url": "https://event-driven.io/en/connection-pooler-modes-advisory-locks",
+   "sourceId": 5,
+   "sourceName": "Postgres Weekly",
+   "title": "PgBouncer Pooling Modes in Practice",
+   "titlePt": "Aguardando artigo",
+   "summaryPt": "O artigo não foi fornecido. Por favor, cole o texto do artigo para que eu possa traduzir o título e escrever o resumo em português do Brasil.",
+   "snippet": "What transaction pooling does to your advisory locks.",
+   "issueUrl": "https://postgresweekly.com/issues/669",
+   "blurb": "What transaction pooling does to your advisory locks.",
+   "kind": "news",
+   "section": "IN BRIEF",
+   "date": "2026-10-14",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "performance",
+     "scalability",
+     "concurrency"
+    ],
+    "content-type": [
+     "deep-dive",
+     "guide"
+    ],
+    "difficulty": [
+     "intermediate"
+    ],
+    "domain": [
+     "backend"
+    ],
+    "framework-library-tool": [
+     "postgresql"
+    ],
+    "topic-technology": [
+     "databases",
+     "connection-pooling",
+     "sql",
+     "transactions",
+     "performance-optimization"
+    ]
+   }
+  },
+  {
+   "id": 19827,
+   "url": "https://aws.amazon.com/blogs/database/understanding-the-differences-between-pgbouncer-and-amazon-rds-proxy-for-postgresql-connection-pooling",
+   "sourceId": 5,
+   "sourceName": "Postgres Weekly",
+   "title": "PgBouncer vs. Amazon RDS Proxy: How the Two Poolers Differ",
+   "titlePt": "N/A",
+   "summaryPt": "Nenhum artigo foi fornecido para resumo.",
+   "snippet": "When hundreds of AWS Lambda invocations or microservice pods each open their own connection, PostgreSQL can run out of connections and memory long before it runs out of CPU. In this post we explain the differences between two popular connection poolers, RDS Proxy and PgBouncer. Connection pooling multiplexes many client connections onto a smaller set of PostgreSQL backends, helping prevent connect",
+   "issueUrl": "https://postgresweekly.com/issues/669",
+   "blurb": null,
+   "kind": "news",
+   "section": "IN BRIEF",
+   "date": "2026-10-14",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "aws",
+     "amazon"
+    ],
+    "concept-theme": [
+     "performance",
+     "scalability",
+     "architecture",
+     "availability"
+    ],
+    "content-type": [
+     "vs-comparison"
+    ],
+    "difficulty": [
+     "intermediate"
+    ],
+    "domain": [
+     "backend"
+    ],
+    "ecosystem-language": [
+     "sql"
+    ],
+    "framework-library-tool": [
+     "postgresql"
+    ],
+    "topic-technology": [
+     "databases",
+     "connection-pooling",
+     "database-access",
+     "scalability"
+    ]
+   }
+  },
+  {
+   "id": 19828,
+   "url": "https://boringsql.com/posts/tablesample",
+   "sourceId": 5,
+   "sourceName": "Postgres Weekly",
+   "title": "How TABLESAMPLE Picks Rows",
+   "titlePt": "Artigo não fornecido",
+   "summaryPt": "O texto do artigo não foi incluído na solicitação. Por favor, forneça o conteúdo do artigo para que eu possa traduzir o título e elaborar o resumo em português do Brasil.",
+   "snippet": "Most exploratory questions against a large table only need a rough answer, but without an index on status, even \"roughly how many shipped orders\" costs a full scan. On the two-million-row orders table, Postgres has to read every single 8 kB page, all 18,085 of them (141 MB), just to count matching rows. EXPLAIN (ANALYZE, BUFFERS) SELECT count(*) FROM orders WHERE status = 'shipped'; Aggregate",
+   "issueUrl": "https://postgresweekly.com/issues/669",
+   "blurb": null,
+   "kind": "news",
+   "section": "IN BRIEF",
+   "date": "2026-10-14",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "performance",
+     "optimization"
+    ],
+    "content-type": [
+     "explainer",
+     "deep-dive"
+    ],
+    "difficulty": [
+     "intermediate"
+    ],
+    "domain": [
+     "backend"
+    ],
+    "ecosystem-language": [
+     "sql"
+    ],
+    "framework-library-tool": [
+     "postgresql"
+    ],
+    "topic-technology": [
+     "databases",
+     "sql",
+     "query-optimization"
+    ]
+   }
+  },
+  {
+   "id": 19829,
+   "url": "https://supabase.com/blog/declarative-schemas-2-0-pg-delta",
+   "sourceId": 5,
+   "sourceName": "Postgres Weekly",
+   "title": "pg-delta: Diff Postgres Schemas Into Ordered Migrations",
+   "titlePt": "",
+   "summaryPt": "Nenhum artigo foi fornecido. Por favor, envie o conteúdo do artigo para que eu possa traduzir o título e produzir o resumo em português do Brasil.",
+   "snippet": "Supabase's new open source schema diff engine. Point it at two Postgres 14–18 databases and get an ordered migration covering RLS policies, grants and domains. It replaces the deprecated migra, but is still alpha.",
+   "issueUrl": "https://postgresweekly.com/issues/669",
+   "blurb": "Supabase's new open source schema diff engine. Point it at two Postgres 14–18 databases and get an ordered migration covering RLS policies, grants and domains. It replaces the deprecated migra, but is still alpha.",
+   "kind": "release",
+   "section": "RELEASES AND CODE",
+   "date": "2026-10-14",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "open-source",
+     "data-engineering",
+     "developer-productivity"
+    ],
+    "content-type": [
+     "tool-release"
+    ],
+    "difficulty": [
+     "intermediate"
+    ],
+    "domain": [
+     "backend"
+    ],
+    "ecosystem-language": [
+     "sql",
+     "python"
+    ],
+    "framework-library-tool": [
+     "postgresql"
+    ],
+    "topic-technology": [
+     "databases",
+     "sql",
+     "software-development"
+    ]
+   }
+  },
+  {
+   "id": 19830,
+   "url": "https://github.com/eulerto/wal2json/releases/tag/wal2json_2_7",
+   "sourceId": 5,
+   "sourceName": "Postgres Weekly",
+   "title": "wal2json 2.7",
+   "titlePt": "Nenhum artigo fornecido",
+   "summaryPt": "O artigo não foi incluído na solicitação. Por favor, forneça o texto do artigo para que eu possa traduzir o título e criar um resumo em português do Brasil.",
+   "snippet": "A logical decoding plugin that emits row changes as JSON, used by many change data capture setups. This first release in over two years adds Postgres 18 and 19 support.",
+   "issueUrl": "https://postgresweekly.com/issues/669",
+   "blurb": "A logical decoding plugin that emits row changes as JSON, used by many change data capture setups. This first release in over two years adds Postgres 18 and 19 support.",
+   "kind": "release",
+   "section": "RELEASES AND CODE",
+   "date": "2026-10-14",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "data-pipelines",
+     "open-source",
+     "reliability"
+    ],
+    "content-type": [
+     "version-release"
+    ],
+    "difficulty": [
+     "for-practitioners"
+    ],
+    "domain": [
+     "backend"
+    ],
+    "ecosystem-language": [
+     "json",
+     "sql"
+    ],
+    "framework-library-tool": [
+     "postgresql"
+    ],
+    "topic-technology": [
+     "databases",
+     "sql"
+    ]
+   }
+  },
+  {
+   "id": 19831,
+   "url": "https://github.com/janbjorge/pgqueuer/releases/tag/v1.6.0",
+   "sourceId": 5,
+   "sourceName": "Postgres Weekly",
+   "title": "PGQueuer 1.6",
+   "titlePt": "Artigo não fornecido",
+   "summaryPt": "Não foi possível gerar o resumo porque o texto do artigo não foi enviado. Por favor, cole o conteúdo do artigo para que eu possa resumi-lo.",
+   "snippet": "A Python job queue library built on Postgres.",
+   "issueUrl": "https://postgresweekly.com/issues/669",
+   "blurb": "A Python job queue library built on Postgres.",
+   "kind": "release",
+   "section": "RELEASES AND CODE",
+   "date": "2026-10-14",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "performance",
+     "optimization",
+     "concurrency",
+     "error-handling"
+    ],
+    "content-type": [
+     "version-release",
+     "library-release"
+    ],
+    "difficulty": [
+     "for-practitioners"
+    ],
+    "domain": [
+     "backend",
+     "python"
+    ],
+    "ecosystem-language": [
+     "python",
+     "sql"
+    ],
+    "framework-library-tool": [
+     "postgresql"
+    ],
+    "topic-technology": [
+     "databases",
+     "sql",
+     "task-queues",
+     "background-jobs"
+    ]
+   }
+  },
+  {
+   "id": 19832,
+   "url": "https://github.com/sbdchd/squawk/releases/tag/v2.68.0",
+   "sourceId": 5,
+   "sourceName": "Postgres Weekly",
+   "title": "Squawk 2.68",
+   "titlePt": "Artigo não informado",
+   "summaryPt": "Não foi possível gerar o resumo porque o texto do artigo não foi enviado. Por favor, cole o conteúdo do artigo para que eu possa traduzir o título e resumir os pontos principais.",
+   "snippet": "A linter for Postgres schema migrations.",
+   "issueUrl": "https://postgresweekly.com/issues/669",
+   "blurb": "A linter for Postgres schema migrations.",
+   "kind": "release",
+   "section": "RELEASES AND CODE",
+   "date": "2026-10-14",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "static-analysis",
+     "reliability",
+     "dev-experience"
+    ],
+    "content-type": [
+     "version-release"
+    ],
+    "difficulty": [
+     "intermediate"
+    ],
+    "domain": [
+     "backend"
+    ],
+    "ecosystem-language": [
+     "sql"
+    ],
+    "framework-library-tool": [
+     "postgresql"
+    ],
+    "topic-technology": [
+     "databases",
+     "sql",
+     "database-migrations",
+     "ci-cd"
+    ]
+   }
+  },
+  {
+   "id": 19833,
+   "url": "https://peter.eisentraut.org/blog/2026/10/09/the-reverts-will-continue-until-morale-improves",
+   "sourceId": 5,
+   "sourceName": "Postgres Weekly",
+   "title": "'The Reverts Will Continue Until Morale Improves'",
+   "titlePt": "Artigo não fornecido",
+   "summaryPt": "Não foi possível gerar o resumo porque o texto do artigo não foi enviado. Por favor, forneça o conteúdo para que eu possa traduzir o título e criar o resumo em português do Brasil.",
+   "snippet": "A Postgres committer, whose own work was among the casualties, shares his take on why so many Postgres 19 features were reverted during beta.",
+   "issueUrl": "https://postgresweekly.com/issues/669",
+   "blurb": "A Postgres committer, whose own work was among the casualties, shares his take on why so many Postgres 19 features were reverted during beta.",
+   "kind": "news",
+   "section": "News",
+   "date": "2026-10-14",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "dev-experience",
+     "technical-debt",
+     "architecture",
+     "open-source"
+    ],
+    "content-type": [
+     "opinion",
+     "analysis"
+    ],
+    "difficulty": [
+     "advanced"
+    ],
+    "domain": [
+     "backend",
+     "llm-models"
+    ],
+    "ecosystem-language": [
+     "sql"
+    ],
+    "framework-library-tool": [
+     "postgresql"
+    ],
+    "topic-technology": [
+     "databases",
+     "llm-models",
+     "software-development"
+    ]
+   }
+  },
+  {
+   "id": 19834,
+   "url": "https://evilmartians.com/chronicles/dont-bet-on-select-order-shuffle-your-rows-see-what-folds",
+   "sourceId": 5,
+   "sourceName": "Postgres Weekly",
+   "title": "Don't Bet on SELECT Order: Shuffle Your Rows and See What Folds",
+   "titlePt": "Artigo não fornecido",
+   "summaryPt": "Não foi possível gerar o resumo porque o texto do artigo não foi enviado. Por favor, forneça o artigo para que eu possa traduzir o título e elaborar um resumo em português do Brasil.",
+   "snippet": "If your app or tests implicitly rely on rows returning in insertion order, that can cause many an annoying bug (I've been bitten myself!). The pg_disorder extension shuffles SELECT results lacking an ORDER BY to catch such bugs in testing.",
+   "issueUrl": "https://postgresweekly.com/issues/669",
+   "blurb": "If your app or tests implicitly rely on rows returning in insertion order, that can cause many an annoying bug (I've been bitten myself!). The pg_disorder extension shuffles SELECT results lacking an ORDER BY to catch such bugs in testing.",
+   "kind": "news",
+   "section": "News",
+   "date": "2026-10-14",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "testing",
+     "reliability",
+     "open-source"
+    ],
+    "content-type": [
+     "analysis",
+     "deep-dive"
+    ],
+    "difficulty": [
+     "advanced"
+    ],
+    "domain": [
+     "backend"
+    ],
+    "ecosystem-language": [
+     "sql"
+    ],
+    "framework-library-tool": [
+     "postgresql",
+     "rails",
+     "django"
+    ],
+    "topic-technology": [
+     "databases",
+     "sql",
+     "query-optimization",
+     "testing-python"
+    ]
+   }
+  },
+  {
+   "id": 19835,
+   "url": "https://github.com/MagicStack/asyncpg",
+   "sourceId": 5,
+   "sourceName": "Postgres Weekly",
+   "title": "asyncpg 0.32.0: Fast Postgres Client Library for Python/asyncio",
+   "titlePt": "Artigo não fornecido",
+   "summaryPt": "Não foi possível gerar o resumo porque o artigo não foi enviado. Por favor, forneça o texto do artigo para que eu possa traduzir o título e elaborar um resumo fiel em português do Brasil.",
+   "snippet": "The long-standing Python client library for use with the asyncio framework now supports Postgres 19, as well as the newly released Python 3.15.",
+   "issueUrl": "https://postgresweekly.com/issues/669",
+   "blurb": "The long-standing Python client library for use with the asyncio framework now supports Postgres 19, as well as the newly released Python 3.15.",
+   "kind": "release",
+   "section": "Releases and Code",
+   "date": "2026-10-14",
+   "verifyStatus": "suspect",
+   "tags": {
+    "concept-theme": [
+     "performance",
+     "async",
+     "data-fetching"
+    ],
+    "content-type": [
+     "version-release",
+     "library-release"
+    ],
+    "difficulty": [
+     "intermediate"
+    ],
+    "domain": [
+     "python",
+     "backend"
+    ],
+    "ecosystem-language": [
+     "python",
+     "sql"
+    ],
+    "framework-library-tool": [
+     "postgresql"
+    ],
+    "topic-technology": [
+     "databases",
+     "asyncio",
+     "database-access",
+     "sql"
+    ]
+   }
+  },
+  {
+   "id": 19836,
+   "url": "https://github.com/orafce/orafce",
+   "sourceId": 5,
+   "sourceName": "Postgres Weekly",
+   "title": "Orafce: Oracle Compatibility Functions for Postgres",
+   "titlePt": "Sem título",
+   "summaryPt": "O artigo necessário para a tradução e resumo não foi fornecido na mensagem. Por favor, envie o texto do artigo para que eu possa traduzir o título e elaborar o resumo em português do Brasil.",
+   "snippet": "Implements some of the functions from Oracle that might be useful for users migrating to Postgres. We haven’t linked to this in a few years but it continues to get frequent releases.",
+   "issueUrl": "https://postgresweekly.com/issues/669",
+   "blurb": "Implements some of the functions from Oracle that might be useful for users migrating to Postgres. We haven’t linked to this in a few years but it continues to get frequent releases.",
+   "kind": "tool",
+   "section": "Releases and Code",
+   "date": "2026-10-14",
+   "verifyStatus": "ok",
+   "tags": {
+    "content-type": [
+     "reference"
+    ],
+    "difficulty": [
+     "intermediate"
+    ],
+    "domain": [
+     "backend"
+    ],
+    "ecosystem-language": [
+     "sql"
+    ],
+    "framework-library-tool": [
+     "postgresql"
+    ],
+    "topic-technology": [
+     "databases",
+     "sql"
+    ]
+   }
+  },
+  {
+   "id": 19837,
+   "url": "https://deno.com/blog/cloudflare",
+   "sourceId": 2,
+   "sourceName": "JavaScript Weekly",
+   "title": "On Hacker News",
+   "titlePt": "Artigo não fornecido",
+   "summaryPt": "Não foi possível gerar o resumo porque o texto do artigo não foi enviado. Por favor, forneça o artigo para que eu possa traduzir o título e elaborar o resumo em português do Brasil.",
+   "snippet": "Ryan Dahl noted that Deno \"has been sucked into the gravity well of Node compatibility\" before asking: \"Why reimplement Node? It works.\" But what happens to the JavaScript™ trademark case, I wonder…?",
+   "issueUrl": "https://javascriptweekly.com/issues/806",
+   "blurb": "Ryan Dahl noted that Deno \"has been sucked into the gravity well of Node compatibility\" before asking: \"Why reimplement Node? It works.\" But what happens to the JavaScript™ trademark case, I wonder…?",
+   "kind": "news",
+   "section": null,
+   "date": "2026-10-13",
+   "verifyStatus": "suspect",
+   "tags": {
+    "company-vendor-model": [
+     "cloudflare"
+    ],
+    "concept-theme": [
+     "architecture",
+     "serverless",
+     "edge-computing",
+     "dev-experience"
+    ],
+    "content-type": [
+     "announcement"
+    ],
+    "difficulty": [
+     "for-practitioners"
+    ],
+    "domain": [
+     "nodejs",
+     "backend"
+    ],
+    "ecosystem-language": [
+     "javascript",
+     "nodejs"
+    ],
+    "framework-library-tool": [
+     "deno",
+     "cloudflare-workers"
+    ],
+    "topic-technology": [
+     "javascript",
+     "nodejs",
+     "serverless",
+     "edge-runtime",
+     "distributed-systems",
+     "software-development"
+    ]
+   }
+  },
+  {
+   "id": 19838,
+   "url": "https://aws.amazon.com/blogs/aws/announcing-aws-lambda-web-functions-for-fast-consistent-web-app-performance-anywhere",
+   "sourceId": 2,
+   "sourceName": "JavaScript Weekly",
+   "title": "AWS has launched Lambda Web Functions",
+   "titlePt": "Artigo não fornecido",
+   "summaryPt": "Não foi possível gerar o resumo porque o artigo não foi incluído na mensagem.",
+   "snippet": "AWS has launched Lambda Web Functions, which run an ordinary port-listening Node server (Express, Hono, Fastify, etc.) on Lambda with no handler rewrite, billing for active CPU time and separately for memory.",
+   "issueUrl": "https://javascriptweekly.com/issues/806",
+   "blurb": "AWS has launched Lambda Web Functions, which run an ordinary port-listening Node server (Express, Hono, Fastify, etc.) on Lambda with no handler rewrite, billing for active CPU time and separately for memory.",
+   "kind": "news",
+   "section": "IN BRIEF",
+   "date": "2026-10-13",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "aws"
+    ],
+    "concept-theme": [
+     "serverless",
+     "scalability",
+     "dev-experience"
+    ],
+    "content-type": [
+     "product-launch"
+    ],
+    "difficulty": [
+     "intermediate"
+    ],
+    "domain": [
+     "backend",
+     "nodejs"
+    ],
+    "ecosystem-language": [
+     "nodejs"
+    ],
+    "framework-library-tool": [
+     "aws",
+     "nodejs"
+    ],
+    "topic-technology": [
+     "serverless",
+     "nodejs",
+     "web-development",
+     "deployment"
+    ]
+   }
+  },
+  {
+   "id": 19839,
+   "url": "https://news.ycombinator.com/item?id=50052814",
+   "sourceId": 2,
+   "sourceName": "JavaScript Weekly",
+   "title": "No malicious Zod release reached npm",
+   "titlePt": "Artigo não fornecido",
+   "summaryPt": "Não foi possível gerar um resumo porque nenhum artigo foi incluído na solicitação. Por favor, forneça o texto do artigo para que eu possa resumir o conteúdo de forma fiel e fluente em português do Brasil.",
+   "snippet": "Despite this week's fresh stir, no malicious Zod release reached npm. Malicious commits pushed to its repo in September were reverted the same day, as Colin McDonnell explains.",
+   "issueUrl": "https://javascriptweekly.com/issues/806",
+   "blurb": "Despite this week's fresh stir, no malicious Zod release reached npm. Malicious commits pushed to its repo in September were reverted the same day, as Colin McDonnell explains.",
+   "kind": "news",
+   "section": "IN BRIEF",
+   "date": "2026-10-13",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "security",
+     "ci-cd",
+     "governance",
+     "open-source"
+    ],
+    "content-type": [
+     "incident-report",
+     "analysis"
+    ],
+    "difficulty": [
+     "intermediate"
+    ],
+    "domain": [
+     "nodejs"
+    ],
+    "ecosystem-language": [
+     "javascript",
+     "nodejs",
+     "typescript"
+    ],
+    "framework-library-tool": [
+     "npm",
+     "nodejs",
+     "github-actions"
+    ],
+    "topic-technology": [
+     "supply-chain-security",
+     "npm-security",
+     "software-development"
+    ]
+   }
+  },
+  {
+   "id": 19840,
+   "url": "https://nextjs.org/blog/upcoming-nextjs-security-update-october-2026",
+   "sourceId": 2,
+   "sourceName": "JavaScript Weekly",
+   "title": "An out-of-band Next.js security release is due tomorrow",
+   "titlePt": "Artigo não fornecido",
+   "summaryPt": "Não foi possível gerar o resumo porque o artigo não foi enviado.",
+   "snippet": "An out-of-band Next.js security release is due tomorrow.",
+   "issueUrl": "https://javascriptweekly.com/issues/806",
+   "blurb": "An out-of-band Next.js security release is due tomorrow.",
+   "kind": "news",
+   "section": "IN BRIEF",
+   "date": "2026-10-13",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "vercel"
+    ],
+    "concept-theme": [
+     "security"
+    ],
+    "content-type": [
+     "security-advisory",
+     "release-announcement"
+    ],
+    "difficulty": [
+     "all-levels"
+    ],
+    "domain": [
+     "reactjs",
+     "frontend",
+     "nodejs"
+    ],
+    "ecosystem-language": [
+     "javascript",
+     "nodejs"
+    ],
+    "framework-library-tool": [
+     "nextjs"
+    ],
+    "topic-technology": [
+     "security-node",
+     "software-development"
+    ]
+   }
+  },
+  {
+   "id": 19841,
+   "url": "https://tanstack.com/blog/tanstack-start-1-0",
+   "sourceId": 2,
+   "sourceName": "JavaScript Weekly",
+   "title": "TanStack Start 1.0",
+   "titlePt": "Artigo não fornecido",
+   "summaryPt": "Não foi possível gerar o resumo porque o texto do artigo não foi enviado. Por favor, cole o conteúdo da notícia ou publicação para que eu possa traduzir o título e resumir os pontos principais em português do Brasil.",
+   "snippet": "Has just dropped. Big news for full-stack React and Solid fans!",
+   "issueUrl": "https://javascriptweekly.com/issues/806",
+   "blurb": "Has just dropped. Big news for full-stack React and Solid fans!",
+   "kind": "release",
+   "section": "RELEASES",
+   "date": "2026-10-13",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "dev-experience",
+     "type-safety",
+     "reliability"
+    ],
+    "content-type": [
+     "product-launch"
+    ],
+    "difficulty": [
+     "intermediate"
+    ],
+    "domain": [
+     "reactjs",
+     "frontend",
+     "backend"
+    ],
+    "ecosystem-language": [
+     "typescript",
+     "javascript",
+     "nodejs"
+    ],
+    "framework-library-tool": [
+     "tanstack-router"
+    ],
+    "topic-technology": [
+     "react",
+     "server-components",
+     "routing",
+     "data-fetching",
+     "ssr",
+     "web-development"
+    ]
+   }
+  },
+  {
+   "id": 19842,
+   "url": "https://marionettejs.com/news/introducing-marionette-5",
+   "sourceId": 2,
+   "sourceName": "JavaScript Weekly",
+   "title": "Marionette 5.0",
+   "titlePt": "Artigo não fornecido",
+   "summaryPt": "Não foi possível gerar o resumo, pois o texto do artigo não foi enviado. Por favor, forneça o conteúdo para que eu possa traduzir o título e resumir.",
+   "snippet": "Six years on, the Backbone-era framework returns with a core free of Backbone, jQuery and Underscore… and they explain why!",
+   "issueUrl": "https://javascriptweekly.com/issues/806",
+   "blurb": "Six years on, the Backbone-era framework returns with a core free of Backbone, jQuery and Underscore… and they explain why!",
+   "kind": "release",
+   "section": "RELEASES",
+   "date": "2026-10-13",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "openai",
+     "claude",
+     "gemini"
+    ],
+    "concept-theme": [
+     "architecture",
+     "dev-experience",
+     "state-management"
+    ],
+    "content-type": [
+     "interview"
+    ],
+    "difficulty": [
+     "for-practitioners"
+    ],
+    "domain": [
+     "frontend",
+     "llm-models"
+    ],
+    "ecosystem-language": [
+     "javascript"
+    ],
+    "topic-technology": [
+     "javascript",
+     "software-development",
+     "ai-agents"
+    ],
+    "trending-emerging": [
+     "ai-coding-agents",
+     "agentic-ai"
+    ]
+   }
+  },
+  {
+   "id": 19843,
+   "url": "https://github.com/expressjs/express/releases/tag/v5.3.0",
+   "sourceId": 2,
+   "sourceName": "JavaScript Weekly",
+   "title": "Express 5.3.0",
+   "titlePt": "Artigo não fornecido",
+   "summaryPt": "Não foi possível gerar o resumo porque o artigo não foi enviado. Envie o texto original para que eu possa traduzir o título e elaborar um resumo fiel em português do Brasil.",
+   "snippet": "A maintenance release worth upgrading to, as patched qs, proxy-addr and body-parser dependencies close five CVEs.",
+   "issueUrl": "https://javascriptweekly.com/issues/806",
+   "blurb": "A maintenance release worth upgrading to, as patched qs, proxy-addr and body-parser dependencies close five CVEs.",
+   "kind": "release",
+   "section": "RELEASES",
+   "date": "2026-10-13",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "security",
+     "reliability"
+    ],
+    "content-type": [
+     "version-release"
+    ],
+    "difficulty": [
+     "intermediate"
+    ],
+    "domain": [
+     "nodejs",
+     "backend"
+    ],
+    "ecosystem-language": [
+     "nodejs",
+     "javascript"
+    ],
+    "framework-library-tool": [
+     "express"
+    ],
+    "topic-technology": [
+     "nodejs",
+     "javascript",
+     "web-development",
+     "rest-api",
+     "security-node"
+    ]
+   }
+  },
+  {
+   "id": 19844,
+   "url": "https://lemire.me/blog/2026/10/10/websocket-servers-in-javascript-node-js-bun-and-deno-in-2026",
+   "sourceId": 2,
+   "sourceName": "JavaScript Weekly",
+   "title": "WebSocket servers in JavaScript (Node.js, Bun and Deno) in 2026",
+   "titlePt": "Artigo não recebido",
+   "summaryPt": "Não foi possível gerar o resumo porque o conteúdo do artigo não foi fornecido. Por favor, cole o texto do artigo para que eu possa traduzir o título e elaborar o resumo em português do Brasil.",
+   "snippet": "WebSocket servers in JavaScript (Node.js, Bun and Deno) in 2026",
+   "issueUrl": "https://javascriptweekly.com/issues/806",
+   "blurb": null,
+   "kind": "news",
+   "section": "Articles and Videos",
+   "date": "2026-10-13",
+   "verifyStatus": "ok",
+   "tags": {
+    "content-type": [
+     "tutorial"
+    ],
+    "difficulty": [
+     "intermediate"
+    ],
+    "domain": [
+     "backend",
+     "nodejs"
+    ],
+    "ecosystem-language": [
+     "javascript",
+     "nodejs"
+    ],
+    "framework-library-tool": [
+     "nodejs",
+     "bun",
+     "deno"
+    ],
+    "topic-technology": [
+     "websockets",
+     "nodejs",
+     "javascript"
+    ]
+   }
+  },
+  {
+   "id": 19845,
+   "url": "https://blog.ikaes.de/yet-another-way-to-invoke-functions-without-parentheses",
+   "sourceId": 2,
+   "sourceName": "JavaScript Weekly",
+   "title": "Yet Another Way to Invoke Functions Without Parentheses",
+   "titlePt": "Artigo não fornecido",
+   "summaryPt": "Não foi possível gerar o resumo porque o texto do artigo não foi enviado. Por favor, forneça o artigo para que eu possa traduzir o título e resumir o conteúdo.",
+   "snippet": "There are many ways to invoke arbitrary functions in JavaScript without using parens, but this is a particularly obscure one!",
+   "issueUrl": "https://javascriptweekly.com/issues/806",
+   "blurb": "There are many ways to invoke arbitrary functions in JavaScript without using parens, but this is a particularly obscure one!",
+   "kind": "news",
+   "section": "Articles and Videos",
+   "date": "2026-10-13",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "security"
+    ],
+    "content-type": [
+     "tutorial",
+     "deep-dive"
+    ],
+    "difficulty": [
+     "advanced"
+    ],
+    "domain": [
+     "frontend"
+    ],
+    "ecosystem-language": [
+     "javascript"
+    ],
+    "topic-technology": [
+     "javascript",
+     "security-node",
+     "error-handling",
+     "function-calling"
+    ]
+   }
+  },
+  {
+   "id": 19846,
+   "url": "https://sergiodxa.com/articles/the-remix-way",
+   "sourceId": 2,
+   "sourceName": "JavaScript Weekly",
+   "title": "Six Months of Building with Remix 3",
+   "titlePt": "Artigo não fornecido",
+   "summaryPt": "Não foi possível gerar o resumo porque o artigo não foi enviado. Por favor, cole o texto do artigo para que eu possa traduzir o título e resumi-lo em português do Brasil.",
+   "snippet": "What the post-React Remix (v3 was released earlier this month) is like to work with day to day.",
+   "issueUrl": "https://javascriptweekly.com/issues/806",
+   "blurb": "What the post-React Remix (v3 was released earlier this month) is like to work with day to day.",
+   "kind": "news",
+   "section": "Articles and Videos",
+   "date": "2026-10-13",
+   "verifyStatus": "suspect",
+   "tags": {
+    "concept-theme": [
+     "architecture",
+     "design-patterns",
+     "caching",
+     "data-fetching"
+    ],
+    "content-type": [
+     "deep-dive",
+     "case-study"
+    ],
+    "difficulty": [
+     "advanced"
+    ],
+    "domain": [
+     "reactjs",
+     "frontend",
+     "backend"
+    ],
+    "ecosystem-language": [
+     "javascript",
+     "typescript",
+     "sql"
+    ],
+    "framework-library-tool": [
+     "remix",
+     "react-router"
+    ],
+    "topic-technology": [
+     "react",
+     "databases",
+     "web-development"
+    ]
+   }
+  },
+  {
+   "id": 19847,
+   "url": "https://anoma.ly/notes/opencode-2-0",
+   "sourceId": 2,
+   "sourceName": "JavaScript Weekly",
+   "title": "OpenCode 2.0: A Big Update for the Open Coding Agent",
+   "titlePt": "Artigo não fornecido",
+   "summaryPt": "Não foi possível gerar o resumo porque o texto do artigo não foi enviado. Por favor, forneça o conteúdo original para que eu possa traduzir o título e elaborar um resumo em português do Brasil.",
+   "snippet": "A full-featured agentic coding app, built on Bun, that's more akin to Claude Code than Pi, say. v2.0 overhauls it with background subagents, a 'code mode' to let models script MCP tool calls, and clients for vanilla JS and Effect code to drive it. If you've not given OpenCode a try yet, you can get started here.",
+   "issueUrl": "https://javascriptweekly.com/issues/806",
+   "blurb": "A full-featured agentic coding app, built on Bun, that's more akin to Claude Code than Pi, say. v2.0 overhauls it with background subagents, a 'code mode' to let models script MCP tool calls, and clients for vanilla JS and Effect code to drive it. If you've not given OpenCode a try yet, you can get started here.",
+   "kind": "release",
+   "section": "Code & Tools",
+   "date": "2026-10-13",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "api-design",
+     "architecture",
+     "dev-experience",
+     "performance"
+    ],
+    "content-type": [
+     "version-release"
+    ],
+    "difficulty": [
+     "for-practitioners"
+    ],
+    "domain": [
+     "ai-general"
+    ],
+    "ecosystem-language": [
+     "javascript",
+     "typescript"
+    ],
+    "topic-technology": [
+     "ai-agents",
+     "agentic-ai",
+     "api-design",
+     "software-development"
+    ],
+    "trending-emerging": [
+     "ai-coding-agents"
+    ]
+   }
+  },
+  {
+   "id": 19848,
+   "url": "https://tamagui.dev/blog/version-three",
+   "sourceId": 2,
+   "sourceName": "JavaScript Weekly",
+   "title": "Tamagui 3: One React UI Codebase for Web and Native",
+   "titlePt": "Artigo não fornecido",
+   "summaryPt": "Não foi possível gerar o resumo porque o texto do artigo não foi enviado. Por favor, inclua o conteúdo do artigo para que eu possa traduzir o título e produzir o resumo em português do Brasil.",
+   "snippet": "A styling system and component kit for sharing UI between React web apps and React Native, with a compiler that keeps things fast on both. v3 adds Tailwind-style props and React Strict DOM support.",
+   "issueUrl": "https://javascriptweekly.com/issues/806",
+   "blurb": "A styling system and component kit for sharing UI between React web apps and React Native, with a compiler that keeps things fast on both. v3 adds Tailwind-style props and React Strict DOM support.",
+   "kind": "release",
+   "section": "Code & Tools",
+   "date": "2026-10-13",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "performance",
+     "optimization",
+     "architecture",
+     "dev-experience"
+    ],
+    "content-type": [
+     "version-release"
+    ],
+    "difficulty": [
+     "advanced"
+    ],
+    "domain": [
+     "reactjs",
+     "frontend"
+    ],
+    "ecosystem-language": [
+     "javascript",
+     "cpp"
+    ],
+    "framework-library-tool": [
+     "react",
+     "react-native",
+     "tailwind"
+    ],
+    "topic-technology": [
+     "react-native",
+     "react",
+     "web-development"
+    ]
+   }
+  },
+  {
+   "id": 19849,
+   "url": "https://hono.dev/docs/guides/migrating-to-v5",
+   "sourceId": 2,
+   "sourceName": "JavaScript Weekly",
+   "title": "Hono 5.0 RC",
+   "titlePt": "Nenhum artigo fornecido",
+   "summaryPt": "Não foi possível gerar o resumo porque o artigo não foi enviado na mensagem. Por favor, cole o texto do artigo para que eu possa traduzir o título e elaborar o resumo em português do Brasil.",
+   "snippet": "The web-standards server framework goes ESM-only and moves its runtime adapters into separate packages.",
+   "issueUrl": "https://javascriptweekly.com/issues/806",
+   "blurb": "The web-standards server framework goes ESM-only and moves its runtime adapters into separate packages.",
+   "kind": "release",
+   "section": "Code & Tools",
+   "date": "2026-10-13",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "error-handling",
+     "api-design",
+     "dev-experience"
+    ],
+    "content-type": [
+     "version-release",
+     "migration-guide"
+    ],
+    "difficulty": [
+     "intermediate"
+    ],
+    "domain": [
+     "backend",
+     "nodejs"
+    ],
+    "ecosystem-language": [
+     "typescript",
+     "javascript",
+     "nodejs"
+    ],
+    "framework-library-tool": [
+     "hono"
+    ],
+    "topic-technology": [
+     "nodejs",
+     "typescript",
+     "javascript",
+     "web-development",
+     "serverless",
+     "rest-api"
+    ]
+   }
+  },
+  {
+   "id": 19850,
+   "url": "https://pnpm.io/blog/releases/12.12.0",
+   "sourceId": 2,
+   "sourceName": "JavaScript Weekly",
+   "title": "pnpm 12.12",
+   "titlePt": "Título não fornecido",
+   "summaryPt": "O artigo não foi incluído na solicitação. Por favor, envie o conteúdo para que eu possa traduzir o título e elaborar o resumo em português do Brasil.",
+   "snippet": "This release shares task results and dependency builds through a remote cache, adds the addMissingPeerTypes setting, and lets pnpm add --config and pnpm update manage configuration dependencies. It also fixes dangerouslyAllowAllBuilds running the build scripts of packages that allowBuilds denies. Minor Changes# pnpm pipeline can share task results between machines. A result is a signed artifact",
+   "issueUrl": "https://javascriptweekly.com/issues/806",
+   "blurb": null,
+   "kind": "release",
+   "section": "Code & Tools",
+   "date": "2026-10-13",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "vercel"
+    ],
+    "concept-theme": [
+     "caching",
+     "performance",
+     "dev-experience",
+     "optimization"
+    ],
+    "content-type": [
+     "version-release",
+     "release-announcement"
+    ],
+    "difficulty": [
+     "advanced"
+    ],
+    "domain": [
+     "nodejs"
+    ],
+    "ecosystem-language": [
+     "nodejs",
+     "javascript"
+    ],
+    "framework-library-tool": [
+     "pnpm"
+    ],
+    "topic-technology": [
+     "package-management",
+     "nodejs",
+     "javascript",
+     "typescript",
+     "monorepos",
+     "databases"
+    ]
+   }
+  },
+  {
+   "id": 19851,
+   "url": "https://linus.dev/posts/kiesel-devlog-15",
+   "sourceId": 2,
+   "sourceName": "JavaScript Weekly",
+   "title": "Kiesel v0.4.0",
+   "titlePt": "Artigo não fornecido",
+   "summaryPt": "O artigo não foi incluído na solicitação. Por favor, envie o texto do artigo para que eu possa traduzir o título e elaborar o resumo em português do Brasil.",
+   "snippet": "Three years ago we mentioned Linus Groh's Zig-based Kiesel JavaScript engine. It passed 25% of test262 back then, but v0.4.0 has landed and it's now at 94.7% (not far behind V8) and supports modern language proposals like await dictionary and numerous iterator proposals.",
+   "issueUrl": "https://javascriptweekly.com/issues/806",
+   "blurb": "Three years ago we mentioned Linus Groh's Zig-based Kiesel JavaScript engine. It passed 25% of test262 back then, but v0.4.0 has landed and it's now at 94.7% (not far behind V8) and supports modern language proposals like await dictionary and numerous iterator proposals.",
+   "kind": "release",
+   "section": "Elsewhere in the ecosystem",
+   "date": "2026-10-13",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "open-source",
+     "developer-productivity"
+    ],
+    "content-type": [
+     "version-release",
+     "tool-release"
+    ],
+    "difficulty": [
+     "advanced"
+    ],
+    "domain": [
+     "nodejs"
+    ],
+    "ecosystem-language": [
+     "javascript",
+     "zig"
+    ],
+    "topic-technology": [
+     "javascript",
+     "nodejs",
+     "software-development"
+    ]
+   }
+  },
+  {
+   "id": 19852,
+   "url": "https://bun.com/blog/bun-v1.4.3",
+   "sourceId": 2,
+   "sourceName": "JavaScript Weekly",
+   "title": "Bun 1.4.3 Adds bun check, a Built-In TypeScript Type Checker",
+   "titlePt": "Artigo não fornecido",
+   "summaryPt": "Não foi possível gerar o resumo porque o texto do artigo não foi enviado. Por favor, cole o conteúdo original para que eu possa traduzir o título e elaborar o resumo em português do Brasil.",
+   "snippet": "bun check is a port of TypeScript 7's checker that reads your tsconfig.json, reports the same errors as tsc and, Jarred claims, runs 3-6x faster. It plugs into bun run/test/build too. Idle server processes now use far less CPU, and a JavaScriptCore upgrade picks up numerous perf gains.",
+   "issueUrl": "https://javascriptweekly.com/issues/806",
+   "blurb": "bun check is a port of TypeScript 7's checker that reads your tsconfig.json, reports the same errors as tsc and, Jarred claims, runs 3-6x faster. It plugs into bun run/test/build too. Idle server processes now use far less CPU, and a JavaScriptCore upgrade picks up numerous perf gains.",
+   "kind": "release",
+   "section": "Top",
+   "date": "2026-10-13",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "type-safety",
+     "performance",
+     "developer-productivity"
+    ],
+    "content-type": [
+     "version-release",
+     "tool-release"
+    ],
+    "difficulty": [
+     "for-practitioners"
+    ],
+    "domain": [
+     "nodejs",
+     "backend"
+    ],
+    "ecosystem-language": [
+     "typescript",
+     "javascript"
+    ],
+    "framework-library-tool": [
+     "bun"
+    ],
+    "topic-technology": [
+     "typescript",
+     "nodejs",
+     "javascript",
+     "performance-optimization",
+     "software-development"
+    ]
+   }
+  },
+  {
+   "id": 19853,
+   "url": "https://www.raymondcamden.com/2026/10/08/tiny-apps-with-tinyjs",
+   "sourceId": 2,
+   "sourceName": "JavaScript Weekly",
+   "title": "Tiny Apps with TinyJS",
+   "titlePt": "Artigo não fornecido",
+   "summaryPt": "O artigo de tecnologia não foi incluído na mensagem. Por favor, envie o texto completo para que eu possa traduzir o título e elaborar um resumo em português do Brasil.",
+   "snippet": "A quick look at a new way to make tiny JS-powered desktop apps we featured a few weeks ago.",
+   "issueUrl": "https://javascriptweekly.com/issues/806",
+   "blurb": "A quick look at a new way to make tiny JS-powered desktop apps we featured a few weeks ago.",
+   "kind": "news",
+   "section": "Articles and Videos",
+   "date": "2026-10-13",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "performance",
+     "dev-experience"
+    ],
+    "content-type": [
+     "tutorial",
+     "getting-started"
+    ],
+    "difficulty": [
+     "beginner"
+    ],
+    "domain": [
+     "backend",
+     "frontend"
+    ],
+    "ecosystem-language": [
+     "javascript",
+     "html",
+     "css"
+    ],
+    "topic-technology": [
+     "javascript",
+     "nodejs"
     ]
    }
   }

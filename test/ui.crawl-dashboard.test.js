@@ -9,7 +9,7 @@ import assert from 'node:assert/strict';
 import { render } from 'ink-testing-library';
 
 const { html } = await import('../src/ui/html.js');
-const { CrawlDashboard } = await import('../src/ui/CrawlDashboard.js');
+const { CrawlDashboard, eventDetail } = await import('../src/ui/CrawlDashboard.js');
 
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -22,6 +22,7 @@ const tele = {
   budget: { spentUsd: 0.42, budgetUsd: 2, calls: 128, reservedUsd: 0, byStage: { curadoria: { costUsd: 0.21 } } },
   progress: {
     active: true, since: '2026-06-25', pctGlobal: 73, sourcesTotal: 5, sourcesListingDone: 3,
+    jobsBase: { done: 30, failed: 0 },
     stages: { fetch: 3, render: 2 },
     counts: { salvos: 34, issues: 12, itensCurados: 89, verificados: 20, resumidos: 18, classificados: 22, mantidosBlurb: 4, estouros: 1 },
     sources: [{ id: 1, name: 'TechCrunch', pct: 40, floorHit: false }, { id: 2, name: 'TLDR', pct: 100, floorHit: true }],
@@ -30,6 +31,12 @@ const tele = {
 const feed = [
   { id: 1, at: 1751544199000, phase: 'curation', kind: 'issue-curated', level: 'success', source: 'TLDR', detail: '7 itens' },
   { id: 2, at: 1751544190000, phase: 'articles', kind: 'timeout', level: 'warn', detail: 'https://verge.com/x' },
+  { id: 3, at: 1751544180000, phase: 'discovery', kind: 'floor-hit', level: 'success', source: 'Node Weekly' },
+  {
+    id: 4, at: 1751544170000, phase: 'articles', kind: 'dead-target', level: 'warn',
+    detail: 'DNS não resolve', count: 8,
+    samples: ['convey.earth', 'nicetomap.com', '00.f.net', 'blog.huyage.dev'],
+  },
 ];
 const ticker = { id: 3, kind: 'saved', detail: 'Novo modelo da OpenAI lança' };
 
@@ -61,6 +68,11 @@ test('UI/dashboard: cabeçalho, fases, ticker, métricas, feed curado e rodapé'
   assert.ok(frame.includes('coletânea curada'), 'marco issue-curated em PT');
   assert.ok(frame.includes('[TLDR]'), 'tag de fonte no feed');
   assert.ok(frame.includes('tempo esgotado'), 'marco timeout em PT');
+  // rótulo NUNCA cortado (a coluna do rótulo tem a largura do maior rótulo) + alvo morto coalescido
+  assert.ok(frame.includes('data-alvo alcançada'), `rótulo floor-hit íntegro\n${frame}`);
+  assert.ok(!frame.includes('data-alvo alcança…'), 'sem truncamento do rótulo');
+  assert.ok(frame.includes('alvo morto'), 'marco dead-target em PT (≠ ✗ erro)');
+  assert.ok(frame.includes('DNS não resolve (×8)'), 'motivo + rajada coalescida');
   // rodapé: avisos internos colapsados + atalhos
   assert.ok(frame.includes('3 avisos internos'), 'contador de avisos');
   assert.ok(frame.includes('v detalhes'), 'atalhos no rodapé');
@@ -88,4 +100,17 @@ test('UI/dashboard: run concluída mostra badge Concluído', async () => {
   const frame = lastFrame() || '';
   assert.ok(/conclu[íi]do/i.test(frame), `badge concluído\n${frame}`);
   unmount();
+});
+
+test('UI/dashboard: eventDetail = motivo + (×N) + amostras (3 primeiros + +N)', () => {
+  assert.equal(
+    eventDetail({ detail: 'DNS não resolve', count: 8, samples: ['convey.earth', 'nicetomap.com', '00.f.net', 'blog.huyage.dev'] }),
+    'DNS não resolve (×8) — convey.earth, nicetomap.com, 00.f.net +1',
+  );
+  assert.equal(eventDetail({ detail: 'fonte' }), 'fonte', 'sem amostras e sem rajada');
+  assert.equal(
+    eventDetail({ detail: 'SSL morto', samples: ['a.dev'] }),
+    'SSL morto — a.dev',
+    'amostra única sem +N',
+  );
 });

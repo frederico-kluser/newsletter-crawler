@@ -9,7 +9,7 @@ import { stmts } from './db.js';
 import { fetchSmart } from './fetch.js';
 import {
   extractArticleAsync, capHtml, htmlBlockText, ensurePlainText,
-  applyJunkSpans, prunePageFrame, isGithubUrl, isGithubRepoRoot, isBlockedPage,
+  applyJunkSpans, prunePageFrame, isGithubUrl, isGithubRepoRoot, isBlockedPage, isErrorPage,
   githubLatestReleaseText, looksLikeReleaseNotes, fallbackTitle,
 } from './clean.js';
 import { getCachedSelector, validateContentSelector } from './selectors.js';
@@ -51,21 +51,8 @@ export function isShrinkRejected(currentLen, nextLen, ratio = REEXTRACT_MIN_KEEP
   return next < cur * ratio;
 }
 
-// Réplica da guarda do crawl (crawl.js isErrorPage — função privada daquele módulo): o
-// reextract é o ÚNICO outro caminho que sobrescreve conteúdo salvo, então aplica a MESMA
-// detecção. Página de erro (404/500/parqueada) vem com 200 e corpo grande — o título
-// extraído é o sinal (o título SALVO do agregador não carrega erro).
-function isErrorPage(title, content) {
-  const t = (title || '').toLowerCase().trim();
-  if (/^(404|403|500|502|503)(\s|-|$)/.test(t)) return true;
-  if (/^not found$/i.test(t)) return true;
-  if (/^(page|página)\s+not\s+found/i.test(t)) return true;
-  if (/^(error|erro)\b/i.test(t) && (content || '').length < 200) return true;
-  const c = (content || '').toLowerCase().trim();
-  if (c.length < 100 && /\b(not found|404|403|500|error|erro)\b/i.test(c)) return true;
-  return false;
-}
-
+// isErrorPage: regra ÚNICA em parse-core.js (a antiga réplica local foi removida — este
+// caminho sobrescreve conteúdo salvo e tem de aplicar a MESMA detecção do crawl).
 /**
  * Guarda JSON do reextract (captura 2026-08-14 — react-dropzone: o site serve um JSON
  * estruturado e a extração o salvou como texto). Conteúdo re-extraído que É JSON nunca é

@@ -188,10 +188,18 @@ const EN_MARKERS = new Set(
 /**
  * O texto LÊ-SE como português? Heurística por palavras-marca (PT × EN), LENIENTE com textos
  * curtos/neutros (menos de 3 marcas = true; indecidível não reprova). Para o guarda de idioma do
- * summarize e a varredura de reparação — nunca lança.
+ * summarize e a varredura de reparação — nunca lança. Código/identificadores técnicos NÃO contam
+ * p/ o idioma: PRs de Rust/Clippy trazem texto PT cheio de identificadores EN (`manual_is_variant_and`,
+ * `map_or`, `for _ in 0..n`) e o guarda marcava resumos PERFEITOS como "fora do PT-BR" (9 fichas
+ * presas por isto, medido 2026-10-15) — spans de código e identificadores saem antes da contagem.
  */
 export function looksPortuguese(text) {
-  const words = String(text ?? '').toLowerCase().match(/[a-zà-ÿ']+/g) || [];
+  const semCodigo = String(text ?? '')
+    .replace(/`[^`\n]{1,200}`/g, ' ') // spans de código em backticks
+    .replace(/\b[A-Za-z_][A-Za-z0-9_]*(?:::[A-Za-z_][A-Za-z0-9_]*)+/g, ' ') // caminhos Rust/C++ (From::from)
+    .replace(/\b[A-Za-z]+(?:_[A-Za-z0-9]+)+\b/g, ' ') // snake_case (identificador)
+    .replace(/\b[a-z]+[A-Z][A-Za-z0-9]*\b/g, ' '); // camelCase (identificador)
+  const words = semCodigo.toLowerCase().match(/[a-zà-ÿ']+/g) || [];
   const marked = words.filter((w) => PT_MARKERS.has(w) || EN_MARKERS.has(w));
   if (marked.length < 3) return true; // curto/neutro: indecidível => não reprova
   const pt = words.filter((w) => PT_MARKERS.has(w)).length;
@@ -231,6 +239,65 @@ export function stripDisplayJunk(text) {
   });
   s = s.replace(/\u0000(\d+)\u0000/g, (m, i) => codeSpans[Number(i)]);
   return s.replace(/\s+/g, ' ').trim();
+}
+
+/**
+ * O texto é uma RECUSA/meta-texto sobre a TAREFA em vez de conteúdo? Os modelos de extração e de
+ * resumo escrevem desculpas quando lhes chega página vazia/interstitial/sem corpo ("Artigo não
+ * fornecido", "Não foi possível extrair o conteúdo porque o texto do artigo não foi fornecido.",
+ * "…é uma mensagem de verificação de página web") — e elas JÁ viveram como `content`/`title_pt`/
+ * `summary_pt` no acervo (medido 2026-10-15: 259 fichas). REGRA ÚNICA do runtime: os guards do
+ * crawl/summarize e o script de reparação usam ESTA função, nunca uma regex paralela.
+ * Olha para o COMEÇO do texto (uma recusa é o texto todo; um resumo legítimo só mencionaria
+ * "não fornecido" pelo meio). Duas portas: frases-fechadas de recusa OU sujeito+negação com
+ * menção do que FALTA (o triplo crivo que impede "O resumo não pode ser produzido sem colaboração
+ * dos editores" — notícia legítima — casar). Nunca lança.
+ */
+const REFUSAL_STANDALONE = [
+  // forma fechada: "<Erro:> <Nenhum> artigo [não] [foi] fornecido[. | para …]" — o verbo da falta
+  // logo após o sujeito. O lookahead impede a construção NOMINAL legítima "O artigo fornecido
+  // PELO autor foi bem recebido" (o que vem depois distingue: recusa segue com fim/para/por favor).
+  '^\\W*(erro\\s*[:\\u2014-]\\s*)?((nenhum|nenhuma|o|um|uma|este|esta)\\s+)?' +
+    '(artigo|conte[uú]do|texto|resumo)(\\s+\\S+){0,2}\\s+(n[aã]o\\s+)?(foi\\s+)?fornecid' +
+    '\\w*\\b(?!\\s+(pelo|pela|pelo menos|por (um|uma|o|a|n[óo]s)))',
+  // "Não foi fornecido o artigo para tradução…" — a negação vem ANTES do objeto (objeto exigido:
+  // uma notícia "Não foi fornecido um parecer sobre o caso" NÃO casa)
+  '^\\W*n[aã]o (foi )?fornecid\\w*\\s+((o|um|o pr[oó]prio|a)\\s+)?(artigo|conte[uú]do|texto|resumo|tradu[cç][aã]o)',
+  // "Não recebi/tenho o artigo…" — pedido de material
+  '^\\W*n[aã]o (recebi|tenho|encontrei|possuo)\\s+((o|um|o pr[oó]prio)\\s+)?(artigo|conte[uú]do|texto|resumo)',
+  'n[aã]o (foi poss[ií]vel|[ée] poss[ií]vel)\\s*(gerar|realizar|produzir|extrair|traduzir|resumir)' +
+    '\\s*(\\S+\\s+){0,2}(resumo|t[ií]tulo|tradu[cç][aã]o|conte[uú]do)',
+  // "…, por favor, envie/insira/cole o texto [do artigo]" (em QUALQUER posição — pedido de material
+  // com objeto exigido para "por favor, envie o relatório à direção" (notícia) não casar)
+  'por favor,?\\s*(envie|insira|forne[cç]a|adicione|informe|cole)\\s+(\\S+\\s+){0,3}(texto|artigo|conte[uú]do|resumo)',
+  '^\\W*please\\s*(provide|send|paste|enter|supply)',
+  '^\\W*(the )?(article|text|content|summary)(\\s+\\S+){0,2}\\s+(was |is )?(not (provided|supplied|available|included)|(was |is )?missing)',
+  '^\\W*as an ai\\b',
+  'mensagem de verifica[cç][aã]o',
+].join('|');
+// Porta 2: sujeito (artigo/conteúdo/texto/resumo) + negação ESPECÍFICA de recusa + menção do que
+// falta/pedido. A negação é exigida completa ("não é um artigo", não "não é") para "O artigo
+// apresenta uma lista não exaustiva…" não casar.
+const REFUSAL_SUBJECT =
+  '^\\W*(erro\\s*[:\\u2014-]\\s*)?((nenhum|nenhuma|um|uma|o|a|este|esta|o pr[oó]prio)\\s+)?' +
+  '(artigo|conte[uú]do|texto|resumo)(\\s+\\S+){0,4}\\s+';
+const REFUSAL_CLAIM =
+  '(n[aã]o (foi )?fornecid|n[aã]o (foi )?enviad|' +
+  'n[aã]o (pode|p[oô]de|foi poss[ií]vel) ser (produzid|gerad|exibid|realizad|traduzid|resumid|acessad|obtid|lido|carregad)|' +
+  'n[aã]o apresenta um artigo|n[aã]o cont[eé]m um artigo|n[aã]o [ée] um artigo|est[aá] (em falta|indispon[ií]vel))';
+const REFUSAL_MISSING =
+  '(fornecid|enviad|em falta|ausente|vazi|indispon|dispon[ií]vel|sem (conte[uú]do|texto|artigo)|' +
+  'por favor|verifica[cç][aã]o|erro[s]?\\W{0,3}(4\\d\\d|5\\d\\d)|p[aá]gina (inacess[ií]vel|indispon[ií]vel))';
+const REFUSAL_RE_STANDALONE = new RegExp(REFUSAL_STANDALONE, 'i');
+const REFUSAL_RE_SUBJECT = new RegExp(REFUSAL_SUBJECT, 'i');
+const REFUSAL_RE_CLAIM = new RegExp(REFUSAL_CLAIM, 'i');
+const REFUSAL_RE_MISSING = new RegExp(REFUSAL_MISSING, 'i');
+
+export function isRefusalText(text) {
+  const head = String(text ?? '').replace(/\s+/g, ' ').trim().slice(0, 200);
+  if (!head) return false;
+  if (REFUSAL_RE_STANDALONE.test(head)) return true;
+  return REFUSAL_RE_SUBJECT.test(head) && REFUSAL_RE_CLAIM.test(head) && REFUSAL_RE_MISSING.test(head);
 }
 
 const ts = () => new Date().toISOString();

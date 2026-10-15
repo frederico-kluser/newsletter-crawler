@@ -143,3 +143,38 @@ As entradas seguintes consolidam decisões grandes já documentadas no `AGENTS.m
 - **Lição 2:** no TUI, erros TRATADOS não podem passar pelo `errorLog`: o sink transforma cada linha
   `error` em marco de feed, então a apresentação (curado × vermelho) decide-se no dispatch, com
   `emitRunEvent` + `log`, não no render.
+
+---
+
+## 2026-10-15 — "Artigo não fornecido": o `+` em falta que truncava o prompt do resumo
+
+- **Contexto:** o acervo tinha 324 fichas com desculpas dos modelos onde devia haver leitura —
+  `title_pt` "Artigo não fornecido"/"Nenhum artigo fornecido" (122), `summary_pt` "Não foi possível
+  gerar o resumo porque o artigo não foi fornecido…" (~70) e `content` com recusas de extração /
+  páginas "403 ERROR" / blobs JSON (87). O utilizador: "arrume TODOS e impeça que isso aconteça".
+- **Bug RAIZ (o achado):** o prompt do `summarizeArticle` (src/llm.js) tinha um `+` em falta no fim
+  de uma linha da cadeia de strings (a bullet "Ignore artefactos de EXTRAÇÃO", do PR #8). JS aceita
+  `'a'\n'b'` como DOIS statements — a const fica com metade da cadeia e o resto é uma expressão
+  pendurada que o runtime descarta **em silêncio**. Resultado: o modelo recebia as INSTRUÇÕES SEM
+  O ARTIGO e respondia naturalmente "Artigo não fornecido" — que era SALVA (a recusa é PT-BR bem
+  escrita, o guarda de idioma deixava passar). Todo o resumo desde 2026-10-10 foi gerado assim.
+- **Correções:** (a) `+` restaurado + teste de regressão "o prompt leva o ARTIGO INTEIRO"; (b) guarda
+  de RECUSA sempre ativo (`isRefusalText` em util.js — regra única usada pelo summarize, pelo crawl
+  e pelo repair; sujeito+negação+menção-do-que-falta p/ "O resumo não pode ser produzido sem
+  colaboração dos editores" (notícia) não casar) — re-amostra e, persistindo, lança (ficha fica NULL,
+  autocorretivo); (c) campos VAZIOS ("" title_pt/summary_pt) também rejeitados; (d) prompt do resumo
+  ganha o BLURB do agregador (itens sem corpo resumem do que existe, nunca "artigo em falta");
+  (e) `isErrorPage` consolidado em parse-core (réplicas divergentes em crawl/reextract removidas) e
+  estendido p/ corpos grandes ("403 ERROR / Request blocked" escapava da regra de <100 chars);
+  (f) `isBlockedPage` apertado ("just a moment" solto marcava artigo REAL como interstitial — #9998).
+- **Reparação:** `scripts/repair-placeholder-text.mjs` (detecta com os MESMOS helpers do runtime):
+  324 fichas — `content` lixo → NULL + `needs_enrich=1` (a próxima run re-enriquece; sem corpo real
+  fica no blurb) e camada de leitura → NULL → `finish --include-legacy` re-resumiu tudo
+  (19 353/19 353, US$ 0,15).
+- **Lição 1 (a cara):** uma cadeia de concatenação de strings multilinha **sem `+` no fim da linha**
+  não é erro de sintaxe — é TRUNCAMENTO silencioso (o resto vira statement pendurado). Um assert
+  que verifica o prompt INTEIRO enviado é o único travão.
+- **Lição 2:** guarda de idioma não apanha recusa (é PT) e confunde código com inglês: PRs de Rust
+  traziam resumos PT perfeitos rejeitados porque `manual_is_variant_and`/`From::from` tokenizavam
+  como palavras EN — `looksPortuguese` passou a ignorar spans de código, snake_case, camelCase e
+  caminhos `X::y`.

@@ -6,7 +6,7 @@ import {
   pruneForLLM, extractArticleAsync, fallbackTitle, readableLinksAsync, linksInHtml, isBlockedPage,
   extractPublishedDate, cpuParse, capHtml, applyJunkSpans, ensurePlainText, htmlToMarkdown,
   htmlBlockText, prunePageFrame, detectTruncatedEnd, stripTrailingTrigger, githubReleaseText,
-  isGithubUrl, looksLikeJson,
+  isGithubUrl, looksLikeJson, isErrorPage,
 } from './clean.js';
 import {
   getCachedSelector, putSelector, validateLinkSelector, applyLinkSelector,
@@ -26,6 +26,7 @@ import { isSubstack, substackArchive } from './substack.js';
 import { isRundown, rundownArchive } from './therundown.js';
 import {
   normalizeUrl, isPlausibleUrl, sha256, domainSig, hostOf, parseDate, clampFutureDate, log, warn, errorLog, debug,
+  isRefusalText,
 } from './util.js';
 import {
   HAS_LLM, RESPECT_ROBOTS, MAX_CRAWL_DEPTH, ROUNDUP_MIN_LINKS, providerInfo,
@@ -633,21 +634,8 @@ export function keepAggregatorVersion(row, ev, reason) {
   return { verifyUrl: row.url };
 }
 
-// Descarta páginas de erro (404, 500, etc.): o Playwright renderiza a página de erro e o
-// título/conteúdo extraídos são a própria mensagem — nunca um artigo real.
-function isErrorPage(title, content) {
-  const t = (title || '').toLowerCase().trim();
-  // Títulos que indicam página de erro
-  if (/^(404|403|500|502|503)(\s|-|$)/.test(t)) return true;
-  if (/^not found$/i.test(t)) return true;
-  if (/^(page|página)\s+not\s+found/i.test(t)) return true;
-  if (/^(error|erro)\b/i.test(t) && (content || '').length < 200) return true;
-  // Conteúdo muito curto com palavras de erro
-  const c = (content || '').toLowerCase().trim();
-  if (c.length < 100 && /\b(not found|404|403|500|error|erro)\b/i.test(c)) return true;
-  return false;
-}
-
+// isErrorPage (página de erro 404/500/parqueada) vive em parse-core.js — regra ÚNICA
+// partilhada com o reextract e com scripts/repair-placeholder-text.mjs.
 async function processArticle(job, source, opts) {
   const url = job.url;
   const depth = job.depth ?? 0;
@@ -823,6 +811,18 @@ async function processArticle(job, source, opts) {
     if (enriching) return keepAggregatorVersion(enriching, ev, 'json-page');
     warn(`conteúdo JSON ignorado (página de dados, não artigo): ${url}`);
     logEvent({ ...ev, stage: 'article', status: 'skip', detail: { reason: 'json-page' } });
+    return;
+  }
+
+  // Recusa/meta-texto no lugar do corpo ("Não foi possível extrair o conteúdo porque o texto do
+  // artigo não foi fornecido.", "…é uma mensagem de verificação de página web"): é a DESCULPA do
+  // extrator sobre a tarefa, nunca conteúdo — guardada como `content`, virava "artigo" (medido
+  // 2026-10-15: 252 fichas com desculpas em content/title_pt/summary_pt). Item curado mantém o
+  // blurb; alvo avulso é descartado. REGRA ÚNICA: isRefusalText (src/util.js).
+  if (isRefusalText(content)) {
+    if (enriching) return keepAggregatorVersion(enriching, ev, 'refusal-text');
+    warn(`meta-texto de recusa ignorado (sem artigo real): ${url}`);
+    logEvent({ ...ev, stage: 'article', status: 'skip', detail: { reason: 'refusal-text' } });
     return;
   }
 

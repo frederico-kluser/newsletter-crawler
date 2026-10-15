@@ -1,14 +1,14 @@
 {
  "schemaVersion": 1,
- "generatedAt": "2026-10-15T04:11:28.515Z",
+ "generatedAt": "2026-10-15T11:46:56.558Z",
  "totals": {
   "articles": 19353,
   "summaries": 19353,
   "classified": 19353
  },
  "cost": {
-  "totalUsd": 23.537049657373,
-  "totalCalls": 24893
+  "totalUsd": 23.668063007373,
+  "totalCalls": 25313
  },
  "sources": [
   {
@@ -4658,11 +4658,11 @@
   {
    "file": "contents.part0.json",
    "from": 1,
-   "to": 9330
+   "to": 9333
   },
   {
    "file": "contents.part1.json",
-   "from": 9331,
+   "from": 9334,
    "to": 19853
   }
  ]

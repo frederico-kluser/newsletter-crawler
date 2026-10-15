@@ -646,17 +646,19 @@ export const stmts = {
   ),
 
   // resumos PT-BR (title_pt/summary_pt; LIMIT -1 = sem limite, como em classify). Com piso legado.
+  // `blurb` entra no SELECT: itens sem corpo são resumidos do título+blurb (não de "artigo em
+  // falta" — ver summarizeArticleRow).
   setSummary: db.prepare(`UPDATE articles SET title_pt = @title_pt, summary_pt = @summary_pt WHERE id = @id`),
   listArticlesNeedingSummary: sweepStmt(
-    `SELECT id, url, title, content FROM articles
+    `SELECT id, url, title, content, blurb FROM articles
       WHERE summary_pt IS NULL AND ${LEGACY_FLOOR} ORDER BY id LIMIT @lim`,
   ),
   listArticlesNeedingSummaryForRun: sweepStmt(
-    `SELECT id, url, title, content FROM articles
+    `SELECT id, url, title, content, blurb FROM articles
       WHERE summary_pt IS NULL AND run_id = @runId AND ${LEGACY_FLOOR} ORDER BY id LIMIT @lim`,
   ),
   listArticlesForResummarize: sweepStmt(
-    `SELECT id, url, title, content FROM articles WHERE ${LEGACY_FLOOR} ORDER BY id LIMIT @lim`,
+    `SELECT id, url, title, content, blurb FROM articles WHERE ${LEGACY_FLOOR} ORDER BY id LIMIT @lim`,
   ),
   countSummaries: db.prepare(`SELECT COUNT(*) c FROM articles WHERE summary_pt IS NOT NULL`),
 

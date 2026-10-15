@@ -324,7 +324,7 @@ test('etapas do pipeline com provider deepseek: modelo DIRETO no body + response
     verifyRecordLLM: { verdict: 'ok', problems: [] },
     deriveDateSelector: { date_selector: '.date', date_attribute: 'datetime', date_regex: null, confidence: 0.7 },
     classifyFacet: { tags: ['node'], uncovered: [], confidence: 1 },
-    summarizeArticle: { title_pt: 'T', summary_pt: 'S' },
+    summarizeArticle: { title_pt: 'Título em PT-BR', summary_pt: 'Resumo legível em português sobre o artigo em questão, com os pontos principais.' },
     judgeRelevance: { relation: 'direct', kind: 'news' },
     judgeRelevanceBatch: { results: [{ id: 1, relation: 'direct', kind: 'news' }] },
     compileQuerySpec: { must_have: ['a'], nice_to_have: [], query_en: 'a', terms: ['a'] },

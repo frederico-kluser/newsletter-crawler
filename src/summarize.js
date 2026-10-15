@@ -18,6 +18,10 @@ export async function summarizeArticleRow(a) {
   const { title_pt, summary_pt } = await summarizeArticle({
     title: a.title,
     content: String(a.content || '').slice(0, SUMMARIZE_MAX_CHARS),
+    // Blurb do agregador: o resumo de itens sem corpo (kept-blurb/extração falhada) sai do que
+    // EXISTE (título + blurb) em vez de pedir o artigo ao modelo — que respondia "Artigo não
+    // fornecido" e era isso que ficava na camada de leitura.
+    blurb: a.blurb || '',
   });
   stmts.setSummary.run({ id: a.id, title_pt, summary_pt });
   return { title_pt, summary_pt };

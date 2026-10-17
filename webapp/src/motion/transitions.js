@@ -1,16 +1,42 @@
-// Vocabulário ÚNICO de springs/fades do app — os componentes importam daqui, nunca definem
-// transição inline solta (consistência de física = identidade de movimento).
-// visualDuration/bounce (Motion): duração percebida até "assentar visualmente" + quique.
+// Vocabulário ÚNICO de springs/fades do app — sincronizado com o @motion/ui-theme (motion.theme.js).
+import motionTheme from '../motion.theme.js';
+
+const { snap, ui, gentle, lively, ambient } = motionTheme.transitions;
+
 export const springs = {
-  /** chips, segmented, botões — resposta imediata, quique mínimo */
-  snappy: { type: 'spring', visualDuration: 0.25, bounce: 0.15 },
-  /** cards, layout FLIP do grid — presença suave */
-  gentle: { type: 'spring', visualDuration: 0.4, bounce: 0.2 },
-  /** sheet de preview, drawer de filtros — massa maior, sem elasticidade excessiva */
-  sheet: { type: 'spring', visualDuration: 0.45, bounce: 0.12 },
+  /** chips, segmented, botões — resposta imediata (token snap) */
+  snappy: {
+    type: 'spring',
+    stiffness: snap.stiffness,
+    damping: snap.damping,
+  },
+  /** cards, reveals, layout FLIP do grid — presença fluida (token ui) */
+  gentle: {
+    type: 'spring',
+    stiffness: ui.stiffness,
+    damping: ui.damping,
+  },
+  /** sheet de preview, drawer de filtros — superfície ampla (token gentle) */
+  sheet: {
+    type: 'spring',
+    stiffness: gentle.stiffness,
+    damping: gentle.damping,
+  },
+  /** contadores, celebrações, badges — elástico controlado (token lively) */
+  lively: {
+    type: 'spring',
+    stiffness: lively.stiffness,
+    damping: lively.damping,
+  },
+  /** pulsos de fundo contínuos (token ambient) */
+  ambient: {
+    type: 'spring',
+    stiffness: ambient.stiffness,
+    damping: ambient.damping,
+  },
 };
 
 export const fades = {
-  fast: { duration: 0.15, ease: 'easeOut' },
-  base: { duration: 0.25, ease: 'easeOut' },
+  fast: { duration: snap.duration, ease: snap.ease },
+  base: { duration: ui.duration, ease: ui.ease },
 };

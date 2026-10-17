@@ -1,0 +1,25 @@
+{
+  "$schema": "https://ui.shadcn.com/schema.json",
+  "style": "nova",
+  "rsc": false,
+  "tsx": false,
+  "tailwind": {
+    "config": "",
+    "css": "src/styles/tokens.css",
+    "baseColor": "zinc",
+    "cssVariables": true
+  },
+  "aliases": {
+    "components": "@/components",
+    "utils": "@/lib",
+    "ui": "@/components/motion-ui"
+  },
+  "registries": {
+    "@motion": {
+      "url": "https://api.motion.dev/ui/registry/{name}.json",
+      "headers": {
+        "Authorization": "Bearer ${MOTION_TOKEN}"
+      }
+    }
+  }
+}

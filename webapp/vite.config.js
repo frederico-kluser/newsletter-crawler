@@ -5,9 +5,15 @@ import react from '@vitejs/plugin-react';
 // Duas páginas: o buscador público (/) e o /admin (backend Vercel: análise JEV × webhook).
 // O /admin é estático — a proteção é no nível da API (cookie de sessão assinado).
 export default defineConfig({
+  resolve: {
+    alias: {
+      '@': resolve(import.meta.dirname, './src'),
+    },
+  },
   server: {
     allowedHosts: true,
   },
+
   plugins: [react()],
   build: {
     rollupOptions: {

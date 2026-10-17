@@ -1,16 +1,13 @@
 import { useEffect, useState } from 'react';
-import { motion, useReducedMotion } from 'motion/react';
-import { springs } from '../motion/transitions.js';
+import { useReducedMotion } from 'motion/react';
+import { ProgressBar } from '@/components/motion-ui/progress-bar';
 import AnimatedCount from './AnimatedCount.jsx';
 import { fmtEta } from '../strings.js';
 import { useStrings } from '../i18n.jsx';
 
 /**
- * Loader da busca IA: barra DETERMINÍSTICA (scaleX por ARTIGOS concluídos — transform, nunca
- * width) + brilho varrendo em CSS (off sob reduced-motion) + linha de métricas ao vivo
- * (X/Y artigos, % , relevantes, custo real, ETA, "não analisados") + Cancelar que aborta.
- * O progresso é nível-artigo nos DOIS modos (soft e profunda), então "quanto já foi processado"
- * é sempre honesto. ETA = elapsed/done · (total-done), recalculada a cada tick + 1 timer de 1s.
+ * Loader da busca IA sobre o primitivo ProgressBar do Motion+ UI:
+ * barra determinística (scaleX por artigos concluídos) + brilho varrendo + telemetria ao vivo.
  */
 export default function AiProgress({ progress, deep, startedAt, onCancel, resuming = false, baseDone = 0 }) {
   const STR = useStrings();
@@ -20,33 +17,31 @@ export default function AiProgress({ progress, deep, startedAt, onCancel, resumi
   const frac = total > 0 ? Math.min(1, p.done / total) : 0;
   const pct = Math.round(frac * 100);
 
-  // relógio de 1s só p/ a contagem regressiva do ETA fluir entre os ticks de progresso.
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(id);
   }, []);
   const elapsed = startedAt ? Math.max(0, now - startedAt) : 0;
-  // ETA mede só o trabalho DESTA sessão: na retomada, `done` já vem semeado (baseDone), então o
-  // ritmo real = itens processados desde o start atual / elapsed atual.
   const sessionDone = Math.max(0, p.done - baseDone);
   const sessionTotal = Math.max(0, total - baseDone);
   const etaSecs =
     sessionDone > 0 && sessionTotal > 0 && sessionDone < sessionTotal && elapsed > 0
-      ? (elapsed / sessionDone) * (sessionTotal - sessionDone) / 1000
+      ? ((elapsed / sessionDone) * (sessionTotal - sessionDone)) / 1000
       : null;
 
   return (
     <div className="ai-progress" role="status" aria-live="polite">
       <div className="ai-progress-bar-row">
-        <div className="ai-progress-track">
-          <motion.div
-            className="ai-progress-fill"
-            initial={false}
-            animate={{ scaleX: Math.max(frac, 0.02) }}
-            transition={springs.gentle}
+        <div className="ai-progress-track-wrap">
+          <ProgressBar
+            value={Math.max(frac, 0.02)}
+            reveal={true}
+            highlight={true}
+            shine={!reduced}
+            progressbar={true}
+            aria-label={STR.searching}
           />
-          {!reduced && <div className="ai-progress-shine" aria-hidden="true" />}
         </div>
         <span className="ai-progress-pct">
           <AnimatedCount value={pct} />%

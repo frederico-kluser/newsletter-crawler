@@ -122,6 +122,7 @@ function repoComStub(stub) {
   g('init', '-q', '-b', 'main');
   g('config', 'user.email', 'teste@exemplo.invalido');
   g('config', 'user.name', 'Teste');
+  g('config', 'core.hooksPath', '/dev/null'); // fixture: gate global de commits não pode pegar
   g('config', 'commit.gpgsign', 'false');
   mkdirSync(path.join(dir, 'src'), { recursive: true });
   writeFileSync(path.join(dir, 'src', 'index.js'), stub);

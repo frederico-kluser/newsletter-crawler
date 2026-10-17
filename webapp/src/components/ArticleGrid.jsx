@@ -11,7 +11,12 @@ import { useStrings } from '../i18n.jsx';
  */
 export default function ArticleGrid({ items, toolTypes, onOpen, visible, relationById = null }) {
   const STR = useStrings();
-  const { count, hasMore, sentinelRef, loadMore } = visible;
+  // `visible` é o objeto do useVisibleCount (browse) OU um inteiro (modo IA: tudo visível).
+  const paging = typeof visible === 'object' && visible !== null ? visible : null;
+  const count = paging ? paging.count : items.length;
+  const hasMore = paging ? paging.hasMore : false;
+  const sentinelRef = paging ? paging.sentinelRef : null;
+  const loadMore = paging ? paging.loadMore : () => {};
   const firstLoad = useRef(true);
   useEffect(() => {
     firstLoad.current = false;

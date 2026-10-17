@@ -50,6 +50,7 @@ function repoDeTeste(headArticles) {
   g('init', '-q', '-b', 'main');
   g('config', 'user.email', 'teste@exemplo.invalido');
   g('config', 'user.name', 'Teste');
+  g('config', 'core.hooksPath', '/dev/null'); // fixture: gate global de commits não pode pegar
   g('config', 'commit.gpgsign', 'false');
 
   writeFileSync(path.join(repo, 'package.json'), '{ "name": "fixture", "type": "module" }\n');

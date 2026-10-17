@@ -45,6 +45,7 @@ function repoComAcervo(articles) {
   git(dir, ['init', '-q', '-b', 'main']);
   git(dir, ['config', 'user.email', 'guard@test.local']);
   git(dir, ['config', 'user.name', 'Guard Test']);
+  git(dir, ['config', 'core.hooksPath', '/dev/null']); // fixture: gate global de commits não pode pegar
   const meta = { schemaVersion: 1, generatedAt: '2026-08-24T00:00:00.000Z', totals: { articles } };
   writeFileSync(path.join(dir, 'meta.json'), `${JSON.stringify(meta, null, 1)}\n`);
   writeFileSync(

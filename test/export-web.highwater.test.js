@@ -36,6 +36,7 @@ function repoComHistorico(totais) {
   git(dir, ['init', '-q', '-b', 'main']);
   git(dir, ['config', 'user.email', 'guard@test.local']);
   git(dir, ['config', 'user.name', 'Guard Test']);
+  git(dir, ['config', 'core.hooksPath', '/dev/null']); // fixture: gate global de commits não pode pegar
   totais.forEach((n, i) => {
     // generatedAt distinto por commit: dois deploys com o MESMO total ainda são dois commits (sem
     // isso o `git commit` recusaria a árvore idêntica e o histórico do teste seria mais curto).

@@ -57,7 +57,14 @@ const shots = [
 for (const s of shots) {
   const ctx = await browser.newContext({ viewport: { width: s.width, height: s.height } });
   const page = await ctx.newPage();
-  await page.addInitScript((theme) => localStorage.setItem('nc-theme', theme), s.theme);
+  // nc-tutorial-seen ANTES do goto: o modal de 1ª visita intercepta todo clique (gotcha documentada)
+  await page.addInitScript(
+    (theme) => {
+      localStorage.setItem('nc-theme', theme);
+      localStorage.setItem('nc-tutorial-seen', '1');
+    },
+    s.theme,
+  );
   await page.goto(BASE, { waitUntil: 'networkidle' });
   await page.waitForSelector('.card', { timeout: 15000 });
   await page.waitForTimeout(900); // stagger de entrada assentar
@@ -70,7 +77,7 @@ for (const s of shots) {
     await page.screenshot({ path: path.join(outDir, 'desktop-dark-sheet.png') });
   }
   if (s.name === 'mobile-dark') {
-    await page.click('.fab');
+    await page.click('.filter-btn');
     await page.waitForSelector('.drawer', { timeout: 15000 });
     await page.waitForTimeout(700);
     await page.screenshot({ path: path.join(outDir, 'mobile-dark-drawer.png') });

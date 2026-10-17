@@ -78,6 +78,7 @@ function makeGitRepo() {
   git(dir, 'init', '-q');
   git(dir, 'config', 'user.email', 'test@example.com');
   git(dir, 'config', 'user.name', 'Test');
+  git(dir, 'config', 'core.hooksPath', '/dev/null'); // fixture: gate global de commits não pode pegar
   writeSnapshotFiles(dir);
   git(dir, 'add', '-A');
   git(dir, 'commit', '-qm', 'snapshot inicial');

@@ -83,3 +83,10 @@ export const setLocale = (l) => set('nc-locale', l);
 // Tutorial de introdução: mostra sozinho só na 1ª visita; o botão de ajuda reabre sempre.
 export const getTutorialSeen = () => get('nc-tutorial-seen') === '1';
 export const setTutorialSeen = () => set('nc-tutorial-seen', '1');
+
+// Estado de navegação (filtros + busca textual + paginação + posição do scroll): restaura onde
+// o usuário parou ao recarregar ou reabrir a página.
+export const getViewStateRaw = () => get('nc-view-state');
+export const setViewStateRaw = (v) => set('nc-view-state', v);
+export const clearViewState = () => del('nc-view-state');
+

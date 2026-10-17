@@ -3,22 +3,27 @@ import { useEffect, useRef, useState } from 'react';
 /**
  * Render INCREMENTAL da lista (24 por página): pré-requisito das animações — montar 600 cards
  * de uma vez mata o stagger e o layout FLIP. Sentinela com IntersectionObserver (rootMargin
- * 600px, mesmo padrão do web-ui do CLI) + loadMore explícito p/ acessibilidade.
- * `resetKey`: mudou filtro/busca, volta à 1ª página.
+ * 300px) + loadMore explícito p/ acessibilidade.
+ *
+ * `initialCount`: ao restaurar uma sessão com scroll profundo, já monta o número de páginas que
+ * estavam abertas antes do reload para que a altura do documento acomode o `window.scrollTo`.
+ * `resetKey`: mudou filtro/busca DEPOIS da montagem inicial, volta à 1ª página (`page`).
  */
-export function useVisibleCount(total, resetKey, page = 24) {
-  const [count, setCount] = useState(page);
+export function useVisibleCount(total, resetKey, page = 24, initialCount = page) {
+  const [count, setCount] = useState(() => Math.max(page, Number(initialCount) || page));
   const sentinelRef = useRef(null);
+  const prevResetKey = useRef(resetKey);
 
   useEffect(() => {
-    setCount(page);
+    if (prevResetKey.current !== resetKey) {
+      prevResetKey.current = resetKey;
+      setCount(page);
+    }
   }, [resetKey, page]);
 
   useEffect(() => {
     const el = sentinelRef.current;
     if (!el || count >= total) return undefined;
-    // rootMargin 300px = prefetch suave (carrega a próxima leva pouco antes do fim) sem estourar
-    // 2 páginas já no scroll 0 num viewport alto (o alvo é DOM inicial enxuto p/ o stagger/FLIP).
     const io = new IntersectionObserver(
       (entries) => {
         if (entries.some((e) => e.isIntersecting)) setCount((c) => Math.min(c + page, total));
@@ -30,9 +35,11 @@ export function useVisibleCount(total, resetKey, page = 24) {
   }, [count, total, page]);
 
   return {
-    count: Math.min(count, total),
+    count: total > 0 ? Math.min(count, total) : count,
+    rawCount: count,
     hasMore: count < total,
     sentinelRef,
-    loadMore: () => setCount((c) => Math.min(c + page, total)),
+    setCount,
+    loadMore: () => setCount((c) => Math.min(c + page, Math.max(total, page))),
   };
 }

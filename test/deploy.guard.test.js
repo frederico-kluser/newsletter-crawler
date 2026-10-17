@@ -431,6 +431,7 @@ function repoComSnapshot(prefixo) {
   g('init', '-q', '-b', 'main');
   g('config', 'user.email', 'teste@exemplo.invalido');
   g('config', 'user.name', 'Teste');
+  g('config', 'core.hooksPath', '/dev/null'); // fixture: gate global de commits não pode pegar
   g('config', 'commit.gpgsign', 'false');
   for (const rel of SNAPSHOT_FILES) {
     mkdirSync(path.join(repo, path.dirname(rel)), { recursive: true });
@@ -554,6 +555,7 @@ function repoE2E(n, stamp) {
   g('init', '-q', '-b', 'main');
   g('config', 'user.email', 'teste@exemplo.invalido');
   g('config', 'user.name', 'Teste');
+  g('config', 'core.hooksPath', '/dev/null'); // fixture: gate global de commits não pode pegar
   g('config', 'commit.gpgsign', 'false');
   escreveSnapshotE2E(repo, n, stamp);
   g('add', '-A');

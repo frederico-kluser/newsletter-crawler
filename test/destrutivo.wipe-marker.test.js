@@ -63,6 +63,7 @@ function buildRepo() {
   git(root, ['config', 'commit.gpgsign', 'false']);
   git(root, ['config', 'user.email', 'test@example.com']);
   git(root, ['config', 'user.name', 'test']);
+  git(root, ['config', 'core.hooksPath', '/dev/null']); // fixture: gate global de commits não pode pegar
 
   const dir = path.join(root, DATA);
   mkdirSync(dir, { recursive: true });

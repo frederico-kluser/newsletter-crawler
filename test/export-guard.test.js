@@ -55,6 +55,7 @@ function newRepo() {
   git(dir, ['init', '-q', '-b', 'main']);
   git(dir, ['config', 'user.email', 'guard@test.local']);
   git(dir, ['config', 'user.name', 'Guard Test']);
+  git(dir, ['config', 'core.hooksPath', '/dev/null']); // fixture: gate global de commits não pode pegar
   return dir;
 }
 

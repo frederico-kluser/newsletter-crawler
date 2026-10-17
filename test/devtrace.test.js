@@ -76,6 +76,12 @@ test('redige segredos e trunca o gigante em QUALQUER profundidade', () => {
 
 test('retenção: só os NC_LLM_DEV_KEEP traces mais recentes ficam', () => {
   const dir = path.join(process.env.NC_HOME, 'logs');
+  // HERMÉTICO: limpa os traces que os testes anteriores deixaram — com sobras, a ordem de NOME
+  // engolia os fakes e o teste passava por acaso (e falhava quando dois inits colidiam no mesmo
+  // milissegundo do `trace-<ts>-<pid>.jsonl`, comum em runner rápido de CI).
+  for (const f of readdirSync(dir).filter((x) => /^trace-.*\.jsonl$/.test(x))) {
+    rmSync(path.join(dir, f), { force: true });
+  }
   // 5 traces antigos FAKE (nomes carregam timestamp => ordem cronológica).
   for (let i = 0; i < 5; i += 1) {
     const f = path.join(dir, `trace-2020-01-0${i + 1}T00-00-00-000Z-1.jsonl`);
@@ -85,8 +91,10 @@ test('retenção: só os NC_LLM_DEV_KEEP traces mais recentes ficam', () => {
   process.env.NC_LLM_DEV_KEEP = '3';
   maybeInitDevTrace({ command: 'teste', argv: [] });
   const restantes = readdirSync(dir).filter((f) => /^trace-.*\.jsonl$/.test(f)).sort();
-  assert.equal(restantes.length, 3, 'poda manteve só 3 (os mais recentes: os fakes de 2020 saem)');
-  assert.ok(restantes.every((f) => !f.includes('2020-01-0')), 'os antigos foram apagados');
+  // o trace novo é criado ANTES da poda e entra na conta do KEEP: novo + 2 fake mais recentes.
+  assert.equal(restantes.length, 3, 'poda manteve só 3 (KEEP=3)');
+  assert.ok(restantes.some((f) => !f.includes('2020-')), 'o trace novo (mais recente) sobreviveu');
+  assert.ok(!restantes.some((f) => /2020-01-0[123]/.test(f)), 'os 3 fake mais antigos foram apagados');
   endDevTrace();
   delete process.env.NC_LLM_DEV;
   delete process.env.NC_LLM_DEV_KEEP;

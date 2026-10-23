@@ -12,6 +12,7 @@
     "newsletter-crawler": "src/index.js"
   },
   "scripts": {
+    "atualizar": "bash scripts/coletar-e-publicar.sh",
     "crawl": "node --env-file-if-exists=.env src/index.js crawl",
     "status": "node --env-file-if-exists=.env src/index.js status",
     "inspect": "node --env-file-if-exists=.env src/index.js inspect",

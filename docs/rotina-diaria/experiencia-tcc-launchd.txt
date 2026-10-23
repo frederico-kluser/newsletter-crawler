@@ -1,0 +1,52 @@
+EXPERIMENTO E1 — TCC × job de launchd × /Volumes/Ext2TB
+======================================================
+Máquina: Mac mini M1 "minim1" · macOS 27.0 (26A428) · 2026-10-23
+Método: LaunchDaemon temporário `com.nc.tccprobe` (UserName=minim1, RunAtLoad,
+one-shot) a executar um script de sondas com guarda de 8 s contra HANG.
+Job removido no fim (bootout + rm plist) sem resíduo.
+
+--- sondagem 1 (bash) ---
+=== 2026-10-23 09:58:44 uid=501 user=minim1 ===
+--- ls /Volumes/Ext2TB/Projects/newsletter-crawler/package.json ---
+-rw-r--r--@ 1 minim1  staff  2587 Oct 23 09:44 /Volumes/Ext2TB/Projects/newsletter-crawler/package.json
+exit=0
+--- head ~/.newsletter-crawler/sources.json ---
+{ "sources": [ { "name": "Node Weekly", ... } ]
+exit=0
+--- ls ~/Documents ---
+exit=1                      # TCC bloqueia Documents (como esperado)
+
+--- sondagem 2 (bash × node, leitura/escrita) ---
+=== 2026-10-23 09:59:35 uid=501 user=minim1 ===
+--- 1. bash read repo (Ext2TB) ---                 exit=0
+--- 2. bash WRITE Ext2TB/tmp ---                   exit=1
+--- 3. bash WRITE repo dir ---
+     .../newsletter-crawler/.nc-tcc-probe.tmp: Operation not permitted   exit=1
+--- 4. NODE read repo file ---                     HANG (>10 s; morto com kill -9)
+
+--- sondagem 3 (node isolado, com guarda) ---
+=== 2026-10-23 10:00:57 uid=501 user=minim1 ===
+--- NODE read repo file (Ext2TB) ---      HANG: morto após 10s (prompt TCC sem GUI)
+--- NODE readdir ~/.npm (symlink→Ext2TB) ---  HANG: morto após 10s
+--- NODE write Ext2TB/tmp (dir inexist.) ---  ENOENT (mkdir anterior falhou com EPERM)
+--- NODE read NC_HOME db ---               read ok   exit=0
+--- NODE write NC_HOME logs ---            write ok  exit=0
+--- bash write Ext2TB/tmp ---              No such file or directory (mkdir EPERM)
+
+--- sondagem 4 (escrita em dir existente) ---
+=== 2026-10-23 10:03:02 uid=501 ===
+--- NODE write /Volumes/Ext2TB/tmp/nc-tcc-n.txt (dir existe) ---  HANG: morto após 8s
+--- bash write /Volumes/Ext2TB/tmp/nc-tcc-b.txt (dir existe) ---  Operation not permitted  exit=1
+--- NODE stat ~/.npm (symlink→Ext2TB) ---                          lstat ok  exit=0
+
+CONCLUSÕES (medidas, não inferidas):
+1. bash, num job launchd (UserName=minim1): LÊ /Volumes/Ext2TB, mas ESCREVE com
+   "Operation not permitted"; ~/Documents bloqueado; NC_HOME (~/ .newsletter-crawler)
+   rw OK.
+2. node (binário de terceiros): HANGA no prompt de consentimento TCC sem GUI ao
+   LER ou ESCREVER no volume externo — não falha, PENDURA.
+3. Consequência: correr o crawler diretamente por launchd é inviável; a via adotada
+   (LaunchDaemon → ssh local → wrapper, a sessão SSH herda a FDA do
+   sshd-keygen-wrapper) funciona — provado em produção pela run #1 da rotina
+   (ver docs/rotina-diaria/dossie-pesquisa.md, E3).
+4. NC_HOME fora do volume externo não tem qualquer restrição.

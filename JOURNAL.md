@@ -9,7 +9,34 @@
 
 ---
 
-## 2026-10-11 — Coleta completa desde 2026-01-01 + o `max_tokens` que estrangulava o raciocínio
+## 2026-10-23 — Do agendamento ao comando único: `npm run atualizar` (coletar → base → deploy)
+
+- **Contexto:** pedido inicial = rotina agendada às 05:00 no Mac mini para buscar as notícias novas
+  desde 2026-01-01 de todas as newsletters. Pesquisa profunda (`--deep-research`, 8 investigadores +
+  6 verificadores adversariais + crítico, 78 fontes) e rotina construída/testada; a meio, o dono
+  mudou de ideias: **«não quero mais a rotina»** — quer um COMANDO ÚNICO que busca as notícias,
+  atualiza a base, faz deploy e só termina com o deploy concluído. A rotina agendada foi
+  desinstalada sem resíduos (job, plist, chave SSH e authorized_keys).
+- **Decisão (a que fica):** `npm run atualizar` (= `scripts/coletar-e-publicar.sh`): ① `crawl --since
+  2026-01-01` em todas as fontes (incremental — dedup por URL + cursor por fonte ⇒ só notícias
+  NOVAS, nunca overwrite; medido: 0 linhas antigas tocadas em +1 048 novas) → ② `finish` (drena
+  verify/classify/summarize) → ③ `deploy` (guard anti-encolhimento, PR+squash, polling até o site
+  servir o snapshot novo). O script só sai depois do deploy (`live` = exit 0; `timeout`/erro = exit
+  ≠ 0), com lock `mkdir`+PID, log em `NC_HOME/logs/coletar-e-publicar.log`, e envs `NC_SINCE` /
+  `NC_DEPLOY_TIMEOUT` (900 s).
+- **TCC medido (E1, `docs/rotina-diaria/experiencia-tcc-launchd.txt`):** num job de launchd direto,
+  `node` HANGA no prompt TCC sem GUI ao tocar em `/Volumes/Ext2TB` e `bash` escreve com
+  `Operation not permitted` — a via fiável para jobs é a sessão SSH local (FDA do
+  `sshd-keygen-wrapper`); para o comando manual (corre numa sessão interativa) isto não se aplica,
+  mas fica documentado para o futuro.
+- **Lição (a guarda que estava morta):** a rotina testada tinha uma guarda anti-dupla-execução que
+  NÃO funcionava — os `sed` esperavam o heartbeat em JSON compacto e o ficheiro é pretty-printado;
+  o teste ao vivo é que a apanhou (uma 2ª execução passou) e ainda revelou que um lock órfão
+  bloqueava 26 h (corrigido: PID morto ⇒ assumir já, padrão do `mac-kluser-web.sh`). Confiar numa
+  guarda sem a ver disparar (e não disparar) é confiar em nada.
+- **Dossiê da pesquisa:** `docs/rotina-diaria/dossie-pesquisa.md` (brief, FAQ Q1–Q8, verificação
+  adversarial, 78 fontes, experimentos E1–E3) — recomenda o LaunchDaemon+SSH para agendamento; a
+  decisão final do dono foi não agendar, mas a investigação sustenta o `deploy`/robustez aqui.
 
 - **Contexto:** pedido autónomo: correr TODOS os newsletters desde 2026-01-01 ignorando o já
   processado, com monitoramento em tempo real (trace `--llm-dev`) e "perante problema de código:

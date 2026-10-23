@@ -256,6 +256,39 @@ export function deployBranchName(now = new Date()) {
   return `deploy/data-${now.toISOString().slice(0, 19).replace(/[:.]/g, '-')}`;
 }
 
+/**
+ * Espera pelos checks de CI de um PR ANTES do merge: o ruleset da `main` exige o status check
+ * `tests-ok`, e sem esta espera o `gh pr merge` falha com
+ * 'Required status check "tests-ok" is expected' (medido: um PR com 5 s de vida ainda não tinha
+ * CI registado). Espera estruturada via `gh pr view --json statusCheckRollup` (o output textual
+ * de `gh pr checks` não é estável). Se o gh não der visibilidade (ex.: testes com gh falso), não
+ * espera nada — o merge decide; sem checks registados no PR desiste ao fim de `registerMs`.
+ */
+export async function waitForChecks(prRef, ghFn = gh, {
+  pollMs = 5000, registerMs = 90_000, waitMs = 15 * 60_000,
+} = {}) {
+  const TERMINAL = new Set(['SUCCESS', 'FAILURE', 'ERROR', 'EXPECTED', 'CANCELLED', 'SKIPPED',
+    'TIMED_OUT', 'ACTION_REQUIRED', 'NEUTRAL', 'STALE']);
+  const start = Date.now();
+  const deadline = start + waitMs;
+  for (;;) {
+    let rollup = null;
+    try {
+      const raw = ghFn(['pr', 'view', String(prRef), '--json', 'statusCheckRollup'], { allowFail: true });
+      if (raw != null) rollup = JSON.parse(raw).statusCheckRollup || [];
+    } catch { /* gh/JSON indisponível — sem o que verificar */ }
+    if (rollup == null) return null;                  // sem visibilidade: o merge decide
+    const pending = rollup.filter((c) => {
+      if (c.conclusion) return false;                 // check run com veredito
+      return !TERMINAL.has(String(c.state || '').toUpperCase());
+    });
+    if (rollup.length > 0 && pending.length === 0) return rollup;
+    if (rollup.length === 0 && Date.now() - start > registerMs) return rollup; // PR sem checks
+    if (Date.now() >= deadline) return rollup;        // teto: o merge fala por si
+    await new Promise((r) => { setTimeout(r, pollMs); });
+  }
+}
+
 // Conteúdo de um arquivo no HEAD (null se não existe lá — primeiro commit do snapshot).
 // `run` é o executor de git (o real, ou a costura de teste — ver runDeploy).
 function showHead(run, rel) {
@@ -611,6 +644,11 @@ export async function runDeploy(flags = {}, deps = {}) {
     ]);
     const prNum = String(prUrl || '').match(/\/pull\/(\d+)/)?.[1] ?? null;
     log(`PR aberto: ${prUrl || '(sem URL)'}`);
+    // O ruleset da `main` exige o status check `tests-ok` (CI): SEM esperar pelos checks o merge
+    // falha e o deploy abortava a meio (medido em 2026-10-23). Espera pelo rollup e só então
+    // faz o squash — o comando só regressa com o merge feito (ou com erro claro).
+    log('a aguardar os checks do CI (ruleset exige tests-ok)…');
+    await waitForChecks(prNum || deployBranch, runGh);
     runGh(prNum
       ? ['pr', 'merge', prNum, '--squash', '--delete-branch']
       : ['pr', 'merge', deployBranch, '--squash', '--delete-branch']);

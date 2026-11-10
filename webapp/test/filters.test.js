@@ -206,3 +206,32 @@ test('applyFilters: DESCARTADOS (junk) ficam FORA por padrão — showJunk e ver
   assert.deepEqual(ids(applyFilters(all, f({ showJunk: true }), [])), [ok.id, sus.id, junk.id], 'showJunk inclui');
   assert.deepEqual(ids(applyFilters(all, f({ verify: 'junk' }), [])), [junk.id], 'select junk mostra só eles');
 });
+
+test('applyFilters: favoritesOnly mostra SÓ os favoritados (Set ou array); desligado ignora o conjunto', () => {
+  const a1 = art();
+  const a2 = art();
+  const a3 = art();
+  const all = [a1, a2, a3];
+
+  // desligado: favoriteIds não é usado (nem existiria no escopo antigo — retrocompatível)
+  assert.deepEqual(ids(applyFilters(all, f(), [], new Set([a1.id]))), [a1.id, a2.id, a3.id]);
+  // ligado: interseção com o conjunto (aceita Set ou array, como chega do store)
+  assert.deepEqual(ids(applyFilters(all, f({ favoritesOnly: true }), [], new Set([a1.id, a3.id]))), [a1.id, a3.id]);
+  assert.deepEqual(ids(applyFilters(all, f({ favoritesOnly: true }), [], [a2.id])), [a2.id]);
+  // ligado sem conjunto = sem favoritos = vazio (não "mostra tudo")
+  assert.deepEqual(applyFilters(all, f({ favoritesOnly: true }), []), []);
+  // combina com os demais filtros (AND)
+  const a4 = art({ source_id: 2, verify_status: 'ok' });
+  assert.deepEqual(
+    ids(applyFilters([a1, a2, a4], f({ favoritesOnly: true, sourceIds: [2] }), [], new Set([a1.id, a4.id]))),
+    [a4.id],
+  );
+});
+
+test('countActiveFilters conta o filtro de favoritos', () => {
+  assert.equal(countActiveFilters(f({ from: '', favoritesOnly: true })), 1);
+  assert.equal(
+    countActiveFilters(f({ from: '2026-06-01', favoritesOnly: true, verify: 'ok' })),
+    3,
+  );
+});

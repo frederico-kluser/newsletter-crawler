@@ -22,6 +22,9 @@ function pillsOf(filters, meta, STR) {
   if (filters.verify) {
     pills.push({ key: 'verify', label: STR.VERIFY_LABEL[filters.verify] || filters.verify, clear: { type: 'set', key: 'verify', value: '' } });
   }
+  if (filters.favoritesOnly) {
+    pills.push({ key: 'favorites', label: STR.favoritesPill, clear: { type: 'set', key: 'favoritesOnly', value: false } });
+  }
   for (const [facet, tags] of Object.entries(filters.facets || {})) {
     for (const tag of tags) {
       pills.push({

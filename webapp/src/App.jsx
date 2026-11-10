@@ -23,9 +23,11 @@ import { EmptyState, ErrorState } from './components/States.jsx';
 import { useTheme } from './hooks/useTheme.js';
 import { useSnapshot } from './hooks/useSnapshot.js';
 import { useAiSearch } from './hooks/useAiSearch.js';
+import { useFavorites } from './hooks/useFavorites.js';
 import { useVisibleCount } from './hooks/useVisibleCount.js';
 import { useMediaQuery } from './hooks/useMediaQuery.js';
 import { useDebouncedValue } from './hooks/useDebouncedValue.js';
+import { toggleFavorite } from './lib/favorites.js';
 import {
   EMPTY_FILTERS,
   applyFilters,
@@ -109,6 +111,7 @@ export default function App() {
 
   const { theme, toggle: toggleTheme } = useTheme();
   const { meta, articles, byId, error, loading, retry } = useSnapshot();
+  const favorites = useFavorites();
   const [filters, dispatchRaw] = useReducer(filtersReducer, initView.filters);
   const [detailId, setDetailId] = useState(null);
   const [strict, setStrict] = useState(false);
@@ -207,9 +210,12 @@ export default function App() {
   const filtered = useMemo(
     () =>
       articles
-        ? sortForDisplay(searchText(applyFilters(articles, filters, toolTypes), textQuery), sortOpts)
+        ? sortForDisplay(
+            searchText(applyFilters(articles, filters, toolTypes, favorites), textQuery),
+            sortOpts,
+          )
         : [],
-    [articles, filters, toolTypes, textQuery, sortOpts],
+    [articles, filters, toolTypes, textQuery, sortOpts, favorites],
   );
 
   const facetCounts = useMemo(
@@ -234,9 +240,10 @@ export default function App() {
     return aiItems.filter(
       (x) =>
         (filters.kind === 'all' || x.judgeKind === filters.kind) &&
-        (!strict || x.relation === 'direct'),
+        (!strict || x.relation === 'direct') &&
+        (!filters.favoritesOnly || favorites.has(x.article.id)),
     );
-  }, [aiItems, filters.kind, strict]);
+  }, [aiItems, filters.kind, filters.favoritesOnly, strict, favorites]);
 
   const hiddenSimilar = useMemo(() => {
     if (!aiItems || !strict) return 0;
@@ -391,6 +398,16 @@ export default function App() {
         },
       },
       {
+        id: 'act:favorites',
+        group: STR.cmdkGroupActions,
+        label: STR.favoritesOnly,
+        hint: favorites.size > 0 ? STR.favoritesCount(favorites.size) : undefined,
+        badge: filters.favoritesOnly ? '★' : '☆',
+        active: filters.favoritesOnly,
+        keywords: ['favorito', 'favoritos', 'favoritar', 'favorite', 'favorites', 'star', 'estrela', 'preferidas', 'salvas'],
+        run: () => dispatch({ type: 'set', key: 'favoritesOnly', value: !filters.favoritesOnly }),
+      },
+      {
         id: 'act:theme',
         group: STR.cmdkGroupActions,
         label: theme === 'dark' ? STR.themeToLight : STR.themeToDark,
@@ -513,7 +530,7 @@ export default function App() {
     }
 
     return list;
-  }, [STR, nActive, theme, toggleTheme, toggleLocale, ai.openKeyModal, filters, meta, facetCounts, dispatch, onTextChange]);
+  }, [STR, nActive, theme, toggleTheme, toggleLocale, ai.openKeyModal, filters, meta, facetCounts, favorites, dispatch, onTextChange]);
 
   const scrollToTop = () => {
     scrollPosRef.current = { scrollY: 0, anchorId: null };
@@ -745,7 +762,9 @@ export default function App() {
                         ? STR.emptyFiltered
                         : articles && articles.length === 0
                           ? STR.emptyBase
-                          : STR.emptyFiltered
+                          : filters.favoritesOnly && favorites.size === 0
+                            ? STR.favoritesEmpty
+                            : STR.emptyFiltered
                     }
                   />
                 )
@@ -756,6 +775,8 @@ export default function App() {
                   onOpen={setDetailId}
                   visible={visible}
                   relationById={relationById}
+                  favorites={favorites}
+                  onToggleFavorite={toggleFavorite}
                 />
               )}
             </section>
@@ -781,6 +802,8 @@ export default function App() {
             isMobile={!isDesktop}
             onClose={() => setDetailId(null)}
             onToggleTag={(facet, tag) => dispatch({ type: 'toggleTag', facet, tag })}
+            favorite={detail ? favorites.has(detail.id) : false}
+            onToggleFavorite={toggleFavorite}
           />
         )}
 

@@ -7,6 +7,7 @@ import { useStrings } from '../i18n.jsx';
 import { fmtDate } from '../lib/format.js';
 import { effectiveKind } from '../lib/taxonomy.js';
 import { usePlayer } from '../player.jsx';
+import FavButton from './FavButton.jsx';
 import PlayButton from './PlayButton.jsx';
 
 /**
@@ -21,6 +22,8 @@ export default function DetailSheet({
   isMobile,
   onClose,
   onToggleTag,
+  favorite = false,
+  onToggleFavorite = null,
 }) {
   const STR = useStrings();
   const { FACET_LABEL, KIND_LABEL, VERIFY_LABEL } = STR;
@@ -84,6 +87,15 @@ export default function DetailSheet({
             {a.date_iso ? ` · ${fmtDate(a.date_iso)}` : ''}
           </span>
           <div className="sheet-head-actions">
+            {onToggleFavorite && (
+              <FavButton
+                className="sheet-fav"
+                active={favorite}
+                onClick={() => onToggleFavorite(a.id)}
+                addLabel={STR.favoriteAdd}
+                removeLabel={STR.favoriteRemove}
+              />
+            )}
             {player && excerpt && (
               <PlayButton
                 className="sheet-play-btn"

@@ -34,6 +34,7 @@ test('saveViewState + loadViewState: persiste e restaura filtros, busca local, p
       kind: 'tool',
       verify: 'ok',
       showJunk: true,
+      favoritesOnly: true,
       facets: {
         domain: ['reactjs', 'nodejs', 'reactjs'],
         'topic-technology': ['agents'],
@@ -55,6 +56,7 @@ test('saveViewState + loadViewState: persiste e restaura filtros, busca local, p
     kind: 'tool',
     verify: 'ok',
     showJunk: true,
+    favoritesOnly: true,
     facets: {
       domain: ['reactjs', 'nodejs'],
       'topic-technology': ['agents'],
@@ -74,6 +76,7 @@ test('sanitizeFilters: entradas inválidas ou malformadas caem nos defaults segu
     kind: 'inexistente',
     verify: 'qualquer',
     showJunk: 'sim',
+    favoritesOnly: 'sim',
     facets: {
       domain: ['llm', '', null, 42],
       vazio: [],
@@ -85,6 +88,7 @@ test('sanitizeFilters: entradas inválidas ou malformadas caem nos defaults segu
   assert.equal(clean.kind, 'all');
   assert.equal(clean.verify, '');
   assert.equal(clean.showJunk, false);
+  assert.equal(clean.favoritesOnly, false);
   assert.deepEqual(clean.facets, { domain: ['llm'] });
 });
 

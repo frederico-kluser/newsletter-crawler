@@ -6,6 +6,7 @@ import {
   AccordionPanel,
   AccordionTrigger,
 } from '@/components/motion-ui/accordion';
+import { useFavorites } from '../hooks/useFavorites.js';
 import { countActiveFilters } from '../lib/filters.js';
 import { useStrings } from '../i18n.jsx';
 
@@ -25,6 +26,7 @@ const DEFAULT_OPEN_FACETS = ['domain', 'topic-technology', 'content-type'];
 export default function FilterPanel({ meta, filters, dispatch, facetCounts }) {
   const STR = useStrings();
   const { FACET_LABEL, VERIFY_LABEL } = STR;
+  const favorites = useFavorites();
   const [tagQuery, setTagQuery] = useState('');
   const [openFacets, setOpenFacets] = useState(() => DEFAULT_OPEN_FACETS);
 
@@ -139,6 +141,22 @@ export default function FilterPanel({ meta, filters, dispatch, facetCounts }) {
             {STR.heroQuickAllTime}
           </button>
         </div>
+      </fieldset>
+
+      <fieldset className="filter-block filter-card-section">
+        <legend className="facet-label">{STR.favoritesSection}</legend>
+        <label className="filter-block switch-row">
+          <input
+            type="checkbox"
+            checked={filters.favoritesOnly === true}
+            onChange={(e) => set('favoritesOnly', e.target.checked)}
+          />
+          <span>
+            <span className="facet-label">{STR.favoritesOnly}</span>
+            <span className="filter-hint">{STR.favoritesOnlyHint}</span>
+          </span>
+        </label>
+        <span className="filter-hint">{STR.favoritesCount(favorites.size)}</span>
       </fieldset>
 
       <div className="filter-block filter-card-section">

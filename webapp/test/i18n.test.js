@@ -84,3 +84,20 @@ test('provedor LLM (KeyModal): todas as chaves existem nos DOIS dicionários e a
   assert.equal(DICTS.en.keyProviderOr, 'OpenRouter');
   assert.equal(DICTS.en.keyProviderDeepSeek, 'DeepSeek');
 });
+
+test('favoritos: strings existem nos DOIS dicionários e a contagem pluraliza em cada idioma', () => {
+  const keys = [
+    'favoritesSection', 'favoritesOnly', 'favoritesOnlyHint',
+    'favoritesPill', 'favoritesEmpty', 'favoriteAdd', 'favoriteRemove',
+  ];
+  for (const k of keys) {
+    assert.ok(typeof DICTS.pt[k] === 'string' && DICTS.pt[k].length > 0, `pt.${k} não-vazio`);
+    assert.ok(typeof DICTS.en[k] === 'string' && DICTS.en[k].length > 0, `en.${k} não-vazio`);
+  }
+  assert.equal(typeof DICTS.pt.favoritesCount, 'function');
+  assert.equal(typeof DICTS.en.favoritesCount, 'function');
+  assert.equal(DICTS.pt.favoritesCount(1), '1 favorito salvo');
+  assert.equal(DICTS.pt.favoritesCount(2), '2 favoritos salvos');
+  assert.equal(DICTS.en.favoritesCount(1), '1 saved favorite');
+  assert.equal(DICTS.en.favoritesCount(2), '2 saved favorites');
+});

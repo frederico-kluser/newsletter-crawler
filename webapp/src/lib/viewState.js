@@ -44,6 +44,8 @@ export function sanitizeFilters(raw, fallback = EMPTY_FILTERS) {
   const kind = VALID_KINDS.has(raw.kind) ? raw.kind : fallback.kind;
   const verify = VALID_VERIFIES.has(raw.verify) ? raw.verify : fallback.verify;
   const showJunk = typeof raw.showJunk === 'boolean' ? raw.showJunk : Boolean(fallback.showJunk);
+  const favoritesOnly =
+    typeof raw.favoritesOnly === 'boolean' ? raw.favoritesOnly : Boolean(fallback.favoritesOnly);
 
   const facets = {};
   if (raw.facets && typeof raw.facets === 'object' && !Array.isArray(raw.facets)) {
@@ -62,6 +64,7 @@ export function sanitizeFilters(raw, fallback = EMPTY_FILTERS) {
     kind,
     verify,
     showJunk,
+    favoritesOnly,
   };
 }
 

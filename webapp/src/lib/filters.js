@@ -24,6 +24,10 @@ export const EMPTY_FILTERS = Object.freeze({
   verify: '',
   // Mostrar os DESCARTADOS (verify_status='junk')? Desligado por padrão: a lista é de matérias.
   showJunk: false,
+  // Mostrar SÓ as matérias favoritadas (estrela no card; favoritos no navegador)? Desligado por
+  // padrão. Requer o conjunto `favoriteIds` (4º argumento de applyFilters) — sem ele o filtro
+  // não tem o que mostrar.
+  favoritesOnly: false,
 });
 
 /**
@@ -46,15 +50,23 @@ export function countActiveFilters(f) {
   n += f.sourceIds?.length || 0;
   if (f.from || f.to) n++;
   if (f.verify) n++;
+  if (f.favoritesOnly) n++;
   for (const tags of Object.values(f.facets || {})) n += tags.length;
   return n;
 }
 
-/** Aplica os filtros de browse. `toolTypes` vem de meta.toolContentTypes. */
-export function applyFilters(articles, f, toolTypes) {
+/** Aplica os filtros de browse. `toolTypes` vem de meta.toolContentTypes.
+ *  `favoriteIds` (Set ou array de ids) só é usado quando `f.favoritesOnly` está ligado. */
+export function applyFilters(articles, f, toolTypes, favoriteIds = null) {
   const facetEntries = Object.entries(f.facets || {}).filter(([, tags]) => tags && tags.length);
   const sourceIds = f.sourceIds?.length ? new Set(f.sourceIds) : null; // vazio = todas as fontes
+  const favSet = f.favoritesOnly
+    ? favoriteIds instanceof Set
+      ? favoriteIds
+      : new Set(favoriteIds || [])
+    : null;
   return articles.filter((a) => {
+    if (favSet && !favSet.has(a.id)) return false;
     if (sourceIds && !sourceIds.has(a.source_id)) return false;
     if (f.from && a.date_iso < f.from) return false;
     if (f.to && a.date_iso > f.to) return false;

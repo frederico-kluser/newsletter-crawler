@@ -10,6 +10,7 @@ import { useStrings } from '../i18n.jsx';
 import { fmtDate } from '../lib/format.js';
 import { effectiveKind } from '../lib/taxonomy.js';
 import { usePlayer } from '../player.jsx';
+import FavButton from './FavButton.jsx';
 import PlayButton from './PlayButton.jsx';
 
 const PRIORITY_FACETS = [
@@ -57,6 +58,8 @@ export default function ArticleCard({
   onOpen,
   entryDelay = 0,
   relation = null,
+  favorite = false,
+  onToggleFavorite = null,
 }) {
   const STR = useStrings();
   const { KIND_LABEL, VERIFY_LABEL } = STR;
@@ -97,6 +100,15 @@ export default function ArticleCard({
             }
             playLabel={STR.playSummary}
             stopLabel={STR.stopPlayback}
+          />
+        )}
+        {onToggleFavorite && (
+          <FavButton
+            className="card-fav"
+            active={favorite}
+            onClick={() => onToggleFavorite(a.id)}
+            addLabel={STR.favoriteAdd}
+            removeLabel={STR.favoriteRemove}
           />
         )}
         <button

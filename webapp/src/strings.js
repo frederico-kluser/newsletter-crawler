@@ -135,6 +135,16 @@ const pt = {
   showLess: 'mostrar menos',
   activeFilters: 'filtros ativos',
 
+  // favoritos (estrela no card; ficam só neste navegador — localStorage)
+  favoritesSection: 'Favoritos',
+  favoritesOnly: 'Somente favoritos',
+  favoritesOnlyHint: 'Mostra só as matérias marcadas com a estrela',
+  favoritesCount: (n) => `${n} favorito${n === 1 ? '' : 's'} salvo${n === 1 ? '' : 's'}`,
+  favoritesPill: '★ Favoritos',
+  favoritesEmpty: 'Nenhuma matéria favoritada ainda — toque na estrela de um card para guardar.',
+  favoriteAdd: 'Favoritar',
+  favoriteRemove: 'Desfavoritar',
+
   // grid / cards
   kindLabel: 'Tipo de item',
   results: (n) => `${n} artigo${n === 1 ? '' : 's'}`,
@@ -442,6 +452,16 @@ const en = {
   showMore: (n) => `+${n} more`,
   showLess: 'show less',
   activeFilters: 'active filters',
+
+  // favorites (star on the card; stored only in this browser — localStorage)
+  favoritesSection: 'Favorites',
+  favoritesOnly: 'Favorites only',
+  favoritesOnlyHint: 'Show only the articles you starred',
+  favoritesCount: (n) => `${n} saved favorite${n === 1 ? '' : 's'}`,
+  favoritesPill: '★ Favorites',
+  favoritesEmpty: 'No favorites yet — tap the star on a card to save it.',
+  favoriteAdd: 'Add to favorites',
+  favoriteRemove: 'Remove from favorites',
 
   kindLabel: 'Item type',
   results: (n) => `${n} article${n === 1 ? '' : 's'}`,

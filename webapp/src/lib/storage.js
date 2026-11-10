@@ -90,3 +90,17 @@ export const getViewStateRaw = () => get('nc-view-state');
 export const setViewStateRaw = (v) => set('nc-view-state', v);
 export const clearViewState = () => del('nc-view-state');
 
+// Matérias favoritas (lido/escrito por lib/favorites.js). Mesma distinção de quota do history:
+// false = quota cheia (o favorites poda os mais antigos e re-tenta); erro de acesso = sessão.
+export const getFavoritesRaw = () => get('nc-favorites');
+export function trySetFavorites(value) {
+  try {
+    localStorage.setItem('nc-favorites', value);
+    return true;
+  } catch (e) {
+    if (isQuotaError(e)) return false; // deixa o favorites podar e re-tentar
+    mem.set('nc-favorites', value); // localStorage indisponível: mantém na sessão
+    return true;
+  }
+}
+

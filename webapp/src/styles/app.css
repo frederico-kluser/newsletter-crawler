@@ -838,6 +838,8 @@
   justify-content: space-between;
   align-items: baseline;
   gap: 10px;
+  /* reserva o canto superior direito para o botão de favorito (estrela) */
+  padding-right: 26px;
 }
 .card-source {
   font-family: var(--font-mono);
@@ -1660,6 +1662,34 @@
   color: var(--on-accent);
   background: var(--accent);
   border-color: transparent;
+}
+/* favoritos: estrela no canto superior direito do card (irmã do card-hit, como o card-play) */
+.fav-btn {
+  color: var(--fg-muted);
+}
+.fav-btn:hover {
+  color: var(--accent-strong);
+}
+.fav-btn.is-active {
+  color: var(--accent-strong);
+}
+.card-fav {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
+  width: 30px;
+  height: 30px;
+  background: var(--card-bg);
+  border: 1px solid var(--hairline);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+.card-fav:hover {
+  background: var(--chip-bg);
+  border-color: color-mix(in oklab, var(--accent) 40%, var(--hairline));
+}
+.sheet-fav.is-active {
+  color: var(--accent-strong);
 }
 .card[data-playing] {
   box-shadow: var(--card-shadow), 0 0 0 2px var(--accent);

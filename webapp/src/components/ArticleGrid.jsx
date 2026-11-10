@@ -9,7 +9,15 @@ import { useStrings } from '../i18n.jsx';
  * - troca de filtros: AnimatePresence popLayout + layout nos cards → sobreviventes deslizam
  *   (FLIP/transform), removidos saem em fade/scale, novos entram sem delay.
  */
-export default function ArticleGrid({ items, toolTypes, onOpen, visible, relationById = null }) {
+export default function ArticleGrid({
+  items,
+  toolTypes,
+  onOpen,
+  visible,
+  relationById = null,
+  favorites = null,
+  onToggleFavorite = null,
+}) {
   const STR = useStrings();
   // `visible` é o objeto do useVisibleCount (browse) OU um inteiro (modo IA: tudo visível).
   const paging = typeof visible === 'object' && visible !== null ? visible : null;
@@ -34,6 +42,8 @@ export default function ArticleGrid({ items, toolTypes, onOpen, visible, relatio
               toolTypes={toolTypes}
               onOpen={onOpen}
               relation={relationById ? relationById.get(a.id) || null : null}
+              favorite={favorites ? favorites.has(a.id) : false}
+              onToggleFavorite={onToggleFavorite}
               entryDelay={firstLoad.current && i < 24 ? Math.min(i, 12) * 0.045 : 0}
             />
           ))}

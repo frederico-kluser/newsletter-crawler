@@ -1,0 +1,52 @@
+{
+  "cenarios": 28,
+  "variantes": {
+    "m1": {
+      "label": "v2_fewshot (depois)",
+      "acerto": 12,
+      "n": 28,
+      "acuracia": 0.4286,
+      "precisao": 1.0,
+      "recall": 0.1111,
+      "f1": 0.2,
+      "previu": {
+        "direct": 0,
+        "similar": 2,
+        "none": 26
+      }
+    },
+    "m0": {
+      "label": "v0_prod (antes)",
+      "acerto": 10,
+      "n": 28,
+      "acuracia": 0.3571,
+      "precisao": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "previu": {
+        "direct": 0,
+        "similar": 0,
+        "none": 28
+      }
+    },
+    "original": {
+      "label": "controle (base)",
+      "acerto": 10,
+      "n": 28,
+      "acuracia": 0.3571,
+      "precisao": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "previu": {
+        "direct": 0,
+        "similar": 0,
+        "none": 28
+      }
+    }
+  },
+  "gabarito": {
+    "direct": 10,
+    "similar": 8,
+    "none": 10
+  }
+}

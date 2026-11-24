@@ -1,0 +1,3085 @@
+{
+  "modelo": "laya-typed-decisions fp32 (System One)",
+  "providers": [
+    "CPUExecutionProvider"
+  ],
+  "hardware": "ONDOKAI",
+  "pool": 42,
+  "cenarios": 5,
+  "variantes": {
+    "v0_prod": {
+      "variant": "v0_prod",
+      "f1": 0.3665,
+      "precision": 0.2249,
+      "recall": 1.0,
+      "acc3": 0.1381,
+      "kindAcc": 0.6238,
+      "msPorDecisao": 3383.5,
+      "decisoes": 420,
+      "perScenario": [
+        {
+          "scenario": "S1",
+          "f1": 0.32,
+          "precision": 0.1905,
+          "recall": 1.0,
+          "acc3": 0.0952,
+          "kindAcc": 0.619,
+          "items": 42,
+          "detail": [
+            {
+              "id": 2249,
+              "relation": "direct",
+              "truth": "direct",
+              "kind": "tool",
+              "conf": 0.375
+            },
+            {
+              "id": 2138,
+              "relation": "direct",
+              "truth": "direct",
+              "kind": "tool",
+              "conf": 0.4776
+            },
+            {
+              "id": 2078,
+              "relation": "similar",
+              "truth": "direct",
+              "kind": "tool",
+              "conf": 0.395
+            },
+            {
+              "id": 2162,
+              "relation": "direct",
+              "truth": "direct",
+              "kind": "tool",
+              "conf": 0.3935
+            },
+            {
+              "id": 2369,
+              "relation": "similar",
+              "truth": "direct",
+              "kind": "news",
+              "conf": 0.3986
+            },
+            {
+              "id": 2012,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4061
+            },
+            {
+              "id": 2008,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4193
+            },
+            {
+              "id": 2007,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4593
+            },
+            {
+              "id": 1985,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4099
+            },
+            {
+              "id": 1983,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3962
+            },
+            {
+              "id": 2002,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4673
+            },
+            {
+              "id": 2003,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4553
+            },
+            {
+              "id": 2324,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4067
+            },
+            {
+              "id": 2323,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.4226
+            },
+            {
+              "id": 2264,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3835
+            },
+            {
+              "id": 2270,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.465
+            },
+            {
+              "id": 1897,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3772
+            },
+            {
+              "id": 2327,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4108
+            },
+            {
+              "id": 2307,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4556
+            },
+            {
+              "id": 2290,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4682
+            },
+            {
+              "id": 2279,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4456
+            },
+            {
+              "id": 2232,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3717
+            },
+            {
+              "id": 2059,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4401
+            },
+            {
+              "id": 2057,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4137
+            },
+            {
+              "id": 2356,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3436
+            },
+            {
+              "id": 2218,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3898
+            },
+            {
+              "id": 2340,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3994
+            },
+            {
+              "id": 2329,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4421
+            },
+            {
+              "id": 2219,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.4133
+            },
+            {
+              "id": 2163,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4245
+            },
+            {
+              "id": 2148,
+              "relation": "direct",
+              "truth": "similar",
+              "kind": "tool",
+              "conf": 0.4474
+            },
+            {
+              "id": 2098,
+              "relation": "similar",
+              "truth": "similar",
+              "kind": "tool",
+              "conf": 0.4481
+            },
+            {
+              "id": 2341,
+              "relation": "direct",
+              "truth": "similar",
+              "kind": "tool",
+              "conf": 0.3583
+            },
+            {
+              "id": 1905,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4455
+            },
+            {
+              "id": 1784,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4092
+            },
+            {
+              "id": 2013,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3877
+            },
+            {
+              "id": 1982,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3656
+            },
+            {
+              "id": 1998,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4121
+            },
+            {
+              "id": 2217,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3742
+            },
+            {
+              "id": 2107,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4055
+            },
+            {
+              "id": 2143,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4041
+            },
+            {
+              "id": 2016,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3749
+            }
+          ]
+        },
+        {
+          "scenario": "S2",
+          "f1": 0.4151,
+          "precision": 0.2619,
+          "recall": 1.0,
+          "acc3": 0.2143,
+          "kindAcc": 0.6429,
+          "items": 42,
+          "detail": [
+            {
+              "id": 2249,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3767
+            },
+            {
+              "id": 2138,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4437
+            },
+            {
+              "id": 2078,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3697
+            },
+            {
+              "id": 2162,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3945
+            },
+            {
+              "id": 2369,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3852
+            },
+            {
+              "id": 2012,
+              "relation": "direct",
+              "truth": "direct",
+              "kind": "tool",
+              "conf": 0.4168
+            },
+            {
+              "id": 2008,
+              "relation": "direct",
+              "truth": "direct",
+              "kind": "tool",
+              "conf": 0.4322
+            },
+            {
+              "id": 2007,
+              "relation": "direct",
+              "truth": "direct",
+              "kind": "tool",
+              "conf": 0.4219
+            },
+            {
+              "id": 1985,
+              "relation": "similar",
+              "truth": "direct",
+              "kind": "tool",
+              "conf": 0.4123
+            },
+            {
+              "id": 1983,
+              "relation": "direct",
+              "truth": "direct",
+              "kind": "tool",
+              "conf": 0.4123
+            },
+            {
+              "id": 2002,
+              "relation": "direct",
+              "truth": "direct",
+              "kind": "tool",
+              "conf": 0.4497
+            },
+            {
+              "id": 2003,
+              "relation": "direct",
+              "truth": "direct",
+              "kind": "tool",
+              "conf": 0.4415
+            },
+            {
+              "id": 2324,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3838
+            },
+            {
+              "id": 2323,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3892
+            },
+            {
+              "id": 2264,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3677
+            },
+            {
+              "id": 2270,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4746
+            },
+            {
+              "id": 1897,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3707
+            },
+            {
+              "id": 2327,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3999
+            },
+            {
+              "id": 2307,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4439
+            },
+            {
+              "id": 2290,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4235
+            },
+            {
+              "id": 2279,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4807
+            },
+            {
+              "id": 2232,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3647
+            },
+            {
+              "id": 2059,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.5113
+            },
+            {
+              "id": 2057,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4173
+            },
+            {
+              "id": 2356,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3667
+            },
+            {
+              "id": 2218,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3996
+            },
+            {
+              "id": 2340,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3772
+            },
+            {
+              "id": 2329,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3987
+            },
+            {
+              "id": 2219,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3869
+            },
+            {
+              "id": 2163,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4035
+            },
+            {
+              "id": 2148,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4594
+            },
+            {
+              "id": 2098,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4
+            },
+            {
+              "id": 2341,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3571
+            },
+            {
+              "id": 1905,
+              "relation": "similar",
+              "truth": "similar",
+              "kind": "tool",
+              "conf": 0.4436
+            },
+            {
+              "id": 1784,
+              "relation": "similar",
+              "truth": "similar",
+              "kind": "tool",
+              "conf": 0.4169
+            },
+            {
+              "id": 2013,
+              "relation": "similar",
+              "truth": "similar",
+              "kind": "tool",
+              "conf": 0.4134
+            },
+            {
+              "id": 1982,
+              "relation": "direct",
+              "truth": "similar",
+              "kind": "tool",
+              "conf": 0.3776
+            },
+            {
+              "id": 1998,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4144
+            },
+            {
+              "id": 2217,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3899
+            },
+            {
+              "id": 2107,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4038
+            },
+            {
+              "id": 2143,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4316
+            },
+            {
+              "id": 2016,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4479
+            }
+          ]
+        },
+        {
+          "scenario": "S3",
+          "f1": 0.3846,
+          "precision": 0.2381,
+          "recall": 1.0,
+          "acc3": 0.0952,
+          "kindAcc": 0.619,
+          "items": 42,
+          "detail": [
+            {
+              "id": 2249,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3811
+            },
+            {
+              "id": 2138,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4633
+            },
+            {
+              "id": 2078,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3949
+            },
+            {
+              "id": 2162,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4036
+            },
+            {
+              "id": 2369,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3915
+            },
+            {
+              "id": 2012,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.414
+            },
+            {
+              "id": 2008,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4866
+            },
+            {
+              "id": 2007,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4411
+            },
+            {
+              "id": 1985,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4435
+            },
+            {
+              "id": 1983,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.398
+            },
+            {
+              "id": 2002,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4633
+            },
+            {
+              "id": 2003,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4296
+            },
+            {
+              "id": 2324,
+              "relation": "similar",
+              "truth": "direct",
+              "kind": "tool",
+              "conf": 0.4117
+            },
+            {
+              "id": 2323,
+              "relation": "similar",
+              "truth": "direct",
+              "kind": "news",
+              "conf": 0.4046
+            },
+            {
+              "id": 2264,
+              "relation": "direct",
+              "truth": "direct",
+              "kind": "tool",
+              "conf": 0.3962
+            },
+            {
+              "id": 2270,
+              "relation": "direct",
+              "truth": "direct",
+              "kind": "tool",
+              "conf": 0.4368
+            },
+            {
+              "id": 1897,
+              "relation": "direct",
+              "truth": "direct",
+              "kind": "tool",
+              "conf": 0.3936
+            },
+            {
+              "id": 2327,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4249
+            },
+            {
+              "id": 2307,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4596
+            },
+            {
+              "id": 2290,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4802
+            },
+            {
+              "id": 2279,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4326
+            },
+            {
+              "id": 2232,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3768
+            },
+            {
+              "id": 2059,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4617
+            },
+            {
+              "id": 2057,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4191
+            },
+            {
+              "id": 2356,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3479
+            },
+            {
+              "id": 2218,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4104
+            },
+            {
+              "id": 2340,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.412
+            },
+            {
+              "id": 2329,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4214
+            },
+            {
+              "id": 2219,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.4049
+            },
+            {
+              "id": 2163,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3947
+            },
+            {
+              "id": 2148,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4564
+            },
+            {
+              "id": 2098,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.401
+            },
+            {
+              "id": 2341,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.36
+            },
+            {
+              "id": 1905,
+              "relation": "similar",
+              "truth": "direct",
+              "kind": "tool",
+              "conf": 0.4379
+            },
+            {
+              "id": 1784,
+              "relation": "similar",
+              "truth": "similar",
+              "kind": "tool",
+              "conf": 0.4111
+            },
+            {
+              "id": 2013,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4055
+            },
+            {
+              "id": 1982,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3633
+            },
+            {
+              "id": 1998,
+              "relation": "direct",
+              "truth": "similar",
+              "kind": "tool",
+              "conf": 0.3819
+            },
+            {
+              "id": 2217,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3847
+            },
+            {
+              "id": 2107,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4073
+            },
+            {
+              "id": 2143,
+              "relation": "direct",
+              "truth": "similar",
+              "kind": "tool",
+              "conf": 0.4062
+            },
+            {
+              "id": 2016,
+              "relation": "direct",
+              "truth": "similar",
+              "kind": "tool",
+              "conf": 0.4105
+            }
+          ]
+        },
+        {
+          "scenario": "S4",
+          "f1": 0.3529,
+          "precision": 0.2143,
+          "recall": 1.0,
+          "acc3": 0.1429,
+          "kindAcc": 0.619,
+          "items": 42,
+          "detail": [
+            {
+              "id": 2249,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3571
+            },
+            {
+              "id": 2138,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4417
+            },
+            {
+              "id": 2078,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3734
+            },
+            {
+              "id": 2162,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3808
+            },
+            {
+              "id": 2369,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3731
+            },
+            {
+              "id": 2012,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.437
+            },
+            {
+              "id": 2008,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4208
+            },
+            {
+              "id": 2007,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4153
+            },
+            {
+              "id": 1985,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4186
+            },
+            {
+              "id": 1983,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4144
+            },
+            {
+              "id": 2002,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4533
+            },
+            {
+              "id": 2003,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4313
+            },
+            {
+              "id": 2324,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3835
+            },
+            {
+              "id": 2323,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4139
+            },
+            {
+              "id": 2264,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3902
+            },
+            {
+              "id": 2270,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4415
+            },
+            {
+              "id": 1897,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3813
+            },
+            {
+              "id": 2327,
+              "relation": "direct",
+              "truth": "direct",
+              "kind": "tool",
+              "conf": 0.4109
+            },
+            {
+              "id": 2307,
+              "relation": "direct",
+              "truth": "direct",
+              "kind": "tool",
+              "conf": 0.4477
+            },
+            {
+              "id": 2290,
+              "relation": "similar",
+              "truth": "direct",
+              "kind": "tool",
+              "conf": 0.4538
+            },
+            {
+              "id": 2279,
+              "relation": "similar",
+              "truth": "direct",
+              "kind": "tool",
+              "conf": 0.4254
+            },
+            {
+              "id": 2232,
+              "relation": "similar",
+              "truth": "direct",
+              "kind": "tool",
+              "conf": 0.3773
+            },
+            {
+              "id": 2059,
+              "relation": "direct",
+              "truth": "direct",
+              "kind": "tool",
+              "conf": 0.5219
+            },
+            {
+              "id": 2057,
+              "relation": "direct",
+              "truth": "direct",
+              "kind": "tool",
+              "conf": 0.4152
+            },
+            {
+              "id": 2356,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3616
+            },
+            {
+              "id": 2218,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4089
+            },
+            {
+              "id": 2340,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3899
+            },
+            {
+              "id": 2329,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4207
+            },
+            {
+              "id": 2219,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.4137
+            },
+            {
+              "id": 2163,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4135
+            },
+            {
+              "id": 2148,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4617
+            },
+            {
+              "id": 2098,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4335
+            },
+            {
+              "id": 2341,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3458
+            },
+            {
+              "id": 1905,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4797
+            },
+            {
+              "id": 1784,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3939
+            },
+            {
+              "id": 2013,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3964
+            },
+            {
+              "id": 1982,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.376
+            },
+            {
+              "id": 1998,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4165
+            },
+            {
+              "id": 2217,
+              "relation": "similar",
+              "truth": "similar",
+              "kind": "tool",
+              "conf": 0.3883
+            },
+            {
+              "id": 2107,
+              "relation": "direct",
+              "truth": "direct",
+              "kind": "tool",
+              "conf": 0.3775
+            },
+            {
+              "id": 2143,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4213
+            },
+            {
+              "id": 2016,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3852
+            }
+          ]
+        },
+        {
+          "scenario": "S5",
+          "f1": 0.36,
+          "precision": 0.2195,
+          "recall": 1.0,
+          "acc3": 0.1429,
+          "kindAcc": 0.619,
+          "items": 42,
+          "detail": [
+            {
+              "id": 2249,
+              "relation": "none",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3438
+            },
+            {
+              "id": 2138,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4301
+            },
+            {
+              "id": 2078,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3957
+            },
+            {
+              "id": 2162,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3785
+            },
+            {
+              "id": 2369,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3965
+            },
+            {
+              "id": 2012,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4296
+            },
+            {
+              "id": 2008,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4294
+            },
+            {
+              "id": 2007,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4121
+            },
+            {
+              "id": 1985,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.431
+            },
+            {
+              "id": 1983,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3898
+            },
+            {
+              "id": 2002,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4682
+            },
+            {
+              "id": 2003,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4274
+            },
+            {
+              "id": 2324,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4076
+            },
+            {
+              "id": 2323,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.4146
+            },
+            {
+              "id": 2264,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3823
+            },
+            {
+              "id": 2270,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4618
+            },
+            {
+              "id": 1897,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3834
+            },
+            {
+              "id": 2327,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4047
+            },
+            {
+              "id": 2307,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4462
+            },
+            {
+              "id": 2290,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4565
+            },
+            {
+              "id": 2279,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4353
+            },
+            {
+              "id": 2232,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3735
+            },
+            {
+              "id": 2059,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.5035
+            },
+            {
+              "id": 2057,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3991
+            },
+            {
+              "id": 2356,
+              "relation": "direct",
+              "truth": "direct",
+              "kind": "tool",
+              "conf": 0.3437
+            },
+            {
+              "id": 2218,
+              "relation": "similar",
+              "truth": "direct",
+              "kind": "tool",
+              "conf": 0.4174
+            },
+            {
+              "id": 2340,
+              "relation": "direct",
+              "truth": "direct",
+              "kind": "tool",
+              "conf": 0.3681
+            },
+            {
+              "id": 2329,
+              "relation": "similar",
+              "truth": "direct",
+              "kind": "tool",
+              "conf": 0.4308
+            },
+            {
+              "id": 2219,
+              "relation": "direct",
+              "truth": "direct",
+              "kind": "news",
+              "conf": 0.4
+            },
+            {
+              "id": 2163,
+              "relation": "similar",
+              "truth": "direct",
+              "kind": "tool",
+              "conf": 0.4236
+            },
+            {
+              "id": 2148,
+              "relation": "direct",
+              "truth": "direct",
+              "kind": "tool",
+              "conf": 0.4501
+            },
+            {
+              "id": 2098,
+              "relation": "direct",
+              "truth": "direct",
+              "kind": "tool",
+              "conf": 0.4033
+            },
+            {
+              "id": 2341,
+              "relation": "direct",
+              "truth": "similar",
+              "kind": "tool",
+              "conf": 0.3444
+            },
+            {
+              "id": 1905,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4285
+            },
+            {
+              "id": 1784,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4041
+            },
+            {
+              "id": 2013,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4196
+            },
+            {
+              "id": 1982,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3702
+            },
+            {
+              "id": 1998,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3787
+            },
+            {
+              "id": 2217,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4123
+            },
+            {
+              "id": 2107,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3915
+            },
+            {
+              "id": 2143,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4157
+            },
+            {
+              "id": 2016,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3964
+            }
+          ]
+        }
+      ]
+    },
+    "v1_rubric": {
+      "variant": "v1_rubric",
+      "f1": 0.3651,
+      "precision": 0.2238,
+      "recall": 1.0,
+      "acc3": 0.1238,
+      "kindAcc": 0.4905,
+      "msPorDecisao": 3969.9,
+      "decisoes": 420,
+      "perScenario": [
+        {
+          "scenario": "S1",
+          "f1": 0.32,
+          "precision": 0.1905,
+          "recall": 1.0,
+          "acc3": 0.0714,
+          "kindAcc": 0.5476,
+          "items": 42,
+          "detail": [
+            {
+              "id": 2249,
+              "relation": "similar",
+              "truth": "direct",
+              "kind": "tool",
+              "conf": 0.3916
+            },
+            {
+              "id": 2138,
+              "relation": "direct",
+              "truth": "direct",
+              "kind": "news",
+              "conf": 0.3851
+            },
+            {
+              "id": 2078,
+              "relation": "direct",
+              "truth": "direct",
+              "kind": "news",
+              "conf": 0.3809
+            },
+            {
+              "id": 2162,
+              "relation": "similar",
+              "truth": "direct",
+              "kind": "tool",
+              "conf": 0.3792
+            },
+            {
+              "id": 2369,
+              "relation": "similar",
+              "truth": "direct",
+              "kind": "news",
+              "conf": 0.3775
+            },
+            {
+              "id": 2012,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3931
+            },
+            {
+              "id": 2008,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3872
+            },
+            {
+              "id": 2007,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3721
+            },
+            {
+              "id": 1985,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3714
+            },
+            {
+              "id": 1983,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3698
+            },
+            {
+              "id": 2002,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4147
+            },
+            {
+              "id": 2003,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3768
+            },
+            {
+              "id": 2324,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3775
+            },
+            {
+              "id": 2323,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.394
+            },
+            {
+              "id": 2264,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.385
+            },
+            {
+              "id": 2270,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3973
+            },
+            {
+              "id": 1897,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3776
+            },
+            {
+              "id": 2327,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3871
+            },
+            {
+              "id": 2307,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3867
+            },
+            {
+              "id": 2290,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3962
+            },
+            {
+              "id": 2279,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3758
+            },
+            {
+              "id": 2232,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3607
+            },
+            {
+              "id": 2059,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.4032
+            },
+            {
+              "id": 2057,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3655
+            },
+            {
+              "id": 2356,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.4245
+            },
+            {
+              "id": 2218,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3864
+            },
+            {
+              "id": 2340,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3964
+            },
+            {
+              "id": 2329,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.394
+            },
+            {
+              "id": 2219,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3811
+            },
+            {
+              "id": 2163,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3648
+            },
+            {
+              "id": 2148,
+              "relation": "direct",
+              "truth": "similar",
+              "kind": "news",
+              "conf": 0.3893
+            },
+            {
+              "id": 2098,
+              "relation": "similar",
+              "truth": "similar",
+              "kind": "news",
+              "conf": 0.4177
+            },
+            {
+              "id": 2341,
+              "relation": "direct",
+              "truth": "similar",
+              "kind": "news",
+              "conf": 0.3728
+            },
+            {
+              "id": 1905,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.367
+            },
+            {
+              "id": 1784,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3765
+            },
+            {
+              "id": 2013,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3896
+            },
+            {
+              "id": 1982,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3827
+            },
+            {
+              "id": 1998,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3745
+            },
+            {
+              "id": 2217,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4134
+            },
+            {
+              "id": 2107,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3868
+            },
+            {
+              "id": 2143,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3884
+            },
+            {
+              "id": 2016,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4194
+            }
+          ]
+        },
+        {
+          "scenario": "S2",
+          "f1": 0.4151,
+          "precision": 0.2619,
+          "recall": 1.0,
+          "acc3": 0.1667,
+          "kindAcc": 0.4762,
+          "items": 42,
+          "detail": [
+            {
+              "id": 2249,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3769
+            },
+            {
+              "id": 2138,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3804
+            },
+            {
+              "id": 2078,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3945
+            },
+            {
+              "id": 2162,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3585
+            },
+            {
+              "id": 2369,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3657
+            },
+            {
+              "id": 2012,
+              "relation": "direct",
+              "truth": "direct",
+              "kind": "tool",
+              "conf": 0.4057
+            },
+            {
+              "id": 2008,
+              "relation": "direct",
+              "truth": "direct",
+              "kind": "tool",
+              "conf": 0.3786
+            },
+            {
+              "id": 2007,
+              "relation": "direct",
+              "truth": "direct",
+              "kind": "news",
+              "conf": 0.3587
+            },
+            {
+              "id": 1985,
+              "relation": "direct",
+              "truth": "direct",
+              "kind": "news",
+              "conf": 0.3643
+            },
+            {
+              "id": 1983,
+              "relation": "direct",
+              "truth": "direct",
+              "kind": "news",
+              "conf": 0.3679
+            },
+            {
+              "id": 2002,
+              "relation": "direct",
+              "truth": "direct",
+              "kind": "news",
+              "conf": 0.4179
+            },
+            {
+              "id": 2003,
+              "relation": "direct",
+              "truth": "direct",
+              "kind": "tool",
+              "conf": 0.3661
+            },
+            {
+              "id": 2324,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3657
+            },
+            {
+              "id": 2323,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3877
+            },
+            {
+              "id": 2264,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3955
+            },
+            {
+              "id": 2270,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.432
+            },
+            {
+              "id": 1897,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3593
+            },
+            {
+              "id": 2327,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4108
+            },
+            {
+              "id": 2307,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3627
+            },
+            {
+              "id": 2290,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4137
+            },
+            {
+              "id": 2279,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3684
+            },
+            {
+              "id": 2232,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3706
+            },
+            {
+              "id": 2059,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.4014
+            },
+            {
+              "id": 2057,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3657
+            },
+            {
+              "id": 2356,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.4378
+            },
+            {
+              "id": 2218,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3886
+            },
+            {
+              "id": 2340,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3973
+            },
+            {
+              "id": 2329,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4008
+            },
+            {
+              "id": 2219,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3625
+            },
+            {
+              "id": 2163,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3699
+            },
+            {
+              "id": 2148,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3711
+            },
+            {
+              "id": 2098,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3871
+            },
+            {
+              "id": 2341,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3803
+            },
+            {
+              "id": 1905,
+              "relation": "direct",
+              "truth": "similar",
+              "kind": "news",
+              "conf": 0.3953
+            },
+            {
+              "id": 1784,
+              "relation": "direct",
+              "truth": "similar",
+              "kind": "news",
+              "conf": 0.3886
+            },
+            {
+              "id": 2013,
+              "relation": "direct",
+              "truth": "similar",
+              "kind": "news",
+              "conf": 0.3944
+            },
+            {
+              "id": 1982,
+              "relation": "direct",
+              "truth": "similar",
+              "kind": "tool",
+              "conf": 0.3967
+            },
+            {
+              "id": 1998,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3658
+            },
+            {
+              "id": 2217,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4212
+            },
+            {
+              "id": 2107,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3907
+            },
+            {
+              "id": 2143,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3833
+            },
+            {
+              "id": 2016,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3947
+            }
+          ]
+        },
+        {
+          "scenario": "S3",
+          "f1": 0.3846,
+          "precision": 0.2381,
+          "recall": 1.0,
+          "acc3": 0.1905,
+          "kindAcc": 0.4048,
+          "items": 42,
+          "detail": [
+            {
+              "id": 2249,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3695
+            },
+            {
+              "id": 2138,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3793
+            },
+            {
+              "id": 2078,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3801
+            },
+            {
+              "id": 2162,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3755
+            },
+            {
+              "id": 2369,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3624
+            },
+            {
+              "id": 2012,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3984
+            },
+            {
+              "id": 2008,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3803
+            },
+            {
+              "id": 2007,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3686
+            },
+            {
+              "id": 1985,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3771
+            },
+            {
+              "id": 1983,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3664
+            },
+            {
+              "id": 2002,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4167
+            },
+            {
+              "id": 2003,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3672
+            },
+            {
+              "id": 2324,
+              "relation": "direct",
+              "truth": "direct",
+              "kind": "news",
+              "conf": 0.3687
+            },
+            {
+              "id": 2323,
+              "relation": "direct",
+              "truth": "direct",
+              "kind": "tool",
+              "conf": 0.381
+            },
+            {
+              "id": 2264,
+              "relation": "direct",
+              "truth": "direct",
+              "kind": "news",
+              "conf": 0.3893
+            },
+            {
+              "id": 2270,
+              "relation": "direct",
+              "truth": "direct",
+              "kind": "tool",
+              "conf": 0.4056
+            },
+            {
+              "id": 1897,
+              "relation": "direct",
+              "truth": "direct",
+              "kind": "news",
+              "conf": 0.3653
+            },
+            {
+              "id": 2327,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3915
+            },
+            {
+              "id": 2307,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3747
+            },
+            {
+              "id": 2290,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4045
+            },
+            {
+              "id": 2279,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3797
+            },
+            {
+              "id": 2232,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3744
+            },
+            {
+              "id": 2059,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3971
+            },
+            {
+              "id": 2057,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3787
+            },
+            {
+              "id": 2356,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.4179
+            },
+            {
+              "id": 2218,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3818
+            },
+            {
+              "id": 2340,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3927
+            },
+            {
+              "id": 2329,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3909
+            },
+            {
+              "id": 2219,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3671
+            },
+            {
+              "id": 2163,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3708
+            },
+            {
+              "id": 2148,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3968
+            },
+            {
+              "id": 2098,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3838
+            },
+            {
+              "id": 2341,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3783
+            },
+            {
+              "id": 1905,
+              "relation": "direct",
+              "truth": "direct",
+              "kind": "tool",
+              "conf": 0.3517
+            },
+            {
+              "id": 1784,
+              "relation": "direct",
+              "truth": "similar",
+              "kind": "news",
+              "conf": 0.3844
+            },
+            {
+              "id": 2013,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3716
+            },
+            {
+              "id": 1982,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3984
+            },
+            {
+              "id": 1998,
+              "relation": "direct",
+              "truth": "similar",
+              "kind": "news",
+              "conf": 0.3687
+            },
+            {
+              "id": 2217,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4112
+            },
+            {
+              "id": 2107,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3862
+            },
+            {
+              "id": 2143,
+              "relation": "similar",
+              "truth": "similar",
+              "kind": "news",
+              "conf": 0.3892
+            },
+            {
+              "id": 2016,
+              "relation": "similar",
+              "truth": "similar",
+              "kind": "tool",
+              "conf": 0.4131
+            }
+          ]
+        },
+        {
+          "scenario": "S4",
+          "f1": 0.3529,
+          "precision": 0.2143,
+          "recall": 1.0,
+          "acc3": 0.119,
+          "kindAcc": 0.5476,
+          "items": 42,
+          "detail": [
+            {
+              "id": 2249,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3655
+            },
+            {
+              "id": 2138,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3811
+            },
+            {
+              "id": 2078,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3774
+            },
+            {
+              "id": 2162,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3707
+            },
+            {
+              "id": 2369,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3654
+            },
+            {
+              "id": 2012,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3911
+            },
+            {
+              "id": 2008,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3749
+            },
+            {
+              "id": 2007,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3641
+            },
+            {
+              "id": 1985,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3625
+            },
+            {
+              "id": 1983,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3657
+            },
+            {
+              "id": 2002,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.4099
+            },
+            {
+              "id": 2003,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3533
+            },
+            {
+              "id": 2324,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.366
+            },
+            {
+              "id": 2323,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3672
+            },
+            {
+              "id": 2264,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3775
+            },
+            {
+              "id": 2270,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4133
+            },
+            {
+              "id": 1897,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3646
+            },
+            {
+              "id": 2327,
+              "relation": "direct",
+              "truth": "direct",
+              "kind": "tool",
+              "conf": 0.3857
+            },
+            {
+              "id": 2307,
+              "relation": "direct",
+              "truth": "direct",
+              "kind": "news",
+              "conf": 0.3624
+            },
+            {
+              "id": 2290,
+              "relation": "direct",
+              "truth": "direct",
+              "kind": "tool",
+              "conf": 0.3968
+            },
+            {
+              "id": 2279,
+              "relation": "direct",
+              "truth": "direct",
+              "kind": "news",
+              "conf": 0.3805
+            },
+            {
+              "id": 2232,
+              "relation": "similar",
+              "truth": "direct",
+              "kind": "tool",
+              "conf": 0.3615
+            },
+            {
+              "id": 2059,
+              "relation": "similar",
+              "truth": "direct",
+              "kind": "news",
+              "conf": 0.3877
+            },
+            {
+              "id": 2057,
+              "relation": "similar",
+              "truth": "direct",
+              "kind": "news",
+              "conf": 0.3567
+            },
+            {
+              "id": 2356,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4046
+            },
+            {
+              "id": 2218,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3865
+            },
+            {
+              "id": 2340,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3859
+            },
+            {
+              "id": 2329,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3955
+            },
+            {
+              "id": 2219,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3746
+            },
+            {
+              "id": 2163,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3541
+            },
+            {
+              "id": 2148,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3751
+            },
+            {
+              "id": 2098,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.4011
+            },
+            {
+              "id": 2341,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3826
+            },
+            {
+              "id": 1905,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3706
+            },
+            {
+              "id": 1784,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3721
+            },
+            {
+              "id": 2013,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3848
+            },
+            {
+              "id": 1982,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3762
+            },
+            {
+              "id": 1998,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3697
+            },
+            {
+              "id": 2217,
+              "relation": "direct",
+              "truth": "similar",
+              "kind": "tool",
+              "conf": 0.3975
+            },
+            {
+              "id": 2107,
+              "relation": "direct",
+              "truth": "direct",
+              "kind": "tool",
+              "conf": 0.3776
+            },
+            {
+              "id": 2143,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3812
+            },
+            {
+              "id": 2016,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.4245
+            }
+          ]
+        },
+        {
+          "scenario": "S5",
+          "f1": 0.3529,
+          "precision": 0.2143,
+          "recall": 1.0,
+          "acc3": 0.0714,
+          "kindAcc": 0.4762,
+          "items": 42,
+          "detail": [
+            {
+              "id": 2249,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3608
+            },
+            {
+              "id": 2138,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3801
+            },
+            {
+              "id": 2078,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3748
+            },
+            {
+              "id": 2162,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3682
+            },
+            {
+              "id": 2369,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3696
+            },
+            {
+              "id": 2012,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3865
+            },
+            {
+              "id": 2008,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3728
+            },
+            {
+              "id": 2007,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3597
+            },
+            {
+              "id": 1985,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3666
+            },
+            {
+              "id": 1983,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.373
+            },
+            {
+              "id": 2002,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.4013
+            },
+            {
+              "id": 2003,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3659
+            },
+            {
+              "id": 2324,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3649
+            },
+            {
+              "id": 2323,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3805
+            },
+            {
+              "id": 2264,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3858
+            },
+            {
+              "id": 2270,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.398
+            },
+            {
+              "id": 1897,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.367
+            },
+            {
+              "id": 2327,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3894
+            },
+            {
+              "id": 2307,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3676
+            },
+            {
+              "id": 2290,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3897
+            },
+            {
+              "id": 2279,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3838
+            },
+            {
+              "id": 2232,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3585
+            },
+            {
+              "id": 2059,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.4005
+            },
+            {
+              "id": 2057,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3566
+            },
+            {
+              "id": 2356,
+              "relation": "direct",
+              "truth": "direct",
+              "kind": "news",
+              "conf": 0.4032
+            },
+            {
+              "id": 2218,
+              "relation": "similar",
+              "truth": "direct",
+              "kind": "news",
+              "conf": 0.386
+            },
+            {
+              "id": 2340,
+              "relation": "direct",
+              "truth": "direct",
+              "kind": "news",
+              "conf": 0.3829
+            },
+            {
+              "id": 2329,
+              "relation": "similar",
+              "truth": "direct",
+              "kind": "tool",
+              "conf": 0.3948
+            },
+            {
+              "id": 2219,
+              "relation": "similar",
+              "truth": "direct",
+              "kind": "news",
+              "conf": 0.3777
+            },
+            {
+              "id": 2163,
+              "relation": "similar",
+              "truth": "direct",
+              "kind": "news",
+              "conf": 0.3567
+            },
+            {
+              "id": 2148,
+              "relation": "direct",
+              "truth": "direct",
+              "kind": "news",
+              "conf": 0.3918
+            },
+            {
+              "id": 2098,
+              "relation": "similar",
+              "truth": "direct",
+              "kind": "news",
+              "conf": 0.3834
+            },
+            {
+              "id": 2341,
+              "relation": "direct",
+              "truth": "similar",
+              "kind": "news",
+              "conf": 0.3766
+            },
+            {
+              "id": 1905,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3721
+            },
+            {
+              "id": 1784,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3939
+            },
+            {
+              "id": 2013,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3806
+            },
+            {
+              "id": 1982,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3856
+            },
+            {
+              "id": 1998,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3632
+            },
+            {
+              "id": 2217,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3937
+            },
+            {
+              "id": 2107,
+              "relation": "direct",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.385
+            },
+            {
+              "id": 2143,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "news",
+              "conf": 0.3831
+            },
+            {
+              "id": 2016,
+              "relation": "similar",
+              "truth": "none",
+              "kind": "tool",
+              "conf": 0.3946
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

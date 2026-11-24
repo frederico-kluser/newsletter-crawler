@@ -1,0 +1,1217 @@
+{
+  "modelo": "typesafe/jev-1.13",
+  "endpoint": "https://openrouter.ai/api/alpha/decisions",
+  "casos": 28,
+  "variantes": {
+    "v0_prod": {
+      "acuracia3": 0.5,
+      "precisao": 1.0,
+      "recall": 0.2222,
+      "f1": 0.3636,
+      "previsto": {
+        "direct": 0,
+        "similar": 4,
+        "none": 24
+      },
+      "kindAcc": 0.5357,
+      "porCenario": {
+        "S1": {
+          "acuracia3": 0.5,
+          "precisao": 1.0,
+          "recall": 0.25,
+          "f1": 0.4,
+          "previsto": {
+            "direct": 0,
+            "similar": 1,
+            "none": 5
+          }
+        },
+        "S2": {
+          "acuracia3": 0.6667,
+          "precisao": 1.0,
+          "recall": 0.5,
+          "f1": 0.6667,
+          "previsto": {
+            "direct": 0,
+            "similar": 2,
+            "none": 4
+          }
+        },
+        "S3": {
+          "acuracia3": 0.5,
+          "precisao": 1.0,
+          "recall": 0.25,
+          "f1": 0.4,
+          "previsto": {
+            "direct": 0,
+            "similar": 1,
+            "none": 5
+          }
+        },
+        "S4": {
+          "acuracia3": 0.4,
+          "precisao": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "previsto": {
+            "direct": 0,
+            "similar": 0,
+            "none": 5
+          }
+        },
+        "S5": {
+          "acuracia3": 0.4,
+          "precisao": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "previsto": {
+            "direct": 0,
+            "similar": 0,
+            "none": 5
+          }
+        }
+      },
+      "segundos": 10.1,
+      "custoUsd": 0.001603,
+      "rows": [
+        {
+          "scenario": "S1",
+          "id": 2249,
+          "truth": "direct",
+          "rel": "none",
+          "relP": 0.99,
+          "kind": "news",
+          "usage": {
+            "input_tokens": 1467,
+            "output_tokens": 66,
+            "cost": 6.1614e-05,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 6.1614e-05,
+              "upstream_inference_prompt_cost": 6.1614e-05,
+              "upstream_inference_completions_cost": 0
+            }
+          }
+        },
+        {
+          "scenario": "S1",
+          "id": 2138,
+          "truth": "direct",
+          "rel": "none",
+          "relP": 1.0,
+          "kind": "tool",
+          "usage": {
+            "input_tokens": 1497,
+            "output_tokens": 66,
+            "cost": 6.2874e-05,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 6.2874e-05,
+              "upstream_inference_prompt_cost": 6.2874e-05,
+              "upstream_inference_completions_cost": 0
+            }
+          }
+        },
+        {
+          "scenario": "S1",
+          "id": 2148,
+          "truth": "similar",
+          "rel": "none",
+          "relP": 0.91,
+          "kind": "tool",
+          "usage": {
+            "input_tokens": 1390,
+            "output_tokens": 66,
+            "cost": 5.838e-05,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 5.838e-05,
+              "upstream_inference_prompt_cost": 5.838e-05,
+              "upstream_inference_completions_cost": 0
+            }
+          }
+        },
+        {
+          "scenario": "S1",
+          "id": 2098,
+          "truth": "similar",
+          "rel": "similar",
+          "relP": 0.71,
+          "kind": "news",
+          "usage": {
+            "input_tokens": 1332,
+            "output_tokens": 66,
+            "cost": 5.5944e-05,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 5.5944e-05,
+              "upstream_inference_prompt_cost": 5.5944e-05,
+              "upstream_inference_completions_cost": 0
+            }
+          }
+        },
+        {
+          "scenario": "S1",
+          "id": 2012,
+          "truth": "none",
+          "rel": "none",
+          "relP": 0.84,
+          "kind": "tool",
+          "usage": {
+            "input_tokens": 915,
+            "output_tokens": 66,
+            "cost": 3.843e-05,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 3.843e-05,
+              "upstream_inference_prompt_cost": 3.843e-05,
+              "upstream_inference_completions_cost": 0
+            }
+          }
+        },
+        {
+          "scenario": "S1",
+          "id": 2008,
+          "truth": "none",
+          "rel": "none",
+          "relP": 0.99,
+          "kind": "tool",
+          "usage": {
+            "input_tokens": 1456,
+            "output_tokens": 66,
+            "cost": 6.1152e-05,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 6.1152e-05,
+              "upstream_inference_prompt_cost": 6.1152e-05,
+              "upstream_inference_completions_cost": 0
+            }
+          }
+        },
+        {
+          "scenario": "S2",
+          "id": 2012,
+          "truth": "direct",
+          "rel": "none",
+          "relP": 0.99,
+          "kind": "tool",
+          "usage": {
+            "input_tokens": 897,
+            "output_tokens": 66,
+            "cost": 3.7674e-05,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 3.7674e-05,
+              "upstream_inference_prompt_cost": 3.7674e-05,
+              "upstream_inference_completions_cost": 0
+            }
+          }
+        },
+        {
+          "scenario": "S2",
+          "id": 2008,
+          "truth": "direct",
+          "rel": "none",
+          "relP": 1.0,
+          "kind": "tool",
+          "usage": {
+            "input_tokens": 1438,
+            "output_tokens": 66,
+            "cost": 6.0396e-05,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 6.0396e-05,
+              "upstream_inference_prompt_cost": 6.0396e-05,
+              "upstream_inference_completions_cost": 0
+            }
+          }
+        },
+        {
+          "scenario": "S2",
+          "id": 1905,
+          "truth": "similar",
+          "rel": "similar",
+          "relP": 0.53,
+          "kind": "news",
+          "usage": {
+            "input_tokens": 1261,
+            "output_tokens": 66,
+            "cost": 5.2962e-05,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 5.2962e-05,
+              "upstream_inference_prompt_cost": 5.2962e-05,
+              "upstream_inference_completions_cost": 0
+            }
+          }
+        },
+        {
+          "scenario": "S2",
+          "id": 1784,
+          "truth": "similar",
+          "rel": "similar",
+          "relP": 0.54,
+          "kind": "tool",
+          "usage": {
+            "input_tokens": 1349,
+            "output_tokens": 66,
+            "cost": 5.6658e-05,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 5.6658e-05,
+              "upstream_inference_prompt_cost": 5.6658e-05,
+              "upstream_inference_completions_cost": 0
+            }
+          }
+        },
+        {
+          "scenario": "S2",
+          "id": 2249,
+          "truth": "none",
+          "rel": "none",
+          "relP": 1.0,
+          "kind": "tool",
+          "usage": {
+            "input_tokens": 1449,
+            "output_tokens": 66,
+            "cost": 6.0858e-05,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 6.0858e-05,
+              "upstream_inference_prompt_cost": 6.0858e-05,
+              "upstream_inference_completions_cost": 0
+            }
+          }
+        },
+        {
+          "scenario": "S2",
+          "id": 2138,
+          "truth": "none",
+          "rel": "none",
+          "relP": 0.99,
+          "kind": "tool",
+          "usage": {
+            "input_tokens": 1479,
+            "output_tokens": 66,
+            "cost": 6.2118e-05,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 6.2118e-05,
+              "upstream_inference_prompt_cost": 6.2118e-05,
+              "upstream_inference_completions_cost": 0
+            }
+          }
+        },
+        {
+          "scenario": "S3",
+          "id": 2324,
+          "truth": "direct",
+          "rel": "none",
+          "relP": 0.85,
+          "kind": "news",
+          "usage": {
+            "input_tokens": 1791,
+            "output_tokens": 66,
+            "cost": 7.5222e-05,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 7.5222e-05,
+              "upstream_inference_prompt_cost": 7.5222e-05,
+              "upstream_inference_completions_cost": 0
+            }
+          }
+        },
+        {
+          "scenario": "S3",
+          "id": 2323,
+          "truth": "direct",
+          "rel": "none",
+          "relP": 0.92,
+          "kind": "tool",
+          "usage": {
+            "input_tokens": 1414,
+            "output_tokens": 66,
+            "cost": 5.9388e-05,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 5.9388e-05,
+              "upstream_inference_prompt_cost": 5.9388e-05,
+              "upstream_inference_completions_cost": 0
+            }
+          }
+        },
+        {
+          "scenario": "S3",
+          "id": 1784,
+          "truth": "similar",
+          "rel": "none",
+          "relP": 0.53,
+          "kind": "tool",
+          "usage": {
+            "input_tokens": 1359,
+            "output_tokens": 66,
+            "cost": 5.7078e-05,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 5.7078e-05,
+              "upstream_inference_prompt_cost": 5.7078e-05,
+              "upstream_inference_completions_cost": 0
+            }
+          }
+        },
+        {
+          "scenario": "S3",
+          "id": 1998,
+          "truth": "similar",
+          "rel": "similar",
+          "relP": 0.75,
+          "kind": "tool",
+          "usage": {
+            "input_tokens": 1324,
+            "output_tokens": 66,
+            "cost": 5.5608e-05,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 5.5608e-05,
+              "upstream_inference_prompt_cost": 5.5608e-05,
+              "upstream_inference_completions_cost": 0
+            }
+          }
+        },
+        {
+          "scenario": "S3",
+          "id": 2249,
+          "truth": "none",
+          "rel": "none",
+          "relP": 0.86,
+          "kind": "tool",
+          "usage": {
+            "input_tokens": 1459,
+            "output_tokens": 66,
+            "cost": 6.1278e-05,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 6.1278e-05,
+              "upstream_inference_prompt_cost": 6.1278e-05,
+              "upstream_inference_completions_cost": 0
+            }
+          }
+        },
+        {
+          "scenario": "S3",
+          "id": 2138,
+          "truth": "none",
+          "rel": "none",
+          "relP": 0.83,
+          "kind": "tool",
+          "usage": {
+            "input_tokens": 1489,
+            "output_tokens": 66,
+            "cost": 6.2538e-05,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 6.2538e-05,
+              "upstream_inference_prompt_cost": 6.2538e-05,
+              "upstream_inference_completions_cost": 0
+            }
+          }
+        },
+        {
+          "scenario": "S4",
+          "id": 2327,
+          "truth": "direct",
+          "rel": "none",
+          "relP": 1.0,
+          "kind": "news",
+          "usage": {
+            "input_tokens": 1487,
+            "output_tokens": 66,
+            "cost": 6.2454e-05,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 6.2454e-05,
+              "upstream_inference_prompt_cost": 6.2454e-05,
+              "upstream_inference_completions_cost": 0
+            }
+          }
+        },
+        {
+          "scenario": "S4",
+          "id": 2307,
+          "truth": "direct",
+          "rel": "none",
+          "relP": 0.99,
+          "kind": "news",
+          "usage": {
+            "input_tokens": 1568,
+            "output_tokens": 66,
+            "cost": 6.5856e-05,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 6.5856e-05,
+              "upstream_inference_prompt_cost": 6.5856e-05,
+              "upstream_inference_completions_cost": 0
+            }
+          }
+        },
+        {
+          "scenario": "S4",
+          "id": 2217,
+          "truth": "similar",
+          "rel": "none",
+          "relP": 0.96,
+          "kind": "news",
+          "usage": {
+            "input_tokens": 666,
+            "output_tokens": 66,
+            "cost": 2.7972e-05,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 2.7972e-05,
+              "upstream_inference_prompt_cost": 2.7972e-05,
+              "upstream_inference_completions_cost": 0
+            }
+          }
+        },
+        {
+          "scenario": "S4",
+          "id": 2249,
+          "truth": "none",
+          "rel": "none",
+          "relP": 0.94,
+          "kind": "news",
+          "usage": {
+            "input_tokens": 1451,
+            "output_tokens": 66,
+            "cost": 6.0942e-05,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 6.0942e-05,
+              "upstream_inference_prompt_cost": 6.0942e-05,
+              "upstream_inference_completions_cost": 0
+            }
+          }
+        },
+        {
+          "scenario": "S4",
+          "id": 2138,
+          "truth": "none",
+          "rel": "none",
+          "relP": 1.0,
+          "kind": "tool",
+          "usage": {
+            "input_tokens": 1481,
+            "output_tokens": 66,
+            "cost": 6.2202e-05,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 6.2202e-05,
+              "upstream_inference_prompt_cost": 6.2202e-05,
+              "upstream_inference_completions_cost": 0
+            }
+          }
+        },
+        {
+          "scenario": "S5",
+          "id": 2356,
+          "truth": "direct",
+          "rel": "none",
+          "relP": 0.76,
+          "kind": "news",
+          "usage": {
+            "input_tokens": 1451,
+            "output_tokens": 66,
+            "cost": 6.0942e-05,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 6.0942e-05,
+              "upstream_inference_prompt_cost": 6.0942e-05,
+              "upstream_inference_completions_cost": 0
+            }
+          }
+        },
+        {
+          "scenario": "S5",
+          "id": 2218,
+          "truth": "direct",
+          "rel": "none",
+          "relP": 0.98,
+          "kind": "news",
+          "usage": {
+            "input_tokens": 980,
+            "output_tokens": 66,
+            "cost": 4.116e-05,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 4.116e-05,
+              "upstream_inference_prompt_cost": 4.116e-05,
+              "upstream_inference_completions_cost": 0
+            }
+          }
+        },
+        {
+          "scenario": "S5",
+          "id": 2341,
+          "truth": "similar",
+          "rel": "none",
+          "relP": 0.86,
+          "kind": "news",
+          "usage": {
+            "input_tokens": 1373,
+            "output_tokens": 66,
+            "cost": 5.7666e-05,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 5.7666e-05,
+              "upstream_inference_prompt_cost": 5.7666e-05,
+              "upstream_inference_completions_cost": 0
+            }
+          }
+        },
+        {
+          "scenario": "S5",
+          "id": 2249,
+          "truth": "none",
+          "rel": "none",
+          "relP": 0.69,
+          "kind": "news",
+          "usage": {
+            "input_tokens": 1455,
+            "output_tokens": 66,
+            "cost": 6.111e-05,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 6.111e-05,
+              "upstream_inference_prompt_cost": 6.111e-05,
+              "upstream_inference_completions_cost": 0
+            }
+          }
+        },
+        {
+          "scenario": "S5",
+          "id": 2138,
+          "truth": "none",
+          "rel": "none",
+          "relP": 0.99,
+          "kind": "tool",
+          "usage": {
+            "input_tokens": 1485,
+            "output_tokens": 66,
+            "cost": 6.237e-05,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 6.237e-05,
+              "upstream_inference_prompt_cost": 6.237e-05,
+              "upstream_inference_completions_cost": 0
+            }
+          }
+        }
+      ]
+    },
+    "v1_rubric": {
+      "acuracia3": 0.4286,
+      "precisao": 0.6667,
+      "recall": 0.2222,
+      "f1": 0.3333,
+      "previsto": {
+        "direct": 0,
+        "similar": 6,
+        "none": 22
+      },
+      "kindAcc": 0.7143,
+      "porCenario": {
+        "S1": {
+          "acuracia3": 0.5,
+          "precisao": 1.0,
+          "recall": 0.25,
+          "f1": 0.4,
+          "previsto": {
+            "direct": 0,
+            "similar": 1,
+            "none": 5
+          }
+        },
+        "S2": {
+          "acuracia3": 0.6667,
+          "precisao": 1.0,
+          "recall": 0.5,
+          "f1": 0.6667,
+          "previsto": {
+            "direct": 0,
+            "similar": 2,
+            "none": 4
+          }
+        },
+        "S3": {
+          "acuracia3": 0.3333,
+          "precisao": 0.5,
+          "recall": 0.25,
+          "f1": 0.3333,
+          "previsto": {
+            "direct": 0,
+            "similar": 2,
+            "none": 4
+          }
+        },
+        "S4": {
+          "acuracia3": 0.4,
+          "precisao": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "previsto": {
+            "direct": 0,
+            "similar": 0,
+            "none": 5
+          }
+        },
+        "S5": {
+          "acuracia3": 0.2,
+          "precisao": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "previsto": {
+            "direct": 0,
+            "similar": 1,
+            "none": 4
+          }
+        }
+      },
+      "segundos": 10.3,
+      "custoUsd": 0.001879,
+      "rows": [
+        {
+          "scenario": "S1",
+          "id": 2249,
+          "truth": "direct",
+          "rel": "none",
+          "relP": 0.7,
+          "kind": "news",
+          "usage": {
+            "input_tokens": 1702,
+            "output_tokens": 66,
+            "cost": 7.1484e-05,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 7.1484e-05,
+              "upstream_inference_prompt_cost": 7.1484e-05,
+              "upstream_inference_completions_cost": 0
+            }
+          }
+        },
+        {
+          "scenario": "S1",
+          "id": 2138,
+          "truth": "direct",
+          "rel": "none",
+          "relP": 0.87,
+          "kind": "news",
+          "usage": {
+            "input_tokens": 1732,
+            "output_tokens": 66,
+            "cost": 7.2744e-05,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 7.2744e-05,
+              "upstream_inference_prompt_cost": 7.2744e-05,
+              "upstream_inference_completions_cost": 0
+            }
+          }
+        },
+        {
+          "scenario": "S1",
+          "id": 2148,
+          "truth": "similar",
+          "rel": "similar",
+          "relP": 0.53,
+          "kind": "tool",
+          "usage": {
+            "input_tokens": 1625,
+            "output_tokens": 66,
+            "cost": 6.825e-05,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 6.825e-05,
+              "upstream_inference_prompt_cost": 6.825e-05,
+              "upstream_inference_completions_cost": 0
+            }
+          }
+        },
+        {
+          "scenario": "S1",
+          "id": 2098,
+          "truth": "similar",
+          "rel": "none",
+          "relP": 0.79,
+          "kind": "news",
+          "usage": {
+            "input_tokens": 1567,
+            "output_tokens": 66,
+            "cost": 6.5814e-05,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 6.5814e-05,
+              "upstream_inference_prompt_cost": 6.5814e-05,
+              "upstream_inference_completions_cost": 0
+            }
+          }
+        },
+        {
+          "scenario": "S1",
+          "id": 2012,
+          "truth": "none",
+          "rel": "none",
+          "relP": 0.78,
+          "kind": "tool",
+          "usage": {
+            "input_tokens": 1150,
+            "output_tokens": 66,
+            "cost": 4.83e-05,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 4.83e-05,
+              "upstream_inference_prompt_cost": 4.83e-05,
+              "upstream_inference_completions_cost": 0
+            }
+          }
+        },
+        {
+          "scenario": "S1",
+          "id": 2008,
+          "truth": "none",
+          "rel": "none",
+          "relP": 0.82,
+          "kind": "tool",
+          "usage": {
+            "input_tokens": 1691,
+            "output_tokens": 66,
+            "cost": 7.1022e-05,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 7.1022e-05,
+              "upstream_inference_prompt_cost": 7.1022e-05,
+              "upstream_inference_completions_cost": 0
+            }
+          }
+        },
+        {
+          "scenario": "S2",
+          "id": 2012,
+          "truth": "direct",
+          "rel": "none",
+          "relP": 0.77,
+          "kind": "tool",
+          "usage": {
+            "input_tokens": 1132,
+            "output_tokens": 66,
+            "cost": 4.7544e-05,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 4.7544e-05,
+              "upstream_inference_prompt_cost": 4.7544e-05,
+              "upstream_inference_completions_cost": 0
+            }
+          }
+        },
+        {
+          "scenario": "S2",
+          "id": 2008,
+          "truth": "direct",
+          "rel": "none",
+          "relP": 0.8,
+          "kind": "tool",
+          "usage": {
+            "input_tokens": 1673,
+            "output_tokens": 66,
+            "cost": 7.0266e-05,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 7.0266e-05,
+              "upstream_inference_prompt_cost": 7.0266e-05,
+              "upstream_inference_completions_cost": 0
+            }
+          }
+        },
+        {
+          "scenario": "S2",
+          "id": 1905,
+          "truth": "similar",
+          "rel": "similar",
+          "relP": 0.7,
+          "kind": "news",
+          "usage": {
+            "input_tokens": 1496,
+            "output_tokens": 66,
+            "cost": 6.2832e-05,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 6.2832e-05,
+              "upstream_inference_prompt_cost": 6.2832e-05,
+              "upstream_inference_completions_cost": 0
+            }
+          }
+        },
+        {
+          "scenario": "S2",
+          "id": 1784,
+          "truth": "similar",
+          "rel": "similar",
+          "relP": 0.74,
+          "kind": "news",
+          "usage": {
+            "input_tokens": 1584,
+            "output_tokens": 66,
+            "cost": 6.6528e-05,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 6.6528e-05,
+              "upstream_inference_prompt_cost": 6.6528e-05,
+              "upstream_inference_completions_cost": 0
+            }
+          }
+        },
+        {
+          "scenario": "S2",
+          "id": 2249,
+          "truth": "none",
+          "rel": "none",
+          "relP": 0.71,
+          "kind": "news",
+          "usage": {
+            "input_tokens": 1684,
+            "output_tokens": 66,
+            "cost": 7.0728e-05,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 7.0728e-05,
+              "upstream_inference_prompt_cost": 7.0728e-05,
+              "upstream_inference_completions_cost": 0
+            }
+          }
+        },
+        {
+          "scenario": "S2",
+          "id": 2138,
+          "truth": "none",
+          "rel": "none",
+          "relP": 0.78,
+          "kind": "tool",
+          "usage": {
+            "input_tokens": 1714,
+            "output_tokens": 66,
+            "cost": 7.1988e-05,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 7.1988e-05,
+              "upstream_inference_prompt_cost": 7.1988e-05,
+              "upstream_inference_completions_cost": 0
+            }
+          }
+        },
+        {
+          "scenario": "S3",
+          "id": 2324,
+          "truth": "direct",
+          "rel": "none",
+          "relP": 0.75,
+          "kind": "tool",
+          "usage": {
+            "input_tokens": 2026,
+            "output_tokens": 66,
+            "cost": 8.5092e-05,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 8.5092e-05,
+              "upstream_inference_prompt_cost": 8.5092e-05,
+              "upstream_inference_completions_cost": 0
+            }
+          }
+        },
+        {
+          "scenario": "S3",
+          "id": 2323,
+          "truth": "direct",
+          "rel": "none",
+          "relP": 0.69,
+          "kind": "tool",
+          "usage": {
+            "input_tokens": 1649,
+            "output_tokens": 66,
+            "cost": 6.9258e-05,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 6.9258e-05,
+              "upstream_inference_prompt_cost": 6.9258e-05,
+              "upstream_inference_completions_cost": 0
+            }
+          }
+        },
+        {
+          "scenario": "S3",
+          "id": 1784,
+          "truth": "similar",
+          "rel": "similar",
+          "relP": 0.72,
+          "kind": "tool",
+          "usage": {
+            "input_tokens": 1594,
+            "output_tokens": 66,
+            "cost": 6.6948e-05,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 6.6948e-05,
+              "upstream_inference_prompt_cost": 6.6948e-05,
+              "upstream_inference_completions_cost": 0
+            }
+          }
+        },
+        {
+          "scenario": "S3",
+          "id": 1998,
+          "truth": "similar",
+          "rel": "none",
+          "relP": 0.56,
+          "kind": "tool",
+          "usage": {
+            "input_tokens": 1559,
+            "output_tokens": 66,
+            "cost": 6.5478e-05,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 6.5478e-05,
+              "upstream_inference_prompt_cost": 6.5478e-05,
+              "upstream_inference_completions_cost": 0
+            }
+          }
+        },
+        {
+          "scenario": "S3",
+          "id": 2249,
+          "truth": "none",
+          "rel": "similar",
+          "relP": 0.55,
+          "kind": "tool",
+          "usage": {
+            "input_tokens": 1694,
+            "output_tokens": 66,
+            "cost": 7.1148e-05,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 7.1148e-05,
+              "upstream_inference_prompt_cost": 7.1148e-05,
+              "upstream_inference_completions_cost": 0
+            }
+          }
+        },
+        {
+          "scenario": "S3",
+          "id": 2138,
+          "truth": "none",
+          "rel": "none",
+          "relP": 0.74,
+          "kind": "tool",
+          "usage": {
+            "input_tokens": 1724,
+            "output_tokens": 66,
+            "cost": 7.2408e-05,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 7.2408e-05,
+              "upstream_inference_prompt_cost": 7.2408e-05,
+              "upstream_inference_completions_cost": 0
+            }
+          }
+        },
+        {
+          "scenario": "S4",
+          "id": 2327,
+          "truth": "direct",
+          "rel": "none",
+          "relP": 0.92,
+          "kind": "tool",
+          "usage": {
+            "input_tokens": 1722,
+            "output_tokens": 66,
+            "cost": 7.2324e-05,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 7.2324e-05,
+              "upstream_inference_prompt_cost": 7.2324e-05,
+              "upstream_inference_completions_cost": 0
+            }
+          }
+        },
+        {
+          "scenario": "S4",
+          "id": 2307,
+          "truth": "direct",
+          "rel": "none",
+          "relP": 0.86,
+          "kind": "news",
+          "usage": {
+            "input_tokens": 1803,
+            "output_tokens": 66,
+            "cost": 7.5726e-05,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 7.5726e-05,
+              "upstream_inference_prompt_cost": 7.5726e-05,
+              "upstream_inference_completions_cost": 0
+            }
+          }
+        },
+        {
+          "scenario": "S4",
+          "id": 2217,
+          "truth": "similar",
+          "rel": "none",
+          "relP": 0.89,
+          "kind": "tool",
+          "usage": {
+            "input_tokens": 901,
+            "output_tokens": 66,
+            "cost": 3.7842e-05,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 3.7842e-05,
+              "upstream_inference_prompt_cost": 3.7842e-05,
+              "upstream_inference_completions_cost": 0
+            }
+          }
+        },
+        {
+          "scenario": "S4",
+          "id": 2249,
+          "truth": "none",
+          "rel": "none",
+          "relP": 0.58,
+          "kind": "tool",
+          "usage": {
+            "input_tokens": 1686,
+            "output_tokens": 66,
+            "cost": 7.0812e-05,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 7.0812e-05,
+              "upstream_inference_prompt_cost": 7.0812e-05,
+              "upstream_inference_completions_cost": 0
+            }
+          }
+        },
+        {
+          "scenario": "S4",
+          "id": 2138,
+          "truth": "none",
+          "rel": "none",
+          "relP": 0.92,
+          "kind": "tool",
+          "usage": {
+            "input_tokens": 1716,
+            "output_tokens": 66,
+            "cost": 7.2072e-05,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 7.2072e-05,
+              "upstream_inference_prompt_cost": 7.2072e-05,
+              "upstream_inference_completions_cost": 0
+            }
+          }
+        },
+        {
+          "scenario": "S5",
+          "id": 2356,
+          "truth": "direct",
+          "rel": "none",
+          "relP": 0.59,
+          "kind": "news",
+          "usage": {
+            "input_tokens": 1686,
+            "output_tokens": 66,
+            "cost": 7.0812e-05,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 7.0812e-05,
+              "upstream_inference_prompt_cost": 7.0812e-05,
+              "upstream_inference_completions_cost": 0
+            }
+          }
+        },
+        {
+          "scenario": "S5",
+          "id": 2218,
+          "truth": "direct",
+          "rel": "none",
+          "relP": 0.56,
+          "kind": "tool",
+          "usage": {
+            "input_tokens": 1215,
+            "output_tokens": 66,
+            "cost": 5.103e-05,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 5.103e-05,
+              "upstream_inference_prompt_cost": 5.103e-05,
+              "upstream_inference_completions_cost": 0
+            }
+          }
+        },
+        {
+          "scenario": "S5",
+          "id": 2341,
+          "truth": "similar",
+          "rel": "none",
+          "relP": 0.73,
+          "kind": "news",
+          "usage": {
+            "input_tokens": 1608,
+            "output_tokens": 66,
+            "cost": 6.7536e-05,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 6.7536e-05,
+              "upstream_inference_prompt_cost": 6.7536e-05,
+              "upstream_inference_completions_cost": 0
+            }
+          }
+        },
+        {
+          "scenario": "S5",
+          "id": 2249,
+          "truth": "none",
+          "rel": "similar",
+          "relP": 0.57,
+          "kind": "tool",
+          "usage": {
+            "input_tokens": 1690,
+            "output_tokens": 66,
+            "cost": 7.098e-05,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 7.098e-05,
+              "upstream_inference_prompt_cost": 7.098e-05,
+              "upstream_inference_completions_cost": 0
+            }
+          }
+        },
+        {
+          "scenario": "S5",
+          "id": 2138,
+          "truth": "none",
+          "rel": "none",
+          "relP": 0.75,
+          "kind": "tool",
+          "usage": {
+            "input_tokens": 1720,
+            "output_tokens": 66,
+            "cost": 7.224e-05,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 7.224e-05,
+              "upstream_inference_prompt_cost": 7.224e-05,
+              "upstream_inference_completions_cost": 0
+            }
+          }
+        }
+      ]
+    }
+  }
+}

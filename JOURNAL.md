@@ -9,6 +9,33 @@
 
 ---
 
+## 2026-11-26 — Rotina diária no Mac mini + produção no GitHub Pages
+
+- **Contexto:** o dono pediu explicitamente uma rotina diária (madrugada) que colete as notícias,
+  atualize o site sozinha e avise por e-mail em caso de problema — invertendo a decisão de
+  2026-10-23 («não quero rotina»), agora com pedido explícito. A sessão anterior publicou o site
+  novo em GitHub Pages (`https://frederico-kluser.github.io/`) porque o projeto Vercel foi deletado
+  e não havia credencial Vercel na máquina.
+- **Decisão (instalada):** LaunchDaemon `com.nc.daily-crawl` às 05:00 com `RunAtLoad`; abre uma
+  sessão SSH local com chave dedicada + forced command `scripts/rotina-diaria.sh run` (a sessão SSH
+  herda a FDA do `sshd-keygen-wrapper`; launchd direto não lê `/Volumes/Ext2TB`). O wrapper usa o
+  lock compartilhado do `npm run atualizar`, guarda de frescura 12 h, preflight
+  (TCC/node/gh/site/banco/chave/espaço), crawl `--since 2026-01-01` → `finish` → `deploy --no-wait`
+  → dispatch do workflow do Pages → polling do `meta.json`; heartbeat
+  `~/.local/state/nc-daily/last-run.json`, log com rotação e alerta local. `npm run atualizar`
+  delega nessa rotina; o caminho Vercel fica em `NC_LEGACY_VERCEL=1`.
+- **Site:** o deploy do Pages é o workflow `deploy.yml` do repo
+  `frederico-kluser/frederico-kluser.github.io` (artifact, sem commits diários de 200 MB). O site de
+  produção permanece `https://frederico-kluser.github.io/`; a API `/api/v1` e o `/admin` são
+  estáticos (o backend Vercel do admin não existe no Pages).
+- **E-mail:** a máquina não tem Mail.app/SMTP/1Password configurados; o dono optou por instalar já
+  com alerta local. O envio fica pronto em `scripts/notify-email.py`, ativado por `NC_SMTP_URL` em
+  `~/.newsletter-crawler/.env` (senha de app do iCloud ou Resend); `scripts/rotina-diaria.sh send-test` testa.
+- **Lição:** a rotina de 2026-10-23 falhava por pressupostos (estado em JSON pretty-print, lock
+  órfão); esta usa o mesmo lock do comando manual, valida o site por `generatedAt` e não depende do
+  Vercel. O saldo OpenRouter (~US$ 11,36 em 2026-11-26) é mostrado no relatório; abaixo de US$ 3
+  gera aviso.
+
 ## 2026-10-23 — Do agendamento ao comando único: `npm run atualizar` (coletar → base → deploy)
 
 - **Contexto:** pedido inicial = rotina agendada às 05:00 no Mac mini para buscar as notícias novas

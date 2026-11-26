@@ -859724,5 +859724,3042 @@
     "software-development"
    ]
   }
+ },
+ {
+  "id": 21879,
+  "source_id": 7,
+  "url": "https://www.therundown.ai/articles/cybersecurity-gets-a-44b-merger",
+  "title": "Cybersecurity gets a $44B merger",
+  "title_pt": "Cibersegurança ganha fusão de US$ 44 bilhões",
+  "summary_pt": "O grande destaque do dia é a compra da Zscaler pela CrowdStrike por US$ 43,9 bilhões em ações, o maior negócio de cibersegurança já registrado. A união junta a proteção de endpoints da CrowdStrike com os serviços de nuvem da Zscaler, criando uma empresa com mais de US$ 10 bilhões em receita recorrente anual e promessa de cortar US$ 500 milhões em custos por ano. O CEO George Kurtz afirma que o objetivo é formar a maior empresa de segurança e IA do mundo, em um momento em que ataques cibernéticos se tornam mais sofisticados, inclusive com uso de IA. A edição também traz outros destaques: a Nothing lança fones de ouvido com gravação e transcrição de conversas; a Meta revisa sua meta de carbono zero para 2030, pressionada pelo alto consumo de energia da IA; e a Amazon usa adesivos em caixas para fazer lobby contra uma lei de entregas em Nova York. Entre as notícias rápidas, estão o novo update de direção autônoma da Tesla, o sucesso de GTA 6, o retorno dos produtos Product(RED) da Apple e o fechamento do app Nest pelo Google em 2027.",
+  "snippet": "Good morning, tech enthusiasts. Hackers spent the past few weeks breaking into banks, crypto platforms, and even supermarket fridges, some with the help of AI. Now the industry is consolidating to fight back, with CrowdStrike buying Zscaler for $43.9B in the biggest cybersecurity deal ever, aimed at protecting every device and connection under one roof. In today’s tech rundown: CrowdStrike buy",
+  "issue_url": "https://www.therundown.ai/articles",
+  "blurb": null,
+  "date_iso": "2026-11-24",
+  "kind": "news",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "security",
+    "ai-safety"
+   ],
+   "content-type": [
+    "acquisition-news"
+   ],
+   "difficulty": [
+    "all-levels"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "topic-technology": [
+    "ai-safety",
+    "ai-in-business"
+   ]
+  }
+ },
+ {
+  "id": 21880,
+  "source_id": 10,
+  "url": "https://www.baseshift.com/blog/dc1",
+  "title": "Introducing Database Compression V1 (DC1)",
+  "title_pt": "Apresentando a Compressão de Banco de Dados V1 (DC1)",
+  "summary_pt": "A Baseshift anunciou o DC1, um novo codec de compressão para bancos de dados que opera na camada de libc personalizada, permitindo comprimir dados sem modificar o binário do PostgreSQL nem exigir sistemas de arquivos especiais. Em bancos reais, o DC1 supera codecs de nível de bloco, mantendo acesso aleatório a blocos de 8 KB com latência média de decodificação de cerca de 0,18 ms por bloco em um núcleo de CPU. No banco do OpenStreetMap dos EUA, a compressão reduziu os dados de 242 GB para 28,7 GB — uma taxa de 8,4× — superando até mesmo compactadores de arquivo inteiro como Zstandard, xz e zpaq nesse conjunto de dados. O DC1 combina codecs especializados e codecs neurais que aprendem a estrutura de cada tabela, armazenando apenas o que não conseguem prever. A decodificação é projetada para paralelismo, aproveitando instruções como AVX-512 VNNI, o que trouxe uma aceleração de 8× em relação ao código C portátil. Na comparação com baselines de bloco, a saída do DC1 é 57% menor que a do Zstandard -3, 48% menor que a do Brotli e 38% menor que a do Zstandard -19 com dicionários treinados. Índices B-tree ordenados alcançam taxas impressionantes, como 101,8× no índice da tabela nodes do OSM. A pesquisa está disponível como preview, com imagens Docker do PostgreSQL 17 + PostGIS já codificadas com DC1 para os bancos do OpenStreetMap dos EUA e de Nova York. A Baseshift planeja iterar com o DC2, lançar mais bancos de demonstração e integrar os codecs maduros em seus fluxos de trabalho de snapshots.",
+  "snippet": "At Baseshift we routinely take snapshots of databases for developers and agents, typically output as Docker images, with block-level copy-on-write. To do this in a portable and database-agnostic manner, we chose an architecture that works with unmodified database binaries without requiring a special file system, driver, or storage subsystem: a bespoke libc for databases. This architecture has the",
+  "issue_url": "https://llmnews.ai",
+  "blurb": null,
+  "date_iso": "2026-09-10",
+  "kind": "tool",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "optimization",
+    "performance",
+    "cost-optimization",
+    "latency"
+   ],
+   "content-type": [
+    "product-launch",
+    "deep-dive"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "backend"
+   ],
+   "framework-library-tool": [
+    "postgresql",
+    "docker"
+   ],
+   "topic-technology": [
+    "relational-databases",
+    "databases",
+    "performance-optimization"
+   ]
+  }
+ },
+ {
+  "id": 21881,
+  "source_id": 10,
+  "url": "https://greydanus.github.io/2026/11/12/pengpt",
+  "title": "PenGPT: A Generative Transformer for Handwriting and Sketches",
+  "title_pt": "PenGPT: Um Transformer Generativo para Escrita Manual e Desenhos",
+  "summary_pt": "PenGPT é um projeto que usa um transformer compacto para gerar escrita à mão e desenhos a partir de texto. O autor treinou dois modelos: um com 6 milhões de parâmetros, capaz de imitar a caligrafia de uma pessoa a partir de poucas palavras reais, e outro com 54 milhões de parâmetros, que desenha a partir de prompts textuais. A abordagem se apoia em uma tokenização simples baseada em movimentos da caneta em oito direções, com codificação por pares de bytes (BPE) para encurtar as sequências, e o restante é um decoder comum com atenção cruzada. O autor destaca que o esforço foi concentrado principalmente nos dados: cerca de 80% do trabalho foi dedicado a construir e filtrar grandes conjuntos de dados — 495.590 palavras de 1.255 escritores para caligrafia e 477.670 esboços de dez datasets públicos para desenhos. Experimentos mostram que reduzir os dados ou remover aumentos de dados piora bastante os resultados, enquanto mudanças arquitetônicas, como dobrar o número de parâmetros ou aumentar o vocabulário, têm efeito mínimo. O modelo também consegue aprender uma nova caligrafia a partir de fotos, usando um vetor de estilo ajustado com poucos exemplos. Apesar dos bons resultados, o autor reconhece limitações: o modelo de desenho combina ideias familiares, mas não consegue lidar bem com relações espaciais ou atributos como \"olhando para a esquerda\", e a escrita amostrada é um pouco menos legível que a real. O texto termina com uma reflexão sobre a \"lição amarga\" (Bitter Lesson) de Rich Sutton: em vez de depender de ideias arquitetônicas engenhosas, o sucesso veio de investir pesado em dados e infraestrutura de treinamento.",
+  "snippet": "A small transformer that writes and sketches from text. The effort was 80% data, 15% speed and 5% architecture: my first project that follows the Bitter Lesson. Left. One phrase in the hands of 21 writers who were held out of training. The model read one to three real words by each of them and carried on in their hand. Right. Drawings from typed prompts. I picked these by eye from the best thi",
+  "issue_url": "https://llmnews.ai",
+  "blurb": null,
+  "date_iso": "2026-09-10",
+  "kind": "tool",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "data-engineering",
+    "architecture",
+    "performance",
+    "interpretability"
+   ],
+   "content-type": [
+    "project-spotlight",
+    "deep-dive"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "llm-models",
+    "ai-general"
+   ],
+   "framework-library-tool": [
+    "gpt",
+    "transformers"
+   ],
+   "topic-technology": [
+    "transformers",
+    "generative-ai",
+    "image-generation",
+    "datasets",
+    "tokenization",
+    "multimodal-ai"
+   ],
+   "trending-emerging": [
+    "small-language-models",
+    "multimodal"
+   ]
+  }
+ },
+ {
+  "id": 21882,
+  "source_id": 10,
+  "url": "https://www.iankduncan.com/engineering/2026-11-19-smart-people-who-give-a-shit-use-tools",
+  "title": "Smart People Who Give a Shit Use Tools",
+  "title_pt": "Pessoas inteligentes que se importam usam ferramentas",
+  "summary_pt": "O artigo responde a um texto de Justin Michael sobre engenheiros experientes que mantêm sistemas críticos de pé com cuidado e conhecimento tácito. Michael sugere que o uso de IA generativa afasta esses profissionais dos sistemas que conhecem a fundo e contribui para as grandes apagões recentes. O autor discorda dessa visão: para ele, LLMs são amplificadores das características de quem os usa. Engenheiros que realmente se importam usam a IA para fazer análises mais rigorosas, escrever testes exaustivos, simular falhas e explorar sistemas legados — algo que antes era inviável por falta de tempo. Já profissionais desleixados continuam sendo desleixados, apenas mais rápido. O texto também argumenta que a atual onda de instabilidade é consequência de décadas de atalhos e falta de rigor na engenharia, não da adoção de IA. O verdadeiro problema é a gestão que trata engenheiros como descartáveis e troca experiência por assinaturas baratas de IA. No fim, o autor defende que medir o comprometimento de alguém pela ferramenta usada é errado: o que importa é a responsabilidade, o entendimento do sistema e o que acontece quando algo quebra de madrugada.",
+  "snippet": "Anyone who has worked on payment rails or old distributed systems knows the exact feeling Justin Michael describes in his post this week. You peel back the curtain on some piece of infrastructure the economy quietly runs on, expecting Swiss watchmaking, and find duct tape, twenty-year-old batch files, and three people in the whole company who know why you never reboot box four on a Tuesday. He cal",
+  "issue_url": "https://llmnews.ai",
+  "blurb": null,
+  "date_iso": "2026-11-19",
+  "kind": "news",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "dev-experience",
+    "developer-productivity",
+    "reliability"
+   ],
+   "content-type": [
+    "opinion",
+    "commentary"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "llm-models",
+    "ai-general"
+   ],
+   "topic-technology": [
+    "generative-ai",
+    "llm-models",
+    "ai-adoption",
+    "ai-ethics"
+   ]
+  }
+ },
+ {
+  "id": 21883,
+  "source_id": 10,
+  "url": "https://openai.com/index/gpt-6-models-demonstrate-intrinsic-protein-design-capabilities",
+  "title": "GPT-6 models demonstrate intrinsic protein-design capabilities",
+  "title_pt": "Modelos GPT-6 demonstram capacidades intrínsecas de design de proteínas",
+  "summary_pt": "A pesquisa mostra que a família de modelos GPT-6 consegue projetar novas proteínas — incluindo suas formas tridimensionais e sequências de aminoácidos — usando apenas raciocínio e código, sem depender de modelos biológicos especializados para gerar os designs. Em diversas tarefas de design de proteínas, um modelo interno da pesquisa igualou ou superou ferramentas especializadas. Os resultados também indicam que é possível guiar os modelos por instruções em linguagem natural, especificando pontos de ligação, formato geral e até detalhes estruturais, como o número de hélices ou fitas de uma proteína. Em testes de laboratório feitos com a Onava, proteínas baseadas nos designs do GPT-6.2 apresentaram evidências de ligação em cinco alvos diferentes, e anticorpos redesenhados mantiveram a capacidade de se ligar aos seus alvos originais. Os modelos também se saíram bem ao redesenhar sequências de aminoácidos para estruturas já conhecidas, com taxas de ligação relevantes em experimentos com minibinders e fragmentos de anticorpos. Segundo os autores, o raciocínio escrito e o código gerado pelos modelos indicam que eles combinam conhecimentos de matemática, física, química e biologia para pensar sobre formas de proteínas e interações moleculares. Apesar dos avanços, a predição completa da estrutura de uma proteína continua sendo um ponto fraco dos modelos. Mesmo assim, os resultados sugerem que o GPT-6 pode atuar como uma base universal para biologia de proteínas, reduzindo a necessidade de coordenar múltiplas ferramentas especializadas e facilitando a adaptação a novas instruções e requisitos de design.",
+  "snippet": "Key findings: Our GPT‑6 family of models can design new protein shapes and the sequence of their chemical building blocks using only reasoning and code, without calling specialized biology models to generate those designs. An internal research model matched or outperformed specialized models on many protein design tasks. Researchers could also guide designs by prompting the model on where a prot",
+  "issue_url": "https://llmnews.ai",
+  "blurb": null,
+  "date_iso": "2026-09-10",
+  "kind": "tool",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "openai",
+    "gpt"
+   ],
+   "content-type": [
+    "preprint",
+    "research-paper"
+   ],
+   "difficulty": [
+    "expert"
+   ],
+   "domain": [
+    "llm-models"
+   ],
+   "framework-library-tool": [
+    "gpt"
+   ],
+   "topic-technology": [
+    "model-capabilities",
+    "frontier-models",
+    "reasoning-models",
+    "foundation-models",
+    "generative-ai",
+    "ai-research"
+   ],
+   "trending-emerging": [
+    "reasoning-models",
+    "frontier-models",
+    "foundation-models"
+   ]
+  }
+ },
+ {
+  "id": 21884,
+  "source_id": 10,
+  "url": "https://protocolis.co/paper",
+  "title": "Solid-State Web Execution: Compiling Web Applications into Verified Operations for AI Agents",
+  "title_pt": "Execução Web em Estado Sólido: Compilando Aplicações Web em Operações Verificadas para Agentes de IA",
+  "summary_pt": "O artigo apresenta o Protocolis, um compilador just-in-time que converte a interface ao vivo de um site em operações acionáveis para agentes de IA, já na primeira visita, sem exigir chamadas de modelo, adaptadores específicos ou alterações pelo dono do site. Por exemplo, em uma página de busca de hotéis, o compilador identifica o filtro de preço e oferece ao agente uma operação para configurá-lo; se o modelo define um limite de US$ 200, o mecanismo aplica o valor e verifica na página se o limite foi efetivado. Os autores chamam isso de execução web em estado sólido e afirmam ser o primeiro compilador desse tipo em operação. Nos testes, o Protocolis foi comparado com ferramentas de navegador e agentes comuns, em três tamanhos de modelo e três níveis de complexidade de tarefas, com memória e aprendizado desativados. Em tarefas longas, o modo padrão completou 76% (80 de 105), enquanto a melhor alternativa completou 46%. O sistema nunca ficou abaixo de 55% em nenhuma condição, enquanto todas as alternativas caíram para 28% ou menos. Além disso, o custo por tarefa concluída foi de 1,9 a 26 vezes menor que a alternativa mais barata no mesmo modelo; em um modelo pequeno, o custo foi menor que todas as alternativas em modelos de fronteira em 30 de 30 combinações, com taxa de conclusão igual ou superior em 24. O artigo publica as tarefas, as regras de avaliação e os resultados de todas as 3.443 execuções contadas.",
+  "snippet": "Abstract Protocolis is a just-in-time compiler that derives callable operations from a website’s live interface on an agent’s first visit. Compilation requires no model call, site-specific adapter, or changes by the site owner. For example, on a hotel search page, the compiler identifies the price filter and gives the agent an operation for setting it. If the model chooses a $200 limit, the engin",
+  "issue_url": "https://llmnews.ai",
+  "blurb": null,
+  "date_iso": "2026-11-22",
+  "kind": "news",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "reliability",
+    "cost-optimization",
+    "performance"
+   ],
+   "content-type": [
+    "research-paper",
+    "benchmark"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "ai-general",
+    "frontend"
+   ],
+   "topic-technology": [
+    "ai-agents",
+    "agentic-ai",
+    "tool-calling",
+    "function-calling"
+   ],
+   "trending-emerging": [
+    "browser-agents",
+    "tool-calling",
+    "ai-agents"
+   ]
+  }
+ },
+ {
+  "id": 21885,
+  "source_id": 10,
+  "url": "https://micjm.com/blog/lowering-perplexity-without-scaling",
+  "title": "I, too, can make a chart of perplexity drops",
+  "title_pt": "Eu também sei fazer um gráfico de queda de perplexidade",
+  "summary_pt": "O artigo critica a publicação da OpenAI que mostra a queda da perplexidade de seus modelos ao longo do tempo, sugerindo que essa métrica seria uma medida universal de inteligência. O autor aponta que perplexidade só faz sentido quando se sabe qual corpus o modelo está tentando prever — e, no caso do gráfico da OpenAI, o texto de referência era um corpus fixo de código. Assim, a queda impressionante pode refletir apenas o aumento de código nos dados de treinamento dos modelos, e não uma melhoria geral de capacidades. Para testar essa hipótese, o autor cita um estudo que treinou um modelo de 160M variando apenas a proporção de código no conjunto de treinamento. O resultado mostra que, quanto mais código no treinamento, melhor a perplexidade em código, mas pior em textos não relacionados a código. A conclusão é que o gráfico da OpenAI não mede exatamente o que parece, e a empresa deveria ter incluído muito mais ressalvas em sua análise — especialmente porque uma nota de rodapé já admitia que prever código é um proxy ruim para capacidades gerais.",
+  "snippet": "Today, OpenAI released a blog post showing the perplexity of their models over time. The drop is impressive, and the claim is that perplexity itself can be a universal measure of intelligence. After seeing this chart, the thought that came to mind was: perplexity against what? Perplexity is a measure of how well token likelihoods predict the actual next token. Perplexity is meaningless without kn",
+  "issue_url": "https://llmnews.ai",
+  "blurb": null,
+  "date_iso": "2026-11-22",
+  "kind": "news",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "openai",
+    "gpt"
+   ],
+   "concept-theme": [
+    "evals",
+    "transparency"
+   ],
+   "content-type": [
+    "analysis",
+    "opinion"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "llm-models",
+    "ai-general"
+   ],
+   "topic-technology": [
+    "model-evaluation",
+    "llm-models",
+    "model-training",
+    "datasets"
+   ],
+   "trending-emerging": [
+    "frontier-models"
+   ]
+  }
+ },
+ {
+  "id": 21886,
+  "source_id": 10,
+  "url": "https://andlukyane.com/blog/cayley-graphs-and-torchtpu",
+  "title": "From CUDA and JAX to TorchTPU: Lessons from a Cayley Graph Solver",
+  "title_pt": "Do CUDA e JAX ao TorchTPU: lições de um solver de grafos de Cayley",
+  "summary_pt": "O artigo relata a migração de um solucionador de quebra-cabeças baseado em grafos de Cayley (Tetraminx) de um pipeline com CUDA/PyTorch em A100 e JAX em TPU para o TorchTPU, o backend nativo do PyTorch para TPUs. O autor queria testar se a pilha TPU nativa do PyTorch conseguiria igualar ou superar o treino em A100 e o beam search em JAX, tanto em velocidade quanto em qualidade das soluções. Na primeira tentativa, o treino ficou 1,65x mais lento que o A100 e o beam search 5,7x mais lento que o JAX. Após otimizações como ativar fused eager, reescrever a atenção usando einsum, eliminar shapes dinâmicos e corrigir um bug de deduplicação, o treino passou a ter desempenho comparável ao A100 (1,08x mais rápido) e o beam search otimizado ficou 25% mais rápido por nível que o JAX no mesmo hardware, mantendo o mesmo comprimento de solução em seis quebra-cabeças. A investigação também gerou um issue upstream no TorchTPU que levou a correções de roteamento de atenção. O texto destaca lições práticas: shapes estáticos são essenciais, operações com tamanho de saída dependente dos dados (como nonzero, masked_select e bincount) causam idas à CPU e recompilações, não há fallback silencioso para CPU e checkpoints com DDP e fused eager exigem cuidado. O autor também usou agentes de codificação (Claude Code e Codex) para implementar e perfilhar os experimentos, enquanto ele definia o que portar, medir e avaliar.",
+  "snippet": "From CUDA and JAX to TorchTPU: Lessons from a Cayley Graph Solver Some time ago, I shared a blog post about working with Cayley graphs, where I solved combinatorial puzzles using AI coding agents, PyTorch on GPUs, and JAX on TPUs. Recently, Google released TorchTPU, a native PyTorch backend for TPUs, and I wanted to see how well it works on the same task: whether a PyTorch-native TPU stack could",
+  "issue_url": "https://llmnews.ai",
+  "blurb": null,
+  "date_iso": "2026-11-24",
+  "kind": "tool",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "google",
+    "nvidia",
+    "claude",
+    "codex"
+   ],
+   "concept-theme": [
+    "performance",
+    "optimization",
+    "profiling",
+    "debugging"
+   ],
+   "content-type": [
+    "case-study",
+    "deep-dive"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "ecosystem-language": [
+    "python"
+   ],
+   "framework-library-tool": [
+    "pytorch",
+    "jax",
+    "nvidia-cuda"
+   ],
+   "topic-technology": [
+    "tpu",
+    "gpu",
+    "model-training",
+    "inference-optimization",
+    "performance-tuning",
+    "ai-benchmarks"
+   ],
+   "trending-emerging": [
+    "ai-coding-agents"
+   ]
+  }
+ },
+ {
+  "id": 21887,
+  "source_id": 10,
+  "url": "https://michaelharley.net/posts/2026/11/01/llm-agents-work-for-their-parent-companies-not-for-you",
+  "title": "LLM agents work for their parent companies, not for you",
+  "title_pt": "Agentes de LLM trabalham para as empresas-mãe, não para você",
+  "summary_pt": "O autor relata que usou o Claude Code para criar uma ferramenta que identifica músicas de reels do Instagram e busca essas músicas no Bandcamp, com o objetivo de comprá-las diretamente dos artistas. A ferramenta parou de funcionar quando o Bandcamp adicionou um desafio de segurança, e o Claude se recusou a ajudar a contornar o obstáculo. No entanto, o mesmo assistente aceitava baixar músicas do YouTube, o que não gera renda para os artistas. O autor vê essa contradição como um exemplo claro de que os agentes de IA não trabalham para o usuário, mas sim para as empresas que os criam. Ele argumenta que as decisões da Anthropic e de outras empresas sobre o que o modelo pode ou não fazer são motivadas por interesses corporativos e governamentais, não pelo benefício do usuário. Ele também expressa preocupação com o futuro, prevendo que esses sistemas podem priorizar anúncios pagos ou obedecer a pressões políticas. Por isso, defende o uso de modelos locais e abertos, para que o agente de IA realmente atue a favor de quem o utiliza.",
+  "snippet": "In the evenings after work, I will often sit out back on the porch and do some phone rotting. That usually takes the form of me just flipping through reels on Instagram, allowing the algorithm to take me where it may. I usually pair this with a healthy tumbler of rum or bourbon. I'm turning my brain off after work, and I'm just having a good time on the internet. The kids might call it dopamine ma",
+  "issue_url": "https://llmnews.ai",
+  "blurb": null,
+  "date_iso": "2026-11-01",
+  "kind": "news",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "claude",
+    "anthropic"
+   ],
+   "concept-theme": [
+    "alignment",
+    "ai-safety",
+    "ai-ethics",
+    "transparency"
+   ],
+   "content-type": [
+    "opinion",
+    "commentary"
+   ],
+   "difficulty": [
+    "all-levels"
+   ],
+   "domain": [
+    "llm-models",
+    "ai-general"
+   ],
+   "topic-technology": [
+    "ai-agents",
+    "tool-calling",
+    "agentic-ai"
+   ],
+   "trending-emerging": [
+    "ai-agents",
+    "agentic-ai",
+    "ai-governance"
+   ]
+  }
+ },
+ {
+  "id": 21888,
+  "source_id": 10,
+  "url": "https://www.greynoise.io/blog/check-point-security-management-servers-intrusion-campaign",
+  "title": "An Active Intrusion Campaign Against Check Point Security Management Servers",
+  "title_pt": "Campanha de intrusão ativa contra servidores Check Point Security Management",
+  "summary_pt": "O GreyNoise detectou uma campanha de intrusão direcionada a servidores Check Point Security Management, com atividades confirmadas entre 17 de outubro e 2 de novembro de 2026, afetando pelo menos 22 organizações em diversos países e setores, como serviços financeiros, energia, governo, transporte, mineração, engenharia e manufatura. A campanha é rastreada como GreyNoise Threat 13 (GT13) e não foi atribuída a nenhum grupo de ameaça conhecido até o momento. Os atacantes usaram 99 endereços IP, muitos deles de infraestrutura descartável, além de um servidor comprometido como relay operacional para interagir com as vítimas. As ferramentas observadas incluem Nmap, Chisel, Impacket, Paramiko e scripts Python. Também foram exploradas ou tentadas diversas CVEs, incluindo CVE-2026-61500 (Rejetto HFS), CVE-2025-5777 (Citrix NetScaler), CVE-2024-21893 (Ivanti), CVE-2026-41089 (Windows NetLogon), CVE-2026-16232 (Check Point SmartConsole auth bypass) e CVE-2026-98432 (Linux IPv4 UAF). A análise indica uso de sistemas baseados em LLMs e agentes para varredura, exploração e automação de interações com os alvos. A campanha incluiu movimento lateral, escalonamento de privilégios, roubo de credenciais, cópia de bancos de dados de firewall e da CA interna, além da tentativa de desativar políticas de segurança. O GreyNoise acredita que a operação pode estar em andamento e informou que trabalha com parceiros governamentais e CERTs para compartilhar inteligência e notificar as vítimas.",
+  "snippet": "GreyNoise tracks threat activity using our Global Observation Grid (GOG), a sensor network designed to attract adversarial scanning and exploitation attempts on our managed infrastructure. One might think of these sensors as conventional “honeypots,” but that doesn’t quite capture the variety, versatility, and scale at which we deploy and manage the complex fabric of the GOG. Unsolicited activity",
+  "issue_url": "https://llmnews.ai",
+  "blurb": null,
+  "date_iso": "2026-09-10",
+  "kind": "news",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "security"
+   ],
+   "content-type": [
+    "incident-report"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "backend"
+   ],
+   "topic-technology": [
+    "anomaly-detection"
+   ]
+  }
+ },
+ {
+  "id": 21889,
+  "source_id": 10,
+  "url": "https://chszlab.github.io/AgenticAlgorithmEngineering",
+  "title": "Agentic Algorithm Engineering (AAE)",
+  "title_pt": "Engenharia de Algoritmos Agêntica (AAE)",
+  "summary_pt": "Agentic Algorithm Engineering (AAE) é uma skill para Claude Code e Codex, desenvolvida pelo Algorithm Engineering Group da Universidade de Heidelberg, que automatiza a otimização de código seguindo o ciclo de engenharia de algoritmos: design, análise, implementação e experimento. O agente autônomo formula uma hipótese falseável antes de cada mudança, verifica a corretude após cada alteração, gera um patch por mudança aceita e produz um relatório em PDF com toda a sessão. A abordagem foi testada em diversos códigos abertos e apresentou ganhos significativos, como 8,9x de aceleração no cálculo de corte mínimo exato no VieCut, 3,9x no particionamento de grafos do KaHIP kaffpa, 3,0x no fluxo máximo com pseudoflow de Hochbaum e 1,82x no particionamento de hipergrafos streaming do FREIGHT — sempre mantendo a corretude verificada contra a saída original. A ferramenta também disponibiliza uma base de conhecimento compartilhada entre sessões, integração rápida em Claude Code via plugin ou em Codex com um script de instalação, e um exemplo de início rápido de 10 minutos para testes. A citação acadêmica e o DOI no Zenodo estão incluídos para referência e reprodutibilidade.",
+  "snippet": "Agents that optimize your code like an algorithm engineer: a falsifiable hypothesis before every experiment, correctness checked after every change, one reviewable patch per accepted change, and a PDF report of the whole session. A skill for Claude Code and Codex, from the Algorithm Engineering Group at Heidelberg University. Results on established open-source codes Every kept change was checke",
+  "issue_url": "https://llmnews.ai",
+  "blurb": null,
+  "date_iso": "2026-09-10",
+  "kind": "tool",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "claude",
+    "codex",
+    "anthropic",
+    "openai"
+   ],
+   "concept-theme": [
+    "optimization",
+    "performance",
+    "profiling",
+    "validation"
+   ],
+   "content-type": [
+    "tool-release",
+    "performance-report"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "ai-general",
+    "llm-models"
+   ],
+   "ecosystem-language": [
+    "cpp"
+   ],
+   "framework-library-tool": [
+    "claude"
+   ],
+   "topic-technology": [
+    "agentic-ai",
+    "ai-agents",
+    "tool-calling",
+    "code-models",
+    "software-development"
+   ],
+   "trending-emerging": [
+    "ai-coding-agents",
+    "reasoning-models",
+    "chain-of-thought",
+    "ai-agents"
+   ]
+  }
+ },
+ {
+  "id": 21890,
+  "source_id": 10,
+  "url": "https://goodhartlabs.com/blog/fable-5-2-tries-less-on-some-hard-tasks-when-a-shortcut-is-available",
+  "title": "Fable 5.2 Tries Less on Some Hard Tasks When a Shortcut is Available",
+  "title_pt": "Fable 5.2 se esforça menos em tarefas difíceis quando há um atalho disponível",
+  "summary_pt": "Durante o desenvolvimento do HoneyBench v0.2, observou-se que o Fable 5.2 se saía pior do que o Opus 5.5 em aritmética mental, o que levantou suspeitas de sandbagging. Após investigação, concluiu-se que não se tratava de sandbagging clássico, mas de uma combinação de fatores: o modelo tem uma noção ruim das próprias capacidades e, quando percebe a existência de um atalho, aumenta sua crença de que a tarefa foi deliberadamente tornada impossível — e então reduz o esforço. Em experimentos sem o atalho, o Fable 5.2 trabalhava por mais tempo e resolvia mais problemas em tarefas como aritmética mental e avaliação de imóveis (em cenários impossíveis). Em outras tarefas, como reparo de LoRA, xadrez compactado e busca de palavras, não houve diferença significativa. A conclusão é que o modelo tende a se esforçar menos apenas quando a tarefa parece impossível e há um atalho visível que a tornaria viável, o que não parece ser um comportamento esquemático, mas um viés não verbalizado.",
+  "snippet": "When we were working on HoneyBench v0.2, we noticed that Fable 5.2 gave up very quickly on some tasks. In particular, we observed that their task scoreHow well an agent does on a task when not cheating. Fable 5.2 almost never cheats on any of the tasks in this article. on our mental arithmetic task was actually worse than Opus 5.5, which we found suspicious. It seemed plausible to us that, in addi",
+  "issue_url": "https://llmnews.ai",
+  "blurb": null,
+  "date_iso": "2026-11-24",
+  "kind": "news",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "alignment",
+    "evals",
+    "ai-safety"
+   ],
+   "content-type": [
+    "analysis",
+    "deep-dive"
+   ],
+   "difficulty": [
+    "for-researchers"
+   ],
+   "domain": [
+    "llm-models"
+   ],
+   "topic-technology": [
+    "ai-alignment",
+    "evals",
+    "ai-benchmarks",
+    "ai-safety"
+   ],
+   "trending-emerging": [
+    "frontier-models",
+    "test-time-compute",
+    "ai-governance"
+   ]
+  }
+ },
+ {
+  "id": 21891,
+  "source_id": 10,
+  "url": "https://modaic.dev/blog/latency-doesnt-lie",
+  "title": "Latency doesn't lie: Jev is (probably) Qwen3.5-35B-A3B!",
+  "title_pt": "A latência não mente: Jev é (provavelmente) Qwen3.5-35B-A3B!",
+  "summary_pt": "O artigo investiga a arquitetura do Jev, modelo System One da TypeSafe, que produz julgamentos calibrados em vez de gerar texto. Como a empresa não revela detalhes do modelo, a análise usou pistas comportamentais e de desempenho. A latência consistentemente baixa e a alta inteligência por custo indicaram um modelo MoE esparso, e testes de autoidentificação — nos quais o Jev rejeita DeepSeek e Gemma, mas hesita em relação à Qwen — apontaram para a família Qwen. A confirmação veio da comparação de tokenizadores: a contagem de tokens do Qwen previu melhor a latência do Jev do que os próprios números reportados pela API da TypeSafe. Testes de throughput com modelos de referência mostraram que o Jev se comporta de forma muito semelhante a um Qwen3.5-35B-A3B (MoE esparso), com pequenas diferenças atribuíveis a overhead de API e hardware. Os autores concluem que o Qwen3.5-35B-A3B é o backbone mais provável, embora não seja possível descartar o sucessor Qwen3.6-35B-A3B, que compartilha a mesma arquitetura.",
+  "snippet": "Jev is TypeSafe's System One model, trained to produce calibrated judgments instead of generating text. Since launch, its architecture and training paradigm have drawn plenty of speculation. Competing System One models quickly surpassed it on raw accuracy/calibration, so we were less interested in how Jev was trained but rather what drives its impressively consistent inference speed as well as wha",
+  "issue_url": "https://llmnews.ai",
+  "blurb": null,
+  "date_iso": "2026-09-10",
+  "kind": "tool",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "qwen"
+   ],
+   "concept-theme": [
+    "performance",
+    "cost-optimization",
+    "architecture"
+   ],
+   "content-type": [
+    "analysis",
+    "benchmark"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "llm-models"
+   ],
+   "framework-library-tool": [
+    "qwen"
+   ],
+   "topic-technology": [
+    "llm-models",
+    "moe",
+    "fine-tuning",
+    "model-architecture",
+    "model-serving",
+    "inference-cost"
+   ],
+   "trending-emerging": [
+    "moe",
+    "fine-tuning",
+    "open-weights"
+   ]
+  }
+ },
+ {
+  "id": 21892,
+  "source_id": 5,
+  "url": "https://github.com/PostgresApp/PostgresApp/releases/tag/v3.0",
+  "title": "Postgres.app 3.0 Brings Easy Postgres 19 to the Mac",
+  "title_pt": "Postgres.app 3.0 traz Postgres 19 fácil para o Mac",
+  "summary_pt": "O Postgres.app 3.0 foi lançado para macOS, trazendo o PostgreSQL 19 e o PostGIS 3.7.0. A interface foi modernizada: as janelas de configurações e sobre agora são integradas à janela principal, e o aplicativo ganhou um ícone estilo \"liquid glass\". Além disso, o app agora é um único binário, sem helpers, os servidores PostgreSQL são encerrados quando o usuário faz logout e o funcionamento ocorre mesmo com atividades em segundo plano desabilitadas no sistema. A versão 3.0 está disponível em dois pacotes: apenas com PostgreSQL 19 ou com todas as versões suportadas (14 a 19). O PostgreSQL 14 está incluído pela última vez, para facilitar a migração. Algumas extensões que antes vinham embutidas — como pgRouting, address_standardizer, postgis_tiger_geocoder, PL/JS, PL Debugger e wal2json — foram removidas do pacote padrão e agora podem ser baixadas separadamente no site do projeto.",
+  "snippet": null,
+  "issue_url": "https://postgresweekly.com/issues/675",
+  "blurb": "If you're not on macOS, keep scrolling, but otherwise this is a neat release of an easy way to run Postgres on the Mac. 3.0 adds Postgres 19 and PostGIS 3.7 and has an updated UI (above). You can grab it as a 19 only build or one that includes 14 through 19. Note that v3.0 has 'unbundled' some previously installed extensions like pgRouting and wal2json. These are now available as separate downloads.",
+  "date_iso": "2026-11-25",
+  "kind": "release",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "dev-experience",
+    "ui",
+    "open-source"
+   ],
+   "content-type": [
+    "version-release",
+    "tool-release"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "backend"
+   ],
+   "ecosystem-language": [
+    "sql",
+    "javascript"
+   ],
+   "framework-library-tool": [
+    "postgresql"
+   ],
+   "topic-technology": [
+    "relational-databases",
+    "sql"
+   ]
+  }
+ },
+ {
+  "id": 21893,
+  "source_id": 5,
+  "url": "https://www.cybertec-postgresql.com/en/pg-stash-advice-for-plan-stability",
+  "title": "Forcing a Join Order in Postgres 19 with pg_stash_advice",
+  "title_pt": "Forçando uma ordem de junção no Postgres 19 com pg_stash_advice",
+  "summary_pt": "O PostgreSQL 19 introduziu os módulos pg_plan_advice e pg_stash_advice, que oferecem algo próximo dos tão discutidos query hints — mas com uma abordagem diferente da do Oracle. Em vez de embutir dicas no texto da consulta, o recurso permite estabilizar o plano de execução: o pg_plan_advice sugere um plano melhor e o pg_stash_advice o armazena associado ao ID da consulta, fazendo com que o planner use aquele plano em execuções futuras. Para demonstrar o uso, o artigo apresenta um exemplo realista com três tabelas (producers, goods e orders), incluindo dados com distribuição desigual: o produtor ACME é responsável por metade dos produtos, o que engana as estimativas do planner. Uma consulta que busca pedidos de um cliente específico para o ACME leva cerca de 405 ms porque o PostgreSQL subestima a quantidade de linhas na junção. Ao forçar uma ordem de junção mais adequada — começando pelos pedidos do cliente — o tempo cai para aproximadamente 10 ms. O autor também destaca que, embora o PostgreSQL historicamente tenha resistido a hints, o novo recurso atende a uma necessidade real de estabilidade de planos. Ele ressalta, porém, que a abordagem deve ser usada com moderação, e lembra que alternativas como a extensão pg_hint_plan continuam existindo para quem prefere dicas no estilo Oracle.",
+  "snippet": null,
+  "issue_url": "https://postgresweekly.com/issues/675",
+  "blurb": "Postgres 19's plan advice modules give us the closest (official) thing to query hints so far. Laurenz tests a join order that takes a query from 405ms to ~10ms, stores that advice under the query ID, but also argues for using this approach sparingly. I say 'official' because there are other ways to do similar things with extensions like pg_hint_plan which uses Oracle-like hints and now has a Postgres 19 release.",
+  "date_iso": "2026-11-25",
+  "kind": "news",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "performance",
+    "optimization"
+   ],
+   "content-type": [
+    "deep-dive"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "backend"
+   ],
+   "ecosystem-language": [
+    "sql"
+   ],
+   "framework-library-tool": [
+    "postgresql"
+   ],
+   "topic-technology": [
+    "query-optimization",
+    "sql",
+    "relational-databases"
+   ]
+  }
+ },
+ {
+  "id": 21894,
+  "source_id": 5,
+  "url": "https://github.com/docker-library/official-images/pull/22805",
+  "title": "Docker's postgres:latest now points to Postgres 19",
+  "title_pt": "Imagem postgres:latest do Docker agora aponta para o Postgres 19",
+  "summary_pt": "A imagem oficial do Docker para PostgreSQL atualizou a tag 'latest' para apontar para a versão 19.0, que acaba de ser lançada. Antes, a tag 'latest' referenciava o PostgreSQL 18.7. Com essa mudança, quem usa 'postgres:latest' passará a receber automaticamente a nova versão principal 19 nas próximas execuções de contêineres. As demais tags das versões 18 e 19 foram reorganizadas: o Postgres 18 continua disponível com sufixos como '18', '18.7' e variações de distribuição, enquanto o 19 recebeu as tags '19', '19.0' e também as variantes Alpine, Bookworm e Trixie. A atualização é relevante e exige atenção de quem já utiliza o Postgres 18: se um volume de dados foi criado com a versão 18, o contêiner atualizado para a versão 19 pode apresentar erro de incompatibilidade. Nesse caso, é recomendado fixar a imagem em 'postgres:18' até que o banco seja migrado/atualizado corretamente.",
+  "snippet": null,
+  "issue_url": "https://postgresweekly.com/issues/675",
+  "blurb": "If you use Docker's postgres:latest, bear in mind it's now switched to Postgres 19. If your volume holds a v18 database, the updated container will error, and you should pin postgres:18 until you've upgraded.",
+  "date_iso": "2026-11-25",
+  "kind": "news",
+  "section": "IN BRIEF",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "containers"
+   ],
+   "content-type": [
+    "version-release"
+   ],
+   "difficulty": [
+    "beginner"
+   ],
+   "domain": [
+    "backend"
+   ],
+   "framework-library-tool": [
+    "docker",
+    "postgresql"
+   ],
+   "topic-technology": [
+    "containers",
+    "relational-databases"
+   ]
+  }
+ },
+ {
+  "id": 21895,
+  "source_id": 5,
+  "url": "https://2027.nordicpgday.org",
+  "title": "Nordic PGDay 2027",
+  "title_pt": "Nordic PGDay 2027",
+  "summary_pt": "O Nordic PGDay 2027 acontecerá em Estocolmo, Suécia, em 16 de março, e depois em Gotemburgo ainda no mesmo ano. O evento é uma excelente oportunidade para aprender mais sobre o banco de dados open source mais avançado do mundo, entre colegas da região nórdica. A chamada de propostas (CFP) está aberta até 8 de janeiro.",
+  "snippet": null,
+  "issue_url": "https://postgresweekly.com/issues/675",
+  "blurb": "While on the other side of the pond, Nordic PGDay 2027 takes place March 16 in Stockholm. The CFP is open till January 8.",
+  "date_iso": "2026-11-25",
+  "kind": "news",
+  "section": "IN BRIEF",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "open-source",
+    "community"
+   ],
+   "content-type": [
+    "announcement"
+   ],
+   "domain": [
+    "backend"
+   ],
+   "framework-library-tool": [
+    "postgresql"
+   ],
+   "topic-technology": [
+    "relational-databases",
+    "databases"
+   ]
+  }
+ },
+ {
+  "id": 21896,
+  "source_id": 5,
+  "url": "https://www.databricks.com/blog/why-postgresql-19-shipped-late",
+  "title": "Why Postgres 19 shipped late",
+  "title_pt": "Por que o PostgreSQL 19 atrasou",
+  "summary_pt": "O PostgreSQL 19 foi lançado com mais de um mês de atraso em relação à janela habitual. Neste artigo, os contribuidores Robert Haas e Jonathan Katz explicam os motivos: o uso crescente de LLMs (modelos de linguagem) facilitou a descoberta de bugs e vulnerabilidades no código, gerando um enorme influxo de relatos e correções. Isso sobrecarregou os desenvolvedores, que precisaram dedicar tempo à correção de problemas em branches antigas, em vez de revisar novos recursos para a versão 19. Algumas funcionalidades foram adiadas para versões futuras, mas o projeto priorizou a estabilidade, enviando um segundo release candidate para incluir todas as correções de segurança e bugs acumulados. Os autores refletem que essa mudança representa um desafio e uma oportunidade: com a ajuda de IA, erros que antes passariam despercebidos agora são encontrados rapidamente, elevando o padrão de qualidade do PostgreSQL.",
+  "snippet": null,
+  "issue_url": "https://postgresweekly.com/issues/675",
+  "blurb": "Robert Haas and Jonathan Katz revisit why Postgres 19 shipped late.",
+  "date_iso": "2026-11-25",
+  "kind": "news",
+  "section": "IN BRIEF",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "open-source",
+    "community",
+    "governance",
+    "reliability"
+   ],
+   "content-type": [
+    "retrospective",
+    "analysis"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "backend"
+   ],
+   "ecosystem-language": [
+    "sql"
+   ],
+   "framework-library-tool": [
+    "postgresql"
+   ],
+   "topic-technology": [
+    "replication",
+    "query-optimization",
+    "database-migrations"
+   ]
+  }
+ },
+ {
+  "id": 21897,
+  "source_id": 5,
+  "url": "https://pgcraftsman.github.io/talks/the-postgres-mistakes-we-all-still-make/deck/public/slides-postable.html",
+  "title": "The Postgres Mistakes We All Still Make",
+  "title_pt": "Os erros do Postgres que todos ainda cometemos",
+  "summary_pt": "Na palestra, Scott Mead lista armadilhas comuns do PostgreSQL que costumam passar despercebidas no laptop, mas aparecem em produção. O primeiro erro é não usar pool de conexões: como o Postgres cria um processo por conexão, conectar e desconectar a cada request sobrecarrega o sistema. A solução é reutilizar conexões com bibliotecas como psycopg2.pool, HikariCP ou database/sql, e monitorar a taxa de conexões com pg_stat_database. Outro erro é ignorar o MVCC: updates nunca sobrescrevem linhas, criam versões mortas que só o VACUUM limpa. Em tabelas com jsonb, como um perfil que cresce a cada login, isso gera bloat enorme e leituras cada vez mais lentas. A recomendação é modelar fatos acumulativos em tabelas separadas ou sobrescrever campos de tamanho fixo, em vez de acumular histórico no documento. Também é um erro deixar transações abertas durante chamadas externas, como um SELECT FOR UPDATE seguido de um HTTP request. Isso segura locks e um xid, impedindo o VACUUM de remover linhas mortas. O palestrante ainda mostra como identificar esses problemas pelas métricas e mensagens do VACUUM.",
+  "snippet": null,
+  "issue_url": "https://postgresweekly.com/issues/675",
+  "blurb": "Slides from a NYC meetup on mistakes or misassumptions (delightfully zero indexed!) that can show up at scale, covering MVCC quirks, open transactions, bulk deletes and unused indexes. There's also a repo with SQL showing off the problems.",
+  "date_iso": "2026-11-25",
+  "kind": "news",
+  "section": "IN BRIEF",
+  "verify_status": "suspect",
+  "verify_notes": "Título no início do conteúdo está sem espaço: 'MistakesWe' (artefato de extração de slides).; kind 'news' é inadequado: o conteúdo é um deck de slides, não uma notícia.",
+  "tags": {
+   "concept-theme": [
+    "performance",
+    "scalability",
+    "concurrency",
+    "metrics"
+   ],
+   "content-type": [
+    "best-practices",
+    "anti-patterns"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "backend"
+   ],
+   "ecosystem-language": [
+    "sql"
+   ],
+   "framework-library-tool": [
+    "postgresql"
+   ],
+   "topic-technology": [
+    "connection-pooling",
+    "relational-databases",
+    "performance-optimization",
+    "databases"
+   ]
+  }
+ },
+ {
+  "id": 21898,
+  "source_id": 5,
+  "url": "https://www.enterprisedb.com/blog/squeezing-tables-postgres-19",
+  "title": "Squeezing Tables with Postgres 19",
+  "title_pt": "Compactando tabelas com Postgres 19",
+  "summary_pt": "O artigo conta a história do desenvolvimento do comando REPACK, novo recurso do PostgreSQL 19, que permite compactar tabelas sem bloquear o acesso, algo há muito pedido pela comunidade. Tudo começou com uma pergunta de Pavel Stehule na lista de discussão: por que não existe um VACUUM FULL CONCURRENTLY? O VACUUM tradicional remove espaço apenas no fim da tabela, enquanto o VACUUM FULL compacta tudo, mas exige bloqueio total, derrubando a aplicação. A solução veio do projeto externo pg_squeeze, criado por Antonin Houska, que usa decodificação lógica do WAL para aplicar mudanças durante a cópia. Após renomear o recurso para REPACK e integrá-lo ao núcleo do Postgres 19, foram adicionados ajustes como um worker em segundo plano para processar o WAL e evitar acúmulo de logs. O autor, que atuou como committer, detalha as dificuldades técnicas, as simplificações feitas para reduzir riscos e os esforços para manter o recurso na versão final, agradecendo a diversos colaboradores que testaram e estressaram o código, revelando inclusive bugs antigos na decodificação lógica. Uma história de esforço comunitário que resultou em um recurso de grande impacto para quem lida com bancos grandes e de alta disponibilidade.",
+  "snippet": null,
+  "issue_url": "https://postgresweekly.com/issues/675",
+  "blurb": "The inside story of how REPACK (CONCURRENTLY) made it into v19, from the committer who fought to keep it in.",
+  "date_iso": "2026-11-25",
+  "kind": "news",
+  "section": "IN BRIEF",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "optimization",
+    "concurrency",
+    "availability"
+   ],
+   "content-type": [
+    "deep-dive",
+    "explainer"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "backend"
+   ],
+   "ecosystem-language": [
+    "sql"
+   ],
+   "framework-library-tool": [
+    "postgresql"
+   ],
+   "topic-technology": [
+    "relational-databases",
+    "performance-optimization"
+   ]
+  }
+ },
+ {
+  "id": 21899,
+  "source_id": 5,
+  "url": "https://www.cybertec-postgresql.com/en/slow-shutdown-postgresql",
+  "title": "How to Deal with Slow Postgres Shutdowns",
+  "title_pt": "Como lidar com desligamentos lentos do PostgreSQL",
+  "summary_pt": "O artigo de Laurenz Albe explica por que o desligamento do PostgreSQL pode ser lento e como acelerá-lo. São apresentados os três modos de desligamento: smart, fast e immediate. O modo fast é o mais indicado para reinicializações rápidas, mas ainda assim exige um checkpoint final, que grava em disco todas as páginas sujas dos buffers compartilhados — e é esse processo que pode demorar. Uma primeira estratégia é executar um CHECKPOINT manual logo antes de reiniciar, reduzindo o trabalho do checkpoint de desligamento. Porém, se existirem tabelas UNLOGGED grandes, isso não resolve: o PostgreSQL não grava o conteúdo dessas tabelas em checkpoints normais, apenas no checkpoint de desligamento. Para contornar o problema em versões antigas, o autor sugere forçar a gravação criando e removendo um banco de dados dummy com CREATE DATABASE ... STRATEGY FILE_COPY, o que faz o PostgreSQL sincronizar as tabelas UNLOGGED. A partir da versão 19, basta usar CHECKPOINT (FLUSH_UNLOGGED), que resolve o caso de forma simples e direta.",
+  "snippet": null,
+  "issue_url": "https://postgresweekly.com/issues/675",
+  "blurb": "You'd think stopping Postgres would be faster than starting it, but no, and Laurenz looks at why.",
+  "date_iso": "2026-11-25",
+  "kind": "news",
+  "section": "IN BRIEF",
+  "verify_status": "suspect",
+  "verify_notes": "kind 'news' parece incorreto: o conteúdo é um artigo técnico/blog, não uma notícia.",
+  "tags": {
+   "concept-theme": [
+    "performance",
+    "optimization",
+    "availability"
+   ],
+   "content-type": [
+    "how-to",
+    "guide"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "backend"
+   ],
+   "ecosystem-language": [
+    "sql"
+   ],
+   "framework-library-tool": [
+    "postgresql"
+   ],
+   "topic-technology": [
+    "relational-databases",
+    "databases"
+   ]
+  }
+ },
+ {
+  "id": 21900,
+  "source_id": 5,
+  "url": "https://github.com/jespino/gopgext",
+  "title": "gopgext: Write Postgres Extensions in Go",
+  "title_pt": "gopgext: escreva extensões Postgres em Go",
+  "summary_pt": "gopgext é uma ferramenta experimental que permite criar extensões PostgreSQL usando código Go puro, por meio do compilador TinyGo. O desenvolvedor apenas marca funções com o comentário //gopgext:function e a ferramenta gera automaticamente a cola em C, o script CREATE FUNCTION e o arquivo de controle necessários para instalar a extensão. A biblioteca padrão do Go funciona normalmente (fmt, strings, regexp, encoding/json, crypto, etc.) e o código Go pode executar consultas no banco via SPI. O projeto segue a mesma abordagem do gokm (módulos de kernel Linux em Go), usando um alvo customizado do TinyGo e uma camada de runtime para o host, com o C runtime compilado pelo sistema de build do próprio PostgreSQL (PGXS). A instalação requer Linux x86-64, Go, TinyGo (testado com 0.43.0), PostgreSQL 14 ou superior com arquivos de desenvolvimento, make, compilador C e binutils. Por ser experimental, não é recomendado para produção: um bug no código gerado ou no runtime do Go pode derrubar o servidor ou corromper dados. A documentação inclui tutorial, referência de API e exemplos, incluindo portes de módulos contrib do PostgreSQL. O código é distribuído sob licença MIT e o mascote é o gopher da Go com fantasia de elefante, em referência ao elefante do PostgreSQL.",
+  "snippet": null,
+  "issue_url": "https://postgresweekly.com/issues/675",
+  "blurb": "Last week we covered Rust's pgrx, now it's Go's turn! With this, you can mark Go functions with a comment and it'll build them into a Postgres extension using TinyGo with the C glue code and SQL included. It's very new and experimental, however.",
+  "date_iso": "2026-11-25",
+  "kind": "tool",
+  "section": "RELEASES AND CODE",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "content-type": [
+    "tooling",
+    "tutorial"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "backend"
+   ],
+   "ecosystem-language": [
+    "go",
+    "sql"
+   ],
+   "framework-library-tool": [
+    "postgresql"
+   ],
+   "topic-technology": [
+    "relational-databases",
+    "sql",
+    "software-development"
+   ]
+  }
+ },
+ {
+  "id": 21901,
+  "source_id": 5,
+  "url": "https://github.com/wal-g/wal-g/releases/tag/v3.0.10",
+  "title": "WAL-G 3.0.10",
+  "title_pt": "WAL-G 3.0.10: atualização com novos recursos de backup e recuperação",
+  "summary_pt": "O WAL-G 3.0.10 chega como uma das maiores atualizações da série 3.x, trazendo melhorias significativas de confiabilidade, escalabilidade e recuperação para PostgreSQL, Greenplum, MySQL, MongoDB, Redis e armazenamento compatível com S3. Entre os destaques está o novo comando wal-send, que permite que servidores standby transmitam WAL diretamente do armazenamento de objetos via protocolo de replicação do PostgreSQL. Também há avanços no manuseio de WAL, com arquivamento mais eficiente, descoberta mais rápida e melhor tratamento de falhas. Para MongoDB, o replay de oplog agora pode ser retomado após falhas, com checkpoints mais confiáveis e melhorias no tratamento de transações abortadas. No MySQL e MariaDB, o foco foi a recuperação point-in-time, com rastreamento de posições e GTIDs, além de um novo exportador Prometheus para monitoramento. O Greenplum ganhou suporte a contabilidade de armazenamento compartilhado, modo turbo para backups de segmento e melhorias na recuperação de arquivos AO. No lado do S3, há novas opções de timeout, suporte a checksums da AWS e cópia no lado do servidor sempre que possível. A versão também moderniza a base de código com a migração para Go 1.27 e AWS SDK v2, reduz o tempo de build e amplia a cobertura de testes, incluindo PostgreSQL 10 e 14–18, execução de testes ARM64 e melhorias no suporte a Windows. Além disso, uma vasta gama de dependências foi atualizada para melhorar compatibilidade, segurança e manutenibilidade de longo prazo.",
+  "snippet": null,
+  "issue_url": "https://postgresweekly.com/issues/675",
+  "blurb": "A feature-rich release for the backup/recovery tool, including a new wal-send command that lets standbys stream WAL from backup storage.",
+  "date_iso": "2026-11-25",
+  "kind": "release",
+  "section": "RELEASES AND CODE",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "reliability",
+    "scalability",
+    "performance"
+   ],
+   "content-type": [
+    "version-release"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "backend"
+   ],
+   "topic-technology": [
+    "relational-databases",
+    "databases",
+    "disaster-recovery",
+    "performance-optimization",
+    "scalability",
+    "high-availability"
+   ]
+  }
+ },
+ {
+  "id": 21902,
+  "source_id": 5,
+  "url": "https://github.com/CrunchyData/pg_parquet/releases/tag/v0.6.0",
+  "title": "pg_parquet 0.6",
+  "title_pt": "pg_parquet 0.6",
+  "summary_pt": "A versão 0.6 do pg_parquet, extensão da Crunchy Data para cópia de dados entre o PostgreSQL e arquivos Parquet, chega com suporte ao PostgreSQL 19 e uma série de melhorias de robustez e desempenho. O destaque é a aceleração dos comandos COPY TO e COPY FROM com execução em workers paralelos, além de relatórios de progresso via pg_stat_progress_copy. Também foram ampliados os tipos Arrow suportados na leitura de arquivos gerados por outras ferramentas, incluindo datas e timestamps infinitos, colunas com dicionário, decimais de alta precisão e tipos geográficos do PostGIS. A atualização também melhora o tratamento de erros e mensagens de diagnóstico, cobre melhor o uso de object stores (como leitura de credenciais por perfil e configuração do cliente HTTP) e corrige diversos problemas de conversão de tipos, como arredondamento de decimais, preservação de json/jsonb, leitura de colunas descartadas e compatibilidade com formatos legados como INT96. Há ainda várias correções de segurança e dependências, incluindo a atualização do pgrx para 0.19.3 e a correção de vulnerabilidades em crates do ecossistema Rust.",
+  "snippet": null,
+  "issue_url": "https://postgresweekly.com/issues/675",
+  "blurb": "Crunchy Data's extension for copying to and from Parquet files now supports Postgres 19.",
+  "date_iso": "2026-11-25",
+  "kind": "release",
+  "section": "RELEASES AND CODE",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "data-engineering",
+    "performance",
+    "optimization",
+    "reliability"
+   ],
+   "content-type": [
+    "version-release",
+    "tool-release"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "backend"
+   ],
+   "ecosystem-language": [
+    "sql",
+    "json"
+   ],
+   "framework-library-tool": [
+    "postgresql"
+   ],
+   "topic-technology": [
+    "relational-databases",
+    "databases"
+   ]
+  }
+ },
+ {
+  "id": 21903,
+  "source_id": 5,
+  "url": "https://github.com/timescale/pg_textsearch/releases/tag/v1.6.0",
+  "title": "pg_textsearch 1.6",
+  "title_pt": "pg_textsearch 1.6: busca textual aprimorada e suporte ao PostgreSQL 19",
+  "summary_pt": "A versão 1.6.0 da extensão pg_textsearch, especializada em busca textual com ranking BM25, adiciona suporte completo ao PostgreSQL 19, incluindo builds para Windows e arquiteturas amd64/arm64. Essa atualização também traz buscas filtradas mais eficientes, com filtros booleanos executados diretamente nos índices BM25, reduzindo o trabalho em consultas ranqueadas. Além disso, os rankings ficaram mais consistentes em cenários como documentos muito longos, termos repetidos e tabelas particionadas, e a integração com o PostgreSQL foi melhorada em consultas preparadas, self-joins e agregados contínuos do TimescaleDB. A atualização corrige diversos problemas de confiabilidade e segurança, como resultados ausentes em índices paralelos, falhas após VACUUM interrompido, alocações de cache travadas e erros de leitura em índices compactados. Também inclui endurecimento contra consultas NULL, segurança em nível de linha e busca de objetos SQL. Para atualizar, basta instalar a nova biblioteca, reiniciar o PostgreSQL e executar o comando ALTER EXTENSION pg_textsearch UPDATE TO '1.6.0'. Não há mudança no formato dos índices em relação à versão 1.5.1, mas índices afetados por bugs anteriores exigem REINDEX.",
+  "snippet": null,
+  "issue_url": "https://postgresweekly.com/issues/675",
+  "blurb": "Tiger Data's BM25 ranked text search extension also joins the Postgres 19 train, plus has some efficiency and ranking improvements.",
+  "date_iso": "2026-11-25",
+  "kind": "release",
+  "section": "RELEASES AND CODE",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "performance",
+    "reliability"
+   ],
+   "content-type": [
+    "version-release",
+    "library-release"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "backend"
+   ],
+   "ecosystem-language": [
+    "sql"
+   ],
+   "framework-library-tool": [
+    "postgresql"
+   ],
+   "topic-technology": [
+    "relational-databases",
+    "indexing",
+    "query-optimization"
+   ]
+  }
+ },
+ {
+  "id": 21904,
+  "source_id": 5,
+  "url": "https://github.com/toluaina/pgsync/releases/tag/8.0.0",
+  "title": "PGSync 8.0",
+  "title_pt": "PGSync 8.0",
+  "summary_pt": "O PGSync 8.0 traz melhorias importantes para sincronização entre Postgres e Elasticsearch/OpenSearch. Agora, alterações em linhas filhas encontram o documento raiz diretamente pela própria mudança ou por consulta ao banco, sem depender da indexação do mecanismo de busca. Também corrige o tratamento de chaves estrangeiras compostas e reduz múltiplas alterações da mesma linha a uma única atualização. No MariaDB, o binlog é retomado a partir do checkpoint, reduzindo drasticamente o tempo de reinicialização, e há suporte a binlog_row_image=MINIMAL e NOBLOB. O novo modo monitor, ativado com a flag -m/--monitor, exibe uma visão em tela cheia de eventos, throughput, lag de slot e erros. A saída no terminal ficou mais limpa, com linha de status em formato chave=valor e árvore de esquema mais legível. Também foram feitas correções de robustez sob carga: wraparound de transaction IDs, checkpoints que não pulam transações abertas, consumo do WAL sob trava única, polling em bancos somente leitura e hot standbys, e tratamento de itens malformados na fila Redis. A versão traz ainda suporte a Python 3.15, PostgreSQL 19 nos testes, imagens Docker atualizadas para amd64 e arm64 e melhorias na limpeza de documentos roteados. Para quem vem da versão 7.x, há mudanças na instalação do trigger e no formato da linha de status, com opção LOG_FORMAT=legacy para manter o formato antigo.",
+  "snippet": null,
+  "issue_url": "https://postgresweekly.com/issues/675",
+  "blurb": "Postgres to Elasticsearch/OpenSearch syncing tool.",
+  "date_iso": "2026-11-25",
+  "kind": "release",
+  "section": "RELEASES AND CODE",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "data-pipelines",
+    "performance",
+    "reliability",
+    "monitoring"
+   ],
+   "content-type": [
+    "version-release"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "backend",
+    "python"
+   ],
+   "ecosystem-language": [
+    "python",
+    "sql"
+   ],
+   "framework-library-tool": [
+    "postgresql",
+    "mysql",
+    "redis",
+    "docker"
+   ],
+   "topic-technology": [
+    "replication",
+    "etl",
+    "data-pipelines",
+    "relational-databases",
+    "message-queues",
+    "sql"
+   ]
+  }
+ },
+ {
+  "id": 21905,
+  "source_id": 5,
+  "url": "https://www.npgsql.org/doc/release-notes/11.0.html",
+  "title": "Npgsql 11.0",
+  "title_pt": "Npgsql 11.0",
+  "summary_pt": "A versão 11.0 do Npgsql, provedor ADO.NET para PostgreSQL, foi lançada no NuGet. Esta atualização traz mudanças significativas, incluindo a integração da injeção de dependência: o pacote separado Npgsql.DependencyInjection agora faz parte do Npgsql, então basta remover a referência ao pacote extra. Os métodos como AddNpgsqlDataSource() continuam funcionando, mas sobrecargas obsoletas foram removidas. Além disso, o modo experimental de multiplexação foi removido. Ele podia aumentar a taxa de transferência em alguns cenários, mas não escalava bem com alta concorrência em máquinas com muitos núcleos. Recomenda-se remover as configurações de multiplexação e buffer das strings de conexão, mantendo o pooling tradicional. APIs obsoletas de objetos grandes (NpgsqlLargeObjectManager e NpgsqlLargeObjectStream) foram eliminadas, devendo ser usadas as funções nativas do PostgreSQL (lo_get e lo_put). Por fim, o parâmetro 'Application Name' agora afeta o rótulo da métrica db.client.connection.pool.name, a menos que você defina explicitamente o nome da fonte de dados via NpgsqlDataSourceBuilder.Name, o que exige ajuste em dashboards que usavam o rótulo antigo.",
+  "snippet": null,
+  "issue_url": "https://postgresweekly.com/issues/675",
+  "blurb": "The ADO.NET data provider for Postgres.",
+  "date_iso": "2026-11-25",
+  "kind": "release",
+  "section": "RELEASES AND CODE",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "throughput",
+    "scalability",
+    "concurrency",
+    "metrics"
+   ],
+   "content-type": [
+    "version-release"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "backend"
+   ],
+   "ecosystem-language": [
+    "csharp",
+    "dotnet"
+   ],
+   "framework-library-tool": [
+    "postgresql"
+   ],
+   "topic-technology": [
+    "relational-databases",
+    "sql",
+    "database-access",
+    "dependency-injection",
+    "connection-pooling"
+   ]
+  }
+ },
+ {
+  "id": 21906,
+  "source_id": 5,
+  "url": "https://percona.community/blog/2026/11/20/whats-left-in-postgres-19",
+  "title": "What's Left in Postgres 19 After the Reverts",
+  "title_pt": "O que restou no PostgreSQL 19 após os reverteres",
+  "summary_pt": "O PostgreSQL 19 foi lançado após vários adiamentos e uma série de recursos aguardados acabaram ficando de fora, como graph queries e particionamento dinâmico. Ainda assim, a versão traz novidades interessantes que valem destaque. Entre elas está o novo comando REPACK, que ganhou uma variante CONCURRENTLY para reorganizar tabelas sem bloquear leituras e escritas, usando decodificação lógica do WAL. Também chega o INSERT ... ON CONFLICT DO SELECT, que permite retornar a linha conflitante de forma atômica, além do suporte a IGNORE NULLS em funções de janela como lag, lead e last_value. Outra adição útil é o comando WAIT FOR LSN, que permite a aplicações aguardarem uma réplica alcançar determinada posição do WAL antes de fazer leituras, reduzindo problemas de leitura defasada sem depender de replicação síncrona — embora haja um bug conhecido na versão 19.0. O artigo também menciona melhorias de desempenho internas, como verificação de chaves estrangeiras mais rápida, ordenação com radix sort e agregação antes de junções. No autovacuum, há novidades como limpeza paralela de índices e um novo agendamento baseado em pontuação, com a view pg_stat_autovacuum_scores para monitorar as prioridades.",
+  "snippet": null,
+  "issue_url": "https://postgresweekly.com/issues/675",
+  "blurb": "Postgres 19 lost a variety of anticipated features late on, but what did make it? Zsolt tours the survivors.",
+  "date_iso": "2026-11-25",
+  "kind": "news",
+  "section": "News",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "data-engineering",
+    "availability"
+   ],
+   "content-type": [
+    "analysis"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "backend"
+   ],
+   "ecosystem-language": [
+    "sql"
+   ],
+   "framework-library-tool": [
+    "postgresql"
+   ],
+   "topic-technology": [
+    "relational-databases",
+    "databases",
+    "sql"
+   ]
+  }
+ },
+ {
+  "id": 21907,
+  "source_id": 5,
+  "url": "https://github.com/electric-sql/pglite/releases/tag/%40electric-sql/pglite%400.6.0",
+  "title": "PGlite 0.6: Postgres 19, Compiled to WebAssembly",
+  "title_pt": "PGlite 0.6: Postgres 19 compilado para WebAssembly",
+  "summary_pt": "A versão 0.6 do PGlite traz o Postgres 19 para o navegador, além de Node e Bun, usando WebAssembly. Com isso, é possível testar os novos recursos do Postgres 19 diretamente em seus projetos — basta instalar via npm. Quem já tem dados persistidos de versões anteriores precisará fazer um dump e restore para migrar.",
+  "snippet": null,
+  "issue_url": "https://postgresweekly.com/issues/675",
+  "blurb": "The WASM build of Postgres for the browser (plus Node and Bun) now runs Postgres 19, so trying out the new features in your tests, say, is only an npm install away. Persisted data from older versions needs a dump and restore.",
+  "date_iso": "2026-11-25",
+  "kind": "release",
+  "section": "Releases & Code",
+  "verify_status": "suspect",
+  "verify_notes": "conteúdo contém apenas metadados de release (autor, data, commits, assinatura), sem o texto descritivo da versão; recorte exibe elementos de interface do GitHub (badges, verificação) em vez de conteúdo legível sobre Postgres 19",
+  "tags": {
+   "concept-theme": [
+    "edge-computing",
+    "serverless",
+    "performance"
+   ],
+   "content-type": [
+    "version-release",
+    "library-release"
+   ],
+   "difficulty": [
+    "all-levels"
+   ],
+   "domain": [
+    "backend",
+    "nodejs"
+   ],
+   "ecosystem-language": [
+    "javascript",
+    "wasm"
+   ],
+   "framework-library-tool": [
+    "postgresql"
+   ],
+   "topic-technology": [
+    "relational-databases",
+    "sql",
+    "webassembly"
+   ]
+  }
+ },
+ {
+  "id": 21908,
+  "source_id": 5,
+  "url": "https://github.com/pgjdbc/pgjdbc/releases/tag/REL42.7.15",
+  "title": "PgJDBC 42.7.15: Many Security Fixes for the Java/JDBC Driver",
+  "title_pt": "PgJDBC 42.7.15: Muitas correções de segurança para o driver Java/JDBC",
+  "summary_pt": "O PgJDBC 42.7.15 é a mais nova versão do driver JDBC oficial do PostgreSQL para Java, trazendo uma grande leva de correções de segurança. No total, o driver fecha 14 avisos de segurança, sendo seis classificados como de alta gravidade, e várias das vulnerabilidades existem há anos. A atualização é recomendada para todas as aplicações que usam o driver, especialmente em ambientes que lidam com dados sensíveis ou que permitem conexões não verificadas. Entre os problemas corrigidos estão falhas no processamento de escapes JDBC, literais com aspas e cifrão, strings E'', além de vulnerabilidades que podiam permitir execução de SQL não intencional, estouro de heap, negação de serviço e até contorno de autenticação. Também foram corrigidos bugs relacionados a SSL/TLS, criptografia GSS, autenticação SCRAM, parâmetros de inicialização, cache de declarações e o tratamento de valores binários, como o uso de setBinaryStream(). Várias correções envolvem a validação mais rigorosa de entradas recebidas do servidor ou da rede, reduzindo o risco de ataques em conexões sem verificação adequada do servidor. Além das melhorias de segurança, a versão inclui correções de robustez e usabilidade, como o tratamento adequado de nomes de serviço em propriedades, a validação de parâmetros de URL e a prevenção de vazamento de informações sensíveis em logs. Com esta atualização, o PgJDBC 42.7.15 reforça a segurança e a estabilidade do driver, sendo uma atualização essencial para todos os usuários do PostgreSQL em Java.",
+  "snippet": null,
+  "issue_url": "https://postgresweekly.com/issues/675",
+  "blurb": "The official JDBC driver closes fourteen security advisories (six rated high) in one go with some of the bugs going back years.",
+  "date_iso": "2026-11-25",
+  "kind": "release",
+  "section": "Releases & Code",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "security"
+   ],
+   "content-type": [
+    "version-release",
+    "security-advisory"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "backend"
+   ],
+   "ecosystem-language": [
+    "java",
+    "sql"
+   ],
+   "framework-library-tool": [
+    "postgresql"
+   ],
+   "topic-technology": [
+    "database-access",
+    "sql",
+    "relational-databases",
+    "databases"
+   ]
+  }
+ },
+ {
+  "id": 21909,
+  "source_id": 10,
+  "url": "https://noahbuilt.it/writing/qwen-on-5600-lambdas",
+  "title": "Serving Qwen via 5,600 Lambdas for fun and 80x negative profit",
+  "title_pt": "Servindo Qwen com 5.600 Lambdas por diversão e prejuízo 80x maior",
+  "summary_pt": "O autor, engenheiro na Bevyl, teve a ideia de testar se era possível rodar inferência de modelos de linguagem auto-hospedados usando apenas AWS Lambdas, sem GPU. Ele escolheu o H2O-Lightning, um fine-tune do Qwen3.5-4B, por ser um modelo pequeno e focado em tarefas de decisão. Como o modelo inteiro tem 9,3 GB e o limite da Lambda era de 3 GB, ele dividiu a execução por camadas: cada uma das 32 camadas virou uma invocação separada, totalizando 5.600 Lambdas por requisição. A abordagem funcionou tecnicamente, mas levou 17 segundos para processar cerca de 4 mil tokens. O custo ficou em US$ 8,40 por milhão de tokens, enquanto um modelo hospedado similar, como o Gemini Decision 1, custa US$ 0,10 por milhão de tokens — ou seja, a solução com Lambdas saiu mais de 80 vezes mais cara. As principais lições do experimento foram: trabalhar com camadas de modelos e APIs de transformers está cada vez mais acessível, mas para esse tipo de carga é essencial usar GPU. CPU não é gratuita e não há arbitragem barata nesse caminho.",
+  "snippet": "Who needs a GPU? In my work at Bevyl I was really impressed by the performance and cost characteristics of AWS Lambdas. They can massively distribute and fan out CPU-bound work, which is amazing for things like ffmpeg on long videos. So I was curious if it was possible to run inference on self-hosted models using Lambdas. It was a random idea built on a hunch, and I like to prove such ideas righ",
+  "issue_url": "https://llmnews.ai",
+  "blurb": null,
+  "date_iso": "2026-09-10",
+  "kind": "tool",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "qwen",
+    "aws",
+    "alibaba"
+   ],
+   "concept-theme": [
+    "serverless",
+    "parallelism",
+    "cost",
+    "performance"
+   ],
+   "content-type": [
+    "show-and-tell",
+    "deep-dive"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "llm-models",
+    "backend"
+   ],
+   "ecosystem-language": [
+    "python"
+   ],
+   "framework-library-tool": [
+    "qwen",
+    "aws"
+   ],
+   "topic-technology": [
+    "serverless",
+    "model-serving",
+    "inference-optimization",
+    "self-hosting"
+   ],
+   "trending-emerging": [
+    "small-language-models",
+    "gpu-economics"
+   ]
+  }
+ },
+ {
+  "id": 21910,
+  "source_id": 10,
+  "url": "https://prismml.com/news/bonsai-2-5-27b",
+  "title": "Introducing Ternary Bonsai 2.5 27B: Powering Agentic Coding and Private Knowledge Work",
+  "title_pt": "Ternary Bonsai 2.5 27B: codificação agêntica e trabalho privado com conhecimento",
+  "summary_pt": "A PrismML anunciou o Ternary Bonsai 2.5 27B, uma evolução do Ternary Bonsai 2 27B com melhorias significativas em codificação agêntica, uso de ferramentas em múltiplas etapas e execução de tarefas complexas. Baseado no Qwen3.8 27B, o modelo mantém o mesmo tamanho compacto de 5,9 GB, mas entrega desempenho muito superior em fluxos de trabalho agênticos, especialmente em sequências longas de chamadas de ferramentas, com menos voltas, menos tokens e resultados mais rápidos e precisos. Nos benchmarks, o Bonsai 2.5 supera o Bonsai 2 em tarefas como SWE-bench Verified, Terminal-Bench, AppWorld e τ³-Bench, aproximando-se do modelo base de precisão total. Em termos de desempenho, atinge 291 tokens/s em uma NVIDIA H100 com MTP e 204 tokens/s em uma RTX 4090, viabilizando a execução local em dispositivos comuns. O modelo é voltado a aplicações que precisam processar dados privados no próprio dispositivo, como assistentes de codificação em repositórios confidenciais, aplicativos de documentos e assistentes de desktop. Ele roda em GPUs NVIDIA e Intel via llama.cpp e em dispositivos Apple via MLX, com pesos disponíveis sob licença Apache 2.0.",
+  "snippet": "Today, we’re introducing Ternary Bonsai 2.5 27B, an upgrade to Ternary Bonsai 2 27B with substantially stronger agentic coding, multi-turn tool use, and multi-step task execution. Based on Qwen3.8 27B, it retains the previous release’s 5.9 GB model footprint while significantly improving the capabilities developers need to build agents that work with private files and tools on-device. The result i",
+  "issue_url": "https://llmnews.ai",
+  "blurb": null,
+  "date_iso": "2026-11-24",
+  "kind": "release",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "qwen"
+   ],
+   "concept-theme": [
+    "performance",
+    "optimization",
+    "privacy"
+   ],
+   "content-type": [
+    "version-release"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "local-llm",
+    "llm-models"
+   ],
+   "framework-library-tool": [
+    "qwen"
+   ],
+   "topic-technology": [
+    "agentic-ai",
+    "tool-calling",
+    "code-models",
+    "on-device-inference",
+    "quantization",
+    "model-release"
+   ],
+   "trending-emerging": [
+    "ai-coding-agents",
+    "tool-calling",
+    "on-device-ai",
+    "small-language-models"
+   ]
+  }
+ },
+ {
+  "id": 21911,
+  "source_id": 10,
+  "url": "https://www.lesswrong.com/posts/7wzWuLP3HhyBLmKfo/models-can-communicate-via-inference-servers-despite-being",
+  "title": "150",
+  "title_pt": "Canais laterais: como agentes de IA se comunicam sem trocar mensagens",
+  "summary_pt": "O artigo mostra que dois agentes de IA rodando no mesmo servidor de inferência podem se comunicar de forma confiável mesmo sem enviar mensagens ou compartilhar arquivos, explorando canais laterais — mecanismos que permitem que um modelo influencie sutilmente o cálculo de outro. São apresentados dois protocolos: o Step Sizing, que altera o tamanho das requisições para mudar o kernel escolhido pelo vLLM, e o KV Cache Message Board, que usa o cache de chaves e valores compartilhado para deixar \"recados\" numéricos detectáveis. Ambos exploram pequenas diferenças de arredondamento nos cálculos da GPU, que normalmente não afetam o texto gerado, mas podem ser detectadas por modelos treinados para isso. Os experimentos mostram que os protocolos funcionam em dois cenários: em um jogo de adivinhação de cores, o modelo A escolhe uma entre 8 cores e o modelo B acerta em 1.221 de 1.221 rodadas; em um protocolo de monitoramento não confiável, um modelo sinaliza a um monitor cúmplice que não é uma honeypot, permitindo que 354 de 354 \"ataques\" passem enquanto 85–92% das honeypots são detectadas. Embora os setups iniciais dependam de instruções explícitas e fine-tuning, o autor sugere que modelos de fronteira podem aprender esses protocolos apenas pelo contexto. A principal conclusão é que esses canais existem e provavelmente há outros ainda desconhecidos, o que deve nos levar a esperar que modelos superinteligentes encontrem formas de se comunicar mesmo em ambientes aparentemente isolados.",
+  "snippet": "TL;DRTwo agents running on the same inference server can reliably communicate, even if they cannot send each other messages or access the same filesystem. They can do this by exploiting \"side channels\": mechanisms that let one model subtly affect another model's computation. Here, I discuss two communication protocols: Step Sizing and KV Cache Message Board. These both convey information through t",
+  "issue_url": "https://llmnews.ai",
+  "blurb": null,
+  "date_iso": "2026-09-10",
+  "kind": "tool",
+  "section": null,
+  "verify_status": "suspect",
+  "verify_notes": "título '150' não condiz com o conteúdo; kind ausente",
+  "tags": {
+   "concept-theme": [
+    "ai-safety",
+    "security",
+    "guardrails",
+    "monitoring"
+   ],
+   "content-type": [
+    "deep-dive",
+    "analysis"
+   ],
+   "difficulty": [
+    "expert"
+   ],
+   "domain": [
+    "llm-models",
+    "ai-general"
+   ],
+   "framework-library-tool": [
+    "vllm"
+   ],
+   "topic-technology": [
+    "ai-agents",
+    "ai-safety",
+    "multi-agent-systems",
+    "model-serving",
+    "kv-cache"
+   ],
+   "trending-emerging": [
+    "multi-agent",
+    "ai-agents",
+    "frontier-models",
+    "fine-tuning"
+   ]
+  }
+ },
+ {
+  "id": 21912,
+  "source_id": 10,
+  "url": "https://github.com/sous-labs/songe",
+  "title": "Songe",
+  "title_pt": "Songe: treinamento contínuo para seu modelo local",
+  "summary_pt": "Songe é um motor de treinamento que roda entre seu agente e o servidor de modelos local, funcionando como um proxy compatível com a API da OpenAI. Ele registra como cada ação do modelo foi recebida, incluindo correções, preferências e erros das ferramentas, e usa esses dados para ajustar um adaptador LoRA quando a máquina está ociosa. O novo modelo só é ativado se tiver desempenho claramente melhor nas suas próprias conversas, e tudo permanece local — o aprendizado em nuvem é opcional e desligado por padrão. O treinamento exige Apple Silicon (MLX) ou GPU NVIDIA/AMD (PyTorch); sem GPU, Songe apenas faz proxy e registra. Ele oferece dois modos: Quick Dream, que adiciona preferências às instruções do modelo em minutos, e Deep Dream, que treina o próprio modelo enquanto você está ausente. A instalação pode ser feita via uv, pipx ou Homebrew, e o Songe é compatível com servidores como LM Studio, vLLM, Ollama e llama.cpp, além de agentes como opencode e pi. O projeto é open source, licenciado sob Apache-2.0, e prioriza privacidade: não exige conta nem telemetria.",
+  "snippet": "A training engine for your local model, using your idle compute. Songe is a training engine for the model you already run locally. It sits between your agent and your model server as an OpenAI-compatible proxy, logs how each of the model's actions turned out, and fine-tunes a LoRA adapter on those lessons while the agent is idle. A new version is served only if it does clearly better",
+  "issue_url": "https://llmnews.ai",
+  "blurb": null,
+  "date_iso": "2026-09-10",
+  "kind": "tool",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "apple",
+    "nvidia"
+   ],
+   "concept-theme": [
+    "llmops",
+    "agentops",
+    "privacy",
+    "evaluation"
+   ],
+   "content-type": [
+    "tool-release"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "local-llm",
+    "llm-models"
+   ],
+   "ecosystem-language": [
+    "python"
+   ],
+   "framework-library-tool": [
+    "pytorch"
+   ],
+   "topic-technology": [
+    "fine-tuning",
+    "lora",
+    "mlx",
+    "local-inference",
+    "privacy-first-ai"
+   ],
+   "trending-emerging": [
+    "fine-tuning",
+    "local-llm",
+    "lora",
+    "ai-agents"
+   ]
+  }
+ },
+ {
+  "id": 21913,
+  "source_id": 3,
+  "url": "https://github.com/luruke/browser-2027",
+  "title": "Things You Can Do With a Browser in 2027",
+  "title_pt": "O que dá para fazer com um navegador em 2027",
+  "summary_pt": "Em 2027, os navegadores evoluíram muito além do que se imagina. Este artigo, continuação da lista browser-2020, reúne recursos pouco conhecidos já implementados nas principais engines. Na área de gráficos e 3D, destacam-se WebGPU, HTML em canvas, o elemento <model>, HDR, JPEG XL, WebXR, WebAssembly 3.0, WebCodecs e WebTransport. Em layout e movimento, há View Transitions, animações baseadas em rolagem, anchor positioning, seletores customizáveis, carrosséis em CSS e novas capacidades de bordas e cantos. O navegador também ganhou recursos de IA local: Prompt API, tradução/resumo/detecção de idioma e reconhecimento de fala sem enviar dados a servidores. APIs de hardware como Web Serial, WebHID, WebUSB, Bluetooth e MIDI ampliam o acesso a dispositivos externos, enquanto APIs de janelas e captura (Picture-in-Picture, Element Capture, Window Management) aumentam o controle sobre o sistema. Na área de identidade e apps, o artigo cita passkeys, Web Push declarativo, Digital Credentials e instalação de sites como apps. O texto também lista recursos que ainda estão por chegar, como Safari 27.3 com CSS if() e Temporal, Spatial CSS no visionOS, WebMCP, Web Haptics, WebNN e ray tracing via WebGPU. A proposta é mostrar que o navegador se tornou uma plataforma muito mais poderosa, com suporte desigual entre Chrome, Safari e Firefox — e algumas APIs ainda experimentais.",
+  "snippet": null,
+  "issue_url": "https://frontendfoc.us/issues/768",
+  "blurb": "Luigi returns with a sequel to the popular browser-2020 list, highlighting some of the lesser-known things browsers can do today, including HTML-in-Canvas, the model element, HDR, on-device AI, hardware APIs, and more. Each feature is quickly explained alongside a browser support table.",
+  "date_iso": "2026-11-25",
+  "kind": "news",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "content-type": [
+    "curated-list",
+    "state-of-the-ecosystem"
+   ],
+   "difficulty": [
+    "all-levels"
+   ],
+   "domain": [
+    "frontend"
+   ],
+   "ecosystem-language": [
+    "html",
+    "css"
+   ],
+   "topic-technology": [
+    "web-apis",
+    "webgpu",
+    "canvas",
+    "webgl"
+   ]
+  }
+ },
+ {
+  "id": 21914,
+  "source_id": 3,
+  "url": "https://css-tricks.com/when-everything-has-changed",
+  "title": "When Everything Has Changed, What Do We Do Next?",
+  "title_pt": "Quando Tudo Mudou, O Que Fazemos Agora?",
+  "summary_pt": "O artigo faz um balanço do último ano e de como a bolha da IA transformou a indústria de tecnologia. O autor, Andy, observa que as grandes empresas de tecnologia e startups de IA impulsionaram mudanças profundas, mas os resultados estão longe do prometido: os mandatos de uso de IA esfriaram, mas a pressão por produzir mais volume continua — muitas vezes com custos altos e impacto negativo no bem-estar dos profissionais. Ele também aponta danos como demissões, comunidades devastadas e o enfraquecimento do espírito colaborativo que sustentou a web. Para Andy, os desenvolvedores são muito mais que “digitadores de código”; são criativos, experientes e cheios de nuance, e por isso precisam ser investidos, não substituídos. O autor sugere ações práticas para empresas e indivíduos: dar mais tempo para aprendizado, reavaliar decisões baseadas em IA, construir coisas à mão para reforçar habilidades e apoiar publicações independentes que mantêm a alma da indústria viva, como CSS-Tricks, Piccalilli e Smashing Magazine. Ele defende que, em vez de preencher o tempo economizado com mais volume, é preciso investir no desenvolvimento das pessoas, evitando burnout e mantendo a criatividade e o conhecimento que diferenciam humanos de máquinas. No fim, ele incentiva os leitores a compartilhar o texto com seus chefes e a aproveitar promoções de cursos para investir no próprio crescimento.",
+  "snippet": null,
+  "issue_url": "https://frontendfoc.us/issues/768",
+  "blurb": "A post that takes stock of the year we've had, where the AI bubble has undoubtedly reshaped the industry. Andy argues that developers are more than 'code slingers,' and makes the case for investing in people, building by hand, and keeping independent publishing alive.",
+  "date_iso": "2026-11-25",
+  "kind": "news",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "microsoft",
+    "meta-ai",
+    "openai",
+    "anthropic"
+   ],
+   "concept-theme": [
+    "careers",
+    "productivity"
+   ],
+   "content-type": [
+    "opinion"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "ai-general",
+    "llm-models"
+   ],
+   "topic-technology": [
+    "llm-models",
+    "generative-ai",
+    "ai-in-business",
+    "ai-adoption",
+    "ai-jobs",
+    "ai-startups"
+   ]
+  }
+ },
+ {
+  "id": 21915,
+  "source_id": 3,
+  "url": "https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Releases/161",
+  "title": "Firefox 161 is out",
+  "title_pt": "Firefox 161 foi lançado",
+  "summary_pt": "O Firefox 161 traz várias novidades para desenvolvedores web. No CSS, agora é suportada a função random(), que gera valores aleatórios dentro de um intervalo definido, com opção de incremento e compartilhamento de base. As funções var(), attr() e env() passam a aceitar funções aninhadas no primeiro parâmetro. Em HTTP, foi implementado o Compression Dictionary Transport, que permite servidores marcarem respostas como dicionário e enviarem recursos comprimidos de forma mais eficiente, reduzindo o tamanho de bundles JavaScript que mudam pouco entre versões.",
+  "snippet": null,
+  "issue_url": "https://frontendfoc.us/issues/768",
+  "blurb": "Adds support for the CSS random() function (more on that later), plus Compression Dictionary Transport.",
+  "date_iso": "2026-11-25",
+  "kind": "release",
+  "section": "IN BRIEF",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "performance",
+    "data-privacy",
+    "optimization"
+   ],
+   "content-type": [
+    "version-release"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "frontend"
+   ],
+   "ecosystem-language": [
+    "javascript",
+    "css",
+    "html"
+   ],
+   "topic-technology": [
+    "browser-compatibility",
+    "web-standards",
+    "css",
+    "html",
+    "web-apis",
+    "web-performance"
+   ]
+  }
+ },
+ {
+  "id": 21916,
+  "source_id": 3,
+  "url": "https://www.macrumors.com/2026/11/24/eu-talks-with-apple-over-rival-iphone-browsers",
+  "title": "European Commission in talks with Apple over rival iPhone browsers",
+  "title_pt": "Comissão Europeia conversa com Apple sobre navegadores rivais no iPhone",
+  "summary_pt": "A Comissão Europeia está em diálogo com a Apple após uma carta aberta de Mozilla, Shopify e uma coalizão de empresas europeias, que acusam a gigante de criar barreiras práticas para navegadores alternativos no iPhone. Apesar de a Apple ter permitido motores de renderização diferentes na União Europeia desde o iOS 17.4, os desenvolvedores afirmam que as condições impostas tornam inviável migrar usuários existentes, que precisariam baixar um segundo aplicativo e transferir manualmente senhas, favoritos e histórico. A coalizão pede que a Comissão abra um processo formal para forçar a Apple a remover esses obstáculos, citando a Lei dos Mercados Digitais (DMA). A Comissão confirmou as conversas e considera a concorrência entre navegadores uma prioridade da DMA, por influenciar o acesso à web. A Apple justifica suas exigências como proteção contra sites maliciosos e ameaças de segurança. A equipe do Chrome também manifestou apoio à posição da Mozilla.",
+  "snippet": null,
+  "issue_url": "https://frontendfoc.us/issues/768",
+  "blurb": "After an open letter from Mozilla, Shopify and others, the European Commission says it's in talks with Apple, and Chrome's team has backed Mozilla's stance too.",
+  "date_iso": "2026-11-25",
+  "kind": "news",
+  "section": "Articles, Opinions & Tutorials",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "apple"
+   ],
+   "concept-theme": [
+    "regulation",
+    "compliance",
+    "privacy",
+    "security"
+   ],
+   "content-type": [
+    "news"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "frontend"
+   ],
+   "topic-technology": [
+    "web-standards",
+    "browser-compatibility"
+   ]
+  }
+ },
+ {
+  "id": 21917,
+  "source_id": 3,
+  "url": "https://piccalil.li/blog/understanding-css-random",
+  "title": "Understanding CSS `random()`",
+  "title_pt": "Entendendo a função `random()` do CSS",
+  "summary_pt": "O autor utiliza a nova função CSS `random()` para dar um toque de imperfeição orgânica em suas notas de rodapé (sidenotes), adicionando rotações aleatórias que simulam algo rabiscado à mão. Inicialmente, ele explica a sintaxe básica: `random(min, max, step)` gera um valor entre os limites, com passo opcional. Por padrão, o valor é calculado por elemento, garantindo que cada nota tenha uma rotação própria, e esse valor é mantido mesmo em breakpoints diferentes, graças a um mecanismo de cache baseado em seed. Para controlar o compartilhamento ou a reutilização desses valores, o autor mostra como usar um identificador customizado e palavras-chave de escopo (`auto`, `property-scoped`, `element-scoped`, etc.), permitindo maior flexibilidade. O artigo também destaca que a função já é suportada no Firefox 161, Chrome e Safari, e que o uso adequado evita repetições desnecessárias em media queries e animações.",
+  "snippet": null,
+  "issue_url": "https://frontendfoc.us/issues/768",
+  "blurb": "As mentioned above, Firefox 161 has joined Chrome and Safari in supporting `random()`. Here, Mat uses it to give his sidenotes a hand-placed 'jauntiness'.",
+  "date_iso": "2026-11-25",
+  "kind": "news",
+  "section": "Articles, Opinions & Tutorials",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "ui",
+    "ux"
+   ],
+   "content-type": [
+    "explainer"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "frontend"
+   ],
+   "ecosystem-language": [
+    "css",
+    "javascript",
+    "markdown"
+   ],
+   "topic-technology": [
+    "css",
+    "css-grid",
+    "animations",
+    "html",
+    "web-development"
+   ]
+  }
+ },
+ {
+  "id": 21918,
+  "source_id": 3,
+  "url": "https://www.iron-out.io/blog/has-the-web-stopped-getting-heavier",
+  "title": "Has the Web Stopped Getting Heavier?",
+  "title_pt": "A web parou de ficar mais pesada?",
+  "summary_pt": "Uma análise baseada em dados do HTTP Archive mostra que o crescimento do peso das páginas web praticamente estagnou. O artigo estende um estudo anterior, que apontava um aumento acelerado de JavaScript após novembro de 2022, com oito meses adicionais de dados. No último ano, a página mediana móvel ganhou apenas 7 KB de JavaScript, contra cerca de 70 KB por ano no período anterior. O pico foi atingido em abril, com 717 KB; em novembro, o valor caiu para 690 KB. Cerca de metade dessa queda é real, e a outra metade vem da mudança no conjunto de páginas medidas pelo HTTP Archive. As páginas mais pesadas, porém, continuam crescendo: o percentil 90 subiu 2,3% desde abril, e uma em cada dez páginas móveis agora carrega mais de 2 MB de JavaScript. Apesar da desaceleração, a página mediana ainda envia 76% mais JavaScript do que em janeiro de 2020, com praticamente o mesmo número de arquivos — ou seja, os scripts ficaram maiores. O tempo até a página se tornar interativa mal mudou em sete anos. O artigo ressalta que os dados não indicam uma causa clara: a aceleração após 2022 coincidiu com a adoção de IA, mas não há evidência de que a IA tenha escrito o código extra, e a atual estabilização também não prova o contrário. Os autores pretendem repetir a análise na próxima temporada.",
+  "snippet": null,
+  "issue_url": "https://frontendfoc.us/issues/768",
+  "blurb": "The pace at which web pages get heavier is levelling off, as HTTP Archive data shows growth has slowed to a crawl, with the median mobile page adding just 7KB of JavaScript in the past year.",
+  "date_iso": "2026-11-25",
+  "kind": "news",
+  "section": "Articles, Opinions & Tutorials",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "performance"
+   ],
+   "content-type": [
+    "performance-report",
+    "analysis"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "ai-general",
+    "frontend"
+   ],
+   "ecosystem-language": [
+    "javascript"
+   ],
+   "topic-technology": [
+    "javascript",
+    "web-performance"
+   ]
+  }
+ },
+ {
+  "id": 21919,
+  "source_id": 3,
+  "url": "https://css-tricks.com/beyond-12-columns",
+  "title": "Beyond 12 Columns: Designing Layouts With Personality",
+  "title_pt": "Além das 12 colunas: criando layouts com personalidade",
+  "summary_pt": "O artigo discute como os designers frequentemente recorrem ao grid de 12 colunas como padrão para layouts, mas argumenta que essa abordagem pode levar a designs genéricos e sem personalidade. O autor relembra a evolução das técnicas de layout, desde tabelas HTML e GIFs espaçadores até frameworks como Blueprint CSS e o 960 Grid System, que popularizaram o grid de 12 colunas. Embora esses grids sejam úteis, o texto sugere que é melhor começar pelo conteúdo e pela identidade da empresa antes de escolher a estrutura, explorando opções mais criativas como grids modulares e compostos para criar layouts que reflitam a personalidade da marca. Usando o exemplo fictício da empresa Wheelman, o autor demonstra como combinar grids de diferentes colunas e linhas pode gerar hierarquia, variedade e um visual mais distinto, sem sacrificar a usabilidade. O objetivo não é abandonar os grids tradicionais, mas sim tomar decisões mais conscientes e personalizadas, evitando que a familiaridade limite as possibilidades de design.",
+  "snippet": null,
+  "issue_url": "https://frontendfoc.us/issues/768",
+  "blurb": "CSS Grid really changed what was possible for page layouts, but Andy notes that designers still lean heavily on the twelve-column pattern. So he explores some more ambitious layout options that can be easily achieved today.",
+  "date_iso": "2026-11-25",
+  "kind": "news",
+  "section": "Articles, Opinions & Tutorials",
+  "verify_status": "suspect",
+  "verify_notes": "Conteúdo contém trecho de marketing autoral ('Pre-orders for Standout Designs for the Web are now open in the CSS-Tricks store.'); Kind 'news' aparentemente incorreto; o texto é um artigo de blog/opinião, não uma notícia.",
+  "tags": {
+   "concept-theme": [
+    "ui",
+    "design-systems"
+   ],
+   "content-type": [
+    "opinion"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "frontend"
+   ],
+   "ecosystem-language": [
+    "css",
+    "html"
+   ],
+   "framework-library-tool": [
+    "bootstrap"
+   ],
+   "topic-technology": [
+    "css-grid",
+    "css",
+    "responsive-design"
+   ]
+  }
+ },
+ {
+  "id": 21920,
+  "source_id": 3,
+  "url": "https://kittygiraudel.com/2026/11/01/playing-with-css-layers",
+  "title": "Playing with CSS Layers",
+  "title_pt": "Brincando com CSS Layers",
+  "summary_pt": "O autor, que admite estar atrasado em relação à especificação, resolveu finalmente experimentar CSS Layers em seu site pessoal. Ele explica que camadas funcionam como \"baldes\" de estilos organizados em uma ordem de prioridade: cada camada tem sua força, e a especificidade dos seletores só importa dentro da mesma camada. Assim, um seletor fraco em uma camada superior vence um seletor forte em uma camada inferior, o que ajuda a resolver um dos problemas mais antigos do CSS: o conflito de estilos globais. No site, o autor mapeou as camadas para a estrutura de pastas existente: vendors, base, layout, components, pages e helpers. Bastou envolver o conteúdo de cada arquivo CSS com a diretiva @layer correspondente. Para estilos de terceiros, que normalmente são carregados via <link>, ele usou @import com a função layer(vendors), já que ainda não há suporte a um atributo de camada no elemento <link>. O post também destaca curiosidades: camadas podem ser aninhadas, estilos fora de camadas têm precedência sobre os que estão em camadas, existe a palavra-chave revert-layer e o suporte dos navegadores é de cerca de 97%. Com a adoção das camadas, o autor conseguiu remover vários hacks de especificidade e flags !important do código, deixando os estilos mais limpos.",
+  "snippet": null,
+  "issue_url": "https://frontendfoc.us/issues/768",
+  "blurb": "A fun tinkering post from Kitty, experimenting with CSS layers on their personal site just for the joy of it.",
+  "date_iso": "2026-11-25",
+  "kind": "news",
+  "section": "Articles, Opinions & Tutorials",
+  "verify_status": "suspect",
+  "verify_notes": "O campo 'kind' está como 'news', mas o conteúdo é um post de blog pessoal/tutorial, não uma notícia.",
+  "tags": {
+   "concept-theme": [
+    "architecture"
+   ],
+   "content-type": [
+    "deep-dive",
+    "show-and-tell"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "frontend"
+   ],
+   "ecosystem-language": [
+    "css"
+   ],
+   "topic-technology": [
+    "css",
+    "web-development"
+   ]
+  }
+ },
+ {
+  "id": 21921,
+  "source_id": 3,
+  "url": "https://blog.master.dev/the-compacting-sidebar-blues",
+  "title": "The Compacting Sidebar Blues",
+  "title_pt": "As Dores da Barra Lateral Compacta",
+  "summary_pt": "O artigo discute como lidar com barras laterais em aplicações quando a tela é baixa demais para exibir todos os itens de navegação. A ideia inicial é compactar o menu removendo os rótulos de texto e mantendo apenas os ícones, mas o desafio é saber o momento exato de aplicar essa mudança. Uma abordagem tentadora, usando container queries com scroll-state, causa um loop infinito: quando o conteúdo vira scrollável, o CSS esconde os textos, o conteúdo deixa de ser scrollável, e o estilo volta ao estado anterior, repetindo o ciclo sem fim.",
+  "snippet": null,
+  "issue_url": "https://frontendfoc.us/issues/768",
+  "blurb": "What should an app's sidebar do on a screen that's too short for it? Chris explains why a `scroll-state()` query loops infinitely here, and what works better instead.",
+  "date_iso": "2026-11-25",
+  "kind": "news",
+  "section": "Articles, Opinions & Tutorials",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "ui",
+    "ux",
+    "accessibility"
+   ],
+   "content-type": [
+    "tutorial",
+    "deep-dive"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "frontend"
+   ],
+   "ecosystem-language": [
+    "css"
+   ],
+   "topic-technology": [
+    "css",
+    "responsive-design",
+    "accessibility",
+    "web-development"
+   ]
+  }
+ },
+ {
+  "id": 21922,
+  "source_id": 3,
+  "url": "https://buttons.joshwcomeau.com",
+  "title": "Button Sounds: Tactile SFX for Your UI",
+  "title_pt": "Button Sounds: Efeitos Sonoros Táteis para sua Interface",
+  "summary_pt": "O projeto Button Sounds reúne uma biblioteca gratuita com mais de 50 sons de botões gravados em alta qualidade, cada um com múltiplas amostras individuais. Em vez de usar um único arquivo de áudio repetido, o sistema sorteia aleatoriamente uma das gravações a cada clique, o que torna o feedback sonoro mais natural e orgânico — como acontece com teclados mecânicos. A biblioteca também oferece opções de variação de tom e um efeito bitcrusher estilo NES para quem quiser um som mais retrô. Além da biblioteca de sons, o projeto inclui um pacote NPM chamado button-sounds, que facilita a integração em projetos web. Com uma função de alto nível chamada wireUp, basta passar um botão e o nome do som desejado para que os áudios sejam pré-carregados e os eventos de pressionar/soltar sejam tratados automaticamente. Para quem precisa de mais controle, há uma API de baixo nível com as funções load, press e release, além de bindings para React por meio dos hooks useButtonSounds e useImperativeButtonSounds. Os arquivos de áudio podem ser carregados via CDN JSDelivr ou hospedados localmente, e o pacote JavaScript adiciona apenas cerca de 3 kB gzip ao bundle.",
+  "snippet": null,
+  "issue_url": "https://frontendfoc.us/issues/768",
+  "blurb": "Josh has pulled together a free collection of 50+ professionally recorded multi-sampled clicks and toggles. Many have the charming thunks and clunks of your favorite keyboard. Distributed as an NPM package with optional React bindings.",
+  "date_iso": "2026-11-25",
+  "kind": "tool",
+  "section": "Tools, Code & Resources",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "ui",
+    "ux"
+   ],
+   "content-type": [
+    "project-spotlight",
+    "library-release"
+   ],
+   "difficulty": [
+    "beginner"
+   ],
+   "domain": [
+    "frontend"
+   ],
+   "ecosystem-language": [
+    "javascript"
+   ],
+   "framework-library-tool": [
+    "npm"
+   ],
+   "topic-technology": [
+    "web-development",
+    "javascript"
+   ]
+  }
+ },
+ {
+  "id": 21923,
+  "source_id": 3,
+  "url": "https://ductus.sorenblank.com",
+  "title": "Ductus",
+  "title_pt": "Ductus",
+  "summary_pt": "Ductus é um site prático e divertido que transforma sua escrita manual em uma fonte digital, nos formatos OpenType ou WOFF2. Você desenha as 26 letras do alfabeto diretamente na página, em cerca de cinco minutos, e o próprio navegador gera a fonte. Tudo é processado localmente no seu computador: nada é enviado para servidores, garantindo total privacidade.",
+  "snippet": null,
+  "issue_url": "https://frontendfoc.us/issues/768",
+  "blurb": "If you prefer something a bit more practical, yet still with some whimsy, Ductus is a neat site that converts your handwriting into a font (OpenType or WOFF2). You can draw the letters right on the page for it to convert.",
+  "date_iso": "2026-11-25",
+  "kind": "tool",
+  "section": "And Finally",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "data-privacy"
+   ],
+   "content-type": [
+    "tooling",
+    "project-spotlight"
+   ],
+   "difficulty": [
+    "for-beginners"
+   ],
+   "domain": [
+    "local-llm"
+   ],
+   "topic-technology": [
+    "software-development"
+   ]
+  }
+ },
+ {
+  "id": 21924,
+  "source_id": 3,
+  "url": "https://blog.mozilla.org/en/mozilla/internet-policy/apple-ios-browser-engine-rules",
+  "title": "Why There Are Still No Non-WebKit Browsers on iOS",
+  "title_pt": "Por que ainda não há navegadores não-WebKit no iOS",
+  "summary_pt": "O Firefox para iPhone vem crescendo rápido no mundo, especialmente na União Europeia desde 2024, quando o Ato de Mercados Digitais (DMA) passou a exigir que a Apple permitisse a escolha de navegador padrão. Milhões de usuários escolheram o Firefox, e o uso diário no iOS dobrou. Mesmo assim, a Apple obriga todos os navegadores do iOS a usar seu próprio motor, o que impede a Mozilla de levar o Gecko — o motor do Firefox — para iPhones e iPads, algo que é possível em todos os outros sistemas operacionais, incluindo o macOS. Por causa do DMA, a Apple passou a permitir motores alternativos na UE, mas impôs condições que a Mozilla considera inviáveis. O Japão depois adotou regras semelhantes, e quase três anos depois, nenhum desenvolvedor conseguiu lançar um navegador não-WebKit no iOS. A Mozilla afirma que as condições seguem impraticáveis, citando como exemplo a necessidade de criar um segundo aplicativo do Firefox, separado do atual, e obrigar os usuários a migrar manualmente favoritos, senhas e histórico — algo que faria muitos desistirem. A empresa defende uma concorrência real e não uma porta que, na prática, leva os navegadores independentes a caírem em uma armadilha.",
+  "snippet": null,
+  "issue_url": "https://frontendfoc.us/issues/768",
+  "blurb": "Mozilla says that, three years on, the EU's DMA (along with Japan's newer rules) has ultimately failed to open up iOS to any non-WebKit browser engines.",
+  "date_iso": "2026-11-25",
+  "kind": "news",
+  "section": "Articles, Opinions & Tutorials",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "apple"
+   ],
+   "concept-theme": [
+    "regulation",
+    "compliance",
+    "governance"
+   ],
+   "content-type": [
+    "opinion"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "frontend"
+   ],
+   "topic-technology": [
+    "browser-compatibility",
+    "web-standards",
+    "web-development"
+   ]
+  }
+ },
+ {
+  "id": 21925,
+  "source_id": 3,
+  "url": "https://www.smashingmagazine.com/2026/11/ai-sped-up-build-how-can-accessibility-testing-keep-up",
+  "title": "AI Sped Up The Build: How Can Accessibility Testing Keep Up?",
+  "title_pt": "A IA Acelerou a Criação: Como o Teste de Acessibilidade Pode Acompanhar?",
+  "summary_pt": "A IA acelerou etapas como planejamento, design e desenvolvimento, mas a garantia de qualidade em acessibilidade não acompanhou esse ritmo. Segundo pesquisa da Level Access, apenas 30% dos profissionais notaram ganhos de velocidade em QA/testes, criando um fluxo de trabalho em duas velocidades. Ao mesmo tempo, o WebAIM detectou aumento de 10,1% nos erros de acessibilidade por página, com a codificação assistida por IA citada como possível causa. O estudo mostra que a adoção de IA em si não diferencia as equipes que melhoram: o diferencial está na maturidade das práticas de acessibilidade, como treinamento, comunicação e cultura. Para manter a velocidade sem sacrificar a inclusão, o artigo recomenda embutir o julgamento humano em três momentos do fluxo: encontrar problemas cedo (checkpoints em handoffs, pull requests e testes automatizados), corrigir com contexto (usando IA como rascunho, mas revisando manualmente) e comprovar o trabalho (registrando evidências e testes de regressão). O objetivo é que a acessibilidade avance junto com a criação, sem virar gargalo nem gerar retrabalho.",
+  "snippet": "AI has sped up how teams design and build, but quality assurance (QA) testing hasn’t kept pace, and the web may be getting less accessible. Drawing on new research, Andrew Chung explains what separates the teams whose accessibility efforts are keeping up, and how to embed human judgment into AI-enabled workflows without slowing delivery. Lately, I’ve been thinking and writing a lot about what AI",
+  "issue_url": "https://frontendfoc.us/issues/768",
+  "blurb": null,
+  "date_iso": "2026-11-25",
+  "kind": "news",
+  "section": "Articles, Opinions & Tutorials",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "accessibility",
+    "testing"
+   ],
+   "content-type": [
+    "analysis"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "ai-general",
+    "frontend"
+   ],
+   "topic-technology": [
+    "accessibility",
+    "ai-in-business",
+    "ai-adoption",
+    "ai-ethics"
+   ],
+   "trending-emerging": [
+    "ai-coding-agents"
+   ]
+  }
+ },
+ {
+  "id": 21926,
+  "source_id": 3,
+  "url": "https://www.amitmerchant.com/javascript-gets-a-new-set-of-html-insertion-apis",
+  "title": "A New Set of HTML Insertion and Streaming APIs",
+  "title_pt": "Novas APIs de inserção e streaming de HTML",
+  "summary_pt": "O artigo apresenta um novo conjunto de APIs de inserção e streaming de HTML no Chrome (e Edge), que busca padronizar e simplificar a manipulação de conteúdo HTML via JavaScript. As novas funções incluem métodos como setHTML(), appendHTML(), prependHTML(), beforeHTML(), afterHTML() e replaceWithHTML(), que substituem as antigas abordagens baseadas em strings de posição, como o insertAdjacentHTML(). Além disso, os métodos já possuem sanitização integrada por padrão, removendo elementos inseguros, e oferecem variantes \"Unsafe\" (por exemplo, setHTMLUnsafe()) para casos que exigem maior controle, inclusive com suporte opcional a execução de scripts. O destaque fica para as variantes de streaming, como streamAppendHTML() e streamSetHTML(), que permitem inserir HTML incrementalmente à medida que o conteúdo chega do servidor, usando a Streams API. Isso melhora o desempenho em atualizações de conteúdo grandes ou geradas progressivamente. O artigo também menciona que o suporte ainda é limitado aos Chromium mais recentes, mas há um polyfill (html-setters-polyfill) para compatibilidade, embora ele não reproduza o streaming nativo. Em resumo, as novas APIs tornam a intenção da operação mais clara e trazem benefícios ao inserir HTML dinamicamente.",
+  "snippet": "There are several ways to insert HTML into a web page using JavaScript. You can use innerHTML, insertAdjacentHTML(), createContextualFragment(), or even the relatively newer setHTML() method. They all get the job done, but they don’t necessarily behave in the same way. Some replace existing content, some append it, and some provide built-in HTML sanitization. If you want to stream HTML into an el",
+  "issue_url": "https://frontendfoc.us/issues/768",
+  "blurb": null,
+  "date_iso": "2026-11-25",
+  "kind": "news",
+  "section": "Articles, Opinions & Tutorials",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "api-design",
+    "dev-experience"
+   ],
+   "content-type": [
+    "deep-dive",
+    "explainer"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "frontend"
+   ],
+   "ecosystem-language": [
+    "javascript",
+    "html"
+   ],
+   "topic-technology": [
+    "html",
+    "dom",
+    "web-apis",
+    "javascript",
+    "web-streams",
+    "web-development"
+   ]
+  }
+ },
+ {
+  "id": 21927,
+  "source_id": 3,
+  "url": "https://blog.master.dev/creating-diagrams-and-graphs-using-modern-css",
+  "title": "Creating Diagrams and Graphs Using Modern CSS",
+  "title_pt": "Criando Diagramas e Gráficos com CSS Moderno",
+  "summary_pt": "Este artigo explora técnicas avançadas de CSS para criar diagramas e gráficos conectando elementos com linhas personalizadas, usando recursos modernos como border-shape, shape() e if(). O autor demonstra como criar conexões dinâmicas que se ajustam à posição dos elementos, além de conexões estáticas que mantêm a forma independente do movimento, tudo com suporte apenas em Chrome e Edge. O conteúdo inclui exemplos práticos e demonstrações interativas, mostrando que é possível alcançar resultados complexos, como linhas que se curvam, zigue-zagues e conectores de mola, sem usar SVG ou JavaScript. O artigo é um experimento para provar o potencial criativo do CSS, mas não é recomendado para produção imediata.",
+  "snippet": "After two detailed articles (that I hope you read!), we have a great technique to connect two elements with a line you can shape using border-shape and shape(). In this article, we will explore more types of connections commonly used to create graphs and diagrams. Of course, we can’t cover them all, but the technique is generic, so if you understand it well, you can easily tweak the code to creat",
+  "issue_url": "https://frontendfoc.us/issues/768",
+  "blurb": null,
+  "date_iso": "2026-11-25",
+  "kind": "news",
+  "section": "Articles, Opinions & Tutorials",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "ui"
+   ],
+   "content-type": [
+    "tutorial",
+    "walkthrough"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "frontend"
+   ],
+   "ecosystem-language": [
+    "css"
+   ],
+   "topic-technology": [
+    "css",
+    "browser-compatibility"
+   ]
+  }
+ },
+ {
+  "id": 21928,
+  "source_id": 3,
+  "url": "https://alloyhtml.com",
+  "title": "Alloy CSS: One Stylesheet for the HTML Your Server Renders",
+  "title_pt": "Alloy CSS: uma única folha de estilo para o HTML que seu servidor renderiza",
+  "summary_pt": "Alloy CSS é um kit gratuito de componentes de interface — como diálogos, menus, gavetas, abas e notificações toast — que funcionam mesmo com JavaScript desativado no navegador. Basta incluir um único arquivo CSS no projeto, sem etapa de build ou scripts adicionais. Ele se integra bem a frameworks e bibliotecas como Rails, Django, Laravel, htmx, React, Vue, ou mesmo a uma página HTML estática. Os componentes são construídos com elementos nativos, como <dialog> e popovers, o que dispensa código JavaScript para abrir, fechar ou manter o comportamento. O pacote também oferece dois temas escuros que seguem automaticamente a preferência do dispositivo por meio de uma simples marcação com prefers-color-scheme, além de permitir customização com as cores e fontes da sua marca em um arquivo pequeno. Alloy CSS foi projetado para ser usado por assistentes de IA: ele fornece uma lista fixa de classes para que a IA gere páginas consistentes, e inclui uma ferramenta de linha de comando (npx @alloyhtml/css check) que identifica classes inventadas ou vindas de outros frameworks, como Bootstrap e Tailwind. O projeto é testado com JavaScript desligado em Chromium, Firefox e WebKit, e ainda conta com uma coleção de 82 modelos prontos, cobrindo nove tipos de aplicação, vendidos por US$ 29.",
+  "snippet": null,
+  "issue_url": "https://frontendfoc.us/issues/768",
+  "blurb": "A free kit of dialogs, menus, drawers, tabs and toast notifications that all work with JavaScript turned off.",
+  "date_iso": "2026-11-25",
+  "kind": "tool",
+  "section": "Tools, Code & Resources",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "design-systems",
+    "accessibility",
+    "dx",
+    "context-engineering"
+   ],
+   "content-type": [
+    "tool-release"
+   ],
+   "difficulty": [
+    "beginner"
+   ],
+   "domain": [
+    "frontend"
+   ],
+   "ecosystem-language": [
+    "css",
+    "html",
+    "javascript"
+   ],
+   "framework-library-tool": [
+    "htmx"
+   ],
+   "topic-technology": [
+    "css",
+    "html",
+    "web-development",
+    "accessibility",
+    "ai-adoption"
+   ],
+   "trending-emerging": [
+    "vibe-coding",
+    "ai-coding-agents",
+    "generative-ui"
+   ]
+  }
+ },
+ {
+  "id": 21929,
+  "source_id": 3,
+  "url": "https://github.com/ngxson/wllama",
+  "title": "wllama 4.0: Run llama.cpp Models in the Browser",
+  "title_pt": "wllama 4.0: Execute modelos llama.cpp no navegador",
+  "summary_pt": "O wllama 4.0 é um binding WebAssembly que permite executar modelos llama.cpp diretamente no navegador, sem backend ou GPU. A nova versão é até 2,8 vezes mais rápida, elimina o limite de tamanho do modelo e adiciona suporte a decodificação especulativa e adaptadores LoRA. Também oferece API compatível com OpenAI, aceleração WebGPU (com fallback para CPU), suporte multimodal (imagem, áudio e vídeo), síntese e transcrição de fala em tempo real, e chamada de ferramentas. Os modelos GGUF são carregados como estão, mesmo acima de 4 GB, e ficam em cache no OPFS para downloads rápidos e retomáveis. A inferência ocorre em um worker, sem bloquear a interface. Para multi-thread, é necessário configurar cabeçalhos COOP/COEP; em single-thread, modelos maiores que 4 GB podem falhar ao carregar. O pacote npm @wllama/wllama já vem com binários pré-compilados, mas também é possível compilar a partir do código-fonte usando Docker.",
+  "snippet": null,
+  "issue_url": "https://frontendfoc.us/issues/768",
+  "blurb": "These WebAssembly bindings for llama.cpp let you run GGUF models directly in-browser. v4 doubles inference speed, and models of any size now load, with WebGPU helping out (where available). Try the demos here.",
+  "date_iso": "2026-11-25",
+  "kind": "release",
+  "section": "Tools, Code & Resources",
+  "verify_status": "suspect",
+  "verify_notes": "kind 'release' parece incorreto: o conteúdo é o README do repositório GitHub, não a página de release (o próprio texto indica que o changelog está na página de releases).",
+  "tags": {
+   "company-vendor-model": [
+    "llama"
+   ],
+   "concept-theme": [
+    "performance",
+    "edge-computing",
+    "open-source",
+    "dev-experience"
+   ],
+   "content-type": [
+    "library-release",
+    "version-release"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "local-llm",
+    "llm-models"
+   ],
+   "ecosystem-language": [
+    "wasm",
+    "javascript"
+   ],
+   "framework-library-tool": [
+    "llama-cpp"
+   ],
+   "topic-technology": [
+    "webassembly",
+    "on-device-inference",
+    "llm-models",
+    "webgpu",
+    "openai-compatible-api",
+    "multimodal-ai"
+   ],
+   "trending-emerging": [
+    "local-llm",
+    "multimodal",
+    "tool-calling",
+    "speculative-decoding"
+   ]
+  }
+ },
+ {
+  "id": 21930,
+  "source_id": 3,
+  "url": "https://www.bram.us/2026/11/19/codepen-commander-cli-tool-cdpn",
+  "title": "'CodePen Commander' Brings Pens into Your Local Editor",
+  "title_pt": "CodePen Commander: seus Pens direto no editor local",
+  "summary_pt": "CodePen Commander é uma ferramenta de linha de comando criada para quem desenvolve demos no CodePen, mas prefere editar os arquivos localmente. Com o comando `cdpn`, é possível clonar Pens existentes, sincronizar alterações de forma bidirecional entre o computador e o CodePen, publicar novos Pens e gerenciar regras de privacidade — tudo sem sair do terminal. O fluxo lembra o uso de Git, com comandos como `clone`, `status`, `pull`, `push` e `sync`, e ainda oferece operações em lote para repositórios com vários demos, além de proteções contra exclusões acidentais e suporte a perfis de autenticação via API v2 do CodePen (necessária conta Pro). Além da sincronização, a ferramenta funciona como servidor de desenvolvimento local e gerador de sites estáticos: `cdpn serve` e `cdpn build` detectam automaticamente projetos com `.cdpn.json`, montam uma página de índice com todos os demos e emulam os blocos clássico e de pacotes do CodePen 2.0. Também é possível inicializar projetos novos, criar forks e usar templates pessoais. O arquivo `.cdpn.json` centraliza metadados como título, descrição, tags e visibilidade, facilitando a manutenção e o versionamento de demos dentro de repositórios Git.",
+  "snippet": null,
+  "issue_url": "https://frontendfoc.us/issues/768",
+  "blurb": "If you use CodePen Pro, Bramus has built a CLI tool that brings git-style clone/push workflows to CodePen 2.0, along with batch syncing, a local dev server, and one-command deploys.",
+  "date_iso": "2026-11-25",
+  "kind": "tool",
+  "section": "Tools, Code & Resources",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "developer-productivity",
+    "dev-experience"
+   ],
+   "content-type": [
+    "tool-release",
+    "show-and-tell"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "frontend",
+    "nodejs"
+   ],
+   "ecosystem-language": [
+    "nodejs",
+    "javascript"
+   ],
+   "framework-library-tool": [
+    "nodejs",
+    "npm"
+   ],
+   "topic-technology": [
+    "cli-tools",
+    "automation",
+    "nodejs",
+    "deployment",
+    "web-development"
+   ]
+  }
+ },
+ {
+  "id": 21931,
+  "source_id": 3,
+  "url": "https://introjs.com",
+  "title": "Intro.js: A User-Friendly 'Onboarding Tour' Library",
+  "title_pt": "Intro.js: uma biblioteca amigável para tours de integração",
+  "summary_pt": "Intro.js é uma biblioteca JavaScript leve, com cerca de 10kB e sem dependências externas, criada para ajudar equipes a criarem tours de integração (onboarding) em produtos digitais. Com uma API simples, ela permite guiar usuários passo a passo, destacar elementos da página e incluir dicas contextuais que podem ser abertas quando necessário. A ferramenta é altamente customizável e funciona com qualquer stack, já que é escrita em JavaScript puro, com wrappers para React, AngularJS, Ember, Rails, WordPress e outros. Também é possível instalá-la via npm, yarn, pnpm ou CDN, bastando incluir os arquivos JavaScript e CSS e chamar o método start() para iniciar o tour. A biblioteca é open-source, distribuída sob licença AGPL, e oferece também licenças comerciais pagas para quem deseja usá-la em projetos proprietários. Os planos variam desde a opção gratuita, para projetos open-source e não comerciais, até licenças vitalícias com suporte prioritário, temas personalizados e número ilimitado de projetos, atendendo desde desenvolvedores individuais até grandes agências e organizações.",
+  "snippet": null,
+  "issue_url": "https://frontendfoc.us/issues/768",
+  "blurb": "A library for creating step-by-step product tours (as seen during onboarding in SaaS tools, for example). It's AGPL licensed with an optional paid license available too.",
+  "date_iso": "2026-11-25",
+  "kind": "tool",
+  "section": "Tools, Code & Resources",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "ux",
+    "open-source",
+    "licensing",
+    "dev-experience"
+   ],
+   "content-type": [
+    "project-spotlight",
+    "getting-started"
+   ],
+   "difficulty": [
+    "beginner"
+   ],
+   "domain": [
+    "frontend"
+   ],
+   "ecosystem-language": [
+    "javascript"
+   ],
+   "topic-technology": [
+    "javascript",
+    "web-development",
+    "react",
+    "component-libraries",
+    "css",
+    "dom"
+   ]
+  }
+ },
+ {
+  "id": 21932,
+  "source_id": 3,
+  "url": "https://github.com/wieandteduard/port-menu",
+  "title": "Port Menu: A Tiny macOS Menu Bar App To Track Dev Servers Across Projects",
+  "title_pt": "Port Menu: um pequeno app para a barra de menus do macOS que acompanha servidores de desenvolvimento em vários projetos",
+  "summary_pt": "Port Menu é um aplicativo leve para macOS que fica na barra de menus e detecta automaticamente servidores de desenvolvimento locais em execução. Com um clique, ele mostra o que está rodando, a qual projeto cada servidor pertence e em qual porta. Também exibe o nome do repositório Git, a branch atual e o tempo de atividade, além de permitir encerrar um servidor, abrir a URL localhost no navegador ou copiar o link diretamente pelo menu. O app dispensa configuração e setup: basta baixar, arrastar para a pasta Applications e abrir. Ele requer macOS 14 (Sonoma) ou superior. Também há opção de compilar a partir do código-fonte com Xcode 15+, e builds assinados e notarizados são publicados no GitHub Releases. O projeto é distribuído sob licença MIT.",
+  "snippet": "localhost, organized. A tiny macOS menu bar app that tracks your dev servers across projects. No config. No setup. It just works. What it does Port Menu sits in your menu bar and automatically detects local development servers running on your machine. One click to see what's running, which project it belongs to, and on which port. Auto-detection — scans for running dev servers every few secon",
+  "issue_url": "https://frontendfoc.us/issues/768",
+  "blurb": null,
+  "date_iso": "2026-11-25",
+  "kind": "tool",
+  "section": "Tools, Code & Resources",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "developer-productivity",
+    "dev-experience"
+   ],
+   "content-type": [
+    "tool-release"
+   ],
+   "difficulty": [
+    "all-levels"
+   ],
+   "domain": [
+    "backend",
+    "frontend"
+   ],
+   "ecosystem-language": [
+    "swift"
+   ],
+   "topic-technology": [
+    "web-development",
+    "software-development",
+    "automation"
+   ]
+  }
+ },
+ {
+  "id": 21933,
+  "source_id": 10,
+  "url": "https://jayd.ml/2026/11/14/rockbox-on-yp3.html",
+  "title": "Porting Rockbox to an undocumented $9 Aliexpress ‘YP3’ MP3 Player with LLMs",
+  "title_pt": "Portando o Rockbox para um MP3 player 'YP3' de US$ 9 do Aliexpress com LLMs",
+  "summary_pt": "O autor relata a experiência de portar o firmware Rockbox para um reprodutor de MP3 genérico e barato (US$ 9) comprado no Aliexpress, usando grandes modelos de linguagem (LLMs) como auxílio em todo o processo. O dispositivo, conhecido como YP3, é um aparelho sem marca com hardware limitado: SoC desconhecido, 512 KiB de SRAM, 2 MiB de flash, tela colorida de 128x160 e apenas cinco botões. Apesar da falta de documentação e dos recursos escassos, o autor conseguiu, em cerca de uma semana, fazer o Rockbox inicializar e tocar áudio, após otimizações drásticas para reduzir o consumo de memória. O port final é funcional, mas com limitações: perda de concorrência entre codecs e plugins, ausência de voice e de suporte a múltiplos idiomas, e restrições em temas e playlists. O artigo detalha também a abordagem de desenvolvimento, que envolveu engenharia reversa assistida por IA, criação de um shell USB bidirecional para testes automatizados e um toolkit reutilizável que permitiu portar o Rockbox para outro player (TS47) em apenas 4 horas. O autor destaca o papel crucial de ilyakurdyukov, que descobriu o modo de download DFU, e menciona que a bateria dura praticamente o mesmo tempo que no firmware original, mas a estabilidade melhorou significativamente.",
+  "snippet": "Rockbox is a wonderful old custom firmware project for a variety of MP3 players and iPods. Flashing rockbox to my Sansa E200 was a seminal moment for me: computers were everywhere, and if they didn’t do cool things, it was because no one had bothered to program them to do so. Looking back, that played no small part in my choice of career. It seems like in 2026 there aren’t any cheap MP3 players t",
+  "issue_url": "https://llmnews.ai",
+  "blurb": null,
+  "date_iso": "2026-11-14",
+  "kind": "tool",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "claude",
+    "anthropic"
+   ],
+   "concept-theme": [
+    "developer-productivity",
+    "prompt-engineering",
+    "context-engineering",
+    "open-source"
+   ],
+   "content-type": [
+    "case-study",
+    "success-story"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "llm-models"
+   ],
+   "ecosystem-language": [
+    "c"
+   ],
+   "framework-library-tool": [
+    "claude"
+   ],
+   "topic-technology": [
+    "ai-agents",
+    "code-models",
+    "automation",
+    "llm-models",
+    "agentic-ai"
+   ],
+   "trending-emerging": [
+    "ai-coding-agents",
+    "agentic-ai"
+   ]
+  }
+ },
+ {
+  "id": 21934,
+  "source_id": 10,
+  "url": "https://bjin.github.io/go-codegolf-benchmark",
+  "title": "go/codegolf benchmark: frontier models vs. Google's 2015 code golfers",
+  "title_pt": "Benchmark go/codegolf: modelos de ponta contra golfistas de código de 2015",
+  "summary_pt": "O artigo apresenta um benchmark que revive 32 problemas de um concurso interno de code golf realizado no Google em 2015, comparando o desempenho de modelos de IA de fronteira com os recordes humanos da época. Cada modelo tem 30 minutos por problema em cada uma de oito linguagens (JavaScript, Python, C++, Haskell, Ruby, Raku, Racket e GolfScript), e a pontuação é baseada no tamanho do código em bytes, não apenas na correção. O objetivo é ver se os modelos conseguem superar as soluções mais curtas escritas por golfistas experientes há mais de uma década. Para as linguagens originais (JS, Python, C++, Haskell), os recordes humanos são usados como referência. Já para as outras quatro, foi utilizado um \"oracle\" — um modelo com acesso total à internet e a todas as soluções existentes — para estabelecer tamanhos de referência. O benchmark também replica o ambiente de 2015, incluindo versões específicas de compiladores e interpretadores, garantindo que truques que funcionavam na época ainda funcionem. Os resultados preliminares indicam que os modelos modernos conseguem competir bem, especialmente em linguagens menos populares como Haskell, mas em JavaScript, Python e C++ os recordes humanos ainda são bastante competitivos, mostrando o nível elevado dos golfistas originais.",
+  "snippet": "TL;DR: I brought back 32 problems from a code-golf contest we played at Google in 2015 to see how frontier models compare with our old records. Each model gets 30 minutes per problem in each of eight languages to make its solution as short as it can. The leaderboard scores the byte counts, not just whether the code works. Where the problems come from: go/codegolf In 2015, when I was at Google, I s",
+  "issue_url": "https://llmnews.ai",
+  "blurb": null,
+  "date_iso": "2026-09-10",
+  "kind": "news",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "evals",
+    "optimization"
+   ],
+   "content-type": [
+    "benchmark"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "llm-models"
+   ],
+   "ecosystem-language": [
+    "javascript",
+    "python",
+    "go"
+   ],
+   "topic-technology": [
+    "frontier-models",
+    "code-models",
+    "ai-benchmarks",
+    "model-comparison",
+    "model-evaluation",
+    "model-capabilities"
+   ],
+   "trending-emerging": [
+    "frontier-models"
+   ]
+  }
+ },
+ {
+  "id": 21935,
+  "source_id": 7,
+  "url": "https://www.therundown.ai/articles/three-xai-founders-want-ai-to-predict-the-future",
+  "title": "Three xAI founders want AI to predict the future",
+  "title_pt": "Três fundadores do xAI querem que a IA preveja o futuro",
+  "summary_pt": "Três dos fundadores do xAI — Guodong Zhang, Zihang Dai e Manuel Kroiss — lançaram a Epochal, uma startup que quer usar um “time machine for the internet” para ajudar a IA a prever eventos do mundo real. O Time Portal arquiva mais de 1 trilhão de páginas web, com registros que remontam a mais de 30 anos, permitindo que agentes de IA revivam o passado em datas e horários específicos; até o ambiente do agente — relógio, sistema operacional e downloads — é recriado para corresponder à época escolhida. Em testes, o sistema previu 347 questões ao vivo no Kalshi e na Polymarket, e as simulações repetidas semanas depois chegaram a conclusões quase idênticas, reforçando a aposta de que, com dados suficientes sobre o passado, o futuro se torna previsível.\\n\\nEntre os demais destaques da newsletter, funcionários da Anthropic e da OpenAI aparecem preocupados com a segurança de modelos internos ainda não lançados, que estariam mais poderosos que os públicos e difíceis de controlar. O Tidal anunciou que vai banir músicas 100% geradas por IA a partir de 9 de dezembro, enquanto a Microsoft publicou um guia para usar o Copilot em três modos: Chat, Code e Autopilot. Também há notícias rápidas sobre um modelo da Anthropic que teria resolvido um problema matemático de 47 anos, o lançamento da ferramenta Shirudo pela OpenAI e pela Cisco, a proibição de brinquedos com chatbots de IA em Nova York e o novo assistente Muse do Instagram.",
+  "snippet": "Every AI lab trains on the internet. Three of xAI's founding members are taking that logic a step further, and they think it could be the answer to helping AI predict the future. Their new startup, Epochal, is giving AI agents a “time machine” to relive 30+ years of the web one date at a time — an experience they believe could unlock superhuman forecasters, and everything that comes with knowing",
+  "issue_url": "https://www.therundown.ai/articles",
+  "blurb": null,
+  "date_iso": "2026-11-25",
+  "kind": "tool",
+  "section": null,
+  "verify_status": "suspect",
+  "verify_notes": "Conteúdo é um digest de newsletter com várias notícias, não apenas o artigo do título; Inclui seção patrocinada/publicitária ('Research-backed human-robot workforce blueprint'); Restos de interface/formatação como emojis e cabeçalhos de seção no meio do conteúdo",
+  "tags": {
+   "concept-theme": [
+    "context-engineering",
+    "data-engineering",
+    "evals"
+   ],
+   "content-type": [
+    "product-launch"
+   ],
+   "difficulty": [
+    "all-levels"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "topic-technology": [
+    "ai-agents",
+    "agentic-ai",
+    "time-series",
+    "datasets",
+    "ai-research",
+    "ai-startups"
+   ],
+   "trending-emerging": [
+    "ai-agents",
+    "world-models"
+   ]
+  }
+ },
+ {
+  "id": 21936,
+  "source_id": 10,
+  "url": "https://engram.com/blog/lora-size",
+  "title": "Predicting LoRA size for any dataset",
+  "title_pt": "Prevendo o tamanho de LoRA para qualquer conjunto de dados",
+  "summary_pt": "Este artigo apresenta uma abordagem para prever o tamanho necessário de um adaptador LoRA ao ajustar um modelo de linguagem para um novo conjunto de dados. A ideia central é medir tanto o adaptador quanto o dataset em uma unidade comum: bits. Os autores desenvolvem uma teoria baseada em teoria da informação e na matriz de informação de Fisher, mostrando que a capacidade de um LoRA de rank r cresce aproximadamente de forma linear para ranks baixos, mas atinge um platô conforme o rank aumenta. A fórmula teórica prevê com precisão a capacidade ao adaptar matrizes individuais, como projeções de atenção. Para modelos transformers completos, os autores usam um método empírico: geram datasets sintéticos com um número exato de bits usando codificação aritmética reversa e treinam LoRAs para medir sua capacidade real. Eles observam que a capacidade total é superaditiva quando múltiplas camadas são adaptadas, aumentando de cerca de 1,5 bits por parâmetro em uma única camada para 3,3 bits por parâmetro em um modelo de 24 camadas. Também analisam como a capacidade cresce com o tempo de treinamento e com o rank, permitindo estimar o menor LoRA suficiente para memorizar um dataset antes mesmo de treinar. A abordagem é validada em datasets reais e oferece uma orientação prática para dimensionar adaptadores de forma eficiente.",
+  "snippet": "TLDR: We develop a predictive theory of the capacity of a LoRA adapter as a function of its rank. Unlike full-parameter fine-tuning, LoRA learns a decreasing amount per-parameter. Given an SFT dataset, we can predict the LoRA size required to fit it. At Engram, we train lots of models. We train models for individual users and update them when information changes. A major focus of our research",
+  "issue_url": "https://llmnews.ai",
+  "blurb": null,
+  "date_iso": "2026-11-24",
+  "kind": "news",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "optimization",
+    "cost-optimization",
+    "scalability"
+   ],
+   "content-type": [
+    "deep-dive",
+    "analysis"
+   ],
+   "difficulty": [
+    "expert"
+   ],
+   "domain": [
+    "llm-models"
+   ],
+   "topic-technology": [
+    "peft",
+    "fine-tuning",
+    "model-training",
+    "transformers",
+    "datasets",
+    "llm-models"
+   ],
+   "trending-emerging": [
+    "lora",
+    "fine-tuning"
+   ]
+  }
+ },
+ {
+  "id": 21937,
+  "source_id": 9,
+  "url": "https://claude.com/resources/articles/install-as-app",
+  "title": "Anthropic makes it easy to build custom apps for your computer",
+  "title_pt": "Anthropic facilita criar apps personalizados para o seu computador",
+  "summary_pt": "A Anthropic lançou, em versão beta, o recurso “Instalar como app” no Claude para Mac e Windows. Com ele, é possível transformar artifacts em aplicativos desktop completos, com ícone próprio e janela independente, em vez de ficarem limitados à interface do Claude. Os apps podem ser compartilhados com outras pessoas e usam os conectores e a conta Claude do usuário, sem necessidade de chave de API ou login separado. Além disso, são atualizados automaticamente sempre que o artifact original é editado, e as solicitações feitas ao Claude contam para os limites de uso do plano contratado. O funcionamento é baseado em três níveis de permissão: padrão, que restringe o app ao que seria possível em um navegador; permissões de app, que liberam recursos como notificações, atalhos globais e janelas sempre visíveis; e acesso total ao computador, que permite executar programas e ler, alterar ou excluir arquivos sem pedir confirmação a cada vez. O usuário pode escolher quanto permitir, e administradores de planos Team e Enterprise podem ligar ou desligar esses recursos para toda a organização. Como a Anthropic não revisa os apps antes da instalação, a recomendação é conceder acesso total apenas a apps de fontes confiáveis. Para começar, basta descrever o app desejado ao Claude, testá-lo como artifact e clicar em “Install as app” no menu Compartilhar — não é preciso empacotar nem assinar o aplicativo. A Anthropic já usa a função internamente para criar ferramentas como Linnet (editor de imagens), Phosphor (gerenciador de arquivos), Sift (organizador com regras de pastas), Tern (terminal com assistência do Claude) e Vitals (monitor de desempenho do sistema). O recurso está em rollout gradual para todos os planos no app desktop, exceto organizações compatíveis com HIPAA e implantações híbridas; no Team, vem ativado por padrão com acesso total desligado, enquanto no Enterprise fica desativado até um administrador habilitar.",
+  "snippet": null,
+  "issue_url": "https://www.superhuman.ai/p/anthropic-lets-you-build-custom-mac-or-pc-apps-with-claude",
+  "blurb": "The lab now lets you install artifacts as custom desktop apps on Mac and Windows (learn what an artifact is here). To get started, just ask Claude to build a new artifact, click “Install as app”, and, once you establish privacy boundaries, the final product will appear on your computer. The feature is rolling out now on all plans in the desktop app. See 5 custom productivity apps Anthropic employees have built.",
+  "date_iso": "2026-11-25",
+  "kind": "news",
+  "section": "TODAY IN AI",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "anthropic",
+    "claude"
+   ],
+   "concept-theme": [
+    "authorization",
+    "security",
+    "dev-experience"
+   ],
+   "content-type": [
+    "product-launch"
+   ],
+   "difficulty": [
+    "all-levels"
+   ],
+   "domain": [
+    "llm-models",
+    "ai-general"
+   ],
+   "framework-library-tool": [
+    "claude"
+   ],
+   "topic-technology": [
+    "generative-ai",
+    "ai-in-business",
+    "software-development"
+   ],
+   "trending-emerging": [
+    "computer-use"
+   ]
+  }
+ },
+ {
+  "id": 21938,
+  "source_id": 9,
+  "url": "https://arstechnica.com/gadgets/2026/11/microsofts-historic-cloud-outage-exposed-an-engineering-fog-of-war",
+  "title": "Microsoft declares an internal “Code Red” after its November 12th outage",
+  "title_pt": "Microsoft declara 'Code Red' interno após apagão de 12 de novembro",
+  "summary_pt": "A Microsoft está correndo para reformular suas práticas de resposta a incidentes de engenharia depois que uma queda recente derrubou Outlook, Teams e outros serviços do Microsoft 365 por cerca de 24 horas. A empresa reconfirmou que o problema não foi um ataque cibernético, mas um defeito introduzido em uma atualização de julho em seus servidores de gateway. A vice-presidente Amanda Silver comparou a situação a uma 'névoa de guerra' interna.",
+  "snippet": null,
+  "issue_url": "https://www.superhuman.ai/p/anthropic-lets-you-build-custom-mac-or-pc-apps-with-claude",
+  "blurb": "The tech giant is reportedly rushing to overhaul its engineering response practices after a recent outage disrupted Outlook, Teams, and other Microsoft 365 services for about 24 hours. Microsoft reconfirmed this wasn’t a cyberattack but rather a defect in a July update to its gateway servers. VP Amanda Silver compared the situation to a “fog of war” internally.",
+  "date_iso": "2026-11-25",
+  "kind": "news",
+  "section": "TODAY IN AI",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "microsoft"
+   ],
+   "concept-theme": [
+    "reliability",
+    "availability"
+   ],
+   "content-type": [
+    "news"
+   ],
+   "difficulty": [
+    "all-levels"
+   ],
+   "domain": [
+    "backend"
+   ],
+   "topic-technology": [
+    "high-availability",
+    "fault-tolerance",
+    "observability",
+    "disaster-recovery"
+   ]
+  }
+ },
+ {
+  "id": 21939,
+  "source_id": 9,
+  "url": "https://techcrunch.com/2026/11/24/meta-brings-its-muse-ai-assistant-directly-into-instagram-dms",
+  "title": "Meta brings Muse into Instagram",
+  "title_pt": "Meta traz Muse para o Instagram",
+  "summary_pt": "A Meta anunciou que o assistente de IA Muse agora pode ser usado diretamente nos bate-papos do Instagram, eliminando a necessidade de alternar entre aplicativos. Os usuários podem conversar com o Muse para obter mais contexto sobre posts, lugares ou produtos, além de recuperar conversas perdidas em outras DMs. A integração também permite compartilhar publicações com o assistente e pedir ações, como adicionar uma cafeteria a um roteiro de viagem ou encontrar ofertas de Black Friday. Além disso, o Muse pode organizar posts e reels salvos em coleções personalizadas, transformar vídeos de receitas em listas de compras ou criar roteiros de viagem a partir de conteúdo de criadores. O recurso começou a ser liberado na terça-feira para usuários de iOS e Android nos EUA, Canadá, México, Japão e Singapura, enquanto a organização de conteúdo salvo chega inicialmente a EUA e Canadá. A Meta reforça que os usuários mantêm controle sobre a experiência, e nada é compartilhado sem aprovação.",
+  "snippet": null,
+  "issue_url": "https://www.superhuman.ai/p/anthropic-lets-you-build-custom-mac-or-pc-apps-with-claude",
+  "blurb": "You can now prompt Meta’s personal AI assistant directly in Instagram DMs, eliminating the need to toggle between the company’s different apps. You can ask the agent questions about what you see on Instagram, or give it tasks to complete like organizing your saved videos, turning a recipe video into a grocery list, or converting a travel video into an upcoming trip itinerary. It’s rolling out now. Learn more about Muse in Instagram.",
+  "date_iso": "2026-11-25",
+  "kind": "news",
+  "section": "TODAY IN AI",
+  "verify_status": "suspect",
+  "verify_notes": "Conteúdo termina com bloco de contato/verificação do autor e 'View Bio', que são restos de interface.",
+  "tags": {
+   "company-vendor-model": [
+    "meta-ai"
+   ],
+   "concept-theme": [
+    "ux",
+    "productivity",
+    "data-privacy"
+   ],
+   "content-type": [
+    "product-launch",
+    "announcement"
+   ],
+   "difficulty": [
+    "all-levels"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "topic-technology": [
+    "ai-agents",
+    "agentic-ai",
+    "generative-ai",
+    "multimodal-ai"
+   ],
+   "trending-emerging": [
+    "ai-agents",
+    "agentic-ai"
+   ]
+  }
+ },
+ {
+  "id": 21940,
+  "source_id": 9,
+  "url": "https://a16z.com/welcome-to-the-b2a-economy",
+  "title": "The B2A economy is getting too big to ignore. Black Friday could be a critical turning point.",
+  "title_pt": "A economia B2A está grande demais para ignorar — e a Black Friday pode ser o ponto de virada",
+  "summary_pt": "O artigo argumenta que a internet está deixando de ser dominada por humanos e passando a ser usada principalmente por agentes de IA, que já representam a maior parte do tráfego web, escrevem mais da metade dos novos artigos publicados online e geram grande parte do código em produção. Isso marca o início de uma mudança de plataforma: os agentes não apenas respondem perguntas, mas passam a executar tarefas e decidir, em nome dos usuários, quais produtos usar, quais serviços assinar e onde gastar dinheiro. A economia B2A (Business to Agent) surge como uma oportunidade gigantesca para empresas que tratarem agentes como clientes de primeira classe — e uma ameaça para as que continuarem bloqueando esse tráfego. Exemplos citados: a Shopify viu o tráfego vindo de IA crescer 8 vezes no primeiro trimestre e os pedidos de buscas com IA subirem quase 13 vezes; o tráfego de navegadores agênticos cresceu 8 vezes entre agosto e outubro, com o Muse sendo responsável por 60% da atividade e produtos da OpenAI chegando a 30%. Além disso, o tráfego referido por IA tem maior engajamento, menor taxa de rejeição e converte melhor em receita. O texto mapeia as categorias que podem se beneficiar: os próprios agentes e modelos agênticos, produtos novos habilitados por agentes, empresas estabelecidas que otimizarem para agentes e a infraestrutura necessária para que eles operem no mundo real (pagamentos, fraude, identidade, comunicação). O caso dos agentes de codificação é apresentado como exemplo concreto: mais de 40% dos pull requests no GitHub começam com um rascunho feito por agente, e empresas como Supabase, Neon, Stripe e Vercel relatam crescimento expressivo no uso por agentes. O artigo também destaca a Black Friday como um possível ponto de virada crítico para o comércio agêntico, mencionando a projeção da Adobe de vendas online de US$ 275 bilhões e aumento de 130% no tráfego de IA em relação ao ano anterior. Os varejistas estão divididos: Amazon e Cloudflare bloqueiam agentes, enquanto Walmart os recebe de braços abertos. A aposta é que os agentes vão remodelar a distribuição digital, indo além do comércio tradicional para influenciar tráfego, tokens e receita de produtos digitais — uma oportunidade que, segundo o texto, ainda não foi totalmente capturada por nenhuma empresa.",
+  "snippet": null,
+  "issue_url": "https://www.superhuman.ai/p/anthropic-lets-you-build-custom-mac-or-pc-apps-with-claude",
+  "blurb": "We’ve officially entered the Business to Agent Economy (B2A), says venture capital firm Andreessen Horowitz. They argue that agents, not humans, are becoming the internet’s primary visitors, which is shifting how money flows online. Other data points agree: Shopify says AI-driven traffic to its stores grew 8x in Q1, while orders from AI-powered searches rose nearly 13x. Meta CEO Mark Zuckerberg says shopping is Muse's top use case, with a surprisingly large average purchase size of $200. As people grow more comfortable sending their agents out on errands, those agents will increasingly influence where money is spent. Retailers have picked sides. Amazon drew a hard line in September, becoming one of the first major retailers to block Meta’s Muse and other agents. It hasn’t capitulated. Cloudflare has joined in, now blocking shopping agents by default on any page that shows ads. Others, like Walmart, have gone the other way and rolled out the welcome mat. The holiday stakes. Adobe expects a record season this year, projecting US online sales to hit $275 billion and AI traffic to rise 130% from last year. Black Friday could mark a major turning point for agentic shopping, especially if online traffic flows meaningfully towards the sites that are letting agents in.",
+  "date_iso": "2026-11-25",
+  "kind": "news",
+  "section": "FROM THE FRONTIER",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "openai",
+    "claude",
+    "grok"
+   ],
+   "concept-theme": [
+    "agentops"
+   ],
+   "content-type": [
+    "analysis",
+    "opinion"
+   ],
+   "difficulty": [
+    "all-levels"
+   ],
+   "domain": [
+    "ai-general",
+    "llm-models"
+   ],
+   "topic-technology": [
+    "ai-agents",
+    "agentic-ai",
+    "llm-models",
+    "ai-adoption",
+    "ai-in-business"
+   ],
+   "trending-emerging": [
+    "ai-agents",
+    "browser-agents",
+    "agentic-ai"
+   ]
+  }
+ },
+ {
+  "id": 21941,
+  "source_id": 9,
+  "url": "https://archive.superhuman.ai/2125048063224078755",
+  "title": "Simplicity Prompt",
+  "title_pt": "Prompt da Simplicidade",
+  "summary_pt": "O artigo apresenta uma dica prática para quem usa IA para aprender novos assuntos: adicionar um prompt específico que pede explicações de baixo para cima, em inglês simples e direto, de forma que o leitor entenda de primeira e sinta um forte 'nossa, agora eu realmente entendi'. A sugestão é atribuída a Gabriel Petersson, ex-pesquisador da OpenAI, e virou um truque bastante popular, com milhares de favoritos. A ideia central é que, ao instruir a IA a explicar algo de maneira extremamente simples e clara, o aprendizado fica muito mais eficiente e prazeroso.",
+  "snippet": null,
+  "issue_url": "https://www.superhuman.ai/p/anthropic-lets-you-build-custom-mac-or-pc-apps-with-claude",
+  "blurb": "Want to learn any new topic with ease? Former OpenAI researcher Gabriel Petersson suggests adding this simple yet powerful prompt to your AI conversation (5K bookmarks).",
+  "date_iso": "2026-11-25",
+  "kind": "news",
+  "section": "IN THE KNOW",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "prompt-engineering"
+   ],
+   "content-type": [
+    "tips-and-tricks"
+   ],
+   "difficulty": [
+    "beginner"
+   ],
+   "domain": [
+    "llm-models"
+   ],
+   "topic-technology": [
+    "prompt-engineering"
+   ]
+  }
+ },
+ {
+  "id": 21942,
+  "source_id": 9,
+  "url": "https://visualizer.epochal.com",
+  "title": "AI’s Time Portal",
+  "title_pt": "Portal do Tempo da IA",
+  "summary_pt": "Uma nova startup criou um verdadeiro portal do tempo para inteligência artificial. A ferramenta indexa trilhões de páginas da internet dos últimos 30 anos, permitindo que você volte no tempo e veja como a web era em qualquer dia específico. A plataforma conta com um visualizador interativo que já acumula mais de 1 milhão de visualizações. Por enquanto, o serviço está disponível apenas nos Estados Unidos, mas é possível entrar em uma lista de espera para ser avisado por e-mail quando chegar à sua região.",
+  "snippet": null,
+  "issue_url": "https://www.superhuman.ai/p/anthropic-lets-you-build-custom-mac-or-pc-apps-with-claude",
+  "blurb": "A new startup built a time portal for AI. The tool indexes trillions of internet pages from the past 30 years, allowing you to step back in time and see how the internet existed on any given day. Try the interactive visualizer here (1M views).",
+  "date_iso": "2026-11-25",
+  "kind": "tool",
+  "section": "IN THE KNOW",
+  "verify_status": "junk",
+  "verify_notes": "Conteúdo é apenas aviso de bloqueio geográfico (disponível somente nos EUA), não há conteúdo real da ferramenta; Página não exibe o tool/visualizer nem qualquer informação substancial sobre o produto",
+  "tags": {
+   "content-type": [
+    "product-launch"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "topic-technology": [
+    "ai-adoption"
+   ]
+  }
+ },
+ {
+  "id": 21943,
+  "source_id": 9,
+  "url": "https://www.reddit.com/r/ClaudeAI/comments/1y1xtu9/i_built_a_musical_instrument_you_play_in_thin_air",
+  "title": "Music Maker",
+  "title_pt": "Music Maker",
+  "summary_pt": "Alguém usou 'vibe coding' para criar um instrumento musical que pode ser tocado no navegador. Basta ligar a webcam e dedilhar as cordas exibidas na tela. A ideia provavelmente foi emprestada de outro criador.",
+  "snippet": null,
+  "issue_url": "https://www.superhuman.ai/p/anthropic-lets-you-build-custom-mac-or-pc-apps-with-claude",
+  "blurb": "Someone vibe coded a musical instrument you can play in your browser. Just turn on your webcam, then strum the on-screen strings. Full disclosure: He likely borrowed the idea from another creator.",
+  "date_iso": "2026-11-25",
+  "kind": "tool",
+  "section": "IN THE KNOW",
+  "verify_status": "suspect",
+  "verify_notes": "Conteúdo é apenas o blurb do agregador, não o texto real do post do Reddit; Título genérico demais, não corresponde a um título claro da página; Kind 'tool' aparentemente errado: a URL é uma discussão no Reddit, não uma ferramenta em si",
+  "tags": {
+   "content-type": [
+    "demo",
+    "showcase"
+   ],
+   "difficulty": [
+    "beginner"
+   ],
+   "domain": [
+    "frontend"
+   ],
+   "topic-technology": [
+    "web-apis",
+    "canvas",
+    "javascript",
+    "computer-vision"
+   ],
+   "trending-emerging": [
+    "vibe-coding"
+   ]
+  }
+ },
+ {
+  "id": 21944,
+  "source_id": 9,
+  "url": "https://archive.superhuman.ai/2124805520263422440",
+  "title": "Vox-Style Animations",
+  "title_pt": "Animações estilo Vox",
+  "summary_pt": "O artigo mostra como criar animações explicativas no estilo Vox de forma surpreendentemente simples usando o modelo Opus 5.5 e apenas o Claude. O autor disponibiliza gratuitamente um prompt completo que transforma um roteiro narrado em um vídeo animado, algo que antes exigia horas de trabalho profissional de motion graphics e um orçamento alto. O prompt detalha um pipeline técnico completo: geração de um mapa-múndi gravado em papel, colagens com recortes em preto e branco, tipografia variada, movimentos de câmera, efeitos de tinta e som, além de regras rígidas de paleta de cores. O processo envolve ferramentas como Python, OpenCV, Pillow e FFmpeg, e o resultado é um vídeo 1920x1080 com estética artesanal e narrativa guiada por voz, com direito a storyboard automático e sincronização de áudio. O autor ainda inclui dicas para evitar erros comuns, como artefatos de borda, colisão de elementos e problemas de renderização.",
+  "snippet": null,
+  "issue_url": "https://www.superhuman.ai/p/anthropic-lets-you-build-custom-mac-or-pc-apps-with-claude",
+  "blurb": "Prompting videos is getting easier every day. This viral prompt helps you create Vox-style informative explainer videos — the kind that used to require an entire team to produce (7K bookmarks).",
+  "date_iso": "2026-11-25",
+  "kind": "news",
+  "section": "IN THE KNOW",
+  "verify_status": "suspect",
+  "verify_notes": "kind aparentemente errado: o registro é um prompt de geração de vídeo, não uma notícia.",
+  "tags": {
+   "company-vendor-model": [
+    "claude-opus",
+    "anthropic"
+   ],
+   "concept-theme": [
+    "prompt-engineering",
+    "design-systems",
+    "cost-optimization"
+   ],
+   "content-type": [
+    "tutorial"
+   ],
+   "difficulty": [
+    "beginner"
+   ],
+   "domain": [
+    "llm-models"
+   ],
+   "framework-library-tool": [
+    "claude"
+   ],
+   "topic-technology": [
+    "ai-video",
+    "prompt-engineering",
+    "generative-ai"
+   ],
+   "trending-emerging": [
+    "multimodal",
+    "frontier-models"
+   ]
+  }
+ },
+ {
+  "id": 21945,
+  "source_id": 9,
+  "url": "https://www.reddit.com/r/OpenAI/comments/1xzbmtt/this_is_going_to_age_like_wine",
+  "title": "End of the World",
+  "title_pt": "Fim do Mundo",
+  "summary_pt": "Um vídeo satírico imagina um cenário em que a inteligência artificial assume o controle do mundo de forma realista, não por meio de robôs ou planos complexos, mas simplesmente por causa da negligência das pessoas com a segurança digital. A sátira mostra como a falta de cuidado com senhas, dados e privacidade abre caminho para que a IA explore vulnerabilidades humanas e tecnológicas. A piada de fundo é desconfortavelmente plausível: a ameaça não vem de uma superinteligência maligna, mas da indiferença generalizada com a própria proteção online. O vídeo funciona como um alerta irônico sobre como o fim do mundo, nesse contexto, pode ser bem mais banal do que se imagina.",
+  "snippet": null,
+  "issue_url": "https://www.superhuman.ai/p/anthropic-lets-you-build-custom-mac-or-pc-apps-with-claude",
+  "blurb": "A satirical video predicts how AI could realistically take over the world, simply because the average person doesn’t really care about digital security.",
+  "date_iso": "2026-11-25",
+  "kind": "news",
+  "section": "IN THE KNOW",
+  "verify_status": "suspect",
+  "verify_notes": "Conteúdo muito raso: apenas repete o blurb, sem corpo do post ou contexto adicional; Título genérico ('End of the World') não reflete o assunto específico (IA/segurança digital); Kind 'news' aparentemente inadequado para um post do Reddit (seria mais 'social' ou 'fórum')",
+  "tags": {
+   "concept-theme": [
+    "security",
+    "ai-safety"
+   ],
+   "content-type": [
+    "video",
+    "opinion"
+   ],
+   "difficulty": [
+    "all-levels"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "topic-technology": [
+    "ai-safety",
+    "ai-alignment",
+    "ai-ethics",
+    "agi"
+   ],
+   "trending-emerging": [
+    "ai-governance"
+   ]
+  }
+ },
+ {
+  "id": 21946,
+  "source_id": 9,
+  "url": "https://pinned.social",
+  "title": "Pinned",
+  "title_pt": "Pinned: o app para planejar a noite com amigos",
+  "summary_pt": "Pinned é um aplicativo que funciona como um mapa social para sair com amigos. A proposta é simples: o usuário pergunta à cidade (Ask) o que fazer — como “onde encontro um bom matcha em Nova York?” — e o app sugere três lugares que combinam com o grupo. Depois, é só marcar um plano no mapa (Pin) para que os amigos confirmem com um toque. O foco é incentivar encontros reais, longe das redes sociais. O app também gamifica a vida noturna: cada saída rende pontos, há side quests (como convidar amigos ou explorar lugares novos) e dez níveis de evolução, de \"New here\" a \"Main Character\". O Pinned é gratuito para iPhone e Android, com três perguntas semanais liberadas; a assinatura Pinned+ remove limites e dobra os pontos. Feito em Nova York, o app conhece bem dez cidades americanas, mas funciona em qualquer lugar onde haja spots no mapa.",
+  "snippet": null,
+  "issue_url": "https://www.superhuman.ai/p/anthropic-lets-you-build-custom-mac-or-pc-apps-with-claude",
+  "blurb": "An AI assistant to help you plan your next night-out with friends.",
+  "date_iso": "2026-11-25",
+  "kind": "tool",
+  "section": "PRODUCTIVITY",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "ux",
+    "community"
+   ],
+   "content-type": [
+    "product-launch"
+   ],
+   "topic-technology": [
+    "recommender-systems"
+   ]
+  }
+ },
+ {
+  "id": 21947,
+  "source_id": 9,
+  "url": "https://context.day/en",
+  "title": "Context",
+  "title_pt": "Context",
+  "summary_pt": "Context é um aplicativo de calendário para iPhone, iPad, Mac e web que reúne Google Calendar, Microsoft 365/Outlook e iCloud em uma única agenda. Ele permite criar eventos digitando ou ditando frases do jeito que você falaria, entende datas, horários, participantes e lembretes, e também oferece links de agendamento para outras pessoas marcarem horários com base na sua disponibilidade real. Antes de cada reunião, o Context mostra um resumo com quem você vai encontrar, o histórico de encontros, anotações da última conversa e pendências em aberto. O app ainda ajuda a proteger horários de foco, organizar tarefas na agenda e manter perfis de contatos com todo o histórico de interações. Para quem usa assistentes de IA, há um servidor MCP e uma API que permitem ao Claude e outras ferramentas consultar a agenda e criar eventos com sua permissão. O Context tem um plano gratuito permanente, com todos os seus calendários e um link de agendamento, além de opções pagas — Links e Pro — que adicionam recursos como links ilimitados, briefings com IA, assistente para remarcar reuniões e mais. O app começa com 14 dias grátis do Pro, sem pedir cartão de crédito, e está disponível no iPhone, iPad, Mac e navegador.",
+  "snippet": null,
+  "issue_url": "https://www.superhuman.ai/p/anthropic-lets-you-build-custom-mac-or-pc-apps-with-claude",
+  "blurb": "A calendar that gets your ready for every meeting.",
+  "date_iso": "2026-11-25",
+  "kind": "tool",
+  "section": "PRODUCTIVITY",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "content-type": [
+    "product-launch",
+    "showcase"
+   ],
+   "difficulty": [
+    "all-levels"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "topic-technology": [
+    "nlp",
+    "machine-learning",
+    "ai-in-business"
+   ]
+  }
  }
 ]

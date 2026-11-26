@@ -22,6 +22,14 @@
 # =============================================================================
 set -uo pipefail
 
+# Produção atual (2026-11-26): GitHub Pages. A rotina é a dona do fluxo completo
+# (crawl -> finish -> deploy --no-wait -> dispatch do Pages -> polling) e este
+# comando passa a delegar nela. O fluxo Vercel antigo fica atrás de
+# NC_LEGACY_VERCEL=1 (o projeto Vercel foi deletado; a URL antiga dá 404).
+if [ "${NC_LEGACY_VERCEL:-0}" != "1" ] && [ -x "$(dirname "$0")/rotina-diaria.sh" ]; then
+    exec bash "$(dirname "$0")/rotina-diaria.sh" run --force
+fi
+
 export HOME=/Users/minim1
 export USER=minim1
 export LOGNAME=minim1

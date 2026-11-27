@@ -862761,5 +862761,3229 @@
     "ai-in-business"
    ]
   }
+ },
+ {
+  "id": 21948,
+  "source_id": 7,
+  "url": "https://www.therundown.ai/articles/your-ai-cheat-sheet-for-thanksgiving-dinner",
+  "title": "Your AI cheat sheet for Thanksgiving dinner",
+  "title_pt": "Seu guia de IA para o jantar de Ação de Graças",
+  "summary_pt": "O boletim The Rundown preparou um guia para ajudar você a conduzir conversas sobre IA durante o feriado. Entre os temas quentes estão a polêmica envolvendo Jensen Huang, CEO da Nvidia, e supostas ligações com espionagem; a relação entre IA e o aumento de falhas de segurança em softwares; e os avanços da IA na matemática, como a suposta solução da Hipótese de Riemann pela Anthropic com o modelo Claude. O guia também traz explicações simples para rebater dúvidas comuns e parecer por dentro do assunto. Além disso, o texto inclui uma dica prática para usar o Gemini Tasks na verificação de preços da Black Friday, um experimento de Nate Grahek que criou um sistema para silenciar anúncios na TV por apenas 5 centavos por jogo, e a resposta do CEO da Anthropic, Dario Amodei, a um relatório da Axios sobre entregar decisões à IA. O resumo ainda menciona tendências de startups de IA e ferramentas em alta no setor.",
+  "snippet": "Good morning, AI enthusiasts, and welcome to our 4,638 new readers. Thanksgiving is here, and for many of us, that means plenty of catching up around the dinner table. If the conversation goes anything like the news cycle, AI may be a main course. Last year, that might’ve meant explaining ChatGPT to a relative. This year, the questions are about the Chinese spy saga, everything being hacked, data",
+  "issue_url": "https://www.therundown.ai/articles",
+  "blurb": null,
+  "date_iso": "2026-11-26",
+  "kind": "tool",
+  "section": null,
+  "verify_status": "suspect",
+  "verify_notes": "Título refere-se apenas a uma seção do boletim, não ao conteúdo completo.; Conteúdo é um boletim com múltiplas notícias, enquanto o título é de uma delas.",
+  "tags": {
+   "company-vendor-model": [
+    "nvidia",
+    "anthropic",
+    "gemini",
+    "openai"
+   ],
+   "concept-theme": [
+    "security",
+    "regulation",
+    "compliance"
+   ],
+   "content-type": [
+    "guide",
+    "explainer"
+   ],
+   "difficulty": [
+    "all-levels"
+   ],
+   "domain": [
+    "ai-general",
+    "llm-models"
+   ],
+   "framework-library-tool": [
+    "gemini",
+    "claude",
+    "gpt"
+   ],
+   "topic-technology": [
+    "ai-chips",
+    "ai-safety",
+    "ai-regulation",
+    "ai-infrastructure"
+   ],
+   "trending-emerging": [
+    "gpu-economics",
+    "ai-data-centers",
+    "ai-governance"
+   ]
+  }
+ },
+ {
+  "id": 21949,
+  "source_id": 10,
+  "url": "https://1password.com/blog/update-on-nov-2026-security-incident",
+  "title": "Update on a security incident involving 1Password’s backend systems.",
+  "title_pt": "Atualização sobre incidente de segurança nos sistemas de backend do 1Password",
+  "summary_pt": "O 1Password informou que, em 19 de novembro de 2026, um atacante obteve acesso à conta GitHub corporativa de um funcionário e usou esse acesso para modificar código e baixar dados administrativos de clientes de seus serviços de backend. Os dados acessados incluíam nomes, endereços de e-mail, identificadores de conta, metadados internos não secretos e tokens presentes em e-mails de convite e recuperação. O conteúdo dos cofres dos usuários, as chaves que os protegem e os segredos de login não foram acessados. Como resposta, a empresa desativou a conta GitHub comprometida, revogou tokens e credenciais potencialmente expostas, reforçou controles internos e ampliou os códigos de convite e recuperação de seis dígitos numéricos para dez caracteres alfanuméricos, tornando ataques de força bruta praticamente impossíveis. O 1Password também contratou especialistas independentes para validar a contenção e a remediação, e afirmou que não há evidências de invasão de contas de usuários. A empresa recomenda que os usuários desconfiem de tentativas de phishing que mencionem o 1Password, convites ou recuperação de conta, e lembra que nunca pedirá senha ou Secret Key. O 1Password reforça que sua arquitetura é desenhada para que, mesmo em caso de violação dos servidores, os dados dos cofres permaneçam criptografados e inacessíveis a terceiros.",
+  "snippet": "Update: We will be providing a Root Cause Analysis (RCA) with details in the coming weeks once our full investigation is complete. What happened On November 19, 2026, 1Password began investigating indications that an attacker gained access to an employee’s corporate GitHub account. The actor used the account to access source code and push malicious code to backend services, which downloaded admini",
+  "issue_url": "https://llmnews.ai",
+  "blurb": null,
+  "date_iso": "2026-11-25",
+  "kind": "news",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "security",
+    "ci-cd",
+    "data-privacy"
+   ],
+   "content-type": [
+    "incident-report"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "backend"
+   ],
+   "topic-technology": [
+    "supply-chain-security",
+    "ci-cd",
+    "secrets-management"
+   ]
+  }
+ },
+ {
+  "id": 21950,
+  "source_id": 10,
+  "url": "https://micjm.com/blog/openai-is-in-cost-control-mode",
+  "title": "OpenAI may be in cost control mode",
+  "title_pt": "OpenAI pode estar em modo de controle de custos",
+  "summary_pt": "O lançamento recente dos modelos Astra 6.2 e Sol 6.2, da OpenAI, foi mal recebido pela comunidade. Segundo análise de dados, esses modelos parecem ter sido ajustados para reduzir custos, com uma queda significativa nos tokens de saída e de raciocínio por tarefa em comparação com seus antecessores e concorrentes. Os gráficos apresentados mostram que, enquanto as versões anteriores (Astra 6 e Sol 6.1) tinham comportamento considerado normal, as novas versões se tornaram outliers no quesito raciocínio e geração de texto, indicando uma clara mudança em direção à economia de recursos. Os testes estatísticos confirmam a relevância dessas diferenças, sugerindo que os modelos foram otimizados para gastar menos, possivelmente em detrimento da qualidade percebida. Em resumo, a OpenAI parece estar priorizando a redução de custos, o que levou a um desempenho considerado 'subpensado' em relação ao esperado.",
+  "snippet": "OpenAI’s recent release of Astra 6.2 and Sol 6.2 was widely panned. What happened? Based on our data, it looks like they’ve been tuned for cost savings. Specifically output tokens per task and reasoning tokens per task have dropped. Here is a chart of high-level cost change from the GPT-6 to GPT 6.2: The X axis in the above chart is the ratio of spending of the GPT model compared to opponents in",
+  "issue_url": "https://llmnews.ai",
+  "blurb": null,
+  "date_iso": "2026-11-26",
+  "kind": "news",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "openai",
+    "gpt"
+   ],
+   "concept-theme": [
+    "cost-optimization",
+    "evals",
+    "performance"
+   ],
+   "content-type": [
+    "analysis",
+    "deep-dive"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "llm-models"
+   ],
+   "topic-technology": [
+    "cost-optimization-llm",
+    "reasoning-models",
+    "test-time-compute",
+    "arena-elo",
+    "frontier-models"
+   ],
+   "trending-emerging": [
+    "reasoning-models",
+    "test-time-compute",
+    "frontier-models"
+   ]
+  }
+ },
+ {
+  "id": 21951,
+  "source_id": 10,
+  "url": "https://janlukas.blog/posts/ai-self-hosting",
+  "title": "AI made self-hosting fun again",
+  "title_pt": "A IA tornou o self-hosting divertido novamente",
+  "summary_pt": "O autor, um entusiasta de self-hosting, conta como a inteligência artificial reacendeu sua paixão por administrar a própria infraestrutura. Com a ajuda de agentes de IA, tarefas que antes eram tediosas — como ajustar configurações, testar novos serviços e automatizar processos — ficaram muito mais fáceis. Toda a configuração está versionada em Git, o que permite que a IA trabalhe nela como em qualquer projeto de software, reduzindo o atrito e tornando viável experimentar tecnologias que antes pareciam complexas demais, como NixOS e imagens bootc personalizadas. Além de automatizar builds, atualizações e deploys com ferramentas como Renovate e GitHub Actions, o autor passou a construir pequenos utilitários sob medida em Go, migrou serviços para um servidor doméstico mais potente e voltou a se divertir com hardware. Ele reconhece os desafios: mais serviços significam mais manutenção, e a dependência de IA cria novos riscos. Mesmo assim, a IA não mudou o motivo pelo qual ele gosta de self-hosting — apenas removeu grande parte do atrito que o fazia perder o entusiasmo. No fim, ele voltou a se sentir empolgado e produtivo com seu setup.",
+  "snippet": "I’ve been self-hosting things for many years. There were times when I was quite enthusiastic about it, constantly trying out new software and tinkering with my infrastructure. But at some point, that enthusiasm faded a bit. I never really stopped self-hosting, but I became less inclined to experiment with new things. Maintaining what I already had running was enough for me. Over the last few month",
+  "issue_url": "https://llmnews.ai",
+  "blurb": null,
+  "date_iso": "2026-11-26",
+  "kind": "news",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "infrastructure-as-code",
+    "devops",
+    "developer-productivity",
+    "dx"
+   ],
+   "content-type": [
+    "opinion",
+    "commentary"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "ai-general",
+    "backend"
+   ],
+   "topic-technology": [
+    "agentic-ai",
+    "ai-agents",
+    "ai-infrastructure",
+    "infrastructure-as-code",
+    "containers"
+   ],
+   "trending-emerging": [
+    "ai-coding-agents"
+   ]
+  }
+ },
+ {
+  "id": 21952,
+  "source_id": 10,
+  "url": "https://techstackups.com/articles/google-workspace-ai-agents-mcp",
+  "title": "Google Will Make AI Agents Use Its Workspace MCP Servers. The Gmail One Can't Send Email",
+  "title_pt": "Google vai obrigar agentes de IA a usar MCP do Workspace; Gmail não envia e-mail",
+  "summary_pt": "Em 24 de novembro, a Google disponibilizou oficialmente oito servidores MCP do Workspace e publicou uma nova cláusula nos termos de API: a partir de 1º de fevereiro de 2027, qualquer ferramenta que seja ou seja dirigida por um agente de IA deve acessar Gmail, Drive, Agenda e demais serviços do Workspace por meio desses servidores. Quem chamar as REST APIs diretamente continuará funcional, mas com cotas de nível padrão e em desacordo com os termos. O servidor MCP do Gmail, porém, tem limitações importantes: consegue pesquisar, ler threads, criar rascunhos e arquivar mensagens, mas não pode enviar, responder, encaminhar ou editar rascunhos — essas ações existem, mas são exclusivas para parceiros. Isso cria um cenário desigual: conectores de grandes fornecedores de IA, como o da Anthropic para o Claude, já oferecem envio e resposta, enquanto desenvolvedores independentes ficam restritos a rascunhos. Além disso, a nova política limita a retenção de dados como embeddings, índices de memória e perfis de usuário a 30 dias, proíbe treinamento ou fine-tuning com dados do Workspace e exige que os dados sejam excluídos quando o usuário desconectar o acesso. A Google justifica a medida como forma de aumentar a segurança, colocando verificação de políticas, limites de dados e confirmação humana no caminho das ações autônomas dos agentes. Na prática, porém, a empresa também ganha controle sobre quais agentes podem executar determinadas operações e sobre possíveis concorrentes construídos sobre o Workspace. Desenvolvedores de agentes devem marcar seus OAuth clients como \"agênticos\", migrar para os servidores MCP, solicitar acesso de parceiro cedo para operações ausentes e revisar o armazenamento de memórias derivadas do Workspace antes do prazo.",
+  "snippet": "On 24 November, Google made its eight Workspace MCP servers generally available and published a new clause in its API terms. From 1 February 2027, any tool that \"is or is driven by an AI Agent\" must reach Gmail, Drive, Calendar and the rest of Workspace through those servers. Read the Gmail server's tool list and you'll find that it can search your mail, read threads, create a draft and file thin",
+  "issue_url": "https://llmnews.ai",
+  "blurb": null,
+  "date_iso": "2026-11-26",
+  "kind": "news",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "google"
+   ],
+   "concept-theme": [
+    "ai-regulation",
+    "api-design",
+    "governance",
+    "data-privacy"
+   ],
+   "content-type": [
+    "news",
+    "analysis"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "topic-technology": [
+    "ai-agents",
+    "mcp",
+    "tool-calling"
+   ],
+   "trending-emerging": [
+    "mcp",
+    "ai-agents",
+    "ai-coding-agents",
+    "tool-calling"
+   ]
+  }
+ },
+ {
+  "id": 21953,
+  "source_id": 10,
+  "url": "https://eng.snap.com/mcp-gateway",
+  "title": "MCP Gateway: How Snap Checks Both the Person and the Agent",
+  "title_pt": "Gateway MCP: como a Snap verifica a pessoa e o agente",
+  "summary_pt": "A Snap construiu um Gateway MCP central para que funcionários e seus agentes de IA, como o Casper, acessem mais de 60 MCPs e mais de 1.100 ferramentas de forma segura. O principal desafio foi garantir que a identidade original da pessoa que inicia uma chamada fosse preservada ao longo da cadeia, já que sistemas internos tradicionalmente assumem que há um humano no navegador. Quando um agente age em nome de uma pessoa, a chamada é atribuída a ambos — o agente e o usuário — usando um sistema chamado Agent Attestation Token (AAT), que carrega quem fez a requisição original e qual agente está realizando a chamada. Isso permite que permissões sejam verificadas tanto para o agente quanto para a pessoa, e que chamadas não autorizadas sejam negadas, como quando um agente tem acesso a uma ferramenta restrita a um time, mas a pessoa que o acionou não faz parte desse time.",
+  "snippet": "AI agents call tools through Model Context Protocol (MCP) servers. One of the first MCP servers we tested worked fine locally. When we hooked it up to a central MCP gateway, the call failed as forbidden. The receiving service's logs showed why: the caller was the MCP's service account, not the engineer. In another test, an agent on a remote machine opened a PR for an engineer, but the PR looked as",
+  "issue_url": "https://llmnews.ai",
+  "blurb": null,
+  "date_iso": "2026-09-10",
+  "kind": "news",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "authentication",
+    "authorization",
+    "security",
+    "architecture"
+   ],
+   "content-type": [
+    "deep-dive",
+    "case-study"
+   ],
+   "difficulty": [
+    "for-architects"
+   ],
+   "domain": [
+    "ai-general",
+    "backend"
+   ],
+   "topic-technology": [
+    "ai-gateway",
+    "mcp",
+    "ai-agents",
+    "tool-calling",
+    "authorization",
+    "agentic-ai"
+   ],
+   "trending-emerging": [
+    "mcp",
+    "ai-agents",
+    "tool-calling",
+    "ai-governance"
+   ]
+  }
+ },
+ {
+  "id": 21954,
+  "source_id": 10,
+  "url": "https://github.com/google-research/google-research/tree/master/cogentic_research_papers",
+  "title": "Cogentic Research Papers",
+  "title_pt": "Artigos de Pesquisa da Cogentic",
+  "summary_pt": "Este diretório reúne artigos de pesquisa produzidos pela Cogentic, uma organização vinculada ao ecossistema de pesquisa do Google. Os documentos estão organizados por data de publicação e abordam tópicos avançados em teoria da computação, criptografia e algoritmos, com ênfase em complexidade computacional e equilíbrios de jogos. Entre os destaques estão artigos sobre fatoração de inteiros incondicional em tempo subexponencial, logaritmos discretos em corpos finitos, algoritmos polinomiais para equilíbrios de Nash aproximados, reconstrução de grafos, desigualdades de profetas em leilões combinatórios e compressão de amostras para classes VC. Os trabalhos datam de outubro a novembro de 2026. O conteúdo do diretório é distribuído sob a licença Apache 2.0, salvo indicação contrária, e não constitui um produto oficial do Google.",
+  "snippet": "Cogentic Research Papers This directory holds research papers that were produced by Cogentic. Papers November 25, 2026 Unconditional Integer Factorization in Time L_N[1/3, O(1)] (PDF) Discrete Logarithms in Finite Fields of Fixed Characteristic in Sub-Quasi-Polynomial Time (PDF) An Exact Polynomial-Time Algorithm for 1/5-Approximate Nash Equilibria in Bimatrix Games (PDF) Unconditional Dete",
+  "issue_url": "https://llmnews.ai",
+  "blurb": null,
+  "date_iso": "2026-09-10",
+  "kind": "news",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "content-type": [
+    "research-paper"
+   ],
+   "difficulty": [
+    "expert"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "topic-technology": [
+    "ai-research"
+   ]
+  }
+ },
+ {
+  "id": 21955,
+  "source_id": 10,
+  "url": "https://session-vault.dev",
+  "title": "Back up your Claude Code sessions and use them on any machine",
+  "title_pt": "Faça backup das sessões do Claude Code e use-as em qualquer máquina",
+  "summary_pt": "O Session Vault é um plugin para o Claude Code que guarda cópias criptografadas das suas sessões de conversa. Por padrão, o Claude Code mantém os históricos apenas na máquina local, em ~/.claude, e apaga transcrições com mais de 30 dias. Com o plugin, você pode salvar sessões específicas com /session-vault:save e restaurá-las em qualquer outra máquina com /session-vault:fetch, sem perder o contexto. Antes do upload, o plugin criptografa a transcrição com a ferramenta age, usando uma chave criada na sua máquina. O servidor guarda o arquivo criptografado e metadados como ID da sessão, projeto e pasta, mas não consegue ler o conteúdo. Para acessar as sessões em outro computador, basta copiar a chave ~/.config/session-vault/age.key para lá; é recomendável manter um backup dessa chave, pois sem ela não é possível descriptografar os dados. O serviço oferece planos: gratuito com 10 sessões, plus com 100 sessões por €3/mês + VAT e max com 500 sessões por €10/mês + VAT. Salvar novamente uma sessão existente não conta como nova. O servidor é open source, então também é possível rodá-lo na sua própria infraestrutura e usar o plugin sem precisar de conta no serviço hospedado.",
+  "snippet": "Claude Code keeps each conversation in ~/.claude, only on the machine where it happened, and by default deletes transcripts older than 30 days. Session Vault keeps an encrypted copy of the sessions you want to hold on to. A saved session survives that cleanup, a new laptop or a wiped disk, and you can fetch it on any of your machines and carry on where you left off. /session-vault:save save",
+  "issue_url": "https://llmnews.ai",
+  "blurb": null,
+  "date_iso": "2026-09-10",
+  "kind": "tool",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "claude",
+    "anthropic"
+   ],
+   "concept-theme": [
+    "encryption",
+    "data-privacy",
+    "open-source"
+   ],
+   "content-type": [
+    "tool-release"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "llm-models"
+   ],
+   "framework-library-tool": [
+    "claude"
+   ],
+   "topic-technology": [
+    "llm-models",
+    "encryption",
+    "ai-agents"
+   ]
+  }
+ },
+ {
+  "id": 21956,
+  "source_id": 10,
+  "url": "https://github.com/batanus/lip-dictation",
+  "title": "Silent dictation for Claude Code: mouth words at your webcam, a local lip-reading model types them into the prompt",
+  "title_pt": "Ditado silencioso para Claude Code: leia os lábios na webcam e o modelo local digita no prompt",
+  "summary_pt": "O artigo apresenta um plugin para o Claude Code que permite ditar comandos sem emitir som: o usuário move os lábios em frente à webcam, e um modelo de leitura labial (Auto-AVSR) roda localmente no Mac, transcrevendo o texto diretamente no campo de prompt. Nenhum áudio é gravado e nenhum vídeo sai da máquina, garantindo privacidade. A precisão é modesta, especialmente em termos técnicos, e o plugin envia ao Claude as leituras alternativas para melhorar o contexto. O processo envolve pressionar um botão para iniciar a captura, articular a frase e parar; o texto aparece após alguns segundos. O modelo pode ser treinado com frases pessoais para melhorar a acurácia. O plugin é útil em ambientes silenciosos (escritórios, bibliotecas, reuniões) e para quem precisa descansar as mãos ou a voz. Requer macOS com chip Apple Silicon, webcam e cerca de 2,5 GB de espaço. O artigo detalha o funcionamento, incluindo a arquitetura (encoder roda na GPU), o histórico de ditados, configurações de privacidade, licenças (modelo com restrições de uso não comercial) e instruções de instalação e remoção. É um protótipo com precisão variável, mas promissor para interações rápidas e discretas com o assistente.",
+  "snippet": "Talk to Claude Code without making a sound. Press a button above the prompt, mouth a phrase at your webcam, press again, and the words appear in the prompt box. A lip-reading model (Auto-AVSR) runs locally on your Mac: no audio is recorded and no video leaves your machine. Accuracy This is a prototype, and accuracy is modest. Lip reading is hard, and silent mouthing is harder than speech: expect",
+  "issue_url": "https://llmnews.ai",
+  "blurb": null,
+  "date_iso": "2026-09-10",
+  "kind": "news",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "claude",
+    "anthropic"
+   ],
+   "concept-theme": [
+    "data-privacy",
+    "ai-safety"
+   ],
+   "content-type": [
+    "demo",
+    "showcase"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "topic-technology": [
+    "speech-recognition",
+    "computer-vision",
+    "local-inference",
+    "edge-ai",
+    "model-training",
+    "privacy-first-ai"
+   ],
+   "trending-emerging": [
+    "coding-agents",
+    "on-device-ai"
+   ]
+  }
+ },
+ {
+  "id": 21957,
+  "source_id": 10,
+  "url": "https://devnull.land/amd-specific-llama-cpp",
+  "title": "AMD-specific fork of llama.cpp",
+  "title_pt": "Fork do llama.cpp específico para AMD",
+  "summary_pt": "O artigo recomenda o uso do llama-cpp-rdna-boosts para quem possui placas de vídeo AMD, destacando ganhos expressivos de desempenho: o autor relata aumento na geração de tokens de 35 para 55 tokens/s e no prefill de 700 para 1300 tokens/s em sua configuração com uma AMD R9700 via eGPU. O projeto é descrito como uma série de patches mínimos aplicados sobre uma versão fixa do llama.cpp, mantendo a base estável e o escopo enxuto, em contraste com outros motores de inferência personalizados que surgiram recentemente. O texto também comenta a tendência de forks como Strata, Basalt e RustingStrata, que priorizam velocidade extrema e otimizações específicas de hardware, mas por vezes alteram o comportamento do modelo para acelerar a geração. O autor prefere a abordagem transparente e conservadora do llama.cpp, e instrui a execução via podman com uma imagem ROCm pré-construída.",
+  "snippet": "tl;dr — I recommend using llama-cpp-rdna-boosts if you have an AMD graphics card. It’s lean, and increased my token generation from 35 to 55 tokens/second, and my prefill from 700 to 1300 tokens per second. YMMV. As of November 2026, an explosion in the number of bespoke inference engines has taken place. Many of them take inspiration from the engines that enabled much of the LLM inference up 'ti",
+  "issue_url": "https://llmnews.ai",
+  "blurb": null,
+  "date_iso": "2026-09-10",
+  "kind": "tool",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "qwen"
+   ],
+   "concept-theme": [
+    "performance",
+    "optimization"
+   ],
+   "content-type": [
+    "project-spotlight",
+    "analysis"
+   ],
+   "domain": [
+    "local-llm",
+    "llm-models"
+   ],
+   "ecosystem-language": [
+    "cpp"
+   ],
+   "framework-library-tool": [
+    "llama-cpp",
+    "vllm",
+    "sglang",
+    "qwen"
+   ],
+   "topic-technology": [
+    "local-inference",
+    "inference-optimization",
+    "quantization",
+    "moe",
+    "rocm",
+    "tokens-per-second"
+   ],
+   "trending-emerging": [
+    "local-llm",
+    "quantization",
+    "moe",
+    "vibe-coding"
+   ]
+  }
+ },
+ {
+  "id": 21958,
+  "source_id": 10,
+  "url": "https://www.testingcatalog.com/testers-share-early-results-possible-claude-opus-5-6",
+  "title": "Early outputs: Anthropic is A/B testing Claude Opus 5.6",
+  "title_pt": "Primeiros resultados: Anthropic testa Claude Opus 5.6 em A/B",
+  "summary_pt": "Circulam nas redes sociais novos resultados atribuídos ao Claude Opus 5.6, embora a Anthropic não tenha anunciado oficialmente o modelo. Testadores acreditam que ele representa um salto em relação ao Opus 5.5, e especula-se que ele esteja sendo testado em um subconjunto de usuários — alguns via Claude Code, outros via Chat. Um dos exemplos citados inclui um curta animado em estilo desenhado à mão sobre uma raposa, gerado inteiramente com código, sem assets externos. Comparações lado a lado feitas por usuários mostram o Opus 5.6 lidando com animações e loops de forma muito mais suave que o Opus 5.5, que se desfaz em formas defeituosas. Também há cenas em Three.js e fã-filmes de Jujutsu Kaisen, tudo produzido por código. Outros rótulos como “Opus-next” ou comparações com modelos Fable 5.2 e suposto Fable 5.5 aparecem, mas são alegações não verificadas de testadores. Por ora, são resultados preliminares e selecionados, sem confirmação oficial. O cenário competitivo acirrou: OpenAI lançou GPT-6.2 Astra e Sol em 17 de novembro, e Google lançou Gemini 4 Neon no dia seguinte. Quem já está no Opus 5.5 Extra pode estar participando do teste.",
+  "snippet": "We are seeing a bunch of new outputs being circulated on X, and testers believe they're from Claude Opus 5.6. Of course, Anthropic hasn't announced anything, and not everyone is labeling this as Opus 5.6, but the results look like a step up from Opus 5.5. In mid-October, some Opus 5.5 requests appeared to be landing on an unannounced model, which could have been an early Opus 5.6 or Fable 5.5.",
+  "issue_url": "https://llmnews.ai",
+  "blurb": null,
+  "date_iso": "2026-11-25",
+  "kind": "tool",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "anthropic",
+    "claude-opus"
+   ],
+   "concept-theme": [
+    "evals",
+    "testing"
+   ],
+   "content-type": [
+    "news",
+    "analysis"
+   ],
+   "difficulty": [
+    "all-levels"
+   ],
+   "domain": [
+    "llm-models"
+   ],
+   "ecosystem-language": [
+    "javascript"
+   ],
+   "framework-library-tool": [
+    "claude-opus"
+   ],
+   "topic-technology": [
+    "model-release",
+    "frontier-models",
+    "model-comparison",
+    "model-capabilities",
+    "generative-ai"
+   ],
+   "trending-emerging": [
+    "frontier-models"
+   ]
+  }
+ },
+ {
+  "id": 21959,
+  "source_id": 10,
+  "url": "https://www.theverge.com/ai-artificial-intelligence/1041227/the-new-york-times-warns-photographers-not-to-update-photoshop-over-ai-features",
+  "title": "The New York Times warns photographers not to update Photoshop over AI features",
+  "title_pt": "NYT proíbe fotógrafos de atualizar Photoshop por causa de recursos de IA",
+  "summary_pt": "O The New York Times pediu que fotógrafos freelancers não usem a versão mais recente do Adobe Photoshop (2027, versão 28.0.0 e atualizações seguintes) em trabalhos para o jornal. A decisão foi comunicada por e-mail pelos líderes de fotografia Meaghan Looram e Josh Haner, que alertam que os novos recursos de IA podem gerar metadados que identificam as imagens como “criadas por IA”, mesmo quando a edição é mínima. O jornal teme que isso abale a confiança dos leitores, já que sua política é de não retocar ou manipular fotos, apenas fazer ajustes mínimos de cor. A atualização de novembro da Adobe adiciona diversas ferramentas baseadas em inteligência artificial, como o “AI Assisted Editor”, um assistente para instruções passo a passo, transformação de imagens por texto e upscaling por IA. Como nem sempre é claro quais recursos usam IA, mesmo ferramentas antigas, como seleção automática, podem ser consideradas parte do pacote de IA, o que leva o Photoshop a marcar as imagens com metadados C2PA. O NYT confirmou a política, mas ainda não se sabe exatamente quais recursos motivaram a restrição; a Adobe não comentou o assunto.",
+  "snippet": "The New York Times is asking freelance photographers not to use the newest version of Adobe Photoshop because features in the 2027 update use AI “in ways that may not be apparent to users.” In an email seen by The Verge and posted on Threads, two of the Times’ photography leaders, Meaghan Looram and Josh Haner, write that the use of these features “can result in metadata identifying photographs as",
+  "issue_url": "https://llmnews.ai",
+  "blurb": null,
+  "date_iso": "2026-11-24",
+  "kind": "news",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "transparency",
+    "ai-ethics",
+    "responsible-ai"
+   ],
+   "content-type": [
+    "news"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "topic-technology": [
+    "generative-ai",
+    "ai-ethics",
+    "image-generation"
+   ]
+  }
+ },
+ {
+  "id": 21960,
+  "source_id": 11,
+  "url": "https://aiweekly.co/issues/ai-labs-hold-unpublished-crypto-bombshells-a-top-theorist",
+  "title": "AI labs hold unpublished crypto \"bombshells,\" a top theorist says",
+  "title_pt": "Laboratórios de IA guardam 'bombshells' criptográficas inéditas, diz teórico",
+  "summary_pt": "O cientista da computação Scott Aaronson, da Universidade do Texas em Austin, afirmou estar \"virtualmente certo\" de que os laboratórios de IA possuem uma ou mais descobertas explosivas não publicadas na área de criptografia. A declaração alimentou rumores de que o problema P vs NP teria sido resolvido em segredo, mas nenhum laboratório, pesquisador ou artigo fez essa alegação. O problema segue oficialmente em aberto, e Aaronson, na verdade, diz que espera a prova de que P é diferente de NP, o oposto do boato. No campo das provas formais, o matemático Levent Alpöge, da Anthropic, anunciou ter provado a Hipótese de Riemann com auxílio do modelo Claude; a prova foi formalizada em 17 milhões de linhas na linguagem Lean e recompilada pelo kernel, recebendo confiança da comunidade Lean, embora nenhum humano a tenha lido por completo. Outros resultados anunciados incluem uma suposta refutação da Hipótese do Tempo Exponencial (ETH), a prova de VP ≠ VNP, um novo expoente para multiplicação de matrizes, um método de fatoração do Google e algoritmos quânticos otimizados pelo DeepMind. Nenhum desses resultados foi revisado por pares, e nenhum demonstrou, até agora, enfraquecer a criptografia usada hoje. O risco real, segundo Aaronson, seria um atalho específico encontrado por IA contra RSA ou curvas elípticas — cenário que não exigiria P = NP e que afetaria toda a internet. A principal defesa, porém, já está em andamento: a migração para a criptografia pós-quântica, incentivada por prazos do NIST (2030/2035) e pela busca de \"agilidade criptográfica\", permitindo trocar algoritmos rapidamente caso uma família de cifras caia.",
+  "snippet": "Five terms first P and NP. P is the set of problems a computer can solve quickly. NP is the set of problems where a proposed answer can be checked quickly, like a finished sudoku. \"P vs NP\" asks whether every problem that is quick to check is also quick to solve. Most experts believe it is not, but nobody has proved it either way. Public-key encryption. The math that lets two strangers set up a",
+  "issue_url": "https://aiweekly.co/issues",
+  "blurb": null,
+  "date_iso": "2026-11-26",
+  "kind": "tool",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "anthropic",
+    "claude"
+   ],
+   "concept-theme": [
+    "encryption",
+    "security"
+   ],
+   "content-type": [
+    "news",
+    "analysis"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "llm-models",
+    "ai-general"
+   ],
+   "framework-library-tool": [
+    "claude"
+   ],
+   "topic-technology": [
+    "reasoning-models",
+    "frontier-models",
+    "ai-research"
+   ],
+   "trending-emerging": [
+    "reasoning-models"
+   ]
+  }
+ },
+ {
+  "id": 21961,
+  "source_id": 10,
+  "url": "https://x.com/thsottiaux/status/2125784147889393806",
+  "title": "Tibo (@thsottiaux)",
+  "title_pt": "Tibo (@thsottiaux) sobre erro de cobrança no lançamento do GPT-6.2",
+  "summary_pt": "Tibo (@thsottiaux) anunciou no X que houve um erro de cobrança no lançamento do GPT-6.2, que aplicou um desconto incorreto no uso do GPT-6.2 Astra e do Sol para a maioria dos usuários. O problema já foi corrigido, e agora o mesmo volume de trabalho consumirá mais da cota do seu plano. Em comparação com a semana passada, os limites serão atingidos 40% mais rápido no GPT-6.2 Astra e 25% mais rápido no Sol, embora o consumo ainda seja menor do que nos modelos 6 Astra e 6.1 Sol. Nenhum outro modelo foi afetado, e não haverá cobrança retroativa pela diferença no uso passado. Como pedido de desculpas, a equipe adicionará um reset acumulado para todos os usuários dos planos Go, Plus, Pro e Business.",
+  "snippet": "Tibo on X: \"We made a billing mistake at launch of GPT-6.2 that incorrectly discounted GPT-6.2 Astra and Sol usage for most users. We’ve fixed this now, so the same work will use more of your plan’s usage allowance. Comparing to last week, you will reach your limits 40% faster on GPT-6.2 Astra and 25% faster on Sol. You should still see these go further in usage compared to 6 Astra and 6.1 Sol.",
+  "issue_url": "https://llmnews.ai",
+  "blurb": null,
+  "date_iso": "2026-11-26",
+  "kind": "tool",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "gpt",
+    "openai"
+   ],
+   "concept-theme": [
+    "pricing",
+    "cost",
+    "transparency"
+   ],
+   "content-type": [
+    "announcement"
+   ],
+   "domain": [
+    "llm-models"
+   ],
+   "framework-library-tool": [
+    "gpt"
+   ],
+   "topic-technology": [
+    "model-pricing",
+    "token-economics",
+    "frontier-models",
+    "model-release"
+   ]
+  }
+ },
+ {
+  "id": 21962,
+  "source_id": 10,
+  "url": "https://commandcode.ai/moat",
+  "title": "MOAT membership",
+  "title_pt": "Assinatura MOAT",
+  "summary_pt": "O MOAT é um serviço de assinatura de US$ 5 por mês que dá acesso a modelos de IA da mais alta qualidade por preços de atacado. A proposta é reunir o poder de compra de uma grande base de usuários para negociar melhores condições, sem limites de uso por 5 horas ou semanais. Todos os modelos são oferecidos com pesos completos e passam por benchmarks próprios do MOAT, com um preço único por modelo, eliminando a necessidade de escolher entre dezenas de provedores. O plano gratuito ou básico custa US$ 100 por mês a partir de certo uso e tem limites de 5 horas e semanais, sendo voltado para desenvolvedores individuais. Já a assinatura paga oferece uso ilimitado com descontos de atacado, sem limites, para um desenvolvedor ou equipes inteiras. Para empresas, há planos de equipe a partir de US$ 500 ou US$ 50.000 por mês, todos com preços de membro. O MOAT não cobra taxa de roteamento, ao contrário de outros agregadores que adicionam 5 a 8%. Segundo o material, a assinatura se paga a partir de US$ 9 mensais, considerando uma combinação de uso de 60% DeepSeek V4.1 Flash e 40% GLM-5.3.",
+  "snippet": "$5/mo to access the highest quality models at wholesale prices. 5-hour limitnone weekly limitnone monthly limitnone our large member base pools its usage into hundreds of trillions of tokens. that buying power gets our members best quality, best price every model at full weights, benchmarked by us. one price per model, no hundred providers to pick from. usage$100 a month, then list price limit",
+  "issue_url": "https://llmnews.ai",
+  "blurb": null,
+  "date_iso": "2026-09-10",
+  "kind": "tool",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "deepseek-v",
+    "glm",
+    "deepseek",
+    "zhipu-ai"
+   ],
+   "concept-theme": [
+    "token-economics",
+    "pricing",
+    "cost",
+    "cost-optimization"
+   ],
+   "content-type": [
+    "product-launch"
+   ],
+   "domain": [
+    "llm-models"
+   ],
+   "topic-technology": [
+    "llm-models",
+    "model-pricing",
+    "token-economics",
+    "inference-cost",
+    "model-routing"
+   ],
+   "trending-emerging": [
+    "foundation-models",
+    "frontier-models",
+    "open-weights",
+    "gpu-economics"
+   ]
+  }
+ },
+ {
+  "id": 21963,
+  "source_id": 10,
+  "url": "https://topcitedscientists.com/figures/ai-at-four-us-companies",
+  "title": "Top-cited AI scientists at four US companies (Top 2% List 2026)",
+  "title_pt": "Cientistas de IA mais citados em quatro empresas dos EUA (Lista Top 2% 2026)",
+  "summary_pt": "O artigo aborda os cientistas de inteligência artificial mais citados do mundo que atuam em quatro grandes empresas dos Estados Unidos, com base na renomada Lista Top 2% da Stanford–Elsevier para 2026. A seleção destaca o impacto desses pesquisadores na área, medida pelo número de citações e pela influência acadêmica. Além disso, o texto apresenta a ferramenta Top-Cited Scientists, que torna essa lista mais fácil de navegar, permitindo buscar e comparar cientistas, instituições e países de forma gratuita, sem anúncios ou cadastro.",
+  "snippet": "top-cited scientists Top-Cited Scientists makes the Stanford–Elsevier top 2% list easy to use. Search and compare scientists, institutions or countries across the world. AboutData & licencePrivacyContact Subscribe New lists and updates in your inbox: each year's list when it's released, and what's new on the site.",
+  "issue_url": "https://llmnews.ai",
+  "blurb": null,
+  "date_iso": "2026-09-10",
+  "kind": "news",
+  "section": null,
+  "verify_status": "suspect",
+  "verify_notes": "Conteúdo capturado é apenas a estrutura do site (menu, navegação, descrição geral), sem o artigo sobre cientistas de IA.; Presença de chamadas para assinatura, doação e elementos de marketing no meio do conteúdo.; Título promete conteúdo específico sobre 4 empresas dos EUA, mas o texto não aborda esse tema.",
+  "tags": {
+   "content-type": [
+    "analysis"
+   ],
+   "difficulty": [
+    "all-levels"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "topic-technology": [
+    "ai-research"
+   ]
+  }
+ },
+ {
+  "id": 21964,
+  "source_id": 10,
+  "url": "https://arxiv.org/abs/2611.33896",
+  "title": "Looped Models are Fast Multi-Token Predictors",
+  "title_pt": "Modelos em Loop são Preditores Rápidos de Múltiplos Tokens",
+  "summary_pt": "O artigo apresenta os modelos de linguagem em loop (looped language models), que ajustam o número de iterações internas para prever tokens sem aumentar proporcionalmente os parâmetros. Essa característica já era usada em decodificação especulativa, com loops rasos como rascunho rápido e loops profundos como verificadores. Agora, os autores mostram que loops rasos também conseguem prever vários tokens futuros, acelerando bastante a inferência. Para isso, propõem o Floodgates, um método simples de decodificação especulativa que adiciona um bloco de tokens de máscara como sufixo e usa adaptação de baixa classificação (LoRA) para gerar esses tokens em paralelo. Em testes com sete modelos, cinco benchmarks e diferentes tamanhos de lote, o Floodgates obteve aceleração de até 7,5x sem perda de qualidade, superando outros métodos de decodificação sem perdas na maioria dos casos. A análise mostra que o ganho vem do treinamento em todas as profundidades dos modelos em loop: o rascunho raso consegue aproveitar o cálculo profundo ao condicionar no cache de prefixo profundo avaliado durante a verificação.",
+  "snippet": "Abstract:Looped language models can adapt computation for predicting a token without a proportional rescaling in unique model parameters by adjusting the number of loops. This property has been used for self-speculative decoding, taking shallow loops as fast drafters and deep loops as verifiers, which is effective since drafting still uses full parameters. In this paper, we show that shallow loops",
+  "issue_url": "https://llmnews.ai",
+  "blurb": null,
+  "date_iso": "2026-11-25",
+  "kind": "news",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "performance",
+    "optimization",
+    "latency",
+    "throughput"
+   ],
+   "content-type": [
+    "research-paper"
+   ],
+   "difficulty": [
+    "expert"
+   ],
+   "domain": [
+    "llm-models"
+   ],
+   "topic-technology": [
+    "inference-optimization",
+    "llm-models",
+    "draft-models",
+    "transformers"
+   ],
+   "trending-emerging": [
+    "speculative-decoding",
+    "lora"
+   ]
+  }
+ },
+ {
+  "id": 21965,
+  "source_id": 9,
+  "url": "https://epochal.com",
+  "title": "Viral new startup claims to have built a ‘time machine’ for AI",
+  "title_pt": "Startup afirma ter criado uma 'máquina do tempo' para IA",
+  "summary_pt": "A Epochal, fundada por ex-integrantes da xAI, apresentou o Time Portal, um ambiente que simula a internet em qualquer data dos últimos 30 anos. Dentro dessa simulação, agentes de IA podem buscar apenas informações disponíveis até aquele momento, permitindo testar previsões, estratégias e decisões como se estivessem no passado. A empresa afirma que os resultados em previsões têm sido surpreendentemente robustos. A plataforma oferece recursos para treinamento por reforço em ambientes controlados e reproduzíveis, backtesting de estratégias, geração de dados históricos, pesquisa de segurança e análises pós-incidente. A infraestrutura conta com mais de 1 trilhão de páginas e 7 trilhões de URLs, com granularidade de até 1 minuto, e promete zero retenção de dados das consultas feitas pelos usuários. Se a tecnologia funcionar como divulgado, ela pode tornar IAs muito melhores em prever mercados, resultados empresariais e eventos mundiais.",
+  "snippet": null,
+  "issue_url": "https://www.superhuman.ai/p/new-startup-unveils-time-machine-for-ai",
+  "blurb": "Epochal, founded by former xAI founders, has unveiled Time Portal, a simulation environment that locks AI agents inside the internet as it existed on any date in the last 30+ years. The agents then use the data to make forecasts, and some results have been surprisingly robust. If true, it could enable AI to become far better at predicting markets, business results, and world events. See the announcement here (3.3M views), or test the tool yourself here.",
+  "date_iso": "2026-11-26",
+  "kind": "news",
+  "section": "TODAY IN AI",
+  "verify_status": "suspect",
+  "verify_notes": "O conteúdo é uma página institucional/de marketing do produto (Time Portal), não a notícia indicada pelo título.; O kind 'news' não condiz com o conteúdo capturado, que é uma landing page.; O recorte traz apenas bullets de funcionalidades e métricas, sem texto jornalístico que corresponda ao título.",
+  "tags": {
+   "concept-theme": [
+    "agentops",
+    "data-fetching",
+    "evaluation"
+   ],
+   "content-type": [
+    "product-launch"
+   ],
+   "difficulty": [
+    "for-researchers"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "topic-technology": [
+    "ai-agents",
+    "reinforcement-learning",
+    "datasets",
+    "model-training",
+    "machine-learning"
+   ],
+   "trending-emerging": [
+    "ai-agents",
+    "agentic-rag",
+    "agentic-ai"
+   ]
+  }
+ },
+ {
+  "id": 21966,
+  "source_id": 9,
+  "url": "https://www.theverge.com/gadgets/1042162/nothing-ear-note-ai-earbuds-reveal",
+  "title": "Nothing teases Ear (note), its first AI-native notetaker earbuds",
+  "title_pt": "Nothing antecipa Ear (note), seus primeiros fones com anotações por IA",
+  "summary_pt": "A Nothing revelou mais detalhes sobre seus próximos fones de ouvido com IA, o Ear (note), que chegam em 8 de dezembro. Os fones conseguem gravar chamadas, enquanto o estojo de carregamento, equipado com microfones, pode gravar, transcrever e resumir conversas presenciais — mesmo com os fones guardados dentro. Há um botão \"Talk\" para gravar a própria voz e um novo botão \"Record\" para capturar e transcrever conversas. O CEO da Nothing, Carl Pei, afirmou que isso é um \"primeiro passo para uma camada de contexto de hardware para IA\". Os Ear (note) se conectam a um aplicativo onde o usuário gerencia gravações, transcrições e resumos gerados por IA, além de suportar interações com agentes de IA, incluindo um sistema de controle por voz desenvolvido pela própria Nothing. Visualmente parecidos com os Ear 3 e Ear 3A, eles prometem o \"melhor áudio intra-auricular da Nothing até hoje\". O dispositivo se junta a outros produtos recentes com IA para anotações, como o Amazon Bee e o Plaud Note Pro, oferecendo uma alternativa prática a gravadores separados, integrada a um acessório que já faz parte do dia a dia.",
+  "snippet": null,
+  "issue_url": "https://www.superhuman.ai/p/new-startup-unveils-time-machine-for-ai",
+  "blurb": "Ear (note) records your calls through the earbuds and captures in-person conversations using microphones built into the charging case — even while the buds remain inside. Then, a companion app turns everything into transcripts and quick summaries. It is a clever alternative to carrying a separate AI recorder, tucking it in a piece of gear you already wear. Get the first look at the futuristic earbuds here.",
+  "date_iso": "2026-11-26",
+  "kind": "news",
+  "section": "TODAY IN AI",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "amazon",
+    "apple"
+   ],
+   "concept-theme": [
+    "context-engineering",
+    "productivity"
+   ],
+   "content-type": [
+    "release-announcement"
+   ],
+   "difficulty": [
+    "all-levels"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "topic-technology": [
+    "speech-to-text",
+    "nlp",
+    "generative-ai",
+    "ai-agents",
+    "ai-hardware"
+   ],
+   "trending-emerging": [
+    "voice-agents",
+    "ai-agents",
+    "on-device-ai"
+   ]
+  }
+ },
+ {
+  "id": 21967,
+  "source_id": 9,
+  "url": "https://www.wsj.com/business/fcc-authorizes-spacex-to-build-1-million-data-centers-in-space-0eb20ee7",
+  "title": "FCC clears SpaceX's million-satellite AI network",
+  "title_pt": "FCC aprova rede de IA com um milhão de satélites da SpaceX",
+  "summary_pt": "A FCC (Comissão Federal de Comunicações dos EUA) deu sinal verde à Starmind, projeto da SpaceX que planeja lançar até um milhão de satélites movidos a energia solar para atuar como data centers de IA em órbita. A aprovação ocorreu apesar da oposição de empresas como Amazon e Viasat, além de astrônomos preocupados com a poluição luminosa. A rede pretende transferir parte da computação de alto consumo energético da Terra para o espaço, atendendo clientes como Anthropic e Google. A SpaceX tem até 2040 para concluir a constelação, com os primeiros lançamentos previstos para 2027.",
+  "snippet": null,
+  "issue_url": "https://www.superhuman.ai/p/new-startup-unveils-time-machine-for-ai",
+  "blurb": "The FCC just greenlit Starmind, SpaceX's plan to launch up to 1M solar-powered AI data center satellites, despite pushback from Amazon, Viasat and astronomers worried about light pollution. The network could move energy-hungry computing away from Earth and serve customers like Anthropic and Google. SpaceX has until 2040 to finish the network, with first launches targeted for 2027.",
+  "date_iso": "2026-11-26",
+  "kind": "news",
+  "section": "TODAY IN AI",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "anthropic",
+    "google"
+   ],
+   "concept-theme": [
+    "energy-efficiency",
+    "sustainability",
+    "edge-computing",
+    "cloud"
+   ],
+   "content-type": [
+    "news"
+   ],
+   "difficulty": [
+    "all-levels"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "topic-technology": [
+    "ai-infrastructure",
+    "ai-hardware"
+   ],
+   "trending-emerging": [
+    "ai-data-centers",
+    "gpu-economics"
+   ]
+  }
+ },
+ {
+  "id": 21968,
+  "source_id": 9,
+  "url": "https://www.youtube.com/watch?v=wo2zbvjC7a4",
+  "title": "Human-made is the hot ad trend this holiday season. But Geico proved AI can still pull off marketing magic.",
+  "title_pt": "Feito por humanos é a tendência em anúncios neste fim de ano, mas Geico prova que IA ainda faz mágica no marketing",
+  "summary_pt": "A Geico lançou uma nova campanha usando animação em stop-motion, alinhando-se à tendência de 'sinalização de esforço' na publicidade. Essa abordagem, que valoriza o trabalho artesanal e humano, tem ganhado destaque nas propagandas de fim de ano. No entanto, o caso mostra que a inteligência artificial também pode produzir resultados criativos e eficazes, desde que bem aplicada.",
+  "snippet": null,
+  "issue_url": "https://www.superhuman.ai/p/new-startup-unveils-time-machine-for-ai",
+  "blurb": "Geico used stop-motion animation in their latest campaign, joining a growing trend of “effort signaling” in advertising.",
+  "date_iso": "2026-11-26",
+  "kind": "news",
+  "section": "FROM THE FRONTIER",
+  "verify_status": "suspect",
+  "verify_notes": "URL é do YouTube (vídeo), mas o campo kind está como 'news', indicando tipo de conteúdo incorreto.; Conteúdo é apenas a repetição do título e do blurb, sem corpo de notícia ou texto real do artigo.; Material parece ser descrição/título de vídeo, não uma notícia completa.",
+  "tags": {
+   "content-type": [
+    "commentary",
+    "analysis"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "topic-technology": [
+    "ai-in-business",
+    "ai-adoption",
+    "generative-ai"
+   ]
+  }
+ },
+ {
+  "id": 21969,
+  "source_id": 9,
+  "url": "https://www.youtube.com/watch?v=Yy6fByUmPuE",
+  "title": "Coca-Cola launched Holidays Are Coming",
+  "title_pt": "Coca-Cola lança 'Holidays Are Coming'",
+  "summary_pt": "A Coca-Cola lançou a campanha 'Holidays Are Coming', que traz imagens clássicas da marca, como ursos polares e o Papai Noel. Porém, a novidade é que o comercial foi produzido com cerca de 70.000 clipes gerados por inteligência artificial. A reação do público é mista, como mostram os comentários mais comentados nas redes sociais.",
+  "snippet": null,
+  "issue_url": "https://www.superhuman.ai/p/new-startup-unveils-time-machine-for-ai",
+  "blurb": "The ad featured classic Coke imagery like polar bears and Santa, but was created using 70,000 AI-generated clips. Scan the top comments to see how people felt.",
+  "date_iso": "2026-11-26",
+  "kind": "news",
+  "section": "FROM THE FRONTIER",
+  "verify_status": "suspect",
+  "verify_notes": "Conteúdo é apenas o blurb do agregador, sem texto real ou transcrição do vídeo; Conteúdo raso demais para um título de notícia; kind 'news' é improvável para uma URL de YouTube; Falta contexto do vídeo; o próprio registro parece ser um teaser/indicação para ver o vídeo",
+  "tags": {
+   "content-type": [
+    "news"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "topic-technology": [
+    "ai-art",
+    "generative-ai"
+   ]
+  }
+ },
+ {
+  "id": 21970,
+  "source_id": 9,
+  "url": "https://www.youtube.com/watch?v=-QMftwmyW-A",
+  "title": "Kalshi created an “unhinged” NBA Finals commercial",
+  "title_pt": "Kalshi criou um comercial 'insano' para as finais da NBA",
+  "summary_pt": "A Kalshi, plataforma de mercados de previsão, lançou um comercial para as finais da NBA com uma estética caótica e cheia de estímulos, na esperança de prender a atenção do público com alto teor de dopamina. A estratégia até gerou visualizações, mas a reação nos comentários mostrou que o resultado não foi o esperado. Em vez de conquistar o público, o anúncio foi visto como exagerado e sem noção, virando alvo de críticas. A marca até conseguiu atenção, mas não da forma positiva que imaginava.",
+  "snippet": null,
+  "issue_url": "https://www.superhuman.ai/p/new-startup-unveils-time-machine-for-ai",
+  "blurb": "The creators hoped the ad’s high-dopamine zaniness would win eyeballs. Technically, it did, but per the comments, not in a good way.",
+  "date_iso": "2026-11-26",
+  "kind": "news",
+  "section": "FROM THE FRONTIER",
+  "verify_status": "suspect",
+  "verify_notes": "Conteúdo excessivamente raso: apenas repete o título e o blurb, sem detalhes do vídeo ou da notícia; Kind aparentemente errado: URL é do YouTube, mas o tipo é 'news', sem relação com artigo de notícia; Falta conteúdo real extraído do vídeo (transcrição, descrição, etc.)",
+  "tags": {
+   "content-type": [
+    "news"
+   ],
+   "topic-technology": [
+    "software-development"
+   ]
+  }
+ },
+ {
+  "id": 21971,
+  "source_id": 9,
+  "url": "https://www.youtube.com/watch?v=SnVi0HoiUSk",
+  "title": "Geico used stop-motion animation",
+  "title_pt": "Geico usou animação em stop-motion",
+  "summary_pt": "A Geico apostou em animação em stop-motion para um comercial que estreou durante o Desfile do Dia de Ação de Graças da Macy's. A técnica, conhecida por dar vida a objetos ou personagens quadro a quadro, foi utilizada para criar um anúncio visualmente marcante, aproveitando a grande audiência do tradicional desfile para divulgar a marca.",
+  "snippet": null,
+  "issue_url": "https://www.superhuman.ai/p/new-startup-unveils-time-machine-for-ai",
+  "blurb": "For an ad debuting during the Macy’s Thanksgiving Day Parade",
+  "date_iso": "2026-11-26",
+  "kind": "news",
+  "section": "FROM THE FRONTIER",
+  "verify_status": "suspect",
+  "verify_notes": "Conteúdo é apenas o título e o blurb, sem corpo, raso demais para notícia; kind 'news' aparentemente errado: URL é do YouTube, registro é de vídeo",
+  "tags": {
+   "content-type": [
+    "news"
+   ],
+   "domain": [
+    "frontend"
+   ],
+   "topic-technology": [
+    "animations"
+   ]
+  }
+ },
+ {
+  "id": 21972,
+  "source_id": 9,
+  "url": "https://www.youtube.com/watch?v=RHXY_nm_rWk",
+  "title": "Geico found a solution: Using AI to let its iconic Gecko join a live, unscripted podcast",
+  "title_pt": "Geico encontrou uma solução: usando IA para seu icônico Gecko participar de um podcast ao vivo e sem roteiro",
+  "summary_pt": "A Geico utilizou inteligência artificial para permitir que seu famoso mascote, o Gecko, participasse de um podcast ao vivo e sem roteiro, ao lado da promessa da WNBA, Azzi Fudd. A iniciativa chamou atenção e agradou o público, que elogiou a interação nos comentários. A ação demonstra como a IA pode ser usada de forma criativa para dar vida a personagens de marca em experiências dinâmicas e envolventes.",
+  "snippet": null,
+  "issue_url": "https://www.superhuman.ai/p/new-startup-unveils-time-machine-for-ai",
+  "blurb": "Using AI to let its iconic Gecko join a live, unscripted podcast with top WNBA pick Azzi Fudd. Judging by the comments, viewers loved it.",
+  "date_iso": "2026-11-26",
+  "kind": "news",
+  "section": "FROM THE FRONTIER",
+  "verify_status": "suspect",
+  "verify_notes": "Conteúdo é apenas réplica do título e descrição, sem texto real de notícia; A página é um vídeo do YouTube, não um artigo de notícia; kind provavelmente incorreto",
+  "tags": {
+   "content-type": [
+    "news"
+   ],
+   "difficulty": [
+    "all-levels"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "topic-technology": [
+    "text-to-speech",
+    "speech-recognition",
+    "nlp",
+    "generative-ai",
+    "ai-in-business",
+    "ai-adoption"
+   ],
+   "trending-emerging": [
+    "voice-ai",
+    "voice-agents",
+    "ai-agents"
+   ]
+  }
+ },
+ {
+  "id": 21973,
+  "source_id": 9,
+  "url": "https://archive.superhuman.ai/2125464682580623467",
+  "title": "Deal Day:",
+  "title_pt": "Dia das Ofertas:",
+  "summary_pt": "Grok Bot, ferramenta desenvolvida pela equipe de Elon Musk, automatiza a busca por promoções na Black Friday. Após uma configuração inicial, ele verifica regularmente os preços em diversas lojas e notifica apenas quando há uma queda real, eliminando anúncios enganosos. Além disso, valida a autenticidade das ofertas, tornando obsoletas as falsas promoções. Dessa forma, o usuário não precisa monitorar sites manualmente; o bot faz o trabalho, destacando os melhores descontos com segurança.",
+  "snippet": null,
+  "issue_url": "https://www.superhuman.ai/p/new-startup-unveils-time-machine-for-ai",
+  "blurb": "No matter how ready you think you are for Black Friday, Grok Bot might still have you beat. Instead of manually checking Amazon, Walmart, Best Buy, and the rest, the tool can now monitor prices every few hours and alert you when the best deals actually pop up. See how you can use it (1.7M views).",
+  "date_iso": "2026-11-26",
+  "kind": "news",
+  "section": "What’s trending on socials & headlines today",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "xai",
+    "grok"
+   ],
+   "content-type": [
+    "release-announcement"
+   ],
+   "difficulty": [
+    "all-levels"
+   ],
+   "domain": [
+    "llm-models",
+    "ai-general"
+   ],
+   "framework-library-tool": [
+    "grok"
+   ],
+   "topic-technology": [
+    "ai-agents",
+    "agentic-ai"
+   ],
+   "trending-emerging": [
+    "browser-agents",
+    "ai-agents",
+    "agentic-ai",
+    "tool-calling"
+   ]
+  }
+ },
+ {
+  "id": 21974,
+  "source_id": 9,
+  "url": "https://archive.superhuman.ai/2125546591851319608",
+  "title": "Meeting Adjourned:",
+  "title_pt": "Reunião Encerrada:",
+  "summary_pt": "Um vídeo viral (2,9 milhões de visualizações) imagina o que acontece quando quatro agentes Claude recebem papéis distintos e são colocados em uma mesma reunião. O resultado, como era de se esperar, é uma bagunça caótica e cheia de situações inusitadas. A cena satiriza a interação entre múltiplas inteligências artificiais em um ambiente corporativo, mostrando como a dinâmica pode fugir do controle rapidamente.",
+  "snippet": null,
+  "issue_url": "https://www.superhuman.ai/p/new-startup-unveils-time-machine-for-ai",
+  "blurb": "This viral skit imagines what happens when you give four Claude agents distinct roles and drop them into the same meeting. Hint: it got just as chaotic as you’d expect. (2.9M views).",
+  "date_iso": "2026-11-26",
+  "kind": "news",
+  "section": "What’s trending on socials & headlines today",
+  "verify_status": "suspect",
+  "verify_notes": "Conteúdo é apenas o blurb do agregador, sem texto real do artigo; Título termina com ':' indicando possível truncamento",
+  "tags": {
+   "company-vendor-model": [
+    "claude",
+    "anthropic"
+   ],
+   "content-type": [
+    "demo",
+    "showcase"
+   ],
+   "difficulty": [
+    "all-levels"
+   ],
+   "domain": [
+    "llm-models",
+    "ai-general"
+   ],
+   "topic-technology": [
+    "multi-agent-systems",
+    "agent-orchestration",
+    "ai-agents"
+   ],
+   "trending-emerging": [
+    "multi-agent",
+    "agent-orchestration",
+    "ai-agents",
+    "agentic-ai"
+   ]
+  }
+ },
+ {
+  "id": 21975,
+  "source_id": 9,
+  "url": "https://archive.superhuman.ai/2125616057788637364",
+  "title": "Early Signal:",
+  "title_pt": "Primeiro sinal: como o Claude Fable 5.2 está sendo usado",
+  "summary_pt": "Duas semanas após o lançamento do Claude Fable 5.2, a Anthropic compartilhou os primeiros vislumbres de como o modelo está sendo explorado pelos usuários. Os exemplos vão muito além dos casos de uso óbvios, mostrando aplicações criativas e ambiciosas, como recriar a origem da letra A, animar as Sete Maravilhas do Mundo Antigo, ilustrar a história da computação gráfica e demonstrar o que acontece com o ar quando um avião quebra a barreira do som. Também há projetos interativos, como um rover inspirado em Marte que percorre terrenos de outros mundos, origamis dobrados passo a passo em código e um braço robótico que joga damas em 62 lances, corrigindo sua própria deflexão de 7 mm. A publicação convida a comunidade a continuar compartilhando o que está sendo criado com a ferramenta.",
+  "snippet": null,
+  "issue_url": "https://www.superhuman.ai/p/new-startup-unveils-time-machine-for-ai",
+  "blurb": "We’re barely two weeks into Claude Fable 5.2, and users are already pushing it far beyond the obvious use cases. Anthropic just shared its first look at how the model is being used in the wild, and some of the examples are surprisingly ambitious.",
+  "date_iso": "2026-11-26",
+  "kind": "news",
+  "section": "What’s trending on socials & headlines today",
+  "verify_status": "suspect",
+  "verify_notes": "Título incompleto ('Early Signal:' sem complemento), não condiz com o conteúdo; Conteúdo é apenas uma lista de exemplos, raso em relação ao título e à descrição do agregador",
+  "tags": {
+   "company-vendor-model": [
+    "claude",
+    "anthropic"
+   ],
+   "content-type": [
+    "release-announcement",
+    "showcase"
+   ],
+   "difficulty": [
+    "all-levels"
+   ],
+   "domain": [
+    "llm-models"
+   ],
+   "framework-library-tool": [
+    "claude"
+   ],
+   "topic-technology": [
+    "multimodal-models",
+    "model-release",
+    "generative-ai",
+    "ai-video",
+    "image-generation",
+    "robotics"
+   ],
+   "trending-emerging": [
+    "multimodal",
+    "world-models",
+    "reasoning-models"
+   ]
+  }
+ },
+ {
+  "id": 21976,
+  "source_id": 9,
+  "url": "https://archive.superhuman.ai/2125485386009084378",
+  "title": "It’s Playtime:",
+  "title_pt": "É hora de jogar",
+  "summary_pt": "Um desenvolvedor solo de primeira viagem revelou que usou IA para programar e criar parte dos visuais de seu primeiro jogo, Slotbound. O título vendeu mais de 200 mil cópias em seis dias e faturou US$ 1,33 milhão na Steam em apenas uma semana, com 91% de avaliações positivas. O dev admitiu que a IA esteve envolvida em todo o projeto, especialmente na codificação e no fluxo de trabalho visual.",
+  "snippet": null,
+  "issue_url": "https://www.superhuman.ai/p/new-startup-unveils-time-machine-for-ai",
+  "blurb": "A first-time solo game developer says he built his first game with AI across coding and parts of the visual workflow. Six days after launch, the game has blown past a sales milestone most indie developers never reach. (13k likes)",
+  "date_iso": "2026-11-26",
+  "kind": "news",
+  "section": "What’s trending on socials & headlines today",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "developer-productivity"
+   ],
+   "content-type": [
+    "success-story",
+    "news"
+   ],
+   "difficulty": [
+    "all-levels"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "topic-technology": [
+    "generative-ai",
+    "ai-in-business",
+    "ai-adoption",
+    "software-development",
+    "ai-art"
+   ],
+   "trending-emerging": [
+    "vibe-coding"
+   ]
+  }
+ },
+ {
+  "id": 21977,
+  "source_id": 9,
+  "url": "https://archive.superhuman.ai/2125409636753064124",
+  "title": "Main Character Energy:",
+  "title_pt": "Energia de Protagonista",
+  "summary_pt": "O Google registrou uma patente para um canal de TV com inteligência artificial que pode transformar o espectador no protagonista de filmes e séries. A tecnologia usaria fotos e a voz da pessoa para inseri-la de forma personalizada em conteúdos audiovisuais, criando uma experiência imersiva e única. A ideia, segundo o registro, é permitir que o usuário se veja atuando em suas produções favoritas, com o canal gerando cenas personalizadas com base em suas características. Ainda não se sabe quando ou se a funcionalidade será lançada oficialmente, mas a patente indica o interesse da empresa em levar a personalização por IA para o entretenimento doméstico.",
+  "snippet": null,
+  "issue_url": "https://www.superhuman.ai/p/new-startup-unveils-time-machine-for-ai",
+  "blurb": "Imagine turning on the TV and seeing yourself star in one of your favorite shows. Google has reportedly filed a patent for an AI-powered TV channel that could use your photos and voice to put you inside personalized movies and shows.",
+  "date_iso": "2026-11-26",
+  "kind": "news",
+  "section": "What’s trending on socials & headlines today",
+  "verify_status": "suspect",
+  "verify_notes": "título truncado: 'Main Character Energy:' termina com dois pontos sem complemento; conteúdo raso demais para o título: apenas uma manchete, sem desenvolvimento ou corpo da notícia",
+  "tags": {
+   "company-vendor-model": [
+    "google"
+   ],
+   "concept-theme": [
+    "ux"
+   ],
+   "content-type": [
+    "news"
+   ],
+   "difficulty": [
+    "all-levels"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "topic-technology": [
+    "ai-video",
+    "multimodal-ai",
+    "image-generation",
+    "deepfakes"
+   ],
+   "trending-emerging": [
+    "multimodal",
+    "voice-ai"
+   ]
+  }
+ },
+ {
+  "id": 21978,
+  "source_id": 9,
+  "url": "https://promptsarchive.superhuman.ai/p/audit-a-website-conversion-funnel",
+  "title": "Audit a Website Conversion Funnel",
+  "title_pt": "Audite o Funil de Conversão do Seu Site",
+  "summary_pt": "Este artigo apresenta um prompt detalhado para realizar uma auditoria completa do funil de conversão de um site, com foco em identificar pontos de atrito e oportunidades de melhoria. O texto orienta o usuário a assumir o papel de um estrategista sênior de otimização de conversão (CRO) e growth analyst, fornecendo um roteiro para analisar cada etapa do funil — da página de entrada ao checkout. São solicitados dados contextuais como tipo de negócio, objetivo principal (compra, cadastro, lead etc.), público-alvo, fontes de tráfego, taxa de conversão atual e ferramentas de análise disponíveis, como GA4, Mixpanel ou Hotjar. A auditoria proposta cobre aspectos como clareza da mensagem, força da proposta de valor, visibilidade dos CTAs, confiança e credibilidade, fricção nas etapas, complexidade de formulários, usabilidade mobile, velocidade de carregamento e alinhamento entre o anúncio e a experiência na página. O prompt também orienta a separar observações baseadas em dados de hipóteses que precisam de teste, priorizar problemas usando impacto, confiança e esforço, e evitar mudanças puramente cosméticas. Por fim, o artigo pede a entrega de um relatório estruturado com: resumo da saúde do funil, maiores riscos de abandono, cinco principais oportunidades de conversão, correções recomendadas por etapa, três testes A/B de maior prioridade, métricas para acompanhar, dados adicionais necessários e um plano de otimização para 30 dias. O conteúdo funciona como um guia prático para quem deseja conduzir uma análise aprofundada e baseada em evidências para aumentar a taxa de conversão de um site.",
+  "snippet": null,
+  "issue_url": "https://www.superhuman.ai/p/new-startup-unveils-time-machine-for-ai",
+  "blurb": "Access the full prompt here – prompt for auditing website conversion funnels.",
+  "date_iso": "2026-11-26",
+  "kind": "tool",
+  "section": "Prompts",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "optimization",
+    "ux",
+    "testing",
+    "metrics"
+   ],
+   "content-type": [
+    "how-to",
+    "deep-dive"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "frontend"
+   ],
+   "topic-technology": [
+    "web-performance",
+    "responsive-design",
+    "data-analysis"
+   ]
+  }
+ },
+ {
+  "id": 21979,
+  "source_id": 9,
+  "url": "https://promptsarchive.superhuman.ai/p/turn-your-zodiac-sign-into-vintage-wall-art-with-ai",
+  "title": "Turn Your Zodiac Sign into Vintage Wall Art with AI",
+  "title_pt": "Transforme Seu Signo do Zodíaco em Arte de Parede Vintage com IA",
+  "summary_pt": "O artigo apresenta um prompt detalhado para criar pôsteres vintage de signos do zodíaco usando inteligência artificial. A proposta é gerar ilustrações inspiradas em antigos mapas astrológicos, almanaques ilustrados e arte mística retrô, com tipografia ousada no topo e o símbolo do signo como tema central. Elementos como flores, estrelas, luas, constelações, conchas ou vinhas podem ser adicionados conforme a personalidade do signo. A paleta de cores sugerida inclui tons como bordô e creme, laranja desbotado e sálvia, ou azul empoeirado e marfim, com textura de papel envelhecido e traços finos para um visual artesanal e nostálgico. Também é possível incluir um pequeno painel de texto com características ou elementos do signo, mantendo o design elegante e legível, em proporção retrato 4:5, evitando estilo moderno ou fotorrealismo.",
+  "snippet": null,
+  "issue_url": "https://www.superhuman.ai/p/new-startup-unveils-time-machine-for-ai",
+  "blurb": "Access the full prompt here – prompt for generating vintage zodiac wall art.",
+  "date_iso": "2026-11-26",
+  "kind": "tool",
+  "section": "Prompts",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "prompt-engineering"
+   ],
+   "content-type": [
+    "tutorial",
+    "guide"
+   ],
+   "difficulty": [
+    "beginner"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "topic-technology": [
+    "image-generation",
+    "generative-ai",
+    "ai-art",
+    "prompt-engineering"
+   ],
+   "trending-emerging": [
+    "multimodal"
+   ]
+  }
+ },
+ {
+  "id": 21980,
+  "source_id": 1,
+  "url": "https://www.zachleat.com/web/npm-audit-report",
+  "title": "Your Tools Are Hiding npm Audits From You",
+  "title_pt": "Suas Ferramentas Estão Escondendo as Auditorias do npm",
+  "summary_pt": "Uma auditoria npm em um projeto Next.js recém-criado pode exibir \"0 vulnerabilidades\", enquanto um projeto Gatsby criado na mesma hora mostra dezenas de problemas. Isso não significa que o Next.js seja mais seguro: ele embute todas as dependências em node_modules/next/dist/compiled, e essas dependências empacotadas ficam fora do alcance do npm audit. No caso analisado, elas escondem dezenas de falhas, incluindo 19 altas e 3 críticas — mais do que as críticas visíveis no Gatsby, que nem é mais mantido. Além do empacotamento de dependências, o artigo lista outras maneiras de \"varrer os relatórios para debaixo do tapete\": vários create-* CLIs (como create-gatsby, create-astro e sv create) suprimem ou ocultam a saída do npm install, e gerenciadores de pacotes como pnpm e Yarn não exibem relatórios de auditoria por padrão, ao contrário do npm. Vite também repete a prática de empacotar dependências, mas mantém a base atualizada e sem auditorias pendentes. Para comparar os ecossistemas de forma transparente, o autor criou o Prototype Pollution Report, um painel que atualiza cerca de uma vez por dia e mede pacotes publicados por diversos projetos — tanto a lista completa quanto apenas o pacote principal — com as respectivas contagens de vulnerabilidades apontadas pelo npm audit.",
+  "snippet": null,
+  "issue_url": "https://nodeweekly.com/issues/649",
+  "blurb": "Running npm audit over a fresh Next.js app can show zero vulnerabilities, but a separate audit of its bundled dependencies tells a different story. Zach shows how Next.js can 'sweep audits under the rug' by vendoring dependencies, and has built Prototype Pollution Report to rank popular frameworks' packages based on their audit results.",
+  "date_iso": "2026-11-26",
+  "kind": "news",
+  "section": null,
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "security",
+    "transparency"
+   ],
+   "content-type": [
+    "hot-take",
+    "analysis"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "nodejs",
+    "frontend"
+   ],
+   "ecosystem-language": [
+    "nodejs",
+    "javascript"
+   ],
+   "framework-library-tool": [
+    "nextjs",
+    "vite",
+    "gatsby",
+    "npm"
+   ],
+   "topic-technology": [
+    "npm-security",
+    "supply-chain-security",
+    "security-node",
+    "package-management"
+   ]
+  }
+ },
+ {
+  "id": 21981,
+  "source_id": 1,
+  "url": "https://aws.amazon.com/about-aws/whats-new/2026/11/aws-lambda-nodejs-26",
+  "title": "AWS Lambda now supports Node.js 26",
+  "title_pt": "AWS Lambda agora suporta Node.js 26",
+  "summary_pt": "A AWS anunciou que o AWS Lambda agora oferece suporte ao Node.js 26, permitindo que desenvolvedores criem aplicações serverless usando essa versão tanto em Lambda Web Functions quanto em Lambda Event Functions. O Node.js 26 pode ser utilizado como runtime gerenciado e também como imagem base de contêiner, nesse último caso apenas para Event Functions. A AWS aplicará automaticamente atualizações de segurança e correções de bugs no runtime e na imagem base conforme forem disponibilizadas. O Node.js 26 é a versão LTS mais recente, com suporte previsto até abril de 2029. Entre os destaques estão a API Temporal, que simplifica o trabalho com datas, horários e fusos horários, e melhorias na Fetch API. Os desenvolvedores podem combinar o Node.js 26 com o Powertools for AWS Lambda (TypeScript), além de usar ferramentas como o console da Lambda, AWS CLI, AWS SAM, AWS CDK e AWS CloudFormation para implantar e gerenciar as aplicações. O runtime está disponível em todas as regiões onde Web Functions e Event Functions são oferecidas.",
+  "snippet": null,
+  "issue_url": "https://nodeweekly.com/issues/649",
+  "blurb": "as a managed runtime (for both Web and Event functions) and container base image (for Event Functions only).",
+  "date_iso": "2026-11-26",
+  "kind": "news",
+  "section": "IN BRIEF",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "aws"
+   ],
+   "concept-theme": [
+    "serverless",
+    "cloud",
+    "containers",
+    "developer-productivity"
+   ],
+   "content-type": [
+    "release-announcement"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "nodejs",
+    "backend"
+   ],
+   "ecosystem-language": [
+    "nodejs",
+    "typescript"
+   ],
+   "framework-library-tool": [
+    "nodejs",
+    "aws"
+   ],
+   "topic-technology": [
+    "nodejs",
+    "serverless"
+   ]
+  }
+ },
+ {
+  "id": 21982,
+  "source_id": 1,
+  "url": "https://corgea.com/research/cve-2026-133120-133250-133212-124289-fastify-express-middie-reply-from-november-2026",
+  "title": "Several Fastify plugins have had a flurry of security fixes",
+  "title_pt": "Vários plugins Fastify recebem uma enxurrada de correções de segurança",
+  "summary_pt": "A equipe do Fastify divulgou, na semana de 16 de novembro, 26 avisos de segurança em oito pacotes npm, sendo seis críticos. As falhas mais graves incluem bypass de middleware de autenticação em @fastify/express e @fastify/middie, além de contrabando de requisição (request smuggling) em @fastify/reply-from. Não há evidências de exploração ativa, mas os avisos publicados incluem exemplos de requisições que disparam os bugs. Nos pacotes @fastify/express e @fastify/middie, o problema ocorre quando o roteador do Fastify e o mecanismo de middleware do Express interpretam o caminho da URL de formas diferentes, permitindo que rotas protegidas sejam acessadas sem passar pelos middlewares. No @fastify/reply-from, uma falha no transporte HTTP do Node.js permitia que um cliente não autenticado enviasse requisições arbitrárias ao servidor de origem, contornando rotas e ganchos de autenticação do proxy. Também houve correções em @fastify/multipart, @fastify/http-proxy, @fastify/busboy, @fastify/static e @fastify/proxy-addr. Recomenda-se atualizar imediatamente para as versões corrigidas: @fastify/express 4.0.10, @fastify/middie 9.3.8, @fastify/reply-from 12.9.1, @fastify/multipart 10.1.9, @fastify/http-proxy 11.6.10, @fastify/busboy 3.2.6, @fastify/static 10.1.12 e @fastify/proxy-addr 5.1.3. Como medida extra, quem usa middlewares Express com escopo de caminho para autenticação deve migrar a validação para hooks preHandler do Fastify, usando request.routeOptions.url.",
+  "snippet": null,
+  "issue_url": "https://nodeweekly.com/issues/649",
+  "blurb": "including critical middleware bypasses in @fastify/express and @fastify/middie, and request smuggling in @fastify/reply-from.",
+  "date_iso": "2026-11-26",
+  "kind": "news",
+  "section": "IN BRIEF",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "security"
+   ],
+   "content-type": [
+    "security-advisory",
+    "cve"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "nodejs",
+    "backend"
+   ],
+   "ecosystem-language": [
+    "nodejs",
+    "javascript"
+   ],
+   "framework-library-tool": [
+    "fastify"
+   ],
+   "topic-technology": [
+    "security-node",
+    "npm-security",
+    "middleware",
+    "supply-chain-security",
+    "nodejs"
+   ]
+  }
+ },
+ {
+  "id": 21983,
+  "source_id": 1,
+  "url": "https://github.com/nodejs/node/pull/67779",
+  "title": "An open PR proposes adding a built-in pprof CPU profiler to Node",
+  "title_pt": "PR aberto propõe adicionar perfilador de CPU pprof integrado ao Node",
+  "summary_pt": "Uma pull request aberta propõe adicionar um módulo experimental `node:perf_hooks/pprof` ao Node.js, que coleta perfis de tempo de parede (wall time) da thread atual e os codifica no formato pprof, permitindo consumo pela ferramenta de linha de comando pprof e serviços de profiling contínuo sem a necessidade de um addon nativo. O perfilador foi portado do pacote `@datadog/pprof` (Apache-2.0) e agora reside em `src/node_pprof.cc` e `src/pprof/`, usando internals do Node em vez de nan; o codificador protobuf vem do pacote `pprof-format` (MIT). As licenças foram adicionadas ao arquivo LICENSE. Em sistemas POSIX, o perfil pode opcionalmente atribuir tempo de CPU da thread às amostras via interceptação dos sinais SIGPROF do sampler do V8, além de contornar um bug do V8 que poderia travar o perfilador ao reiniciá-lo. O módulo não inclui o heap profiler, amostragem de contextos ou suporte a source maps, e emite um `ExperimentalWarning` ao ser carregado. A PR também corrige um problema em `time.profile()` que interrompia o perfilador errado e adiciona testes. Os revisores debatem a abordagem adotada.",
+  "snippet": null,
+  "issue_url": "https://nodeweekly.com/issues/649",
+  "blurb": "ported from Datadog's work, with reviewers debating the approach.",
+  "date_iso": "2026-11-26",
+  "kind": "news",
+  "section": "IN BRIEF",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "claude",
+    "anthropic"
+   ],
+   "concept-theme": [
+    "profiling",
+    "performance",
+    "debugging",
+    "observability"
+   ],
+   "content-type": [
+    "announcement"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "nodejs"
+   ],
+   "ecosystem-language": [
+    "nodejs",
+    "javascript",
+    "cpp"
+   ],
+   "framework-library-tool": [
+    "nodejs"
+   ],
+   "topic-technology": [
+    "nodejs",
+    "performance-tuning",
+    "apm"
+   ]
+  }
+ },
+ {
+  "id": 21984,
+  "source_id": 1,
+  "url": "https://github.com/nodejs/node/pull/67624",
+  "title": "Node's main branch now uses Ada 4.1",
+  "title_pt": "Branch principal do Node agora usa Ada 4.1",
+  "summary_pt": "O branch principal do Node.js foi atualizado para utilizar a biblioteca Ada 4.1, um parser de URL que traz melhorias significativas de desempenho. Essa mudança torna o processamento de URLs mais rápido, beneficiando aplicações que dependem da manipulação de URLs via a API URL do Node.",
+  "snippet": null,
+  "issue_url": "https://nodeweekly.com/issues/649",
+  "blurb": "a notably faster release of the URL parser behind URL.",
+  "date_iso": "2026-11-26",
+  "kind": "news",
+  "section": "IN BRIEF",
+  "verify_status": "junk",
+  "verify_notes": "Conteúdo é um fragmento ilegível de interface do GitHub, não um texto de notícia.; Aparecem apenas nomes de usuários/labels e a frase solta 'added the dependencies'.; Página de pull request não é conteúdo editorial; o registro é inutilizável como notícia.",
+  "tags": {
+   "concept-theme": [
+    "performance",
+    "optimization"
+   ],
+   "content-type": [
+    "version-release"
+   ],
+   "difficulty": [
+    "all-levels"
+   ],
+   "domain": [
+    "nodejs",
+    "backend"
+   ],
+   "ecosystem-language": [
+    "nodejs"
+   ],
+   "framework-library-tool": [
+    "nodejs"
+   ],
+   "topic-technology": [
+    "nodejs"
+   ]
+  }
+ },
+ {
+  "id": 21985,
+  "source_id": 1,
+  "url": "https://vercel.com/blog/eve-is-now-generally-available",
+  "title": "Vercel's eve has reached 1.0",
+  "title_pt": "O eve da Vercel chega à versão 1.0",
+  "summary_pt": "O eve, framework open-source da Vercel para construção de agentes de produção, atingiu a versão 1.0, tornando-se disponível para uso geral. Desde o preview público em junho, foram lançadas mais de 230 versões e milhares de pull requests, com melhorias significativas em velocidade, integrações, observabilidade (via OpenTelemetry) e controles de segurança mais flexíveis. O framework permite que os desenvolvedores escolham o modelo, adicionem ferramentas, editem instruções e definam quais ações precisam de aprovação, tudo com um SDK de Workflow que salva progresso e retoma após falhas.",
+  "snippet": null,
+  "issue_url": "https://nodeweekly.com/issues/649",
+  "blurb": "a Next.js-style agent framework we featured in June. The idea is for you to 'own the harness' you build agents on.",
+  "date_iso": "2026-11-26",
+  "kind": "release",
+  "section": "IN BRIEF",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "company-vendor-model": [
+    "vercel"
+   ],
+   "concept-theme": [
+    "agentops",
+    "observability",
+    "security",
+    "evals"
+   ],
+   "content-type": [
+    "version-release"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "ai-general",
+    "backend"
+   ],
+   "topic-technology": [
+    "agentic-ai",
+    "ai-agents",
+    "agent-orchestration",
+    "multi-agent-systems",
+    "tool-calling"
+   ],
+   "trending-emerging": [
+    "ai-agents",
+    "agent-orchestration",
+    "multi-agent",
+    "tool-calling"
+   ]
+  }
+ },
+ {
+  "id": 21986,
+  "source_id": 1,
+  "url": "https://cascadiajs.com",
+  "title": "CascadiaJS 2027",
+  "title_pt": "CascadiaJS 2027",
+  "summary_pt": "A CascadiaJS 2027, conferência dedicada à Web e à IA, acontecerá nos dias 7 e 8 de junho de 2027 no Seattle Convention Center. O evento reúne mais de 600 desenvolvedores, com mais de 20 palestrantes, 4 workshops e 2 festas, promovendo uma forte comunidade e troca de experiências na região do Noroeste Pacífico. A chamada para palestras está aberta até 10 de janeiro de 2027, e os interessados podem inclusive submeter suas propostas via servidor MCP. A conferência também oferece oportunidades de patrocínio para empresas que buscam maior visibilidade e interação com um público qualificado, que influencia decisões tecnológicas em suas organizações.",
+  "snippet": null,
+  "issue_url": "https://nodeweekly.com/issues/649",
+  "blurb": "is taking place in Seattle next June and its CFP is open till January 10 (curiously you can even submit your talk via an MCP server!).",
+  "date_iso": "2026-11-26",
+  "kind": "news",
+  "section": "IN BRIEF",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "community"
+   ],
+   "content-type": [
+    "announcement"
+   ],
+   "difficulty": [
+    "all-levels"
+   ],
+   "domain": [
+    "frontend",
+    "ai-general"
+   ],
+   "ecosystem-language": [
+    "javascript"
+   ],
+   "topic-technology": [
+    "javascript"
+   ]
+  }
+ },
+ {
+  "id": 21987,
+  "source_id": 1,
+  "url": "https://evilmartians.com/chronicles/type-errors-cost-our-coding-agents-under-one-percent-of-their-time",
+  "title": "Do Agents Really Do Better With TypeScript?",
+  "title_pt": "Agentes de código realmente se saem melhor com TypeScript?",
+  "summary_pt": "A afirmação comum de que tipos estáticos melhoram agentes de codificação foi testada pela Evil Martians. Analisando benchmarks públicos em dez linguagens, eles descobriram que, em tarefas de dificuldade equivalente, linguagens tipadas e dinâmicas empatam em cerca de 65% de resolução. O TypeScript não superou o JavaScript puro em nenhum dos três benchmarks analisados, e os agentes raramente usam o verificador de tipos, gastando menos de 1% do tempo lidando com erros de tipo. Quando instruídos a usar checagem de tipos, os agentes não resolveram mais tarefas e perderam de 20% a 28% do tempo com essas ferramentas. Na prática, os erros de tipo não foram a causa de falhas; o que mais consumiu tempo foi ler código e verificar o trabalho. O artigo inclui experimentos próprios com Ruby (com e sem RBS/Sorbet) e Rust, reforçando que os tipos não trazem vantagem mensurável para agentes.",
+  "snippet": null,
+  "issue_url": "https://nodeweekly.com/issues/649",
+  "blurb": "It's often claimed types can make coding agents produce better code, but Evil Martians found across three public benchmarks that agents solved comparable JavaScript issues at least as often as TypeScript issues.",
+  "date_iso": "2026-11-26",
+  "kind": "news",
+  "section": "IN BRIEF",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "static-analysis",
+    "type-safety"
+   ],
+   "content-type": [
+    "deep-dive",
+    "hot-take"
+   ],
+   "difficulty": [
+    "for-researchers"
+   ],
+   "domain": [
+    "llm-models",
+    "ai-general"
+   ],
+   "ecosystem-language": [
+    "typescript",
+    "javascript",
+    "ruby"
+   ],
+   "framework-library-tool": [
+    "rails"
+   ],
+   "topic-technology": [
+    "agentic-ai",
+    "ai-agents",
+    "typescript",
+    "javascript",
+    "software-development",
+    "ai-benchmarks"
+   ],
+   "trending-emerging": [
+    "coding-agents"
+   ]
+  }
+ },
+ {
+  "id": 21988,
+  "source_id": 1,
+  "url": "https://jimp-dev.github.io/jimp",
+  "title": "Jimp",
+  "title_pt": "Jimp",
+  "summary_pt": "Jimp é uma biblioteca de processamento de imagens escrita inteiramente em JavaScript, que funciona tanto em Node.js quanto no navegador, sem dependências nativas. Ela permite ler, editar e escrever imagens de forma simples, com suporte integrado a formatos comuns como PNG, JPEG, GIF, BMP, TIFF e ICO, além de formatos adicionais via plugins WASM (WEBP, AVIF, etc.). A biblioteca oferece mais de cem métodos encadeáveis para redimensionar, cortar, rotacionar, desfocar, ajustar cores, compor imagens e desenhar formas, e pode ser executada em navegadores, web workers e Cloudflare Workers. O fluxo de uso segue três etapas: carregar (de arquivo, URL ou buffer), manipular (chamando métodos que editam a imagem) e salvar (gerando arquivo, buffer ou data URL). O projeto também é extensível, permitindo criar plugins para novos formatos ou métodos, e inclui documentação abrangente com guias, referência de API e exemplos interativos.",
+  "snippet": "Image processing in plain JavaScript. Jimp reads, edits and writes images in Node.js and the browser. It's written entirely in JavaScript, so there are no native dependencies to install or compile. npm install jimp Every example on this site runs the real Jimp, in your browser. Each button runs a real Jimp method on the image. The code panel shows the program you'd write to get the same",
+  "issue_url": "https://nodeweekly.com/issues/649",
+  "blurb": null,
+  "date_iso": "2026-11-26",
+  "kind": "tool",
+  "section": "Code & Tools",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "content-type": [
+    "documentation",
+    "getting-started"
+   ],
+   "difficulty": [
+    "beginner"
+   ],
+   "domain": [
+    "nodejs",
+    "frontend"
+   ],
+   "ecosystem-language": [
+    "javascript",
+    "nodejs",
+    "wasm"
+   ],
+   "topic-technology": [
+    "javascript",
+    "nodejs",
+    "web-development"
+   ]
+  }
+ },
+ {
+  "id": 21989,
+  "source_id": 1,
+  "url": "https://github.com/imagescript/ImageScript/releases/tag/v4.0.0",
+  "title": "ImageScript 4.0",
+  "title_pt": "ImageScript 4.0",
+  "summary_pt": "ImageScript 4.0, a primeira grande atualização desde a versão 3.0, chega com APIs mais consistentes, remoção de recursos obsoletos e maior resistência a entradas hostis ou de grande volume. A migração exige atualizar antes para 3.20.5, corrigir avisos de depreciação e seguir o guia de migração, que lista todas as mudanças. Os métodos agora usam objetos de opções em vez de argumentos posicionais, e modos são strings simples, facilitando o uso. Animações foram reformuladas: decode() retorna uma Animation com quadros, e Frame contém uma imagem, sem herança de Array ou Image. O comportamento de várias funções mudou (rotação no sentido horário, quantização com dithering por padrão, JPEG com fundo para transparência, WebP em qualidade 100 é lossless) e validações mais rígidas lançam erros claros em vez de ignorar valores inválidos. Removidos: Image.encode(), contain/cover (substituídos por resize({fit})), helpers de cor e tipos obsoletos. Novidades incluem resize({width, height, fit}), mais métodos para animações e quadros (clone, crop, trim, etc.), Image.encodeGIF() com opções de dithering, subsampling JPEG e limites para entrada não confiável (LimitError). Correções importantes para arquivos cortados ou corrompidos, além de melhorias no SVG, texto, encoders e composição. A documentação ganhou guias e o playground foi atualizado. A versão 4.0 continua em TypeScript puro, lendo/escrevendo WebP, AVIF e JPEG XL sem WASM, diferencial em relação a bibliotecas como o Jimp.",
+  "snippet": null,
+  "issue_url": "https://nodeweekly.com/issues/649",
+  "blurb": "If you want a smaller option, ImageScript 4.0 can, unlike Jimp, read/write WebP, AVIF and JPEG XL in pure TypeScript, no WASM needed.",
+  "date_iso": "2026-11-26",
+  "kind": "release",
+  "section": "Code & Tools",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "api-design",
+    "error-handling",
+    "validation",
+    "reliability"
+   ],
+   "content-type": [
+    "version-release",
+    "migration-guide"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "nodejs",
+    "frontend"
+   ],
+   "ecosystem-language": [
+    "typescript",
+    "javascript"
+   ],
+   "topic-technology": [
+    "javascript",
+    "typescript",
+    "image-optimization",
+    "web-development"
+   ]
+  }
+ },
+ {
+  "id": 21990,
+  "source_id": 1,
+  "url": "https://github.com/alexreardon/memoize-one",
+  "title": "memoize-one 7.0",
+  "title_pt": "memoize-one 7.0",
+  "summary_pt": "memoize-one é uma biblioteca de memoização que armazena apenas o resultado da chamada mais recente de uma função. Em vez de manter um cache com múltiplas entradas (como outras bibliotecas), ela compara os argumentos atuais com os da última invocação e, se forem iguais segundo Object.is, retorna o resultado previamente calculado, evitando recomputação sem risco de estouro de memória. A abordagem cobre muitos casos de uso reais e é semelhante ao comportamento de useMemo e useCallback do React. A biblioteca permite passar uma função de igualdade personalizada para comparar os argumentos, sendo o padrão a função areInputsEqual, que considera igualdade por quantidade de argumentos e Object.is (NaN é igual a NaN, +0 e -0 são diferentes). Também respeita o contexto this da função memoizada: se o this mudar, mesmo com argumentos iguais, a função original é reexecutada. Há um método .clear() para limpar o cache manualmente. A versão 7+ é um módulo ES apenas e requer ambientes que suportem ES2022 (Node.js 20.19+ para require(), navegadores modernos). Para ambientes mais antigos, deve-se usar a v6.",
+  "snippet": null,
+  "issue_url": "https://nodeweekly.com/issues/649",
+  "blurb": "A memoization library that only caches the result of the most recent arguments.",
+  "date_iso": "2026-11-26",
+  "kind": "release",
+  "section": "Code & Tools",
+  "verify_status": "suspect",
+  "verify_notes": "kind aparentemente errado: 'release' mas conteúdo é README/documentação",
+  "tags": {
+   "concept-theme": [
+    "performance",
+    "caching",
+    "optimization"
+   ],
+   "content-type": [
+    "library-release",
+    "version-release"
+   ],
+   "difficulty": [
+    "beginner"
+   ],
+   "domain": [
+    "frontend"
+   ],
+   "ecosystem-language": [
+    "javascript"
+   ],
+   "topic-technology": [
+    "memoization",
+    "javascript",
+    "performance-optimization",
+    "usememo",
+    "usecallback"
+   ]
+  }
+ },
+ {
+  "id": 21991,
+  "source_id": 1,
+  "url": "https://github.com/nodejs/node/pull/67654",
+  "title": "node:sqlite is Now Marked Stable",
+  "title_pt": "node:sqlite agora é estável",
+  "summary_pt": "Após mais de dois anos em fase experimental, o módulo sqlite embutido do Node.js foi oficialmente marcado como estável na versão mais recente do Node 27 alpha (0.2.0). Isso significa que os desenvolvedores podem utilizar o suporte nativo a SQLite sem a necessidade de um addon externo. A estabilização foi concluída com contribuições de diversos colaboradores, incluindo ajustes como o lançamento de erro ERR_NO_SQLITE quando o suporte não está disponível e a adição do getter statement.columnCount.",
+  "snippet": null,
+  "issue_url": "https://nodeweekly.com/issues/649",
+  "blurb": "More than two years after its experimental debut, Node's built-in SQLite module is now marked stable as of today's latest Node 27 alpha (0.2.0). No native addon is required.",
+  "date_iso": "2026-11-26",
+  "kind": "news",
+  "section": "News",
+  "verify_status": "suspect",
+  "verify_notes": "kind 'news' inadequado: conteúdo é a timeline de um pull request do GitHub, não uma notícia; conteúdo contém muitos restos de interface do GitHub (labels, eventos de bot, commits referenciados); conteúdo não é um texto contínuo, mas uma lista estruturada de atividades do PR",
+  "tags": {
+   "content-type": [
+    "release-announcement"
+   ],
+   "domain": [
+    "nodejs",
+    "backend"
+   ],
+   "ecosystem-language": [
+    "nodejs",
+    "sql"
+   ],
+   "framework-library-tool": [
+    "nodejs",
+    "sqlite"
+   ],
+   "topic-technology": [
+    "nodejs",
+    "relational-databases",
+    "sql",
+    "database-access"
+   ]
+  }
+ },
+ {
+  "id": 21992,
+  "source_id": 1,
+  "url": "https://www.devas.life/how-i-fixed-55-bugs-in-a-week-by-making-my-monorepo-more-agent-friendly",
+  "title": "How I Fixed 55 Bugs in a Week by Making My Monorepo More Agent-Friendly",
+  "title_pt": "Como Corrigi 55 Bugs em Uma Semana Tornando Meu Monorepo Mais Amigável para Agentes",
+  "summary_pt": "O autor, desenvolvedor do aplicativo Inkdrop, reestruturou seu monorepo para torná-lo mais eficiente para agentes de IA que auxiliam na programação. Ele percebeu que os agentes tendem a copiar padrões existentes no código, então reorganizou os diretórios por funcionalidade (em vez de por tipo), criou contratos tipados para comunicação entre processos e adotou regras de lint extremamente rígidas. Essas mudanças, combinadas com a escrita de testes unitários para cada correção, revelaram cerca de 55 bugs que ele mesmo havia introduzido ao longo do tempo, todos corrigidos com a ajuda dos agentes. O artigo também reflete sobre como o próprio autor seguia padrões antigos de código, semelhante ao comportamento dos agentes, e destaca que a disciplina imposta pelas novas regras e pela estrutura mais limpa é essencial para construir confiança nas ferramentas de IA. A conclusão é que o trabalho de engenharia mudou: agora, o foco está em criar um ambiente que oriente bem os agentes, com código limpo, limites claros e verificação automatizada.",
+  "snippet": null,
+  "issue_url": "https://nodeweekly.com/issues/649",
+  "blurb": "Inkdrop is a fantastic Electron-based note taking app I've been using for years, so it's cool to see how its creator has reshaped it for his agents to work on. Feature folders, strict lint rules, and new tests added extra discipline, surfacing a variety of long-standing bugs.",
+  "date_iso": "2026-11-26",
+  "kind": "news",
+  "section": "Articles",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "refactoring",
+    "architecture",
+    "testing",
+    "static-analysis"
+   ],
+   "content-type": [
+    "retrospective",
+    "deep-dive"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "framework-library-tool": [
+    "oxlint",
+    "vitest"
+   ],
+   "topic-technology": [
+    "monorepos",
+    "ai-agents",
+    "agentic-ai",
+    "software-development"
+   ],
+   "trending-emerging": [
+    "ai-coding-agents",
+    "agentic-ai"
+   ]
+  }
+ },
+ {
+  "id": 21993,
+  "source_id": 1,
+  "url": "https://lemire.me/blog/2026/11/20/decoding-base64-email-attachments",
+  "title": "Ranking Languages and Runtimes by MIME Base64 Decoding Speed",
+  "title_pt": "Ranking de Linguagens e Runtimes por Velocidade de Decodificação Base64 MIME",
+  "summary_pt": "O artigo apresenta um ranking de linguagens de programação e runtimes quanto à velocidade de decodificação de Base64 no formato MIME. O destaque fica para Node, Bun e Deno, que aparecem nas primeiras posições. Esse desempenho superior é atribuído principalmente à biblioteca simdutf, desenvolvida por Daniel, que acelera significativamente o processamento de strings UTF-8 e operações relacionadas, incluindo a decodificação Base64.",
+  "snippet": null,
+  "issue_url": "https://nodeweekly.com/issues/649",
+  "blurb": "– Node, Bun and Deno all sit near the top, largely thanks to Daniel's simdutf.",
+  "date_iso": "2026-11-26",
+  "kind": "news",
+  "section": "Articles",
+  "verify_status": "suspect",
+  "verify_notes": "Conteúdo salvo contém apenas o título e o blurb, sem o corpo do artigo; Recorte raso demais para o título; não há texto real do post",
+  "tags": {
+   "concept-theme": [
+    "performance"
+   ],
+   "content-type": [
+    "benchmark",
+    "comparison"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "nodejs",
+    "backend"
+   ],
+   "ecosystem-language": [
+    "javascript",
+    "nodejs"
+   ],
+   "framework-library-tool": [
+    "nodejs",
+    "bun",
+    "deno"
+   ],
+   "topic-technology": [
+    "nodejs",
+    "performance-optimization",
+    "javascript",
+    "buffers"
+   ]
+  }
+ },
+ {
+  "id": 21994,
+  "source_id": 1,
+  "url": "https://bloomberg.github.io/js-blog/post/reintroducing-stricli",
+  "title": "Reintroducing Stricli: Bloomberg's Framework for Type-Safe CLIs",
+  "title_pt": "Reapresentando o Stricli: o framework da Bloomberg para CLIs com segurança de tipos",
+  "summary_pt": "A Bloomberg reintroduz o Stricli, um framework open source lançado em 2024 e usado internamente para construir interfaces de linha de comando (CLIs) escaláveis. O Stricli funciona em qualquer runtime compatível com JavaScript, como Node.js e Bun, e foi projetado desde o início para oferecer segurança de tipos de primeira classe, garantindo em tempo de compilação que os tipos vindos do parser de argumentos correspondam aos esperados pela implementação de cada comando. Ele também inclui asserções de runtime e gera mensagens de ajuda e erro automaticamente a partir das configurações, servindo como fonte única de verdade sobre o que cada argumento aceita. Outro destaque é o carregamento dinâmico de código: por meio de loaders assíncronos e import() dinâmico, o Stricli permite carregar apenas o necessário para cada conjunto de argumentos, usando padrões de linguagem já conhecidos pelo TypeScript. Isso evita sacrificar performance em favor da tipagem. O framework é especialmente útil para agentes de IA, e a Bloomberg publicou uma versão llms.txt da documentação para facilitar o uso por esses agentes. Para humanos, há um guia de início rápido e widgets interativos nos documentos para experimentar a API no navegador. Feedback e pedidos de recursos podem ser enviados pelo GitHub.",
+  "snippet": null,
+  "issue_url": "https://nodeweekly.com/issues/649",
+  "blurb": "Bloomberg builds its internal command line tools with Stricli. As well as first-class type support (which feeds into auto-generated help and error messages), your commands' code can also be lazy-loaded for added efficiency.",
+  "date_iso": "2026-11-26",
+  "kind": "tool",
+  "section": "Code & Tools",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "type-safety",
+    "dev-experience",
+    "architecture",
+    "open-source"
+   ],
+   "content-type": [
+    "tool-release",
+    "release-announcement"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "nodejs"
+   ],
+   "ecosystem-language": [
+    "typescript",
+    "javascript",
+    "nodejs"
+   ],
+   "topic-technology": [
+    "typescript",
+    "nodejs",
+    "javascript",
+    "cli-tools"
+   ]
+  }
+ },
+ {
+  "id": 21995,
+  "source_id": 1,
+  "url": "https://github.com/keichi/binary-parser",
+  "title": "binary-parser 3.0: Declaratively Build Parsers for Binary Data",
+  "title_pt": "binary-parser 3.0: Construa parsers para dados binários de forma declarativa",
+  "summary_pt": "binary-parser é uma biblioteca JavaScript que permite criar parsers para dados binários de maneira simples e declarativa, encadeando métodos como .uint16be() e .bit4() para descrever o formato. Ela gera e compila o código do parser dinamicamente, alcançando desempenho comparável ao de um parser escrito manualmente, mas com muito menos esforço. A versão 3.0 suporta diversos tipos de dados, incluindo inteiros de 8 a 64 bits, floats, bit fields, strings, arrays, choices e pointers. A biblioteca pode ser instalada via npm (npm install binary-parser) e funciona em Node.js, Bun, Deno e navegadores. Exemplos de uso incluem parsing de cabeçalhos IP, além de formatos como ELF, TCP e tar. A API oferece métodos como uint8, int16le, string, array, choice e nest, permitindo combinar parsers aninhados e lidar com estruturas complexas. O resultado do parse é um objeto JavaScript, e erros são lançados como exceções quando a análise falha.",
+  "snippet": null,
+  "issue_url": "https://nodeweekly.com/issues/649",
+  "blurb": "Chain methods like .uint16be() and .bit4() to describe a binary format, and you end up with a parser as fast as a bespoke one. There are some examples for parsing ELF, TCP, tar, and similar formats.",
+  "date_iso": "2026-11-26",
+  "kind": "tool",
+  "section": "Code & Tools",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "performance",
+    "type-safety",
+    "error-handling",
+    "dev-experience"
+   ],
+   "content-type": [
+    "version-release",
+    "library-release"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "nodejs"
+   ],
+   "ecosystem-language": [
+    "javascript",
+    "nodejs"
+   ],
+   "framework-library-tool": [
+    "nodejs"
+   ],
+   "topic-technology": [
+    "javascript",
+    "serialization",
+    "nodejs"
+   ]
+  }
+ },
+ {
+  "id": 21996,
+  "source_id": 8,
+  "url": "https://blog.rust-lang.org/2026/11/12/Rust-1.100.0",
+  "title": "Announcing Rust 1.100.0",
+  "title_pt": "Rust 1.100.0 é lançado com estabilização do never type e melhorias no Cargo",
+  "summary_pt": "A equipe do Rust anunciou o lançamento da versão 1.100.0 da linguagem. Entre os destaques está a estabilização do \"never type\" (!), que representa computações que nunca produzem um valor. Esse tipo já podia ser usado em funções com retorno -> !, mas agora pode ser nomeado em qualquer posição, como em Result<T, !>. Além disso, Infallible agora é um alias para o never type, o que exigiu uma mudança breaking no fallback do tipo nunca em edições anteriores a 2024. Outra novidade é a estabilização parcial da API Allocator, permitindo que bibliotecas definam alocadores personalizados para uso com Vec e Box. Também foi introduzido o core::mem::DropGuard, um tipo auxiliar que executa uma closure quando sai de escopo, facilitando a implementação de transações com rollback. A função std::mem::conjure_zst foi adicionada para criar zero-sized types de forma segura quando necessário. No Cargo, há melhorias significativas: avisos sobre dependências não utilizadas, redução de colisões no cache de build com nova organização do diretório de build, e a estabilização do min-publish-age, que permite configurar um período mínimo de espera antes de aceitar versões recém-publicadas de dependências, como defesa contra ataques à cadeia de suprimentos. Várias APIs também foram estabilizadas, incluindo implementações de PartialEq para Vec com Cow e traits relacionados a alocadores.",
+  "snippet": "The Rust team is happy to announce a new version of Rust, 1.100.0. Rust is a programming language empowering everyone to build reliable and efficient software. If you have a previous version of Rust installed via rustup, you can get 1.100.0 with: $ rustup update stable If you don't have it already, you can get rustup from the appropriate page on our website, and check out the detailed release n",
+  "issue_url": "https://this-week-in-rust.org/blog/2026/11/25/this-week-in-rust-679/",
+  "blurb": null,
+  "date_iso": "2026-11-25",
+  "kind": "release",
+  "section": "Official",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "type-safety",
+    "performance",
+    "reliability",
+    "optimization"
+   ],
+   "content-type": [
+    "version-release"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "backend"
+   ],
+   "ecosystem-language": [
+    "rust"
+   ],
+   "topic-technology": [
+    "software-development"
+   ]
+  }
+ },
+ {
+  "id": 21997,
+  "source_id": 8,
+  "url": "https://blog.rust-lang.org/inside-rust/2026/11/23/all-hands-2027",
+  "title": "Rust All Hands 2027",
+  "title_pt": "Rust All Hands 2027",
+  "summary_pt": "O Rust All Hands 2027 será realizado em Utrecht, nos Países Baixos, como parte da RustWeek 2027, organizado pela RustNL. A RustWeek acontecerá nos dias 25 e 26 de maio, seguida pelo Rust All Hands, que ocorrerá de 27 a 29 de maio. O segundo dia da conferência contará com uma trilha do projeto Rust, onde membros da equipe poderão apresentar palestras a outros membros e contribuidores atuais e futuros. O evento é privado e destinado a pessoas vinculadas ao projeto Rust, como membros de equipes, participantes de grupos de trabalho ou responsáveis por objetivos do projeto. Para participar, é necessário se registrar, e dúvidas podem ser encaminhadas a Mara via Zulip.",
+  "snippet": "The Rust All Hands 2027 will again take place in Utrecht, the Netherlands as part of RustWeek 2027, hosted by RustNL. The RustWeek conference takes place on Tuesday (25 May) and Wednesday (26 May) followed by the three-day Rust All Hands on Thursday (27 May), Friday (28 May) and Saturday (29 May)! The second conference day (Wednesday 26 May) will again include a \"Rust Project Track\", where Rust t",
+  "issue_url": "https://this-week-in-rust.org/blog/2026/11/25/this-week-in-rust-679/",
+  "blurb": null,
+  "date_iso": "2026-11-25",
+  "kind": "news",
+  "section": "Official",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "community",
+    "open-source",
+    "governance"
+   ],
+   "content-type": [
+    "announcement"
+   ],
+   "domain": [
+    "backend"
+   ],
+   "ecosystem-language": [
+    "rust"
+   ],
+   "topic-technology": [
+    "software-development"
+   ]
+  }
+ },
+ {
+  "id": 21998,
+  "source_id": 8,
+  "url": "https://rustfoundation.org/media/needles-haystacks-and-numbers-between-0-and-1",
+  "title": "Needles, Haystacks, and Numbers Between 0 and 1",
+  "title_pt": "Agulhas, Palheiros e Números entre 0 e 1",
+  "summary_pt": "A Rust Foundation está patrocinando um trabalho exploratório que usa modelos de decisão para examinar automaticamente crates publicados no crates.io e sinalizar possíveis pacotes maliciosos para revisão humana. Diferentemente dos LLMs, os modelos de decisão são mais restritos, rápidos e baratos, o que permite analisar todo o fluxo de publicações sem custos inviáveis. Após testar prompts e custos em um corpus inicial de cerca de 1.000 crates, o projeto passou a escanear todos os crates publicados em novembro e dezembro. Nos primeiros dias, mais de 135 mil arquivos de crates foram analisados. O modelo atribui uma pontuação de 0 a 1 indicando a probabilidade de o crate ser ativamente malicioso, e o projeto calibrou o limiar de alerta: valores acima de 0,7 parecem oferecer um bom equilíbrio entre encontrar malware e não sobrecarregar revisores humanos com falsos positivos. Nenhuma ação automatizada é tomada; os achados seguem o processo normal de análise e remoção, e o conteúdo dos crates não é retido após a varredura. A taxa de falsos negativos é difícil de medir automaticamente, mas deve ser avaliada com dados futuros. O trabalho também deve evoluir com novos experimentos de prompts e modelos, além da integração com outros sinais de segurança do ecossistema Rust.",
+  "snippet": "Given the increasingly hostile supply chain environment the entire software community is working within, the Rust Foundation is sponsoring exploratory work on using decision models to automatically scan crates as they are published, and flag potentially malicious crates for human review. We’ve had the scanner running on the crate firehose for a little more than a week at this point, and here’s wh",
+  "issue_url": "https://this-week-in-rust.org/blog/2026/11/25/this-week-in-rust-679/",
+  "blurb": null,
+  "date_iso": "2026-11-25",
+  "kind": "news",
+  "section": "Foundation",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "security",
+    "sast",
+    "evals"
+   ],
+   "content-type": [
+    "analysis",
+    "deep-dive"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "ecosystem-language": [
+    "rust"
+   ],
+   "topic-technology": [
+    "anomaly-detection",
+    "supply-chain-security",
+    "machine-learning",
+    "model-evaluation"
+   ],
+   "trending-emerging": [
+    "reasoning-models",
+    "structured-output"
+   ]
+  }
+ },
+ {
+  "id": 21999,
+  "source_id": 8,
+  "url": "https://scientificcomputing.rs/monthly/2026-11",
+  "title": "Scientific Computing in Rust #24 (November 2026)",
+  "title_pt": "Rust para Computação Científica #24 (Novembro de 2026)",
+  "summary_pt": "Esta edição do boletim mensal destaca o Jiff, biblioteca de datas e horas que se tornou a 'crate do mês', especialmente relevante após a recomendação de segurança RUSTSEC-2026-0543 contra o uso de chrono por falta de manutenção. O Jiff v1 traz suporte a timestamps e fusos horários com compromisso claro de desenvolvimento contínuo. Entre os novos lançamentos, EGObox v1.0.1 oferece otimização global eficiente como crates Rust ou biblioteca Python; fetch-data 0.2.1 melhora o download e cache de conjuntos de dados científicos com retentativas automáticas, timeouts e downloads atômicos; e oximo v0.8.0 adiciona programação disjuntiva generalizada, modelagem semidefinida e novo backend SCIP para problemas de otimização. As publicações incluem o artigo de Raph Levien sobre 'squircles' (formas entre quadrados e círculos) e o anúncio do Rust 1.100.0, que traz recursos como DropGuards, Vec::from_fn, trim_prefix/suffix para slices e o 'dependency cooldown' do Cargo para exigir idade mínima de dependências, útil contra ataques à cadeia de suprimentos.",
+  "snippet": "Scientific Computing in Rust Monthly #24 Welcome to this month's issue of Scientific Computing in Rust Monthly. Items can be added to the next issue of the newsletter by opening a pull request to the Scientific Computing in Rust Monthly repository on GitHub. You can find more information about adding items here. Crate of the month: Jiff Jiff is a datetime library that makes it easy to de",
+  "issue_url": "https://this-week-in-rust.org/blog/2026/11/25/this-week-in-rust-679/",
+  "blurb": null,
+  "date_iso": "2026-11-25",
+  "kind": "news",
+  "section": "Newsletters",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "optimization",
+    "data-fetching",
+    "caching",
+    "reliability"
+   ],
+   "content-type": [
+    "newsletter-roundup"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "python"
+   ],
+   "ecosystem-language": [
+    "rust",
+    "python"
+   ],
+   "topic-technology": [
+    "scientific-computing",
+    "numerical-computing",
+    "data-pipelines",
+    "data-analysis"
+   ]
+  }
+ },
+ {
+  "id": 22000,
+  "source_id": 8,
+  "url": "https://www.theembeddedrustacean.com/p/the-embedded-rustacean-issue-85",
+  "title": "The Embedded Rustacean Issue #85",
+  "title_pt": "The Embedded Rustacean Edição #85",
+  "summary_pt": "A edição #85 da newsletter The Embedded Rustacean reúne as principais novidades do ecossistema Rust embarcado. Entre os destaques estão o lançamento do Slint 1.19, a certificação do Ferrocene para o sistema QNX, a chegada do Rust 1.100.0 e o suporte oficial para rodar Linux completo em um ESP32. Também são mencionadas ferramentas que permitem acesso via SSH a interfaces como UART, CAN e I2C, além de um osciloscópio da Tektronix com assistência de IA e uma plataforma unificada de robótica apresentada pela NXP. Além das notícias, a newsletter traz uma seção com recursos educacionais, atualizações da comunidade e uma lista de vagas de emprego voltadas a profissionais que trabalham com Rust embarcado. A edição encerra com uma citação de Harold Abelson sobre a importância de escrever programas para seres humanos, reforçando o espírito da comunidade Rust.",
+  "snippet": "🚨 Issue Highlights 🎨 Slint 1.19 lands 🦺 Ferrocene now on QNX 🦀 Rust 1.100.0 is out 🔌 SSH into your UART, CAN, and I2C with Rust 📉 AI-assisted Tektronix scope 🤖 NXP unveils a unified robotics platform 🐧 Full Linux on an ESP32, officially 📜 🦀 🌱 Oxidize XIAO Community Program 💬 Quote of the Issue ❝ Programs must be written for people to read, and only incidentally for machines to execute.",
+  "issue_url": "https://this-week-in-rust.org/blog/2026/11/25/this-week-in-rust-679/",
+  "blurb": null,
+  "date_iso": "2026-11-25",
+  "kind": "news",
+  "section": "Newsletters",
+  "verify_status": "suspect",
+  "verify_notes": "Seções 'News & Article Roundup', 'Educational Resources' e 'Updates, Events, & Announcements' estão vazias, sem os links/itens esperados.; Conteúdo é apenas o esqueleto da newsletter, com destaques e títulos de seção, mas sem o corpo real das notícias/artigos.",
+  "tags": {
+   "concept-theme": [
+    "edge-computing",
+    "open-source",
+    "community",
+    "dev-experience"
+   ],
+   "content-type": [
+    "newsletter-roundup"
+   ],
+   "difficulty": [
+    "all-levels"
+   ],
+   "domain": [
+    "ai-general"
+   ],
+   "ecosystem-language": [
+    "rust"
+   ],
+   "topic-technology": [
+    "robotics",
+    "edge-ai",
+    "software-development"
+   ]
+  }
+ },
+ {
+  "id": 22001,
+  "source_id": 8,
+  "url": "https://community.nlnetlabs.nl/t/release-roto-v0-14-0/3511",
+  "title": "Release: Roto v0.14.0!",
+  "title_pt": "Lançamento: Roto v0.14.0!",
+  "summary_pt": "A versão 0.14.0 do Roto foi publicada no crates.io. Trata-se de um lançamento majoritariamente de correção de bugs, e a maioria dos usuários deve conseguir atualizar sem problemas. A única mudança que quebra compatibilidade está relacionada ao uso de List::contains e List::index a partir do Rust. Os colaboradores sha90w e @algernon foram destacados por relatarem e corrigirem diversos problemas.",
+  "snippet": "Roto version 0.14.0 is now available on crates.io! This is mostly a bugfix release and most users should be able to upgrade without any problems. The only breaking change is around List::contains and List::index when they are used from Rust. For this release, I’d like to thank sha90w and @algernon in particular for both reporting and fixing many issues! As always you can find the release in the",
+  "issue_url": "https://this-week-in-rust.org/blog/2026/11/25/this-week-in-rust-679/",
+  "blurb": null,
+  "date_iso": "2026-11-25",
+  "kind": "release",
+  "section": "Project/Tooling Updates",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "content-type": [
+    "version-release",
+    "library-release"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "backend"
+   ],
+   "topic-technology": [
+    "software-development"
+   ]
+  }
+ },
+ {
+  "id": 22002,
+  "source_id": 8,
+  "url": "https://servo.org/blog/2026/11/25/october-in-servo",
+  "title": "October in Servo: video captions and inert content",
+  "title_pt": "Outubro no Servo: legendas de vídeo e conteúdo inerte",
+  "summary_pt": "A versão 0.8.0 do motor web Servo foi lançada, incorporando 588 commits (um recorde). Entre as novidades, destaca-se a renderização de legendas e subtítulos em elementos <video>, além de novos recursos da plataforma web, como os valores spelling-error e grammar-error para text-decoration-line, a função CSS progress(), o elemento <input type=image>, a pseudoclasse :focus-visible, o evento beforeinput, o elemento <wbr> e os valores auto e stable para text-wrap-style. Também foram adicionadas árvores inertes e a propriedade interactivity, junto com diversas APIs DOM, incluindo nós WebAudio DelayNode e ConvolverNode, propriedades de timeout em XMLHTTPRequest, atributos de espaçamento em e <input>, e suporte a CloseWatcher e novos membros de HTMLDialogElement.",
+  "snippet": "Servo 0.8.0 contains all of the changes we landed in October, spanning 588 commits (a new record)! Servo now renders subtitles and captions over <video> elements (@TimvdLippe, #48809)! Servo 0.8 showing a video playing with captions that change over time We’ve shipped new web platform features: the spelling-error and grammar-error values for text-decoration-line (@yezhizhen, #48883)",
+  "issue_url": "https://this-week-in-rust.org/blog/2026/11/25/this-week-in-rust-679/",
+  "blurb": null,
+  "date_iso": "2026-11-25",
+  "kind": "news",
+  "section": "Project/Tooling Updates",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "accessibility",
+    "performance"
+   ],
+   "content-type": [
+    "version-release",
+    "news"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "frontend"
+   ],
+   "topic-technology": [
+    "html",
+    "css",
+    "dom",
+    "web-apis",
+    "accessibility",
+    "web-standards"
+   ]
+  }
+ },
+ {
+  "id": 22003,
+  "source_id": 8,
+  "url": "https://trifectatech.org/blog/new-name-for-ntpd-rs-statime",
+  "title": "A new name for ntpd-rs: Statime",
+  "title_pt": "Novo nome para ntpd-rs: Statime",
+  "summary_pt": "O projeto de sincronização de tempo ntpd-rs será renomeado para Statime, mudança que afeta binários, unidades do systemd, crates e repositórios. O motivo é que o utilitário não atende mais apenas ao protocolo NTP: as próximas versões 2.0 incluirão suporte a PTP (Precision Time Protocol), NTS (Network Time Security) e ao emergente padrão Client Server PTP. O nome Statime vem do latim 'statim', que significa 'firmemente' e depois 'imediatamente', refletindo os objetivos do projeto. A renomeação ocorre antes do lançamento da versão 2.0, previsto para dezembro de 2026, com versões 2.x adicionais em janeiro de 2027. A antiga biblioteca PTP, que também se chamava Statime, será renomeada para Statime-PTP e integrada ao novo utilitário. O nome 'Pendulum' e a organização GitHub 'project-pendulum' serão aposentados, e o projeto passará a viver em github.com/trifectatechfoundation. Um guia de migração será publicado quando a versão 2.0 for lançada.",
+  "snippet": "In the coming weeks leading up to the 2.0 release, we will rename our time synchronization utility ntpd-rs to Statime. The name change affects the names of the binaries, systemd units, crates, and repositories. Work on ntpd-rs started in 2022, initiated by the tremendous folks of ISRG’s Prossimo project. In June of 2024, the project reached its first major milestone when Let's Encrypt deployed it",
+  "issue_url": "https://this-week-in-rust.org/blog/2026/11/25/this-week-in-rust-679/",
+  "blurb": null,
+  "date_iso": "2026-11-25",
+  "kind": "news",
+  "section": "Project/Tooling Updates",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "content-type": [
+    "announcement"
+   ],
+   "difficulty": [
+    "for-practitioners"
+   ],
+   "domain": [
+    "backend"
+   ],
+   "ecosystem-language": [
+    "rust"
+   ],
+   "topic-technology": [
+    "software-development",
+    "system-design",
+    "distributed-systems"
+   ]
+  }
+ },
+ {
+  "id": 22004,
+  "source_id": 8,
+  "url": "https://donsz.nl/blog/optimizing-rustcs-next-trait-solver",
+  "title": "Optimizing Rustc's next trait solver",
+  "title_pt": "Otimizando o novo trait solver do rustc",
+  "summary_pt": "O artigo explica o que é o trait solver do compilador Rust e por que seu desempenho foi um grande desafio antes da estabilização do novo solver, que finalmente chegará na versão 1.102.0. O autor, que trabalha em tempo integral na otimização desse subsistema, apresenta o histórico do projeto: o antigo Chalk, iniciado em 2015, foi descontinuado em favor do novo trait solver, criado em 2022. O objetivo é reduzir bugs de corretude no sistema de tipos, num esforço chamado de “project zero”. O texto também menciona o apoio da Hexcat e da RustNL para o desenvolvimento do compilador. Para tornar o assunto acessível, o autor parte dos conceitos básicos: traits são propriedades de tipos, e o trait solver é responsável por verificar se uma determinada trait é satisfeita, por exemplo, se um tipo implementa Clone ou Add. Ele compara o funcionamento do solver ao de um programa Prolog, mostrando como fatos e relações entre traits podem ser usados para derivar provas. Também diferencia trait solving de inferência de tipos, embora os dois subsistemas interajam. São apresentadas as principais estratégias de prova: encontrar um impl block, usar regras embutidas no compilador (como Sized para tipos primitivos) ou aproveitar where bounds em funções genéricas. O autor explica ainda a dificuldade de responder consultas de Sized em massa — cerca de 800 mil vezes ao compilar a biblioteca padrão — e como o processo pode ser recursivo, como no caso de uma struct cujos campos precisam ser Sized.",
+  "snippet": "The next rust trait solver, a large subsystem of the rust compiler that we've been trying to replace, will finally land in rust 1.102.0. In the last stages, before stabilizing it, its performance was a major blocker. But what is \"a trait solver\"? And why is its performance a problem? My goal for this blog post is to answer those questions in a way where you don't need any prior knowledge. I think",
+  "issue_url": "https://this-week-in-rust.org/blog/2026/11/25/this-week-in-rust-679/",
+  "blurb": null,
+  "date_iso": "2026-11-25",
+  "kind": "news",
+  "section": "Observations/Thoughts",
+  "verify_status": "suspect",
+  "verify_notes": "kind 'news' não condiz com o conteúdo: é um blog post, não uma notícia",
+  "tags": {
+   "concept-theme": [
+    "performance",
+    "optimization"
+   ],
+   "content-type": [
+    "deep-dive"
+   ],
+   "difficulty": [
+    "beginner"
+   ],
+   "domain": [
+    "backend"
+   ],
+   "ecosystem-language": [
+    "rust"
+   ],
+   "topic-technology": [
+    "performance-optimization",
+    "software-development"
+   ]
+  }
+ },
+ {
+  "id": 22005,
+  "source_id": 8,
+  "url": "https://linebender.org/blog/next-100-guis",
+  "title": "Advice for the next 100 Rust GUIs",
+  "title_pt": "Conselhos para as próximas 100 GUIs em Rust",
+  "summary_pt": "Raph Levien faz um follow-up de seu famoso post de 2022 e analisa o cenário das GUIs em Rust, que segue promissor, mas com adoção ainda lenta. O interesse cresceu com o auxílio de IA, que reduz o custo relativo de escrever Rust e favorece reescritas de código legado. Apesar de exemplos como o editor Zed e o framework GPUI, não há consenso sobre a melhor estratégia para a camada de UI. Em mobile, a alternativa mais viável é usar o toolkit nativo para a interface e Rust para a lógica, como fizeram Shopify, 1Password e o plano Phoenix do Discord. No desktop, a situação é mais fragmentada, e o termo \"nativo\" continua ambíguo. O texto também celebra avanços importantes: o layout de texto com Parley e a acessibilidade via AccessKit são considerados problemas basicamente resolvidos. Por outro lado, o uso do compositor do sistema (essencial para vídeo com boa performance) segue sem solução consolidada. Levien discute a tensão entre immediate mode e retained mode, criticando a escolha de egui em projetos como ArtCraft, e defende a separação em módulos bem definidos e com especificações claras, essencial para o desenvolvimento assistido por LLMs. Ele sugere adaptar padrões web com parcimônia, e cita Blitz e a divisão Xilem/Masonry como exemplos de arquitetura modular e eficiente.",
+  "snippet": "Raph Levien, November 21, 2026 This is a followup to Advice for the next dozen Rust GUIs, published 4.5 years ago. The world is different in many ways, but some of the advice there is still valid. There have been roughly 20 Rust GUI toolkits announced since that blog post (see 2026 survey), but also a recent rapid acceleration of interest in Rust GUI, fueled by AI. Rust GUI is still compelling",
+  "issue_url": "https://this-week-in-rust.org/blog/2026/11/25/this-week-in-rust-679/",
+  "blurb": null,
+  "date_iso": "2026-11-25",
+  "kind": "news",
+  "section": "Observations/Thoughts",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "performance",
+    "dev-experience"
+   ],
+   "content-type": [
+    "opinion",
+    "analysis"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "frontend"
+   ],
+   "ecosystem-language": [
+    "rust"
+   ],
+   "topic-technology": [
+    "software-development"
+   ],
+   "trending-emerging": [
+    "ai-coding-agents"
+   ]
+  }
+ },
+ {
+  "id": 22006,
+  "source_id": 8,
+  "url": "https://lucumr.pocoo.org/2026/11/25/poisoning",
+  "title": "Abolish Lock Poisoning",
+  "title_pt": "Abolir o envenenamento de locks",
+  "summary_pt": "O autor critica fortemente o recurso de envenenamento de mutex (lock poisoning) da biblioteca padrão do Rust, no qual um mutex fica marcado como \"envenenado\" após um panic enquanto estava sendo mantido, fazendo com que chamadas futuras a lock() retornem erro. Ele argumenta que o recurso nunca o ajudou e que raramente é tratado corretamente, causando mais problemas do que benefícios. Entre os problemas citados estão: o PoisonError retém a guard do lock, podendo causar deadlocks; panics em um único thread podem transformar o serviço em uma falha lenta e permanente, já que cada lock().unwrap() subsequente também entra em panic; tentativas de recuperação com into_inner() não limpam o flag, gerando efeitos colaterais repetidos. O autor também aponta que nem a própria biblioteca padrão usa o recurso em seus locks internos, e que a ausência de envenenamento em RefCell, além da inconsistência entre LazyLock, OnceLock e Mutex, enfraquece a justificativa do recurso. Como solução, ele sugere que o Rust torne locks não envenenados o padrão, como em std::sync::nonpoison, permitindo que quem realmente quiser use um tipo separado (como Poison<T>) para optar pelo comportamento. Ele também considera que a ideia de fazer lock() entrar em panic em vez de retornar Result seria o pior desfecho, pois tornaria a interrupção lenta a única opção, em vez de permitir que o processo continue ou seja abortado de forma controlada.",
+  "snippet": "written on November 25, 2026 Rust has a curious feature that I don’t think the language would land today, if it was not there for a long time: mutex poisoning. When some Rust code panics while holding a std::sync::Mutex, the mutex is poisoned. That means that any further call to lock() returns a PoisonError. The motivation for this feature is that an object might have some internal invariants",
+  "issue_url": "https://this-week-in-rust.org/blog/2026/11/25/this-week-in-rust-679/",
+  "blurb": null,
+  "date_iso": "2026-11-25",
+  "kind": "news",
+  "section": "Observations/Thoughts",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "error-handling",
+    "concurrency",
+    "reliability"
+   ],
+   "content-type": [
+    "opinion"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "backend"
+   ],
+   "ecosystem-language": [
+    "rust"
+   ],
+   "topic-technology": [
+    "concurrency",
+    "error-handling",
+    "threading",
+    "software-development"
+   ]
+  }
+ },
+ {
+  "id": 22007,
+  "source_id": 8,
+  "url": "https://yoyo-code.com/derive-debug-compile-time-improvements",
+  "title": "Compile time improvements for derive(Debug)",
+  "title_pt": "Melhorias no tempo de compilação para derive(Debug)",
+  "summary_pt": "O artigo relata um esforço para otimizar o desempenho do compilador Rust na geração de implementações de derive(Debug), que se mostram lentas para enums grandes devido à complexidade quadrática dos algoritmos de verificação de match e de borrow checking. Uma primeira tentativa de otimização, que concatenava os nomes das variantes em uma única string e usava o discriminante para indexar, causou regressões em crates como bitflags, que modificam discriminantes via macros. Para contornar isso, a estratégia foi alterada: em vez de usar o discriminante, o código gerado usa um match que retorna um índice inteiro, combinado com uma função auxiliar em std para recuperar o nome. Isso reduziu o custo de borrow checking e permitiu aplicar a otimização a mais cenários. Outra melhoria envolveu usar uma única string concatenada para os nomes de campos em structs, eliminando a necessidade de arrays de constantes e reduzindo o tempo de compilação. No entanto, essa abordagem gerou um aumento no tamanho do binário em plataformas embarcadas, devido ao uso de split UTF-8 e tratamento de erros. O problema foi resolvido com rotinas personalizadas para dividir strings e evitar caminhos de erro pesados. O autor também menciona trabalho futuro para otimizar o algoritmo de verificação de match e reflete sobre as complexidades de macros procedurais, que podem alterar o código original de maneiras imprevisíveis.",
+  "snippet": "Recently, I've helped to optimize compiler performance on derive(Debug) implementation. This ended up being a bit of a rabbit hole, and some of the issues we encountered and tricks we used might be useful for Rust developers in general, so I decided to summarize it here. It all started a while ago with #133945, where @themathas reported that deriving Debug on large enums is slow, and it has quadr",
+  "issue_url": "https://this-week-in-rust.org/blog/2026/11/25/this-week-in-rust-679/",
+  "blurb": null,
+  "date_iso": "2026-11-25",
+  "kind": "news",
+  "section": "Observations/Thoughts",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "optimization",
+    "performance"
+   ],
+   "content-type": [
+    "deep-dive",
+    "case-study"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "backend"
+   ],
+   "ecosystem-language": [
+    "rust"
+   ],
+   "topic-technology": [
+    "performance-optimization",
+    "software-development"
+   ]
+  }
+ },
+ {
+  "id": 22008,
+  "source_id": 8,
+  "url": "https://sgued.fr/blog/semver-trick-wait",
+  "title": "The semver trick is not backwards compatible if you wait",
+  "title_pt": "O truque do semver não é retrocompatível se você esperar",
+  "summary_pt": "O artigo discute o chamado \"semver trick\", uma técnica usada na comunidade Rust para realizar mudanças que quebram compatibilidade sem fragmentar o ecossistema de dependências. A ideia é, ao lançar uma nova versão major (ex.: 0.2.0) que remove itens depreciados, também publicar uma versão antiga (ex.: 0.1.1) que reexporta os itens novos a partir da versão 0.2.0, permitindo que crates que dependem de versões diferentes continuem interoperáveis. Porém, o autor alerta que o truque só funciona se ambas as versões forem publicadas quase simultaneamente. Se houver um intervalo de dias, outros mantenedores podem antecipar a divisão e criar implementações duplicadas (por exemplo, usando feature flags para suportar as duas versões). Quando a versão antiga com o reexport for publicada depois, isso gera conflitos de implementação (implementations duplicadas para o mesmo tipo), quebrando dependências que antes funcionavam. Conclusão: o truque deve ser aplicado no momento exato do lançamento da mudança que quebra compatibilidade; esperar torna o ecossistema vulnerável a quebras.",
+  "snippet": "On November 18, 2026 by Sosthène Guédon The Rust ecosystem relies a lot on semver to make it easy to update dependencies without spending hours each time refactoring the code that uses them. Sometimes, as a library developer, you want to do a breaking change in a small part of your library. There is a way to do a semver-breaking change, while at the same time avoiding",
+  "issue_url": "https://this-week-in-rust.org/blog/2026/11/25/this-week-in-rust-679/",
+  "blurb": null,
+  "date_iso": "2026-11-25",
+  "kind": "news",
+  "section": "Observations/Thoughts",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "content-type": [
+    "deep-dive",
+    "analysis"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "backend"
+   ],
+   "ecosystem-language": [
+    "rust"
+   ],
+   "topic-technology": [
+    "dependency-management",
+    "packaging",
+    "software-development"
+   ]
+  }
+ },
+ {
+  "id": 22009,
+  "source_id": 8,
+  "url": "https://edvong.com/stop-generic-type-explosion",
+  "title": "How to Stop Generic Type Explosion in Rust",
+  "title_pt": "Como Parar a Explosão de Tipos Genéricos em Rust",
+  "summary_pt": "O artigo aborda um problema comum no ecossistema Rust: a tendência de usar tipos genéricos em excesso para codificar toda a estrutura sintática e de estado em parâmetros de tipo, resultando em 'explosão de tipos genéricos'. Isso gera erros de compilação extensos, dificuldades com controle de fluxo (como `if` e loops) e inchaço de monomorfização no backend LLVM, aumentando drasticamente o tempo de compilação. O autor usa como exemplo um matcher de regras com `Rule<T, V, Ctx>`, que exige contêineres recursivos como `And<L, R>` para combinar regras heterogêneas. A solução proposta é aplicar uma abordagem 'estrita na fronteira, plana por dentro': verificar as restrições de tipos na API pública, mas apagar imediatamente os parâmetros genéricos após a validação, convertendo os dados em um tipo homogêneo (como `ExprNode`). Isso é feito com um trait `Erase` que colapsa `Rule<Ctx>` para `Rule<()>`, permitindo que `Matcher` use um `Vec<Rule<()>>` internamente. O resultado é a mesma segurança de tipos sem a complexidade e o custo de compilação da abordagem original.",
+  "snippet": "There is a popular tendency in the Rust ecosystem, often treated as a mark of clever design: stuffing all state and syntax structure into generic type parameters. Many type-heavy designs get carried away with this kind of \"compile-time magic,\" wrapping another layer of generics around the return type on every method call. It feels neat until the compiler spits out dozens of lines of nested type er",
+  "issue_url": "https://this-week-in-rust.org/blog/2026/11/25/this-week-in-rust-679/",
+  "blurb": null,
+  "date_iso": "2026-11-25",
+  "kind": "news",
+  "section": "Observations/Thoughts",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "type-safety",
+    "architecture"
+   ],
+   "content-type": [
+    "tutorial",
+    "best-practices"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "backend"
+   ],
+   "ecosystem-language": [
+    "rust"
+   ],
+   "topic-technology": [
+    "api-design",
+    "software-development"
+   ]
+  }
+ },
+ {
+  "id": 22010,
+  "source_id": 8,
+  "url": "https://kerkour.com/rust-at-proton",
+  "title": "How Proton (Mail / VPN...) are rewriting their cross-platform apps in Rust to reduces costs and improve security for millions of people",
+  "title_pt": "Como a Proton está reescrevendo seus apps em Rust para reduzir custos e aumentar a segurança",
+  "summary_pt": "A Proton, conhecida por serviços como Proton Mail e Proton VPN, anunciou que reescreveu a base tecnológica de seus aplicativos móveis usando Rust. Com isso, os apps Android e iOS passaram a compartilhar cerca de 80% do código. Além do Proton Mail, os aplicativos Proton Pass e Proton Authenticator também são construídos sobre um núcleo comum em Rust, disponível no GitHub. A principal motivação é o princípio \"escreva uma vez, execute em qualquer lugar\": ter um núcleo compartilhado reduz trabalho duplicado, acelera o desenvolvimento e garante consistência entre plataformas. Além disso, Rust traz mais segurança, evitando vulnerabilidades comuns em bibliotecas C antigas, e garante que dados cifrados em um dispositivo possam ser decifrados em outro, mantendo a interoperabilidade. A implementação é organizada em pacotes: o núcleo proton-pass-common contém a lógica de negócio e criptografia, enquanto proton-pass-web usa wasm-bindgen para gerar WebAssembly e proton-pass-mobile usa Mozilla uniffi para gerar bindings Kotlin e Swift. Um exemplo prático é o gerador de senhas, cujo algoritmo fica em um único arquivo Rust. Se houver um bug, basta corrigir esse arquivo e recompilar os apps, em vez de reescrever o algoritmo em várias linguagens. O autor elogia a decisão da Proton, destacando que Rust reduz custos, melhora a segurança e permite entregar produtos melhores com mais velocidade.",
+  "snippet": "Last year, Proton announced the version 7 of their ProtonMail application, built for speed and the future. One thing immediately caught my attention in the release announcement: Behind the scenes, we rewrote our mobile tech stack using Rust. Our Android and iOS apps now share roughly 80% of their code. So, of course, I took a look at their GitHub repositories to see how they are doing it and what",
+  "issue_url": "https://this-week-in-rust.org/blog/2026/11/25/this-week-in-rust-679/",
+  "blurb": null,
+  "date_iso": "2026-11-25",
+  "kind": "news",
+  "section": "Observations/Thoughts",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "security",
+    "encryption",
+    "cost-optimization",
+    "architecture"
+   ],
+   "content-type": [
+    "deep-dive",
+    "case-study"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "frontend"
+   ],
+   "ecosystem-language": [
+    "rust"
+   ],
+   "topic-technology": [
+    "software-development",
+    "system-design"
+   ]
+  }
+ },
+ {
+  "id": 22011,
+  "source_id": 8,
+  "url": "https://www.youtube.com/watch?v=fP2FiYfyzlk",
+  "title": "[video] Rust Release Changelog - 1.100",
+  "title_pt": "Changelog da versão 1.100 do Rust",
+  "summary_pt": "O artigo apresenta um vídeo com o changelog da versão 1.100 da linguagem Rust. A release traz novidades e melhorias para a linguagem, incluindo estabilização de APIs, correções de bugs e aprimoramentos de desempenho. O vídeo detalha as principais mudanças, destacando avanços na biblioteca padrão e na ferramenta de compilação, além de preparar o terreno para futuras evoluções do ecossistema Rust.",
+  "snippet": "[video] Rust Release Changelog - 1.100",
+  "issue_url": "https://this-week-in-rust.org/blog/2026/11/25/this-week-in-rust-679/",
+  "blurb": null,
+  "date_iso": "2026-11-25",
+  "kind": "news",
+  "section": "Observations/Thoughts",
+  "verify_status": "junk",
+  "verify_notes": "Conteúdo é apenas o título do vídeo, sem transcrição/descrição; não há texto real aproveitável",
+  "tags": {
+   "content-type": [
+    "version-release",
+    "video"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "backend"
+   ],
+   "ecosystem-language": [
+    "rust"
+   ],
+   "topic-technology": [
+    "software-development"
+   ]
+  }
+ },
+ {
+  "id": 22012,
+  "source_id": 8,
+  "url": "https://www.youtube.com/watch?v=Hhtdf0bQBks",
+  "title": "[video] From Hardware to Human Interface: Building HID Devices in Rust - Frank Lyaruu",
+  "title_pt": "Do Hardware à Interface Humana: Construindo Dispositivos HID em Rust — Frank Lyaruu",
+  "summary_pt": "Nesta palestra em vídeo, Frank Lyaruu apresenta uma visão prática sobre o desenvolvimento de dispositivos HID (Human Interface Devices) utilizando a linguagem Rust. O autor percorre o caminho que vai do hardware físico à construção da interface que interage com o usuário, mostrando como Rust pode ser usado para criar firmware de dispositivos como teclados, mouses e outros periféricos. A apresentação aborda desde conceitos básicos de comunicação com o host até a implementação de protocolos HID, destacando vantagens da linguagem para segurança e confiabilidade no desenvolvimento embarcado.",
+  "snippet": "[video] From Hardware to Human Interface: Building HID Devices in Rust - Frank Lyaruu",
+  "issue_url": "https://this-week-in-rust.org/blog/2026/11/25/this-week-in-rust-679/",
+  "blurb": null,
+  "date_iso": "2026-11-25",
+  "kind": "news",
+  "section": "Observations/Thoughts",
+  "verify_status": "suspect",
+  "verify_notes": "Conteúdo é apenas o título do vídeo, sem descrição ou transcrição; kind 'news' parece incorreto para um vídeo do YouTube",
+  "tags": {
+   "content-type": [
+    "talk",
+    "video"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "ecosystem-language": [
+    "rust"
+   ],
+   "topic-technology": [
+    "software-development"
+   ]
+  }
+ },
+ {
+  "id": 22013,
+  "source_id": 8,
+  "url": "https://www.youtube.com/watch?v=0M72XNQzkRU",
+  "title": "[video] Tales from the Embedded Rust Frontier - Jonathan Pallant",
+  "title_pt": "Histórias da Fronteira do Rust Embarcado — Jonathan Pallant",
+  "summary_pt": "Nesta palestra em vídeo, Jonathan Pallant compartilha experiências reais e lições aprendidas ao usar Rust no desenvolvimento para sistemas embarcados. O autor explora os desafios típicos dessa área, como gerenciamento de memória, segurança em tempo real e interoperabilidade com hardware, destacando como o Rust oferece garantias de segurança e confiabilidade que são especialmente valiosas nesse contexto. A apresentação também aborda casos práticos, ferramentas e o ecossistema atual do Rust embarcado, servindo como um guia inspirador para quem deseja levar a linguagem para novos territórios no desenvolvimento de software de baixo nível.",
+  "snippet": "[video] Tales from the Embedded Rust Frontier - Jonathan Pallant",
+  "issue_url": "https://this-week-in-rust.org/blog/2026/11/25/this-week-in-rust-679/",
+  "blurb": null,
+  "date_iso": "2026-11-25",
+  "kind": "news",
+  "section": "Observations/Thoughts",
+  "verify_status": "suspect",
+  "verify_notes": "conteúdo é apenas o título do vídeo, sem texto/descrição real; título contém marcador '[video]' (resto de interface); kind 'news' não condiz com conteúdo de vídeo do YouTube",
+  "tags": {
+   "content-type": [
+    "video",
+    "talk"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "backend"
+   ],
+   "ecosystem-language": [
+    "rust"
+   ],
+   "topic-technology": [
+    "software-development"
+   ]
+  }
+ },
+ {
+  "id": 22014,
+  "source_id": 8,
+  "url": "https://netstack.fm/episodes/axum-with-david-pedersen",
+  "title": "[audio] Axum with David Pedersen",
+  "title_pt": "Axum com David Pedersen",
+  "summary_pt": "Neste episódio do Netstack.fm, Glen conversa com David Pedersen, criador do Axum e colaborador de longa data dos ecossistemas Tower e Tokio. Eles exploram a origem do Axum na Embark Studios, como um motor de jogos inspirou os extratores (extractors) e por que David mantém o Axum deliberadamente pequeno. A conversa também aborda a macro debug_handler, as camadas abaixo do Axum, WebSockets e como seria um Tower 1.0 sem poll_ready. Além disso, discutem a evolução do Axum, a integração entre HTTP e gRPC, a manutenção da comunidade, o projeto Topcoat e a relação do Axum com o hyper. O episódio termina com considerações sobre o futuro do Tower e o encerramento do bate-papo.",
+  "snippet": "Show notes Season 2 · Episode 2 – Axum with David Pedersen. In this episode of Netstack.fm, Glen talks with David Pedersen, creator of Axum and long-time contributor to the Tower and Tokio ecosystems. They discuss how Axum started at Embark Studios, why a game engine inspired its extractors, and why David keeps Axum deliberately small. They also dig into the debug_handler macro, the layers below A",
+  "issue_url": "https://this-week-in-rust.org/blog/2026/11/25/this-week-in-rust-679/",
+  "blurb": null,
+  "date_iso": "2026-11-25",
+  "kind": "news",
+  "section": "Observations/Thoughts",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "api-design",
+    "async",
+    "open-source",
+    "architecture"
+   ],
+   "content-type": [
+    "podcast",
+    "interview"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "backend"
+   ],
+   "ecosystem-language": [
+    "rust"
+   ],
+   "framework-library-tool": [
+    "axum"
+   ],
+   "topic-technology": [
+    "web-development",
+    "rest-api",
+    "websockets",
+    "grpc",
+    "middleware",
+    "concurrency"
+   ]
+  }
+ },
+ {
+  "id": 22015,
+  "source_id": 8,
+  "url": "https://rustacean-station.org/episode/david-cabanis",
+  "title": "[audio] Embedded Software with Rust with David Cabanis",
+  "title_pt": "Software Embarcado com Rust: entrevista com David Cabanis",
+  "summary_pt": "Neste episódio do Rustacean FM, Allen Wyma conversa com David Cabanis, autor do livro Embedded Software with Rust. A conversa aborda desenvolvimento bare-metal com Rust, explorando conceitos como ownership aplicado a periféricos de hardware, uso de tipos fortes para segurança e criação de aplicações no_std do zero. David também explica o fluxo de inicialização de um programa Rust embarcado, desde o reset até a função main, e como realizar chamadas entre C e Rust usando FFI (foreign function interfaces). Além disso, o episódio traz dicas práticas para migrar gradualmente um firmware existente em C para Rust, discutindo premissas do FFI, erros, strings e tipos complexos. David fala sobre ferramentas de depuração familiares, o ecossistema de crates para embarcados (PACs, HALs e placa de suporte), e recomenda aprender portando projetos reais de hardware. Também são citados os pré-requisitos do livro, exemplos, máquina virtual de desenvolvimento, placas de baixo custo e o simulador PICSimLab.",
+  "snippet": "Allen Wyma talks with David Cabanis, author of Embedded Software with Rust, about bare-metal Rust, peripheral ownership, no_std applications, and moving existing C firmware toward Rust. Twitter: @rustaceanfm Discord: Rustacean Station Github: @rustacean-station Email: [email protected] Timestamps [@00:00] - Rustacean Station intro [@00:10] - Embedded Software with Rust and the scop",
+  "issue_url": "https://this-week-in-rust.org/blog/2026/11/25/this-week-in-rust-679/",
+  "blurb": null,
+  "date_iso": "2026-11-25",
+  "kind": "news",
+  "section": "Observations/Thoughts",
+  "verify_status": "suspect",
+  "verify_notes": "kind 'news' não condiz com o conteúdo, que é um episódio de podcast; título contém marcador '[audio]' que pode ser considerado sujo; conteúdo inclui elementos de contato/redes sociais (Twitter, Discord, Github, Email) que são partes fixas do programa, mas não comprometem a leitura",
+  "tags": {
+   "content-type": [
+    "podcast",
+    "interview"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "backend"
+   ],
+   "ecosystem-language": [
+    "rust",
+    "c"
+   ],
+   "topic-technology": [
+    "software-development",
+    "system-design"
+   ]
+  }
+ },
+ {
+  "id": 22016,
+  "source_id": 8,
+  "url": "https://cetra3.github.io/blog/state-of-allocators-2026-finally-stabilised",
+  "title": "The State of Allocators in 2026 - Finally Stabilised!",
+  "title_pt": "O Estado dos Alocadores em 2026 — Finalmente Estabilizados!",
+  "summary_pt": "O artigo celebra a estabilização dos alocadores customizados na linguagem Rust, destacando a versão 1.100 como um marco após dez anos de espera. Com a nova API de alocadores, programadores podem controlar onde e como a memória é alocada, indo além do alocador global padrão e alcançando maior paridade com linguagens como C++ e Zig. São apresentados três usos práticos: (1) alocadores do tipo bump, que reservam um grande bloco de memória e fazem alocações sequenciais baratas, permitindo liberar tudo de uma vez — útil para padrões de pico em requisições web ou consultas a banco de dados; (2) alocadores com contabilidade de memória, que rastreiam o total alocado por trechos específicos de código, possibilitando limites, cache com evicção e perfis de heap; e (3) alocadores que controlam a localização física da memória, como alocar primeiro na pilha (estilo SmallVec) para ganhos de desempenho. O autor também apresenta sua crate chamada Thresher, um alocador de contabilidade com callback por limiar, usado em produção para gerar heap profiles em serviços Rust.",
+  "snippet": "The State of Allocators in 2026 - Finally Stabilised! Now that custom allocators are stabilised, what can we do with them? It's only been a couple of months since the last article, and I am pleased to see that, after 10 years of limbo, allocators have finally been stabilised! While it feels like the never type did steal a bit of thunder, rust 1.100 was nonetheless a monumental rel",
+  "issue_url": "https://this-week-in-rust.org/blog/2026/11/25/this-week-in-rust-679/",
+  "blurb": null,
+  "date_iso": "2026-11-25",
+  "kind": "news",
+  "section": "Rust Walkthroughs",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "performance",
+    "optimization"
+   ],
+   "content-type": [
+    "deep-dive",
+    "explainer"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "backend"
+   ],
+   "ecosystem-language": [
+    "rust"
+   ],
+   "topic-technology": [
+    "performance-optimization",
+    "software-development"
+   ]
+  }
+ },
+ {
+  "id": 22017,
+  "source_id": 8,
+  "url": "https://rust-projects-write-an-interpreter.github.io",
+  "title": "Rust Projects - Write an Interpreter - Version 1.0.1",
+  "title_pt": "Projetos Rust: Escreva um Interpretador — Versão 1.0.1",
+  "summary_pt": "Este livro é um guia prático para implementar em Rust a linguagem Lox, criada por Robert Nystrom em seu livro \"Crafting Interpreters\". O material acompanha o desafio de mesmo nome da plataforma CodeCrafters, conduzindo o leitor desde a criação de um scanner simples até tópicos mais avançados, como análise sintática de expressões e execução de comandos. Atualmente, a obra cobre o desafio base e as extensões \"Parsing Expressions\", \"Evaluating Expressions\" e \"Statements & State\". O livro também está disponível em PDF no LeanPub, com modelo de pagamento \"pague quanto quiser\".",
+  "snippet": "This book is a hands-on guide to writing a Rust implementation of Lox, the language invented by Robert Nystrom for his book \"Crafting Interpreters\". The book follows the CodeCrafters challenge of the same name. Readers will start by implementing a simple scanner, moving then to more advanced concepts like parsing expressions and executing statements. The book currently covers the base challenge an",
+  "issue_url": "https://this-week-in-rust.org/blog/2026/11/25/this-week-in-rust-679/",
+  "blurb": null,
+  "date_iso": "2026-11-25",
+  "kind": "news",
+  "section": "Rust Walkthroughs",
+  "verify_status": "suspect",
+  "verify_notes": "Tipo 'news' não condiz com o conteúdo (descrição de livro/projeto); Título menciona versão 1.0.1, mas conteúdo não especifica versão",
+  "tags": {
+   "concept-theme": [
+    "architecture"
+   ],
+   "content-type": [
+    "guide",
+    "tutorial"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "backend"
+   ],
+   "ecosystem-language": [
+    "rust"
+   ],
+   "topic-technology": [
+    "software-development"
+   ]
+  }
+ },
+ {
+  "id": 22018,
+  "source_id": 8,
+  "url": "https://scherzer.dev/Blog/20261120-rsphp-build-tools",
+  "title": "RSPHP Part 2: Build Tools",
+  "title_pt": "RSPHP Parte 2: Ferramentas de Build",
+  "summary_pt": "Neste segundo post sobre o projeto RSPHP, o autor apresenta o crate rsphp-build-tools, que fornece utilitários para o script de build do rsphp-sys. A ideia é facilitar a criação de extensões PHP em Rust, permitindo que desenvolvedores personalizem as bindings do C ABI do PHP. A versão 0.1.3 inclui sete ferramentas: cinco estruturas que implementam o trait ParseCallbacks do bindgen, um iterador para os cabeçalhos C do PHP e um utilitário para executar o comando php-config.",
+  "snippet": "Friday, 20 November 2026 In my last post, I talked about the rsphp-sys crate, which provides Rust bindings for PHP's C ABI for building PHP extensions in Rust. As I mentioned, I fully expect extension developers to override the definition of the rsphp-sys crate to customize their bindings. In order to facilitate those overrides, most of the build logic comes from a separate crate, rsphp-build-tool",
+  "issue_url": "https://this-week-in-rust.org/blog/2026/11/25/this-week-in-rust-679/",
+  "blurb": null,
+  "date_iso": "2026-11-25",
+  "kind": "news",
+  "section": "Rust Walkthroughs",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "developer-productivity",
+    "dev-experience",
+    "type-safety"
+   ],
+   "content-type": [
+    "deep-dive"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "backend"
+   ],
+   "ecosystem-language": [
+    "rust",
+    "php"
+   ],
+   "topic-technology": [
+    "software-development"
+   ]
+  }
+ },
+ {
+  "id": 22019,
+  "source_id": 8,
+  "url": "https://heikoseeberger.de/2026-11-24-rolling-upgrades",
+  "title": "Rolling upgrades in tellus: old code cannot learn a new shape",
+  "title_pt": "Upgrades contínuos no tellus: código antigo não aprende novas formas",
+  "summary_pt": "O artigo mostra como o tellus lida com upgrades contínuos em um cluster, quando nós antigos e novos precisam trocar mensagens durante a substituição gradual dos nós. O problema central é que o código antigo já implantado não pode ser alterado para entender novos formatos de mensagem; portanto, o novo código precisa fazer a ponte nos dois sentidos: converter o formato antigo para o novo ao receber (upcast) e voltar a codificar o formato antigo ao enviar para nós que ainda rodam a versão anterior (downcast). Para isso, cada tipo enviado entre nós implementa a trait Schema, que carrega uma versão de schema junto com cada payload; quando um tipo muda, sua versão é incrementada e o código novo usa a versão anunciada pelo peer para decidir como codificar ou decodificar. O exemplo concreto é o tipo Pong, que ganhou um novo campo opcional na versão 2 da aplicação demo. A versão antiga do Pong é mantida apenas para compatibilidade, e o encode verifica se o peer roda uma versão anterior; nesse caso, envia o formato antigo (versão 0). O decode faz o caminho inverso, preenchendo o novo campo com None quando recebe o formato antigo. O artigo também explica por que Vec<Pong> não pode ser Schema automaticamente: a vector inteira seria codificada com uma única versão, e as versões dos elementos nunca seriam verificadas. Por fim, a solução é testada no demo com um agente de caos que atualiza e faz downgrade dos cinco nós, verificando o cluster em todas as etapas do rollout.",
+  "snippet": "In the announcement of tellus 0.6 I promised to show how rolling upgrades look in code. The problem is not special to actors. Whenever an old and a new version of a program exchange data, one of them sees a shape it was not built for. Let’s look at how tellus deals with that, with the cluster demo as our example. The work started with an issue by cosmir17, who asked what happens to a rolling upgra",
+  "issue_url": "https://this-week-in-rust.org/blog/2026/11/25/this-week-in-rust-679/",
+  "blurb": null,
+  "date_iso": "2026-11-25",
+  "kind": "news",
+  "section": "Rust Walkthroughs",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "concept-theme": [
+    "reliability",
+    "type-safety",
+    "architecture",
+    "api-design"
+   ],
+   "content-type": [
+    "deep-dive",
+    "explainer"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "backend"
+   ],
+   "ecosystem-language": [
+    "rust"
+   ],
+   "topic-technology": [
+    "distributed-systems",
+    "serialization",
+    "api-versioning"
+   ]
+  }
+ },
+ {
+  "id": 22020,
+  "source_id": 8,
+  "url": "https://www.buildyourownpaint.com/en",
+  "title": "Build your own Paint",
+  "title_pt": "Construa seu próprio Paint",
+  "summary_pt": "Este tutorial ensina, passo a passo, a criar um pequeno aplicativo de desenho em Rust, no espírito do Paint. Você começa com um projeto cargo new vazio e, ao longo de 12 capítulos, escreve cerca de 800 linhas de código usando apenas a dependência minifb para abrir a janela e capturar mouse e teclado. Toda a lógica de rasterização — desenhar retângulos, círculos e linhas, selecionar e mover formas, escolher cores e exportar a imagem — é feita do zero, com explicações sobre como as formas viram pixels na tela. O texto assume que você conhece apenas os primeiros capítulos do Rust Book, e os conceitos mais avançados da linguagem, como enums, traits, borrowing e módulos, são introduzidos conforme necessário. Cada capítulo termina com um programa compilável e visível, e o repositório no GitHub oferece tags para acompanhar cada etapa. Ao final, você tem um editor simples e funcional, além de sugestões para continuar evoluindo o projeto — por exemplo, adicionar pincel, balde de tinta ou botão de desfazer.",
+  "snippet": "Welcome! This tutorial shows you how to write a small drawing app in Rust, in the spirit of Paint. We open a window, draw rectangles, circles and lines with the mouse, move them around, pick a color, and export the drawing as an image. We start from an empty cargo new. By the end, you have about 800 lines of Rust spread over fifteen or so files, with a single dependency: minifb, which opens the w",
+  "issue_url": "https://this-week-in-rust.org/blog/2026/11/25/this-week-in-rust-679/",
+  "blurb": null,
+  "date_iso": "2026-11-25",
+  "kind": "news",
+  "section": "Rust Walkthroughs",
+  "verify_status": "suspect",
+  "verify_notes": "kind 'news' parece incorreto: o conteúdo é um tutorial/guia, não uma notícia.",
+  "tags": {
+   "concept-theme": [
+    "ui",
+    "architecture",
+    "error-handling"
+   ],
+   "content-type": [
+    "tutorial"
+   ],
+   "difficulty": [
+    "for-beginners"
+   ],
+   "domain": [
+    "frontend"
+   ],
+   "ecosystem-language": [
+    "rust"
+   ],
+   "topic-technology": [
+    "software-development"
+   ]
+  }
+ },
+ {
+  "id": 22021,
+  "source_id": 8,
+  "url": "https://www.youtube.com/watch?v=KznFsjlPCbo",
+  "title": "[video] Nine Rules for Compile-Time Work with const fn by Carl Kadie",
+  "title_pt": "Nove Regras para Trabalho em Tempo de Compilação com const fn",
+  "summary_pt": "Neste vídeo, Carl Kadie apresenta nove regras práticas para usar `const fn` em Rust, permitindo que funções sejam avaliadas em tempo de compilação. O autor explora como escrever código mais eficiente e seguro, aproveitando a capacidade de executar cálculos durante a compilação, o que pode reduzir o trabalho em tempo de execução e melhorar o desempenho. As regras abrangem desde a compreensão das limitações das funções const até padrões para estruturar código que funciona tanto em tempo de compilação quanto em tempo de execução. O vídeo é voltado para desenvolvedores Rust que desejam aprofundar seus conhecimentos em metaprogramação e otimização, com exemplos práticos e dicas de boas práticas.",
+  "snippet": "[video] Nine Rules for Compile-Time Work with const fn by Carl Kadie",
+  "issue_url": "https://this-week-in-rust.org/blog/2026/11/25/this-week-in-rust-679/",
+  "blurb": null,
+  "date_iso": "2026-11-25",
+  "kind": "news",
+  "section": "Rust Walkthroughs",
+  "verify_status": "junk",
+  "verify_notes": "Conteúdo é apenas o título repetido, sem texto real ou descrição; Página é um vídeo do YouTube, não uma notícia (kind incorreto)",
+  "tags": {
+   "concept-theme": [
+    "performance",
+    "optimization"
+   ],
+   "content-type": [
+    "talk",
+    "video"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "backend"
+   ],
+   "ecosystem-language": [
+    "rust"
+   ],
+   "topic-technology": [
+    "software-development"
+   ]
+  }
+ },
+ {
+  "id": 22022,
+  "source_id": 8,
+  "url": "https://www.youtube.com/watch?v=zbglU7Ppv10",
+  "title": "[video] [series] Repository Pattern in Rust: async fn in traits, dyn vs generics, and the Send problem (Axum + SQLx)",
+  "title_pt": "Padrão Repository em Rust: async fn, dyn vs genéricos e o problema do Send (Axum + SQLx)",
+  "summary_pt": "Esta série em vídeo aborda a implementação do padrão Repository em Rust, usando Axum e SQLx como base. O conteúdo explora como lidar com funções assíncronas dentro de traits, um desafio clássico na linguagem, além de comparar as abordagens com despacho dinâmico (dyn) e genéricos (static dispatch). Outro ponto central é o problema do trait Send em contextos assíncronos, que envolve garantir que objetos compartilhados entre tarefas sejam seguros e eficientes. A série oferece orientações práticas para estruturar repositórios, equilibrar flexibilidade e desempenho, e integrar esses padrões com frameworks web e bancos de dados SQLx no ecossistema Rust.",
+  "snippet": "[video] [series] Repository Pattern in Rust: async fn in traits, dyn vs generics, and the Send problem (Axum + SQLx)",
+  "issue_url": "https://this-week-in-rust.org/blog/2026/11/25/this-week-in-rust-679/",
+  "blurb": null,
+  "date_iso": "2026-11-25",
+  "kind": "news",
+  "section": "Rust Walkthroughs",
+  "verify_status": "junk",
+  "verify_notes": "Registro contém apenas o título do vídeo, sem descrição, transcrição ou qualquer conteúdo textual real.",
+  "tags": {
+   "concept-theme": [
+    "design-patterns",
+    "async",
+    "type-safety",
+    "concurrency"
+   ],
+   "content-type": [
+    "tutorial",
+    "video"
+   ],
+   "difficulty": [
+    "advanced"
+   ],
+   "domain": [
+    "backend"
+   ],
+   "ecosystem-language": [
+    "rust"
+   ],
+   "framework-library-tool": [
+    "axum"
+   ],
+   "topic-technology": [
+    "async-await",
+    "concurrency",
+    "web-development",
+    "database-access",
+    "software-development"
+   ]
+  }
+ },
+ {
+  "id": 22023,
+  "source_id": 8,
+  "url": "https://www.youtube.com/watch?v=Yn4i4tRhOdU",
+  "title": "[video] Code Safari: uutils cp",
+  "title_pt": "[vídeo] Code Safari: uutils cp",
+  "summary_pt": "O vídeo apresenta um Code Safari, ou seja, uma exploração guiada do código-fonte da implementação do comando `cp` na suíte uutils, que é um conjunto de utilitários Unix reescritos em Rust. Durante a apresentação, o foco é entender como essa versão do comando de cópia é estruturada, quais decisões de design e técnicas de Rust são aplicadas e como ela se compara ao comportamento do comando tradicional do Unix. O conteúdo é voltado para desenvolvedores interessados em Rust, sistemas operacionais e implementação de ferramentas de linha de comando.",
+  "snippet": "[video] Code Safari: uutils cp",
+  "issue_url": "https://this-week-in-rust.org/blog/2026/11/25/this-week-in-rust-679/",
+  "blurb": null,
+  "date_iso": "2026-11-25",
+  "kind": "news",
+  "section": "Rust Walkthroughs",
+  "verify_status": "suspect",
+  "verify_notes": "Conteúdo é apenas o título repetido, sem corpo/descrição da página; kind 'news' parece inadequado para um vídeo do YouTube; Título contém prefixo '[video]', possivelmente resto de marcação do agregador",
+  "tags": {
+   "concept-theme": [
+    "open-source",
+    "type-safety",
+    "reliability",
+    "performance"
+   ],
+   "content-type": [
+    "video"
+   ],
+   "difficulty": [
+    "intermediate"
+   ],
+   "domain": [
+    "backend"
+   ],
+   "ecosystem-language": [
+    "rust"
+   ],
+   "topic-technology": [
+    "software-development"
+   ]
+  }
+ },
+ {
+  "id": 22024,
+  "source_id": 8,
+  "url": "https://crates.io/crates/i_overlay",
+  "title": "i_overlay",
+  "title_pt": "i_overlay: operações geométricas com inteiros",
+  "summary_pt": "O destaque da semana é o crate i_overlay, que oferece um conjunto de operações geométricas sobre polígonos e cadeias de segmentos de reta, executadas inteiramente com matemática de inteiros. Isso permite realizar cálculos geométricos sem depender de ponto flutuante, o que pode trazer benefícios de precisão e desempenho em determinados contextos. A biblioteca é voltada para quem precisa de manipulação geométrica robusta e previsível, típica de aplicações como processamento de mapas, gráficos e jogos.",
+  "snippet": null,
+  "issue_url": "https://this-week-in-rust.org/blog/2026/11/25/this-week-in-rust-679/",
+  "blurb": "This week's crate is i_overlay, providing a set of geometrical operations on polygons and line segment chains running completely on integer math.",
+  "date_iso": "2026-11-25",
+  "kind": "tool",
+  "section": "Crate of the Week",
+  "verify_status": "ok",
+  "verify_notes": null,
+  "tags": {
+   "content-type": [
+    "library-release"
+   ],
+   "difficulty": [
+    "for-beginners"
+   ],
+   "ecosystem-language": [
+    "rust"
+   ],
+   "topic-technology": [
+    "software-development"
+   ]
+  }
+ },
+ {
+  "id": 22025,
+  "source_id": 8,
+  "url": "https://github.com/panstromek/rustc-perf/blob/e92593db8a8ea7c091e1b6e673349297dd4d6f23/triage/2026/2026-11-23.md",
+  "title": "Rust Compiler Performance Triage",
+  "title_pt": "Triagem de desempenho do compilador Rust",
+  "summary_pt": "A semana foi bastante positiva para o desempenho do compilador Rust, com várias melhorias no sistema de tipos, na geração de código, nas informações de depuração e na codificação. A maior melhoria veio, surpreendentemente, de uma atualização no submódulo do Cargo, que recentemente alterou o nível padrão de debuginfo para o perfil de desenvolvimento, usando apenas tabelas de linhas (line-tables-only). Isso resultou em ganhos significativos de desempenho, reduzindo o tempo de compilação e o tamanho dos artefatos.",
+  "snippet": null,
+  "issue_url": "https://this-week-in-rust.org/blog/2026/11/25/this-week-in-rust-679/",
+  "blurb": "Very positive week with many improvements in the type system, codegen, debuginfo and encoding. The biggest improvement came perhaps surprisingly from Cargo submodule update, because Cargo recently changed the default debuginfo level for dev profile to line-tables-only.",
+  "date_iso": "2026-11-25",
+  "kind": "news",
+  "section": "Rust Compiler Performance Triage",
+  "verify_status": "junk",
+  "verify_notes": "Conteúdo é mensagem de erro/indisponibilidade do GitHub (The Unicorns have taken over), não o relatório real de triagem de performance.; Texto não corresponde ao título nem ao blurb do agregador; é uma página de falha do serviço.",
+  "tags": {
+   "concept-theme": [
+    "performance",
+    "optimization"
+   ],
+   "content-type": [
+    "incident-report"
+   ],
+   "domain": [
+    "backend"
+   ],
+   "ecosystem-language": [
+    "rust"
+   ],
+   "topic-technology": [
+    "disaster-recovery",
+    "high-availability",
+    "fault-tolerance"
+   ]
+  }
  }
 ]

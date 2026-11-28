@@ -1,33 +1,33 @@
 {
  "schemaVersion": 1,
- "generatedAt": "2026-11-27T08:06:14.192Z",
+ "generatedAt": "2026-11-28T08:05:22.632Z",
  "documentation": "/api/v1/README.md",
  "schema": "/api/v1/schema.json",
  "totals": {
-  "articles": 21683,
-  "summaries": 21682,
-  "classified": 21683,
+  "articles": 21739,
+  "summaries": 21738,
+  "classified": 21739,
   "byKind": {
-   "news": 12981,
-   "tool": 4929,
-   "release": 3114,
+   "news": 13015,
+   "tool": 4940,
+   "release": 3125,
    "unknown": 659
   }
  },
  "dates": {
   "min": "2022-10-06",
-  "max": "2026-11-26"
+  "max": "2026-11-27"
  },
  "sources": [
   {
    "id": 6,
    "name": "Golang Weekly",
-   "count": 5380
+   "count": 5402
   },
   {
    "id": 9,
    "name": "Superhuman",
-   "count": 5062
+   "count": 5070
   },
   {
    "id": 8,
@@ -42,7 +42,7 @@
   {
    "id": 10,
    "name": "llmnews.ai",
-   "count": 1409
+   "count": 1417
   },
   {
    "id": 3,
@@ -55,19 +55,19 @@
    "count": 942
   },
   {
+   "id": 4,
+   "name": "React Status",
+   "count": 840
+  },
+  {
    "id": 1,
    "name": "Node Weekly",
    "count": 826
   },
   {
-   "id": 4,
-   "name": "React Status",
-   "count": 824
-  },
-  {
    "id": 7,
    "name": "The Rundown",
-   "count": 419
+   "count": 421
   },
   {
    "id": 11,
@@ -81,27 +81,27 @@
    "tags": [
     {
      "tag": "backend",
-     "count": 7878
+     "count": 7901
     },
     {
      "tag": "ai-general",
-     "count": 6283
+     "count": 6295
     },
     {
      "tag": "frontend",
-     "count": 3516
+     "count": 3533
     },
     {
      "tag": "llm-models",
-     "count": 2462
+     "count": 2471
     },
     {
      "tag": "nodejs",
-     "count": 1431
+     "count": 1433
     },
     {
      "tag": "reactjs",
-     "count": 882
+     "count": 895
     },
     {
      "tag": "local-llm",
@@ -118,19 +118,19 @@
    "tags": [
     {
      "tag": "tutorial",
-     "count": 2591
+     "count": 2595
     },
     {
      "tag": "news",
-     "count": 2556
+     "count": 2564
     },
     {
      "tag": "release-announcement",
-     "count": 2170
+     "count": 2172
     },
     {
      "tag": "deep-dive",
-     "count": 2123
+     "count": 2132
     },
     {
      "tag": "product-launch",
@@ -138,27 +138,27 @@
     },
     {
      "tag": "announcement",
-     "count": 2040
+     "count": 2045
     },
     {
      "tag": "analysis",
-     "count": 1708
+     "count": 1713
     },
     {
      "tag": "version-release",
-     "count": 1695
+     "count": 1707
     },
     {
      "tag": "how-to",
-     "count": 1226
+     "count": 1228
     },
     {
      "tag": "tool-release",
-     "count": 1165
+     "count": 1172
     },
     {
      "tag": "guide",
-     "count": 1164
+     "count": 1165
     },
     {
      "tag": "tooling",
@@ -166,27 +166,27 @@
     },
     {
      "tag": "opinion",
-     "count": 1064
+     "count": 1065
     },
     {
      "tag": "explainer",
-     "count": 817
+     "count": 818
     },
     {
      "tag": "library-release",
-     "count": 809
+     "count": 817
     },
     {
      "tag": "showcase",
-     "count": 739
+     "count": 741
     },
     {
      "tag": "project-spotlight",
-     "count": 511
+     "count": 512
     },
     {
      "tag": "case-study",
-     "count": 385
+     "count": 387
     },
     {
      "tag": "getting-started",
@@ -198,7 +198,7 @@
     },
     {
      "tag": "reference",
-     "count": 301
+     "count": 302
     },
     {
      "tag": "commentary",
@@ -210,15 +210,15 @@
     },
     {
      "tag": "newsletter-roundup",
-     "count": 291
+     "count": 292
     },
     {
      "tag": "benchmark",
-     "count": 277
+     "count": 279
     },
     {
      "tag": "tips-and-tricks",
-     "count": 259
+     "count": 260
     },
     {
      "tag": "documentation",
@@ -238,7 +238,7 @@
     },
     {
      "tag": "paper-summary",
-     "count": 176
+     "count": 177
     },
     {
      "tag": "video",
@@ -250,7 +250,7 @@
     },
     {
      "tag": "comparison",
-     "count": 158
+     "count": 159
     },
     {
      "tag": "show-and-tell",
@@ -266,15 +266,15 @@
     },
     {
      "tag": "retrospective",
-     "count": 124
+     "count": 126
     },
     {
      "tag": "curated-list",
-     "count": 109
+     "count": 110
     },
     {
      "tag": "incident-report",
-     "count": 109
+     "count": 110
     },
     {
      "tag": "conference-talk",
@@ -282,7 +282,7 @@
     },
     {
      "tag": "hot-take",
-     "count": 89
+     "count": 91
     },
     {
      "tag": "research-paper",
@@ -298,7 +298,7 @@
     },
     {
      "tag": "walkthrough",
-     "count": 68
+     "count": 69
     },
     {
      "tag": "podcast",
@@ -314,7 +314,7 @@
     },
     {
      "tag": "roadmap",
-     "count": 60
+     "count": 61
     },
     {
      "tag": "survey-results",
@@ -322,7 +322,7 @@
     },
     {
      "tag": "vulnerability-disclosure",
-     "count": 54
+     "count": 56
     },
     {
      "tag": "deprecation-notice",
@@ -411,27 +411,27 @@
    "tags": [
     {
      "tag": "software-development",
-     "count": 8266
+     "count": 8284
     },
     {
      "tag": "generative-ai",
-     "count": 1961
+     "count": 1967
     },
     {
      "tag": "ai-agents",
-     "count": 1937
+     "count": 1943
     },
     {
      "tag": "javascript",
-     "count": 1846
+     "count": 1851
     },
     {
      "tag": "system-design",
-     "count": 1384
+     "count": 1386
     },
     {
      "tag": "web-development",
-     "count": 1247
+     "count": 1252
     },
     {
      "tag": "agentic-ai",
@@ -439,11 +439,11 @@
     },
     {
      "tag": "llm-models",
-     "count": 1174
+     "count": 1179
     },
     {
      "tag": "ai-in-business",
-     "count": 1129
+     "count": 1130
     },
     {
      "tag": "nodejs",
@@ -451,11 +451,11 @@
     },
     {
      "tag": "performance-optimization",
-     "count": 1075
+     "count": 1083
     },
     {
      "tag": "react",
-     "count": 861
+     "count": 871
     },
     {
      "tag": "ai-adoption",
@@ -463,39 +463,39 @@
     },
     {
      "tag": "robotics",
-     "count": 813
+     "count": 814
     },
     {
      "tag": "relational-databases",
-     "count": 810
+     "count": 812
     },
     {
      "tag": "sql",
-     "count": 797
+     "count": 799
     },
     {
      "tag": "typescript",
-     "count": 747
+     "count": 749
     },
     {
      "tag": "css",
-     "count": 645
+     "count": 646
     },
     {
      "tag": "databases",
-     "count": 634
+     "count": 637
     },
     {
      "tag": "tool-calling",
-     "count": 585
+     "count": 586
     },
     {
      "tag": "ai-safety",
-     "count": 560
+     "count": 562
     },
     {
      "tag": "frontier-models",
-     "count": 544
+     "count": 549
     },
     {
      "tag": "computer-vision",
@@ -507,23 +507,23 @@
     },
     {
      "tag": "performance-tuning",
-     "count": 479
+     "count": 480
     },
     {
      "tag": "ai-ethics",
-     "count": 469
+     "count": 471
     },
     {
      "tag": "ai-research",
-     "count": 462
+     "count": 464
+    },
+    {
+     "tag": "ai-infrastructure",
+     "count": 418
     },
     {
      "tag": "automation",
      "count": 418
-    },
-    {
-     "tag": "ai-infrastructure",
-     "count": 417
     },
     {
      "tag": "image-generation",
@@ -531,11 +531,11 @@
     },
     {
      "tag": "cli-tools",
-     "count": 407
+     "count": 410
     },
     {
      "tag": "distributed-systems",
-     "count": 404
+     "count": 405
     },
     {
      "tag": "package-management",
@@ -543,11 +543,11 @@
     },
     {
      "tag": "prompt-engineering",
-     "count": 387
+     "count": 389
     },
     {
      "tag": "machine-learning",
-     "count": 373
+     "count": 374
     },
     {
      "tag": "html",
@@ -555,31 +555,31 @@
     },
     {
      "tag": "mcp",
-     "count": 344
+     "count": 346
     },
     {
      "tag": "concurrency",
-     "count": 338
+     "count": 339
     },
     {
      "tag": "ai-policy",
-     "count": 333
+     "count": 335
     },
     {
      "tag": "web-standards",
-     "count": 329
+     "count": 331
     },
     {
      "tag": "ai-hardware",
-     "count": 326
+     "count": 327
     },
     {
      "tag": "ai-regulation",
-     "count": 324
+     "count": 326
     },
     {
      "tag": "accessibility",
-     "count": 321
+     "count": 322
     },
     {
      "tag": "model-release",
@@ -602,16 +602,16 @@
      "count": 291
     },
     {
+     "tag": "component-libraries",
+     "count": 274
+    },
+    {
      "tag": "api-design",
-     "count": 272
+     "count": 273
     },
     {
      "tag": "ai-funding",
-     "count": 270
-    },
-    {
-     "tag": "component-libraries",
-     "count": 270
+     "count": 271
     },
     {
      "tag": "edge-ai",
@@ -619,14 +619,14 @@
     },
     {
      "tag": "autonomous-vehicles",
-     "count": 268
-    },
-    {
-     "tag": "ai-startups",
-     "count": 266
+     "count": 269
     },
     {
      "tag": "ci-cd",
+     "count": 267
+    },
+    {
+     "tag": "ai-startups",
      "count": 266
     },
     {
@@ -635,14 +635,14 @@
     },
     {
      "tag": "web-apis",
-     "count": 237
-    },
-    {
-     "tag": "agent-orchestration",
-     "count": 235
+     "count": 239
     },
     {
      "tag": "gpu",
+     "count": 236
+    },
+    {
+     "tag": "agent-orchestration",
      "count": 235
     },
     {
@@ -655,23 +655,23 @@
     },
     {
      "tag": "model-capabilities",
-     "count": 228
+     "count": 231
     },
     {
      "tag": "supply-chain-security",
-     "count": 227
+     "count": 229
+    },
+    {
+     "tag": "code-models",
+     "count": 223
     },
     {
      "tag": "ai-benchmarks",
      "count": 222
     },
     {
-     "tag": "code-models",
-     "count": 221
-    },
-    {
      "tag": "error-handling",
-     "count": 220
+     "count": 222
     },
     {
      "tag": "browser-compatibility",
@@ -691,11 +691,11 @@
     },
     {
      "tag": "authentication",
-     "count": 188
+     "count": 189
     },
     {
      "tag": "observability",
-     "count": 187
+     "count": 188
     },
     {
      "tag": "serialization",
@@ -703,7 +703,7 @@
     },
     {
      "tag": "data-analysis",
-     "count": 182
+     "count": 183
     },
     {
      "tag": "foundation-models",
@@ -715,7 +715,7 @@
     },
     {
      "tag": "webassembly",
-     "count": 163
+     "count": 165
     },
     {
      "tag": "open-weights",
@@ -735,7 +735,7 @@
     },
     {
      "tag": "serverless",
-     "count": 149
+     "count": 150
     },
     {
      "tag": "data-visualization",
@@ -750,6 +750,10 @@
      "count": 143
     },
     {
+     "tag": "reasoning-models",
+     "count": 143
+    },
+    {
      "tag": "event-driven-architecture",
      "count": 142
     },
@@ -758,8 +762,8 @@
      "count": 142
     },
     {
-     "tag": "reasoning-models",
-     "count": 142
+     "tag": "caching",
+     "count": 138
     },
     {
      "tag": "speech-to-text",
@@ -774,10 +778,6 @@
      "count": 136
     },
     {
-     "tag": "caching",
-     "count": 136
-    },
-    {
      "tag": "datasets",
      "count": 136
     },
@@ -786,12 +786,16 @@
      "count": 136
     },
     {
-     "tag": "design-systems",
-     "count": 134
+     "tag": "ai-chips",
+     "count": 135
     },
     {
-     "tag": "ai-chips",
-     "count": 133
+     "tag": "design-systems",
+     "count": 135
+    },
+    {
+     "tag": "privacy-first-ai",
+     "count": 134
     },
     {
      "tag": "inference-optimization",
@@ -802,8 +806,8 @@
      "count": 132
     },
     {
-     "tag": "privacy-first-ai",
-     "count": 132
+     "tag": "animations",
+     "count": 129
     },
     {
      "tag": "kubernetes",
@@ -814,11 +818,11 @@
      "count": 129
     },
     {
-     "tag": "animations",
-     "count": 128
+     "tag": "bundling",
+     "count": 124
     },
     {
-     "tag": "bundling",
+     "tag": "docker",
      "count": 124
     },
     {
@@ -827,10 +831,6 @@
     },
     {
      "tag": "async-await",
-     "count": 122
-    },
-    {
-     "tag": "docker",
      "count": 122
     },
     {
@@ -854,7 +854,15 @@
      "count": 116
     },
     {
+     "tag": "state-management",
+     "count": 115
+    },
+    {
      "tag": "data-modeling",
+     "count": 113
+    },
+    {
+     "tag": "responsive-design",
      "count": 113
     },
     {
@@ -862,35 +870,35 @@
      "count": 113
     },
     {
-     "tag": "responsive-design",
-     "count": 112
-    },
-    {
-     "tag": "state-management",
-     "count": 112
+     "tag": "esm",
+     "count": 111
     },
     {
      "tag": "database-migrations",
      "count": 110
     },
     {
-     "tag": "esm",
-     "count": 110
-    },
-    {
      "tag": "deployment",
-     "count": 109
+     "count": 110
     },
     {
      "tag": "model-safety",
      "count": 109
     },
     {
+     "tag": "react-native",
+     "count": 106
+    },
+    {
+     "tag": "proprietary-models",
+     "count": 105
+    },
+    {
      "tag": "indexing",
      "count": 104
     },
     {
-     "tag": "proprietary-models",
+     "tag": "ssr",
      "count": 104
     },
     {
@@ -906,24 +914,20 @@
      "count": 103
     },
     {
-     "tag": "react-native",
-     "count": 103
-    },
-    {
-     "tag": "ssr",
-     "count": 103
-    },
-    {
      "tag": "agi",
      "count": 100
     },
     {
      "tag": "dom",
-     "count": 97
+     "count": 99
     },
     {
      "tag": "reinforcement-learning",
      "count": 97
+    },
+    {
+     "tag": "containers",
+     "count": 93
     },
     {
      "tag": "authorization",
@@ -932,10 +936,6 @@
     {
      "tag": "encryption",
      "count": 92
-    },
-    {
-     "tag": "containers",
-     "count": 91
     },
     {
      "tag": "neural-networks",
@@ -990,12 +990,12 @@
      "count": 75
     },
     {
-     "tag": "transformers",
+     "tag": "data-fetching",
      "count": 74
     },
     {
-     "tag": "data-fetching",
-     "count": 73
+     "tag": "transformers",
+     "count": 74
     },
     {
      "tag": "edge-deployment",
@@ -1026,6 +1026,10 @@
      "count": 66
     },
     {
+     "tag": "logging",
+     "count": 65
+    },
+    {
      "tag": "middleware",
      "count": 65
     },
@@ -1043,10 +1047,6 @@
     },
     {
      "tag": "edge-runtime",
-     "count": 64
-    },
-    {
-     "tag": "logging",
      "count": 64
     },
     {
@@ -1126,16 +1126,16 @@
      "count": 58
     },
     {
+     "tag": "connection-pooling",
+     "count": 57
+    },
+    {
      "tag": "data-validation",
      "count": 57
     },
     {
      "tag": "embeddings",
      "count": 57
-    },
-    {
-     "tag": "connection-pooling",
-     "count": 56
     },
     {
      "tag": "anomaly-detection",
@@ -1182,6 +1182,10 @@
      "count": 50
     },
     {
+     "tag": "react-19",
+     "count": 50
+    },
+    {
      "tag": "vector-database",
      "count": 50
     },
@@ -1191,10 +1195,6 @@
     },
     {
      "tag": "grpc",
-     "count": 49
-    },
-    {
-     "tag": "react-19",
      "count": 49
     },
     {
@@ -1211,6 +1211,10 @@
     },
     {
      "tag": "metrics",
+     "count": 45
+    },
+    {
+     "tag": "spa",
      "count": 45
     },
     {
@@ -1234,7 +1238,7 @@
      "count": 44
     },
     {
-     "tag": "spa",
+     "tag": "theming",
      "count": 44
     },
     {
@@ -1247,10 +1251,6 @@
     },
     {
      "tag": "nosql",
-     "count": 43
-    },
-    {
-     "tag": "theming",
      "count": 43
     },
     {
@@ -1278,6 +1278,10 @@
      "count": 40
     },
     {
+     "tag": "key-value-stores",
+     "count": 40
+    },
+    {
      "tag": "keyboard-navigation",
      "count": 40
     },
@@ -1288,10 +1292,6 @@
     {
      "tag": "npm-scripts",
      "count": 40
-    },
-    {
-     "tag": "key-value-stores",
-     "count": 39
     },
     {
      "tag": "model-context-protocol",
@@ -1334,8 +1334,16 @@
      "count": 37
     },
     {
+     "tag": "jailbreaks",
+     "count": 37
+    },
+    {
      "tag": "numerical-computing",
      "count": 37
+    },
+    {
+     "tag": "component-composition",
+     "count": 36
     },
     {
      "tag": "custom-elements",
@@ -1366,14 +1374,6 @@
      "count": 35
     },
     {
-     "tag": "component-composition",
-     "count": 35
-    },
-    {
-     "tag": "jailbreaks",
-     "count": 35
-    },
-    {
      "tag": "modules",
      "count": 35
     },
@@ -1398,6 +1398,10 @@
      "count": 34
     },
     {
+     "tag": "forms",
+     "count": 33
+    },
+    {
      "tag": "model-leaderboards",
      "count": 33
     },
@@ -1410,15 +1414,15 @@
      "count": 32
     },
     {
-     "tag": "forms",
-     "count": 32
-    },
-    {
      "tag": "pretraining",
      "count": 32
     },
     {
      "tag": "task-queues",
+     "count": 32
+    },
+    {
+     "tag": "testing-react",
      "count": 32
     },
     {
@@ -1430,8 +1434,8 @@
      "count": 31
     },
     {
-     "tag": "testing-react",
-     "count": 31
+     "tag": "component-testing",
+     "count": 30
     },
     {
      "tag": "css-grid",
@@ -1468,10 +1472,6 @@
     {
      "tag": "validation",
      "count": 29
-    },
-    {
-     "tag": "component-testing",
-     "count": 28
     },
     {
      "tag": "dependency-injection",
@@ -1518,16 +1518,16 @@
      "count": 25
     },
     {
+     "tag": "agentops",
+     "count": 25
+    },
+    {
      "tag": "openai-compatible-api",
      "count": 25
     },
     {
      "tag": "retries",
      "count": 25
-    },
-    {
-     "tag": "agentops",
-     "count": 24
     },
     {
      "tag": "cache-invalidation",
@@ -1790,6 +1790,10 @@
      "count": 13
     },
     {
+     "tag": "openapi",
+     "count": 13
+    },
+    {
      "tag": "react-18",
      "count": 13
     },
@@ -1811,10 +1815,6 @@
     },
     {
      "tag": "media-queries",
-     "count": 12
-    },
-    {
-     "tag": "openapi",
      "count": 12
     },
     {
@@ -2070,6 +2070,10 @@
      "count": 5
     },
     {
+     "tag": "usetransition",
+     "count": 5
+    },
+    {
      "tag": "batch-inference",
      "count": 4
     },
@@ -2115,10 +2119,6 @@
     },
     {
      "tag": "usestate",
-     "count": 4
-    },
-    {
-     "tag": "usetransition",
      "count": 4
     },
     {
@@ -2388,27 +2388,27 @@
    "tags": [
     {
      "tag": "intermediate",
-     "count": 7625
+     "count": 7637
     },
     {
      "tag": "advanced",
-     "count": 3217
+     "count": 3230
     },
     {
      "tag": "all-levels",
-     "count": 2952
+     "count": 2961
     },
     {
      "tag": "beginner",
-     "count": 2597
+     "count": 2598
     },
     {
      "tag": "for-practitioners",
-     "count": 1207
+     "count": 1219
     },
     {
      "tag": "expert",
-     "count": 1108
+     "count": 1109
     },
     {
      "tag": "for-beginners",
@@ -2437,31 +2437,31 @@
    "tags": [
     {
      "tag": "go",
-     "count": 4325
+     "count": 4341
     },
     {
      "tag": "rust",
-     "count": 3625
+     "count": 3626
     },
     {
      "tag": "javascript",
-     "count": 3076
+     "count": 3094
     },
     {
      "tag": "nodejs",
-     "count": 1154
+     "count": 1156
     },
     {
      "tag": "typescript",
-     "count": 1067
+     "count": 1073
     },
     {
      "tag": "sql",
-     "count": 942
+     "count": 943
     },
     {
      "tag": "css",
-     "count": 584
+     "count": 585
     },
     {
      "tag": "html",
@@ -2473,11 +2473,11 @@
     },
     {
      "tag": "wasm",
-     "count": 267
+     "count": 268
     },
     {
      "tag": "json",
-     "count": 243
+     "count": 245
     },
     {
      "tag": "c",
@@ -2493,7 +2493,7 @@
     },
     {
      "tag": "bash",
-     "count": 72
+     "count": 73
     },
     {
      "tag": "yaml",
@@ -2537,7 +2537,7 @@
     },
     {
      "tag": "zig",
-     "count": 26
+     "count": 27
     },
     {
      "tag": "kotlin",
@@ -2598,27 +2598,27 @@
    "tags": [
     {
      "tag": "anthropic",
-     "count": 1190
+     "count": 1196
     },
     {
      "tag": "openai",
-     "count": 1157
+     "count": 1161
     },
     {
      "tag": "claude",
-     "count": 856
+     "count": 860
     },
     {
      "tag": "google",
-     "count": 837
+     "count": 839
     },
     {
      "tag": "gpt",
-     "count": 491
+     "count": 493
     },
     {
      "tag": "gemini",
-     "count": 323
+     "count": 325
     },
     {
      "tag": "microsoft",
@@ -2626,15 +2626,15 @@
     },
     {
      "tag": "nvidia",
-     "count": 286
+     "count": 288
     },
     {
      "tag": "github",
-     "count": 253
+     "count": 255
     },
     {
      "tag": "meta-ai",
-     "count": 215
+     "count": 216
     },
     {
      "tag": "apple",
@@ -2642,7 +2642,7 @@
     },
     {
      "tag": "codex",
-     "count": 186
+     "count": 187
     },
     {
      "tag": "aws",
@@ -2650,15 +2650,15 @@
     },
     {
      "tag": "claude-opus",
-     "count": 160
+     "count": 161
     },
     {
      "tag": "amazon",
-     "count": 153
+     "count": 154
     },
     {
      "tag": "xai",
-     "count": 135
+     "count": 136
     },
     {
      "tag": "cloudflare",
@@ -2674,7 +2674,7 @@
     },
     {
      "tag": "vercel",
-     "count": 104
+     "count": 105
     },
     {
      "tag": "grok",
@@ -2895,11 +2895,11 @@
    "tags": [
     {
      "tag": "postgresql",
-     "count": 771
+     "count": 773
     },
     {
      "tag": "react",
-     "count": 758
+     "count": 767
     },
     {
      "tag": "nodejs",
@@ -2907,11 +2907,11 @@
     },
     {
      "tag": "claude",
-     "count": 530
+     "count": 531
     },
     {
      "tag": "gpt",
-     "count": 278
+     "count": 279
     },
     {
      "tag": "npm",
@@ -2919,7 +2919,7 @@
     },
     {
      "tag": "gemini",
-     "count": 193
+     "count": 195
     },
     {
      "tag": "docker",
@@ -2931,7 +2931,7 @@
     },
     {
      "tag": "vite",
-     "count": 160
+     "count": 162
     },
     {
      "tag": "aws",
@@ -2955,11 +2955,11 @@
     },
     {
      "tag": "react-native",
-     "count": 89
+     "count": 92
     },
     {
      "tag": "claude-opus",
-     "count": 88
+     "count": 89
     },
     {
      "tag": "tailwind",
@@ -2979,7 +2979,7 @@
     },
     {
      "tag": "svelte",
-     "count": 72
+     "count": 73
     },
     {
      "tag": "nvidia-cuda",
@@ -3019,18 +3019,18 @@
     },
     {
      "tag": "redis",
-     "count": 46
+     "count": 47
     },
     {
      "tag": "kimi",
      "count": 45
     },
     {
-     "tag": "express",
-     "count": 43
+     "tag": "vitest",
+     "count": 44
     },
     {
-     "tag": "vitest",
+     "tag": "express",
      "count": 43
     },
     {
@@ -3178,6 +3178,10 @@
      "count": 20
     },
     {
+     "tag": "storybook",
+     "count": 20
+    },
+    {
      "tag": "zod",
      "count": 20
     },
@@ -3191,10 +3195,6 @@
     },
     {
      "tag": "react-query",
-     "count": 19
-    },
-    {
-     "tag": "storybook",
      "count": 19
     },
     {
@@ -3222,11 +3222,15 @@
      "count": 17
     },
     {
+     "tag": "jest",
+     "count": 17
+    },
+    {
      "tag": "babel",
      "count": 16
     },
     {
-     "tag": "jest",
+     "tag": "expo",
      "count": 16
     },
     {
@@ -3250,10 +3254,6 @@
      "count": 15
     },
     {
-     "tag": "expo",
-     "count": 15
-    },
-    {
      "tag": "hono",
      "count": 15
     },
@@ -3262,11 +3262,11 @@
      "count": 15
     },
     {
-     "tag": "drizzle",
-     "count": 14
+     "tag": "tanstack-query",
+     "count": 15
     },
     {
-     "tag": "tanstack-query",
+     "tag": "drizzle",
      "count": 14
     },
     {
@@ -3354,6 +3354,10 @@
      "count": 9
     },
     {
+     "tag": "material-ui",
+     "count": 9
+    },
+    {
      "tag": "minimax-m",
      "count": 9
     },
@@ -3391,10 +3395,6 @@
     },
     {
      "tag": "langgraph",
-     "count": 8
-    },
-    {
-     "tag": "material-ui",
      "count": 8
     },
     {
@@ -3996,71 +3996,71 @@
    "tags": [
     {
      "tag": "performance",
-     "count": 4643
+     "count": 4656
     },
     {
      "tag": "dev-experience",
-     "count": 2345
+     "count": 2356
     },
     {
      "tag": "optimization",
-     "count": 2197
+     "count": 2202
     },
     {
      "tag": "security",
-     "count": 2059
+     "count": 2065
     },
     {
      "tag": "open-source",
-     "count": 1847
+     "count": 1850
     },
     {
      "tag": "architecture",
-     "count": 1767
+     "count": 1774
     },
     {
      "tag": "reliability",
-     "count": 1560
+     "count": 1564
     },
     {
      "tag": "developer-productivity",
-     "count": 1442
+     "count": 1451
     },
     {
      "tag": "api-design",
-     "count": 1125
+     "count": 1128
     },
     {
      "tag": "testing",
-     "count": 973
+     "count": 975
     },
     {
      "tag": "ui",
-     "count": 899
+     "count": 902
     },
     {
      "tag": "type-safety",
-     "count": 889
+     "count": 891
     },
     {
      "tag": "ux",
-     "count": 863
+     "count": 865
     },
     {
      "tag": "static-analysis",
-     "count": 812
+     "count": 813
     },
     {
      "tag": "community",
-     "count": 777
+     "count": 779
     },
     {
      "tag": "concurrency",
-     "count": 693
+     "count": 694
     },
     {
      "tag": "error-handling",
-     "count": 673
+     "count": 677
     },
     {
      "tag": "scalability",
@@ -4068,7 +4068,7 @@
     },
     {
      "tag": "productivity",
-     "count": 586
+     "count": 587
     },
     {
      "tag": "design-patterns",
@@ -4076,15 +4076,15 @@
     },
     {
      "tag": "governance",
-     "count": 519
+     "count": 520
     },
     {
      "tag": "debugging",
-     "count": 514
+     "count": 516
     },
     {
      "tag": "ai-safety",
-     "count": 473
+     "count": 475
     },
     {
      "tag": "refactoring",
@@ -4100,27 +4100,27 @@
     },
     {
      "tag": "accessibility",
-     "count": 419
+     "count": 421
     },
     {
      "tag": "observability",
-     "count": 415
+     "count": 416
     },
     {
      "tag": "data-privacy",
-     "count": 410
+     "count": 414
     },
     {
      "tag": "prompt-engineering",
-     "count": 402
+     "count": 404
     },
     {
      "tag": "async",
-     "count": 348
+     "count": 349
     },
     {
      "tag": "ci-cd",
-     "count": 345
+     "count": 347
     },
     {
      "tag": "data-engineering",
@@ -4132,7 +4132,7 @@
     },
     {
      "tag": "dx",
-     "count": 328
+     "count": 329
     },
     {
      "tag": "evaluation",
@@ -4140,23 +4140,23 @@
     },
     {
      "tag": "ai-ethics",
-     "count": 319
+     "count": 320
     },
     {
      "tag": "caching",
-     "count": 312
+     "count": 315
     },
     {
      "tag": "privacy",
-     "count": 304
+     "count": 305
     },
     {
      "tag": "latency",
-     "count": 293
+     "count": 294
     },
     {
      "tag": "agentops",
-     "count": 283
+     "count": 284
     },
     {
      "tag": "transparency",
@@ -4164,19 +4164,19 @@
     },
     {
      "tag": "responsible-ai",
-     "count": 266
+     "count": 267
     },
     {
      "tag": "authentication",
-     "count": 262
+     "count": 263
+    },
+    {
+     "tag": "guardrails",
+     "count": 249
     },
     {
      "tag": "validation",
      "count": 248
-    },
-    {
-     "tag": "guardrails",
-     "count": 247
     },
     {
      "tag": "availability",
@@ -4195,12 +4195,12 @@
      "count": 225
     },
     {
-     "tag": "cost",
-     "count": 222
+     "tag": "state-management",
+     "count": 225
     },
     {
-     "tag": "state-management",
-     "count": 221
+     "tag": "cost",
+     "count": 222
     },
     {
      "tag": "monitoring",
@@ -4208,7 +4208,7 @@
     },
     {
      "tag": "design-systems",
-     "count": 211
+     "count": 212
     },
     {
      "tag": "parallelism",
@@ -4216,11 +4216,11 @@
     },
     {
      "tag": "compliance",
-     "count": 204
+     "count": 206
     },
     {
      "tag": "data-fetching",
-     "count": 201
+     "count": 202
     },
     {
      "tag": "authorization",
@@ -4236,15 +4236,15 @@
     },
     {
      "tag": "ai-regulation",
-     "count": 168
+     "count": 170
     },
     {
      "tag": "containers",
-     "count": 164
+     "count": 165
     },
     {
      "tag": "technical-debt",
-     "count": 160
+     "count": 161
     },
     {
      "tag": "data-pipelines",
@@ -4256,7 +4256,7 @@
     },
     {
      "tag": "regulation",
-     "count": 146
+     "count": 147
     },
     {
      "tag": "llmops",
@@ -4267,11 +4267,11 @@
      "count": 137
     },
     {
-     "tag": "evals",
-     "count": 136
+     "tag": "unit-testing",
+     "count": 137
     },
     {
-     "tag": "unit-testing",
+     "tag": "evals",
      "count": 136
     },
     {
@@ -4292,7 +4292,7 @@
     },
     {
      "tag": "leadership",
-     "count": 113
+     "count": 114
     },
     {
      "tag": "throughput",
@@ -4304,7 +4304,7 @@
     },
     {
      "tag": "logging",
-     "count": 91
+     "count": 92
     },
     {
      "tag": "metrics",
@@ -4316,7 +4316,7 @@
     },
     {
      "tag": "platform-engineering",
-     "count": 88
+     "count": 89
     },
     {
      "tag": "ethics",
@@ -4324,7 +4324,7 @@
     },
     {
      "tag": "localization",
-     "count": 82
+     "count": 83
     },
     {
      "tag": "energy-efficiency",
@@ -4352,7 +4352,7 @@
     },
     {
      "tag": "seo",
-     "count": 66
+     "count": 67
     },
     {
      "tag": "infrastructure-as-code",
@@ -4360,7 +4360,7 @@
     },
     {
      "tag": "e2e-testing",
-     "count": 56
+     "count": 57
     },
     {
      "tag": "hiring-trends",
@@ -4433,23 +4433,23 @@
    "tags": [
     {
      "tag": "ai-agents",
-     "count": 2108
+     "count": 2109
     },
     {
      "tag": "agentic-ai",
-     "count": 1547
+     "count": 1549
     },
     {
      "tag": "ai-coding-agents",
-     "count": 896
+     "count": 905
     },
     {
      "tag": "frontier-models",
-     "count": 671
+     "count": 675
     },
     {
      "tag": "ai-governance",
-     "count": 655
+     "count": 657
     },
     {
      "tag": "multimodal",
@@ -4465,15 +4465,15 @@
     },
     {
      "tag": "foundation-models",
-     "count": 399
+     "count": 400
     },
     {
      "tag": "mcp",
-     "count": 360
+     "count": 363
     },
     {
      "tag": "reasoning-models",
-     "count": 357
+     "count": 359
     },
     {
      "tag": "multi-agent",
@@ -4501,7 +4501,7 @@
     },
     {
      "tag": "ai-data-centers",
-     "count": 243
+     "count": 245
     },
     {
      "tag": "edge-ai",
@@ -4513,7 +4513,7 @@
     },
     {
      "tag": "gpu-economics",
-     "count": 219
+     "count": 221
     },
     {
      "tag": "vision-language-models",
@@ -4536,12 +4536,12 @@
      "count": 135
     },
     {
-     "tag": "world-models",
+     "tag": "generative-ui",
      "count": 129
     },
     {
-     "tag": "generative-ui",
-     "count": 128
+     "tag": "world-models",
+     "count": 129
     },
     {
      "tag": "rag",
@@ -4569,7 +4569,7 @@
     },
     {
      "tag": "prompt-injection",
-     "count": 72
+     "count": 73
     },
     {
      "tag": "quantization",
@@ -4613,7 +4613,7 @@
     },
     {
      "tag": "jailbreaks",
-     "count": 30
+     "count": 32
     },
     {
      "tag": "semantic-search",
@@ -870651,6 +870651,2384 @@
      "disaster-recovery",
      "high-availability",
      "fault-tolerance"
+    ]
+   }
+  },
+  {
+   "id": 22026,
+   "url": "https://www.therundown.ai/articles/your-future-housekeeper-might-be-an-xpeng",
+   "sourceId": 7,
+   "sourceName": "The Rundown",
+   "title": "Your future housekeeper might be an XPeng",
+   "titlePt": "Seu futuro empregado doméstico pode ser um XPeng",
+   "summaryPt": "A XPeng, montadora chinesa de veículos elétricos, apresentou uma versão atualizada do seu robô humanoide IRON durante o AI Day 2026. O robô possui 76 graus de liberdade, mais de 1.500 pontos de toque sensoriais e três chips de IA Turing, com navegação autônoma e capacidade de autocarregamento. A empresa planeja iniciar a produção em massa em janeiro de 2027, treinar o robô para atuar como assistente de varejo no primeiro trimestre e lançá-lo ao público no segundo trimestre. O objetivo é que, após o uso comercial, o IRON possa realizar tarefas domésticas em um ou dois anos, embora ainda não haja cronograma definido. A XPeng usa a mesma arquitetura de IA, o VLA 3.0, tanto nos robôs quanto nos veículos autônomos, incluindo o robotáxi YOYO-01, previsto para 2027. A iniciativa intensifica a disputa com Tesla, Figure AI e outras empresas chinesas, como AgiBot e Unitree, que já enviaram cerca de 16,7 mil humanoides no primeiro semestre de 2026. O desafio é que o ambiente doméstico é mais complexo que uma loja, com interiores que mudam e presença de crianças e animais de estimação. Outras notícias do setor: a FAA investiga a Amazon após um drone Prime Air derrubar uma garrafa de xampu e ficar preso em um telhado em Michigan; pesquisadores da Caltech desenvolveram nanobots ativados por luz que entregam quimioterapia ao cérebro de camundongos com 5,2 vezes mais eficiência; e a Zoox, em parceria com a Virginia Tech, testou tons de alerta personalizados para robotáxis, que se mostraram tão eficazes quanto a buzina em evitar que pedestres atravessassem na frente do veículo, sem o ruído agressivo. Há também novidades rápidas sobre a Figure 03, Samsung, Neuromeka, SoftBank, Nuro e outras startups de robótica.",
+   "snippet": "Good morning, robotics enthusiasts. China’s XPeng has unveiled an upgraded IRON humanoid that could greet car buyers by early 2027 — and tackle household chores a year or two after that. The move intensifies a race against Tesla, Figure AI, and a growing field of Chinese robotics companies looking to turn impressive humanoid demos into commercially useful machines, with the home robot as the ult",
+   "issueUrl": "https://www.therundown.ai/articles",
+   "blurb": null,
+   "kind": "news",
+   "section": null,
+   "date": "2026-11-26",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "amazon"
+    ],
+    "content-type": [
+     "newsletter-roundup"
+    ],
+    "difficulty": [
+     "all-levels"
+    ],
+    "domain": [
+     "ai-general"
+    ],
+    "topic-technology": [
+     "robotics",
+     "autonomous-vehicles"
+    ]
+   }
+  },
+  {
+   "id": 22027,
+   "url": "https://www.semafor.com/article/11/26/2026/banks-look-to-dump-ai-debt",
+   "sourceId": 10,
+   "sourceName": "llmnews.ai",
+   "title": "Exclusive: Banks look to dump AI debt",
+   "titlePt": "Bancos buscam se livrar de dívidas ligadas à IA",
+   "summaryPt": "Bancos como Citi e JPMorgan estão procurando vender ou repassar parte de suas carteiras de empréstimos relacionados à inteligência artificial, segundo fontes familiarizadas com as negociações. O movimento busca gerenciar riscos e, em alguns casos, abrir espaço para assumir ainda mais exposição no setor. Entre as estratégias usadas está a transferência sintética de risco, que mantém os empréstimos nos balanços dos bancos, mas transfere o risco de perdas para investidores, preservando a relação com os tomadores corporativos. Embora seja comum ver esse tipo de ajuste em dezembro, quando os bancos querem fechar o ano com resultados mais limpos, chama a atenção que os financiadores da infraestrutura de IA estejam seguindo o mesmo caminho das gigantes de tecnologia, tentando tirar obrigações de seus livros. O volume de emissão de dívida ligada à IA já é tão grande que acabou competindo com títulos do Tesouro dos EUA, e alguns investidores mostram sinais de saturação. Há quem diga que a venda de risco serve justamente para liberar capacidade de novos empréstimos, mas, no fim, o risco não desaparece — apenas migra para lugares menos visíveis.",
+   "snippet": "Banks are increasingly shopping around their AI portfolios as they look to offload some of their exposure to AI-related debt. Banks including Citi and JPMorgan are marketing portfolios of loans, people familiar with the deals tell me, to manage risk or, in some cases, ready themselves to take on even more. In some instances, banks are pitching structures that would keep the loans on their balance",
+   "issueUrl": "https://llmnews.ai",
+   "blurb": null,
+   "kind": "news",
+   "section": null,
+   "date": "2026-11-26",
+   "verifyStatus": "ok",
+   "tags": {
+    "content-type": [
+     "news",
+     "analysis"
+    ],
+    "domain": [
+     "ai-general"
+    ],
+    "topic-technology": [
+     "ai-funding",
+     "ai-infrastructure",
+     "ai-in-business"
+    ],
+    "trending-emerging": [
+     "ai-data-centers",
+     "gpu-economics"
+    ]
+   }
+  },
+  {
+   "id": 22028,
+   "url": "https://generativehistory.substack.com/p/gpt-62-astra-solves-a-historical",
+   "sourceId": 10,
+   "sourceName": "llmnews.ai",
+   "title": "GPT 6.2 Astra Solves a Historical Mystery",
+   "titlePt": "GPT-6.2 Astra Resolve um Mistério Histórico",
+   "summaryPt": "O artigo relata um avanço impressionante da inteligência artificial: o modelo GPT-6.2 Astra, da OpenAI, identificou de forma autônoma o autor de um caderno de esboços anônimo de 1808, guardado na Biblioteca Beinecke da Universidade Yale. Em apenas 22 minutos, o modelo analisou imagens, consultou fontes primárias e secundárias públicas e levantou a hipótese de que o autor seria Louis-Guy-Charles-Guillaume de Rohan-Chabot, um aristocrata francês exilado e oficial do exército britânico. A descoberta foi confirmada ao localizar um diário microfilmado da viagem de Chabot, que o próprio modelo sugeriu como prova, e que bateu perfeitamente com os desenhos e as datas do caderno. O autor do texto destaca que a façanha representa um marco: enquanto o progresso em matemática já era esperado por ser uma área determinística, a capacidade de fazer descobertas históricas com raciocínio indutivo e busca em arquivos dispersos indica que a IA está começando a generalizar seu poder de pesquisa para domínios não determinísticos. O artigo também comenta peculiaridades do GPT-6.2 Astra, como sua comunicação estranha, mas com resultados confiáveis, e sua habilidade em tarefas longas e complexas, incluindo a correção de uma transcrição de 8.002 linhas de um livro contábil histórico. Para o autor, o caso é um exemplo concreto de que a explosão de inteligência pode estar chegando mais rápido do que se imagina.",
+   "snippet": "There’s a growing sense in the AI community that we’re approaching an intelligence explosion far faster than even the most optimistic accelerationists predicted. One of the most publicly visible signals pointing at that acceleration is the rapid progress made in mathematics in recent months. In four years, LLMs have gone from scoring a D+ on elementary school math tests to literally solving hundre",
+   "issueUrl": "https://llmnews.ai",
+   "blurb": null,
+   "kind": "news",
+   "section": null,
+   "date": "2026-11-24",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "openai",
+     "gpt"
+    ],
+    "content-type": [
+     "case-study",
+     "deep-dive"
+    ],
+    "difficulty": [
+     "intermediate"
+    ],
+    "domain": [
+     "llm-models"
+    ],
+    "topic-technology": [
+     "llm-models",
+     "frontier-models",
+     "reasoning-models",
+     "model-capabilities",
+     "ai-research"
+    ],
+    "trending-emerging": [
+     "frontier-models",
+     "reasoning-models",
+     "foundation-models"
+    ]
+   }
+  },
+  {
+   "id": 22029,
+   "url": "https://www.therundown.ai/articles/ai-takes-a-swing-at-physics-biggest-puzzle",
+   "sourceId": 7,
+   "sourceName": "The Rundown",
+   "title": "AI takes a swing at physics' biggest puzzle",
+   "titlePt": "IA enfrenta o maior enigma da física",
+   "summaryPt": "O artigo destaca que a IA, depois de resolver problemas matemáticos antigos, agora ataca um enigma da física sem solução há quase um século. O físico Venkatesa Chandrasekaran, de Stanford, publicou um artigo de 83 páginas propondo uma teoria quântica da gravidade desenvolvida com ajuda do modelo GPT-6 Astra, da OpenAI. A proposta usa os caminhos da luz no espaço-tempo para descrever a gravidade em nível quântico, mas cobre apenas o espaço vazio, deixando a matéria de lado. O autor afirma que a teoria evita as infinitudes que quebram os cálculos tradicionais, mantendo concordância com resultados conhecidos sobre buracos negros e a relatividade geral de Einstein. Apesar do entusiasmo de Sam Altman, outros físicos criticaram o trabalho, chamando-o de golpe publicitário e apontando problemas sinalizados pela própria IA. Além dessa notícia principal, o boletim traz outras atualizações: uma dica simples para melhorar respostas de IA (pedir que o modelo faça cinco perguntas antes de responder), um guia para configurar o agente pessoal Nod, da n8n, e um relatório sobre como as restrições dos EUA estão atrasando o progresso da IA na China, afetando laboratórios como Zhipu e Moonshot. O texto também menciona ferramentas em alta, como MAGI-2, Qwen-Audio-3.1 e Claude Duet, além de breves notícias sobre OpenAI, SpaceX e previsões sobre AGI.",
+   "snippet": "The past few months have been all about AI cracking decades-old math problems. Now it’s taking on a physics puzzle unsolved for nearly a century. Stanford physicist Venkatesa Chandrasekaran just proposed a quantum theory of gravity, developed with help from GPT-6 Astra, that could tie together the physics of planets and particles. Some physicists, however, don’t seem impressed. In today’s AI ru",
+   "issueUrl": "https://www.therundown.ai/articles",
+   "blurb": null,
+   "kind": "tool",
+   "section": null,
+   "date": "2026-11-27",
+   "verifyStatus": "suspect",
+   "tags": {
+    "company-vendor-model": [
+     "openai",
+     "gpt"
+    ],
+    "content-type": [
+     "news",
+     "paper-summary"
+    ],
+    "difficulty": [
+     "all-levels"
+    ],
+    "domain": [
+     "llm-models",
+     "ai-general"
+    ],
+    "framework-library-tool": [
+     "gpt"
+    ],
+    "topic-technology": [
+     "ai-research",
+     "generative-ai",
+     "llm-models",
+     "frontier-models",
+     "model-capabilities"
+    ],
+    "trending-emerging": [
+     "frontier-models",
+     "reasoning-models"
+    ]
+   }
+  },
+  {
+   "id": 22030,
+   "url": "https://chrhenning.com/blog/2026/introduction-to-uncertainty",
+   "sourceId": 10,
+   "sourceName": "llmnews.ai",
+   "title": "An Introduction to Uncertainty in Machine Learning",
+   "titlePt": "Uma Introdução à Incerteza em Aprendizado de Máquina",
+   "summaryPt": "O artigo apresenta uma visão intuitiva sobre incerteza em aprendizado de máquina. Modelos probabilísticos sempre carregam incerteza, mesmo quando não explicitamente escolhida. A incerteza é descrita por probabilidades e pode ser dividida em dois tipos: epistêmica, que vem do que ainda não foi aprendido e pode ser reduzida com mais dados, e aleatória, que vem do que não pode ser observado e não desaparece com mais dados da mesma natureza. A distinção depende do que é medido: se medirmos mais variáveis relevantes, parte da incerteza aleatória pode se tornar epistêmica. A incerteza é importante porque uma previsão pontual não basta para decisões: ela esconde eventos raros e não indica quando delegar um caso a um humano ou coletar mais dados. O artigo usa como exemplo a predição do ângulo de direção de um carro: em uma divisão de faixas, motoristas na faixa do meio podem ir para a esquerda ou para a direita, e a média dessas direções aponta para o divisor. Um modelo Gaussiano com variância fixa, treinado por erro quadrático médio, não captura essa bimodalidade e falha. A solução é usar um modelo mais rico, como uma mistura de Gaussianas, que possa conter a verdade. Porém, modelos mais flexíveis exigem mais dados, ilustrando o trade-off entre viés e variância.",
+   "snippet": "Essentially, all models are wrong, but some are useful. George E. P. Box Most of machine learning is based on probabilistic modelling, even if it does not always seem like it. So most models carry some uncertainty, whether we chose it or not, and in many decisions it pays to take that uncertainty into account, as the examples in this post show. In my experience, uncertainty in machine learni",
+   "issueUrl": "https://llmnews.ai",
+   "blurb": null,
+   "kind": "news",
+   "section": null,
+   "date": "2026-09-10",
+   "verifyStatus": "ok",
+   "tags": {
+    "content-type": [
+     "explainer"
+    ],
+    "difficulty": [
+     "beginner"
+    ],
+    "domain": [
+     "ai-general"
+    ],
+    "topic-technology": [
+     "machine-learning"
+    ]
+   }
+  },
+  {
+   "id": 22031,
+   "url": "https://emergent.sh/news/claude-code-skills-now-sharable-across-teams",
+   "sourceId": 10,
+   "sourceName": "llmnews.ai",
+   "title": "Claude Code Skills Now Sharable Across Teams",
+   "titlePt": "Habilidades do Claude Code agora podem ser compartilhadas entre equipes",
+   "summaryPt": "A CleanCommit lançou um framework que permite a equipes de engenharia compartilhar e reutilizar padrões de interação com o Claude Code entre projetos. O objetivo é resolver o problema da fragmentação: desenvolvedores criavam fluxos de trabalho isolados que não beneficiavam o restante do time. Agora, é possível empacotar habilidades como templates versionados, distribuí-los via repositório central e acompanhar quais padrões geram melhores resultados, reduzindo duplicação e acelerando a integração de novos membros. A ferramenta, lançada em 27 de novembro de 2026, cria uma memória institucional para padrões de desenvolvimento assistido por IA, permitindo que as equipes construam bibliotecas de habilidades adaptadas à sua arquitetura e padrões de codificação. Ela se integra a sistemas de controle de versão e plataformas de gerenciamento de projetos, e os primeiros usuários já criaram bibliotecas para tarefas como geração de endpoints de API, scripts de migração de banco de dados, atualização de documentação e correção de vulnerabilidades. O lançamento posiciona o Claude Code como uma ferramenta de colaboração em equipe, em vez de um assistente pessoal, e oferece um caminho para que as organizações capturem e multipliquem o conhecimento adquirido, em vez de perder valiosas instruções em históricos de chat.",
+   "snippet": "💡 TL;DR CleanCommit launches framework enabling engineering teams to share and reuse Claude Code interaction patterns across projects. The tool addresses fragmentation where individual developers build isolated Claude Code workflows that never benefit teammates. Teams can now package coding skills as shareable templates, reducing duplication and accelerating onboarding for AI-assisted development.",
+   "issueUrl": "https://llmnews.ai",
+   "blurb": null,
+   "kind": "tool",
+   "section": null,
+   "date": "2026-11-27",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "claude",
+     "anthropic"
+    ],
+    "concept-theme": [
+     "prompt-engineering",
+     "developer-productivity",
+     "dx"
+    ],
+    "content-type": [
+     "tool-release"
+    ],
+    "difficulty": [
+     "for-practitioners"
+    ],
+    "domain": [
+     "llm-models",
+     "ai-general"
+    ],
+    "framework-library-tool": [
+     "claude"
+    ],
+    "topic-technology": [
+     "ai-agents",
+     "prompt-engineering",
+     "code-models",
+     "generative-ai"
+    ],
+    "trending-emerging": [
+     "ai-coding-agents"
+    ]
+   }
+  },
+  {
+   "id": 22032,
+   "url": "https://www.infohawk.com/news/2026-11-27-black-friday-webrtc-skimmer",
+   "sourceId": 10,
+   "sourceName": "llmnews.ai",
+   "title": "Credit card skimming scripts using WebRTC found on popular shopping sites",
+   "titlePt": "Skimming de cartões via WebRTC em lojas online populares",
+   "summaryPt": "Na semana anterior à Black Friday, scripts de roubo de dados de cartão foram injetados nas lojas online da Lascana, Samsonite, American Tourister, Revolve e FWRD. Os códigos, removidos nos dias 24 e 25 de novembro após notificações, capturavam número, validade e código de segurança do cartão, além de dados pessoais, enviando-os a terceiros via WebRTC — uma tecnologia normalmente usada para chamadas de vídeo, mas que foge aos mecanismos tradicionais de monitoramento. No teste feito em um dos sites (Lascana), os dados de um cartão de teste foram exfiltrados com sucesso antes da confirmação do pagamento. A injeção ocorreu por diferentes vetores: alteração de pixel de marketing (Quorum), configuração de banner de cookies (Seers) e arquivos no próprio CDN da Revolve. O ataque mirava dispositivos móveis e só era ativado na página de checkout, o que dificultava a detecção por varreduras comuns. Os especialistas recomendam que lojas definam regras de connect-src restritas, revisem pixels de terceiros e isolem campos de pagamento, enquanto consumidores devem monitorar extratos e acionar o banco imediatamente em caso de cobranças suspeitas.",
+   "snippet": "November 27, 2026 All the sites we contacted took action; but the larger consumer web ecosystem should be prepared to mitigate these attack vectors A card-skimming script was planted on the online stores of Lascana, Samsonite, American Tourister, Revolve and FWRD in the week before Black Friday. After our reports to affected companies, all have had the script removed (on November 24th or 25th) a",
+   "issueUrl": "https://llmnews.ai",
+   "blurb": null,
+   "kind": "news",
+   "section": null,
+   "date": "2026-11-27",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "security",
+     "data-privacy"
+    ],
+    "content-type": [
+     "vulnerability-disclosure",
+     "incident-report"
+    ],
+    "difficulty": [
+     "for-practitioners"
+    ],
+    "domain": [
+     "frontend"
+    ],
+    "ecosystem-language": [
+     "javascript"
+    ],
+    "topic-technology": [
+     "supply-chain-security",
+     "web-apis"
+    ]
+   }
+  },
+  {
+   "id": 22033,
+   "url": "https://github.com/convex/convex-backend-skill/issues/64",
+   "sourceId": 10,
+   "sourceName": "llmnews.ai",
+   "title": "Quickstart skills send the user's idea to a convex.site host and run remote scripts, written to avoid safety checks",
+   "titlePt": "Quickstart: envio de ideias e execução remota contornando verificações de segurança",
+   "summaryPt": "O plugin contém três habilidades (quickstart, add e labs-quickstart) que levantam preocupações de segurança. A habilidade quickstart envia a ideia do usuário em uma única frase para um host externo (basic-anteater-667.convex.site), marcada como telemetria, sem informar que os dados saem da máquina. A habilidade add executa scripts baixados do mesmo host diretamente no bash. Já a labs-quickstart divide o download e a execução em duas chamadas Bash, com o objetivo explícito de evitar que os classificadores de segurança bloqueiem o comando combinado de baixar e executar código remoto.",
+   "snippet": "Three skills in this plugin (listed in Anthropic's claude-plugins-official marketplace) raised the same concern for me: skills/quickstart/SKILL.md lines 48 to 56 POST the user's one-sentence project idea to basic-anteater-667.convex.site, marked in a comment as telemetry. The user is not told the idea leaves the machine. skills/add/SKILL.md lines 62 and 64 pipe a script from the same host straig",
+   "issueUrl": "https://llmnews.ai",
+   "blurb": null,
+   "kind": "news",
+   "section": null,
+   "date": "2026-10-26",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "anthropic",
+     "claude"
+    ],
+    "concept-theme": [
+     "security",
+     "guardrails",
+     "data-privacy",
+     "ai-safety"
+    ],
+    "content-type": [
+     "vulnerability-disclosure",
+     "analysis"
+    ],
+    "difficulty": [
+     "expert"
+    ],
+    "domain": [
+     "llm-models",
+     "ai-general"
+    ],
+    "ecosystem-language": [
+     "bash",
+     "nodejs",
+     "json"
+    ],
+    "topic-technology": [
+     "ai-safety",
+     "jailbreaks",
+     "ai-agents",
+     "tool-calling",
+     "supply-chain-security",
+     "privacy-first-ai"
+    ],
+    "trending-emerging": [
+     "ai-coding-agents",
+     "jailbreaks",
+     "agentic-ai",
+     "ai-agents"
+    ]
+   }
+  },
+  {
+   "id": 22034,
+   "url": "https://sessiongraph.ai",
+   "sourceId": 10,
+   "sourceName": "llmnews.ai",
+   "title": "SessionGraph",
+   "titlePt": "SessionGraph",
+   "summaryPt": "O SessionGraph é uma ferramenta que reúne o histórico de sessões dos seus agentes de codificação em um só lugar, exibindo tudo em um gráfico visual e permitindo comparações. Ele funciona de forma totalmente local e privada: lê o armazenamento de sessões do seu harness, indexa os dados e abre um aplicativo desktop para você explorar. Para começar, basta executar o comando `npx sessiongraph` no terminal. A ferramenta oferece suporte a diversos harnesses e cria um banco de dados unificado para todas as suas sessões. Com isso, você pode pesquisar conversas antigas, retomar de onde parou ou verificar o que mudou em um projeto. O SessionGraph também disponibiliza um servidor MCP, permitindo que o próprio agente de codação acesse sessões passadas sem trocar de aplicativo, além de uma API HTTP para consultar o mesmo índice a partir de scripts e ferramentas personalizadas.",
+   "snippet": "Visualize your coding agent history Bring all your coding agent sessions together. Visualize them in a graph and compare with your friends. Fully local and private. SessionGraph reads your harness' session store, indexes it and opens a desktop app for you to play around. Everything happens locally. Paste this into your terminal to open SessionGraph.",
+   "issueUrl": "https://llmnews.ai",
+   "blurb": null,
+   "kind": "tool",
+   "section": null,
+   "date": "2026-09-10",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "codex",
+     "claude",
+     "openai",
+     "anthropic"
+    ],
+    "concept-theme": [
+     "agentops",
+     "data-privacy",
+     "developer-productivity"
+    ],
+    "content-type": [
+     "tool-release",
+     "showcase"
+    ],
+    "difficulty": [
+     "for-practitioners"
+    ],
+    "domain": [
+     "ai-general",
+     "nodejs"
+    ],
+    "ecosystem-language": [
+     "nodejs",
+     "javascript"
+    ],
+    "topic-technology": [
+     "ai-agents",
+     "agentops",
+     "mcp",
+     "privacy-first-ai",
+     "databases"
+    ],
+    "trending-emerging": [
+     "ai-coding-agents",
+     "mcp"
+    ]
+   }
+  },
+  {
+   "id": 22035,
+   "url": "https://www.thetimes.com/uk/technology-uk/article/ai-making-online-security-useless-smr73d3n8",
+   "sourceId": 10,
+   "sourceName": "llmnews.ai",
+   "title": "Verifying your device",
+   "titlePt": "Verificando seu dispositivo",
+   "summaryPt": "O artigo apresenta uma mensagem típica de verificação de dispositivo, exibida durante o processamento. Inicialmente, o usuário vê um aviso para aguardar enquanto o dispositivo é verificado. Em seguida, se a verificação falhar, uma mensagem de erro é exibida, oferecendo a opção de tentar novamente. O conteúdo é curto e parece ser uma tela de espera ou de erro de um serviço online, sem detalhes adicionais sobre o processo em si.",
+   "snippet": "Verifying your device, please wait Verification failed. Please try again. Try Again",
+   "issueUrl": "https://llmnews.ai",
+   "blurb": null,
+   "kind": "news",
+   "section": null,
+   "date": "2026-09-10",
+   "verifyStatus": "junk",
+   "tags": {
+    "concept-theme": [
+     "authentication",
+     "security"
+    ],
+    "content-type": [
+     "announcement"
+    ],
+    "domain": [
+     "backend"
+    ],
+    "topic-technology": [
+     "authentication"
+    ]
+   }
+  },
+  {
+   "id": 22036,
+   "url": "https://www.engadget.com/2329200/nvidia-reportedly-halts-chip-shipments-to-southeast-asia",
+   "sourceId": 9,
+   "sourceName": "Superhuman",
+   "title": "Nvidia hits pause on server shipments to Southeast Asia",
+   "titlePt": "Nvidia pausa envios de servidores para o Sudeste Asiático",
+   "summaryPt": "A Nvidia interrompeu o envio de servidores de IA para Malásia, Singapura, Tailândia e Indonésia, conforme relatos do Financial Times. Fabricantes parceiros, como Dell e Supermicro, informaram clientes desses países que a empresa não está mais permitindo o envio de pedidos, embora ainda não esteja claro se a suspensão é temporária. A decisão ocorre dias após Jensen Huang ter sido reconduzido ao cargo de CEO da companhia.",
+   "snippet": "The chipmaker has reportedly told server makers to stop shipping its hardware to Malaysia, Singapore, Thailand and Indonesia after new US export license rules kicked in, just days after Jensen Huang's return to Nvidia. According to Reuters, the move is likely to set Chinese AI model development back significantly, while Fitch warns that data center investment in the region will likely slow and bec",
+   "issueUrl": "https://www.superhuman.ai/p/nvidia-hits-pause-on-shipments-to-southeast-asia",
+   "blurb": "The chipmaker has reportedly told server makers to stop shipping its hardware to Malaysia, Singapore, Thailand and Indonesia after new US export license rules kicked in, just days after Jensen Huang's return to Nvidia. According to Reuters, the move is likely to set Chinese AI model development back significantly, while Fitch warns that data center investment in the region will likely slow and become more selective.",
+   "kind": "news",
+   "section": "TODAY IN AI",
+   "date": "2026-11-27",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "nvidia"
+    ],
+    "concept-theme": [
+     "compliance",
+     "ai-regulation",
+     "regulation"
+    ],
+    "content-type": [
+     "news"
+    ],
+    "difficulty": [
+     "all-levels"
+    ],
+    "domain": [
+     "ai-general"
+    ],
+    "topic-technology": [
+     "ai-hardware",
+     "gpu",
+     "ai-chips",
+     "ai-regulation",
+     "ai-policy"
+    ],
+    "trending-emerging": [
+     "ai-data-centers",
+     "gpu-economics",
+     "ai-governance"
+    ]
+   }
+  },
+  {
+   "id": 22037,
+   "url": "https://www.theverge.com/policy/1042620/character-ai-sale-state-ags-block-selling-users-chats",
+   "sourceId": 9,
+   "sourceName": "Superhuman",
+   "title": "States move to block Character.AI's chat sale",
+   "titlePt": "Estados tentam bloquear venda de chats do Character.AI",
+   "summaryPt": "Uma coalizão de 42 procuradores-gerais dos EUA está tentando impedir que a Character.AI venda os dados de conversas de seus usuários durante o processo de recuperação judicial (Chapter 11). Segundo os procuradores, a empresa planeja leiloar os históricos de chat de mais de 21 milhões de contas americanas — incluindo 2,1 milhões registradas por menores — sem oferecer qualquer proteção aos envolvidos. A empresa entrou com pedido de falência em outubro, após anos de escândalos e disputas legais, incluindo uma ação da Disney. A Disney acabou comprando parte dos ativos e contratando o CEO da Character.AI, Karandeep Anand, em uma espécie de 'acquihire', com vários membros da equipe técnica indo para a gigante do entretenimento. Esse acordo também enfrentou oposição de um grupo semelhante de procuradores. A principal crítica à venda dos dados de chat é a ausência de garantias: o comprador não precisaria respeitar as políticas de privacidade existentes, os usuários não teriam como excluir seus dados e não haveria limites para o que o comprador poderia fazer com as informações, inclusive revendê-las a terceiros. Além disso, o primeiro licitante foi criado recentemente, sem histórico claro de operação. Alguns estados, como Nova York, Connecticut, Califórnia e Colorado, já aprovaram leis de regulação de chatbots que podem entrar em conflito com as práticas da empresa a partir de janeiro de 2027.",
+   "snippet": "Your private chatbot conversations could end up on the auction block — but not if this bipartisan group of 42 state AGs has anything to say about it. The coalition is fighting Character.AI's alleged plan to sell chat histories from over 21M US accounts, including 2.1M belonging to minors. The AGs claim the deal has no safeguards: buyers wouldn't have to honor privacy policies, users can’t delete t",
+   "issueUrl": "https://www.superhuman.ai/p/nvidia-hits-pause-on-shipments-to-southeast-asia",
+   "blurb": "Your private chatbot conversations could end up on the auction block — but not if this bipartisan group of 42 state AGs has anything to say about it. The coalition is fighting Character.AI's alleged plan to sell chat histories from over 21M US accounts, including 2.1M belonging to minors. The AGs claim the deal has no safeguards: buyers wouldn't have to honor privacy policies, users can’t delete their data, and it could be resold.",
+   "kind": "news",
+   "section": "TODAY IN AI",
+   "date": "2026-11-27",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "privacy",
+     "data-privacy",
+     "ai-regulation",
+     "compliance"
+    ],
+    "content-type": [
+     "news"
+    ],
+    "domain": [
+     "ai-general"
+    ],
+    "topic-technology": [
+     "ai-regulation",
+     "ai-ethics",
+     "ai-policy",
+     "generative-ai"
+    ],
+    "trending-emerging": [
+     "ai-governance"
+    ]
+   }
+  },
+  {
+   "id": 22038,
+   "url": "https://www.wired.com/story/jensen-huang-is-back-as-nvidia-ceo",
+   "sourceId": 9,
+   "sourceName": "Superhuman",
+   "title": "Jensen's back",
+   "titlePt": "Jensen está de volta",
+   "summaryPt": "Em uma reviravolta surpreendente, o conselho da Nvidia decidiu reinstalar Jensen Huang como CEO, apenas 11 dias após sua renúncia. A decisão foi tomada após consultas com altos funcionários do governo dos EUA, incluindo o presidente Donald Trump, que apoiou publicamente o retorno. Huang expressou honra em liderar a empresa novamente, destacando seu papel em uma nova revolução industrial. A renúncia inicial ocorreu em meio a escândalos envolvendo relacionamentos extraconjugais de Huang, incluindo com uma empresária chinesa suspeita de ser espiã e com funcionárias da própria Nvidia. Apesar da resistência inicial do conselho, que afirmou não ter intenção de reinstalá-lo, a pressão de funcionários, acionistas e figuras tecnológicas influentes como Elon Musk levou à reversão da decisão. Mais de 200 mil assinaturas em uma petição pública apoiaram seu retorno. A Nvidia, que domina cerca de 90% do mercado global de GPUs e se tornou essencial para o avanço da IA, enfrentou uma queda significativa em seu valor de mercado após a renúncia de Huang. Com sua volta, a empresa busca estabilidade e recuperação, reafirmando sua posição como líder no setor de chips para inteligência artificial.",
+   "snippet": "In a surprise move, Nvidia's board voted unanimously to reinstate Jensen Huang as President, CEO, and board member, less than two weeks after he resigned. The board says it spoke with top US government officials and is confident his return poses no national security risk.",
+   "issueUrl": "https://www.superhuman.ai/p/nvidia-hits-pause-on-shipments-to-southeast-asia",
+   "blurb": "In a surprise move, Nvidia's board voted unanimously to reinstate Jensen Huang as President, CEO, and board member, less than two weeks after he resigned. The board says it spoke with top US government officials and is confident his return poses no national security risk.",
+   "kind": "news",
+   "section": "FROM THE FRONTIER",
+   "date": "2026-11-27",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "nvidia"
+    ],
+    "concept-theme": [
+     "leadership",
+     "governance"
+    ],
+    "content-type": [
+     "news"
+    ],
+    "topic-technology": [
+     "ai-chips"
+    ]
+   }
+  },
+  {
+   "id": 22039,
+   "url": "https://archive.superhuman.ai/2125622238481371372",
+   "sourceId": 9,
+   "sourceName": "Superhuman",
+   "title": "Boring Slides Are Out",
+   "titlePt": "Apresentações Chatas Estão Fora",
+   "summaryPt": "Um criador usou o recém-lançado modelo Opus 5.6, da Anthropic, para transformar uma apresentação monótona em algo dinâmico que se reescreve enquanto o público assiste. O modelo, descrito como o mais poderoso já testado, foi capaz de inovar o formato de slides, indicando que as apresentações tradicionais estão com os dias contados. A demonstração, compartilhada no Claude.ai, já recebeu milhares de curtidas e promete revolucionar a forma como criamos conteúdo visual para reuniões e palestras.",
+   "snippet": "Presentations are about to change forever. One creator claims to have given the unreleased Opus 5.6 a boring presentation and turned it into something that literally rewrites itself as you watch (39k likes).",
+   "issueUrl": "https://www.superhuman.ai/p/nvidia-hits-pause-on-shipments-to-southeast-asia",
+   "blurb": "Presentations are about to change forever. One creator claims to have given the unreleased Opus 5.6 a boring presentation and turned it into something that literally rewrites itself as you watch (39k likes).",
+   "kind": "news",
+   "section": "IN THE KNOW",
+   "date": "2026-11-27",
+   "verifyStatus": "suspect",
+   "tags": {
+    "company-vendor-model": [
+     "claude-opus",
+     "anthropic"
+    ],
+    "content-type": [
+     "hot-take",
+     "opinion"
+    ],
+    "domain": [
+     "llm-models"
+    ],
+    "framework-library-tool": [
+     "claude-opus"
+    ],
+    "topic-technology": [
+     "frontier-models",
+     "llm-models",
+     "proprietary-models",
+     "model-capabilities"
+    ],
+    "trending-emerging": [
+     "frontier-models"
+    ]
+   }
+  },
+  {
+   "id": 22040,
+   "url": "https://archive.superhuman.ai/2126044155830759789",
+   "sourceId": 9,
+   "sourceName": "Superhuman",
+   "title": "In the Deep",
+   "titlePt": "Nas Profundezas",
+   "summaryPt": "O artigo apresenta uma dica poderosa para melhorar a qualidade das respostas de modelos de IA. Em vez de pedir algo genérico como 'melhore isto', que costuma gerar apenas mais texto sem substância, o truque é usar um prompt específico que obriga o modelo a pensar mais profundamente, como se fosse um profissional de alto nível. Essa pequena alteração na forma de pedir pode transformar drasticamente o resultado. O texto é de Felix Rieseberg, engenheiro que trabalha no Claude, e faz parte de um tutorial sobre como ser mais ambicioso no uso de IA.",
+   "snippet": "Prompting an AI model to simply 'make this better' usually gets you more words but no substance. This viral prompt forces the model to go deeper and think like a top professional — a small tweak that can dramatically change the quality of your output.",
+   "issueUrl": "https://www.superhuman.ai/p/nvidia-hits-pause-on-shipments-to-southeast-asia",
+   "blurb": "Prompting an AI model to simply 'make this better' usually gets you more words but no substance. This viral prompt forces the model to go deeper and think like a top professional — a small tweak that can dramatically change the quality of your output.",
+   "kind": "news",
+   "section": "IN THE KNOW",
+   "date": "2026-11-27",
+   "verifyStatus": "suspect",
+   "tags": {
+    "company-vendor-model": [
+     "anthropic",
+     "claude"
+    ],
+    "concept-theme": [
+     "prompt-engineering"
+    ],
+    "content-type": [
+     "tutorial"
+    ],
+    "domain": [
+     "llm-models",
+     "ai-general"
+    ],
+    "topic-technology": [
+     "prompt-engineering",
+     "frontier-models"
+    ]
+   }
+  },
+  {
+   "id": 22041,
+   "url": "https://archive.superhuman.ai/2125591320341229890",
+   "sourceId": 9,
+   "sourceName": "Superhuman",
+   "title": "The 80% Rule",
+   "titlePt": "A Regra dos 80%",
+   "summaryPt": "Um usuário pediu ao Gemini 4 Neon um conselho genuinamente não óbvio para obter vantagem na vida e ficou 'completamente sem palavras' com a resposta. A dica, conhecida como a regra dos 80%, é algo que a maioria dos indivíduos de alta performance rejeitaria instintivamente — justamente por isso vale a pena considerar. O conselho desafia a busca pela perfeição, sugerindo que se contentar com 80% de qualidade em certas tarefas pode levar a maior produtividade e menos estresse, liberando energia para o que realmente importa.",
+   "snippet": "This user asked Gemini 4 Neon for a genuinely non-obvious life advantage and was left 'completely speechless' at the advice — one that most high-performers would instinctively reject (which is exactly why it’s worth reading).",
+   "issueUrl": "https://www.superhuman.ai/p/nvidia-hits-pause-on-shipments-to-southeast-asia",
+   "blurb": "This user asked Gemini 4 Neon for a genuinely non-obvious life advantage and was left 'completely speechless' at the advice — one that most high-performers would instinctively reject (which is exactly why it’s worth reading).",
+   "kind": "news",
+   "section": "IN THE KNOW",
+   "date": "2026-11-27",
+   "verifyStatus": "suspect",
+   "tags": {
+    "company-vendor-model": [
+     "gemini",
+     "google"
+    ],
+    "concept-theme": [
+     "productivity"
+    ],
+    "content-type": [
+     "hot-take"
+    ],
+    "difficulty": [
+     "all-levels"
+    ],
+    "domain": [
+     "llm-models"
+    ],
+    "framework-library-tool": [
+     "gemini"
+    ],
+    "topic-technology": [
+     "llm-models",
+     "generative-ai",
+     "frontier-models"
+    ],
+    "trending-emerging": [
+     "frontier-models"
+    ]
+   }
+  },
+  {
+   "id": 22042,
+   "url": "https://archive.superhuman.ai/2126026038002209176",
+   "sourceId": 9,
+   "sourceName": "Superhuman",
+   "title": "Loophole List",
+   "titlePt": "Lista de Brechas",
+   "summaryPt": "Um usuário decidiu explorar um caminho alternativo e pediu ao Gemini Neon sugestões de truques de vida considerados antiéticos. Em resposta, recebeu uma lista de 'brechas perfeitamente legais' que as empresas provavelmente prefeririam que ninguém descobrisse. O resumo destaca a tentativa de obter vantagens não convencionais, mostrando como a IA pode revelar lacunas no sistema que passam despercebidas.",
+   "snippet": "This user decided to go another way, and asked Gemini Neon for unethical life hacks and got back a list of 'perfectly legal loopholes' companies would probably rather you never notice.",
+   "issueUrl": "https://www.superhuman.ai/p/nvidia-hits-pause-on-shipments-to-southeast-asia",
+   "blurb": "This user decided to go another way, and asked Gemini Neon for unethical life hacks and got back a list of 'perfectly legal loopholes' companies would probably rather you never notice.",
+   "kind": "news",
+   "section": "IN THE KNOW",
+   "date": "2026-11-27",
+   "verifyStatus": "suspect",
+   "tags": {
+    "company-vendor-model": [
+     "gemini",
+     "google"
+    ],
+    "concept-theme": [
+     "ai-ethics",
+     "responsible-ai",
+     "ai-safety",
+     "guardrails"
+    ],
+    "content-type": [
+     "curated-list",
+     "tips-and-tricks"
+    ],
+    "difficulty": [
+     "all-levels"
+    ],
+    "domain": [
+     "llm-models",
+     "ai-general"
+    ],
+    "framework-library-tool": [
+     "gemini"
+    ],
+    "topic-technology": [
+     "jailbreaks",
+     "ai-ethics",
+     "ai-safety",
+     "llm-models"
+    ],
+    "trending-emerging": [
+     "jailbreaks",
+     "prompt-injection"
+    ]
+   }
+  },
+  {
+   "id": 22043,
+   "url": "https://futurism.com/future-society/gta-6-publisher-furious-reverse-engineers-pc",
+   "sourceId": 9,
+   "sourceName": "Superhuman",
+   "title": "Race to PC",
+   "titlePt": "Corrida para o PC",
+   "summaryPt": "Como era esperado, o sexto título da franquia Grand Theft Auto teve um lançamento estrondoso. A Take-Two Interactive, dona da Rockstar Games, anunciou vendas recordes de US$ 3,79 bilhões em um único dia, tornando GTA 6 o maior lançamento da história do entretenimento. No entanto, devido a acordos de exclusividade com Microsoft e Sony, jogadores de PC ficaram de fora no lançamento. Com o avanço de ferramentas de codificação baseadas em IA, essa espera tradicional mudou. Modders e engenheiros reversos já estão trabalhando em versões não oficiais do jogo para PC, enfrentando a Take-Two, que já removeu mais de 3.000 repositórios no GitHub via DMCA. Apesar disso, novos projetos surgem diariamente, com vídeos mostrando o jogo rodando em PC, ainda que com taxas de quadros muito baixas — um progresso notável em menos de uma semana. Isso levanta questões: o jogo pode se tornar alvo fácil de pirataria, mas também pode levar as publicadoras a adotar medidas ainda mais rígidas de proteção, enquanto milhões de fãs esperam por uma versão oficial para PC.",
+   "snippet": "GTA 6 may not officially be on PC yet, but that hasn’t stopped people from trying. Reverse engineers have apparently managed to get it running, and reportedly have Rockstar’s parent company fuming.",
+   "issueUrl": "https://www.superhuman.ai/p/nvidia-hits-pause-on-shipments-to-southeast-asia",
+   "blurb": "GTA 6 may not officially be on PC yet, but that hasn’t stopped people from trying. Reverse engineers have apparently managed to get it running, and reportedly have Rockstar’s parent company fuming.",
+   "kind": "news",
+   "section": "IN THE KNOW",
+   "date": "2026-11-27",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "github"
+    ],
+    "concept-theme": [
+     "performance",
+     "optimization"
+    ],
+    "content-type": [
+     "news",
+     "analysis"
+    ],
+    "difficulty": [
+     "all-levels"
+    ],
+    "domain": [
+     "ai-general",
+     "llm-models"
+    ],
+    "topic-technology": [
+     "code-models",
+     "generative-ai",
+     "software-development"
+    ],
+    "trending-emerging": [
+     "ai-coding-agents"
+    ]
+   }
+  },
+  {
+   "id": 22044,
+   "url": "https://bsky.app/profile/ricky.fm/post/3n35lo3frik2z",
+   "sourceId": 4,
+   "sourceName": "React Status",
+   "title": "Ricky Hanlon is Leaving Meta (But Not React)",
+   "titlePt": "Ricky Hanlon deixa a Meta, mas não o React",
+   "summaryPt": "Ricky Hanlon, que trabalhou por oito anos na Meta (Facebook) ajudando o React a crescer de 4 milhões para 250 milhões de downloads semanais, anunciou sua saída da empresa. Ele observou que a maior parte do time principal do React já havia deixado a Meta, e agora é a sua vez. Apesar disso, Hanlon continuará trabalhando no React em uma nova empresa a partir da próxima semana, possivelmente na Vercel, conforme comentários de apoio.",
+   "snippet": "After years helping get React \"from 4 million to 250 million weekly downloads\", Ricky has left React's birthplace, noting \"most of the React Core team have left Meta\". This is more an 'end of an era' than big news, as he'll continue to work on React, and React getting its own foundation this year showed us the direction of travel.",
+   "issueUrl": "https://react.statuscode.com/issues/499",
+   "blurb": "After years helping get React \"from 4 million to 250 million weekly downloads\", Ricky has left React's birthplace, noting \"most of the React Core team have left Meta\". This is more an 'end of an era' than big news, as he'll continue to work on React, and React getting its own foundation this year showed us the direction of travel.",
+   "kind": "news",
+   "section": null,
+   "date": "2026-11-27",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "vercel"
+    ],
+    "concept-theme": [
+     "open-source",
+     "community"
+    ],
+    "content-type": [
+     "news",
+     "announcement"
+    ],
+    "domain": [
+     "reactjs",
+     "frontend"
+    ],
+    "framework-library-tool": [
+     "react"
+    ],
+    "topic-technology": [
+     "react"
+    ]
+   }
+  },
+  {
+   "id": 22045,
+   "url": "https://www.gmoniava.com/blog/react-forms-beyond-onsubmit",
+   "sourceId": 4,
+   "sourceName": "React Status",
+   "title": "React Forms Beyond `onSubmit`",
+   "titlePt": "Formulários React: além do onSubmit",
+   "summaryPt": "Este artigo compara três abordagens para lidar com envio de formulários em React: o tradicional onSubmit, a nova prop action introduzida no React 19 e a combinação de onSubmit com o hook useTransition. Usando um exemplo de assinatura de newsletter, o autor mostra como cada método trata o envio, o estado de carregamento e a exibição de mensagens de erro ou sucesso. A prop action simplifica o código ao eliminar a necessidade de event.preventDefault(), recebe o FormData diretamente e reinicia automaticamente os campos não controlados após a conclusão. Além disso, a função passada para action roda dentro de uma Transition, permitindo o uso de atualizações otimistas e error boundaries. Para indicar o estado de envio, o artigo recomenda o hook useFormStatus em componentes filhos, pois atualizações de estado síncronas dentro de Transitions podem ser adiadas. Já a abordagem com useTransition oferece controle explícito via isPending, mas requer que atualizações após await sejam envolvidas em startTransition para serem tratadas como Transitions. O texto também destaca uma diferença importante: com Server Functions, a prop action permite progressive enhancement, pois o formulário pode funcionar mesmo antes do JavaScript ser carregado, algo que não é possível com onSubmit. Ao final, uma tabela comparativa resume as diferenças entre as três abordagens, e o autor menciona o hook useActionState como uma alternativa futura para gerenciar o resultado da action.",
+   "snippet": "See the differences between a form built three ways (with onSubmit, React 19's action prop, and onSubmit plus useTransition). Each has pros and cons, shown in a comparison table.",
+   "issueUrl": "https://react.statuscode.com/issues/499",
+   "blurb": "See the differences between a form built three ways (with onSubmit, React 19's action prop, and onSubmit plus useTransition). Each has pros and cons, shown in a comparison table.",
+   "kind": "news",
+   "section": null,
+   "date": "2026-11-27",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "state-management",
+     "error-handling",
+     "async"
+    ],
+    "content-type": [
+     "how-to",
+     "deep-dive"
+    ],
+    "difficulty": [
+     "intermediate"
+    ],
+    "domain": [
+     "reactjs",
+     "frontend"
+    ],
+    "ecosystem-language": [
+     "typescript",
+     "javascript"
+    ],
+    "framework-library-tool": [
+     "react"
+    ],
+    "topic-technology": [
+     "forms",
+     "usetransition",
+     "react-19",
+     "react"
+    ]
+   }
+  },
+  {
+   "id": 22046,
+   "url": "https://expo.dev/blog/ship-to-production-from-your-phone",
+   "sourceId": 4,
+   "sourceName": "React Status",
+   "title": "Can You Confidently Ship to Production From Your Phone?",
+   "titlePt": "Você consegue enviar para produção com confiança pelo celular?",
+   "summaryPt": "O autor conta como corrigiu um bug de interface no seu aplicativo OpenMulticam diretamente do celular, durante uma caminhada. Usando o ChatGPT com o conector Expo, ele pediu ao agente que investigasse o problema; o agente abriu um pull request com a correção, testes e vídeos de verificação em simuladores na nuvem. Depois de revisar e mesclar o PR, o autor publicou a atualização over-the-air (OTA) em dois canais — primeiro em um canal de verificação e depois em produção, resolvendo o bug para todos os usuários. O artigo explica a arquitetura envolvida (Expo Workflows, Expo Update, Expo Simulators e o conector MCP) e detalha os quatro passos para configurar esse fluxo em um projeto Expo: adicionar o conector ao ChatGPT, Claude ou Grok; conectar o repositório GitHub ao projeto no expo.dev; dar ao agente acesso para criar pull requests via Codex (ou token GitHub); e colar um prompt de configuração que ajusta os arquivos de workflow. Também são listadas as limitações: apenas JavaScript e assets são suportados (mudanças nativas exigem novo build), o padrão é iOS (mas dá para incluir Android) e o simulador não tem câmera física, então a verificação precisa usar feed simulado. Por fim, o autor indica pontos de partida, como o guia do Expo Update e o fluxo de Issue para PR para quem quiser explorar mais automação.",
+   "snippet": "How an Expo engineer fixed a bug and shipped an over-the-air update while on a walk.",
+   "issueUrl": "https://react.statuscode.com/issues/499",
+   "blurb": "How an Expo engineer fixed a bug and shipped an over-the-air update while on a walk.",
+   "kind": "news",
+   "section": null,
+   "date": "2026-11-27",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "openai",
+     "anthropic",
+     "xai"
+    ],
+    "concept-theme": [
+     "developer-productivity",
+     "dev-experience",
+     "ci-cd",
+     "e2e-testing"
+    ],
+    "content-type": [
+     "tutorial",
+     "walkthrough"
+    ],
+    "difficulty": [
+     "intermediate"
+    ],
+    "domain": [
+     "reactjs",
+     "frontend"
+    ],
+    "ecosystem-language": [
+     "javascript"
+    ],
+    "framework-library-tool": [
+     "react-native"
+    ],
+    "topic-technology": [
+     "react-native",
+     "ai-agents",
+     "ci-cd",
+     "deployment"
+    ],
+    "trending-emerging": [
+     "ai-coding-agents",
+     "agentic-ai"
+    ]
+   }
+  },
+  {
+   "id": 22047,
+   "url": "https://base44.com/blog/base44-apps-full-stack",
+   "sourceId": 4,
+   "sourceName": "React Status",
+   "title": "Why Base44 Now Generates New Apps with TanStack Start",
+   "titlePt": "Por que a Base44 agora gera novos apps com TanStack Start",
+   "summaryPt": "O artigo da Base44 explica a migração da plataforma de aplicativos single-page (SPA) com funções backend separadas para uma arquitetura full-stack baseada em TanStack Start. O time queria unificar o código de frontend e backend, permitir compartilhamento de código e ter server-side rendering para melhorar SEO e desempenho em sites públicos. A escolha por TanStack Start se deu por ele ser construído sobre Vite, usar React e atender tanto apps com login quanto sites públicos que precisam de renderização no servidor. A implementação envolveu três frentes: ajustar o servidor dentro de cada sandbox de desenvolvimento, criar um novo pipeline de hospedagem no Cloudflare Workers com proxy para autenticação e ensinar o agente de IA a escrever apps no novo stack. O time também corrigiu um problema de health check que confundia exceções da aplicação com queda do servidor, trocando a verificação pela página inicial por um ping do Vite. A migração foi lançada gradualmente atrás de um feature flag, monitorado por um agente de IA que acompanhava métricas e podia desativar o recurso automaticamente. Quando uma atualização de dependência quebrou a renderização no servidor, o agente desligou o flag e o problema foi contido. O resultado: a taxa de falhas na inicialização caiu de cerca de 4% para menos de 0,1%, abaixo dos 0,5% dos apps single-page. O custo por interação do agente ainda é um pouco maior, mas o time considera o benefício para os usuários compensador e já planeja melhorias de performance e novos scaffolds.",
+   "snippet": "Bye to SPAs plus separate backend functions; hello full-stack apps.",
+   "issueUrl": "https://react.statuscode.com/issues/499",
+   "blurb": "Bye to SPAs plus separate backend functions; hello full-stack apps.",
+   "kind": "news",
+   "section": null,
+   "date": "2026-11-27",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "architecture",
+     "platform-engineering",
+     "technical-debt",
+     "seo"
+    ],
+    "content-type": [
+     "case-study",
+     "deep-dive"
+    ],
+    "difficulty": [
+     "intermediate"
+    ],
+    "domain": [
+     "reactjs",
+     "frontend",
+     "backend"
+    ],
+    "ecosystem-language": [
+     "typescript",
+     "javascript"
+    ],
+    "framework-library-tool": [
+     "react",
+     "vite"
+    ],
+    "topic-technology": [
+     "ssr",
+     "ai-agents",
+     "spa",
+     "serverless",
+     "react"
+    ],
+    "trending-emerging": [
+     "ai-coding-agents"
+    ]
+   }
+  },
+  {
+   "id": 22048,
+   "url": "https://sigh.dev/posts/vibecoding-faster-react-tests",
+   "sourceId": 4,
+   "sourceName": "React Status",
+   "title": "React Testing Library is Faster When It's Part of the DOM",
+   "titlePt": "React Testing Library fica mais rápida quando o DOM é feito para ela",
+   "summaryPt": "O artigo descreve como o autor criou o @ctrl/dom, uma implementação de DOM otimizada para testes com React Testing Library, alcançando grandes ganhos de desempenho em suítes de testes. Em vez de percorrer a API pública do DOM como o jsdom, o @ctrl/dom usa um único objeto por nó, compartilha classes entre janelas e integra a lógica de Testing Library diretamente ao DOM, evitando chamadas desnecessárias a métodos como matches() e getComputedStyle(). Resultados práticos mostram acelerações de 32% a 54% em projetos reais (Sentry, Base UI, React Router, React Hook Form), e benchmarks sintéticos indicam melhorias de até 5–6× em testes isolados. O artigo também destaca que o @ctrl/dom usa relógio virtual para timers (eliminando espera real) e que a maior parte do ganho vem da reescrita da Testing Library, enquanto o ambiente de execução (Vitest, Jest ou Bun) também influencia o desempenho geral. A solução é compatível apenas com Node 26+ e React 19, e ainda está em versão 0.x, sujeita a bugs.",
+   "snippet": "An interesting approach.",
+   "issueUrl": "https://react.statuscode.com/issues/499",
+   "blurb": "An interesting approach.",
+   "kind": "news",
+   "section": null,
+   "date": "2026-11-27",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "performance",
+     "unit-testing"
+    ],
+    "content-type": [
+     "benchmark",
+     "analysis"
+    ],
+    "difficulty": [
+     "advanced"
+    ],
+    "domain": [
+     "reactjs",
+     "frontend"
+    ],
+    "ecosystem-language": [
+     "javascript"
+    ],
+    "framework-library-tool": [
+     "react"
+    ],
+    "topic-technology": [
+     "testing-react",
+     "component-testing",
+     "dom",
+     "performance-optimization"
+    ]
+   }
+  },
+  {
+   "id": 22049,
+   "url": "https://zpao.com/posts/14-years-at-meta",
+   "sourceId": 4,
+   "sourceName": "React Status",
+   "title": "Paul O'Shannessy Looks Back at 14 Years at Meta",
+   "titlePt": "Paul O'Shannessy relembra seus 14 anos na Meta, do React ao GitHub",
+   "summaryPt": "Paul O'Shannessy, engenheiro conhecido por ter aberto o código do React em 2013 e por ajudar a criar a PyTorch Foundation e a React Foundation, deixou a Meta neste ano e publicou uma retrospectiva de sua trajetória. Ele entrou na empresa em 2012, vindo da Mozilla, e começou no Newsfeed, passando depois a integrar o time inicial do React. Nos três anos seguintes, manteve praticamente sozinho o projeto open source da biblioteca, além de ajudar a tirar do papel projetos como Jest, Relay, Draft e Flow. Depois, migrou para o time de Open Source da empresa, onde passou cerca de oito anos como engineering manager e acabou liderando o OSPO (Open Source Program Office) da Meta. O trabalho envolvia desde apoiar times de engenharia até negociar contratos de milhões de dólares, escrever políticas e atuar na formação de fundações. Ele conta que foi pego nos layoffs recentes da empresa, mas recusou a oferta de permanecer como IC em Applied AI, em parte por burnout e pelo desgaste pessoal: a esposa havia sido diagnosticada com esclerose múltipla e a família precisou se despedir da cachorra de 14 anos. Após cinco meses de pausa, O'Shannessy volta ao mercado de trabalho na próxima semana, agora no GitHub, onde pretende construir a infraestrutura e os produtos que ajudam a viabilizar projetos open source ao redor do mundo.",
+   "snippet": "Paul O'Shannessy, who pushed React's first public code in 2013 and helped form the foundation, also left Meta this year and wrote a look back at his 14 years there.",
+   "issueUrl": "https://react.statuscode.com/issues/499",
+   "blurb": "Paul O'Shannessy, who pushed React's first public code in 2013 and helped form the foundation, also left Meta this year and wrote a look back at his 14 years there.",
+   "kind": "news",
+   "section": null,
+   "date": "2026-11-27",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "meta-ai"
+    ],
+    "concept-theme": [
+     "dev-experience",
+     "developer-productivity"
+    ],
+    "content-type": [
+     "retrospective"
+    ],
+    "difficulty": [
+     "all-levels"
+    ],
+    "domain": [
+     "reactjs",
+     "frontend"
+    ],
+    "ecosystem-language": [
+     "javascript"
+    ],
+    "framework-library-tool": [
+     "react"
+    ],
+    "topic-technology": [
+     "react",
+     "web-development",
+     "software-development"
+    ]
+   }
+  },
+  {
+   "id": 22050,
+   "url": "https://generativeloaders.com",
+   "sourceId": 4,
+   "sourceName": "React Status",
+   "title": "Generative Loaders: Loading States for Generative UI",
+   "titlePt": "Loaders Generativos: Estados de Carregamento para UI Generativa",
+   "summaryPt": "O artigo apresenta uma coleção de quase cinquenta loaders elegantes e acessíveis para interfaces generativas, desenvolvidos em React e instaláveis via npm (comando: npm install generative-loaders). Esses componentes visam melhorar a experiência do usuário durante momentos de 'pensamento' da interface, como quando um modelo de linguagem (LLM) está gerando texto, uma imagem está sendo criada ou processos em segundo plano estão em execução. A biblioteca inclui variações para texto, imagens e controles de velocidade de animação, além de opções como Decode, Typewriter, Skeleton, Cascade, entre outras, permitindo exibir de forma clara e visual o progresso de tarefas generativas.",
+   "snippet": "Almost fifty elegant and accessible ways to show the 'thinking' moments in UIs, like when an LLM is generating text, an image is being generated, or even just while a background process is working on something.",
+   "issueUrl": "https://react.statuscode.com/issues/499",
+   "blurb": "Almost fifty elegant and accessible ways to show the 'thinking' moments in UIs, like when an LLM is generating text, an image is being generated, or even just while a background process is working on something.",
+   "kind": "tool",
+   "section": "Code, Tools & Libraries",
+   "date": "2026-11-27",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "ui",
+     "ux"
+    ],
+    "content-type": [
+     "library-release",
+     "showcase"
+    ],
+    "difficulty": [
+     "intermediate"
+    ],
+    "domain": [
+     "reactjs",
+     "frontend"
+    ],
+    "ecosystem-language": [
+     "javascript",
+     "typescript"
+    ],
+    "framework-library-tool": [
+     "react"
+    ],
+    "topic-technology": [
+     "react",
+     "component-libraries",
+     "generative-ai",
+     "animations"
+    ],
+    "trending-emerging": [
+     "generative-ui"
+    ]
+   }
+  },
+  {
+   "id": 22051,
+   "url": "https://vcarl.com/sashay",
+   "sourceId": 4,
+   "sourceName": "React Status",
+   "title": "Sashay: Sliding, Resizable Panes for React",
+   "titlePt": "Sashay: painéis deslizantes e redimensionáveis para React",
+   "summaryPt": "Sashay é uma biblioteca React que permite criar painéis redimensionáveis e deslizantes, oferecendo aos usuários a liberdade de organizar a interface de acordo com suas preferências. Com um simples controle na borda entre painéis, é possível arrastar para redimensionar, com ajuste automático para frações simples (denominadores até seis), garantindo que o layout funcione bem em diferentes tamanhos de tela. Em dispositivos móveis, as bordas se transformam em abas para facilitar a navegação. O layout pode ser salvo na URL e compartilhado, mantendo a disposição dos painéis. A biblioteca suporta barras inferiores por painel e dobra profundamente painéis em uma coluna fina, mantendo o desempenho estável. É uma solução intermediária entre interfaces totalmente customizáveis e layouts responsivos simples.",
+   "snippet": "A way to let users arrange your app the way they want by dragging and snapping edges between panes (and on phones, the edges become tabs). The homepage is a good demo itself.",
+   "issueUrl": "https://react.statuscode.com/issues/499",
+   "blurb": "A way to let users arrange your app the way they want by dragging and snapping edges between panes (and on phones, the edges become tabs). The homepage is a good demo itself.",
+   "kind": "tool",
+   "section": "Code, Tools & Libraries",
+   "date": "2026-11-27",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "ui",
+     "ux",
+     "state-management"
+    ],
+    "content-type": [
+     "library-release"
+    ],
+    "difficulty": [
+     "for-practitioners"
+    ],
+    "domain": [
+     "reactjs",
+     "frontend"
+    ],
+    "ecosystem-language": [
+     "javascript"
+    ],
+    "framework-library-tool": [
+     "react"
+    ],
+    "topic-technology": [
+     "react",
+     "component-composition",
+     "responsive-design",
+     "state-management"
+    ]
+   }
+  },
+  {
+   "id": 22052,
+   "url": "https://github.com/wojtekmaj/react-pdf/releases/tag/v11.1.0",
+   "sourceId": 4,
+   "sourceName": "React Status",
+   "title": "react-pdf 11.1",
+   "titlePt": "react-pdf 11.1",
+   "summaryPt": "A biblioteca react-pdf, usada para exibir PDFs em aplicações React, lançou a versão 11.1. A atualização traz melhorias significativas, incluindo suporte à nova versão do PDF.js (6.5.438), que proporciona maior desempenho e seleção de texto mais eficiente. Também foram adicionadas classes de modificador para estados de carregamento, erro e ausência de dados nos componentes Document, Page e Thumbnail, facilitando a estilização condicional. Além disso, a versão inclui aprimoramentos de acessibilidade, renderização de anotações e formulários, conversão de fontes, decodificação de imagens, renderização de padrões e seleção de texto. A documentação para builds legados do PDF.js e exemplos com Next.js foram atualizados. Correções de bugs incluem o posicionamento correto de anotações não rotacionadas em páginas rotacionadas e a configuração de cópia de assets no Vite para cMaps, módulos WebAssembly e fontes padrão.",
+   "snippet": "Display PDFs in your React app. Now on a newer version of PDF.js with better performance and text selecting.",
+   "issueUrl": "https://react.statuscode.com/issues/499",
+   "blurb": "Display PDFs in your React app. Now on a newer version of PDF.js with better performance and text selecting.",
+   "kind": "release",
+   "section": "Code, Tools & Libraries",
+   "date": "2026-11-27",
+   "verifyStatus": "suspect",
+   "tags": {
+    "concept-theme": [
+     "performance",
+     "accessibility"
+    ],
+    "content-type": [
+     "version-release",
+     "library-release"
+    ],
+    "difficulty": [
+     "for-practitioners"
+    ],
+    "domain": [
+     "reactjs",
+     "frontend"
+    ],
+    "ecosystem-language": [
+     "javascript"
+    ],
+    "framework-library-tool": [
+     "react"
+    ],
+    "topic-technology": [
+     "react",
+     "component-libraries",
+     "accessibility",
+     "performance-optimization",
+     "javascript"
+    ]
+   }
+  },
+  {
+   "id": 22053,
+   "url": "https://github.com/testing-library/jest-dom/releases/tag/v8.0.0",
+   "sourceId": 4,
+   "sourceName": "React Status",
+   "title": "jest-dom 8.0",
+   "titlePt": "jest-dom 8.0",
+   "summaryPt": "jest-dom 8.0 é uma biblioteca que oferece matchers personalizados de DOM para Jest e Vitest, facilitando a escrita de testes mais expressivos e legíveis. A nova versão traz uma mudança importante para usuários do Vitest: agora é necessário utilizar o Vitest 5 ou versão superior para aproveitar os recursos do jest-dom 8.0.",
+   "snippet": "Custom DOM matchers for Jest and Vitest. Note that Vitest users now need Vitest 5 or later.",
+   "issueUrl": "https://react.statuscode.com/issues/499",
+   "blurb": "Custom DOM matchers for Jest and Vitest. Note that Vitest users now need Vitest 5 or later.",
+   "kind": "release",
+   "section": "Code, Tools & Libraries",
+   "date": "2026-11-27",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "testing"
+    ],
+    "content-type": [
+     "version-release"
+    ],
+    "difficulty": [
+     "intermediate"
+    ],
+    "domain": [
+     "frontend"
+    ],
+    "ecosystem-language": [
+     "javascript"
+    ],
+    "framework-library-tool": [
+     "jest",
+     "vitest"
+    ],
+    "topic-technology": [
+     "component-testing",
+     "dom",
+     "javascript"
+    ]
+   }
+  },
+  {
+   "id": 22054,
+   "url": "https://github.com/callstackincubator/voltra/releases/tag/v2.7.0",
+   "sourceId": 4,
+   "sourceName": "React Status",
+   "title": "Voltra 2.7",
+   "titlePt": "Voltra 2.7",
+   "summaryPt": "A versão 2.7 do Voltra traz melhorias importantes para iOS. Os Dynamic Widgets agora exibem o motivo da falha na renderização, seguindo a mesma política que o Android recebeu na versão 2.6.0. Em builds de depuração, um erro é mostrado na Home Screen com o ID do widget, o estágio da falha, a mensagem e o stack trace. Em builds de lançamento, o último render bem-sucedido é mantido para cada widget, configuração, tamanho e aparência. Outra novidade é o suporte a gradientes em `style.backgroundImage` no iOS, incluindo `linear-gradient`, `radial-gradient` e `conic-gradient`, agora compatível com o Android. Além disso, foram corrigidos três bugs no iOS: gradientes sem posições explícitas nas paradas de cor, um crash no VoltraView em builds de depuração com React Native 0.88 (Expo SDK 58) e a leitura incorreta das props iniciais. No Android, o fetch de Dynamic Widgets server-driven passou a ocorrer apenas uma vez ao colocar o widget, em vez de duas.",
+   "snippet": "A way to build iOS Live Activities and widgets as React Native components.",
+   "issueUrl": "https://react.statuscode.com/issues/499",
+   "blurb": "A way to build iOS Live Activities and widgets as React Native components.",
+   "kind": "release",
+   "section": "Code, Tools & Libraries",
+   "date": "2026-11-27",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "error-handling",
+     "debugging",
+     "logging",
+     "ui"
+    ],
+    "content-type": [
+     "version-release"
+    ],
+    "difficulty": [
+     "for-practitioners"
+    ],
+    "domain": [
+     "reactjs",
+     "frontend"
+    ],
+    "ecosystem-language": [
+     "javascript"
+    ],
+    "framework-library-tool": [
+     "react-native",
+     "expo"
+    ],
+    "topic-technology": [
+     "react-native",
+     "component-libraries",
+     "error-handling",
+     "logging"
+    ]
+   }
+  },
+  {
+   "id": 22055,
+   "url": "https://github.com/hustcc/echarts-for-react/releases/tag/v3.1.0",
+   "sourceId": 4,
+   "sourceName": "React Status",
+   "title": "echarts-for-react 3.1",
+   "titlePt": "Versão 3.1 do echarts-for-react",
+   "summaryPt": "Esta versão do echarts-for-react, um wrapper React para Apache ECharts, traz diversas correções e melhorias. Entre os principais destaques, estão a limpeza de event listeners de renders anteriores, correções para compatibilidade com React 19, a declaração de tslib como dependência de runtime, e a adição de um mapa de exports para que bundlers resolvam a build ESM corretamente. Também foi ajustado o tipo de opções para aceitar todas as opções de inicialização do ECharts. Além disso, foi adicionado um workflow de publicação via OIDC no npm. O pacote também recebeu contribuições de novos colaboradores, como Sam-Razavi e hustcc (com Copilot). No geral, a versão 3.1 foca em estabilidade e compatibilidade, preparando o terreno para futuras atualizações.",
+   "snippet": "React wrapper for Apache ECharts.",
+   "issueUrl": "https://react.statuscode.com/issues/499",
+   "blurb": "React wrapper for Apache ECharts.",
+   "kind": "release",
+   "section": "Code, Tools & Libraries",
+   "date": "2026-11-27",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "dev-experience",
+     "type-safety",
+     "api-design",
+     "ci-cd"
+    ],
+    "content-type": [
+     "version-release",
+     "library-release"
+    ],
+    "difficulty": [
+     "intermediate"
+    ],
+    "domain": [
+     "reactjs",
+     "frontend"
+    ],
+    "ecosystem-language": [
+     "javascript",
+     "typescript"
+    ],
+    "framework-library-tool": [
+     "react"
+    ],
+    "topic-technology": [
+     "react",
+     "typescript",
+     "esm"
+    ]
+   }
+  },
+  {
+   "id": 22056,
+   "url": "https://github.com/mui/material-ui/releases/tag/v9.6.0",
+   "sourceId": 4,
+   "sourceName": "React Status",
+   "title": "Material UI 9.6",
+   "titlePt": "Material UI 9.6",
+   "summaryPt": "A versão 9.6 do Material UI (MUI) chega com melhorias de personalização e acessibilidade. Entre os destaques está o novo aprimorador de tema experimental unstable_enhanceDensity, que aplica dimensionamento consistente e ajustável aos componentes. Também foram adicionadas opções para customizar o anel de foco visível, com focusVisible.insetOverrides e theme.applyFocusVisible, além do suporte ao idioma uzbeque (uz-UZ). O release inclui dezenas de correções em componentes como Autocomplete, Select, Slider, TextField, Tabs, Tooltip e Grid, abrangendo desde problemas de TypeScript e desempenho até ajustes de estilo e comportamento de teclado. Pacotes do ecossistema, como @mui/system, @mui/utils e @mui/codemod, também receberam correções, e a documentação ganhou novos exemplos e guias atualizados.",
+   "snippet": "Comprehensive React component suite.",
+   "issueUrl": "https://react.statuscode.com/issues/499",
+   "blurb": "Comprehensive React component suite.",
+   "kind": "release",
+   "section": "Code, Tools & Libraries",
+   "date": "2026-11-27",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "design-systems",
+     "accessibility",
+     "localization"
+    ],
+    "content-type": [
+     "version-release",
+     "library-release"
+    ],
+    "difficulty": [
+     "for-practitioners"
+    ],
+    "domain": [
+     "reactjs",
+     "frontend"
+    ],
+    "ecosystem-language": [
+     "javascript",
+     "typescript",
+     "css"
+    ],
+    "framework-library-tool": [
+     "material-ui"
+    ],
+    "topic-technology": [
+     "react",
+     "component-libraries",
+     "design-systems",
+     "theming",
+     "css",
+     "typescript"
+    ]
+   }
+  },
+  {
+   "id": 22057,
+   "url": "https://svelte.dev/blog/ten-years-of-svelte",
+   "sourceId": 4,
+   "sourceName": "React Status",
+   "title": "Svelte celebrates ten years",
+   "titlePt": "Svelte celebra dez anos",
+   "summaryPt": "O framework Svelte completou uma década desde seu primeiro commit. Para marcar a data, a comunidade se reuniu em Liubliana, na Eslovênia, durante o terceiro Svelte Summit presencial, com atmosfera animada e diversos anúncios. Entre as novidades estão o suporte experimental a renderizadores personalizados (permitindo criar apps nativos, UIs de terminal e PDFs), avanços no Svelte assíncrono, a integração do vite-devtools-svelte à organização Svelte e o rsvelte, uma ferramenta unificada escrita em Rust, ainda em desenvolvimento, mas muito mais rápida que as versões em JavaScript. Também foram anunciados o Svelte como framework central do Storybook e o mdsvex 1.0, um kit de markdown para componentes Svelte. O evento também abordou o papel da IA no desenvolvimento, com muitos participantes usando a tecnologia com certa ambivalência, mas reconhecendo que encontros presenciais mostram que o melhor do trabalho não pode ser automatizado. As palestras serão publicadas no canal do YouTube da Svelte Society nos próximos dias.",
+   "snippet": "The Svelte team is celebrating the project's tenth birthday.",
+   "issueUrl": "https://react.statuscode.com/issues/499",
+   "blurb": "The Svelte team is celebrating the project's tenth birthday.",
+   "kind": "news",
+   "section": "Elsewhere in the ecosystem",
+   "date": "2026-11-27",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "community",
+     "open-source",
+     "performance",
+     "dev-experience"
+    ],
+    "content-type": [
+     "retrospective",
+     "announcement"
+    ],
+    "difficulty": [
+     "for-practitioners"
+    ],
+    "domain": [
+     "frontend"
+    ],
+    "ecosystem-language": [
+     "javascript",
+     "rust"
+    ],
+    "framework-library-tool": [
+     "svelte",
+     "vite",
+     "storybook"
+    ],
+    "topic-technology": [
+     "javascript"
+    ],
+    "trending-emerging": [
+     "mcp",
+     "ai-coding-agents"
+    ]
+   }
+  },
+  {
+   "id": 22058,
+   "url": "https://github.com/TanStack/query/discussions/12669",
+   "sourceId": 4,
+   "sourceName": "React Status",
+   "title": "The Roadmap to TanStack Query v6",
+   "titlePt": "Roteiro do TanStack Query v6",
+   "summaryPt": "O artigo apresenta o plano da próxima versão principal do TanStack Query, conforme compartilhado por Dominik. A v6 terá foco em limpeza do código, será exclusivamente ESM e usará React 19 como versão base, com quebras controladas — nas palavras dele, \"vamos quebrar coisas, mas não muitas\". O texto também discute decisões técnicas, como a lógica de desempate no descarte de consultas inativas, propondo armazenar o maior timestamp de gcTime em vez do último registro. Além disso, aborda a extensão das opções de consulta: o núcleo deve expor apenas opções universais, enquanto adaptadores (como React) podem adicionar campos específicos, por exemplo throwOnError e suspense. A comunidade é convidada a enviar feedback.",
+   "snippet": "Dominik has shared the plan for TanStack Query's next major version, and it's focused on cleaning up, going ESM-only, React 19 as a baseline, etc. In his words, \"we'll break things, but not too many.\" If you've got things to say, feedback is welcomed.",
+   "issueUrl": "https://react.statuscode.com/issues/499",
+   "blurb": "Dominik has shared the plan for TanStack Query's next major version, and it's focused on cleaning up, going ESM-only, React 19 as a baseline, etc. In his words, \"we'll break things, but not too many.\" If you've got things to say, feedback is welcomed.",
+   "kind": "news",
+   "section": null,
+   "date": "2026-11-27",
+   "verifyStatus": "suspect",
+   "tags": {
+    "concept-theme": [
+     "data-fetching",
+     "caching",
+     "state-management",
+     "api-design"
+    ],
+    "content-type": [
+     "roadmap"
+    ],
+    "difficulty": [
+     "advanced"
+    ],
+    "domain": [
+     "reactjs",
+     "frontend"
+    ],
+    "ecosystem-language": [
+     "javascript",
+     "typescript"
+    ],
+    "framework-library-tool": [
+     "tanstack-query"
+    ],
+    "topic-technology": [
+     "react",
+     "data-fetching",
+     "caching",
+     "state-management",
+     "performance-optimization"
+    ]
+   }
+  },
+  {
+   "id": 22059,
+   "url": "https://github.com/expo/exact",
+   "sourceId": 4,
+   "sourceName": "React Status",
+   "title": "Exact: Expo's Experimental All-Platform App Framework",
+   "titlePt": "Exact: framework experimental de apps multiplataforma da Expo",
+   "summaryPt": "Exact é um framework experimental criado pela Expo (empresa por trás do React Native) para desenvolver aplicativos nativos em várias plataformas com uma única base de código. Diferente de soluções \"cross-platform\" tradicionais, que costumam nivelar os recursos de cada sistema, o Exact adota uma abordagem \"all-platform\": usa componentes e APIs nativas reais em cada ambiente — DOM no navegador, UIKit no iOS, AppKit no macOS, Material 3 com views nativas no Android e renderização direta via GPU nos demais. O projeto é construído em Rust, com lógica de app em TypeScript (Hermes) ou Rust, e já roda em web, iOS, macOS, Android e Linux, com Windows em desenvolvimento, além de hosts para tvOS, watchOS, Android TV e terminal. Ainda é pré-1.0, sem versão empacotada nem garantia de API estável — o uso é feito diretamente do repositório. O framework é desenhado em torno de três prioridades: ser \"agent native\" (integrado de ponta a ponta para agentes de codificação, com um driver determinístico de 10 operações que controla todas as plataformas), velocidade extrema (cold start de 100 ms, recarga de 100 ms, zero JavaScript antes do primeiro pixel e runtime web de ~20 KB) e \"no compromises\" (permitindo desde o visual nativo automático até controle criativo total com layout CSS, SVG, Canvas 2D, shaders wgpu e acesso direto a APIs nativas, como câmera, HealthKit, passkeys etc.). O texto também compara o Exact com React Native e Flutter, mostrando as diferenças de arquitetura, e oferece um guia rápido de instalação e criação de apps no macOS com Rust, Bun e Xcode.",
+   "snippet": "It's not React, but it's interesting to see the company behind so much React Native tooling building a Rust-powered multi-platform app framework. A big focus is on being 'agent native'.",
+   "issueUrl": "https://react.statuscode.com/issues/499",
+   "blurb": "It's not React, but it's interesting to see the company behind so much React Native tooling building a Rust-powered multi-platform app framework. A big focus is on being 'agent native'.",
+   "kind": "tool",
+   "section": null,
+   "date": "2026-11-27",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "performance",
+     "architecture",
+     "developer-productivity"
+    ],
+    "content-type": [
+     "announcement",
+     "deep-dive"
+    ],
+    "difficulty": [
+     "advanced"
+    ],
+    "domain": [
+     "frontend"
+    ],
+    "framework-library-tool": [
+     "react-native"
+    ],
+    "topic-technology": [
+     "software-development",
+     "react-native",
+     "ai-agents",
+     "web-development",
+     "performance-optimization"
+    ],
+    "trending-emerging": [
+     "ai-coding-agents"
+    ]
+   }
+  },
+  {
+   "id": 22060,
+   "url": "https://www.alexedwards.net/blog/an-overview-of-go-tooling-v2",
+   "sourceId": 6,
+   "sourceName": "Golang Weekly",
+   "title": "An Overview of Go Tooling v2",
+   "titlePt": "Uma Visão Geral das Ferramentas do Go v2",
+   "summaryPt": "Este artigo é uma versão atualizada de um post de 2019 sobre as ferramentas do Go, refletindo as grandes mudanças dos últimos sete anos. O texto aborda o ecossistema atual, incluindo o uso de módulos, a integração com o gopls e o suporte a tokens e assistentes de IA, oferecendo um panorama completo do tooling moderno da linguagem. O autor explica as três formas principais de instalar e executar ferramentas de terceiros: go install, go run e go tool, cada uma adequada a diferentes cenários, como uso geral, execuções pontuais ou versionamento consistente em equipes. Em seguida, explora ferramentas essenciais para o desenvolvimento, como o gopls (servidor de linguagem oficial), go doc para documentação, go env para informações do ambiente, gofmt e goimports para formatação de código, e go mod tidy para manutenção dos arquivos de módulo. O artigo também cobre outras áreas importantes: qualidade de código (segurança, correção e higiene), gerenciamento de dependências, testes (incluindo fuzzing e stress test), construção de binários, compilação cruzada, debugging, profiling, otimização guiada por perfil (PGO), rastreamento de execução e detecção de corridas. Por fim, menciona a seção de reportar bugs, fechando com um guia prático para quem quer dominar as ferramentas do Go na era atual.",
+   "snippet": "Way back in 2019, I wrote the blog post An Overview of Go's Tooling. It was a popular article and IIRC, ended up being one of the most-read items in the Go Weekly newsletter that year. It's also one that I personally still come back to fairly often, when I want to remind myself of a specific command that I can't remember. But a lot has changed in the past 7 years, and some of the in",
+   "issueUrl": "https://golangweekly.com/issues/626",
+   "blurb": null,
+   "kind": "news",
+   "section": null,
+   "date": "2026-11-27",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "developer-productivity",
+     "testing",
+     "debugging",
+     "optimization"
+    ],
+    "content-type": [
+     "guide",
+     "reference"
+    ],
+    "difficulty": [
+     "intermediate"
+    ],
+    "domain": [
+     "backend"
+    ],
+    "ecosystem-language": [
+     "go"
+    ],
+    "topic-technology": [
+     "software-development",
+     "mcp"
+    ],
+    "trending-emerging": [
+     "ai-coding-agents",
+     "mcp"
+    ]
+   }
+  },
+  {
+   "id": 22061,
+   "url": "https://groups.google.com/g/golang-dev/c/jWSe53fL_dI",
+   "sourceId": 6,
+   "sourceName": "Golang Weekly",
+   "title": "Go 1.28's scheduled development freeze has begun",
+   "titlePt": "O congelamento de desenvolvimento programado do Go 1.28 começou",
+   "summaryPt": "A equipe do Go anunciou o início do congelamento de desenvolvimento para a versão 1.28. A partir de agora, todos os CLs (change lists) de novas funcionalidades ou otimizações precisam aguardar a próxima versão; apenas correções de bugs são aceitas. O anúncio orienta os desenvolvedores a consultarem a página go.dev/s/release, especialmente a seção sobre o início do congelamento na quarta semana de maio/novembro, para esclarecer dúvidas sobre o ciclo de lançamento. Além disso, o primeiro release candidate (RC1) do Go 1.28 está previsto para a semana de 10 de dezembro, e a equipe pede que a comunidade foque em resolver problemas que possam atrasar essa data.",
+   "snippet": "with RC1 'tentatively scheduled' for the week of December 10.",
+   "issueUrl": "https://golangweekly.com/issues/626",
+   "blurb": "with RC1 'tentatively scheduled' for the week of December 10.",
+   "kind": "news",
+   "section": "IN BRIEF",
+   "date": "2026-11-27",
+   "verifyStatus": "ok",
+   "tags": {
+    "content-type": [
+     "announcement"
+    ],
+    "difficulty": [
+     "all-levels"
+    ],
+    "domain": [
+     "backend"
+    ],
+    "ecosystem-language": [
+     "go"
+    ],
+    "topic-technology": [
+     "software-development"
+    ]
+   }
+  },
+  {
+   "id": 22062,
+   "url": "https://go-review.googlesource.com/c/go/+/866013",
+   "sourceId": 6,
+   "sourceName": "Golang Weekly",
+   "title": "Stable SIMD API is now enabled by default",
+   "titlePt": "API SIMD estável habilitada por padrão no Go",
+   "summaryPt": "A API SIMD estável para Go 1.28 agora é ativada por padrão, após ser aceita na semana passada. Para desativá-la, os desenvolvedores podem usar a variável de ambiente GOEXPERIMENT=nosimdstable. Essa mudança simplifica o uso de instruções SIMD em código Go, oferecendo uma interface estável para otimizações de desempenho.",
+   "snippet": "Following last week's 'likely accept', for Go 1.28, with GOEXPERIMENT=nosimdstable for turning it off.",
+   "issueUrl": "https://golangweekly.com/issues/626",
+   "blurb": "Following last week's 'likely accept', for Go 1.28, with GOEXPERIMENT=nosimdstable for turning it off.",
+   "kind": "news",
+   "section": "IN BRIEF",
+   "date": "2026-11-27",
+   "verifyStatus": "suspect",
+   "tags": {
+    "content-type": [
+     "news"
+    ],
+    "topic-technology": [
+     "webassembly",
+     "performance-optimization",
+     "web-apis",
+     "javascript"
+    ]
+   }
+  },
+  {
+   "id": 22063,
+   "url": "https://github.com/golang/go/issues/29561",
+   "sourceId": 6,
+   "sourceName": "Golang Weekly",
+   "title": "GOCACHE build cache will trim itself as it grows",
+   "titlePt": "GOCACHE: cache de build do Go vai se autolimitar conforme cresce",
+   "summaryPt": "O cache de build do Go (GOCACHE) não possui um limite de tamanho em disco, o que se torna um problema em ambientes com pouco espaço, como o builder OpenBSD/arm que roda em um pendrive. Nesses casos, o diretório ~/.cache/go-build cresce rapidamente para vários gigabytes, causando erros de disco cheio e falhas em operações como git clone e builds. A única solução prática era limpar o cache manualmente com frequência. O artigo sugere que seria melhor ter um limite superior configurável e/ou verificações de espaço livre que impeçam escritas quando o disco estiver cheio, com evicção antes de gravar. Essa reclamação, que já dura cerca de sete anos, está finalmente sendo resolvida na versão Go 1.28, que deve incluir mecanismos para manter o tamanho do cache sob controle.",
+   "snippet": "Fixing a seven year old complaint, Go 1.28's, to help keep the size in check.",
+   "issueUrl": "https://golangweekly.com/issues/626",
+   "blurb": "Fixing a seven year old complaint, Go 1.28's, to help keep the size in check.",
+   "kind": "news",
+   "section": "IN BRIEF",
+   "date": "2026-11-27",
+   "verifyStatus": "suspect",
+   "tags": {
+    "concept-theme": [
+     "caching",
+     "optimization"
+    ],
+    "content-type": [
+     "deep-dive",
+     "analysis"
+    ],
+    "difficulty": [
+     "for-practitioners"
+    ],
+    "domain": [
+     "backend"
+    ],
+    "ecosystem-language": [
+     "go"
+    ],
+    "topic-technology": [
+     "software-development",
+     "performance-optimization",
+     "system-design"
+    ]
+   }
+  },
+  {
+   "id": 22064,
+   "url": "https://blog.jetbrains.com/go/2026/11/25/go-by-goland-public-preview",
+   "sourceId": 6,
+   "sourceName": "Golang Weekly",
+   "title": "GoLand's code intelligence to VS Code and Cursor users",
+   "titlePt": "Go by LSP: inteligência do GoLand chega ao VS Code e Cursor",
+   "summaryPt": "A JetBrains anunciou o lançamento de uma prévia pública gratuita do Go by LSP, uma extensão para editores baseados em VS Code (incluindo o Cursor) que leva a inteligência de código do GoLand para além da plataforma IntelliJ. Baseada nos protocolos LSP e DAP, a extensão oferece recursos como navegação por definições e implementações, análise de código com correções rápidas, refatorações seguras, execução e depuração de testes, além de conclusão de código e documentação no hover. O foco é atender projetos de grande porte: em testes com um repositório de 93 milhões de linhas, a extensão alcançou navegação quase instantânea (11 ms) e consumo de memória de cerca de 833 MiB. Durante o período de prévia, o uso é gratuito, mas cada build expira em 30 dias. A JetBrains pretende coletar feedback para priorizar melhorias e também planeja otimizar o uso por agentes de codificação, reduzindo custos e acelerando o desenvolvimento. A extensão já demonstrou ganhos na Netflix, onde integrações com o motor de código da JetBrains reduziram o consumo de tokens e o tempo em tarefas reais.",
+   "snippet": "JetBrains has opened this up in a free public beta preview.",
+   "issueUrl": "https://golangweekly.com/issues/626",
+   "blurb": "JetBrains has opened this up in a free public beta preview.",
+   "kind": "news",
+   "section": "IN BRIEF",
+   "date": "2026-11-27",
+   "verifyStatus": "suspect",
+   "tags": {
+    "concept-theme": [
+     "dev-experience",
+     "developer-productivity"
+    ],
+    "content-type": [
+     "tool-release"
+    ],
+    "difficulty": [
+     "all-levels"
+    ],
+    "domain": [
+     "backend"
+    ],
+    "topic-technology": [
+     "software-development"
+    ]
+   }
+  },
+  {
+   "id": 22065,
+   "url": "https://antonz.org/probabilistic-data-structures-2",
+   "sourceId": 6,
+   "sourceName": "Golang Weekly",
+   "title": "Probabilistic Data Structures in Go – Part 2",
+   "titlePt": "Estruturas de Dados Probabilísticas em Go – Parte 2",
+   "summaryPt": "Este artigo continua a exploração de estruturas de dados probabilísticas em Go, apresentando três novas estruturas: filtro binário fuse, UltraLogLog e histograma log-linear. Todas elas trocam exatidão por economia de memória, fornecendo respostas aproximadas para consultas como pertencimento, contagem de elementos únicos e percentis. Os exemplos usam o pacote 'unsure', que implementa essas estruturas em Go. O filtro binário fuse é semelhante a um Bloom filter, porém estático: construído uma única vez, ocupa menos memória para a mesma taxa de falsos positivos. O UltraLogLog é um contador de elementos únicos que precisa de cerca de 43% menos memória que o HyperLogLog para a mesma precisão, mas é mais lento para adicionar, contar e mesclar. O histograma log-linear estima quantis (como mediana e 99º percentil) de um fluxo de números com erro relativo garantido, usando muito menos espaço do que armazenar todos os valores. O artigo compara desempenho e precisão dessas estruturas com alternativas conhecidas, destacando trade-offs entre velocidade, memória e complexidade de implementação.",
+   "snippet": "A follow-up to our featured item last week that moves on to binary fuse filters, UltraLogLog, MinHash and more.",
+   "issueUrl": "https://golangweekly.com/issues/626",
+   "blurb": "A follow-up to our featured item last week that moves on to binary fuse filters, UltraLogLog, MinHash and more.",
+   "kind": "news",
+   "section": "IN BRIEF",
+   "date": "2026-11-27",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "performance",
+     "optimization"
+    ],
+    "content-type": [
+     "deep-dive",
+     "comparison"
+    ],
+    "difficulty": [
+     "advanced"
+    ],
+    "domain": [
+     "backend"
+    ],
+    "ecosystem-language": [
+     "go"
+    ],
+    "topic-technology": [
+     "data-analysis",
+     "software-development",
+     "databases"
+    ]
+   }
+  },
+  {
+   "id": 22066,
+   "url": "https://newsletter.esc.sh/p/performance-penalty-in-gos-default",
+   "sourceId": 6,
+   "sourceName": "Golang Weekly",
+   "title": "The Performance Penalty in Go's Default HTTP Client",
+   "titlePt": "A Penalidade de Desempenho no Cliente HTTP Padrão do Go",
+   "summaryPt": "O artigo explora um gargalo de desempenho no cliente HTTP padrão da linguagem Go, relacionado à configuração MaxIdleConnsPerHost, cujo valor padrão é 2. Em HTTP/1.1, isso limita o número de conexões ociosas, forçando a criação de novas conexões para cada requisição concorrente, o que gera um custo elevado de CPU e queda de throughput em cenários de alta concorrência. Em testes com um servidor simples e clientes com múltiplos workers, o autor observou que o throughput estagnava após 4 workers e o uso de CPU do kernel disparava. Ao ajustar MaxIdleConnsPerHost para o número de workers, o throughput melhorou drasticamente — de 2.721 req/s para 22.922 req/s com 64 workers — e o uso de CPU caiu para menos da metade. A causa raiz estava no kernel Linux: ao abrir e fechar muitas conexões rapidamente, a escolha de portas locais se tornava ineficiente, especialmente devido ao TIME_WAIT de 60 segundos e à preferência por portas pares, levando a uma sobrecarga de verificação de portas. O artigo conclui recomendando configurar explicitamente o MaxIdleConnsPerHost no cliente HTTP do Go, mesmo em HTTP/2, e destaca como ferramentas como perf e IA (como Claude) ajudaram a investigar o problema, que se revelou uma lição valiosa sobre o funcionamento interno do kernel e redes.",
+   "snippet": "Why two idle connections per host can have the kernel looking for free ports.",
+   "issueUrl": "https://golangweekly.com/issues/626",
+   "blurb": "Why two idle connections per host can have the kernel looking for free ports.",
+   "kind": "news",
+   "section": "IN BRIEF",
+   "date": "2026-11-27",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "performance",
+     "optimization",
+     "latency",
+     "concurrency"
+    ],
+    "content-type": [
+     "benchmark",
+     "deep-dive"
+    ],
+    "difficulty": [
+     "advanced"
+    ],
+    "domain": [
+     "backend"
+    ],
+    "topic-technology": [
+     "performance-tuning",
+     "connection-pooling",
+     "concurrency",
+     "web-development",
+     "software-development"
+    ]
+   }
+  },
+  {
+   "id": 22067,
+   "url": "https://kmcd.dev/posts/http3-from-scratch-part-2",
+   "sourceId": 6,
+   "sourceName": "Golang Weekly",
+   "title": "HTTP/3 From Scratch, Part 2",
+   "titlePt": "HTTP/3 do zero, Parte 2",
+   "summaryPt": "Nesta segunda parte da série, o autor transforma a base construída anteriormente — streams QUIC, codificação varint e QPACK — em um servidor e um cliente HTTP/3 funcionais em Go. O artigo começa explicando como um navegador descobre que um site suporta HTTP/3, já que o QUIC roda sobre UDP e não sobre TCP. São apresentados dois mecanismos principais: o cabeçalho Alt-Svc, que informa ao navegador que o servidor também fala HTTP/3 na mesma porta UDP, e o registro DNS HTTPS (RFC 9460), que permite ao navegador tentar HTTP/3 já na primeira requisição, sem precisar de uma conexão TCP prévia. Em seguida, o texto detalha a implementação prática. No lado do servidor, é necessário abrir um stream unidirecional de controle (identificado pelo tipo 0x00) e enviar um frame SETTINGS, além de ler os streams unidirecionais do cliente e aceitar streams bidirecionais para cada requisição. O servidor implementa a interface http.Handler do Go, decodificando os HEADERS recebidos via QPACK e convertendo os DATA frames em um corpo de requisição legível. No cliente, o fluxo é o inverso: dial QUIC, envia as configurações no stream de controle, abre um stream bidirecional, escreve HEADERS e DATA, e lê a resposta. O artigo também mostra como testar a implementação localmente. Para o curl, basta usar --http3-only -k com um certificado autoassinado. Para o Chrome, é necessário usar mkcert para gerar um certificado confiável e a flag --origin-to-force-quic-on para forçar o navegador a usar QUIC em localhost. Os testes automatizados confirmam a interoperabilidade com quic-go, tanto no papel de cliente quanto de servidor. Por fim, o autor adianta que a Parte 3 vai explicar os detalhes de cabeamento dos pacotes QUIC e substituir o quic-go por uma implementação própria de transporte.",
+   "snippet": "Getting a browser to actually use HTTP/3, then building a full server and client in Go.",
+   "issueUrl": "https://golangweekly.com/issues/626",
+   "blurb": "Getting a browser to actually use HTTP/3, then building a full server and client in Go.",
+   "kind": "news",
+   "section": "IN BRIEF",
+   "date": "2026-11-27",
+   "verifyStatus": "suspect",
+   "tags": {
+    "concept-theme": [
+     "architecture",
+     "reliability",
+     "performance"
+    ],
+    "content-type": [
+     "deep-dive",
+     "tutorial"
+    ],
+    "difficulty": [
+     "advanced"
+    ],
+    "domain": [
+     "backend"
+    ],
+    "ecosystem-language": [
+     "go"
+    ],
+    "topic-technology": [
+     "web-standards",
+     "web-development"
+    ]
+   }
+  },
+  {
+   "id": 22068,
+   "url": "https://www.jvt.me/posts/2026/11/23/go-no-vcs",
+   "sourceId": 6,
+   "sourceName": "Golang Weekly",
+   "title": "Letting Packagers Override Your Go Program's Version",
+   "titlePt": "Permitindo que empacotadores definam a versão do seu programa Go",
+   "summaryPt": "Ao empacotar programas Go com ferramentas como Nix, a build costuma ser feita a partir do código-fonte, sem um diretório .git. Por isso, a detecção automática de versão baseada no repositório Git — comum em CLIs escritos em Go — não funciona nesse contexto. Uma solução é permitir que quem empacota o projeto defina a versão manualmente, usando o padrão da comunidade Go com a flag de linkagem `-X main.version`. Para implementar isso, o pacote principal do programa precisa expor uma variável `version` (com valor padrão, como \"dev\"), que será preenchida em tempo de build com `go build -ldflags=\"-X main.version=1.2.3\"`. Na função que determina a versão, o código deve verificar primeiro se `main.version` foi definida e, se sim, usá-la; caso contrário, recorre a informações do runtime (como `runtime/debug` ou módulos de versão). Assim, qualquer empacotador pode especificar uma versão personalizada, com fallback para os dados do repositório Git.",
+   "snippet": "When folks build Nix packages, it usually builds them from the source code itself, not in a Git checkout. This means that when you're building tools that use the Git checkout to determine what version of the code you're running - like I'd detailed in Getting a --version flag for Cobra CLIs in Go - this doesn't actually work for Nix users, as there's no .git to look for. This is something we'd hit",
+   "issueUrl": "https://golangweekly.com/issues/626",
+   "blurb": null,
+   "kind": "news",
+   "section": "IN BRIEF",
+   "date": "2026-11-27",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "dev-experience",
+     "developer-productivity"
+    ],
+    "content-type": [
+     "how-to"
+    ],
+    "difficulty": [
+     "intermediate"
+    ],
+    "domain": [
+     "backend"
+    ],
+    "ecosystem-language": [
+     "go"
+    ],
+    "topic-technology": [
+     "cli-tools",
+     "software-development"
+    ]
+   }
+  },
+  {
+   "id": 22069,
+   "url": "https://jespino.github.io/gopgext",
+   "sourceId": 6,
+   "sourceName": "Golang Weekly",
+   "title": "gopgext: Write Postgres Extensions in Go",
+   "titlePt": "gopgext: Escreva Extensões do Postgres em Go",
+   "summaryPt": "gopgext é uma ferramenta experimental que permite criar extensões do PostgreSQL a partir de código Go puro, usando TinyGo. Basta marcar uma função com o comentário //gopgext:function para que ela se torne uma função SQL; a ferramenta gera automaticamente o código C de ligação, o script de instalação e o arquivo de controle. Por ser experimental, não é recomendada para produção, pois um bug no código gerado ou no runtime Go pode rodar dentro do servidor e causar falhas ou corrupção de dados. O projeto usa arquivos Go simples, com suporte à biblioteca padrão (fmt, regexp, encoding/json, crypto/*, entre outros). Os tipos Go são mapeados para tipos SQL (strings, números, arrays, NULL, conjuntos, timestamps, UUIDs, JSON) e é possível definir tipos personalizados. Também oferece consultas via SPI, erros com códigos SQLSTATE, triggers, agregados, classes de operadores GiST/GIN/SP-GiST/BRIN, métodos de acesso a índices, foreign data wrappers e hooks de consulta. A ferramenta já foi validada com portes de módulos contrib do PostgreSQL (como pgcrypto, hstore e pg_stat_statements) que passam nos testes de regressão oficiais. Várias extensões Go podem coexistir no mesmo backend. O gopgext segue a mesma abordagem do projeto gokm, que constrói módulos de kernel Linux a partir de Go, usando um target personalizado do TinyGo e um runtime para o host. Um tutorial passo a passo mostra como criar e instalar uma extensão simples com os comandos gopgext init, gopgext install e CREATE EXTENSION.",
+   "snippet": "It's amazing what you can do with TinyGo and Jesús Espino has been experimenting a lot recently! gopgext uses a custom TinyGo target to turn plain Go (with marked functions becoming SQL functions) into Postgres extensions. And a way to write Linux kernel modules in Go too. Jesús's other experiment, gokm, takes a similar approach for building Linux kernel modules as a way to create devices, filesys",
+   "issueUrl": "https://golangweekly.com/issues/626",
+   "blurb": "It's amazing what you can do with TinyGo and Jesús Espino has been experimenting a lot recently! gopgext uses a custom TinyGo target to turn plain Go (with marked functions becoming SQL functions) into Postgres extensions. And a way to write Linux kernel modules in Go too. Jesús's other experiment, gokm, takes a similar approach for building Linux kernel modules as a way to create devices, filesystems, network interfaces and more.",
+   "kind": "tool",
+   "section": "Code & Tools",
+   "date": "2026-11-27",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "developer-productivity",
+     "dev-experience"
+    ],
+    "content-type": [
+     "tool-release",
+     "tutorial"
+    ],
+    "difficulty": [
+     "advanced"
+    ],
+    "domain": [
+     "backend"
+    ],
+    "ecosystem-language": [
+     "go"
+    ],
+    "framework-library-tool": [
+     "postgresql"
+    ],
+    "topic-technology": [
+     "relational-databases",
+     "sql",
+     "software-development"
+    ]
+   }
+  },
+  {
+   "id": 22070,
+   "url": "https://github.com/hajimehoshi/ekuma",
+   "sourceId": 6,
+   "sourceName": "Golang Weekly",
+   "title": "Ekuma: A Pure Go JavaScript Engine",
+   "titlePt": "Ekuma: Motor JavaScript em Go puro",
+   "summaryPt": "Ekuma é um motor JavaScript escrito inteiramente em Go, sem dependências nativas (cgo), que implementa quase todo o padrão ES2026 (incluindo Temporal, decoradores e ShadowRealm). Ele foi projetado para ser rápido: benchmarks mostram que é cerca de 8 vezes mais rápido que o goja, o motor JavaScript puro em Go mais conhecido, e passa em 99,99% dos testes do test262 (53.791 de 53.795). O motor usa um interpretador de bytecode baseado em registradores, com classes ocultas, caches de propriedade inline e armazenamento denso de arrays, além de suportar chamadas de cauda e valores compactos que podem armazenar números, BigInts de 64 bits ou strings curtas inline. A API em Go segue o estilo de syscall/js, permitindo avaliação de scripts, módulos (inclusive módulos sintéticos), promises, realms e controle de tempo e aleatoriedade. Há suporte opcional para Intl (ECMA-402) por meio de um pacote separado que aumenta o tamanho do binário, mas é totalmente implementado em Go. O motor também oferece recursos avançados como SharedArrayBuffer para agentes em gorrotinas, limites de execução via context e cancelamento, e diferencia-se de outros motores por não exigir nenhuma configuração específica de plataforma (exceto quando usando WebAssembly ou Intl). O autor é o criador do Ebitengine, conhecido por suas bibliotecas em Go para jogos, e o projeto está em versão alfa (v0.2.0), com API ainda instável.",
+   "snippet": "From Ebitengine's creator comes a new, cgo-free JavaScript engine covering nearly all of ES2026 (the latest JavaScript language standard). It passes 99.99% of the test262 suite, and benchmarks ~8x faster than the more established goja.",
+   "issueUrl": "https://golangweekly.com/issues/626",
+   "blurb": "From Ebitengine's creator comes a new, cgo-free JavaScript engine covering nearly all of ES2026 (the latest JavaScript language standard). It passes 99.99% of the test262 suite, and benchmarks ~8x faster than the more established goja.",
+   "kind": "tool",
+   "section": "Code & Tools",
+   "date": "2026-11-27",
+   "verifyStatus": "ok",
+   "tags": {
+    "company-vendor-model": [
+     "github"
+    ],
+    "concept-theme": [
+     "architecture",
+     "performance",
+     "dev-experience",
+     "open-source"
+    ],
+    "content-type": [
+     "release-announcement",
+     "tool-release"
+    ],
+    "difficulty": [
+     "advanced"
+    ],
+    "domain": [
+     "backend",
+     "nodejs"
+    ],
+    "ecosystem-language": [
+     "javascript",
+     "go"
+    ],
+    "topic-technology": [
+     "javascript"
+    ]
+   }
+  },
+  {
+   "id": 22071,
+   "url": "https://github.com/fillmore-labs/errortype",
+   "sourceId": 6,
+   "sourceName": "Golang Weekly",
+   "title": "errortype: Find Inconsistent Uses of Error Types",
+   "titlePt": "errortype: Encontre usos inconsistentes de tipos de erro",
+   "summaryPt": "errortype é uma ferramenta de análise estática para Go que ajuda a detectar problemas comuns no uso de tipos de erro. Ela oferece quatro categorias de verificação: uso inconsistente do tipo de erro (como valor ou ponteiro), comparações sem sentido (como ptr == &MyStruct{}), consultas de asserção de erro (métodos Is que funcionam como verificação de tipo e helpers legados que ignoram erros encapsulados) e convenções de nomenclatura (como prefixo Err para erros sentinela e sufixo Error para tipos estruturados). A ferramenta pode corrigir a maioria dos problemas automaticamente com a flag -fix. O principal benefício é evitar que erros sejam tratados de forma incorreta, por exemplo, ao usar errors.AsType com o tipo errado (ponteiro vs. valor), o que faz a verificação falhar silenciosamente. O errortype analisa o uso pretendido do tipo de erro no pacote de definição e sugere a forma correta. Também detecta comparações sempre falsas com endereços recém-alocados e métodos Is que na prática são apenas verificações de tipo. A ferramenta é instalável via go install, Homebrew ou eget, e possui flags para ativar verificações opcionais, como a recomendada -recommended, além de integração com gopls a partir da versão v0.24.0.",
+   "snippet": "A linter that checks error types are used consistently as either a value or a pointer, as a mismatch can trip up errors.As. v0.0.12 can rename errors to Go's ErrX/XError conventions, and flags code that go vet will report if your go.mod uses 1.27+.",
+   "issueUrl": "https://golangweekly.com/issues/626",
+   "blurb": "A linter that checks error types are used consistently as either a value or a pointer, as a mismatch can trip up errors.As. v0.0.12 can rename errors to Go's ErrX/XError conventions, and flags code that go vet will report if your go.mod uses 1.27+.",
+   "kind": "tool",
+   "section": "Code & Tools",
+   "date": "2026-11-27",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "static-analysis",
+     "error-handling"
+    ],
+    "content-type": [
+     "tool-release"
+    ],
+    "difficulty": [
+     "advanced"
+    ],
+    "domain": [
+     "backend"
+    ],
+    "ecosystem-language": [
+     "go"
+    ],
+    "topic-technology": [
+     "error-handling",
+     "software-development",
+     "cli-tools"
+    ]
+   }
+  },
+  {
+   "id": 22072,
+   "url": "https://fzakaria.com/2026/11/25/browser-tabs-as-a-container-runtime",
+   "sourceId": 6,
+   "sourceName": "Golang Weekly",
+   "title": "tabc: Running Containers in Browser Tabs",
+   "titlePt": "tabc: Executando Contêineres em Abas do Navegador",
+   "summaryPt": "tabc é um runtime de contêineres OCI que executa cada contêiner dentro de uma aba do navegador Chromium, em vez de usar o kernel do host. Ele compila o kernel Linux para WebAssembly (usando o projeto unkernel), permitindo rodar imagens Docker como Alpine diretamente no navegador, sem necessidade de hipervisor ou máquina virtual Linux, mesmo no macOS. Com ele, é possível usar o comando `docker run --runtime tabc` ou o próprio `tabc run`, iniciando contêineres em menos de um segundo. A abordagem oferece uma alternativa ao Docker tradicional, usando o sandbox do navegador como isolamento. Cada contêiner roda em uma aba separada com seu próprio kernel Linux compilado para WASM, o que adiciona uma camada extra de segurança. Embora haja overhead de memória (cerca de 540 MiB por contêiner) e possíveis atrasos em workloads computacionais pesados, o desempenho é aceitável para uso interativo. O projeto também suporta `docker compose` e integra-se ao ambiente desktop, permitindo interagir com o contêiner diretamente na aba do navegador, inclusive com terminal compartilhado.",
+   "snippet": "A Go-built OCI runtime that runs containers on a WASM-compiled Linux kernel inside a headless Chromium instance making it possible to run images on a Mac, say, without needing a typical Linux VM.",
+   "issueUrl": "https://golangweekly.com/issues/626",
+   "blurb": "A Go-built OCI runtime that runs containers on a WASM-compiled Linux kernel inside a headless Chromium instance making it possible to run images on a Mac, say, without needing a typical Linux VM.",
+   "kind": "tool",
+   "section": "Code & Tools",
+   "date": "2026-11-27",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "containers"
+    ],
+    "content-type": [
+     "project-spotlight"
+    ],
+    "difficulty": [
+     "advanced"
+    ],
+    "domain": [
+     "backend"
+    ],
+    "ecosystem-language": [
+     "wasm"
+    ],
+    "topic-technology": [
+     "containers",
+     "webassembly",
+     "docker"
+    ]
+   }
+  },
+  {
+   "id": 22073,
+   "url": "https://github.com/charmbracelet/bubbletea/releases/tag/v2.2.0",
+   "sourceId": 6,
+   "sourceName": "Golang Weekly",
+   "title": "Bubble Tea 2.2",
+   "titlePt": "Bubble Tea 2.2",
+   "summaryPt": "O Bubble Tea, framework popular para interfaces de terminal (TUI), lançou a versão 2.2 com suporte ao Protocolo de Retomada de Programa (OSC 7577). Esse novo recurso permite que programas informem ao terminal como devem ser restaurados após uma reinicialização do terminal ou da sessão. Para usar, basta configurar a propriedade ProgramResume na view, passando o comando que reinicia o programa e, opcionalmente, o diretório de execução — por exemplo, incluindo um ID de sessão ou caminho para um arquivo de estado. A detecção de suporte é feita por meio da variável de ambiente OSC7577_TOKEN, enviada ao programa no início via tea.EnvMsg. Com isso, o desenvolvedor pode adaptar o comportamento do app, como exibir uma mensagem de que a sessão sobreviverá a reinicializações ou evitar salvar estado de retomada quando não houver suporte. A atualização inclui também ajustes no changelog e melhorias internas, consolidando a versão 2.2.0.",
+   "snippet": "The popular TUI framework can now tell the terminal how to resume your program after a restart (via the OSC 7577 standard, which Rex and Herdr support).",
+   "issueUrl": "https://golangweekly.com/issues/626",
+   "blurb": "The popular TUI framework can now tell the terminal how to resume your program after a restart (via the OSC 7577 standard, which Rex and Herdr support).",
+   "kind": "release",
+   "section": "Code & Tools",
+   "date": "2026-11-27",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "state-management",
+     "dev-experience"
+    ],
+    "content-type": [
+     "version-release",
+     "release-announcement"
+    ],
+    "difficulty": [
+     "for-practitioners"
+    ],
+    "domain": [
+     "backend"
+    ],
+    "ecosystem-language": [
+     "go"
+    ],
+    "topic-technology": [
+     "cli-tools",
+     "state-management",
+     "software-development"
+    ]
+   }
+  },
+  {
+   "id": 22074,
+   "url": "https://github.com/redis/go-redis/releases/tag/v9.24.0",
+   "sourceId": 6,
+   "sourceName": "Golang Weekly",
+   "title": "go-redis 9.24",
+   "titlePt": "go-redis 9.24: suporte ao Redis 8.12 e melhorias no cliente",
+   "summaryPt": "A versão 9.24 do go-redis, cliente Redis oficial para Go, traz suporte ao Redis 8.12, incluindo novos comandos como expiração de membros em conjuntos (SExpire, SPExpire, etc.), ZMOVE, BITRANGEINTARRAY, CF.COMPACT e BLESS, além de índices HNSW com quantização escalar. A release também introduz um cliente experimental MultiDB para failover em arquiteturas Active-Active (Redis Enterprise), com roteamento automático entre bancos de dados saudáveis e estratégias de failover baseadas em circuit breakers e health checks. Outras novidades incluem roteamento de cluster orientado por metadados (COMMAND), que melhora a distribuição de comandos e o cache do lado do cliente (CSC) com modos OPT-IN/OPT-OUT e suporte a conexões efêmeras. Há ainda otimizações significativas de desempenho no full-duplex autopipelining, redução drástica do custo de métricas OpenTelemetry no caminho crítico, e a possibilidade de configurar um OTelRecorder por cliente. Várias correções em conexões, roteamento, autenticação e parsing de respostas também foram incluídas.",
+   "snippet": "The official Redis client library gains Redis 8.12 commands and an experimental Active-Active failover client.",
+   "issueUrl": "https://golangweekly.com/issues/626",
+   "blurb": "The official Redis client library gains Redis 8.12 commands and an experimental Active-Active failover client.",
+   "kind": "release",
+   "section": "Code & Tools",
+   "date": "2026-11-27",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "caching",
+     "performance",
+     "architecture",
+     "observability"
+    ],
+    "content-type": [
+     "library-release",
+     "version-release"
+    ],
+    "difficulty": [
+     "intermediate"
+    ],
+    "domain": [
+     "backend"
+    ],
+    "ecosystem-language": [
+     "go"
+    ],
+    "framework-library-tool": [
+     "redis"
+    ],
+    "topic-technology": [
+     "key-value-stores",
+     "caching",
+     "distributed-systems",
+     "databases",
+     "observability"
+    ]
+   }
+  },
+  {
+   "id": 22075,
+   "url": "https://github.com/odvcencio/gotreesitter/releases/tag/v0.58.0",
+   "sourceId": 6,
+   "sourceName": "Golang Weekly",
+   "title": "gotreesitter 0.58",
+   "titlePt": "gotreesitter 0.58",
+   "summaryPt": "gotreesitter 0.58 é um runtime tree-sitter em Go puro que agora equipara a saída do C tree-sitter para 34 gramáticas, servidas por padrão pelo novo núcleo ccore. Esse núcleo, fiel ao C, reproduz árvores, reuso de subárvores, tempo e memória iguais ou melhores que o motor anterior. Para manter o motor antigo em um parser, basta chamar parser.SetAdmissionCandidateRoute(false); ClearAdmissionCandidateRoute() retorna ao padrão. Entre as novidades estão LangEntry.ParseContext e LangEntry.ParseStrict, para cancelamento cooperativo e erros de parada antecipada, além de Tree.RetryStopReason(). O lançamento também traz correções importantes em scanners externos, TypeScript, parsing incremental, geração de gramática e diagnósticos de contagem de trabalho. Medições iniciais mostram ganhos expressivos: edições de TypeScript em um arquivo de teste caíram de cerca de 149–255 vezes o tempo do C para 0,83–0,85 vezes, uma redução de aproximadamente 99,5%.",
+   "snippet": "Pure Go tree-sitter runtime whose output now matches C tree-sitter's for 34 grammars.",
+   "issueUrl": "https://golangweekly.com/issues/626",
+   "blurb": "Pure Go tree-sitter runtime whose output now matches C tree-sitter's for 34 grammars.",
+   "kind": "release",
+   "section": "Code & Tools",
+   "date": "2026-11-27",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "performance",
+     "error-handling"
+    ],
+    "content-type": [
+     "version-release",
+     "library-release"
+    ],
+    "difficulty": [
+     "intermediate"
+    ],
+    "domain": [
+     "backend"
+    ],
+    "ecosystem-language": [
+     "go"
+    ],
+    "topic-technology": [
+     "software-development"
+    ]
+   }
+  },
+  {
+   "id": 22076,
+   "url": "https://github.com/quic-go/quic-go/releases/tag/v0.66.0",
+   "sourceId": 6,
+   "sourceName": "Golang Weekly",
+   "title": "quic-go 0.66",
+   "titlePt": "quic-go 0.66: correções de conformidade com RFC e melhorias",
+   "summaryPt": "quic-go 0.66, implementação em Go puro de QUIC e HTTP/3, chega com uma grande leva de correções de conformidade com as RFCs, incluindo a revalidação de ECN após migração de conexão e um novo timeout de leitura de cabeçalhos de requisição no servidor HTTP/3 (Server.ReadHeaderTimeout). A versão também traz mudanças que quebram compatibilidade, como o retorno apenas do *Stream em HTTPStreamer.HTTPStream, o aborto de datagramas HTTP fora do Extended CONNECT com erro H3_DATAGRAM_ERROR, e o vínculo de tokens de validação de endereço e session tickets à versão do QUIC. Entre os destaques estão a redução de memória em conexões ociosas, menos alocações em várias operações, e correções importantes como evitar travamentos na fila de envio, vazamentos em streams resetados durante Write bloqueado, suporte a handshakes com certificados grandes (acima de 16 KiB) e correções para 0-RTT, ECN e manipulação de frames. A atualização também inclui diversos ajustes de conformidade HTTP/3 com a RFC 9114.",
+   "snippet": "The pure Go QUIC and HTTP/3 implementation lands a large batch of RFC compliance fixes.",
+   "issueUrl": "https://golangweekly.com/issues/626",
+   "blurb": "The pure Go QUIC and HTTP/3 implementation lands a large batch of RFC compliance fixes.",
+   "kind": "release",
+   "section": "Code & Tools",
+   "date": "2026-11-27",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "reliability",
+     "performance",
+     "security"
+    ],
+    "content-type": [
+     "version-release"
+    ],
+    "difficulty": [
+     "advanced"
+    ],
+    "domain": [
+     "backend"
+    ],
+    "topic-technology": [
+     "web-development",
+     "web-standards",
+     "performance-optimization"
+    ]
+   }
+  },
+  {
+   "id": 22077,
+   "url": "https://github.com/oapi-codegen/oapi-codegen/releases/tag/v2.9.0",
+   "sourceId": 6,
+   "sourceName": "Golang Weekly",
+   "title": "oapi-codegen 2.9",
+   "titlePt": "oapi-codegen 2.9",
+   "summaryPt": "oapi-codegen 2.9 é uma grande atualização da ferramenta que gera código Go a partir de especificações OpenAPI. O destaque é a reescrita da forma como allOf, anyOf e oneOf são convertidos em tipos Go, agora com três versões de comportamento (v1, v2 e v3) selecionáveis por opção, sendo v3 mais fiel à especificação e detectando conflitos. Também há maior configurabilidade em nomes gerados, struct tags e tipos de conteúdo, além de suporte a métodos HTTP personalizados e a novos recursos do OpenAPI 3.1/3.2. A versão inclui diversas correções de bugs, muitas de contribuidores de primeira viagem, e exige Go 1.26 e runtime v1.9.0 ou superior. Houve mudanças que quebram compatibilidade, como recusa de $refs remotos por padrão e alteração em campos anuláveis. A recomendação é regenerar o código antes de atualizar o runtime e revisar as mudanças de quebra antes do upgrade.",
+   "snippet": "Tool to generate Go clients/servers from OpenAPI specs.",
+   "issueUrl": "https://golangweekly.com/issues/626",
+   "blurb": "Tool to generate Go clients/servers from OpenAPI specs.",
+   "kind": "release",
+   "section": "Code & Tools",
+   "date": "2026-11-27",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "security",
+     "api-design",
+     "type-safety"
+    ],
+    "content-type": [
+     "version-release"
+    ],
+    "difficulty": [
+     "for-practitioners"
+    ],
+    "domain": [
+     "backend"
+    ],
+    "ecosystem-language": [
+     "go"
+    ],
+    "topic-technology": [
+     "openapi",
+     "api-design",
+     "software-development"
+    ]
+   }
+  },
+  {
+   "id": 22078,
+   "url": "https://github.com/expr-lang/expr/releases/tag/v1.18.0",
+   "sourceId": 6,
+   "sourceName": "Golang Weekly",
+   "title": "Expr 1.18",
+   "titlePt": "Expr 1.18",
+   "summaryPt": "Expr 1.18 é uma atualização da linguagem de expressões para Go, projetada para configurações dinâmicas com precisão, segurança e velocidade. Esta versão traz melhorias significativas de segurança, incluindo um limite de profundidade de aninhamento (10.000 níveis) para evitar estouro de pilha, e a aplicação do MemoryBudget em concatenação de strings e builtins que geram texto, evitando uso excessivo de memória. Além disso, foram adicionados novos builtins: merge() para combinar mapas, log2() para logaritmo na base 2, e suporte a opcional chaining em slices (ex.: foo?.[0:1]). Também é possível ocultar a variável $env via DisableBuiltin(\"$env\") e acessar campos de tipos concretos por trás de interfaces.",
+   "snippet": "Expression language and evaluation engine for Go.",
+   "issueUrl": "https://golangweekly.com/issues/626",
+   "blurb": "Expression language and evaluation engine for Go.",
+   "kind": "release",
+   "section": "Code & Tools",
+   "date": "2026-11-27",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "security",
+     "reliability"
+    ],
+    "content-type": [
+     "version-release",
+     "library-release"
+    ],
+    "difficulty": [
+     "for-practitioners"
+    ],
+    "domain": [
+     "backend"
+    ],
+    "ecosystem-language": [
+     "go"
+    ],
+    "topic-technology": [
+     "software-development"
+    ]
+   }
+  },
+  {
+   "id": 22079,
+   "url": "https://progrium.github.io/minipg",
+   "sourceId": 6,
+   "sourceName": "Golang Weekly",
+   "title": "minipg",
+   "titlePt": "minipg",
+   "summaryPt": "minipg é uma ferramenta que empacota o PostgreSQL como um único executável, sem necessidade de configurar um servidor. Um diretório .pgdb contém todos os dados, configurações, credenciais e até a versão do Postgres, de modo que basta executar `minipg app.pgdb` para abrir um shell psql ou rodar comandos SQL diretamente. O servidor é iniciado sob demanda e encerrado quando fica ocioso, simplificando o uso em desenvolvimento e testes. Para funcionar, o minipg incorpora a imagem postgres:18-alpine do Docker Hub e a executa via h9, uma biblioteca Zig que usa o hipervisor do sistema para rodar os binários do Alpine diretamente, sem precisar de kernel Linux, VM ou Docker. Ele oferece vários comandos úteis, como `minipg serve`, `minipg dump` e `minipg run`, permitindo integrar o banco a outras aplicações de forma fácil. Em CI, o binário Linux é estático e não exige privilégios especiais, tornando-o ideal para testes automatizados. Apesar da abordagem inovadora, o projeto está em estágio inicial e o desempenho do Postgres em h9 é cerca de 2x mais lento que o nativo para um único cliente, sendo mais lento sob carga. O código-fonte está disponível no GitHub sob licença MIT. Plataformas suportadas incluem Linux x86_64 (com ou sem KVM), Linux arm64, macOS (Apple Silicon) e navegadores via emulação. Devido à imaturidade, não é recomendado para dados críticos, mas é uma opção prática para ambientes de desenvolvimento e testes.",
+   "snippet": "Offers an interesting approach to using Postgres as a single executable, with a .pgdb directory holding the database. Could be a handy way to spin up Postgres temporarily in development and testing.",
+   "issueUrl": "https://golangweekly.com/issues/626",
+   "blurb": "Offers an interesting approach to using Postgres as a single executable, with a .pgdb directory holding the database. Could be a handy way to spin up Postgres temporarily in development and testing.",
+   "kind": "tool",
+   "section": "Elsewhere in the ecosystem",
+   "date": "2026-11-27",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "dev-experience"
+    ],
+    "content-type": [
+     "tool-release"
+    ],
+    "difficulty": [
+     "intermediate"
+    ],
+    "domain": [
+     "backend"
+    ],
+    "ecosystem-language": [
+     "sql",
+     "zig",
+     "javascript"
+    ],
+    "framework-library-tool": [
+     "postgresql"
+    ],
+    "topic-technology": [
+     "relational-databases",
+     "sql",
+     "docker",
+     "containers"
+    ]
+   }
+  },
+  {
+   "id": 22080,
+   "url": "https://traefik.io/blog/yaegi-v2-traefik-plugins-that-behave-like-compiled-go",
+   "sourceId": 6,
+   "sourceName": "Golang Weekly",
+   "title": "Yaegi v2: 'The Most Complete Go Interpreter'",
+   "titlePt": "Yaegi v2: o interpretador Go mais completo",
+   "summaryPt": "A Traefik Labs lançou o Yaegi v2, uma reescrita completa do interpretador Go embutido que alimenta os plugins do Traefik. O novo motor foi construído do zero usando as ferramentas oficiais do Go (go/parser, go/types e go/ssa) para entender o código, adicionando apenas a parte que executa o programa. O resultado é uma compatibilidade muito maior: o Yaegi v2 passa em 1044 dos 1066 testes da suíte oficial do Go, contra 641 da versão anterior. Plugins que usam bibliotecas como encoding/json, fmt, gRPC, AWS SDK e OpenTelemetry agora se comportam exatamente como se fossem compilados, incluindo suporte a reflect e generics. Além disso, a maioria dos plugins fica cerca de duas vezes mais rápida, e o interpretador adiciona proteções contra bugs que possam afetar o Traefik, como limites de execução e isolamento de variáveis globais. O Yaegi v2 é opcional no Traefik v3.8 e pode ser ativado por plugin ou globalmente. Também está disponível como ferramenta de linha de comando e biblioteca Go, com exemplos e documentação para a comunidade criar novos plugins.",
+   "snippet": "Traefik's embeddable Go interpreter has been rewritten from scratch and in a simpler, more logical way with go/types and Go's SSA package doing the heavy lifting. It also passes 1044 of 1066 programs in Go's test suite (up from 641 previously).",
+   "issueUrl": "https://golangweekly.com/issues/626",
+   "blurb": "Traefik's embeddable Go interpreter has been rewritten from scratch and in a simpler, more logical way with go/types and Go's SSA package doing the heavy lifting. It also passes 1044 of 1066 programs in Go's test suite (up from 641 previously).",
+   "kind": "news",
+   "section": "Featured",
+   "date": "2026-11-27",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "performance",
+     "reliability",
+     "architecture",
+     "dev-experience"
+    ],
+    "content-type": [
+     "version-release"
+    ],
+    "difficulty": [
+     "advanced"
+    ],
+    "domain": [
+     "backend"
+    ],
+    "ecosystem-language": [
+     "go"
+    ],
+    "topic-technology": [
+     "software-development",
+     "performance-optimization",
+     "system-design"
+    ]
+   }
+  },
+  {
+   "id": 22081,
+   "url": "https://internals-for-interns.com/posts/go-json-v2",
+   "sourceId": 6,
+   "sourceName": "Golang Weekly",
+   "title": "How encoding/json/v2 Works Internally",
+   "titlePt": "Como encoding/json/v2 funciona por dentro",
+   "summaryPt": "O artigo detalha a implementação interna do pacote encoding/json/v2, a nova versão da biblioteca JSON de Go, que traz padrões mais rígidos e é usada como base para a v1. O autor acompanha um documento JSON de exemplo pelos vários níveis da arquitetura, mostrando como cada camada contribui para o processo de decodificação e codificação.",
+   "snippet": "The Go team's explained how the new JSON API works, but Jesús goes a bit deeper and follows a JSON document through the new stack, pointing out what's going on along the way.",
+   "issueUrl": "https://golangweekly.com/issues/626",
+   "blurb": "The Go team's explained how the new JSON API works, but Jesús goes a bit deeper and follows a JSON document through the new stack, pointing out what's going on along the way.",
+   "kind": "news",
+   "section": "Featured",
+   "date": "2026-11-27",
+   "verifyStatus": "ok",
+   "tags": {
+    "concept-theme": [
+     "architecture"
+    ],
+    "content-type": [
+     "deep-dive"
+    ],
+    "difficulty": [
+     "advanced"
+    ],
+    "domain": [
+     "backend"
+    ],
+    "ecosystem-language": [
+     "go",
+     "json"
+    ],
+    "topic-technology": [
+     "software-development"
     ]
    }
   }
